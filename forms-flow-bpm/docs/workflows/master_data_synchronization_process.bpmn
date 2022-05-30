@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1j5tgi9" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.9.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
+  <bpmn:message id="Message_0nfy4o1" name="application_resubmitted" />
+  <bpmn:process id="Event_0k72qa1" name="Master Data Synchronization" isExecutable="true">
+    <bpmn:startEvent id="Event_1n784d5" name="Submit Application">
+      <bpmn:outgoing>Flow_1oowssa</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:task id="Activity_06mndaj" name="Report API">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1oowssa</bpmn:incoming>
+      <bpmn:incoming>Flow_02h4pa8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0y7gn0j</bpmn:outgoing>
+    </bpmn:task>
+    <bpmn:sequenceFlow id="Flow_1oowssa" sourceRef="Event_1n784d5" targetRef="Activity_06mndaj">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', 'Created');</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0y7gn0j" sourceRef="Activity_06mndaj" targetRef="Activity_1kon3fn">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">var project = S(projects).prop("name").value();
+execution.setVariable("project", project);
+</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Activity_1kon3fn" name="${project}" default="Flow_02h4pa8">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">task.execution.setVariable('applicationStatus', "Modified");
+task.execution.setVariable('deleteReason', "completed");</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0y7gn0j</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ygnjka</bpmn:outgoing>
+      <bpmn:outgoing>Flow_02h4pa8</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:endEvent id="Event_0vv2sj6">
+      <bpmn:incoming>Flow_0ygnjka</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0ygnjka" sourceRef="Activity_1kon3fn" targetRef="Event_0vv2sj6">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${applicationStatus == 'End'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_02h4pa8" name="Resubmitted" sourceRef="Activity_1kon3fn" targetRef="Activity_06mndaj">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Event_0k72qa1">
+      <bpmndi:BPMNEdge id="Flow_09zib4n_di" bpmnElement="Flow_1oowssa">
+        <di:waypoint x="168" y="190" />
+        <di:waypoint x="250" y="190" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1ux81yw_di" bpmnElement="Flow_0y7gn0j">
+        <di:waypoint x="350" y="180" />
+        <di:waypoint x="410" y="180" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fdiah0_di" bpmnElement="Flow_0ygnjka">
+        <di:waypoint x="510" y="200" />
+        <di:waypoint x="592" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zkge9w_di" bpmnElement="Flow_02h4pa8">
+        <di:waypoint x="510" y="180" />
+        <di:waypoint x="570" y="180" />
+        <di:waypoint x="570" y="80" />
+        <di:waypoint x="170" y="80" />
+        <di:waypoint x="170" y="160" />
+        <di:waypoint x="250" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="339" y="63" width="63" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_0zinqwr_di" bpmnElement="Activity_06mndaj">
+        <dc:Bounds x="250" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0thwebx_di" bpmnElement="Activity_1kon3fn">
+        <dc:Bounds x="410" y="140" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0vv2sj6_di" bpmnElement="Event_0vv2sj6">
+        <dc:Bounds x="592" y="182" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1n784d5_di" bpmnElement="Event_1n784d5">
+        <dc:Bounds x="132" y="172" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="123" y="216" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

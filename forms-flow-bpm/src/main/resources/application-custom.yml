@@ -1,0 +1,2 @@
+report.url: ${REPORT_API_URL:}
+formsflow.ai.camunda.spring.webclient.connectionTimeout: ${BPM_CLIENT_CONN_TIMEOUT:55000}

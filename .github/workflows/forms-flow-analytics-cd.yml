@@ -1,0 +1,40 @@
+name: Forms flow analytics CD
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev)"
+        required: true
+        default: "dev"
+defaults:
+  run:
+    shell: bash
+    working-directory: .
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  TAG: sha-${{ github.sha }}
+
+jobs:
+  deploy-to-dev:
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT4_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT4_SA_TOKEN}} --insecure-skip-tls-verify
+      - name: Watch new rollout (trigger by image change in Openshift)
+        shell: bash
+        run: |
+          oc rollout latest dc/forms-flow-analytics-adhoc-worker -n ${{ secrets.OPENSHIFT4_DEV_REPO }}
+          oc rollout latest dc/forms-flow-analytics-scheduled-worker -n ${{ secrets.OPENSHIFT4_DEV_REPO }}
+          oc rollout latest dc/forms-flow-analytics-scheduler -n ${{ secrets.OPENSHIFT4_DEV_REPO }}
+          oc rollout latest dc/forms-flow-analytics-server -n ${{ secrets.OPENSHIFT4_DEV_REPO }}
+          oc rollout latest dc/forms-flow-analytics-worker -n ${{ secrets.OPENSHIFT4_DEV_REPO }}
