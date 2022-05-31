@@ -18,6 +18,7 @@ from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import StaffService
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -31,6 +32,8 @@ class Staffs(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get():
         """Return all active staffs."""
         position_id = request.args.get('position', None)
@@ -46,6 +49,8 @@ class Staff(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get(_id):
         """Return a staff detail based on id."""
         return StaffService.find_by_id(_id), HTTPStatus.OK
@@ -57,6 +62,8 @@ class StaffPosition(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get(position_id):
         """Return a staff detail based on id."""
         return StaffService.find_by_position_id(position_id), HTTPStatus.OK

@@ -19,6 +19,7 @@ from flask_restx import Namespace, Resource, cors
 
 from reports_api.services.phaseservice import PhaseService
 from reports_api.utils.util import cors_preflight
+from reports_api.utils import auth, profiletime
 
 
 API = Namespace('phases', description='Phases')
@@ -31,6 +32,8 @@ class PhasesByEaActWorkType(Resource):
 
     @staticmethod
     @cors.crossdomain('*')
+    @auth.require
+    @profiletime
     def get(ea_act_id, work_type_id):
         """Return all phase codes based on ea_act_id and work_type_id."""
         return PhaseService.find_phase_codes_by_ea_act_and_work_type(ea_act_id, work_type_id), HTTPStatus.OK

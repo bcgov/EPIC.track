@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import InspectionService
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -30,6 +31,8 @@ class Inspections(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get():
         """Return total number of inspections."""
         return InspectionService.get_count(), HTTPStatus.OK
