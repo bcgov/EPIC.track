@@ -12,3 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module holds general utility functions and helpers for the main package."""
+
+from .auth import auth
+from .profiler import profiletime

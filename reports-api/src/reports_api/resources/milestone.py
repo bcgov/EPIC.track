@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import MilestoneService
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -30,6 +31,8 @@ class Milestones(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get(phase_id):
         """Return all milestones based on phase_id."""
         return MilestoneService.find_non_decision_by_phase_id(phase_id), HTTPStatus.OK

@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import ProjectService
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -30,12 +31,16 @@ class Projects(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get():
         """Return all projects."""
         return ProjectService.find_all(), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def post():
         """Create new project"""
         project = ProjectService.create_project(API.payload)
@@ -49,12 +54,16 @@ class Project(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get(project_id):
         """Return details of a project."""
         return ProjectService.find(project_id), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def put(project_id):
         """Update and return a project."""
         project = ProjectService.update_project(project_id, API.payload)
@@ -62,6 +71,8 @@ class Project(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def delete(project_id):
         """Delete a project"""
         ProjectService.delete_project(project_id)
