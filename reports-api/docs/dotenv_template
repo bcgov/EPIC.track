@@ -1,0 +1,39 @@
+#
+# This file contains the environment-specific settings that are read by python-dotenv. Place it somewhere above your
+# source code and it will be used.
+#
+
+# ===== reports-api ======================================================================================================
+
+# Connection to local database.
+DATABASE_URL="postgresql://postgres@localhost:54332/postgres"
+DATABASE_USERNAME="postgres"
+DATABASE_PASSWORD="postgres"
+DATABASE_NAME="postgres"
+DATABASE_HOST="localhost"
+DATABASE_PORT="54332"
+
+# Connection to unit test database.
+DATABASE_TEST_URL="postgresql://postgres:admin@localhost:54333/postgres"
+DATABASE_TEST_USERNAME=postgres
+DATABASE_TEST_PASSWORD=postgres
+DATABASE_TEST_HOST=localhost
+DATABASE_TEST_PORT=543313
+DATABASE_TEST_NAME=postgres
+
+# Flask settings
+PYTHONWARNINGS="once"
+FLASK_APP=wsgi.py
+FLASK_ENV="development"
+FLASK_DEBUG=True
+POD_TESTING=True
+SQLALCHEMY_ECHO=False
+
+
+# keycloak settings
+JWT_OIDC_ISSUER=
+JWT_OIDC_WELL_KNOWN_CONFIG=
+JWT_OIDC_ALGORITHMS=
+JWT_OIDC_AUDIENCE=
+JWT_OIDC_CLIENT_SECRET=
+JWT_OIDC_JWKS_CACHE_TIMEOUT=

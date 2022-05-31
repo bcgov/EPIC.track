@@ -1,0 +1,28 @@
+version: "3.1"
+
+services:
+  reportdb:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54332:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data1
+
+  reportdb-test:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "54333:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data2
+
+volumes:
+  db-data:
+    driver: local
