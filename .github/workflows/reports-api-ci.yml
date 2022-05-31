@@ -4,10 +4,13 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "reports-api/**"
 
 defaults:
   run:
     shell: bash
+    working-directory: ./reports-api
 
 jobs:
   setup-job:
