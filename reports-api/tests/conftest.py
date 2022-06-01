@@ -15,6 +15,8 @@
 """Common setup and fixtures for the py-test suite used by this service."""
 
 import asyncio
+from functools import wraps
+from unittest.mock import patch
 
 import pytest
 from flask_migrate import Migrate, upgrade
@@ -25,7 +27,6 @@ from reports_api import create_app
 from reports_api import jwt as _jwt
 from reports_api.models import Project, Staff
 from reports_api.models import db as _db
-from tests.utilities.base_test import get_token
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -209,7 +210,12 @@ def new_staff():
     return staff
 
 
-@pytest.fixture(scope='function')
-def access_token():
-    token = get_token(_jwt)
-    return token
+def mock_decorator(f, *args, **kwargs):
+    """Function to mock a decorator. Used to mock auth.require"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+patch('reports_api.utils.auth.require', mock_decorator, spec=True).start()
