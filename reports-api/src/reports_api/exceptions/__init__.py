@@ -21,7 +21,7 @@ status_code - where possible use HTTP Error Codes
 """
 
 
-class BusinessException(Exception):
+class BusinessError(Exception):
     """Exception that adds error code and error."""
 
     def __init__(self, error, status_code, *args, **kwargs):

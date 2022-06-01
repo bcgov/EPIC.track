@@ -20,15 +20,23 @@ from urllib.parse import urljoin
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_code_by_type(client):
+def test_get_code_by_type(client, jwt, access_token):
     """Test get code by type."""
     url = urljoin(API_BASE_URL, 'codes/work_types')
-    result = client.get(url)
+    headers = {
+        'Authorization': 'Bearer {}'.format(access_token),
+        "content-type": "application/json",
+    }
+    print('*' * 100)
+    print(f'HEADERS:: {headers}')
+    print('*' * 100)
+    result = client.get(url, headers=headers)
+    print(result.json)
     assert result.status_code == HTTPStatus.OK
 
 
-def test_get_code_by_type_and_code(client):
-    """Test get code by type and code."""
-    url = urljoin(API_BASE_URL, 'codes/work_types/1')
-    result = client.get(url)
-    assert result.status_code == HTTPStatus.OK
+# def test_get_code_by_type_and_code(client):
+#     """Test get code by type and code."""
+#     url = urljoin(API_BASE_URL, 'codes/work_types/1')
+#     result = client.get(url)
+#     assert result.status_code == HTTPStatus.OK

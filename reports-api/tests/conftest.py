@@ -25,6 +25,7 @@ from reports_api import create_app
 from reports_api import jwt as _jwt
 from reports_api.models import Project, Staff
 from reports_api.models import db as _db
+from tests.utilities.base_test import get_token
 
 
 @pytest.fixture(scope='session', autouse=True)
@@ -206,3 +207,9 @@ def new_staff():
     _db.session.commit()
 
     return staff
+
+
+@pytest.fixture(scope='function')
+def access_token():
+    token = get_token(_jwt)
+    return token

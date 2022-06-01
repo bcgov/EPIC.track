@@ -6,7 +6,7 @@ from http import HTTPStatus
 from flask import current_app, g, request
 from flask_jwt_oidc import JwtManager
 
-from ..exceptions import BusinessException
+from ..exceptions import BusinessError
 
 jwt = JwtManager()  # pylint: disable=invalid-name
 
@@ -44,7 +44,7 @@ class Auth:
                 if jwt.contains_role(roles):
                     return f(*args, **kwargs)
 
-                raise BusinessException("Access Denied", HTTPStatus.UNAUTHORIZED)
+                raise BusinessError("Access Denied", HTTPStatus.UNAUTHORIZED)
 
             return wrapper
 
