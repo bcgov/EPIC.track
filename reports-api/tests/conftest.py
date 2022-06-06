@@ -15,6 +15,8 @@
 """Common setup and fixtures for the py-test suite used by this service."""
 
 import asyncio
+from functools import wraps
+from unittest.mock import patch
 
 import pytest
 from flask_migrate import Migrate, upgrade
@@ -206,3 +208,14 @@ def new_staff():
     _db.session.commit()
 
     return staff
+
+
+def mock_decorator(f, *args, **kwargs):
+    """Function to mock a decorator. Used to mock auth.require"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        return f(*args, **kwargs)
+    return decorated_function
+
+
+patch('reports_api.utils.auth.require', mock_decorator, spec=True).start()

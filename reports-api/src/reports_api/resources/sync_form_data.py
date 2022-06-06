@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services.sync_form_data import SyncFormDataService
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -30,6 +31,8 @@ class SyncFormData(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def post():
         """Update and return a project."""
         response = SyncFormDataService.sync_data(API.payload)

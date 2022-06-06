@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import OutcomeService
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -30,6 +31,8 @@ class Outcomes(Resource):
 
     @staticmethod
     @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
     def get(milestone_id):
         """Return all outcomes based on milestone_id."""
         return OutcomeService.find_by_milestone_id(milestone_id), HTTPStatus.OK

@@ -17,8 +17,10 @@
 Test-Suite to ensure that the /reports endpoint is working as expected.
 """
 
+
 token_header = {
     'alg': 'RS256',
     'typ': 'JWT',
     'kid': 'sbc-auth-web'
+
 }
