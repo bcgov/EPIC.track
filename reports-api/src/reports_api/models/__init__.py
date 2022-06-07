@@ -21,6 +21,7 @@ from .code_table import CodeTable
 from .db import db  # noqa: I001
 from .ea_act import EAAct
 from .eao_team import EAOTeam
+from .engagement import Engagement, WorkEngagement
 from .event import Event
 from .federal_involvement import FederalInvolvement
 from .indigenous_category import IndigenousCategory
