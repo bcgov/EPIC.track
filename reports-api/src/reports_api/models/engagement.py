@@ -29,10 +29,10 @@ class Engagement(BaseModel):
     start_date = Column(DateTime, nullable=False)
     end_date = Column(DateTime, nullable=False)
     correlation_id = Column(String(255), nullable=True, default=None)
-    engagement_public_link = Column(String(255), nullable=True, default=None)
+    met_link = Column(String(255), nullable=True, default=None)
     status = Column(String(32), nullable=False, default='planned')
 
-    staff_id = Column(ForeignKey('staff_work_roles.id'), nullable=False)
+    staff_id = Column(ForeignKey('staff_work_roles.id'), nullable=True)
     staff = relationship('StaffWorkRole', foreign_keys=[staff_id], lazy='select')
 
     work_engagements = relationship("WorkEngagement",
@@ -55,8 +55,8 @@ class WorkEngagement(BaseModel):
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     engagement = relationship('Engagement', foreign_keys=[engagement_id], lazy='select')
 
-    def as_dict(self):
+    def as_dict(self, recursive=False):
         """Return a JSON representation"""
-        obj = super().as_dict(recursive=False)
+        obj = super().as_dict(recursive=recursive)
         obj['engagement'] = self.engagement.as_dict()
         return obj
