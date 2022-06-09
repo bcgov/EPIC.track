@@ -43,6 +43,7 @@ class Staffs(Resource):
         return StaffService.find_all_active_staff(), HTTPStatus.OK
 
 
+@cors_preflight('GET')
 @API.route('/<int:_id>', methods=['GET', 'OPTIONS'])
 class Staff(Resource):
     """Endpoint resource to return staff details."""
@@ -56,6 +57,7 @@ class Staff(Resource):
         return StaffService.find_by_id(_id), HTTPStatus.OK
 
 
+@cors_preflight('GET')
 @API.route('/positions/<int:position_id>', methods=['GET', 'OPTIONS'])
 class StaffPosition(Resource):
     """Endpoint resource to return staffs based on position_id."""
