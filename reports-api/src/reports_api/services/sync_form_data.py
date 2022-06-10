@@ -34,7 +34,7 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         columns = dict(mapper.columns).keys()
         # set data only if key is in column names and has a valid value
         # To avoid passing empty strings to integer / float fields
-        data = {k: v for k, v in data.items() if v and k in columns}
+        data = {k: v for k, v in data.items() if k in columns and v}
         if 'id' in data and data['id']:
             obj = model_class.find_by_id(data['id'])
             obj = obj.update(data)
@@ -68,7 +68,7 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         instance = instance.as_dict()
         if instance:
             for dependant in dependants:
-                current_app.logger.info('Processing dependants')
+                current_app.logger.info(f'Processing dependant {dependant}')
                 foreign_keys = {}
                 key, value = next(iter(dependant.items()))
                 if not hasattr(model_class, key):
@@ -82,10 +82,10 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
                         foreign_keys[f'{instance_name}_id'] = instance['id']
                         current_app.logger.info(f'foreign_keys {foreign_keys}')
                         if isinstance(value, dict):
-                            dependant.update(foreign_keys)
+                            value.update(foreign_keys)
                         elif isinstance(value, list):
-                            dependant = [{**v, **foreign_keys} for v in value]
-                    instance[key] = cls._process_model_data(model_name, dependant, result)
+                            value = [{**v, **foreign_keys} for v in value]
+                    instance[key] = cls._process_model_data(model_name, value, result)
         return instance
 
     @classmethod
