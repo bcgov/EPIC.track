@@ -35,9 +35,9 @@ class Engagement(BaseModel):
     staff_id = Column(ForeignKey('staff_work_roles.id'), nullable=True)
     staff = relationship('StaffWorkRole', foreign_keys=[staff_id], lazy='select')
 
-    work_engagements = relationship("WorkEngagement",
-                                    primaryjoin="Engagement.id==WorkEngagement.engagement_id",
-                                    back_populates="engagement")
+    work_engagements_list = relationship("WorkEngagement",
+                                         primaryjoin="Engagement.id==WorkEngagement.engagement_id",
+                                         back_populates="engagement")
 
 
 class WorkEngagement(BaseModel):
@@ -58,5 +58,5 @@ class WorkEngagement(BaseModel):
     def as_dict(self, recursive=False):
         """Return a JSON representation"""
         obj = super().as_dict(recursive=recursive)
-        obj['engagement'] = self.engagement.as_dict()
+        obj['engagement'] = self.engagement.as_dict(recursive=recursive)
         return obj
