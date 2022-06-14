@@ -19,7 +19,7 @@ env:
 
 jobs:
   sonar-scan:
-    if: github.event_name == 'push' && github.repository == 'bcgov/eao-project-reports'
+    if: github.event_name == 'push' && github.repository == 'bcgov/EPIC-FLOW'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -37,7 +37,7 @@ jobs:
       matrix:
         include:
           - image: ghcr.io/bcgov/eao-project-reports
-            context: .
+            context: ./reports-api
             dockerfile: Dockerfile
             name: app
     permissions:
