@@ -169,11 +169,11 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 		return dataElements;
 	}
 
-	private String getUrl(DelegateExecution execution) {
-		String formUrl = String.valueOf(execution.getVariables().get(FORM_URL));
-		String modifiedUri = StringUtils.substringAfter(formUrl, "/form/");
-		return this.formioUrl + "/form/" + modifiedUri;
-	}
+        private String getUrl(DelegateExecution execution) {
+    	String formUrl = String.valueOf(execution.getVariables().get("formUrl"));
+    	String modifiedUri = StringUtils.substringAfter(formUrl, "/form/");
+    	return this.formioUrl + "/form/" + modifiedUri;
+    }
 
 	/**
 	 * Returns the endpoint of Sync API.
