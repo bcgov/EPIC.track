@@ -28,71 +28,75 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * This is a custom class to invoke Sync API and tranforms form data into CAM variables
+ * This is a custom class to invoke Sync API and tranforms form data into CAM
+ * variables
  * 
  * @author Sneha Suresh
  */
 @Named("SyncFormDataPipelineListener")
 public class SyncFormDataPipelineListener extends BaseListener implements TaskListener, ExecutionListener {
 
-    private final Logger LOGGER = Logger.getLogger(SyncFormDataPipelineListener.class.getName());
+	private final Logger LOGGER = Logger.getLogger(SyncFormDataPipelineListener.class.getName());
 
-    @Autowired
-    private HTTPServiceInvoker httpServiceInvoker;
+	@Autowired
+	private HTTPServiceInvoker httpServiceInvoker;
 
-    @Autowired
-    private FormSubmissionService formSubmissionService;
+	@Autowired
+	private FormSubmissionService formSubmissionService;
 
-    @Autowired
-    private WebClient webClient;
+	@Autowired
+	private WebClient webClient;
 
-    @Value("${report.url}")
-    private String reportUrl;
+	@Value("${report.url}")
+	private String reportUrl;
 
-    @Override
-    public void notify(DelegateExecution execution) {
-        try {
-            patchFormAttributes(execution);
-        } catch (IOException e) {
-            handleException(execution, ExceptionSource.EXECUTION, e);
-        }
-    }
+	@Value("${formsflow.ai.formio.url}")
+	private String formioUrl;
 
-    @Override
-    public void notify(DelegateTask delegateTask) {
-        try {
-            patchFormAttributes(delegateTask.getExecution());
-        } catch (IOException e) {
-            handleException(delegateTask.getExecution(), ExceptionSource.TASK, e);
-        }
-    }
+	@Override
+	public void notify(DelegateExecution execution) {
+		try {
+			patchFormAttributes(execution);
+		} catch (IOException e) {
+			handleException(execution, ExceptionSource.EXECUTION, e);
+		}
+	}
 
-    /**
-     * This method invokes the HTTP service invoker for patch.
-     *
-     * @param execution
-     */
-    private void patchFormAttributes(DelegateExecution execution) throws IOException {
-        String formUrl = MapUtils.getString(execution.getVariables(), "formUrl", null);
-        if (StringUtils.isBlank(formUrl)) {
-            LOGGER.log(Level.SEVERE, "Unable to read submission for " + execution.getVariables().get("formUrl"));
-            return;
-        }
-        ResponseEntity<String> response = httpServiceInvoker.execute(getUrl(execution), HttpMethod.PATCH,
-                getModifiedCustomFormElements(execution));
-        if (response.getStatusCodeValue() != HttpStatus.OK.value()) {
-            throw new FormioServiceException(
-                    "Unable to get patch values for: " + formUrl + ". Message Body: " + response.getBody());
-        }
-    }
+	@Override
+	public void notify(DelegateTask delegateTask) {
+		try {
+			patchFormAttributes(delegateTask.getExecution());
+		} catch (IOException e) {
+			handleException(delegateTask.getExecution(), ExceptionSource.TASK, e);
+		}
+	}
 
-    /**
-     * Prepares and returns Modified Custom Form Elements.
-     *
-     * @param execution
-     * @return
-     */
-    private Set<FormElement> getModifiedCustomFormElements(DelegateExecution execution) throws IOException {
+	/**
+	 * This method invokes the HTTP service invoker for patch.
+	 *
+	 * @param execution
+	 */
+	private void patchFormAttributes(DelegateExecution execution) throws IOException {
+		String formUrl = MapUtils.getString(execution.getVariables(), "formUrl", null);
+		if (StringUtils.isBlank(formUrl)) {
+			LOGGER.log(Level.SEVERE, "Unable to read submission for " + execution.getVariables().get("formUrl"));
+			return;
+		}
+		ResponseEntity<String> response = httpServiceInvoker.execute(getUrl(execution), HttpMethod.PATCH,
+				getModifiedCustomFormElements(execution));
+		if (response.getStatusCodeValue() != HttpStatus.OK.value()) {
+			throw new FormioServiceException(
+					"Unable to get patch values for: " + formUrl + ". Message Body: " + response.getBody());
+		}
+	}
+
+	/**
+	 * Prepares and returns Modified Custom Form Elements.
+	 *
+	 * @param execution
+	 * @return
+	 */
+	private Set<FormElement> getModifiedCustomFormElements(DelegateExecution execution) throws IOException {
 		Set<FormElement> elements = new LinkedHashSet<>();
 		JsonNode data = new ObjectMapper().readTree(invokeSyncApplicationService(execution));
 		Iterator<String> iterator = data.fieldNames();
@@ -130,52 +134,54 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 		});
 	}
 
-    /**
-     * This method invokes Sync API and returns the response.
-     *
-     * @param execution
-     * @return
-     */
-    private String invokeSyncApplicationService(DelegateExecution execution) throws IOException {
-        Object dataJson = prepareSyncData(execution);
-        String payload = dataJson != null ? new ObjectMapper().writeValueAsString(dataJson) : null;
-        payload = (dataJson == null) ? new JsonObject().toString() : payload;
+	/**
+	 * This method invokes Sync API and returns the response.
+	 *
+	 * @param execution
+	 * @return
+	 */
+	private String invokeSyncApplicationService(DelegateExecution execution) throws IOException {
+		Object dataJson = prepareSyncData(execution);
+		String payload = dataJson != null ? new ObjectMapper().writeValueAsString(dataJson) : null;
+		payload = (dataJson == null) ? new JsonObject().toString() : payload;
 
-        Mono<ResponseEntity<String>> entityMono = webClient.method(HttpMethod.POST).uri(getSyncApplicationUrl())
-                .accept(MediaType.APPLICATION_JSON).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(payload), String.class).retrieve().toEntity(String.class);
+		Mono<ResponseEntity<String>> entityMono = webClient.method(HttpMethod.POST).uri(getSyncApplicationUrl())
+				.accept(MediaType.APPLICATION_JSON).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.body(Mono.just(payload), String.class).retrieve().toEntity(String.class);
 
-        ResponseEntity<String> response = entityMono.block();
-        return response.getBody();
-    }
+		ResponseEntity<String> response = entityMono.block();
+		return response.getBody();
+	}
 
-    /**
-     * Prepares and returns the Form Data Elements.
-     *
-     * @param execution
-     * @return
-     */
-    private JsonNode prepareSyncData(DelegateExecution execution) throws IOException {
-        String submission = formSubmissionService.readSubmission(getUrl(execution));
-        if (submission.isEmpty()) {
-            throw new RuntimeException("Unable to retrieve submission");
-        }
-        JsonNode dataNode = new ObjectMapper().readTree(submission);
-        JsonNode dataElements = dataNode.findValue("data");
-        return dataElements;
-    }
+	/**
+	 * Prepares and returns the Form Data Elements.
+	 *
+	 * @param execution
+	 * @return
+	 */
+	private JsonNode prepareSyncData(DelegateExecution execution) throws IOException {
+		String submission = formSubmissionService.readSubmission(getUrl(execution));
+		if (submission.isEmpty()) {
+			throw new RuntimeException("Unable to retrieve submission");
+		}
+		JsonNode dataNode = new ObjectMapper().readTree(submission);
+		JsonNode dataElements = dataNode.findValue("data");
+		return dataElements;
+	}
 
-    private String getUrl(DelegateExecution execution) {
-        return String.valueOf(execution.getVariables().get("formUrl"));
-    }
+	private String getUrl(DelegateExecution execution) {
+		String formUrl = String.valueOf(execution.getVariables().get(FORM_URL));
+		String modifiedUri = StringUtils.substringAfter(formUrl, "/form/");
+		return this.formioUrl + "/form/" + modifiedUri;
+	}
 
-    /**
-     * Returns the endpoint of Sync API.
-     *
-     * @return
-     */
-    private String getSyncApplicationUrl() {
-        return this.reportUrl + "/sync-form-data";
-    }
+	/**
+	 * Returns the endpoint of Sync API.
+	 *
+	 * @return
+	 */
+	private String getSyncApplicationUrl() {
+		return this.reportUrl + "/sync-form-data";
+	}
 
 }
