@@ -6,6 +6,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.shaded.json.parser.ParseException;
 
 import org.apache.commons.lang.ObjectUtils.Null;
+import org.springframework.beans.factory.annotation.Value;
 import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.DelegateTask;
