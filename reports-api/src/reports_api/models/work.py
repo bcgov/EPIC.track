@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Work."""
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
