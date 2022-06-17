@@ -13,7 +13,6 @@
 # limitations under the License.
 """Model to handle all operations related to Engagement."""
 
-from flask import current_app
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
