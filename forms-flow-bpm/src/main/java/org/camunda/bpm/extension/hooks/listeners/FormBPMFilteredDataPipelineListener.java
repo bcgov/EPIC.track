@@ -113,7 +113,7 @@ public class FormBPMFilteredDataPipelineListener extends BaseListener implements
 						Object entryValue = jsonContext.read(jsonPath);
 						if (entryValue != null) {
 							execution.setVariable(entry.getValue().getLabel(),
-									convertToOriginType(String.valueOf(entryValue)));
+									convertToOriginType(entryValue));
 						}
 					}
 				}
