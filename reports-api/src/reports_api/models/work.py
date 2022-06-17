@@ -13,10 +13,20 @@
 # limitations under the License.
 """Model to handle all operations related to Work."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+import enum
+
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
+
+
+class WorkStatusStoplightEnum(enum.Enum):
+    """Work Status Stoplight Enum."""
+
+    RED = 'R'
+    YELLOW = 'Y'
+    GREEN = 'G'
 
 
 class Work(BaseModel):
@@ -34,7 +44,7 @@ class Work(BaseModel):
     is_completed = Column(Boolean, default=False)
     work_status_notes = Column(Text)
     work_short_status = Column(String(255))
-    work_status_stoplight = Column(String(6))
+    work_status_stoplight = Column(Enum(WorkStatusStoplightEnum))
 
     start_date = Column(DateTime)
     anticipated_decision_date = Column(DateTime)
@@ -64,4 +74,5 @@ class Work(BaseModel):
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return JSON Representation."""
         result = super().as_dict()
+        result['work_status_stoplight'] = self.work_status_stoplight.value if self.work_status_stoplight else None
         return result
