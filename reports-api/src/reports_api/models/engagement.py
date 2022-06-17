@@ -13,6 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Engagement."""
 
+from flask import current_app
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -38,6 +39,10 @@ class Engagement(BaseModel):
     work_engagements_list = relationship("WorkEngagement",
                                          primaryjoin="Engagement.id==WorkEngagement.engagement_id",
                                          back_populates="engagement")
+
+    def as_dict(self, recursive=False):
+        """Return a JSON representation"""
+        return super().as_dict(recursive=recursive)
 
 
 class WorkEngagement(BaseModel):
