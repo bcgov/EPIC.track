@@ -39,6 +39,10 @@ class Engagement(BaseModel):
                                          primaryjoin="Engagement.id==WorkEngagement.engagement_id",
                                          back_populates="engagement")
 
+    def as_dict(self, recursive=False):
+        """Return a JSON representation"""
+        return super().as_dict(recursive=recursive)
+
 
 class WorkEngagement(BaseModel):
     """Model class for Work Engagements."""
