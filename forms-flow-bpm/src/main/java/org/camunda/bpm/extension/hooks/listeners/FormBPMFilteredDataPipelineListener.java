@@ -114,6 +114,7 @@ public class FormBPMFilteredDataPipelineListener extends BaseListener implements
 						if (entryValue != null) {
 							execution.setVariable(entry.getValue().getLabel(),
 									convertToOriginType(entryValue));
+							LOGGER.error(convertToOriginType(entryValue).toString());
 						}
 					}
 				}
