@@ -1,6 +1,6 @@
 
 # Maven build
-FROM maven:3.6.1-jdk-11-slim AS MAVEN_TOOL_CHAIN
+FROM maven:3.8.1-openjdk-17-slim AS MAVEN_TOOL_CHAIN
 RUN apt-get update \
     && apt-get install -y git
 
@@ -26,12 +26,12 @@ COPY ./src/ /tmp/src/
 RUN mvn -s /usr/share/maven/ref/settings-docker.xml package
 
 
-# Final custom slim java image (for apk command see jdk-11.0.3_7-alpine-slim)
-FROM adoptopenjdk/openjdk11:jdk-11.0.3_7-alpine
+# Final custom slim java image (for apk command see 17-jdk-alpine-slim)
+FROM openjdk:17-jdk-alpine
 
-ENV JAVA_VERSION jdk-11.0.3+7
-ENV JAVA_HOME=/opt/java/openjdk \
-    PATH="/opt/java/openjdk/bin:$PATH"
+ENV JAVA_VERSION=17-ea+14
+ENV JAVA_HOME=/opt/java/openjdk-17\
+    PATH="/opt/java/openjdk-17/bin:$PATH"
 
 EXPOSE 8080
 # OpenShift has /app in the image, but it's missing when doing local development - Create it when missing
@@ -42,4 +42,4 @@ COPY --from=MAVEN_TOOL_CHAIN /tmp/target/forms-flow-bpm.jar ./app
 RUN chmod a+rwx -R /app
 WORKDIR /app
 VOLUME /tmp
-ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=custom", "-jar","/app/forms-flow-bpm.jar"]
+ENTRYPOINT ["java","-Djava.security.egd=file:/dev/./urandom", "-Dspring.profiles.active=custom", "-Dpolyglot.js.nashorn-compat=true", "-Dpolyglot.engine.WarnInterpreterOnly=false", "-jar","/app/forms-flow-bpm.jar"]
