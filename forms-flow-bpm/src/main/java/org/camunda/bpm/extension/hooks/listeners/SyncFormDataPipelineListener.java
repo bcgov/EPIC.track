@@ -50,9 +50,6 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 	@Value("${report.url}")
 	private String reportUrl;
 
-	@Value("${formsflow.ai.formio.url}")
-	private String formioUrl;
-
 	@Override
 	public void notify(DelegateExecution execution) {
 		try {
@@ -169,11 +166,9 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 		return dataElements;
 	}
 
-        private String getUrl(DelegateExecution execution) {
-    	String formUrl = String.valueOf(execution.getVariables().get("formUrl"));
-    	String modifiedUri = StringUtils.substringAfter(formUrl, "/form/");
-    	return this.formioUrl + "/form/" + modifiedUri;
-    }
+	private String getUrl(DelegateExecution execution) {
+		return String.valueOf(execution.getVariables().get("formUrl"));
+	}
 
 	/**
 	 * Returns the endpoint of Sync API.

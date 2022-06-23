@@ -6,8 +6,6 @@ import com.jayway.jsonpath.JsonPath;
 import com.nimbusds.jose.shaded.json.parser.ParseException;
 
 import org.apache.commons.lang.ObjectUtils.Null;
-import org.springframework.beans.factory.annotation.Value;
-import org.apache.commons.lang3.StringUtils;
 import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.DelegateTask;
 import org.camunda.bpm.engine.delegate.ExecutionListener;
@@ -31,13 +29,9 @@ import javax.annotation.Resource;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Map.Entry;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,9 +54,6 @@ public class FormBPMFilteredDataPipelineListener extends BaseListener implements
 	private FormSubmissionService formSubmissionService;
 	@Autowired
 	private HTTPServiceInvoker httpServiceInvoker;
-	
-	@Value("${formsflow.ai.formio.url}")
-	private String formioUrl;
 
 	@Override
 	public void notify(DelegateExecution execution) {
@@ -105,7 +96,7 @@ public class FormBPMFilteredDataPipelineListener extends BaseListener implements
 
 			if (!filterInfoMap.isEmpty()) {
 				String submission = formSubmissionService
-						.readSubmission(getUrl(execution));
+						.readSubmission(String.valueOf(execution.getVariables().get(FORM_URL)));
 				DocumentContext jsonContext = JsonPath.parse(submission);
 				for (Map.Entry<String, FilterInfo> entry : filterInfoMap.entrySet()) {
 					if (entry.getValue() != null) {
@@ -114,7 +105,6 @@ public class FormBPMFilteredDataPipelineListener extends BaseListener implements
 						if (entryValue != null) {
 							execution.setVariable(entry.getValue().getLabel(),
 									convertToOriginType(entryValue));
-							LOGGER.error(convertToOriginType(entryValue).toString());
 						}
 					}
 				}
@@ -131,12 +121,6 @@ public class FormBPMFilteredDataPipelineListener extends BaseListener implements
 	private String getApplicationUrl(DelegateExecution execution) {
 		return httpServiceInvoker.getProperties().getProperty("api.url") + "/form/applicationid/"
 				+ execution.getVariable(APPLICATION_ID);
-	}
-	
-	private String getUrl(DelegateExecution execution) {
-		String formUrl = String.valueOf(execution.getVariables().get(FORM_URL));
-		String modifiedUri = StringUtils.substringAfter(formUrl, "/form/");
-		return this.formioUrl + "/form/" + modifiedUri;
 	}
 
 	private Object convertToOriginType(Object value) throws IOException {
