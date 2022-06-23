@@ -35,7 +35,7 @@ ENV JAVA_HOME=/opt/java/openjdk \
 
 EXPOSE 8080
 # OpenShift has /app in the image, but it's missing when doing local development - Create it when missing
-# RUN test ! -d /app && mkdir /app || :
+RUN test ! -d /app && mkdir /app || :
 # Add spring boot application
 RUN mkdir -p /app
 COPY --from=MAVEN_TOOL_CHAIN /tmp/target/forms-flow-bpm.jar ./app
