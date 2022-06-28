@@ -5,14 +5,6 @@
     <bpmn:startEvent id="Event_1n784d5" name="Submit Application">
       <bpmn:outgoing>Flow_1oowssa</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Activity_06mndaj" name="Report API">
-      <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_1oowssa</bpmn:incoming>
-      <bpmn:incoming>Flow_02h4pa8</bpmn:incoming>
-      <bpmn:outgoing>Flow_0y7gn0j</bpmn:outgoing>
-    </bpmn:task>
     <bpmn:sequenceFlow id="Flow_1oowssa" sourceRef="Event_1n784d5" targetRef="Activity_06mndaj">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
@@ -24,7 +16,7 @@
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMDataPipelineListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0y7gn0j" sourceRef="Activity_06mndaj" targetRef="Activity_1kon3fn" />
@@ -57,6 +49,14 @@ task.execution.setVariable('deleteReason', "completed");</camunda:script>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
+    <bpmn:task id="Activity_06mndaj" name="Report API">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_02h4pa8</bpmn:incoming>
+      <bpmn:incoming>Flow_1oowssa</bpmn:incoming>
+      <bpmn:outgoing>Flow_0y7gn0j</bpmn:outgoing>
+    </bpmn:task>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Event_0k72qa1">
