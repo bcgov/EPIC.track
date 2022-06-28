@@ -43,7 +43,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 5}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '5'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1q09bmj" sourceRef="Activity_0l9smge" targetRef="Gateway_0igl8mz">
       <bpmn:extensionElements>
@@ -74,14 +74,9 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 2}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '2'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1ocywhk" sourceRef="Activity_1ijipih" targetRef="Gateway_0j55fhh">
-      <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
-      </bpmn:extensionElements>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1nu0fsx" sourceRef="Activity_1cxdn4p" targetRef="Gateway_0kyl34x">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
@@ -101,7 +96,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 7}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '7'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1ydeeeo" name="isComplete?" sourceRef="Gateway_1ggk8e8" targetRef="Activity_0l9smge">
       <bpmn:extensionElements>
@@ -117,7 +112,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 4}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '4'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1ygb02x" name="isComplete?" sourceRef="Gateway_0phq651" targetRef="Activity_18o8b8i">
       <bpmn:extensionElements>
@@ -133,7 +128,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 8}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '8'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_08je08k" name="isComplete?" sourceRef="Gateway_1ykufab" targetRef="Activity_0jpvspx">
       <bpmn:extensionElements>
@@ -149,23 +144,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 9}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0i6xbxb" name="isComplete?" sourceRef="Gateway_0kyl34x" targetRef="Activity_1ijipih">
-      <bpmn:extensionElements>
-        <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Early Engagement Completed");</camunda:script>
-        </camunda:executionListener>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
-          <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
-          </camunda:field>
-        </camunda:executionListener>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
-      </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 1}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '9'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0ge04r2" name="isComplete?" sourceRef="Gateway_1v8a1kj" targetRef="Activity_0tz7odl">
       <bpmn:extensionElements>
@@ -181,7 +160,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 3}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '3'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0vcuk6i" name="isComplete?" sourceRef="Gateway_1gp6tm5" targetRef="Activity_0dapu3s">
       <bpmn:extensionElements>
@@ -197,7 +176,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 6}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '6'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:userTask id="Activity_1cxdn4p" name="Early Engagement - (${workTitle})">
       <bpmn:extensionElements>
@@ -210,32 +189,29 @@
       <bpmn:outgoing>Flow_1nu0fsx</bpmn:outgoing>
     </bpmn:userTask>
     <bpmn:sequenceFlow id="Flow_0phjzg9" sourceRef="Activity_1c6wq54" targetRef="Event_1iv2ihr" />
-    <bpmn:sequenceFlow id="Flow_18jt41m" sourceRef="Gateway_0kyl34x" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_15ngq5h" sourceRef="Gateway_0j55fhh" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_06nrt31" sourceRef="Gateway_1v8a1kj" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0rff2bu" sourceRef="Gateway_1ggk8e8" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_10vzq7g" name="Terminate" sourceRef="Gateway_0igl8mz" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1cwhu3s" sourceRef="Gateway_1l21rp7" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1pdi5a8" sourceRef="Gateway_1gp6tm5" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1jhwj47" sourceRef="Gateway_0phq651" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_18v999u" name="Terminate" sourceRef="Gateway_1ykufab" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:startEvent id="Event_08in3hw" name="Start">
       <bpmn:outgoing>Flow_1g2dh63</bpmn:outgoing>
@@ -250,13 +226,7 @@
       <bpmn:incoming>Flow_1pk94rs</bpmn:incoming>
       <bpmn:outgoing>Flow_0sdgg5k</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_0kyl34x" name="Action?" default="Flow_0jo372u">
-      <bpmn:incoming>Flow_1nu0fsx</bpmn:incoming>
-      <bpmn:outgoing>Flow_0i6xbxb</bpmn:outgoing>
-      <bpmn:outgoing>Flow_18jt41m</bpmn:outgoing>
-      <bpmn:outgoing>Flow_0jo372u</bpmn:outgoing>
-    </bpmn:exclusiveGateway>
-    <bpmn:task id="Activity_1c6wq54" name="Update Status">
+    <bpmn:task id="Activity_1c6wq54" name="Update Status" camunda:asyncBefore="true">
       <bpmn:extensionElements>
         <camunda:executionListener event="start">
           <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Work Terminated");</camunda:script>
@@ -270,7 +240,6 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_18jt41m</bpmn:incoming>
       <bpmn:incoming>Flow_15ngq5h</bpmn:incoming>
       <bpmn:incoming>Flow_06nrt31</bpmn:incoming>
       <bpmn:incoming>Flow_0rff2bu</bpmn:incoming>
@@ -280,9 +249,10 @@
       <bpmn:incoming>Flow_1jhwj47</bpmn:incoming>
       <bpmn:incoming>Flow_18v999u</bpmn:incoming>
       <bpmn:incoming>Flow_1at4vm7</bpmn:incoming>
+      <bpmn:incoming>Flow_18jt41m</bpmn:incoming>
       <bpmn:outgoing>Flow_0phjzg9</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:exclusiveGateway id="Gateway_1ggk8e8" name="Action?" default="Flow_1tkshjd">
+    <bpmn:exclusiveGateway id="Gateway_1ggk8e8" name="Action?" camunda:asyncAfter="true" default="Flow_1tkshjd">
       <bpmn:incoming>Flow_1y8nu22</bpmn:incoming>
       <bpmn:outgoing>Flow_1ydeeeo</bpmn:outgoing>
       <bpmn:outgoing>Flow_0rff2bu</bpmn:outgoing>
@@ -298,23 +268,13 @@
       <bpmn:incoming>Flow_1tkshjd</bpmn:incoming>
       <bpmn:outgoing>Flow_1y8nu22</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_1v8a1kj" name="Action?" default="Flow_0pjz4mh">
+    <bpmn:exclusiveGateway id="Gateway_1v8a1kj" name="Action?" camunda:asyncAfter="true" default="Flow_0pjz4mh">
       <bpmn:incoming>Flow_1gnqz9t</bpmn:incoming>
       <bpmn:outgoing>Flow_0ge04r2</bpmn:outgoing>
       <bpmn:outgoing>Flow_06nrt31</bpmn:outgoing>
       <bpmn:outgoing>Flow_0pjz4mh</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:userTask id="Activity_1ijipih" name="Proponent Time - (${workTitle})">
-      <bpmn:extensionElements>
-        <camunda:taskListener event="complete">
-          <camunda:script scriptFormat="javascript">task.execution.setVariable('deleteReason', "completed");</camunda:script>
-        </camunda:taskListener>
-      </bpmn:extensionElements>
-      <bpmn:incoming>Flow_0i6xbxb</bpmn:incoming>
-      <bpmn:incoming>Flow_0lcpruo</bpmn:incoming>
-      <bpmn:outgoing>Flow_1ocywhk</bpmn:outgoing>
-    </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_0igl8mz" name="Action?" default="Flow_1yl1brp">
+    <bpmn:exclusiveGateway id="Gateway_0igl8mz" name="Action?" camunda:asyncAfter="true" default="Flow_1yl1brp">
       <bpmn:incoming>Flow_1q09bmj</bpmn:incoming>
       <bpmn:outgoing>Flow_0pksl9g</bpmn:outgoing>
       <bpmn:outgoing>Flow_10vzq7g</bpmn:outgoing>
@@ -340,7 +300,7 @@
       <bpmn:incoming>Flow_0y99zm4</bpmn:incoming>
       <bpmn:outgoing>Flow_0tbksvg</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_1ykufab" name="Action?" default="Flow_02l0i2f">
+    <bpmn:exclusiveGateway id="Gateway_1ykufab" name="Action?" camunda:asyncAfter="true" default="Flow_02l0i2f">
       <bpmn:incoming>Flow_0ihjyop</bpmn:incoming>
       <bpmn:outgoing>Flow_08je08k</bpmn:outgoing>
       <bpmn:outgoing>Flow_18v999u</bpmn:outgoing>
@@ -356,7 +316,7 @@
       <bpmn:incoming>Flow_02l0i2f</bpmn:incoming>
       <bpmn:outgoing>Flow_0ihjyop</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_0phq651" name="Action?" default="Flow_0t96xtx">
+    <bpmn:exclusiveGateway id="Gateway_0phq651" name="Action?" camunda:asyncAfter="true" default="Flow_0t96xtx">
       <bpmn:incoming>Flow_06o9xhy</bpmn:incoming>
       <bpmn:outgoing>Flow_1ygb02x</bpmn:outgoing>
       <bpmn:outgoing>Flow_1jhwj47</bpmn:outgoing>
@@ -372,7 +332,7 @@
       <bpmn:incoming>Flow_0t96xtx</bpmn:incoming>
       <bpmn:outgoing>Flow_06o9xhy</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_1l21rp7" name="Action?" default="Flow_0e12gix">
+    <bpmn:exclusiveGateway id="Gateway_1l21rp7" name="Action?" camunda:asyncAfter="true" default="Flow_0e12gix">
       <bpmn:incoming>Flow_12i1l4g</bpmn:incoming>
       <bpmn:outgoing>Flow_04jd2c3</bpmn:outgoing>
       <bpmn:outgoing>Flow_1cwhu3s</bpmn:outgoing>
@@ -388,7 +348,7 @@
       <bpmn:incoming>Flow_0e12gix</bpmn:incoming>
       <bpmn:outgoing>Flow_12i1l4g</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_1gp6tm5" name="Action?" default="Flow_1pk94rs">
+    <bpmn:exclusiveGateway id="Gateway_1gp6tm5" name="Action?" camunda:asyncAfter="true" default="Flow_1pk94rs">
       <bpmn:incoming>Flow_0sdgg5k</bpmn:incoming>
       <bpmn:outgoing>Flow_0vcuk6i</bpmn:outgoing>
       <bpmn:outgoing>Flow_1pdi5a8</bpmn:outgoing>
@@ -404,7 +364,7 @@
       <bpmn:incoming>Flow_0pjz4mh</bpmn:incoming>
       <bpmn:outgoing>Flow_1gnqz9t</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_0j55fhh" name="Action?" default="Flow_0lcpruo">
+    <bpmn:exclusiveGateway id="Gateway_0j55fhh" name="Action?" camunda:asyncAfter="true" default="Flow_0lcpruo">
       <bpmn:incoming>Flow_1ocywhk</bpmn:incoming>
       <bpmn:outgoing>Flow_0w563e9</bpmn:outgoing>
       <bpmn:outgoing>Flow_15ngq5h</bpmn:outgoing>
@@ -413,12 +373,6 @@
     <bpmn:endEvent id="Event_1iv2ihr" name="Terminated">
       <bpmn:incoming>Flow_0phjzg9</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0jo372u" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
-      <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
-      </bpmn:extensionElements>
-    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0lcpruo" sourceRef="Gateway_0j55fhh" targetRef="Activity_1ijipih">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
@@ -481,7 +435,7 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 10}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '10'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0y99zm4" sourceRef="Gateway_1u3rb75" targetRef="Activity_0jpvspx">
       <bpmn:extensionElements>
@@ -489,7 +443,7 @@
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:exclusiveGateway id="Gateway_1u3rb75" default="Flow_0y99zm4">
+    <bpmn:exclusiveGateway id="Gateway_1u3rb75" camunda:asyncAfter="true" default="Flow_0y99zm4">
       <bpmn:incoming>Flow_0tbksvg</bpmn:incoming>
       <bpmn:outgoing>Flow_14uwbd7</bpmn:outgoing>
       <bpmn:outgoing>Flow_0y99zm4</bpmn:outgoing>
@@ -499,7 +453,53 @@
       <bpmn:incoming>Flow_14uwbd7</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_1at4vm7" sourceRef="Gateway_1u3rb75" targetRef="Activity_1c6wq54">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == true}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1nu0fsx" sourceRef="Activity_1cxdn4p" targetRef="Gateway_0kyl34x">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Activity_1ijipih" name="Proponent Time - (${workTitle})">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">task.execution.setVariable('deleteReason', "completed");</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0lcpruo</bpmn:incoming>
+      <bpmn:incoming>Flow_0i6xbxb</bpmn:incoming>
+      <bpmn:outgoing>Flow_1ocywhk</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0i6xbxb" name="isComplete?" sourceRef="Gateway_0kyl34x" targetRef="Activity_1ijipih">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Early Engagement Completed");</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 1}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:exclusiveGateway id="Gateway_0kyl34x" name="Action?" camunda:asyncAfter="true" default="Flow_0jo372u">
+      <bpmn:incoming>Flow_1nu0fsx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0i6xbxb</bpmn:outgoing>
+      <bpmn:outgoing>Flow_18jt41m</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0jo372u</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_18jt41m" sourceRef="Gateway_0kyl34x" targetRef="Activity_1c6wq54">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0jo372u" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
     </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -507,6 +507,32 @@
       <bpmndi:BPMNShape id="Participant_0hed8ox_di" bpmnElement="Participant_0hed8ox" isHorizontal="true">
         <dc:Bounds x="169" y="60" width="1641" height="470" />
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0jo372u_di" bpmnElement="Flow_0jo372u">
+        <di:waypoint x="430" y="225" />
+        <di:waypoint x="430" y="270" />
+        <di:waypoint x="320" y="270" />
+        <di:waypoint x="320" y="240" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18jt41m_di" bpmnElement="Flow_18jt41m">
+        <di:waypoint x="430" y="175" />
+        <di:waypoint x="430" y="100" />
+        <di:waypoint x="1640" y="100" />
+        <di:waypoint x="1640" y="260" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i6xbxb_di" bpmnElement="Flow_0i6xbxb">
+        <di:waypoint x="455" y="200" />
+        <di:waypoint x="540" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="459" y="213" width="62" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nu0fsx_di" bpmnElement="Flow_1nu0fsx">
+        <di:waypoint x="370" y="200" />
+        <di:waypoint x="405" y="200" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="411" y="173" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1at4vm7_di" bpmnElement="Flow_1at4vm7">
         <di:waypoint x="1510" y="425" />
         <di:waypoint x="1510" y="500" />
@@ -571,12 +597,6 @@
         <di:waypoint x="590" y="270" />
         <di:waypoint x="590" y="240" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0jo372u_di" bpmnElement="Flow_0jo372u">
-        <di:waypoint x="430" y="225" />
-        <di:waypoint x="430" y="270" />
-        <di:waypoint x="320" y="270" />
-        <di:waypoint x="320" y="240" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_18v999u_di" bpmnElement="Flow_18v999u">
         <di:waypoint x="1240" y="425" />
         <di:waypoint x="1240" y="500" />
@@ -631,12 +651,6 @@
         <di:waypoint x="1640" y="100" />
         <di:waypoint x="1640" y="260" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_18jt41m_di" bpmnElement="Flow_18jt41m">
-        <di:waypoint x="430" y="175" />
-        <di:waypoint x="430" y="100" />
-        <di:waypoint x="1640" y="100" />
-        <di:waypoint x="1640" y="260" />
-      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0phjzg9_di" bpmnElement="Flow_0phjzg9">
         <di:waypoint x="1690" y="300" />
         <di:waypoint x="1752" y="300" />
@@ -653,13 +667,6 @@
         <di:waypoint x="1080" y="200" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1009" y="213" width="62" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0i6xbxb_di" bpmnElement="Flow_0i6xbxb">
-        <di:waypoint x="455" y="200" />
-        <di:waypoint x="540" y="200" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="459" y="213" width="62" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_08je08k_di" bpmnElement="Flow_08je08k">
@@ -694,13 +701,6 @@
         <di:waypoint x="230" y="138" />
         <di:waypoint x="230" y="210" />
         <di:waypoint x="270" y="210" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1nu0fsx_di" bpmnElement="Flow_1nu0fsx">
-        <di:waypoint x="370" y="200" />
-        <di:waypoint x="405" y="200" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="411" y="173" width="48" height="14" />
-        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ocywhk_di" bpmnElement="Flow_1ocywhk">
         <di:waypoint x="640" y="200" />
@@ -774,12 +774,6 @@
       <bpmndi:BPMNShape id="Activity_1sk4oih_di" bpmnElement="Activity_1mwcacs">
         <dc:Bounds x="260" y="360" width="100" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Gateway_1jew3dx_di" bpmnElement="Gateway_0kyl34x" isMarkerVisible="true">
-        <dc:Bounds x="405" y="175" width="50" height="50" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="381" y="163" width="37" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1c6wq54_di" bpmnElement="Activity_1c6wq54">
         <dc:Bounds x="1590" y="260" width="100" height="80" />
       </bpmndi:BPMNShape>
@@ -797,9 +791,6 @@
         <bpmndi:BPMNLabel>
           <dc:Bounds x="931" y="163" width="37" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_1n3r3sc_di" bpmnElement="Activity_1ijipih">
-        <dc:Bounds x="540" y="160" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_0igl8mz_di" bpmnElement="Gateway_0igl8mz" isMarkerVisible="true">
         <dc:Bounds x="1505" y="175" width="50" height="50" />
@@ -868,6 +859,15 @@
         <dc:Bounds x="1582" y="382" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="1590" y="425" width="20" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1n3r3sc_di" bpmnElement="Activity_1ijipih">
+        <dc:Bounds x="540" y="160" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1jew3dx_di" bpmnElement="Gateway_0kyl34x" isMarkerVisible="true">
+        <dc:Bounds x="405" y="175" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="381" y="163" width="37" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
