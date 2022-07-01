@@ -29,8 +29,6 @@ class PhaseCode(db.Model, CodeTable):
 
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
     ea_act_id = Column(ForeignKey('ea_acts.id'), nullable=False)
-    start_event = Column(String())
-    end_event = Column(String)
     duration = Column(Integer())
     legislated = Column(Boolean())
     sort_order = Column(Integer())
@@ -49,8 +47,6 @@ class PhaseCode(db.Model, CodeTable):
             'id': self.id,
             'name': self.name,
             'sort_order': self.sort_order,
-            'start_event': self.start_event,
-            'end_event': self.end_event,
             'duration': self.duration,
             'legislated': self.legislated,
             'work_type': self.work_type.as_dict(),
