@@ -32,12 +32,13 @@ class Project(BaseModel):
     epic_guid = Column(String(), nullable=True, default=None)
     is_project_closed = Column(Boolean(), default=False)
     address = Column(Text, nullable=True, default=None)
+
     ea_certificate = Column(String(255), nullable=True, default=None)
     sub_sector_id = Column(ForeignKey('sub_sectors.id'), nullable=False)
     proponent_id = Column(ForeignKey('proponents.id'), nullable=False)
     region_id_env = Column(ForeignKey('regions.id'), nullable=False)
     region_id_flnro = Column(ForeignKey('regions.id'), nullable=False)
-
+    abbreviation = Column(String(10), nullable=True)
     sub_sector = relationship('SubSector', foreign_keys=[sub_sector_id], lazy='select')
     proponent = relationship('Proponent', foreign_keys=[proponent_id], lazy='select')
     region_env = relationship('Region', foreign_keys=[region_id_env], lazy='select')

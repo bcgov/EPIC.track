@@ -13,11 +13,19 @@
 # limitations under the License.
 """Model to handle all operations related to Milestone."""
 
+import enum
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 from .db import db
+
+
+class MilestoneKind(enum.Enum):
+    """Enum for MilestoneKind"""
+
+    EVENT = 'EVENT'
+    ENGAGEMENT = 'ENGAGEMENT'
 
 
 class Milestone(BaseModel):
@@ -30,8 +38,8 @@ class Milestone(BaseModel):
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
     milestone_type_id = Column(ForeignKey('milestone_types.id'), nullable=False)
     sort_order = Column(Integer, nullable=False)
-    is_start_event = Column(Boolean, default=False)
-    is_end_event = Column(Boolean, default=False)
+    start_at = Column(Integer, nullable=False, default=0)
+    duration = Column(Integer, nullable=False, default=0)
 
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     milestone_type = relationship('MilestoneType', foreign_keys=[milestone_type_id], lazy='select')
@@ -39,18 +47,21 @@ class Milestone(BaseModel):
     outcomes = relationship("Outcome",
                             primaryjoin="Milestone.id==Outcome.milestone_id",
                             back_populates="milestone")
+    kind = Column(String, nullable=False, default='EVENT')
+    auto = Column(Boolean, default=False)
 
     @classmethod
     def find_by_phase_id(cls, _phase_id):
         """Returns collection of milestone by phaseid"""
-        milestones = db.session.query(Milestone).filter_by(phase_id=_phase_id).all()
+        milestones = db.session.query(Milestone).filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).all()
         return milestones
 
     @classmethod
     def find_non_decision_by_phase_id(cls, _phase_id: int):
         """Find non decision by phase id."""
-        milestones = cls.query.filter_by(phase_id=_phase_id, is_start_event=False, is_end_event=False).all()
-        return milestones
+        milestones = cls.query.filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).all()
+        # first and last items should not be returned as it is already autopopulated as events
+        return milestones[1:len(milestones) - 1]
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Returns JSON representation"""
@@ -59,7 +70,10 @@ class Milestone(BaseModel):
             'name': self.name,
             'phase_id': self.phase_id,
             'milestone_type': self.milestone_type.as_dict(),
-            'is_start_event': self.is_start_event,
-            'is_end_event': self.is_end_event,
+            'auto': self.auto,
+            'sort_order': self.sort_order,
+            'kind': self.kind,
+            'start_at': self.start_at,
+            'duration': self.duration,
             'outcomes': [x.as_dict() for x in self.outcomes]
         }
