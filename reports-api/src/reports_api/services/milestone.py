@@ -26,3 +26,10 @@ class MilestoneService():  # pylint:disable=too-few-public-methods
         current_app.logger.debug(f'find non decision making milestones by phase id {phase_id}')
         milestones = Milestone.find_non_decision_by_phase_id(phase_id)
         return jsonify([item.as_dict() for item in milestones])
+
+    @classmethod
+    def find_milestone_by_id(cls, milestone_id: int):
+        """Find milestone by id"""
+        current_app.logger.debug(f'find milestone by id {milestone_id}')
+        milestone = Milestone.find_by_id(milestone_id)
+        return jsonify(milestone.as_dict())
