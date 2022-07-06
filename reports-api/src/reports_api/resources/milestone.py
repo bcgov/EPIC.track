@@ -36,3 +36,17 @@ class Milestones(Resource):
     def get(phase_id):
         """Return all milestones based on phase_id."""
         return MilestoneService.find_non_decision_by_phase_id(phase_id), HTTPStatus.OK
+
+
+@cors_preflight('GET')
+@API.route('/<int:milestone_id>', methods=['GET', 'OPTIONS'])
+class Milestone(Resource):
+    """Endpoint resource to return milestone by id"""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def get(milestone_id):
+        """Return single milestone based on the milestone id given"""
+        return MilestoneService.find_milestone_by_id(milestone_id), HTTPStatus.OK
