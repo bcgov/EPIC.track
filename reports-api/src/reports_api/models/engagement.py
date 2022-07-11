@@ -62,5 +62,6 @@ class WorkEngagement(BaseModel):
     def as_dict(self, recursive=False):
         """Return a JSON representation"""
         obj = super().as_dict(recursive=recursive)
-        obj['engagement'] = self.engagement.as_dict(recursive=recursive)
+        if recursive:
+            obj['engagement'] = self.engagement.as_dict(recursive=recursive)
         return obj
