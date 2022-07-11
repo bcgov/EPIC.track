@@ -127,6 +127,9 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 								String.valueOf(innerElementValue)));
 					}
 				}
+			} else if (nestedData.isObject()) {
+				JsonNode innerElementValue = nestedData.get("id");
+				elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/id", String.valueOf(innerElementValue)));
 			}
 		});
 	}
