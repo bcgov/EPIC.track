@@ -13,11 +13,13 @@
 # limitations under the License.
 """Resource for syncing work form data with reports DB."""
 from http import HTTPStatus
+import pydoc
 
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services.sync_form_data import SyncFormDataService
 from reports_api.utils import auth, profiletime
+from reports_api.utils.constants import SCHEMA_MAPS
 from reports_api.utils.util import cors_preflight
 
 
@@ -35,5 +37,15 @@ class SyncFormData(Resource):
     @profiletime
     def post():
         """Update and return a project."""
+        schema_name = API.payload.get('validatorKey', '_')
+        schema_path = SCHEMA_MAPS.get(schema_name, None)
+
+        if schema_path is None:
+            return {"message": "No matching validator found"}, HTTPStatus.INTERNAL_SERVER_ERROR
+        schema_class = pydoc.locate(schema_path)
+        schema_errors = schema_class().validate(API.payload)
+        if isinstance(schema_errors, dict):
+            return schema_errors, HTTPStatus.BAD_REQUEST
+
         response = SyncFormDataService.sync_data(API.payload)
         return response, HTTPStatus.OK
