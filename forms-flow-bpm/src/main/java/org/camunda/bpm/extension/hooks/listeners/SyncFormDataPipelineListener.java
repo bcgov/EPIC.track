@@ -144,12 +144,13 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 		Object dataJson = prepareSyncData(execution);
 		String payload = dataJson != null ? new ObjectMapper().writeValueAsString(dataJson) : null;
 		payload = (dataJson == null) ? new JsonObject().toString() : payload;
-
+		LOGGER.info("ReportAPI Payload : " + payload);
 		Mono<ResponseEntity<String>> entityMono = webClient.method(HttpMethod.POST).uri(getSyncApplicationUrl())
 				.accept(MediaType.APPLICATION_JSON).header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
 				.body(Mono.just(payload), String.class).retrieve().toEntity(String.class);
 
 		ResponseEntity<String> response = entityMono.block();
+		LOGGER.info("ReportAPI Response : " + response.getBody());
 		return response.getBody();
 	}
 
@@ -161,6 +162,7 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 	 */
 	private JsonNode prepareSyncData(DelegateExecution execution) throws IOException {
 		String submission = formSubmissionService.readSubmission(getUrl(execution));
+		LOGGER.info("Formio Response : " + submission);
 		if (submission.isEmpty()) {
 			throw new RuntimeException("Unable to retrieve submission");
 		}
