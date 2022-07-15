@@ -14,6 +14,7 @@
 """Model to handle all operations related to Milestone."""
 
 import enum
+from flask import current_app
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
@@ -53,13 +54,16 @@ class Milestone(BaseModel):
     @classmethod
     def find_by_phase_id(cls, _phase_id):
         """Returns collection of milestone by phaseid"""
-        milestones = db.session.query(Milestone).filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).all()
+        current_app.logger.info(f"Find by phase {_phase_id}")
+        milestones = db.session.query(Milestone).filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).order_by(
+            Milestone.sort_order.asc(), Milestone.id.asc()).all()
         return milestones
 
     @classmethod
     def find_non_decision_by_phase_id(cls, _phase_id: int):
         """Find non decision by phase id."""
-        milestones = cls.query.filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).all()
+        milestones = cls.query.filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).order_by(
+            Milestone.sort_order.asc(), Milestone.id.asc()).all()
         # first and last items should not be returned as it is already autopopulated as events
         return milestones[1:len(milestones) - 1]
 
