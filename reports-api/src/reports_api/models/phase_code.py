@@ -39,7 +39,8 @@ class PhaseCode(db.Model, CodeTable):
 
     milestones = relationship("Milestone",
                               primaryjoin="PhaseCode.id==Milestone.phase_id",
-                              back_populates="phase")
+                              back_populates="phase",
+                              order_by="Milestone.sort_order.asc(), Milestone.id.asc()")
 
     def as_dict(self):
         """Return Json representation."""
