@@ -19,6 +19,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+
 import javax.inject.Named;
 import java.io.IOException;
 import java.util.Iterator;
@@ -95,19 +98,23 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 	 */
 	private Set<FormElement> getModifiedCustomFormElements(DelegateExecution execution) throws IOException {
 		Set<FormElement> elements = new LinkedHashSet<>();
-		JsonNode data = new ObjectMapper().readTree(invokeSyncApplicationService(execution));
+		JsonNode data = prepareSyncData(execution);
+		DocumentContext jsonContext = JsonPath.parse(invokeSyncApplicationService(execution));
 		Iterator<String> iterator = data.fieldNames();
 		iterator.forEachRemaining(entry -> {
 			JsonNode jsonData = data.get(entry);
 			if (jsonData != null && jsonData.isArray()) {
 				for (int i = 0; i < jsonData.size(); i++) {
-					JsonNode elementValue = jsonData.get(i).get("id");
+					if (jsonData.get(i).has("id")) {
+					String jsonPath = "$." + entry + "[" + i + "]" + ".id";
+					Integer elementValue = jsonContext.read(jsonPath);
 					elements.add(new FormElement(entry + "/" + i + "/id", String.valueOf(elementValue)));
-
-					readInnerDataElements(i, jsonData, elements, entry);
+					}
+					readInnerDataElements(i, jsonData, elements, entry, jsonContext);
 				}
 			} else {
-				JsonNode elementValue = jsonData.get("id");
+				String jsonPath = "$." + entry + ".id";
+				Integer elementValue = jsonContext.read(jsonPath);
 				elements.add(new FormElement(entry + "/id", String.valueOf(elementValue)));
 			}
 		});
@@ -115,20 +122,22 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 		return elements;
 	}
 
-	private void readInnerDataElements(int i, JsonNode jsonData, Set<FormElement> elements, String entry) {
+	private void readInnerDataElements(int i, JsonNode jsonData, Set<FormElement> elements, String entry, DocumentContext jsonContext) {
 		Iterator<String> iterateData = jsonData.get(i).fieldNames();
 		iterateData.forEachRemaining(innerEntry -> {
 			JsonNode nestedData = jsonData.get(i).get(innerEntry);
 			if (nestedData != null && nestedData.isArray()) {
 				for (int j = 0; j < nestedData.size(); j++) {
 					if (nestedData.get(j).has("id")) {
-						JsonNode innerElementValue = nestedData.get(j).get("id");
+						String jsonPath = "$." + entry + "[" + i + "]" + "." + innerEntry + "[" + j + "]" + ".id";
+						Integer innerElementValue = jsonContext.read(jsonPath);
 						elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/" + j + "/" + "id",
 								String.valueOf(innerElementValue)));
 					}
 				}
 			} else if (nestedData.has("id") && nestedData.isObject()) {
-				JsonNode innerElementValue = nestedData.get("id");
+				String jsonPath = "$." + entry + "[" + i + "]" + "." + innerEntry + ".id";
+				Integer innerElementValue = jsonContext.read(jsonPath);
 				elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/id", String.valueOf(innerElementValue)));
 			}
 		});
