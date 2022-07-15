@@ -106,13 +106,13 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 			if (jsonData != null && jsonData.isArray()) {
 				for (int i = 0; i < jsonData.size(); i++) {
 					if (jsonData.get(i).has("id")) {
-					String jsonPath = "$." + entry + "[" + i + "]" + ".id";
-					Integer elementValue = jsonContext.read(jsonPath);
-					elements.add(new FormElement(entry + "/" + i + "/id", String.valueOf(elementValue)));
+						String jsonPath = "$." + entry + "[" + i + "]" + ".id";
+						Integer elementValue = jsonContext.read(jsonPath);
+						elements.add(new FormElement(entry + "/" + i + "/id", String.valueOf(elementValue)));
 					}
 					readInnerDataElements(i, jsonData, elements, entry, jsonContext);
 				}
-			} else {
+			} else if (jsonData.has("id") && jsonData.isObject()) {
 				String jsonPath = "$." + entry + ".id";
 				Integer elementValue = jsonContext.read(jsonPath);
 				elements.add(new FormElement(entry + "/id", String.valueOf(elementValue)));
@@ -122,7 +122,8 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 		return elements;
 	}
 
-	private void readInnerDataElements(int i, JsonNode jsonData, Set<FormElement> elements, String entry, DocumentContext jsonContext) {
+	private void readInnerDataElements(int i, JsonNode jsonData, Set<FormElement> elements, String entry,
+			DocumentContext jsonContext) {
 		Iterator<String> iterateData = jsonData.get(i).fieldNames();
 		iterateData.forEachRemaining(innerEntry -> {
 			JsonNode nestedData = jsonData.get(i).get(innerEntry);
