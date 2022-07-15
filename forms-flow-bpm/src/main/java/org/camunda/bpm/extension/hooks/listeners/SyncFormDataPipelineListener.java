@@ -99,8 +99,7 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 	private Set<FormElement> getModifiedCustomFormElements(DelegateExecution execution) throws IOException {
 		Set<FormElement> elements = new LinkedHashSet<>();
 		JsonNode data = prepareSyncData(execution);
-		JsonNode syncData = new ObjectMapper().readTree(invokeSyncApplicationService(execution));
-		DocumentContext jsonContext = JsonPath.parse(syncData);
+		DocumentContext jsonContext = JsonPath.parse(invokeSyncApplicationService(execution));
 		Iterator<String> iterator = data.fieldNames();
 		iterator.forEachRemaining(entry -> {
 			JsonNode jsonData = data.get(entry);
