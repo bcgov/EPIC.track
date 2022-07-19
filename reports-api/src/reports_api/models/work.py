@@ -61,7 +61,8 @@ class Work(BaseModel):
 
     current_phase = relationship("PhaseCode", foreign_keys=[current_phase_id], lazy='select')
 
-    def as_dict(self):  # pylint:disable=arguments-differ
+    def as_dict(self, recursive=True):
         """Return JSON Representation."""
-        result = super().as_dict()
+        result = super().as_dict(recursive=recursive)
+        result['start_date'] = self.start_date.isoformat(sep=' ', timespec='milliseconds')
         return result

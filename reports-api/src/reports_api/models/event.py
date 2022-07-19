@@ -44,9 +44,9 @@ class Event(BaseModel):
     milestone = relationship('Milestone', foreign_keys=[milestone_id], lazy='select')
     outcome = relationship('Outcome', foreign_keys=[outcome_id], lazy='select')
 
-    def as_dict(self):  # pylint:disable=arguments-differ
+    def as_dict(self, recursive=True):
         """Return Json representation."""
-        return {
+        obj = {
             'id': self.id,
             'title': self.title,
             'short_description': self.short_description,
@@ -54,14 +54,21 @@ class Event(BaseModel):
             'is_active': self.is_active,
             'is_complete': self.is_complete,
             'oh_attendance': self.oh_attendance,
-            'anticipated_start_date': str(self.anticipated_start_date) if self.anticipated_start_date else None,
-            'start_date': str(self.start_date) if self.start_date else None,
-            'anticipated_end_date': str(self.anticipated_end_date) if self.anticipated_end_date else None,
-            'end_date': str(self.end_date) if self.end_date else None,
+            'anticipated_start_date': self.anticipated_start_date.isoformat(sep=' ', timespec='milliseconds')
+            if self.anticipated_start_date else None,
+            'start_date': self.start_date.isoformat(sep=' ', timespec='milliseconds') if self.start_date else None,
+            'anticipated_end_date': self.anticipated_end_date.isoformat(sep=' ', timespec='milliseconds')
+            if self.anticipated_end_date else None,
+            'end_date': self.end_date.isoformat(sep=' ', timespec='milliseconds') if self.end_date else None,
             'work_id': self.work_id,
-            'milestone': self.milestone.as_dict() if self.milestone else None,
-            'outcome': self.outcome.as_dict() if self.outcome else None
         }
+        if recursive:
+            obj['milestone'] = self.milestone.as_dict() if self.milestone else None
+            obj['outcome'] = self.outcome.as_dict() if self.outcome else None
+        else:
+            obj['milestone_id'] = self.milestone_id
+            obj['outcome_id'] = self.outcome_id
+        return obj
 
     @classmethod
     def find_by_work_id(cls, work_id: int):

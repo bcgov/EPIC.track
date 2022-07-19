@@ -43,7 +43,7 @@ class SyncFormData(Resource):
         if schema_path is None:
             return {"message": "No matching validator found"}, HTTPStatus.INTERNAL_SERVER_ERROR
         schema_class = pydoc.locate(schema_path)
-        schema_errors = schema_class().validate(API.payload)
+        schema_errors = schema_class.from_dict(API.payload).validate()
         if isinstance(schema_errors, dict):
             return schema_errors, HTTPStatus.BAD_REQUEST
 
