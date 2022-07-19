@@ -52,6 +52,7 @@ class WorkEngagement(BaseModel):
     project_id = Column(ForeignKey('projects.id'), nullable=False)
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
+    milestone_id = Column(ForeignKey('milestones.id'), nullable=True)
     engagement_id = Column(ForeignKey('engagements.id'), nullable=False)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
