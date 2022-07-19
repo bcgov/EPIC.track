@@ -20,7 +20,7 @@
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0y7gn0j" sourceRef="Activity_06mndaj" targetRef="Activity_1kon3fn" />
-    <bpmn:userTask id="Activity_1kon3fn" name="${projectName}" default="Flow_02h4pa8">
+    <bpmn:userTask id="Activity_1kon3fn" name="${projectName}" default="Flow_02h4pa8" camunda:asyncAfter="true">
       <bpmn:extensionElements>
         <camunda:taskListener event="complete">
           <camunda:script scriptFormat="javascript">task.execution.setVariable('applicationStatus', "Modified");
@@ -46,7 +46,7 @@ task.execution.setVariable('deleteReason', "completed");</camunda:script>
             <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMDataPipelineListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
     <bpmn:task id="Activity_06mndaj" name="Report API" camunda:asyncBefore="true">

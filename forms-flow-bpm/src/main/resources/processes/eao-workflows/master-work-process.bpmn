@@ -100,7 +100,7 @@
       <bpmn:incoming>Flow_0r9nl1m</bpmn:incoming>
       <bpmn:outgoing>Flow_026o447</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:exclusiveGateway id="Gateway_1nkkyet" name="Action Taken ?">
+    <bpmn:exclusiveGateway id="Gateway_1nkkyet" name="Action Taken ?" camunda:asyncAfter="true">
       <bpmn:incoming>Flow_10qxtdj</bpmn:incoming>
       <bpmn:outgoing>Flow_0lo5h18</bpmn:outgoing>
       <bpmn:outgoing>Flow_0r9nl1m</bpmn:outgoing>
