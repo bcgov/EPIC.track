@@ -36,11 +36,11 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
-          <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
-          </camunda:field>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '5'}</bpmn:conditionExpression>
@@ -67,9 +67,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -89,9 +93,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -105,9 +113,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -121,9 +133,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -137,9 +153,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -153,9 +173,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -169,9 +193,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -390,51 +418,43 @@
     <bpmn:endEvent id="Event_1iv2ihr" name="Terminated">
       <bpmn:incoming>Flow_0phjzg9</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0lcpruo" sourceRef="Gateway_0j55fhh" targetRef="Activity_1ijipih">
+    <bpmn:sequenceFlow id="Flow_0lcpruo" name="Resubmit" sourceRef="Gateway_0j55fhh" targetRef="Activity_1ijipih">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0pjz4mh" sourceRef="Gateway_1v8a1kj" targetRef="Activity_17f7mte">
+    <bpmn:sequenceFlow id="Flow_0pjz4mh" name="Resubmit" sourceRef="Gateway_1v8a1kj" targetRef="Activity_17f7mte">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1tkshjd" sourceRef="Gateway_1ggk8e8" targetRef="Activity_0tz7odl">
+    <bpmn:sequenceFlow id="Flow_1tkshjd" name="Resubmit" sourceRef="Gateway_1ggk8e8" targetRef="Activity_0tz7odl">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1yl1brp" sourceRef="Gateway_0igl8mz" targetRef="Activity_0l9smge">
+    <bpmn:sequenceFlow id="Flow_1yl1brp" name="Resubmit" sourceRef="Gateway_0igl8mz" targetRef="Activity_0l9smge">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_1pk94rs" sourceRef="Gateway_1gp6tm5" targetRef="Activity_1mwcacs">
+    <bpmn:sequenceFlow id="Flow_1pk94rs" name="Resubmit" sourceRef="Gateway_1gp6tm5" targetRef="Activity_1mwcacs">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0e12gix" sourceRef="Gateway_1l21rp7" targetRef="Activity_0dapu3s">
+    <bpmn:sequenceFlow id="Flow_0e12gix" name="Resubmit" sourceRef="Gateway_1l21rp7" targetRef="Activity_0dapu3s">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0t96xtx" sourceRef="Gateway_0phq651" targetRef="Activity_1rrw1ui">
+    <bpmn:sequenceFlow id="Flow_0t96xtx" name="Resubmit" sourceRef="Gateway_0phq651" targetRef="Activity_1rrw1ui">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_02l0i2f" sourceRef="Gateway_1ykufab" targetRef="Activity_18o8b8i">
+    <bpmn:sequenceFlow id="Flow_02l0i2f" name="Resubmit" sourceRef="Gateway_1ykufab" targetRef="Activity_18o8b8i">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
@@ -445,22 +465,25 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == '10'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0y99zm4" sourceRef="Gateway_1u3rb75" targetRef="Activity_0jpvspx">
+    <bpmn:sequenceFlow id="Flow_0y99zm4" name="Resubmit" sourceRef="Gateway_1u3rb75" targetRef="Activity_0jpvspx">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:exclusiveGateway id="Gateway_1u3rb75" camunda:asyncAfter="true" default="Flow_0y99zm4">
+    <bpmn:exclusiveGateway id="Gateway_1u3rb75" name="Action" camunda:asyncAfter="true" default="Flow_0y99zm4">
       <bpmn:incoming>Flow_0tbksvg</bpmn:incoming>
       <bpmn:outgoing>Flow_14uwbd7</bpmn:outgoing>
       <bpmn:outgoing>Flow_0y99zm4</bpmn:outgoing>
@@ -496,9 +519,13 @@
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
+        </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
@@ -515,75 +542,78 @@
     <bpmn:sequenceFlow id="Flow_18jt41m" sourceRef="Gateway_0kyl34x" targetRef="Activity_1c6wq54">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${isWorkTerminated == 'true'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0jo372u" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
+    <bpmn:sequenceFlow id="Flow_0jo372u" name="Resubmit" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0zci9bl" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Accept IPD &amp; Engagement Plan");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Accept IPD &amp; Engagement Plan'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1my375s" sourceRef="Gateway_0j55fhh" targetRef="Activity_1ijipih">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Start of Proponent Time: Early Engagement");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == ' Start of Proponent Time: Early Engagement'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1i3zk8u" sourceRef="Gateway_1v8a1kj" targetRef="Activity_17f7mte">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Accept Detailed Project Description");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Accept Detailed Project Description'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_00q707o" sourceRef="Gateway_1ggk8e8" targetRef="Activity_0tz7odl">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Start of the Process Planning Phase");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
@@ -591,115 +621,121 @@
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Start of the Process Planning Phase'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0nukjaf" sourceRef="Gateway_0igl8mz" targetRef="Activity_0l9smge">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Start of Proponent Time: Process Planning");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:expression>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Start of Proponent Time: Process Planning'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0yd4t78" sourceRef="Gateway_1u3rb75" targetRef="Activity_0jpvspx">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus',"Referral Package Sent to Ministers");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:string>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:string>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Referral Package Sent to Ministers'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0mjm9o5" sourceRef="Gateway_1ykufab" targetRef="Activity_18o8b8i">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Draft Assessment Report Posted");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:string>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:string>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Draft Assessment Report Posted'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_01id3ee" sourceRef="Gateway_0phq651" targetRef="Activity_1rrw1ui">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Accept Revised EAC Application");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:string>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:string>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Accept Revised EAC Application'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1xtwkiz" sourceRef="Gateway_1l21rp7" targetRef="Activity_0dapu3s">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Start of Proponent Time: Application Review");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:string>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:string>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Start of Proponent Time: Application Review'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1opk34e" sourceRef="Gateway_1gp6tm5" targetRef="Activity_1mwcacs">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Accept EAC Application");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEvent'));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedPhaseEvent', "");</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
-            <camunda:expression>["applicationId", "applicationStatus", "completedEvent"]</camunda:expression>
+            <camunda:string>["applicationId", "applicationStatus", "completedEvent", "completedPhaseEvent"]</camunda:string>
           </camunda:field>
         </camunda:executionListener>
       </bpmn:extensionElements>
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${completedEvent == 'Accept EAC Application'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -766,12 +802,18 @@
         <di:waypoint x="430" y="130" />
         <di:waypoint x="320" y="130" />
         <di:waypoint x="320" y="160" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="338" y="112" width="74" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0jo372u_di" bpmnElement="Flow_0jo372u">
         <di:waypoint x="430" y="225" />
         <di:waypoint x="430" y="270" />
         <di:waypoint x="320" y="270" />
         <di:waypoint x="320" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="351" y="252" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_18jt41m_di" bpmnElement="Flow_18jt41m">
         <di:waypoint x="430" y="175" />
@@ -804,6 +846,9 @@
         <di:waypoint x="1510" y="330" />
         <di:waypoint x="1390" y="330" />
         <di:waypoint x="1390" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1426" y="312" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_14uwbd7_di" bpmnElement="Flow_14uwbd7">
         <di:waypoint x="1535" y="400" />
@@ -814,48 +859,72 @@
         <di:waypoint x="1240" y="330" />
         <di:waypoint x="1110" y="330" />
         <di:waypoint x="1110" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1151" y="312" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0t96xtx_di" bpmnElement="Flow_0t96xtx">
         <di:waypoint x="950" y="375" />
         <di:waypoint x="950" y="330" />
         <di:waypoint x="840" y="330" />
         <di:waypoint x="840" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="871" y="312" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0e12gix_di" bpmnElement="Flow_0e12gix">
         <di:waypoint x="690" y="375" />
         <di:waypoint x="690" y="330" />
         <di:waypoint x="580" y="330" />
         <di:waypoint x="580" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="611" y="312" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1pk94rs_di" bpmnElement="Flow_1pk94rs">
         <di:waypoint x="430" y="375" />
         <di:waypoint x="430" y="330" />
         <di:waypoint x="310" y="330" />
         <di:waypoint x="310" y="360" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="346" y="312" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1yl1brp_di" bpmnElement="Flow_1yl1brp">
         <di:waypoint x="1530" y="225" />
         <di:waypoint x="1530" y="270" />
         <di:waypoint x="1410" y="270" />
         <di:waypoint x="1410" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1446" y="252" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1tkshjd_di" bpmnElement="Flow_1tkshjd">
         <di:waypoint x="1260" y="225" />
         <di:waypoint x="1260" y="270" />
         <di:waypoint x="1130" y="270" />
         <di:waypoint x="1130" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1171" y="252" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0pjz4mh_di" bpmnElement="Flow_0pjz4mh">
         <di:waypoint x="980" y="225" />
         <di:waypoint x="980" y="270" />
         <di:waypoint x="870" y="270" />
         <di:waypoint x="870" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="901" y="252" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0lcpruo_di" bpmnElement="Flow_0lcpruo">
         <di:waypoint x="710" y="225" />
         <di:waypoint x="710" y="270" />
         <di:waypoint x="590" y="270" />
         <di:waypoint x="590" y="240" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="626" y="252" width="48" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_18v999u_di" bpmnElement="Flow_18v999u">
         <di:waypoint x="1240" y="425" />
@@ -1114,6 +1183,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1u3rb75_di" bpmnElement="Gateway_1u3rb75" isMarkerVisible="true">
         <dc:Bounds x="1485" y="375" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1454" y="363" width="31" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_02tgcfx_di" bpmnElement="Event_02tgcfx">
         <dc:Bounds x="1582" y="382" width="36" height="36" />
