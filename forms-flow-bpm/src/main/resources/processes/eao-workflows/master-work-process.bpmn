@@ -100,7 +100,7 @@
       <bpmn:incoming>Flow_0r9nl1m</bpmn:incoming>
       <bpmn:outgoing>Flow_026o447</bpmn:outgoing>
     </bpmn:callActivity>
-    <bpmn:exclusiveGateway id="Gateway_1nkkyet" name="Action Taken ?">
+    <bpmn:exclusiveGateway id="Gateway_1nkkyet" name="Action Taken ?" camunda:asyncAfter="true">
       <bpmn:incoming>Flow_10qxtdj</bpmn:incoming>
       <bpmn:outgoing>Flow_0lo5h18</bpmn:outgoing>
       <bpmn:outgoing>Flow_0r9nl1m</bpmn:outgoing>
@@ -214,7 +214,6 @@
     <bpmn:task id="Activity_0s2ms94" name="Sync Data" camunda:asyncBefore="true">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
-        <camunda:failedJobRetryTimeCycle>R3/PT2M</camunda:failedJobRetryTimeCycle>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1rridu9</bpmn:incoming>
       <bpmn:outgoing>Flow_10qxtdj</bpmn:outgoing>

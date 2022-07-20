@@ -12,7 +12,7 @@
       <bpmn:incoming>Flow_02fvthu</bpmn:incoming>
       <bpmn:outgoing>Flow_0zwaspu</bpmn:outgoing>
     </bpmn:task>
-    <bpmn:userTask id="Activity_0ch1f4v" name="${inspectionNo}-${projectName}" default="Flow_02fvthu">
+    <bpmn:userTask id="Activity_0ch1f4v" name="${inspectionNo}-${projectName}" default="Flow_02fvthu" camunda:asyncAfter="true">
       <bpmn:extensionElements>
         <camunda:taskListener event="complete">
           <camunda:script scriptFormat="javascript">task.execution.setVariable('applicationStatus', "Modified");
