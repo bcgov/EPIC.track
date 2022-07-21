@@ -64,5 +64,4 @@ class Work(BaseModel):
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         result = super().as_dict(recursive=recursive)
-        result['start_date'] = self.start_date.isoformat(sep=' ', timespec='milliseconds') if self.start_date else ''
         return result
