@@ -32,9 +32,6 @@ class Engagement(BaseModel):
     met_link = Column(String(255), nullable=True, default=None)
     status = Column(String(32), nullable=False, default='planned')
 
-    staff_id = Column(ForeignKey('staffs.id'), nullable=True)
-    staff = relationship('Staff', foreign_keys=[staff_id], lazy='select')
-
     work_engagements_list = relationship("WorkEngagement",
                                          primaryjoin="Engagement.id==WorkEngagement.engagement_id",
                                          back_populates="engagement")
