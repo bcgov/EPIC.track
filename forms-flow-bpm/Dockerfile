@@ -5,12 +5,12 @@ RUN apt-get update \
     && apt-get install -y git
 
 ARG FORMS_FLOW_REPO=https://github.com/aot-technologies/forms-flow-ai
-ARG FORMS_FLOW_VERSION=v4.0.6
+ARG FORMS_FLOW_VERSION=master
 
 RUN git clone -b ${FORMS_FLOW_VERSION} ${FORMS_FLOW_REPO} /bpm/
 
-RUN cp /bpm/forms-flow-bpm/pom-docker.xml /tmp/pom.xml
-RUN cp /bpm/forms-flow-bpm/settings-docker.xml /tmp/pom-default.xml
+RUN cp /bpm/forms-flow-bpm/pom.xml /tmp/pom.xml
+RUN cp /bpm/forms-flow-bpm/pom-default.xml /tmp/pom-default.xml
 # COPY ./pom.xml /tmp/pom.xml
 RUN cp /bpm/forms-flow-bpm/settings-docker.xml /usr/share/maven/ref/
 
