@@ -54,12 +54,10 @@ class Event(BaseModel):
             'is_active': self.is_active,
             'is_complete': self.is_complete,
             'oh_attendance': self.oh_attendance,
-            'anticipated_start_date': self.anticipated_start_date.isoformat(sep=' ', timespec='milliseconds')
-            if self.anticipated_start_date else None,
-            'start_date': self.start_date.isoformat(sep=' ', timespec='milliseconds') if self.start_date else None,
-            'anticipated_end_date': self.anticipated_end_date.isoformat(sep=' ', timespec='milliseconds')
-            if self.anticipated_end_date else None,
-            'end_date': self.end_date.isoformat(sep=' ', timespec='milliseconds') if self.end_date else None,
+            'anticipated_start_date': self.anticipated_start_date,
+            'start_date': self.start_date,
+            'anticipated_end_date': self.anticipated_end_date,
+            'end_date': self.end_date,
             'work_id': self.work_id,
         }
         if recursive:

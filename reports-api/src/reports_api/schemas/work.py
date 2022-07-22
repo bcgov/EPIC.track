@@ -4,10 +4,11 @@ from dataclasses import InitVar, dataclass, fields
 from typing import List, Optional
 
 from reports_api.models import Event, Work
+from reports_api.schemas.base import BaseSchema
 
 
 @dataclass
-class WorkSchema:  # pylint: disable=too-many-instance-attributes
+class WorkSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
     """Schema representing validation rules for work"""
 
     id: Optional[int]
@@ -25,19 +26,16 @@ class WorkSchema:  # pylint: disable=too-many-instance-attributes
     long_description: str
     work_short_status: str
     work_status_stoplight: str
-    start_date: str
-    anticipated_decision_date: str
+    start_date: datetime
+    anticipated_decision_date: datetime
     is_pcep_required: bool
     is_cac_recommended: bool
     is_active: bool
-    dateformat: InitVar[str] = '%Y-%m-%d %H:%M:%S.%f'
+    dateformat: InitVar[str] = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def __init__(self, **kwargs: dict):
-        """Return a valid WorkSchema."""
-        field_names = {f.name for f in fields(self)}
-        for k, v in kwargs.items():
-            if k in field_names:
-                setattr(self, k, v)
+    def __init__(self, **kwargs: dict):  # pylint: disable=useless-super-delegation
+        """Create a valid Schema."""
+        super().__init__(**kwargs)
 
     def validate(self) -> dict:
         """Method to validate the given data"""
@@ -54,14 +52,14 @@ class WorkSchema:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class EventSchema:  # pylint: disable=too-many-instance-attributes
+class EventSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
     """Schema representing validation rules for event"""
 
     id: int
     milestone_id: int
     title: str
-    anticipated_start_date: str
-    anticipated_end_date: str
+    anticipated_start_date: datetime
+    anticipated_end_date: datetime
 
     is_active: bool
     is_complete: bool
@@ -69,19 +67,16 @@ class EventSchema:  # pylint: disable=too-many-instance-attributes
     outcome_id: Optional[int] = None
     duration: int = 0
     number_of_days: int = 0
-    start_date: Optional[str] = None
-    end_date: Optional[str] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
     short_description: str = ''
     long_description: str = ''
     milestone_type_name: str = ''
-    dateformat: InitVar[str] = '%Y-%m-%d %H:%M:%S.%f'
+    dateformat: InitVar[str] = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def __init__(self, **kwargs: dict):
-        """Create a valid EventSchema."""
-        field_names = {f.name for f in fields(self)}
-        for k, v in kwargs.items():
-            if k in field_names:
-                setattr(self, k, v)
+    def __init__(self, **kwargs: dict):  # pylint: disable=useless-super-delegation
+        """Create a valid Schema."""
+        super().__init__(**kwargs)
 
     def __eq__(self, other: 'EventSchema') -> bool:
         """Compares two objects for equality"""
@@ -98,7 +93,7 @@ class EventSchema:  # pylint: disable=too-many-instance-attributes
         """Method to validate last event end date and work's anticipated end date"""
         errors = {}
         if anticipated_end_date:
-            event_end_date = datetime.strptime(getattr(self, "_".join(error_key.split())), self.dateformat)
+            event_end_date = getattr(self, "_".join(error_key.split()))
             if anticipated_end_date != event_end_date:
                 errors['works.anticipated_decision_date'] = "Anticipated end date and last event's" +\
                     f" {error_key} must be the same"
@@ -114,10 +109,6 @@ class EventSchema:  # pylint: disable=too-many-instance-attributes
         event_anticipated_start_date = self.anticipated_start_date
         event_anticipated_end_date = self.anticipated_end_date
         if event_anticipated_start_date and event_anticipated_end_date:
-            event_anticipated_start_date = datetime.strptime(
-                event_anticipated_start_date, self.dateformat)
-            event_anticipated_end_date = datetime.strptime(event_anticipated_end_date, self.dateformat)
-
             if self.milestone_type_name == 'PECP':
                 number_of_days = int(self.number_of_days)
                 if event_anticipated_end_date != event_anticipated_start_date + \
@@ -125,15 +116,11 @@ class EventSchema:  # pylint: disable=too-many-instance-attributes
                     errors[f'works-events[{index}].anticipated_end_date'] = \
                         "Anticipated end date must be equal " +\
                         " to anticipated start date + number of days"
-                if self.start_date:
-                    event_start_date = datetime.strptime(self.start_date, self.dateformat)
-                    if self.end_date:
-                        event_end_date = datetime.strptime(self.end_date, self.dateformat)
-
-                        if event_end_date != event_start_date + timedelta(days=number_of_days):
-                            errors[f'works-events[{index}].end_date'] = \
-                                "End date must be equal to start date " +\
-                                "+ number of days"
+                if self.start_date and self.end_date:
+                    if self.end_date != self.start_date + timedelta(days=number_of_days):
+                        errors[f'works-events[{index}].end_date'] = \
+                            "End date must be equal to start date " +\
+                            "+ number of days"
             else:
                 if event_anticipated_start_date != event_anticipated_end_date:
                     errors[f'works-events[{index}].anticipated_start_date'] = \
@@ -152,30 +139,26 @@ class EventSchema:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class WorkPhaseSchema:
+class WorkPhaseSchema(BaseSchema):
     """Schema representing validation rules for work phase"""
 
     id: int
     work_id: Optional[int]
     phase_id: int
     duration: int
-    start_date: str
-    anticipated_end_date: str
+    start_date: datetime
+    anticipated_end_date: datetime
     legislated: bool
-    dateformat: InitVar[str] = '%Y-%m-%d %H:%M:%S.%f'
+    dateformat: InitVar[str] = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def __init__(self, **kwargs: dict):
-        """Return a valid WorkPhaseSchema."""
-        field_names = {f.name for f in fields(self)}
-        for k, v in kwargs.items():
-            if k in field_names:
-                setattr(self, k, v)
+    def __init__(self, **kwargs: dict):  # pylint: disable=useless-super-delegation
+        """Create a valid Schema."""
+        super().__init__(**kwargs)
 
     def validate(self, anticipated_end_date: datetime, index: int) -> dict:
         """Method to validate the given data"""
-        work_phase_end_date = datetime.strptime(self.anticipated_end_date, self.dateformat)
         errors = {}
-        if anticipated_end_date != work_phase_end_date:
+        if anticipated_end_date != self.anticipated_end_date:
             errors['works.anticipated_decision_date'] = "Anticipated end date and last phase's" +\
                 " end date must be the same"
             errors[f"works-work_phases[{index}]"] = "Anticipated end date and last phase's" +\
@@ -190,10 +173,10 @@ class WorksFormSchema:
     work: WorkSchema
     events: List[EventSchema]
     work_phases: List[WorkPhaseSchema]
-    dateformat: InitVar[str] = '%Y-%m-%d %H:%M:%S.%f'
+    dateformat: InitVar[str] = '%Y-%m-%dT%H:%M:%S.%fZ'
 
     @classmethod
-    def from_dict(cls, data: dict) -> WorkPhaseSchema:
+    def from_dict(cls, data: dict) -> 'WorksFormSchema':
         """Return a valid WorkFormSchema from a dictionary."""
         work = data.get('works')
         work_phases = data.get('works-work_phases')
@@ -209,8 +192,7 @@ class WorksFormSchema:
         errors = {}
         work_errors = self.work.validate()
         errors.update(work_errors)
-        anticipated_end_date = datetime.strptime(self.work.anticipated_decision_date, self.dateformat)
-        phase_errors = self.work_phases[-1].validate(anticipated_end_date, len(self.work_phases) - 1)
+        phase_errors = self.work_phases[-1].validate(self.work.anticipated_decision_date, len(self.work_phases) - 1)
         errors.update(phase_errors)
         event_end_date = self.events[-1].end_date
         event_error_key = 'end date'
@@ -220,7 +202,7 @@ class WorksFormSchema:
         event_ids = [e.id for e in self.events if e.id]
         completed_events = Event.query.filter(
             Event.id.in_(event_ids), Event.is_complete.is_(True)).all()
-        last_event_errors = self.events[-1].validate_anticipated_date(anticipated_end_date,
+        last_event_errors = self.events[-1].validate_anticipated_date(self.work.anticipated_decision_date,
                                                                       len(self.events) - 1, event_error_key)
         errors.update(last_event_errors)
 
