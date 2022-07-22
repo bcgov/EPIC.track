@@ -5,7 +5,7 @@ RUN apt-get update \
     && apt-get install -y git
 
 ARG FORMS_FLOW_REPO=https://github.com/aot-technologies/forms-flow-ai
-ARG FORMS_FLOW_VERSION=master
+ARG FORMS_FLOW_VERSION=develop
 
 RUN git clone -b ${FORMS_FLOW_VERSION} ${FORMS_FLOW_REPO} /bpm/
 
