@@ -12,7 +12,7 @@ jsonschema
 requests
 attrs
 dpath
-Werkzeug
+Werkzeug==2.1.2
 cryptography
 sqlalchemy_utils
 sqlalchemy<1.4

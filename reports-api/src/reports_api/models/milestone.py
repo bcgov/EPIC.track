@@ -62,7 +62,7 @@ class Milestone(BaseModel):
     @classmethod
     def find_non_decision_by_phase_id(cls, _phase_id: int):
         """Find non decision by phase id."""
-        milestones = cls.query.filter_by(phase_id=_phase_id, kind=MilestoneKind.EVENT.value).order_by(
+        milestones = cls.query.filter_by(phase_id=_phase_id).order_by(
             Milestone.sort_order.asc(), Milestone.id.asc()).all()
         # first and last items should not be returned as it is already autopopulated as events
         return milestones[1:len(milestones) - 1]
