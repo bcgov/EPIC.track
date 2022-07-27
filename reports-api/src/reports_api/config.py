@@ -23,6 +23,7 @@ import os
 import sys
 
 from dotenv import find_dotenv, load_dotenv
+from reports_api.utils import constants
 
 
 # this will load all the envars from a .env file located in the project root (api)
@@ -97,6 +98,9 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     TESTING = False
     DEBUG = True
+
+    CACHE_TYPE = constants.CACHE_TYPE
+    CACHE_DEFAULT_TIMEOUT = constants.CACHE_DEFAULT_TIMEOUT
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -183,6 +187,7 @@ W0mOp436T6ZaELBfbFNulNLOzLLi5YzNRPLppfG1SRNZjbIrvTIKVL4N/YxLvQbT
 NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
 4H8UZcVFN95vEKxJiLRjAmj6g273pu9kK4ymXNEjWWJn
 -----END RSA PRIVATE KEY-----"""
+    CACHE_TYPE = constants.NULL_CACHE_TYPE
 
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods

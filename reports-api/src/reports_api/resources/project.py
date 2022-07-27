@@ -19,6 +19,7 @@ from flask_restx import Namespace, Resource, cors
 from reports_api.services import ProjectService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
+from reports_api.utils.caching import AppCache
 
 
 API = Namespace('projects', description='Projects')
@@ -32,6 +33,7 @@ class Projects(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached()
     @profiletime
     def get():
         """Return all projects."""
@@ -55,6 +57,7 @@ class Project(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached()
     @profiletime
     def get(project_id):
         """Return details of a project."""

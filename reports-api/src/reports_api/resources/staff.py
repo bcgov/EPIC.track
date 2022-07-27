@@ -17,8 +17,9 @@ from http import HTTPStatus
 from flask import request
 from flask_restx import Namespace, Resource, cors
 
+from reports_api.utils.caching import AppCache
 from reports_api.services import StaffService
-from reports_api.utils import auth, profiletime
+from reports_api.utils import auth, profiletime, constants
 from reports_api.utils.util import cors_preflight
 
 
@@ -33,6 +34,7 @@ class Staffs(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     @profiletime
     def get():
         """Return all active staffs."""
@@ -51,6 +53,7 @@ class Staff(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     @profiletime
     def get(_id):
         """Return a staff detail based on id."""
@@ -65,6 +68,7 @@ class StaffPosition(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     @profiletime
     def get(position_id):
         """Return a staff detail based on id."""

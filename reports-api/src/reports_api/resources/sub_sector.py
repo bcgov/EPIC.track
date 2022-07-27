@@ -15,11 +15,10 @@
 from http import HTTPStatus
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
-
 from reports_api.services import SubSectorService
-from reports_api.utils import auth, profiletime
+from reports_api.utils.caching import AppCache
+from reports_api.utils import auth, profiletime, constants
 from reports_api.utils.util import cors_preflight
-
 
 API = Namespace('sub-sectors', description='SubSectors')
 
@@ -33,6 +32,7 @@ class SubSectors(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     def get():
         """Return all sub_sectors based on sector_id."""
         sector_id = request.args.get('sector_id', None)
