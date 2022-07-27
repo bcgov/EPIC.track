@@ -1,9 +1,9 @@
 name: Report API CD
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - closed
     paths:
       - "reports-api/**"
     
