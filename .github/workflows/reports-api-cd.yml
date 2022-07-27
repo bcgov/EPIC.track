@@ -1,9 +1,9 @@
 name: Report API CD
 on:
   workflow_dispatch:
-  pull_request:
-    types:
-      - closed
+  push:
+    branches:
+      - main
     paths:
       - "reports-api/**"
     
@@ -22,6 +22,7 @@ jobs:
       - run: "true"
   
   invoke-webhook:
+    if: github.repository == 'bcgov/EPIC-FLOW'
     needs: setup-job
     runs-on: ubuntu-20.04
     steps:
