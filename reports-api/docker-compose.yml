@@ -21,7 +21,7 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-    restart: always
+    restart: unless-stopped
     links:
       - eao-reports-api-db
     ports:
