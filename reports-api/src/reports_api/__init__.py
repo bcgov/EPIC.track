@@ -26,6 +26,7 @@ from reports_api.models import db
 from reports_api.utils.auth import jwt
 from reports_api.utils.logging import setup_logging
 from reports_api.utils.run_version import get_run_version
+from reports_api.utils.caching import AppCache
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))
@@ -35,6 +36,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
+    AppCache.configure_cache(run_mode, app)
 
     db.init_app(app)
 

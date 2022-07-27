@@ -19,6 +19,8 @@ from flask_restx import Namespace, Resource, cors
 from reports_api.services import MilestoneService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
+from reports_api.utils.caching import AppCache
+from reports_api.utils import constants
 
 
 API = Namespace('milestones', description='MileStones')
@@ -32,6 +34,7 @@ class Milestones(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     @profiletime
     def get(phase_id):
         """Return all milestones based on phase_id."""
@@ -46,6 +49,7 @@ class Milestone(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     @profiletime
     def get(milestone_id):
         """Return single milestone based on the milestone id given"""

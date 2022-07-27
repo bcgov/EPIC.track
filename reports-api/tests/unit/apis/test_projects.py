@@ -84,7 +84,6 @@ def test_delete_project(client):
     project = client.post(projects_url, json=payload)
     response = client.get(projects_url)
     assert len(response.json['projects']) == 1
-
     url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
     client.delete(url)
     response = client.get(projects_url)

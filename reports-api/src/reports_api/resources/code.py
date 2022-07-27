@@ -17,8 +17,9 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services.code import CodeService
+from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
-from reports_api.utils import auth, profiletime
+from reports_api.utils import auth, profiletime, constants
 
 
 API = Namespace('codes', description='Codes')
@@ -33,6 +34,7 @@ class Codes(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     def get(code_type):
         """Return all codes based on code_type."""
         return CodeService.find_code_values_by_type(code_type), HTTPStatus.OK
@@ -47,6 +49,7 @@ class Code(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     def get(code_type, code):
         """Return all codes based on code_type."""
         return CodeService.find_code_value_by_type_and_code(code_type, code), HTTPStatus.OK

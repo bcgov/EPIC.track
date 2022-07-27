@@ -19,7 +19,8 @@ from flask_restx import Namespace, Resource, cors
 from reports_api.services import OutcomeService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
-
+from reports_api.utils.caching import AppCache
+from reports_api.utils import constants
 
 API = Namespace('outcomes', description='Outcomes')
 
@@ -32,6 +33,7 @@ class Outcomes(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     @profiletime
     def get(milestone_id):
         """Return all outcomes based on milestone_id."""
