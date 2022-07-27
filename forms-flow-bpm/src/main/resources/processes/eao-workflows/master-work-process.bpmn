@@ -66,6 +66,11 @@
       <bpmn:outgoing>Flow_1uapttv</bpmn:outgoing>
     </bpmn:callActivity>
     <bpmn:startEvent id="Event_0iydrv7" name="Submit Application" camunda:asyncAfter="true">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="start">
+          <camunda:script scriptFormat="javascript">execution.setVariable("authentication",org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
       <bpmn:outgoing>Flow_1rridu9</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:callActivity id="Activity_0bx0a98" name="EAC Extension" calledElement="Process_extension_eac">
@@ -134,7 +139,8 @@
     <bpmn:sequenceFlow id="Flow_1rridu9" sourceRef="Event_0iydrv7" targetRef="Activity_0s2ms94">
       <bpmn:extensionElements>
         <camunda:executionListener event="take">
-          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Created");</camunda:script>
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', "Created");
+org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable("authentication"));</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
