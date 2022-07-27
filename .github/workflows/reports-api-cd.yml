@@ -1,11 +1,12 @@
 name: Report API CD
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
-    workflow_dispatch:
     paths:
       - "reports-api/**"
+    
 
 defaults:
   run:
