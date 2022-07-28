@@ -17,10 +17,9 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import MilestoneService
-from reports_api.utils import auth, profiletime
-from reports_api.utils.util import cors_preflight
+from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
-from reports_api.utils import constants
+from reports_api.utils.util import cors_preflight
 
 
 API = Namespace('milestones', description='MileStones')

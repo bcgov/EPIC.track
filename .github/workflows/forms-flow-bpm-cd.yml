@@ -29,4 +29,4 @@ jobs:
         uses: distributhor/workflow-webhook@v2.0.3
         env:
           webhook_url: 'https://api.silver.devops.gov.bc.ca:6443/apis/build.openshift.io/v1/namespaces/dc383e-tools/buildconfigs/forms-flow-bpm.build/webhooks/github-secret-key/github'
-          webhook_secret: 'P@sww0rd'
+          webhook_secret: 'P@sw0rd'

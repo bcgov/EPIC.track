@@ -13,12 +13,15 @@
 # limitations under the License.
 """Resource for Sub Sector endpoints."""
 from http import HTTPStatus
+
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
+
 from reports_api.services import SubSectorService
+from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
-from reports_api.utils import auth, profiletime, constants
 from reports_api.utils.util import cors_preflight
+
 
 API = Namespace('sub-sectors', description='SubSectors')
 
