@@ -36,12 +36,12 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
-    AppCache.configure_cache(run_mode, app)
 
     db.init_app(app)
 
     if run_mode != 'migration':
 
+        AppCache.configure_cache(run_mode, app)
         # pylint: disable=import-outside-toplevel
         from reports_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
