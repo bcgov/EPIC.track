@@ -35,6 +35,7 @@ class Event(BaseModel):
     start_date = Column(DateTime, nullable=True)
     anticipated_end_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
+    is_deleted = Column(Boolean, default=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     milestone_id = Column(ForeignKey('milestones.id'), nullable=False)

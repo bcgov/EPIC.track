@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to WorkStatus."""
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -26,8 +26,6 @@ class WorkStatus(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     status = Column(String(255), nullable=False)
-    created_at = Column(DateTime, server_default=func.now())
-    updated_at = Column(DateTime, onupdate=func.now())
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
 

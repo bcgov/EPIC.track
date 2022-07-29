@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to StaffWorkRole."""
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -25,6 +25,7 @@ class StaffWorkRole(BaseModel):
     __tablename__ = 'staff_work_roles'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    is_deleted = Column(Boolean, default=False)
     work_id = Column(ForeignKey('works.id'), nullable=False)
     role_id = Column(ForeignKey('roles.id'), nullable=False)
     staff_id = Column(ForeignKey('staffs.id'), nullable=False)

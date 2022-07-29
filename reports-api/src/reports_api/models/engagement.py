@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Engagement."""
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -31,6 +31,9 @@ class Engagement(BaseModel):
     correlation_id = Column(String(255), nullable=True, default=None)
     met_link = Column(String(255), nullable=True, default=None)
     status = Column(String(32), nullable=False, default='planned')
+    is_deleted = Column(Boolean, default=False)
+    work_id = Column(ForeignKey('works.id'), nullable=True)
+    work = relationship('Work', foreign_keys=[work_id], lazy='select')
 
     work_engagements_list = relationship("WorkEngagement",
                                          primaryjoin="Engagement.id==WorkEngagement.engagement_id",

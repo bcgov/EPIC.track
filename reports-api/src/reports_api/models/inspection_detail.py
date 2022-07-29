@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Inspection Details."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -31,6 +31,7 @@ class InspectionDetail(BaseModel):
     compliance_status = Column(String(255), nullable=False)
     requirement = Column(String(255), nullable=False)
     reference_number = Column(String(255), nullable=False)
+    is_deleted = Column(Boolean, default=False)
 
     inspection_id = Column(ForeignKey('inspections.id'), nullable=False)
     inspection = relationship('Inspection', foreign_keys=[inspection_id], lazy='select')

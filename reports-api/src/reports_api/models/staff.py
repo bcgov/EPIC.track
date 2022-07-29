@@ -31,6 +31,7 @@ class Staff(db.Model, CodeTable):
     email = Column(String(), nullable=False)
     is_active = Column(Boolean(), default=True)
     position_id = Column(ForeignKey('positions.id'), nullable=False)
+    is_deleted = Column(Boolean, default=False)
 
     position = relationship('Position', foreign_keys=[position_id], lazy='select')
 
