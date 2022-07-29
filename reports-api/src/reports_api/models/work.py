@@ -35,6 +35,7 @@ class Work(BaseModel):
     work_status_notes = Column(Text)
     work_short_status = Column(String(255))
     work_status_stoplight = Column(String(6))
+    is_deleted = Column(Boolean, default=False)
 
     start_date = Column(DateTime)
     anticipated_decision_date = Column(DateTime)

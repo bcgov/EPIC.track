@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Inspection."""
 
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -46,6 +46,7 @@ class Inspection(BaseModel):
     start_date = Column(Date, nullable=False)
     response_date = Column(Date, nullable=True)
     date_finalized = Column(Date, nullable=True)
+    is_deleted = Column(Boolean, default=False)
 
     project_id = Column(ForeignKey('projects.id'), nullable=False)
     project = relationship('Project', foreign_keys=[project_id], lazy='select')

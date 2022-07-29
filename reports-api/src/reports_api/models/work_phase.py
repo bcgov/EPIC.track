@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to WorkPhase."""
 
-from sqlalchemy import Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -27,6 +27,7 @@ class WorkPhase(BaseModel):
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_date = Column(DateTime)
     anticipated_end_date = Column(DateTime)
+    is_deleted = Column(Boolean, default=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)

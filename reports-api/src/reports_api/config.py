@@ -217,3 +217,5 @@ class MigrationConfig():  # pylint: disable=too-few-public-methods
     DB_PORT = _get_config('DATABASE_PORT', default='5432')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    CACHE_TYPE = constants.NULL_CACHE_TYPE
+    CACHE_DEFAULT_TIMEOUT = constants.CACHE_DEFAULT_TIMEOUT

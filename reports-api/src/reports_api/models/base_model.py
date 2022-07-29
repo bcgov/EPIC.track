@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Super class to handle all operations related to base model."""
-
+from sqlalchemy import Column, DateTime, String, func
 from .db import db
 
 
@@ -20,6 +20,11 @@ class BaseModel(db.Model):
     """This class manages all of the base model functions."""
 
     __abstract__ = True
+
+    created_by = Column(String(255), default=None, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(255), default=None, nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
 
     @staticmethod
     def commit():
