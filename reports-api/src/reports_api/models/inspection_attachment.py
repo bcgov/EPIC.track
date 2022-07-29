@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Inspection Attachments."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
@@ -30,6 +30,7 @@ class InspectionAttachment(BaseModel):
     subject = Column(String(255), nullable=False)
     description = Column(Text, nullable=False)
     file = Column(MutableList.as_mutable(JSONB), nullable=False)
+    is_deleted = Column(Boolean, default=False)
 
     inspection_detail_id = Column(ForeignKey('inspection_details.id'), nullable=False)
     inspection_detail = relationship('InspectionDetail', foreign_keys=[inspection_detail_id], lazy='select')

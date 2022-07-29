@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to InspectionAttendee."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
@@ -30,6 +30,7 @@ class InspectionAttendee(BaseModel):
     name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     attended_on = Column(MutableList.as_mutable(JSONB), nullable=False)
+    is_deleted = Column(Boolean, default=False)
 
     inspection_id = Column(ForeignKey('inspections.id'), nullable=False)
     inspection = relationship('Inspection', foreign_keys=[inspection_id], lazy='select')
