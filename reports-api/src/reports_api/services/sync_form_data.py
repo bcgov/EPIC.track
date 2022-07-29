@@ -84,6 +84,8 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
                         if isinstance(value, dict):
                             value.update(foreign_keys)
                         elif isinstance(value, list):
+                            object_ids = [x['id'] for x in value if x['id']]
+                            cls._sync_deletions(model_name, object_ids, foreign_keys)
                             value = [{**v, **foreign_keys} for v in value]
                     instance[key] = cls._process_model_data(model_name, value, result)
         return instance
@@ -105,6 +107,14 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         return instance
 
     @classmethod
+    def _sync_deletions(cls, model_name, object_ids, foreign_keys):
+        if foreign_keys:
+            model_class = find_model_from_table_name(model_name)
+            old_entries = model_class.query.filter(model_class.id.notin_(object_ids)).filter_by(**foreign_keys)
+            current_app.logger.info(f'Marking {old_entries.all()} for model {model_name} as deleted')
+            old_entries.update({"is_deleted": True}, synchronize_session='fetch')
+
+    @classmethod
     def sync_data(cls, payload: dict):
         """Synchronize data from payload with database."""
         result = {}
@@ -119,6 +129,8 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             if isinstance(dataset, dict):
                 dataset.update(foreign_keys)
             elif isinstance(dataset, list):
+                object_ids = [x['id'] for x in dataset if x['id']]
+                cls._sync_deletions(model_name, object_ids, foreign_keys)
                 dataset = [{**x, **foreign_keys} for x in dataset]
             current_app.logger.info(f'Processing model data for {model_name}')
             obj = cls._process_model_data(model_name, dataset, result)

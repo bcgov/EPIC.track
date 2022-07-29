@@ -28,7 +28,7 @@ class IndigenousWork(BaseModel):
     work_id = Column(ForeignKey('works.id'), nullable=False)
     indigenous_nation_id = Column(ForeignKey('indigenous_nations.id'), nullable=False)
     indigenous_category_id = Column(ForeignKey('indigenous_categories.id'), nullable=False)
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
 
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     indigenous_nation = relationship('IndigenousNation', foreign_keys=[indigenous_nation_id], lazy='select')

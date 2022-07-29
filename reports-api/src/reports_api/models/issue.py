@@ -35,7 +35,7 @@ class Issue(BaseModel):
     start_date = Column(DateTime, nullable=False)
     anticipated_resolution_date = Column(DateTime, nullable=True)
     resolution_date = Column(DateTime, nullable=True)
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')

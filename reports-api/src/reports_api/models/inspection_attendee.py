@@ -30,7 +30,7 @@ class InspectionAttendee(BaseModel):
     name = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     attended_on = Column(MutableList.as_mutable(JSONB), nullable=False)
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
 
     inspection_id = Column(ForeignKey('inspections.id'), nullable=False)
     inspection = relationship('Inspection', foreign_keys=[inspection_id], lazy='select')

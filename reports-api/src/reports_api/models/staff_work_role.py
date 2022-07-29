@@ -25,7 +25,7 @@ class StaffWorkRole(BaseModel):
     __tablename__ = 'staff_work_roles'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
     work_id = Column(ForeignKey('works.id'), nullable=False)
     role_id = Column(ForeignKey('roles.id'), nullable=False)
     staff_id = Column(ForeignKey('staffs.id'), nullable=False)
