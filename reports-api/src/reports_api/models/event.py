@@ -35,7 +35,7 @@ class Event(BaseModel):
     start_date = Column(DateTime, nullable=True)
     anticipated_end_date = Column(DateTime, nullable=True)
     end_date = Column(DateTime, nullable=True)
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     milestone_id = Column(ForeignKey('milestones.id'), nullable=False)
@@ -54,6 +54,7 @@ class Event(BaseModel):
             'long_description': self.long_description,
             'is_active': self.is_active,
             'is_complete': self.is_complete,
+            'is_deleted': self.is_deleted,
             'oh_attendance': self.oh_attendance,
             'anticipated_start_date': self.anticipated_start_date,
             'start_date': self.start_date,

@@ -31,7 +31,7 @@ class Engagement(BaseModel):
     correlation_id = Column(String(255), nullable=True, default=None)
     met_link = Column(String(255), nullable=True, default=None)
     status = Column(String(32), nullable=False, default='planned')
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
     work_id = Column(ForeignKey('works.id'), nullable=True)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
 

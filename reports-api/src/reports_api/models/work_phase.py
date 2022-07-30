@@ -27,7 +27,7 @@ class WorkPhase(BaseModel):
     id = Column(Integer, primary_key=True, autoincrement=True)
     start_date = Column(DateTime)
     anticipated_end_date = Column(DateTime)
-    is_deleted = Column(Boolean, default=False)
+    is_deleted = Column(Boolean(), default=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
