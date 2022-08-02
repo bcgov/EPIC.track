@@ -88,7 +88,7 @@ class EventSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
         for field in field_list:
             obj_value = getattr(self, field.name)
             other_value = getattr(other, field.name)
-            if (obj_value or other_value) and field.type(obj_value) != field.type(other_value):
+            if (obj_value or other_value) and obj_value != other_value:
                 return False
         return True
 
