@@ -48,6 +48,10 @@ class WorkSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
                 errors['works.ea_act_id'] = 'Cannot update EA Act after creation'
             if work.start_date != self.start_date:
                 errors['works.start_date'] = 'Cannot update start date after creation'
+        else:
+            if Work.query.filter_by(work_type_id=self.work_type_id, project_id=self.project_id).count() > 0:
+                errors['works.work_type_id'] = 'Work already exists for selected work type and project'
+                errors['works.project_id'] = 'Work already exists for selected work type and project'
         return errors
 
 
