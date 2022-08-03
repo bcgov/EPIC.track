@@ -27,7 +27,7 @@ API = Namespace('works', description='Works')
 
 
 @cors_preflight('GET')
-@API.route('/exists/', methods=['GET', 'OPTIONS'])
+@API.route('/exists', methods=['GET', 'OPTIONS'])
 class ValidateWork(Resource):
     """Endpoint resource to return staffs."""
 
