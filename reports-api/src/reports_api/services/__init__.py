@@ -20,3 +20,4 @@ from .outcome import OutcomeService
 from .project import ProjectService
 from .staff import StaffService
 from .sub_sector import SubSectorService
+from .work import WorkService
