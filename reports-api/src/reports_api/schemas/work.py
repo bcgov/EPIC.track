@@ -54,8 +54,7 @@ class WorkSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
                     work_type_id=self.work_type_id,
                     project_id=self.project_id,
                     is_deleted=False,
-                ).count()
-                > 0
+                ).count() > 0
             ):
                 errors[
                     "works.work_type_id"
@@ -119,12 +118,12 @@ class EventSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
             event_end_date = getattr(self, "_".join(error_key.split()))
             if anticipated_end_date != event_end_date:
                 errors["works.anticipated_decision_date"] = (
-                    "Anticipated end date and last event's"
-                    + f" {error_key} must be the same"
+                    "Anticipated end date and last event's" +
+                    f" {error_key} must be the same"
                 )
                 errors[f"works-events[{index}]"] = (
-                    "Anticipated end date and last event's"
-                    + f" {error_key} must be the same"
+                    "Anticipated end date and last event's" +
+                    f" {error_key} must be the same"
                 )
         return errors
 
@@ -143,12 +142,12 @@ class EventSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
             if self.milestone_type_name == "PECP":
                 number_of_days = int(self.number_of_days)
                 if (
-                    event_anticipated_end_date
-                    != event_anticipated_start_date + timedelta(days=number_of_days)
+                    event_anticipated_end_date !=
+                    event_anticipated_start_date + timedelta(days=number_of_days)
                 ):
                     errors[f"works-events[{index}].anticipated_end_date"] = (
-                        "Anticipated end date must be equal "
-                        + " to anticipated start date + number of days"
+                        "Anticipated end date must be equal " +
+                        " to anticipated start date + number of days"
                     )
                 if self.start_date and self.end_date:
                     if self.end_date != self.start_date + timedelta(
@@ -160,16 +159,16 @@ class EventSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
             else:
                 if event_anticipated_start_date != event_anticipated_end_date:
                     errors[f"works-events[{index}].anticipated_start_date"] = (
-                        "Anticipated end date must be "
-                        + " same as anticipated start date"
+                        "Anticipated end date must be " +
+                        " same as anticipated start date"
                     )
         if self.is_complete is True or self.end_date:
             if (
                 not prev_event.is_complete or prev_event.end_date is None
             ) and index > 0:
                 errors[f"works-events[{index}].is_complete"] = (
-                    "Previous events must be completed before "
-                    + "you can complete this event"
+                    "Previous events must be completed before " +
+                    "you can complete this event"
                 )
             completed_event = next(
                 (x for x in completed_events if x.id == int(self.id)), None
