@@ -22,6 +22,11 @@ class WorkService:  # pylint: disable=too-few-public-methods
     @classmethod
     def check_existence(cls, project_id, work_type_id):
         """Checks if a work exists for a given project and work type"""
-        if Work.query.filter_by(work_type_id=work_type_id, project_id=project_id).count() > 0:
+        if (
+            Work.query.filter_by(
+                work_type_id=work_type_id, project_id=project_id, is_deleted=False
+            ).count() >
+            0
+        ):
             return {"exists": True}
         return {"exists": False}
