@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_0a6doua" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0">
+  <bpmn:process id="Process_1my0l7g" name="Request Access" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_1" name="Start">
+      <bpmn:outgoing>Flow_0nmuqg8</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_0nmuqg8" sourceRef="StartEvent_1" targetRef="Activity_0x1167f">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_1sfxkcc">
+      <bpmn:incoming>Flow_1tqflkd</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_1tqflkd" sourceRef="Activity_0x1167f" targetRef="Event_1sfxkcc" />
+    <bpmn:sendTask id="Activity_0x1167f" name="Send Email">
+      <bpmn:extensionElements>
+        <camunda:connector>
+          <camunda:inputOutput>
+            <camunda:inputParameter name="html">
+              <camunda:script scriptFormat="freemarker">&lt;html&gt;
+&lt;head&gt;
+&lt;style&gt;
+.header {
+}
+.email {
+    color: blue;
+    text-decoration:underline;
+}
+.content {
+    width: 600px;
+    flex-direction: column;
+    line-height: 40px;
+}
+.title {
+    color: #245b64;
+    font-weight: bold;
+    font-size: 2rem;
+}
+.roles {
+    
+}
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class="content"&gt;
+&lt;div class="title"&gt;EPIC FLOW ACCESS REQUEST&lt;/div&gt;
+&lt;div class="header"&gt;&lt;span class="email"&gt;${email}&lt;/span&gt; is requesting access for the below mentioned roles&lt;/div&gt;
+&lt;div class="roles"&gt;${roles}&lt;/div&gt;
+&lt;div class="comment"&gt;&lt;i&gt;${access_request_comment}&lt;/i&gt;&lt;/div&gt;
+&lt;div class="url"&gt;Please use the below link ${keycloak_url}&lt;/div&gt;
+&lt;/div&gt;
+    
+&lt;/body&gt;
+&lt;/html&gt;</camunda:script>
+            </camunda:inputParameter>
+            <camunda:inputParameter name="subject">Access Required</camunda:inputParameter>
+            <camunda:inputParameter name="to">${emailto}</camunda:inputParameter>
+          </camunda:inputOutput>
+          <camunda:connectorId>mail-send</camunda:connectorId>
+        </camunda:connector>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0nmuqg8</bpmn:incoming>
+      <bpmn:outgoing>Flow_1tqflkd</bpmn:outgoing>
+    </bpmn:sendTask>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Process_1my0l7g">
+      <bpmndi:BPMNEdge id="Flow_1tqflkd_di" bpmnElement="Flow_1tqflkd">
+        <di:waypoint x="380" y="130" />
+        <di:waypoint x="422" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nmuqg8_di" bpmnElement="Flow_0nmuqg8">
+        <di:waypoint x="228" y="130" />
+        <di:waypoint x="280" y="130" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
+        <dc:Bounds x="192" y="112" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="198" y="155" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1sfxkcc_di" bpmnElement="Event_1sfxkcc">
+        <dc:Bounds x="422" y="112" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_071qbzc_di" bpmnElement="Activity_0x1167f">
+        <dc:Bounds x="280" y="90" width="100" height="80" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
