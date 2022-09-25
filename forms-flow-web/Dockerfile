@@ -90,7 +90,7 @@ RUN cp -R /tmp/${CUSTOM_PUBLIC_DIR}/* /web/ && rm -Rf /tmp/${CUSTOM_PUBLIC_DIR}/
 
 # Install Dependencies 
 # COPY package.json ./
-
+COPY . /web
 RUN npm install
 RUN npm run build
 
