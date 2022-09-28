@@ -8,7 +8,6 @@ import {
   getUserRolePermission,
   // TODO : modify insigth permission conditions
   // getUserInsightsPermission,
-
 } from "../helper/user";
 import createURLPathMatchExp from "../helper/regExp/pathMatch";
 import { useTranslation } from "react-i18next";
@@ -20,14 +19,13 @@ import {
   STAFF_DESIGNER,
   MULTITENANCY_ENABLED,
 } from "../constants/constants";
-import ServiceFlowFilterListDropDown from "../components/ServiceFlow/filter/ServiceTaskFilterListDropDown";
 import { push } from "connected-react-router";
 import i18n from "../resourceBundles/i18n";
 import { setLanguage } from "../actions/languageSetAction";
 import { updateUserlang } from "../apiManager/services/userservices";
 
 import { fetchSelectLanguages } from "../apiManager/services/languageServices";
-import EnvironmentalIndicator from '../components/EnvironmentIndicator/index';
+import EnvironmentalIndicator from '../components/EnvironmentIndicator/index'; 
 
 const NavBar = React.memo(() => {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -87,6 +85,9 @@ const NavBar = React.memo(() => {
         fixed="top"
       >
         <Container fluid>
+          {/* <div style={{width:'100px',height:'100px',background:'red'}}>
+            dineshdsss
+          </div> */}
           <EnvironmentalIndicator></EnvironmentalIndicator>
           <Navbar.Brand className="d-flex">
             <Link to={`${baseUrl}`}>
@@ -139,8 +140,10 @@ const NavBar = React.memo(() => {
                     as={Link}
                     to={`${baseUrl}processes`}
                     className={`main-nav nav-item ${
-                      pathname.match(createURLPathMatchExp("processes", baseUrl)) 
-                        ? "active-tab" 
+                      pathname.match(
+                        createURLPathMatchExp("processes", baseUrl)
+                      )
+                        ? "active-tab"
                         : ""
                     }`}
                   >
@@ -173,48 +176,42 @@ const NavBar = React.memo(() => {
                     </Nav.Link>
                   ) : null
                 ) : null}
-
                 {getUserRolePermission(userRoles, STAFF_REVIEWER) ? (
-                  <NavDropdown
-                    title={
-                      <>
-                        <i className="fa fa-list fa-lg fa-fw mr-2" />
-                        {t("Tasks")}{" "}
-                      </>
-                    }
-                    id="task-dropdown"
+                  <Nav.Link
+                    as={Link}
+                    to={`${baseUrl}task`}
                     className={`main-nav nav-item taskDropdown ${
                       pathname.match(createURLPathMatchExp("task", baseUrl))
-                        ? "active-tab-dropdown"
+                        ? "active-tab"
                         : ""
                     }`}
                     onClick={goToTask}
                   >
-                    <ServiceFlowFilterListDropDown />
-                  </NavDropdown>
+                    {" "}
+                    <i className="fa fa-list fa-lg fa-fw mr-2" />
+                    {t("Tasks")}
+                  </Nav.Link>
                 ) : null}
 
                 {getUserRolePermission(userRoles, STAFF_REVIEWER) ? (
-
-               <Nav.Link
-                      as={Link}
-                      to={`${baseUrl}metrics`}
-                      data-testid="Dashboards"
-                      className={`main-nav nav-item ${
-                        pathname.match(
-                          createURLPathMatchExp("metrics", baseUrl)
-                        ) || pathname.match(
-                              createURLPathMatchExp("insights", baseUrl)
-                            )
-                          ? "active-tab"
-                          : ""
-                      }`}
-                    >
-                      {" "}
-                      <i className="fa fa-tachometer fa-lg fa-fw mr-2" />
-                         {t("Dashboards")}
-                    </Nav.Link>
-                  ) : null}
+                  <Nav.Link
+                    as={Link}
+                    to={`${baseUrl}metrics`}
+                    data-testid="Dashboards"
+                    className={`main-nav nav-item ${
+                      pathname.match(
+                        createURLPathMatchExp("metrics", baseUrl)
+                      ) ||
+                      pathname.match(createURLPathMatchExp("insights", baseUrl))
+                        ? "active-tab"
+                        : ""
+                    }`}
+                  >
+                    {" "}
+                    <i className="fa fa-tachometer fa-lg fa-fw mr-2" />
+                    {t("Dashboards")}
+                  </Nav.Link>
+                ) : null}
               </Nav>
 
               <Nav className="ml-lg-auto mr-auto px-lg-0 px-3">
