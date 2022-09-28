@@ -35,7 +35,7 @@ class SubSectors(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all sub_sectors based on sector_id."""
         sector_id = request.args.get('sector_id', None)
