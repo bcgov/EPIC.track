@@ -6,7 +6,6 @@ on:
       keycloak_url:
         description: 'Base URL of the keycloak to which the test would connect to get token'
         required: true
-        default: 'https://keycloak-dc383e-dev.apps.silver.devops.gov.bc.ca'
         type: string
       keycloak_realm:
         description: 'Keycloak realm'
@@ -16,12 +15,10 @@ on:
       keycloak_client_id:
         description: 'Client id of keycloak client using which the test gain access to token'
         required: true
-        default: 'forms-flow-web'
         type: string
       keycloak_username:
         description: 'Username of the keycloak user'
         required: true
-        default: 'formsflow-designer'
         type: string
       form_id:
         description: 'id of the form for which the submission are about to be made'
@@ -30,12 +27,10 @@ on:
       formio_url:
         description: 'Base URL of the formio service'
         required: true
-        default: 'https://forms-flow-forms-dc383e-dev.apps.silver.devops.gov.bc.ca'
         type: string
       formsflow_api_url:
         description: 'Base URL of the formsflow api service'
         required: true
-        default: 'https://forms-flow-api-dc383e-dev.apps.silver.devops.gov.bc.ca'
         type: string
       iterations:
         description: 'Number of times the test to be executed to generate enough load'
@@ -48,18 +43,12 @@ on:
         default: 1
         type: string
 jobs:
-  setup-job:
+  submission-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
-
-  submission-test:
-    needs: setup-job
-    runs-on: ubuntu-latest
-    steps:
-      - name: List
-        run: ls
+        uses: actions/checkout@v3
+        
       - name: Run k6 test
         uses: grafana/k6-action@v0.2.0
         with:
@@ -69,10 +58,10 @@ jobs:
           KEYCLOAK_URL: ${{inputs.keycloak_url}}
           KEYCLOAK_REALM: ${{inputs.keycloak_realm}}
           KEYCLOAK_CLIENT_ID: ${{inputs.keycloak_client_id}}
-          USERNAME: ${{inputs.keycloak_username}}
-          PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
+          KEYCLOAK_USERNAME: ${{inputs.keycloak_username}}
+          KEYCLOAK_PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
           FORMID: ${{inputs.form_id}}
-          FORM_URL: ${{inputs.form_url}}
+          FORMIO_URL: ${{inputs.formio_url}}
           APPLICATION_API: ${{inputs.formsflow_api_url}}
           K6_ITERATIONS: ${{inputs.iterations}}
           K6_VUS: ${{inputs.vus}}

@@ -3,14 +3,14 @@ import { check } from 'k6';
 import {submission_data} from './data/submission_data.js';
 import {application_data} from './data/application.js';
 // init code
-const KEYCLOAK_URL = __ENV.KEYCLOAK_URL || 'https://keycloak-dc383e-dev.apps.silver.devops.gov.bc.ca';
+const KEYCLOAK_URL = __ENV.KEYCLOAK_URL;
 const KEYCLOAK_REALM = __ENV.KEYCLOAK_REALM || 'forms-flow-ai';
-const KEYCLOAK_CLIENT_ID = __ENV.KEYCLOAK_CLIENT_ID || 'forms-flow-web';
-const USERNAME = __ENV.KEYCLOAK_USERNAME || 'formsflow-designer';
-const PASSWORD = __ENV.KEYCLOAK_PASSWORD || 'password';
-const FORMID = __ENV.FORMID || '62a960eeb85a5dd8768c0541';
-const FORM_URL = __ENV.FORMIO_URL || 'https://forms-flow-forms-dc383e-dev.apps.silver.devops.gov.bc.ca';
-const APPLICATION_API = __ENV.APPLICATION_API || 'https://forms-flow-api-dc383e-dev.apps.silver.devops.gov.bc.ca';
+const KEYCLOAK_CLIENT_ID = __ENV.KEYCLOAK_CLIENT_ID;
+const USERNAME = __ENV.KEYCLOAK_USERNAME;
+const PASSWORD = __ENV.KEYCLOAK_PASSWORD;
+const FORMID = __ENV.FORMID;
+const FORM_URL = __ENV.FORMIO_URL;
+const APPLICATION_API = __ENV.APPLICATION_API;
 const SUBMISSION_URL = `${FORM_URL}/form/${FORMID}/submission`;
 const APPLICATION_CREATE_URL = `${APPLICATION_API}/application/create`;
 const ROLES_URL = `${APPLICATION_API}/formio/roles`;
@@ -64,7 +64,6 @@ export default function (result) {
  var data = JSON.stringify(submission_data);
 
  var submission_response = http.post(SUBMISSION_URL, data, params);
- console.log('submission id',submission_response.body._id);
  check(submission_response, {
     '(Submission)response code was 201': (res)=>res.status === 201,
     '(Submission)should have submission id': (res)=>JSON.parse(res.body)._id !== undefined
