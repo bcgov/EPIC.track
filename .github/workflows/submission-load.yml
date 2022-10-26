@@ -1,4 +1,5 @@
 name: Submission Load
+
 on: 
   workflow_dispatch:
     inputs:
@@ -20,7 +21,7 @@ on:
       keycloak_username:
         description: 'Username of the keycloak user'
         required: true
-        default: 'forms-flow-web'
+        default: 'formsflow-designer'
         type: string
       form_id:
         description: 'id of the form for which the submission are about to be made'
@@ -36,32 +37,47 @@ on:
         required: true
         default: 'https://forms-flow-api-dc383e-dev.apps.silver.devops.gov.bc.ca'
         type: string
+      iterations:
+        description: 'Number of times the test to be executed to generate enough load'
+        required: true
+        default: 1
+        type: Number
+      vus:
+        description: 'Number of virtual users to be used to perform the task'
+        required: true
+        default: 1
+        type: number
 jobs:
-  submission-test:
+  setup-job:
     runs-on: ubuntu-latest
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      with:
-        ref: performance_testing
-        path: tests/performance/submission-load
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: tests/performance/submission-load
 
-    - name: Run k6 test
-      uses: grafana/k6-action@v0.2.0
-      with:
-        filename: src/index.jobs
-        flags: --out json=results.json
+  submission-test:
+    needs: setup-job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run k6 test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: src/index.js
+          flags: --out json=results.json
         env:
-          KEYCLOAK_URL: ${{keycloak_url}}
-          KEYCLOAK_REALM: ${{keycloak_realm}}
-          KEYCLOAK_CLIENT_ID: ${{keycloak_client_id}}
-          USERNAME: ${{keycloak_username}}
+          KEYCLOAK_URL: ${{inputs.keycloak_url}}
+          KEYCLOAK_REALM: ${{inputs.keycloak_realm}}
+          KEYCLOAK_CLIENT_ID: ${{inputs.keycloak_client_id}}
+          USERNAME: ${{inputs.keycloak_username}}
           PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
-          FORMID: ${{form_id}}
-          FORM_URL: ${{form_url}}
-          APPLICATION_API: ${{formsflow_api_url}}
+          FORMID: ${{inputs.form_id}}
+          FORM_URL: ${{inputs.form_url}}
+          APPLICATION_API: ${{inputs.formsflow_api_url}}
+          K6_ITERATIONS: ${{inputs.iterations}}
+          K6_VUS: ${{inputs.vus}}
 
-    - name: Upload submission test results
+      - name: Upload submission test results
         uses: actions/upload-artifact@v3
         with:
           name: submission-test report
