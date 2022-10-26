@@ -1,0 +1,68 @@
+name: Submission Load
+on: 
+  workflow_dispatch:
+    inputs:
+      keycloak_url:
+        description: 'Base URL of the keycloak to which the test would connect to get token'
+        required: true
+        default: 'https://keycloak-dc383e-dev.apps.silver.devops.gov.bc.ca'
+        type: string
+      keycloak_realm:
+        description: 'Keycloak realm'
+        required: true
+        default: 'forms-flow-ai'
+        type: string
+      keycloak_client_id:
+        description: 'Client id of keycloak client using which the test gain access to token'
+        required: true
+        default: 'forms-flow-web'
+        type: string
+      keycloak_username:
+        description: 'Username of the keycloak user'
+        required: true
+        default: 'forms-flow-web'
+        type: string
+      form_id:
+        description: 'id of the form for which the submission are about to be made'
+        required: true
+        type: string
+      formio_url:
+        description: 'Base URL of the formio service'
+        required: true
+        default: 'https://forms-flow-forms-dc383e-dev.apps.silver.devops.gov.bc.ca'
+        type: string
+      formsflow_api_url:
+        description: 'Base URL of the formsflow api service'
+        required: true
+        default: 'https://forms-flow-api-dc383e-dev.apps.silver.devops.gov.bc.ca'
+        type: string
+jobs:
+  submission-test:
+    runs-on: ubuntu-latest
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: performance_testing
+        path: tests/performance/submission-load
+
+    - name: Run k6 test
+      uses: grafana/k6-action@v0.2.0
+      with:
+        filename: src/index.jobs
+        flags: --out json=results.json
+        env:
+          KEYCLOAK_URL: ${{keycloak_url}}
+          KEYCLOAK_REALM: ${{keycloak_realm}}
+          KEYCLOAK_CLIENT_ID: ${{keycloak_client_id}}
+          USERNAME: ${{keycloak_username}}
+          PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
+          FORMID: ${{form_id}}
+          FORM_URL: ${{form_url}}
+          APPLICATION_API: ${{formsflow_api_url}}
+
+    - name: Upload submission test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: submission-test report
+          path: results.json
