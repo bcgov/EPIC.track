@@ -63,7 +63,7 @@ jobs:
           APPLICATION_API: ${{formsflow_api_url}}
 
     - name: Upload submission test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: submission-test report
-          path: results.json
+      uses: actions/upload-artifact@v3
+      with:
+        name: submission-test report
+        path: results.json
