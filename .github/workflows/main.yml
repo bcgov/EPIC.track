@@ -40,9 +40,6 @@ on:
 jobs:
   setup-job:
     runs-on: ubuntu-latest
-  submission-test:
-    needs: setup-job
-    runs-on: ubuntu-20.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -50,20 +47,24 @@ jobs:
           ref: performance_testing
           path: tests/performance/submission-load
 
+  submission-test:
+    needs: setup-job
+    runs-on: ubuntu-latest
+    steps:
       - name: Run k6 test
         uses: grafana/k6-action@v0.2.0
         with:
           filename: src/index.jobs
           flags: --out json=results.json
-          env:
-            KEYCLOAK_URL: ${{keycloak_url}}
-            KEYCLOAK_REALM: ${{keycloak_realm}}
-            KEYCLOAK_CLIENT_ID: ${{keycloak_client_id}}
-            USERNAME: ${{keycloak_username}}
-            PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
-            FORMID: ${{form_id}}
-            FORM_URL: ${{form_url}}
-            APPLICATION_API: ${{formsflow_api_url}}
+        env:
+          KEYCLOAK_URL: ${{keycloak_url}}
+          KEYCLOAK_REALM: ${{keycloak_realm}}
+          KEYCLOAK_CLIENT_ID: ${{keycloak_client_id}}
+          USERNAME: ${{keycloak_username}}
+          PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
+          FORMID: ${{form_id}}
+          FORM_URL: ${{form_url}}
+          APPLICATION_API: ${{formsflow_api_url}}
 
       - name: Upload submission test results
         uses: actions/upload-artifact@v3
