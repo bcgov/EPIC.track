@@ -41,23 +41,25 @@ on:
         description: 'Number of times the test to be executed to generate enough load'
         required: true
         default: 1
-        type: Number
+        type: string
       vus:
         description: 'Number of virtual users to be used to perform the task'
         required: true
         default: 1
-        type: number
+        type: string
 jobs:
   setup-job:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
   submission-test:
     needs: setup-job
     runs-on: ubuntu-latest
     steps:
+      - name: List
+        run: ls
       - name: Run k6 test
         uses: grafana/k6-action@v0.2.0
         with:
