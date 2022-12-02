@@ -21,6 +21,7 @@ import os
 from flask import Flask
 
 from reports_api import config
+from reports_api.commands.import_other_work_types import COMMANDS_BLUE_PRINT
 from reports_api.config import _Config
 from reports_api.models import db
 from reports_api.utils.auth import jwt
@@ -47,6 +48,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         app.register_blueprint(API_BLUEPRINT)
         app.register_blueprint(OPS_BLUEPRINT)
+        app.register_blueprint(COMMANDS_BLUE_PRINT)
 
         setup_jwt_manager(app, jwt)
 

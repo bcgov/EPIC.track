@@ -1,0 +1,450 @@
+{
+  "phases": [
+    {
+      "name": "Post: Simple Amendment",
+      "work_type_id": 7,
+      "ea_act_id": 3,
+      "sort_order": 1,
+      "duration": 60,
+      "color": "#cfc8dd",
+      "id": "post_simple_amendment"
+    },
+    {
+      "name": "Post: Typical Amendment",
+      "work_type_id": 8,
+      "ea_act_id": 3,
+      "sort_order": 1,
+      "duration": 90,
+      "color": "#cfc8dd",
+      "id": "post_typical_amendment"
+    },
+    {
+      "name": "Post: Complex Amendment",
+      "work_type_id": 9,
+      "ea_act_id": 3,
+      "sort_order": 1,
+      "duration": 120,
+      "color": "#cfc8dd",
+      "id": "post_complex_amendment"
+    }
+  ],
+  "milestones": [
+    {
+      "name": "Amendment Submission",
+      "phase_id": "post_simple_amendment",
+      "milestone_type_id": 16,
+      "sort_order": 1,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "auto": true
+    },
+    {
+      "name": "Submission Decision",
+      "phase_id": "post_simple_amendment",
+      "milestone_type_id": 1,
+      "sort_order": 2,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "simple_amendment_submission_decision",
+      "auto": true
+    },
+    {
+      "name": "Amendment Decision",
+      "phase_id": "post_simple_amendment",
+      "milestone_type_id": 1,
+      "sort_order": 3,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "simple_amendment_amendment_decision",
+      "auto": true
+    },
+    {
+      "name": "Other",
+      "phase_id": "post_simple_amendment",
+      "milestone_type_id": 8,
+      "sort_order": 4,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Amendment Submission",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 16,
+      "sort_order": 1,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "auto": true
+    },
+    {
+      "name": "Submission Decision",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 1,
+      "sort_order": 2,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "post_typical_amendment_submission_decision",
+      "auto": true
+    },
+    {
+      "name": "Amendment Assessment Procedures",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 3,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Amendment Supplemental IR",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 4,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Proponent's Amendment Assessment",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 5,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "PECP Coming Announcement & Tweet",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 21,
+      "sort_order": 6,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 11,
+      "sort_order": 7,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP Open Announcement & Tweet",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 22,
+      "sort_order": 8,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP Closing Announcement & Tweet",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 23,
+      "sort_order": 9,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP Close",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 18,
+      "sort_order": 10,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Open House",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 6,
+      "sort_order": 11,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Virtual Open House",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 17,
+      "sort_order": 12,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Report & Referral",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 13,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Amendment Decision",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 1,
+      "sort_order": 14,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "post_typical_amendment_amendment_decision",
+      "auto": true
+    },
+    {
+      "name": "Other",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 8,
+      "sort_order": 15,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Amendment Submission",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 16,
+      "sort_order": 1,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "auto": true
+    },
+    {
+      "name": "Submission Decision",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 1,
+      "sort_order": 2,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "post_complex_amendment_submission_decision"
+    },
+    {
+      "name": "Amendment Assessment Procedures",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 3,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Amendment Supplemental IR",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 4,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Proponent's Amendment Assessment",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 5,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "PECP Coming Announcement & Tweet",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 21,
+      "sort_order": 6,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 11,
+      "sort_order": 7,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP Open Announcement & Tweet",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 22,
+      "sort_order": 8,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP Closing Announcement & Tweet",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 23,
+      "sort_order": 9,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT"
+    },
+    {
+      "name": "PECP Close",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 18,
+      "sort_order": 10,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Open House",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 6,
+      "sort_order": 11,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Virtual Open House",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 17,
+      "sort_order": 12,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "Report & Referral",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 13,
+      "sort_order": 13,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    },
+    {
+      "name": "CEAO's Amendment Decision",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 1,
+      "sort_order": 14,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "post_complex_amendment_ceao_decision",
+      "auto": true
+    },
+    {
+      "name": "Minister's Amendment Decision",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 2,
+      "sort_order": 15,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT",
+      "id": "post_complex_amendment_minister_decision",
+      "auto": true
+    },
+    {
+      "name": "Other",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 8,
+      "sort_order": 16,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "EVENT"
+    }
+  ],
+  "outcomes": [
+    {
+      "name": "Start Amendment Assessment",
+      "milestone_id": "simple_amendment_submission_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Request More Information",
+      "milestone_id": "simple_amendment_submission_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Granted",
+      "milestone_id": "simple_amendment_amendment_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Refused",
+      "milestone_id": "simple_amendment_amendment_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    },
+    {
+      "name": "Start Amendment Assessment",
+      "milestone_id": "post_typical_amendment_submission_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Request More Information",
+      "milestone_id": "post_typical_amendment_submission_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Granted",
+      "milestone_id": "post_complex_amendment_ceao_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Refused",
+      "milestone_id": "post_complex_amendment_ceao_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Granted",
+      "milestone_id": "post_complex_amendment_minister_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Refused",
+      "milestone_id": "post_complex_amendment_minister_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Granted",
+      "milestone_id": "post_typical_amendment_amendment_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Amendment Refused",
+      "milestone_id": "post_typical_amendment_amendment_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    },
+    {
+      "name": "Start Amendment Assessment",
+      "milestone_id": "post_complex_amendment_submission_decision",
+      "sort_order": 1,
+      "terminates_work": false
+    },
+    {
+      "name": "Request More Information",
+      "milestone_id": "post_complex_amendment_submission_decision",
+      "sort_order": 2,
+      "terminates_work": false
+    }
+  ]
+}
