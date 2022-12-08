@@ -1,0 +1,78 @@
+name: Submission Load
+
+on: 
+  workflow_dispatch:
+    inputs:
+      keycloak_url:
+        description: 'Base URL of the keycloak to which the test would connect to get token'
+        required: true
+        type: string
+      keycloak_realm:
+        description: 'Keycloak realm'
+        required: true
+        default: 'forms-flow-ai'
+        type: string
+      keycloak_client_id:
+        description: 'Client id of keycloak client using which the test gain access to token'
+        required: true
+        type: string
+      keycloak_username:
+        description: 'Username of the keycloak user'
+        required: true
+        type: string
+      form_id:
+        description: 'id of the form for which the submission are about to be made'
+        required: true
+        type: string
+      formio_url:
+        description: 'Base URL of the formio service'
+        required: true
+        type: string
+      formsflow_api_url:
+        description: 'Base URL of the formsflow api service'
+        required: true
+        type: string
+      web_url:
+        description: 'Base URL of the formsflow web front end'
+        required: true
+        type: string
+      iterations:
+        description: 'Number of times the test to be executed to generate enough load'
+        required: true
+        default: 1
+        type: string
+      vus:
+        description: 'Number of virtual users to be used to perform the task'
+        required: true
+        default: 1
+        type: string
+jobs:
+  submission-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Run k6 test
+        uses: grafana/k6-action@v0.2.0
+        with:
+          filename: ./tests/performance/submission-load/src/index.js
+          flags: --out json=results.json --http-debug
+        env:
+          KEYCLOAK_URL: ${{inputs.keycloak_url}}
+          KEYCLOAK_REALM: ${{inputs.keycloak_realm}}
+          KEYCLOAK_CLIENT_ID: ${{inputs.keycloak_client_id}}
+          KEYCLOAK_USERNAME: ${{inputs.keycloak_username}}
+          KEYCLOAK_PASSWORD: ${{secrets.KEYCLOAK_TESTING_PASSWORD}}
+          FORMID: ${{inputs.form_id}}
+          FORMIO_URL: ${{inputs.formio_url}}
+          WEB_URL: ${{inputs.web_url}}
+          APPLICATION_API: ${{inputs.formsflow_api_url}}
+          K6_ITERATIONS: ${{inputs.iterations}}
+          K6_VUS: ${{inputs.vus}}
+
+      - name: Upload submission test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: submission-test report
+          path: results.json
