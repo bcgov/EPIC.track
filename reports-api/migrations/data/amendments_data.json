@@ -125,7 +125,8 @@
       "sort_order": 6,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP",
@@ -134,7 +135,18 @@
       "sort_order": 7,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "EVENT",
+      "auto": false
+    },
+    {
+      "name": "PECP",
+      "phase_id": "post_typical_amendment",
+      "milestone_type_id": 11,
+      "sort_order": 7,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP Open Announcement & Tweet",
@@ -143,7 +155,8 @@
       "sort_order": 8,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP Closing Announcement & Tweet",
@@ -152,7 +165,8 @@
       "sort_order": 9,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP Close",
@@ -161,7 +175,8 @@
       "sort_order": 10,
       "start_at": 0,
       "duration": 0,
-      "kind": "EVENT"
+      "kind": "EVENT",
+      "auto": false
     },
     {
       "name": "Open House",
@@ -264,7 +279,8 @@
       "sort_order": 6,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP",
@@ -273,7 +289,18 @@
       "sort_order": 7,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "EVENT",
+      "auto": false
+    },
+    {
+      "name": "PECP",
+      "phase_id": "post_complex_amendment",
+      "milestone_type_id": 11,
+      "sort_order": 7,
+      "start_at": 0,
+      "duration": 0,
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP Open Announcement & Tweet",
@@ -282,7 +309,8 @@
       "sort_order": 8,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP Closing Announcement & Tweet",
@@ -291,7 +319,8 @@
       "sort_order": 9,
       "start_at": 0,
       "duration": 0,
-      "kind": "ENGAGEMENT"
+      "kind": "ENGAGEMENT",
+      "auto": true
     },
     {
       "name": "PECP Close",
@@ -300,7 +329,8 @@
       "sort_order": 10,
       "start_at": 0,
       "duration": 0,
-      "kind": "EVENT"
+      "kind": "EVENT",
+      "auto": false
     },
     {
       "name": "Open House",
