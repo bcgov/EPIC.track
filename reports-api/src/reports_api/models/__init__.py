@@ -34,6 +34,7 @@ from .issue import Issue
 from .milestone import Milestone
 from .milestone_type import MilestoneType
 from .ministry import Ministry
+from .organization import Organization
 from .outcome import Outcome
 from .phase_code import PhaseCode
 from .position import Position
