@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Indigenous Group."""
 
-from sqlalchemy import Boolean, Column, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
 from .code_table import CodeTable
 from .db import db
@@ -28,12 +29,16 @@ class IndigenousNation(db.Model, CodeTable):
     name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True)
 
+    responsible_epd_id = Column(ForeignKey('staffs.id'), nullable=True, default=None)
+    responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')
+
     def as_dict(self):
         """Return Json representation."""
         return {
             'id': self.id,
             'name': self.name,
-            'is_active': self.is_active
+            'is_active': self.is_active,
+            'responsible_epd_id': self.responsible_epd_id
         }
 
     @classmethod
