@@ -11,37 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model to handle all operations related to Indigenous Group."""
+"""Model to handle all operations related to Organization."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import BOOLEAN, Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
+
+from reports_api.models.base_model import BaseModel
 
 from .code_table import CodeTable
 from .db import db
 
 
-class IndigenousNation(db.Model, CodeTable):
-    """Model class for IndigenousNation."""
+class Organization(db.Model, CodeTable):
+    """Model class for Organization."""
 
-    __tablename__ = 'indigenous_nations'
+    __tablename__ = 'organizations'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    is_active = Column(BOOLEAN(), default=True)
+    is_deleted = Column(Boolean(), default=False)
 
     responsible_epd_id = Column(ForeignKey('staffs.id'), nullable=True, default=None)
     responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')
 
     def as_dict(self):
-        """Return Json representation."""
-        return {
-            'id': self.id,
-            'name': self.name,
-            'is_active': self.is_active,
-            'responsible_epd_id': self.responsible_epd_id
-        }
-
-    @classmethod
-    def find_all_active_groups(cls):
-        """Find all active groups."""
-        return cls.query.filter_by(is_active=True).all()
+        """Return JSON Representation."""
+        result = BaseModel.as_dict(self)
+        result['is_active'] = self.is_active
+        return result
