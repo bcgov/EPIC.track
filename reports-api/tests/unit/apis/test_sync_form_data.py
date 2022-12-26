@@ -35,7 +35,7 @@ def test_sync_form_data_create(client, new_project, new_staff):
             "eao_team_id": 1
         },
         "works-work_statuses": {
-            "status": "Testing foreign key entry creation"
+            "status_text": "Testing foreign key entry creation"
         }
     }
     result = client.post(API_URL, json=payload)
@@ -58,7 +58,7 @@ def test_sync_form_data_update(client, new_project, new_staff):
             "eao_team_id": 1
         },
         "works-work_statuses": {
-            "status": "Testing foreign key entry creation"
+            "status_text": "Testing foreign key entry creation"
         }
     }
     new = client.post(API_URL, json=new_payload).json
@@ -78,7 +78,7 @@ def test_sync_form_data_update(client, new_project, new_staff):
             "eao_team_id": 1
         },
         "works-work_statuses": {
-            "status": "Testing foreign key entry and updated_at updation ",
+            "status_text": "Testing foreign key entry and updated_at updation ",
             "id": new['works-work_statuses']['id']
         }
     }
