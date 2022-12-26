@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to WorkStatus."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -25,7 +25,8 @@ class WorkStatus(BaseModel):
     __tablename__ = 'work_statuses'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    status = Column(String(255), nullable=False)
+    status_text = Column(String(255), nullable=False)
+    is_deleted = Column(Boolean(), default=False)
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
 
@@ -33,7 +34,7 @@ class WorkStatus(BaseModel):
         """Return dict representation."""
         return {
             'id': self.id,
-            'status': self.status,
+            'status_text': self.status_text,
             'created_at': str(self.created_at) if self.created_at else None,
             'updated_at': str(self.updated_at) if self.updated_at else None,
             'work_id': self.work_id

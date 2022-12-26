@@ -16,7 +16,9 @@
 from sqlalchemy import event  # noqa: I001
 from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 
-from .inspection_attendee import InspectionAttendee
+# Import signal for it to register itself
+from reports_api.signals import before_commit
+
 from .code_table import CodeTable
 from .db import db  # noqa: I001
 from .ea_act import EAAct
@@ -27,9 +29,10 @@ from .federal_involvement import FederalInvolvement
 from .indigenous_category import IndigenousCategory
 from .indigenous_nation import IndigenousNation
 from .indigenous_work import IndigenousWork
-from .inspection_attachment import InspectionAttachment
-from .inspection_detail import InspectionDetail
 from .inspection import Inspection
+from .inspection_attachment import InspectionAttachment
+from .inspection_attendee import InspectionAttendee
+from .inspection_detail import InspectionDetail
 from .issue import Issue
 from .milestone import Milestone
 from .milestone_type import MilestoneType
