@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_052c1wr" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.17.0">
+  <bpmn:collaboration id="Collaboration_0dm9dz9">
+    <bpmn:participant id="Participant_0hed8ox" name="Assessment Version1" processRef="Process_assessment_latest" />
+  </bpmn:collaboration>
+  <bpmn:process id="Process_assessment_latest" name="Assessment " isExecutable="true">
+    <bpmn:userTask id="Activity_1cxdn4p" name="${workTitle}(WorkPhase-N)">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">task.execution.setVariable('deleteReason', "completed");</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0jo372u</bpmn:incoming>
+      <bpmn:incoming>Flow_0zci9bl</bpmn:incoming>
+      <bpmn:incoming>Flow_1g2dh63</bpmn:incoming>
+      <bpmn:incoming>Flow_1opunlc</bpmn:incoming>
+      <bpmn:outgoing>Flow_1nu0fsx</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:startEvent id="Event_08in3hw" name="Start">
+      <bpmn:outgoing>Flow_1g2dh63</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:exclusiveGateway id="Gateway_0kyl34x" name="Action?" camunda:asyncAfter="true" default="Flow_0jo372u">
+      <bpmn:incoming>Flow_1nu0fsx</bpmn:incoming>
+      <bpmn:outgoing>Flow_0jo372u</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0zci9bl</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0i6xbxb</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1opunlc</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0zci9bl" name="isEmpty?" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEventPhase').concat('( ').concat(execution.getVariable('completedEvent')).concat(' )'));</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedEventPhase', "");</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedEventPhase"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent and actionType == 0}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0jo372u" name="Resubmit" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1nu0fsx" sourceRef="Activity_1cxdn4p" targetRef="Gateway_0kyl34x">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_1g2dh63" sourceRef="Event_08in3hw" targetRef="Activity_1cxdn4p" />
+    <bpmn:userTask id="Activity_1ijipih" name="End">
+      <bpmn:extensionElements>
+        <camunda:taskListener event="complete">
+          <camunda:script scriptFormat="javascript">task.execution.setVariable('deleteReason', "completed");</camunda:script>
+        </camunda:taskListener>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0i6xbxb</bpmn:incoming>
+      <bpmn:outgoing>Flow_0pxdv1a</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_0i6xbxb" name="isComplete?" sourceRef="Gateway_0kyl34x" targetRef="Activity_1ijipih">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEventPhase').concat('( ').concat(execution.getVariable('completedEvent')).concat(' )'));</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedEventPhase', "");</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedEventPhase"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType == 10}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:endEvent id="Event_0hk84k6">
+      <bpmn:incoming>Flow_0pxdv1a</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0pxdv1a" sourceRef="Activity_1ijipih" targetRef="Event_0hk84k6" />
+    <bpmn:sequenceFlow id="Flow_1opunlc" name="actionType?" sourceRef="Gateway_0kyl34x" targetRef="Activity_1cxdn4p">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', execution.getVariable('completedEventPhase').concat('( ').concat(execution.getVariable('completedEvent')).concat(' )'));</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormSubmissionListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">execution.setVariable('completedEvent', "");
+execution.setVariable('completedEventPhase', "");</camunda:script>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus", "completedEvent", "completedEventPhase"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${actionType &gt;= 1}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Collaboration_0dm9dz9">
+      <bpmndi:BPMNShape id="Participant_0hed8ox_di" bpmnElement="Participant_0hed8ox" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="610" height="290" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_0pxdv1a_di" bpmnElement="Flow_0pxdv1a">
+        <di:waypoint x="630" y="220" />
+        <di:waypoint x="712" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0i6xbxb_di" bpmnElement="Flow_0i6xbxb">
+        <di:waypoint x="455" y="220" />
+        <di:waypoint x="530" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="459" y="193" width="62" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1g2dh63_di" bpmnElement="Flow_1g2dh63">
+        <di:waypoint x="230" y="168" />
+        <di:waypoint x="230" y="220" />
+        <di:waypoint x="280" y="220" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1nu0fsx_di" bpmnElement="Flow_1nu0fsx">
+        <di:waypoint x="380" y="220" />
+        <di:waypoint x="405" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="411" y="173" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0jo372u_di" bpmnElement="Flow_0jo372u">
+        <di:waypoint x="430" y="245" />
+        <di:waypoint x="430" y="300" />
+        <di:waypoint x="330" y="300" />
+        <di:waypoint x="330" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="356" y="282" width="48" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0zci9bl_di" bpmnElement="Flow_0zci9bl">
+        <di:waypoint x="430" y="195" />
+        <di:waypoint x="430" y="150" />
+        <di:waypoint x="330" y="150" />
+        <di:waypoint x="330" y="180" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="357" y="132" width="46" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1opunlc_di" bpmnElement="Flow_1opunlc">
+        <di:waypoint x="455" y="220" />
+        <di:waypoint x="480" y="220" />
+        <di:waypoint x="480" y="350" />
+        <di:waypoint x="300" y="350" />
+        <di:waypoint x="300" y="260" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="500" y="293" width="60" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_02z6mwo_di" bpmnElement="Activity_1cxdn4p">
+        <dc:Bounds x="280" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_08in3hw_di" bpmnElement="Event_08in3hw">
+        <dc:Bounds x="212" y="132" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="217" y="108" width="25" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_1jew3dx_di" bpmnElement="Gateway_0kyl34x" isMarkerVisible="true">
+        <dc:Bounds x="405" y="195" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="446" y="173" width="37" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1n3r3sc_di" bpmnElement="Activity_1ijipih">
+        <dc:Bounds x="530" y="180" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0hk84k6_di" bpmnElement="Event_0hk84k6">
+        <dc:Bounds x="712" y="202" width="36" height="36" />
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
