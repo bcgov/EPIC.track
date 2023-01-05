@@ -33,3 +33,10 @@ class MilestoneService():  # pylint:disable=too-few-public-methods
         current_app.logger.debug(f'find milestone by id {milestone_id}')
         milestone = Milestone.find_by_id(milestone_id)
         return jsonify(milestone.as_dict())
+
+    @classmethod
+    def find_all_active_milestones(cls):
+        """Find all active milestones"""
+        current_app.logger.debug(f'Find all active milestones')
+        milestones = Milestone.find_all()
+        return jsonify([item.as_dict() for item in milestones])
