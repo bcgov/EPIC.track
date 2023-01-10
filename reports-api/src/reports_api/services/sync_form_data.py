@@ -62,6 +62,8 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
     @classmethod
     def _process_model_instance_data(cls, model_class, data: dict, result: dict):  # pylint:disable=too-many-locals
         """Process data for a single instance of a model"""
+        if not data:
+            return {}
         dependants = [{k: v} for k, v in data.items() if isinstance(v, (dict, list))]
         instance = cls._update_or_create(model_class, data)
         current_app.logger.info(f'Model class ---> {model_class}')
@@ -97,7 +99,7 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         model_class = find_model_from_table_name(model_name)
 
         if model_class:
-            if isinstance(dataset, dict):
+            if isinstance(dataset, dict) and dataset:
                 instance = cls._process_model_instance_data(model_class, dataset, result)
             elif isinstance(dataset, list):
                 instance = []
@@ -129,9 +131,9 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             if isinstance(dataset, dict):
                 dataset.update(foreign_keys)
             elif isinstance(dataset, list):
-                object_ids = [x['id'] for x in dataset if x['id']]
+                object_ids = [x['id'] for x in dataset if 'id' in x and x['id']]
                 cls._sync_deletions(model_name, object_ids, foreign_keys)
-                dataset = [{**x, **foreign_keys} for x in dataset]
+                dataset = [{**x, **foreign_keys} for x in dataset if x]
             current_app.logger.info(f'Processing model data for {model_name}')
             obj = cls._process_model_data(model_name, dataset, result)
             if obj:
