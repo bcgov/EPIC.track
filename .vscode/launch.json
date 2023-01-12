@@ -4,6 +4,16 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+    {
+        "name": "Load Excel Data",
+        "program": "${workspaceFolder}/scripts/data-migration/bin/index.js",
+        "request": "launch",
+        "skipFiles": [
+            "<node_internals>/**"
+        ],
+        "type": "node",
+        "args": ["--type=work", "--file=./scripts/data-migration/data/Work.xlsx", "--env=dev"]
+    },
         {
             "name": "ReportsAPI",
             "type": "python",
