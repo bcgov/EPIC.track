@@ -53,3 +53,18 @@ class Milestone(Resource):
     def get(milestone_id):
         """Return single milestone based on the milestone id given"""
         return MilestoneService.find_milestone_by_id(milestone_id), HTTPStatus.OK
+
+
+@cors_preflight('GET')
+@API.route('', methods=['GET', 'OPTIONS'])
+class ActiveMilestones(Resource):
+    """Endpoint resource to return all active milestones"""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @profiletime
+    def get():
+        """Return single milestone based on the milestone id given"""
+        return MilestoneService.find_all_active_milestones(), HTTPStatus.OK

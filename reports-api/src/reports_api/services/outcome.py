@@ -26,3 +26,10 @@ class OutcomeService():  # pylint:disable=too-few-public-methods
         current_app.logger.debug(f'Find outcomes by milestone_id {milestone_id}')
         outcomes = Outcome.find_by_milestone_id(milestone_id)
         return jsonify([item.as_dict() for item in outcomes])
+
+    @classmethod
+    def find_all_active_milestones(cls):
+        """Find all active outcomes"""
+        current_app.logger.debug('Find all active outcomes')
+        outcomes = Outcome.find_all()
+        return jsonify([item.as_dict() for item in outcomes])

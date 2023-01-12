@@ -49,6 +49,7 @@ from .sector import Sector
 from .staff import Staff
 from .staff_work_role import StaffWorkRole
 from .sub_sector import SubSector
+from .substitution_acts import SubstitutionAct
 from .work import Work
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
