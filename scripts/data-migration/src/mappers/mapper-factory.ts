@@ -1,5 +1,6 @@
 import LookupRepository from "../infrastructure/lookup-repository";
 import DefaultMapper from "./default-mapper";
+import IndigenousNationMapper from "./indigenous-nation-mapper";
 import MapperBase from "./mapper-base";
 import OrganizationMapper from "./organization-mapper";
 import ProjectMapper from "./project-mapper";
@@ -14,6 +15,7 @@ export default  class MapperFactory {
             case 'work': return new WorkMapper(file, lookupRepository);
             case 'project': return new ProjectMapper(file, lookupRepository);
             case 'staff': return new StaffMapper(file, lookupRepository);
+            case 'indigenousnation': return new IndigenousNationMapper(file, lookupRepository);
             default: return new DefaultMapper();
         }
         
