@@ -3,6 +3,7 @@ import DefaultMapper from "./default-mapper";
 import MapperBase from "./mapper-base";
 import OrganizationMapper from "./organization-mapper";
 import ProjectMapper from "./project-mapper";
+import StaffMapper from "./staff-mapper";
 import WorkMapper from "./work-mapper";
 
 export default  class MapperFactory {
@@ -12,6 +13,7 @@ export default  class MapperFactory {
             case 'organization': return new OrganizationMapper(file, lookupRepository);
             case 'work': return new WorkMapper(file, lookupRepository);
             case 'project': return new ProjectMapper(file, lookupRepository);
+            case 'staff': return new StaffMapper(file, lookupRepository);
             default: return new DefaultMapper();
         }
         
