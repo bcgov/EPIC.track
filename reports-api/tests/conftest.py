@@ -198,7 +198,8 @@ def new_project():
 def new_staff():
     """Create new staff."""
     staff = Staff(**{
-        "name": "Andrew",
+        "first_name": "Andrew",
+        "last_name": "Drew",
         "phone": "1111111111",
         "email": "andrew@test.com",
         "position_id": 3
