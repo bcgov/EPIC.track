@@ -13,6 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Staff."""
 
+from typing import List
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import column_property, relationship
 
@@ -54,6 +55,11 @@ class Staff(BaseModel):
     def find_active_staff_by_position(cls, position_id: int):
         """Return active staff by position id."""
         return cls.query.filter_by(position_id=position_id, is_active=True)
+
+    @classmethod
+    def find_active_staff_by_positions(cls, position_ids: List[int]):
+        """Return active staffs by position ids."""
+        return cls.query.filter(Staff.position_id.in_(position_ids), Staff.is_active == True)
 
     @classmethod
     def find_all_active_staff(cls):
