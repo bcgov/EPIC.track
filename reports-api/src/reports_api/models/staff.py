@@ -16,11 +16,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import column_property, relationship
 
-from .code_table import CodeTable
-from .db import db
+from reports_api.models.base_model import BaseModel
 
 
-class Staff(db.Model, CodeTable):
+class Staff(BaseModel):
     """Model class for Staff."""
 
     __tablename__ = 'staffs'
@@ -38,7 +37,7 @@ class Staff(db.Model, CodeTable):
 
     full_name = column_property(first_name + ", " + last_name)
 
-    def as_dict(self):
+    def as_dict(self):  # pylint: disable=arguments-differ
         """Return Json representation."""
         return {
             'id': self.id,
