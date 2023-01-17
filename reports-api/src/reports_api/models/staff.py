@@ -14,7 +14,7 @@
 """Model to handle all operations related to Staff."""
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import column_property, relationship
 
 from .code_table import CodeTable
 from .db import db
@@ -26,7 +26,8 @@ class Staff(db.Model, CodeTable):
     __tablename__ = 'staffs'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(), nullable=False)
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
     phone = Column(String(), nullable=False)
     email = Column(String(), nullable=False)
     is_active = Column(Boolean(), default=True)
@@ -35,11 +36,15 @@ class Staff(db.Model, CodeTable):
 
     position = relationship('Position', foreign_keys=[position_id], lazy='select')
 
+    full_name = column_property(first_name + ", " + last_name)
+
     def as_dict(self):
         """Return Json representation."""
         return {
             'id': self.id,
-            'name': self.name,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'full_name': self.full_name,
             'phone': self.phone,
             'email': self.email,
             'is_active': self.is_active,

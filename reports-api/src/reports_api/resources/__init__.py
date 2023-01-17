@@ -26,6 +26,7 @@ from flask import Blueprint
 
 from .apihelper import Api
 from .code import API as CODES_API
+from .lookup_data_generator import API as LOOKUP_API
 from .meta import API as META_API
 from .milestone import API as MILESTONE_API
 from .ops import API as OPS_API
@@ -79,3 +80,4 @@ API.add_namespace(OUTCOME_API, path='/outcomes')
 API.add_namespace(SUB_SECTOR_API, path='/sub-sectors')
 API.add_namespace(INSPECTION_API, path='/inspections')
 API.add_namespace(WORK_API, path='/works')
+API.add_namespace(LOOKUP_API, path='/lookups')

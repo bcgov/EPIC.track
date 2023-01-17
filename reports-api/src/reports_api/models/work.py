@@ -36,6 +36,8 @@ class Work(BaseModel):
     work_short_status = Column(String(255))
     work_status_stoplight = Column(String(6))
     is_deleted = Column(Boolean(), default=False)
+    project_tracking_number = Column(String(255), nullable=True, default=None)
+    work_tracking_number = Column(String(255), nullable=True, default=None)
 
     start_date = Column(DateTime)
     anticipated_decision_date = Column(DateTime)
