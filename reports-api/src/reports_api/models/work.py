@@ -36,6 +36,8 @@ class Work(BaseModel):
     work_short_status = Column(String(255))
     work_status_stoplight = Column(String(6))
     is_deleted = Column(Boolean(), default=False)
+    project_tracking_number = Column(String(255), nullable=True, default=None)
+    work_tracking_number = Column(String(255), nullable=True, default=None)
 
     start_date = Column(DateTime)
     anticipated_decision_date = Column(DateTime)
@@ -50,6 +52,7 @@ class Work(BaseModel):
     work_lead_id = Column(ForeignKey('staffs.id'), nullable=False)
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
     current_phase_id = Column(ForeignKey('phase_codes.id'), nullable=True, default=None)
+    substitution_act_id = Column(ForeignKey('substitution_acts.id'), nullable=True, default=None)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')
@@ -61,6 +64,7 @@ class Work(BaseModel):
     work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
 
     current_phase = relationship("PhaseCode", foreign_keys=[current_phase_id], lazy='select')
+    substitution_act = relationship("SubstitutionAct", foreign_keys=[substitution_act_id], lazy='select')
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""

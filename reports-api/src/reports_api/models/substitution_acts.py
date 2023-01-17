@@ -11,14 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all of the Services used in the API."""
+"""Model to handle all operations related to Substitution acts."""
 
-from .code import CodeService
-from .inspection import InspectionService
-from .lookups import LookupService
-from .milestone import MilestoneService
-from .outcome import OutcomeService
-from .project import ProjectService
-from .staff import StaffService
-from .sub_sector import SubSectorService
-from .work import WorkService
+from sqlalchemy import Column, Integer, String, Text
+
+from .code_table import CodeTable
+from .db import db
+
+
+class SubstitutionAct(db.Model, CodeTable):
+    """Model class for SubstitutionActs."""
+
+    __tablename__ = 'substitution_acts'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String())
+    description = Column(Text, nullable=True)

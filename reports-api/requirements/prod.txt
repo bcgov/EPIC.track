@@ -17,3 +17,4 @@ cryptography
 sqlalchemy_utils
 sqlalchemy<1.4
 Inflector
+XlsxWriter==3.0.6
