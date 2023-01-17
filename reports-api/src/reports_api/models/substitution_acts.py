@@ -26,4 +26,3 @@ class SubstitutionAct(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String())
-    description = Column(Text, nullable=True)
