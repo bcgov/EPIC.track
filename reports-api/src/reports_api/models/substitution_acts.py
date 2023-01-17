@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Substitution acts."""
 
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String
 
 from .code_table import CodeTable
 from .db import db
@@ -26,4 +26,3 @@ class SubstitutionAct(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String())
-    description = Column(Text, nullable=True)
