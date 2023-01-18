@@ -36,20 +36,23 @@ class Inspections(Resource):
     @profiletime
     def get():  # pylint: disable=too-many-locals
         """Return total number of inspections."""
+        positions = CodeService.find_code_values_by_type('positions')
+        staffs = CodeService.find_code_values_by_type('staffs')
         indigenous_nations = CodeService.find_code_values_by_type('indigenous_nations')
         indigenous_categories = CodeService.find_code_values_by_type('indigenous_categories')
         roles = CodeService.find_code_values_by_type('roles')
-        positions = CodeService.find_code_values_by_type('positions')
-        staffs = CodeService.find_code_values_by_type('staffs')
         ea_acts = CodeService.find_code_values_by_type('ea_acts')
         work_types = CodeService.find_code_values_by_type('work_types')
+        projects = ProjectService.find_all()
         ministries = CodeService.find_code_values_by_type('ministries')
         federal_involvements = CodeService.find_code_values_by_type('federal_involvements')
         phases = CodeService.find_code_values_by_type('phase_codes')
         milestones = CodeService.find_code_values_by_type('milestones')
         outcomes = CodeService.find_code_values_by_type('outcomes')
         teams = CodeService.find_code_values_by_type('eao_teams')
-        projects = ProjectService.find_all()
+        regions = CodeService.find_code_values_by_type('regions')
+        types = CodeService.find_code_values_by_type('types')
+        sub_types = CodeService.find_code_values_by_type('sub_types')
 
         data = {}
 
@@ -77,8 +80,12 @@ class Inspections(Resource):
                            'position': x['position']['name']} for x in staffs['codes']]
         data['projects'] = [{'id': x['id'], 'name': x['name'], 'location': x['location'],
                              'description': x['description'], 'address': x['address'],
-                             'proponent_name': x['proponent']['name'], 'sub_sector_name': x['sub_sector']['name']}
+                             'proponent_name': x['proponent']['name'], 'sub_type_name': x['sub_type']['name']}
                             for x in projects['projects']]
+        data['regions'] = [{'id': x['id'], 'name': x['name'], 'entity': x['entity']} for x in regions['codes']]
+        data['types'] = [{'id': x['id'], 'name': x['name'], 'short_name': x['short_name']} for x in types['codes']]
+        data['sub_types'] = [{'id': x['id'], 'name': x['name'], 'short_name': x['short_name'],
+                             'types': x['type']['name']} for x in sub_types['codes']]
 
         lookup_data = LookupService.generate_excel(data)
 
