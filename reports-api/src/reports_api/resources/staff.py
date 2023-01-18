@@ -15,7 +15,7 @@
 from http import HTTPStatus
 
 from flask import request
-from flask_restx import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import StaffService
 from reports_api.utils import auth, constants, profiletime
@@ -24,6 +24,9 @@ from reports_api.utils.util import cors_preflight
 
 
 API = Namespace('staffs', description='Staffs')
+
+parser = reqparse.RequestParser()
+parser.add_argument("positions", type=int, action="split")
 
 
 @cors_preflight('GET')
@@ -34,14 +37,17 @@ class Staffs(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     @profiletime
+    @API.expect(parser)
     def get():
         """Return all active staffs."""
         position_id = request.args.get('position', None)
         if position_id:
             return StaffService.find_by_position_id(position_id), HTTPStatus.OK
-
+        positions = parser.parse_args()["positions"]
+        if positions:
+            return StaffService.find_by_position_ids(parser.parse_args()["positions"]), HTTPStatus.OK
         return StaffService.find_all_active_staff(), HTTPStatus.OK
 
 
