@@ -13,7 +13,9 @@ export default abstract class MapperBase {
                 if (errors && errors.length > 0) {
                     reject(JSON.stringify(errors));
                 }
-                resolve(rows);
+                return rows;
+            }).then((rows:any[])=>{
+                resolve(rows.filter(p=>!p.import_completed));
             });
         })
     }

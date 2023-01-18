@@ -9,8 +9,8 @@ export class StaffFormData extends FormDataBase {
 }
 export class Staff {
     id: string = "";
-    firstname: string = "";
-    lastname: string = "";
+    first_name: string = "";
+    last_name: string = "";
     phone: string = "";
     email: string = "";
     position_id: string = "";
@@ -19,14 +19,14 @@ export class Staff {
      *
      */
     constructor(
-        firstname: string
-        , lastname: string
+        first_name: string
+        , last_name: string
         , phone: string
         , email: string
         , position_id: string
     ) {
-        this.firstname = firstname;
-        this.lastname = lastname;
+        this.first_name = first_name;
+        this.last_name = last_name;
         this.phone = phone;
         this.email = email;
         this.position_id = position_id;
