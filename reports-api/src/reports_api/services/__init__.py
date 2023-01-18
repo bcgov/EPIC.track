@@ -20,5 +20,5 @@ from .milestone import MilestoneService
 from .outcome import OutcomeService
 from .project import ProjectService
 from .staff import StaffService
-from .sub_sector import SubSectorService
+from .sub_type import SubTypeService
 from .work import WorkService

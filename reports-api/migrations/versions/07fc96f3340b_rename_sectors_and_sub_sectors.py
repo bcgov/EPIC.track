@@ -139,7 +139,7 @@ def upgrade():
         "positions",
         sa.Column("name", sa.String(), nullable=False),
     )
-    op.bulk_insert(positions, [{"name": "Minster"}])
+    op.bulk_insert(positions, [{"name": "Minister"}])
     # ### end Alembic commands ###
 
 

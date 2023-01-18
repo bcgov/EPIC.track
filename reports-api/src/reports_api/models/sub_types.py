@@ -23,18 +23,18 @@ from .db import db
 class SubType(db.Model, CodeTable):
     """Model class for SubTypes."""
 
-    __tablename__ = 'sub_types'
+    __tablename__ = "sub_types"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     short_name = Column(String())
-    type_id = Column(ForeignKey('types.id'), nullable=False)
-    type = relationship('Types', foreign_keys=[type_id], lazy='select')
+    type_id = Column(ForeignKey("types.id"), nullable=False)
+    type = relationship("Type", foreign_keys=[type_id], lazy="select")
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return Json representation."""
         result = CodeTable.as_dict(self)
-        result['short_name'] = self.short_name
-        result['type'] = self.type.as_dict()
+        result["short_name"] = self.short_name
+        result["type"] = self.type.as_dict()
         return result
 
     @classmethod
