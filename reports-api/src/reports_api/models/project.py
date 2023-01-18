@@ -22,7 +22,7 @@ from .base_model import BaseModel
 class Project(BaseModel):
     """Model class for Project."""
 
-    __tablename__ = 'projects'
+    __tablename__ = "projects"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String())
@@ -34,12 +34,12 @@ class Project(BaseModel):
     address = Column(Text, nullable=True, default=None)
 
     ea_certificate = Column(String(255), nullable=True, default=None)
-    sub_sector_id = Column(ForeignKey('sub_sectors.id'), nullable=False)
-    proponent_id = Column(ForeignKey('proponents.id'), nullable=False)
-    region_id_env = Column(ForeignKey('regions.id'), nullable=False)
-    region_id_flnro = Column(ForeignKey('regions.id'), nullable=False)
+    sub_type_id = Column(ForeignKey("sub_types.id"), nullable=False)
+    proponent_id = Column(ForeignKey("proponents.id"), nullable=False)
+    region_id_env = Column(ForeignKey("regions.id"), nullable=False)
+    region_id_flnro = Column(ForeignKey("regions.id"), nullable=False)
     abbreviation = Column(String(10), nullable=True)
-    sub_sector = relationship('SubSector', foreign_keys=[sub_sector_id], lazy='select')
-    proponent = relationship('Proponent', foreign_keys=[proponent_id], lazy='select')
-    region_env = relationship('Region', foreign_keys=[region_id_env], lazy='select')
-    region_flnro = relationship('Region', foreign_keys=[region_id_flnro], lazy='select')
+    sub_type = relationship("SubType", foreign_keys=[sub_type_id], lazy="select")
+    proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")
+    region_env = relationship("Region", foreign_keys=[region_id_env], lazy="select")
+    region_flnro = relationship("Region", foreign_keys=[region_id_flnro], lazy="select")

@@ -25,17 +25,21 @@ from .db import db
 class Organization(db.Model, CodeTable):
     """Model class for Organization."""
 
-    __tablename__ = 'organizations'
+    __tablename__ = "organizations"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = Column(Integer, primary_key=True, autoincrement=True)
     is_active = Column(BOOLEAN(), default=True)
     is_deleted = Column(Boolean(), default=False)
 
-    responsible_epd_id = Column(ForeignKey('staffs.id'), nullable=True, default=None)
-    responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')
+    relationship_holder_id = Column(
+        ForeignKey("staffs.id"), nullable=True, default=None
+    )
+    relationship_holder = relationship(
+        "Staff", foreign_keys=[relationship_holder_id], lazy="select"
+    )
 
     def as_dict(self):
         """Return JSON Representation."""
         result = BaseModel.as_dict(self)
-        result['is_active'] = self.is_active
+        result["is_active"] = self.is_active
         return result

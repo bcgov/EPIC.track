@@ -11,18 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Service to manage SubSectors."""
-from flask import current_app, jsonify
+"""Test suite for phases."""
 
-from reports_api.models import SubSector
+from http import HTTPStatus
+from urllib.parse import urljoin
 
 
-class SubSectorService():  # pylint:disable=too-few-public-methods
-    """Service to manage sub sector related operations"""
+API_BASE_URL = "/api/v1/"
 
-    @classmethod
-    def find_by_sector_id(cls, sector_id: int):
-        """Find sub sectors by sector_id"""
-        current_app.logger.debug(f'find sub sectors by sector_id {sector_id}')
-        sub_sectors = SubSector.find_by_sector_id(sector_id)
-        return jsonify([item.as_dict() for item in sub_sectors])
+
+def test_get_sub_types_by_type_id(client):
+    """Test get sub type by type_id."""
+    url = urljoin(API_BASE_URL, "sub-types?type_id=1")
+    result = client.get(url)
+    assert result.status_code == HTTPStatus.OK
+    sub_types = result.json
+    filtered_sub_types = list(filter(lambda x: x["type"]["id"] == 1, sub_types))
+    assert len(sub_types) == len(filtered_sub_types)

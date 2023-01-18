@@ -17,7 +17,7 @@ from http import HTTPStatus
 from urllib.parse import urljoin
 
 
-API_BASE_URL = '/api/v1/'
+API_BASE_URL = "/api/v1/"
 
 
 def test_create_project(client):
@@ -26,23 +26,23 @@ def test_create_project(client):
         "name": "New Project",
         "description": "Testing the create project endpoint",
         "location": "Victoria, BC",
-        "sub_sector_id": 1,
+        "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
-        "region_id_flnro": 1
+        "region_id_flnro": 1,
     }
-    url = urljoin(API_BASE_URL, 'projects')
+    url = urljoin(API_BASE_URL, "projects")
     response = client.post(url, json=payload)
     assert response.status_code == HTTPStatus.CREATED
-    assert 'id' in response.json
+    assert "id" in response.json
 
 
 def test_get_projects(client):
     """Test get projects."""
-    url = urljoin(API_BASE_URL, 'projects')
+    url = urljoin(API_BASE_URL, "projects")
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
-    assert 'projects' in response.json
+    assert "projects" in response.json
 
 
 def test_update_project(client):
@@ -51,21 +51,21 @@ def test_update_project(client):
         "name": "New Project",
         "description": "Testing the create project endpoint",
         "location": "Victoria, BC",
-        "sub_sector_id": 1,
+        "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
-        "region_id_flnro": 1
+        "region_id_flnro": 1,
     }
     # Create a project
-    url = urljoin(API_BASE_URL, 'projects')
+    url = urljoin(API_BASE_URL, "projects")
     response = client.post(url, json=payload)
     # Update the project
-    payload['name'] = 'New Project Updated'
+    payload["name"] = "New Project Updated"
     url = urljoin(API_BASE_URL, f'projects/{response.json["id"]}')
     response = client.put(url, json=payload)
 
     assert response.status_code == HTTPStatus.OK
-    assert response.json['name'] == 'New Project Updated'
+    assert response.json["name"] == "New Project Updated"
 
 
 def test_delete_project(client):
@@ -74,20 +74,20 @@ def test_delete_project(client):
         "name": "New Project",
         "description": "Testing the create project endpoint",
         "location": "Victoria, BC",
-        "sub_sector_id": 1,
+        "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
-        "region_id_flnro": 1
+        "region_id_flnro": 1,
     }
     # Create a project
-    projects_url = urljoin(API_BASE_URL, 'projects')
+    projects_url = urljoin(API_BASE_URL, "projects")
     project = client.post(projects_url, json=payload)
     response = client.get(projects_url)
-    assert len(response.json['projects']) == 1
+    assert len(response.json["projects"]) == 1
     url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
     client.delete(url)
     response = client.get(projects_url)
-    assert len(response.json['projects']) == 0
+    assert len(response.json["projects"]) == 0
 
 
 def test_project_detail(client):
@@ -96,17 +96,17 @@ def test_project_detail(client):
         "name": "New Project",
         "description": "Testing the create project endpoint",
         "location": "Victoria, BC",
-        "sub_sector_id": 1,
+        "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
-        "region_id_flnro": 1
+        "region_id_flnro": 1,
     }
     # Create a project
-    projects_url = urljoin(API_BASE_URL, 'projects')
+    projects_url = urljoin(API_BASE_URL, "projects")
     project = client.post(projects_url, json=payload)
     url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
-    assert 'id' in response.json
+    assert "id" in response.json
     for key, value in payload.items():
         assert value == response.json[key]
