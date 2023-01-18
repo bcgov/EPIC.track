@@ -13,14 +13,14 @@
 # limitations under the License.
 """Model to handle all operations related to Staff."""
 
+from typing import List
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import column_property, relationship
 
-from .code_table import CodeTable
-from .db import db
+from reports_api.models.base_model import BaseModel
 
 
-class Staff(db.Model, CodeTable):
+class Staff(BaseModel):
     """Model class for Staff."""
 
     __tablename__ = 'staffs'
@@ -38,7 +38,7 @@ class Staff(db.Model, CodeTable):
 
     full_name = column_property(first_name + ", " + last_name)
 
-    def as_dict(self):
+    def as_dict(self):  # pylint: disable=arguments-differ
         """Return Json representation."""
         return {
             'id': self.id,
@@ -55,6 +55,11 @@ class Staff(db.Model, CodeTable):
     def find_active_staff_by_position(cls, position_id: int):
         """Return active staff by position id."""
         return cls.query.filter_by(position_id=position_id, is_active=True)
+
+    @classmethod
+    def find_active_staff_by_positions(cls, position_ids: List[int]):
+        """Return active staffs by position ids."""
+        return cls.query.filter(Staff.position_id.in_(position_ids), Staff.is_active.is_(True))
 
     @classmethod
     def find_all_active_staff(cls):

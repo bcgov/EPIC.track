@@ -34,6 +34,18 @@ class StaffService:
         return response
 
     @classmethod
+    def find_by_position_ids(cls, position_ids):
+        """Find staff by position."""
+        current_app.logger.debug(f'Find staff by positions : {position_ids}')
+
+        response = {'staffs': []}
+        for row in Staff.find_active_staff_by_positions(position_ids):
+            response['staffs'].append(row.as_dict())
+
+        current_app.logger.debug('>find_code_values_by_type')
+        return response
+
+    @classmethod
     def find_all_active_staff(cls):
         """Find all staffs."""
         response = {'staffs': []}
