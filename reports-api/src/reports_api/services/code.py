@@ -26,8 +26,8 @@ class CodeService:
     def find_code_values_by_type(
             cls,
             code_type: str,
-            filters: dict
-    ):
+            filters: dict = {}
+    ):  # pylint: disable=dangerous-default-value
         """Find code values by code type."""
         current_app.logger.debug(f'<find_code_values_by_type : {code_type}')
         model: CodeTable = find_model_from_table_name(code_type)
