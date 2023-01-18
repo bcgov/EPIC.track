@@ -13,6 +13,7 @@
 # limitations under the License.
 """Resource for code endpoints."""
 from http import HTTPStatus
+from flask import request
 
 from flask_restx import Namespace, Resource, cors
 
@@ -34,10 +35,11 @@ class Codes(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get(code_type):
         """Return all codes based on code_type."""
-        return CodeService.find_code_values_by_type(code_type), HTTPStatus.OK
+        filters = dict(request.args)
+        return CodeService.find_code_values_by_type(code_type, filters), HTTPStatus.OK
 
 
 @cors_preflight('GET')
