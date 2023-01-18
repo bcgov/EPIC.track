@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model to handle all operations related to Sector."""
+"""Model to handle all operations related to Types."""
 
 from sqlalchemy import Column, Integer, String
 
@@ -19,12 +19,12 @@ from .code_table import CodeTable
 from .db import db
 
 
-class Sector(db.Model, CodeTable):
-    """Model class for Sector."""
+class Type(db.Model, CodeTable):
+    """Model class for Types."""
 
-    __tablename__ = 'sectors'
+    __tablename__ = 'types'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = Column(Integer, primary_key=True, autoincrement=True)
     short_name = Column(String())
 
     def as_dict(self):
