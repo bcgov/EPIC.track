@@ -32,6 +32,7 @@ class CodeService:
         current_app.logger.debug(f'<find_code_values_by_type : {code_type}')
         model: CodeTable = find_model_from_table_name(code_type)
         response = {'codes': []}
+        filters = {k: v for k, v in filters.items() if hasattr(model, k)}
         for row in model.query.filter_by(**filters):
             response['codes'].append(row.as_dict())
 

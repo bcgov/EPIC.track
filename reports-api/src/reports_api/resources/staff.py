@@ -14,7 +14,7 @@
 """Resource for staff endpoints."""
 from http import HTTPStatus
 
-from flask import request
+from flask import current_app
 from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import StaffService
@@ -25,8 +25,9 @@ from reports_api.utils.util import cors_preflight
 
 API = Namespace('staffs', description='Staffs')
 
-parser = reqparse.RequestParser()
-parser.add_argument("positions", type=int, action="split")
+parser = reqparse.RequestParser(bundle_errors=True)
+parser.add_argument("positions", type=int, action="split", location='args')
+parser.add_argument("position", type=int, location='args')
 
 
 @cors_preflight('GET')
@@ -42,12 +43,15 @@ class Staffs(Resource):
     @API.expect(parser)
     def get():
         """Return all active staffs."""
-        position_id = request.args.get('position', None)
+        current_app.logger.info("Getting staffs")
+        position_id = parser.parse_args()["position"]
+        current_app.logger.info(f'Position id is {position_id}')
         if position_id:
             return StaffService.find_by_position_id(position_id), HTTPStatus.OK
         positions = parser.parse_args()["positions"]
+        current_app.logger.info(f'Position ids are {positions}')
         if positions:
-            return StaffService.find_by_position_ids(parser.parse_args()["positions"]), HTTPStatus.OK
+            return StaffService.find_by_position_ids(positions), HTTPStatus.OK
         return StaffService.find_all_active_staff(), HTTPStatus.OK
 
 
