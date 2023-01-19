@@ -16,6 +16,7 @@
 This module is the API for the EAO Reports system.
 """
 
+import logging
 import os
 
 from flask import Flask
@@ -36,6 +37,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
+    app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
 
     db.init_app(app)
 
