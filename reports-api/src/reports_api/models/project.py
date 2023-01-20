@@ -26,6 +26,7 @@ class Project(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String())
+    project_tracking_number= Column(String(), nullable=True, default=None)
     description = Column(String())
     location = Column(String())
     capital_investment = Column(Float())
