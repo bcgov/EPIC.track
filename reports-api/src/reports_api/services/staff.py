@@ -35,7 +35,7 @@ class StaffService:
 
     @classmethod
     def find_by_position_ids(cls, position_ids):
-        """Find staff by position."""
+        """Find staffs by position ids."""
         current_app.logger.debug(f'Find staff by positions : {position_ids}')
 
         response = {'staffs': []}

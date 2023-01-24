@@ -65,7 +65,7 @@ class Milestone(BaseModel):
         milestones = cls.query.filter_by(phase_id=_phase_id).order_by(
             Milestone.sort_order.asc(), Milestone.id.asc()).all()
         # first and last items should not be returned as it is already autopopulated as events
-        return milestones[1:len(milestones) - 1]
+        return milestones
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Returns JSON representation"""

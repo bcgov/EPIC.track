@@ -29,42 +29,42 @@ from reports_api.models import Project, Staff
 from reports_api.models import db as _db
 
 
-@pytest.fixture(scope='session', autouse=True)
+@pytest.fixture(scope="session", autouse=True)
 def app():
     """Return a session-wide application configured in TEST mode."""
-    _app = create_app('testing')
+    _app = create_app("testing")
 
     return _app
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def app_request():
     """Return a session-wide application configured in TEST mode."""
-    _app = create_app('testing')
+    _app = create_app("testing")
 
     return _app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client(app):  # pylint: disable=redefined-outer-name
     """Return a session-wide Flask test client."""
     return app.test_client()
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def jwt(app):
     """Return session-wide jwt manager."""
     return _jwt
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def client_ctx(app):
     """Return session-wide Flask test client."""
     with app.test_client() as _client:
         yield _client
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
@@ -87,10 +87,10 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         sess = _db.session()
         for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
             try:
-                sess.execute(text('DROP SEQUENCE public.%s ;' % seq))
-                print('DROP SEQUENCE public.%s ' % seq)
+                sess.execute(text("DROP SEQUENCE public.%s ;" % seq))
+                print("DROP SEQUENCE public.%s " % seq)
             except Exception as err:  # NOQA pylint: disable=broad-except
-                print(f'Error: {err}')
+                print(f"Error: {err}")
         sess.commit()
 
         # ############################################
@@ -108,7 +108,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         return _db
 
 
-@pytest.fixture(scope='function', autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a function-scoped session."""
     with app.app_context():
@@ -122,17 +122,19 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
         sess.begin_nested()
 
-        @event.listens_for(sess(), 'after_transaction_end')
+        @event.listens_for(sess(), "after_transaction_end")
         def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
             # Detecting whether this is indeed the nested transaction of the test
-            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
+            if (
+                trans.nested and not trans._parent.nested
+            ):  # pylint: disable=protected-access
                 # Handle where test DOESN'T session.commit(),
                 sess2.expire_all()
                 sess.begin_nested()
 
         db.session = sess
 
-        sql = text('select 1')
+        sql = text("select 1")
         sess.execute(sql)
 
         yield sess
@@ -144,7 +146,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         conn.close()
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def future(event_loop):
     """Return a future that is used for managing function tests."""
     _future = asyncio.Future(loop=event_loop)
@@ -169,41 +171,46 @@ def create_mock_coro(mocker, monkeypatch):
     return _create_mock_patch_coro
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def docker_compose_files(pytestconfig):
     """Get the docker-compose.yml absolute path."""
     import os
+
     return [
-        os.path.join(str(pytestconfig.rootdir), 'tests/docker', 'docker-compose.yml')
+        os.path.join(str(pytestconfig.rootdir), "tests/docker", "docker-compose.yml")
     ]
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def new_project():
     """Create new project."""
-    project = Project(**{
-        "name": "New Project",
-        "description": "Testing the create project endpoint",
-        "location": "Victoria, BC",
-        "sub_sector_id": 1,
-        "proponent_id": 1,
-        "region_id_env": 1,
-        "region_id_flnro": 1
-    })
+    project = Project(
+        **{
+            "name": "New Project",
+            "description": "Testing the create project endpoint",
+            "location": "Victoria, BC",
+            "sub_type_id": 1,
+            "proponent_id": 1,
+            "region_id_env": 1,
+            "region_id_flnro": 1,
+        }
+    )
     project = project.save()
     return project
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def new_staff():
     """Create new staff."""
-    staff = Staff(**{
-        "first_name": "Andrew",
-        "last_name": "Drew",
-        "phone": "1111111111",
-        "email": "andrew@test.com",
-        "position_id": 3
-    })
+    staff = Staff(
+        **{
+            "first_name": "Andrew",
+            "last_name": "Drew",
+            "phone": "1111111111",
+            "email": "andrew@test.com",
+            "position_id": 3,
+        }
+    )
     # staff = staff.save()
     _db.session.add(staff)
     _db.session.commit()
@@ -213,10 +220,12 @@ def new_staff():
 
 def mock_decorator(f, *args, **kwargs):
     """Function to mock a decorator. Used to mock auth.require"""
+
     @wraps(f)
     def decorated_function(*args, **kwargs):
         return f(*args, **kwargs)
+
     return decorated_function
 
 
-patch('reports_api.utils.auth.require', mock_decorator, spec=True).start()
+patch("reports_api.utils.auth.require", mock_decorator, spec=True).start()

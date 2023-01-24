@@ -13,6 +13,7 @@
 # limitations under the License.
 """Test suite for sync form data."""
 
+from datetime import datetime
 from http import HTTPStatus
 
 
@@ -35,7 +36,8 @@ def test_sync_form_data_create(client, new_project, new_staff):
             "eao_team_id": 1
         },
         "works-work_statuses": {
-            "status_text": "Testing foreign key entry creation"
+            "status_text": "Testing foreign key entry creation",
+            "posted_date": datetime.now().date()
         }
     }
     result = client.post(API_URL, json=payload)
@@ -58,7 +60,8 @@ def test_sync_form_data_update(client, new_project, new_staff):
             "eao_team_id": 1
         },
         "works-work_statuses": {
-            "status_text": "Testing foreign key entry creation"
+            "status_text": "Testing foreign key entry creation",
+            "posted_date": datetime.now().date()
         }
     }
     new = client.post(API_URL, json=new_payload).json

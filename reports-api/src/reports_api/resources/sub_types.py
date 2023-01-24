@@ -17,28 +17,31 @@ from http import HTTPStatus
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.services import SubSectorService
+from reports_api.services import SubTypeService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace('sub-sectors', description='SubSectors')
+API = Namespace("sub-types", description="SubTypes")
 
 
-@cors_preflight('GET')
-@API.route('', methods=['GET', 'OPTIONS'])
-class SubSectors(Resource):
-    """Endpoint resource to return sub sectors based on sector id"""
+@cors_preflight("GET")
+@API.route("", methods=["GET", "OPTIONS"])
+class SubTypes(Resource):
+    """Endpoint resource to return sub types based on type id"""
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
-        """Return all sub_sectors based on sector_id."""
-        sector_id = request.args.get('sector_id', None)
-        if sector_id is None:
-            return jsonify({'message': 'Sector ID is missing in URL parameters'}), HTTPStatus.BAD_REQUEST
-        return SubSectorService.find_by_sector_id(sector_id), HTTPStatus.OK
+        """Return all sub_types based on type_id."""
+        type_id = request.args.get("type_id", None)
+        if type_id is None:
+            return (
+                jsonify({"message": "Type ID is missing in URL parameters"}),
+                HTTPStatus.BAD_REQUEST,
+            )
+        return SubTypeService.find_by_type_id(type_id), HTTPStatus.OK
