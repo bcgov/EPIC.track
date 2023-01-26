@@ -9,6 +9,7 @@ export class ProjectFormData extends FormDataBase {
 }
 export class Project {
     id: string = "";
+    project_tracking_number: string;
     name: string = "";
     proponent_id: string = "";
     sector_id: string = "";
@@ -28,7 +29,9 @@ export class Project {
     /**
      *
      */
-    constructor(name: string
+    constructor(
+        project_tracking_number: string
+        ,name: string
         ,proponent_id: string
         ,sector_id: string
         ,sub_sector_id: string
@@ -45,6 +48,7 @@ export class Project {
         ,ea_certificate: string
         ,is_project_closed: boolean) {
         this.name = name;
+        this.project_tracking_number = project_tracking_number;
         this.proponent_id = proponent_id;
         this.sector_id = sector_id;
         this.sub_sector_id = sub_sector_id;

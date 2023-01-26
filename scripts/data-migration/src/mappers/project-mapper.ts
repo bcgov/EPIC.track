@@ -7,8 +7,8 @@ import { Project, ProjectFormData } from "../form-data/project-formdata";
 
 export default class ProjectMapper extends MapperBase {
     private regions: any[] = [];
-    private sectors: any[] = [];
-    private subsectors: any[] = [];
+    private types: any[] = [];
+    private subtypes: any[] = [];
     private proponents: any[] = [];
     private lookupRepository: LookupRepository;
     constructor(file: string, lookupRepository: LookupRepository) {
@@ -16,47 +16,50 @@ export default class ProjectMapper extends MapperBase {
         this.file = file;
         this.lookupRepository = lookupRepository;
         this.schema = {
+            'Project Tracking Number': {
+                prop: 'project_tracking_number'
+            },
             'Name': {
                 prop: 'name'
             },
             'Proponent': {
                 prop: 'proponent',
             },
-            'Sector': {
-                prop: 'sector'
+            'Type': {
+                prop: 'type'
             },
-            'Subsector': {
-                prop: 'subsector'
+            'Sub-Type': {
+                prop: 'subtype'
             },
             'Description': {
                 prop: 'description'
             },
-            'Address': {
+            'Location': {
                 prop: 'address'
             },
-            'Latitude': {
+            'LAT': {
                 prop: 'latitude'
             },
-            'Longitude': {
+            'LONG': {
                 prop: 'longitude'
             },
-            'ENVRegion': {
+            'Region (ENV)': {
                 prop: 'env_region'
             },
-            'FLNRORegion': {
+            'Region (FLNRO)': {
                 prop: 'flnro_region'
             },
             'Capital Investment': {
                 prop: 'capital_investment'
             },
-            'EPIC Guid': {
+            'EPIC GUID': {
                 prop: 'epic_guid'
             },
             'Abbreviation': {
                 prop: 'abbreviation'
             },
-            'EACertificate': {
-                prop: 'abbreviation'
+            'EAC Number': {
+                prop: 'ea_certificate'
             },
             'Project Closed': {
                 prop: 'project_closed'
@@ -66,25 +69,33 @@ export default class ProjectMapper extends MapperBase {
     }
     async map(): Promise<FormDataBase[]> {
         await this.lookupRepository.init();
-        this.sectors = this.lookupRepository.getDataBySheet(Sheetnames.SECTORS); 
-        this.subsectors = this.lookupRepository.getDataBySheet(Sheetnames.SUBSECTORS); 
+        this.types = this.lookupRepository.getDataBySheet(Sheetnames.TYPES); 
+        this.subtypes = this.lookupRepository.getDataBySheet(Sheetnames.SUBTYPES); 
         this.regions = this.lookupRepository.getDataBySheet(Sheetnames.REGIONS); 
-        this.proponents = this.lookupRepository.getDataBySheet(Sheetnames.PROPONETS);       
+        this.proponents = this.lookupRepository.getDataBySheet(Sheetnames.PROPONETS);   
         let excelProjects = await this.mapFile(this.file, this.schema).catch(errors => {
             throw Error(`Schema mismatch. Make sure the given template is followed correctly. Error: ${JSON.stringify(errors)}`);
         });
         let mapped_data:any[] = [];
+        let index = 1;
         for(let project of excelProjects) {
-            const sector = this.sectors.filter(p=> p.name === project.sector)[0];
-            const subsector = this.subsectors.filter(p=> p.name === project.subsector)[0];
+            console.log(index);
+            const type = this.types.filter(p=> p.name === project.type)[0];
+            console.log(type);
+            const subtype = this.subtypes.filter(p=> p.name === project.subtype)[0];
+            console.log(subtype);
             const envRegion = this.regions.filter(p=> p.name === project.env_region && p.entity === 'ENV')[0];
+            console.log(envRegion);
             const flnroRegion = this.regions.filter(p=> p.name === project.flnro_region && p.entity === 'FLNR')[0];
+            console.log(flnroRegion);
             const proponent = this.proponents.filter(p=> p.name === project.proponent)[0];
+            console.log(proponent);
             const projectData = new Project(
-                project.name
+                project.project_tracking_number
+                ,project.name
                 ,proponent.id
-                ,sector.id
-                ,subsector.id
+                ,type.id
+                ,subtype.id
                 ,project.description
                 ,project.address
                 ,project.latitude
@@ -102,6 +113,7 @@ export default class ProjectMapper extends MapperBase {
             mapped_data.push({
                 data: projectFormData
             });
+            index++;
         }
         console.log('Project mapped data',JSON.stringify(mapped_data));
         return mapped_data;

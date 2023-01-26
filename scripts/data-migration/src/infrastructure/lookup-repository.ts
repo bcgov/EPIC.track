@@ -118,17 +118,17 @@ export default class LookupRepository {
                 'entity': { prop: 'entity' }
             }
         },{
-            sheet: Sheetnames.SECTORS,
+            sheet: Sheetnames.TYPES,
             schema: {
                 ...this.masterSchema,
                 'short_name': { prop: 'short_name' }
             }
         },{
-            sheet: Sheetnames.SUBSECTORS,
+            sheet: Sheetnames.SUBTYPES,
             schema: {
                 ...this.masterSchema,
                 'short_name': { prop: 'short_name' },
-                'sector': { prop: 'sector' }
+                'type': { prop: 'type' }
             }
         },{
             sheet: Sheetnames.PROPONETS,

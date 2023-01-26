@@ -14,7 +14,7 @@ export default class Sheetnames {
     static TEAMS = 'Teams';
     static OUTCOMES = 'Outcomes';
     static REGIONS = 'Regions';
-    static SECTORS = 'Sectors';
-    static SUBSECTORS = 'Subsectors';
+    static TYPES = 'Types';
+    static SUBTYPES = 'SubTypes';
     static PROPONETS = 'Proponents';
 }

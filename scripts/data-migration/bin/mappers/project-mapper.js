@@ -19,53 +19,56 @@ class ProjectMapper extends mapper_base_1.default {
     constructor(file, lookupRepository) {
         super();
         this.regions = [];
-        this.sectors = [];
-        this.subsectors = [];
+        this.types = [];
+        this.subtypes = [];
         this.proponents = [];
         this.file = file;
         this.lookupRepository = lookupRepository;
         this.schema = {
+            'Project Tracking Number': {
+                prop: 'project_tracking_number'
+            },
             'Name': {
                 prop: 'name'
             },
             'Proponent': {
                 prop: 'proponent',
             },
-            'Sector': {
-                prop: 'sector'
+            'Type': {
+                prop: 'type'
             },
-            'Subsector': {
-                prop: 'subsector'
+            'Sub-Type': {
+                prop: 'subtype'
             },
             'Description': {
                 prop: 'description'
             },
-            'Address': {
+            'Location': {
                 prop: 'address'
             },
-            'Latitude': {
+            'LAT': {
                 prop: 'latitude'
             },
-            'Longitude': {
+            'LONG': {
                 prop: 'longitude'
             },
-            'ENVRegion': {
+            'Region (ENV)': {
                 prop: 'env_region'
             },
-            'FLNRORegion': {
+            'Region (FLNRO)': {
                 prop: 'flnro_region'
             },
             'Capital Investment': {
                 prop: 'capital_investment'
             },
-            'EPIC Guid': {
+            'EPIC GUID': {
                 prop: 'epic_guid'
             },
             'Abbreviation': {
                 prop: 'abbreviation'
             },
-            'EACertificate': {
-                prop: 'abbreviation'
+            'EAC Number': {
+                prop: 'ea_certificate'
             },
             'Project Closed': {
                 prop: 'project_closed'
@@ -75,25 +78,33 @@ class ProjectMapper extends mapper_base_1.default {
     map() {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.lookupRepository.init();
-            this.sectors = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.SECTORS);
-            this.subsectors = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.SUBSECTORS);
+            this.types = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.TYPES);
+            this.subtypes = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.SUBTYPES);
             this.regions = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.REGIONS);
             this.proponents = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.PROPONETS);
             let excelProjects = yield this.mapFile(this.file, this.schema).catch(errors => {
                 throw Error(`Schema mismatch. Make sure the given template is followed correctly. Error: ${JSON.stringify(errors)}`);
             });
             let mapped_data = [];
+            let index = 1;
             for (let project of excelProjects) {
-                const sector = this.sectors.filter(p => p.name === project.sector)[0];
-                const subsector = this.subsectors.filter(p => p.name === project.subsector)[0];
+                console.log(index);
+                const type = this.types.filter(p => p.name === project.type)[0];
+                console.log(type);
+                const subtype = this.subtypes.filter(p => p.name === project.subtype)[0];
+                console.log(subtype);
                 const envRegion = this.regions.filter(p => p.name === project.env_region && p.entity === 'ENV')[0];
+                console.log(envRegion);
                 const flnroRegion = this.regions.filter(p => p.name === project.flnro_region && p.entity === 'FLNR')[0];
+                console.log(flnroRegion);
                 const proponent = this.proponents.filter(p => p.name === project.proponent)[0];
-                const projectData = new project_formdata_1.Project(project.name, proponent.id, sector.id, subsector.id, project.description, project.address, project.latitude, project.longitude, `${project.latitude},${project.longitude}`, envRegion.id, flnroRegion.id, project.capital_investment, project.epic_guid, project.abbreviation, project.ea_certificate, project.project_closed);
+                console.log(proponent);
+                const projectData = new project_formdata_1.Project(project.project_tracking_number, project.name, proponent.id, type.id, subtype.id, project.description, project.address, project.latitude, project.longitude, `${project.latitude},${project.longitude}`, envRegion.id, flnroRegion.id, project.capital_investment, project.epic_guid, project.abbreviation, project.ea_certificate, project.project_closed);
                 const projectFormData = new project_formdata_1.ProjectFormData(projectData);
                 mapped_data.push({
                     data: projectFormData
                 });
+                index++;
             }
             console.log('Project mapped data', JSON.stringify(mapped_data));
             return mapped_data;

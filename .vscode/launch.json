@@ -4,16 +4,20 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    {
-        "name": "Load Excel Data",
-        "program": "${workspaceFolder}/scripts/data-migration/bin/index.js",
-        "request": "launch",
-        "skipFiles": [
-            "<node_internals>/**"
-        ],
-        "type": "node",
-        "args": ["--type=work", "--file=./scripts/data-migration/data/Work.xlsx", "--env=dev"]
-    },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Debug Data Migration",
+            "program": "${workspaceFolder}/scripts/data-migration/src/index.ts",
+            "args": ["--type=project","--env=dev"],
+            "preLaunchTask": "npm: build",
+            "sourceMaps": true,
+            "smartStep": true,
+            "internalConsoleOptions": "openOnSessionStart",
+            "outFiles": [
+                "${workspaceFolder}/scripts/data-migration/bin/**/*.js"
+            ]
+          },
         {
             "name": "ReportsAPI",
             "type": "python",

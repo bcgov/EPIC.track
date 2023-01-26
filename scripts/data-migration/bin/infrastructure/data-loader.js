@@ -22,19 +22,18 @@ class DataLoader {
     load() {
         return __awaiter(this, void 0, void 0, function* () {
             const mappedData = yield this.mapper.map();
-            const accessToken = yield this.fetchToken();
-            const formIOToken = yield this.fetchFormIOToken(accessToken);
-            console.log(formIOToken);
-            if (mappedData && mappedData.length > 0) {
-                for (let i = 0; i < mappedData.length; i++) {
-                    const formData = mappedData[i];
-                    const submissionResponse = yield this.submitFormData(accessToken, formIOToken, formData);
-                    yield this.createApplication(submissionResponse.submissionId, submissionResponse.formId, accessToken);
-                }
-            }
-            else {
-                throw Error('No data to be loaded. Either the input excel was empty or the mapping failed');
-            }
+            // const accessToken = await this.fetchToken();
+            // const formIOToken = await this.fetchFormIOToken(accessToken);
+            // console.log(formIOToken);
+            // if (mappedData && mappedData.length > 0) {
+            //     for (let i = 0; i < mappedData.length; i++) {
+            //         const formData = mappedData[i];
+            //         const submissionResponse = await this.submitFormData(accessToken, formIOToken, formData);
+            //         await this.createApplication(submissionResponse.submissionId, submissionResponse.formId, accessToken)
+            //     }
+            // } else {
+            //     throw Error('No data to be loaded. Either the input excel was empty or the mapping failed');
+            // }
         });
     }
     fetchToken() {

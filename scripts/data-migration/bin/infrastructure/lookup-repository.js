@@ -91,11 +91,11 @@ class LookupRepository {
                 sheet: sheetnames_const_1.default.REGIONS,
                 schema: Object.assign(Object.assign({}, this.masterSchema), { 'entity': { prop: 'entity' } })
             }, {
-                sheet: sheetnames_const_1.default.SECTORS,
+                sheet: sheetnames_const_1.default.TYPES,
                 schema: Object.assign(Object.assign({}, this.masterSchema), { 'short_name': { prop: 'short_name' } })
             }, {
-                sheet: sheetnames_const_1.default.SUBSECTORS,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'short_name': { prop: 'short_name' }, 'sector': { prop: 'sector' } })
+                sheet: sheetnames_const_1.default.SUBTYPES,
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'short_name': { prop: 'short_name' }, 'type': { prop: 'type' } })
             }, {
                 sheet: sheetnames_const_1.default.PROPONETS,
                 schema: Object.assign({}, this.masterSchema)

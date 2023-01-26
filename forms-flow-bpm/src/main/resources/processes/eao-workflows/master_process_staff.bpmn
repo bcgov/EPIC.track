@@ -49,14 +49,15 @@ task.execution.setVariable('deleteReason', "completed");</camunda:script>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:task id="Activity_0ndaj" name="Report API" camunda:asyncBefore="true">
+    <bpmn:serviceTask id="Activity_0ndaj" name="Report API" camunda:asyncBefore="true">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
+        <camunda:failedJobRetryTimeCycle>PT</camunda:failedJobRetryTimeCycle>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_02pa8</bpmn:incoming>
       <bpmn:incoming>Flow_1ossa</bpmn:incoming>
+      <bpmn:incoming>Flow_02pa8</bpmn:incoming>
       <bpmn:outgoing>Flow_0ygn0j</bpmn:outgoing>
-    </bpmn:task>
+    </bpmn:serviceTask>
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Master_Staffs">
@@ -95,7 +96,7 @@ task.execution.setVariable('deleteReason', "completed");</camunda:script>
       <bpmndi:BPMNShape id="Event_0vv2sj6_di" bpmnElement="Event_vv2sj6">
         <dc:Bounds x="592" y="182" width="36" height="36" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_0zinqwr_di" bpmnElement="Activity_0ndaj">
+      <bpmndi:BPMNShape id="Activity_1fvzdfy_di" bpmnElement="Activity_0ndaj">
         <dc:Bounds x="250" y="140" width="100" height="80" />
       </bpmndi:BPMNShape>
     </bpmndi:BPMNPlane>
