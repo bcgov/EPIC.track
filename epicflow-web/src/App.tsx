@@ -1,9 +1,15 @@
 import React from 'react';
 import logo from './logo.svg';
-import './App.css';
+import "./App.styles.scss";
+import Button from '@mui/material/Button';
+import Section from '@mui/material/Card';
+const styles = require('./App.scss');
 
-function App() {
+const  App = () => {
+  const click = () => console.log('clicked');
+  console.log('STYLES STYLES',styles);
   return (
+   
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
@@ -13,14 +19,19 @@ function App() {
         <a
           className="App-link"
           href="https://reactjs.org"
-          target="_blank"
+          
           rel="noopener noreferrer"
         >
           Learn React
         </a>
+        <Button variant="contained" onClick={click}>Hello World</Button>
+        <Section >
+          This is a sample section from Material
+        </Section>
       </header>
     </div>
   );
 }
+
 
 export default App;
