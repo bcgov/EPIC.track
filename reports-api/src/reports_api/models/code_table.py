@@ -12,8 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Base class for code model."""
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
 from sqlalchemy.ext.declarative import declared_attr
+
 from .db import db
 
 
@@ -22,6 +23,13 @@ class CodeTable():  # pylint: disable=too-few-public-methods
 
     id = Column(Integer(), primary_key=True, autoincrement=True)
     name = Column(String(250))
+
+    created_by = Column(String(255), default=None, nullable=True)
+    created_at = Column(DateTime, server_default=func.now())
+    updated_by = Column(String(255), default=None, nullable=True)
+    updated_at = Column(DateTime, onupdate=func.now())
+    is_active = Column(Boolean, default=True, server_default='t')
+    is_deleted = Column(Boolean, default=False, server_default='f')
 
     @declared_attr
     def id(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
@@ -32,6 +40,36 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     def name(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code name."""
         return Column(String)
+
+    @declared_attr
+    def created_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return code created by."""
+        return Column(String)
+
+    @declared_attr
+    def created_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return code created timestamp."""
+        return Column(DateTime)
+
+    @declared_attr
+    def updated_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return code updated  by."""
+        return Column(String)
+
+    @declared_attr
+    def updated_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return code updated timestamp."""
+        return Column(DateTime)
+
+    @declared_attr
+    def is_active(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return code active status."""
+        return Column(Boolean)
+
+    @declared_attr
+    def is_deleted(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return code deleted status."""
+        return Column(Boolean)
 
     @classmethod
     def find_by_id(cls, _id):
