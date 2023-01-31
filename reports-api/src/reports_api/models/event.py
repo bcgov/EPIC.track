@@ -42,10 +42,12 @@ class Event(BaseModel):
     work_id = Column(ForeignKey('works.id'), nullable=False)
     milestone_id = Column(ForeignKey('milestones.id'), nullable=False)
     outcome_id = Column(ForeignKey('outcomes.id'), nullable=True, default=None)
+    decision_by_id = Column(ForeignKey('staffs.id'), nullable=True, default=None)
 
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     milestone = relationship('Milestone', foreign_keys=[milestone_id], lazy='select')
     outcome = relationship('Outcome', foreign_keys=[outcome_id], lazy='select')
+    decision_by = relationship('Staff', foreign_keys=[decision_by_id], lazy='select')
 
     def as_dict(self, recursive=True):
         """Return Json representation."""
