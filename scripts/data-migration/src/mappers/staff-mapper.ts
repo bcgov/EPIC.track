@@ -45,6 +45,7 @@ export default class StaffMapper extends MapperBase {
         let mapped_data: any[] = [];
         for (let staff of excelStaffs) {
             const position = this.positions.filter(p => p.name === staff.position)[0];
+            console.log(staff.position);
             const staffData = new Staff(
                 staff.first_name
                 , staff.last_name

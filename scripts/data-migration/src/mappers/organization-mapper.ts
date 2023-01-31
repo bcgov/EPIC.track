@@ -27,7 +27,6 @@ export default class OrganizationMapper extends MapperBase {
     async map(): Promise<FormDataBase[]> {
         await this.lookupRepository.init();
         this.staffs = this.lookupRepository.getDataBySheet(Sheetnames.STAFFS);
-        console.log('STAFFS: ',JSON.stringify(this.staffs));
         let excelRows = await this.mapFile(this.file, this.schema).catch(errors => {
             throw Error(`Schema mismatch. Make sure the given template is followed correctly. Error: ${JSON.stringify(errors)}`);
         });

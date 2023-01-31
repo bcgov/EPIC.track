@@ -22,18 +22,22 @@ class DataLoader {
     load() {
         return __awaiter(this, void 0, void 0, function* () {
             const mappedData = yield this.mapper.map();
-            // const accessToken = await this.fetchToken();
-            // const formIOToken = await this.fetchFormIOToken(accessToken);
-            // console.log(formIOToken);
-            // if (mappedData && mappedData.length > 0) {
-            //     for (let i = 0; i < mappedData.length; i++) {
-            //         const formData = mappedData[i];
-            //         const submissionResponse = await this.submitFormData(accessToken, formIOToken, formData);
-            //         await this.createApplication(submissionResponse.submissionId, submissionResponse.formId, accessToken)
-            //     }
-            // } else {
-            //     throw Error('No data to be loaded. Either the input excel was empty or the mapping failed');
-            // }
+            console.log('MAPPED EXCEL DATA: ', JSON.stringify(mappedData));
+            const accessToken = yield this.fetchToken();
+            const formIOToken = yield this.fetchFormIOToken(accessToken);
+            if (mappedData && mappedData.length > 0) {
+                for (let i = 0; i < mappedData.length; i++) {
+                    console.log('STARTED PROCESSING INDEX: ', i);
+                    const formData = mappedData[i];
+                    const submissionResponse = yield this.submitFormData(accessToken, formIOToken, formData);
+                    console.log('FORM SUBMISSION COMPLETED FOR REACORD AT INDEX: ', i);
+                    const appCreateResponse = yield this.createApplication(submissionResponse.submissionId, submissionResponse.formId, accessToken);
+                    console.log('APPLICATION CREATED FOR RECORD AT INDEX: ', i, appCreateResponse);
+                }
+            }
+            else {
+                throw Error('No data to be loaded. Either the input excel was empty or the mapping failed');
+            }
         });
     }
     fetchToken() {

@@ -6,8 +6,8 @@ export default class LookupRepository {
     private sheetConfig: any[] = [];
     private excelRows: any = {};
     private masterSchema: any = {
-        'id': { prop: 'id' },
-        'name': { prop: 'name' }
+        'Id': { prop: 'id' },
+        'Name': { prop: 'name' }
     };
     constructor(env: string) {
         this.file = `./templates/LookUps_${env.toLowerCase()}.xlsx`;
@@ -41,9 +41,11 @@ export default class LookupRepository {
             sheet: Sheetnames.STAFFS,
             schema: {
                 ...this.masterSchema,
-                'phone': { prop: 'phone' },
-                'email': { prop: 'email' },
-                'position': { prop: 'position' }
+                'First Name': {prop: 'firstname'},
+                'Last Name': {prop: 'lastname'},
+                'Phone': { prop: 'phone' },
+                'Email': { prop: 'email' },
+                'Position': { prop: 'position' }
             }
         }, {
             sheet: Sheetnames.INDIGENOUS_NATIONS,
@@ -64,17 +66,17 @@ export default class LookupRepository {
             sheet: Sheetnames.PROJECTS,
             schema: {
                 ...this.masterSchema,
-                'description': { prop: 'description' },
-                'location': { prop: 'location' },
-                'address': { prop: 'address' },
-                'proponent_name': { prop: 'proponent_name' },
-                'sub_sector_name': { prop: 'sub_sector_name' }
+                'Description': { prop: 'description' },
+                'Location': { prop: 'location' },
+                'Address': { prop: 'address' },
+                'Proponent Name': { prop: 'proponent_name' },
+                'Sub Type Name': { prop: 'sub_type_name' }
             }
         },{
             sheet: Sheetnames.MINISTRIES,
             schema: {
                 ...this.masterSchema,
-                'abbreviation': { prop: 'abbreviation' }
+                'Abbreviation': { prop: 'abbreviation' }
             }
         },{
             sheet: Sheetnames.FEDERAL_INVOLVEMENTS,
@@ -83,21 +85,21 @@ export default class LookupRepository {
             sheet: Sheetnames.PHASES,
             schema: {
                 ...this.masterSchema,
-                'duration': { prop: 'duration' },
-                'legislated': { prop: 'legislated' },
-                'work_type': { prop: 'work_type' },
-                'ea_act': { prop: 'ea_act' }
+                'Duration': { prop: 'duration' },
+                'Legislated': { prop: 'legislated' },
+                'Work_type': { prop: 'work_type' },
+                'Ea Act': { prop: 'ea_act' }
             }
         },{
             sheet: Sheetnames.MILESTONES,
             schema: {
                 ...this.masterSchema,
-                'start_at': { prop: 'start_at' },
-                'duration': { prop: 'duration' },
-                'kind': { prop: 'kind' },
-                'auto': { prop: 'auto' },
-                'milestone_type': { prop: 'milestone_type' },
-                'phase_name': { prop: 'phase_name' }
+                'Start At': { prop: 'start_at' },
+                'Duration': { prop: 'duration' },
+                'Kind': { prop: 'kind' },
+                'Auto': { prop: 'auto' },
+                'Milestone Type': { prop: 'milestone_type' },
+                'Phase Name': { prop: 'phase_name' }
             }
         },{
             sheet: Sheetnames.TEAMS,
@@ -108,27 +110,27 @@ export default class LookupRepository {
             sheet: Sheetnames.OUTCOMES,
             schema: {
                 ...this.masterSchema,
-                'milestone': { prop: 'milestone' },
-                'terminates_work': { prop: 'terminates_work' }
+                'Milestone': { prop: 'milestone' },
+                'Terminates Work': { prop: 'terminates_work' }
             }
         },{
             sheet: Sheetnames.REGIONS,
             schema: {
                 ...this.masterSchema,
-                'entity': { prop: 'entity' }
+                'Entity': { prop: 'entity' }
             }
         },{
             sheet: Sheetnames.TYPES,
             schema: {
                 ...this.masterSchema,
-                'short_name': { prop: 'short_name' }
+                'Short Name': { prop: 'short_name' }
             }
         },{
             sheet: Sheetnames.SUBTYPES,
             schema: {
                 ...this.masterSchema,
-                'short_name': { prop: 'short_name' },
-                'type': { prop: 'type' }
+                'Short Name': { prop: 'short_name' },
+                'Type': { prop: 'type' }
             }
         },{
             sheet: Sheetnames.PROPONETS,

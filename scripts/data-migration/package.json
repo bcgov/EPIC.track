@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Migrate excel based data to the EPICFLOW system",
   "main": "script.js",
-  "type": "module",
   "scripts": {
     "start": "node bin/index.js",
     "prestart": "npm run build",

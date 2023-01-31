@@ -4,7 +4,7 @@ export default class Sheetnames {
     static INDIGENOUS_NATIONS = 'Indigenous Nations';
     static INDIGENOUS_CATEGORY = 'Indigenous Categories';
     static ROLES = 'Roles';
-    static EAACTS = 'EAActs';
+    static EAACTS = 'Ea Acts';
     static WORK_TYPES = 'Work Types';
     static PROJECTS = 'Projects';
     static MINISTRIES = 'Ministries';
@@ -15,6 +15,6 @@ export default class Sheetnames {
     static OUTCOMES = 'Outcomes';
     static REGIONS = 'Regions';
     static TYPES = 'Types';
-    static SUBTYPES = 'SubTypes';
+    static SUBTYPES = 'Sub Types';
     static PROPONETS = 'Proponents';
 }

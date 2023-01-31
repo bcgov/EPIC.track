@@ -13,19 +13,22 @@ export default class DataLoader {
 
     async load() {
         const mappedData = await this.mapper.map();
-        // const accessToken = await this.fetchToken();
-        // const formIOToken = await this.fetchFormIOToken(accessToken);
-        // console.log(formIOToken);
-        // if (mappedData && mappedData.length > 0) {
-        //     for (let i = 0; i < mappedData.length; i++) {
-        //         const formData = mappedData[i];
-        //         const submissionResponse = await this.submitFormData(accessToken, formIOToken, formData);
-        //         await this.createApplication(submissionResponse.submissionId, submissionResponse.formId, accessToken)
-        //     }
+        console.log('MAPPED EXCEL DATA: ',JSON.stringify(mappedData));
+        const accessToken = await this.fetchToken();
+        const formIOToken = await this.fetchFormIOToken(accessToken);
+        if (mappedData && mappedData.length > 0) {
+            for (let i = 0; i < mappedData.length; i++) {
+                console.log('STARTED PROCESSING INDEX: ',i);
+                const formData = mappedData[i];
+                const submissionResponse = await this.submitFormData(accessToken, formIOToken, formData);
+                console.log('FORM SUBMISSION COMPLETED FOR REACORD AT INDEX: ',i);
+                const appCreateResponse = await this.createApplication(submissionResponse.submissionId, submissionResponse.formId, accessToken);
+                console.log('APPLICATION CREATED FOR RECORD AT INDEX: ',i, appCreateResponse);
+            }
 
-        // } else {
-        //     throw Error('No data to be loaded. Either the input excel was empty or the mapping failed');
-        // }
+        } else {
+            throw Error('No data to be loaded. Either the input excel was empty or the mapping failed');
+        }
     }
     private async fetchToken(): Promise<string> {
         const self = this;

@@ -34,7 +34,6 @@ class OrganizationMapper extends mapper_base_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.lookupRepository.init();
             this.staffs = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.STAFFS);
-            console.log('STAFFS: ', JSON.stringify(this.staffs));
             let excelRows = yield this.mapFile(this.file, this.schema).catch(errors => {
                 throw Error(`Schema mismatch. Make sure the given template is followed correctly. Error: ${JSON.stringify(errors)}`);
             });

@@ -19,8 +19,8 @@ class LookupRepository {
         this.sheetConfig = [];
         this.excelRows = {};
         this.masterSchema = {
-            'id': { prop: 'id' },
-            'name': { prop: 'name' }
+            'Id': { prop: 'id' },
+            'Name': { prop: 'name' }
         };
         this.file = `./templates/LookUps_${env.toLowerCase()}.xlsx`;
         this.initSheetConfig();
@@ -50,7 +50,7 @@ class LookupRepository {
                 schema: this.masterSchema
             }, {
                 sheet: sheetnames_const_1.default.STAFFS,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'phone': { prop: 'phone' }, 'email': { prop: 'email' }, 'position': { prop: 'position' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'First Name': { prop: 'firstname' }, 'Last Name': { prop: 'lastname' }, 'Phone': { prop: 'phone' }, 'Email': { prop: 'email' }, 'Position': { prop: 'position' } })
             }, {
                 sheet: sheetnames_const_1.default.INDIGENOUS_NATIONS,
                 schema: this.masterSchema
@@ -68,34 +68,34 @@ class LookupRepository {
                 schema: this.masterSchema
             }, {
                 sheet: sheetnames_const_1.default.PROJECTS,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'description': { prop: 'description' }, 'location': { prop: 'location' }, 'address': { prop: 'address' }, 'proponent_name': { prop: 'proponent_name' }, 'sub_sector_name': { prop: 'sub_sector_name' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Description': { prop: 'description' }, 'Location': { prop: 'location' }, 'Address': { prop: 'address' }, 'Proponent Name': { prop: 'proponent_name' }, 'Sub Type Name': { prop: 'sub_type_name' } })
             }, {
                 sheet: sheetnames_const_1.default.MINISTRIES,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'abbreviation': { prop: 'abbreviation' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Abbreviation': { prop: 'abbreviation' } })
             }, {
                 sheet: sheetnames_const_1.default.FEDERAL_INVOLVEMENTS,
                 schema: this.masterSchema
             }, {
                 sheet: sheetnames_const_1.default.PHASES,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'duration': { prop: 'duration' }, 'legislated': { prop: 'legislated' }, 'work_type': { prop: 'work_type' }, 'ea_act': { prop: 'ea_act' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Duration': { prop: 'duration' }, 'Legislated': { prop: 'legislated' }, 'Work_type': { prop: 'work_type' }, 'Ea Act': { prop: 'ea_act' } })
             }, {
                 sheet: sheetnames_const_1.default.MILESTONES,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'start_at': { prop: 'start_at' }, 'duration': { prop: 'duration' }, 'kind': { prop: 'kind' }, 'auto': { prop: 'auto' }, 'milestone_type': { prop: 'milestone_type' }, 'phase_name': { prop: 'phase_name' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Start At': { prop: 'start_at' }, 'Duration': { prop: 'duration' }, 'Kind': { prop: 'kind' }, 'Auto': { prop: 'auto' }, 'Milestone Type': { prop: 'milestone_type' }, 'Phase Name': { prop: 'phase_name' } })
             }, {
                 sheet: sheetnames_const_1.default.TEAMS,
                 schema: Object.assign({}, this.masterSchema)
             }, {
                 sheet: sheetnames_const_1.default.OUTCOMES,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'milestone': { prop: 'milestone' }, 'terminates_work': { prop: 'terminates_work' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Milestone': { prop: 'milestone' }, 'Terminates Work': { prop: 'terminates_work' } })
             }, {
                 sheet: sheetnames_const_1.default.REGIONS,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'entity': { prop: 'entity' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Entity': { prop: 'entity' } })
             }, {
                 sheet: sheetnames_const_1.default.TYPES,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'short_name': { prop: 'short_name' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Short Name': { prop: 'short_name' } })
             }, {
                 sheet: sheetnames_const_1.default.SUBTYPES,
-                schema: Object.assign(Object.assign({}, this.masterSchema), { 'short_name': { prop: 'short_name' }, 'type': { prop: 'type' } })
+                schema: Object.assign(Object.assign({}, this.masterSchema), { 'Short Name': { prop: 'short_name' }, 'Type': { prop: 'type' } })
             }, {
                 sheet: sheetnames_const_1.default.PROPONETS,
                 schema: Object.assign({}, this.masterSchema)
