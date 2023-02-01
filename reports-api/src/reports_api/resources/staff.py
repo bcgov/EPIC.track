@@ -38,7 +38,7 @@ class Staffs(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
+    @AppCache.cache.cached(timeout=constants.CACHE_LOWER_TIMEOUT_LIMIT, query_string=True)
     @profiletime
     @API.expect(parser)
     def get():
@@ -63,7 +63,7 @@ class Staff(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @AppCache.cache.cached(timeout=constants.CACHE_LOWER_TIMEOUT_LIMIT)
     @profiletime
     def get(_id):
         """Return a staff detail based on id."""
@@ -78,7 +78,7 @@ class StaffPosition(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @AppCache.cache.cached(timeout=constants.CACHE_LOWER_TIMEOUT_LIMIT)
     @profiletime
     def get(position_id):
         """Return a staff detail based on id."""
