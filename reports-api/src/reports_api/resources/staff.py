@@ -18,7 +18,7 @@ from flask import current_app
 from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import StaffService
-from reports_api.utils import auth, constants, profiletime
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
