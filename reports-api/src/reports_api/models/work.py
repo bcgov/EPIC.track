@@ -52,7 +52,7 @@ class Work(BaseModel):
     current_phase_id = Column(ForeignKey('phase_codes.id'), nullable=True, default=None)
     substitution_act_id = Column(ForeignKey('substitution_acts.id'), nullable=True, default=None)
     eac_decision_by_id = Column(ForeignKey('staffs.id'), nullable=False)
-    decision_by_id = Column(ForeignKey('staffs.id'), nullable=False)
+    decision_by_id = Column(ForeignKey('staffs.id'), nullable=True)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')
