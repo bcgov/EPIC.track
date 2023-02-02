@@ -53,6 +53,7 @@ class Inspections(Resource):
         regions = CodeService.find_code_values_by_type('regions')
         types = CodeService.find_code_values_by_type('types')
         sub_types = CodeService.find_code_values_by_type('sub_types')
+        proponents = CodeService.find_code_values_by_type('proponents')
 
         data = {}
 
@@ -86,6 +87,7 @@ class Inspections(Resource):
         data['types'] = [{'id': x['id'], 'name': x['name'], 'short_name': x['short_name']} for x in types['codes']]
         data['sub_types'] = [{'id': x['id'], 'name': x['name'], 'short_name': x['short_name'],
                              'types': x['type']['name']} for x in sub_types['codes']]
+        data['proponents'] = [{'id': x['id'], 'name': x['name']} for x in proponents['codes']]
 
         lookup_data = LookupService.generate_excel(data)
 
