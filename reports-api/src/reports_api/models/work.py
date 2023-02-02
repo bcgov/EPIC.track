@@ -32,8 +32,6 @@ class Work(BaseModel):
     is_cac_recommended = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)
     is_completed = Column(Boolean, default=False)
-    work_status_notes = Column(Text)
-    work_short_status = Column(String(255))
     work_status_stoplight = Column(String(6))
     is_deleted = Column(Boolean(), default=False)
     project_tracking_number = Column(String(255), nullable=True, default=None)
@@ -53,6 +51,8 @@ class Work(BaseModel):
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
     current_phase_id = Column(ForeignKey('phase_codes.id'), nullable=True, default=None)
     substitution_act_id = Column(ForeignKey('substitution_acts.id'), nullable=True, default=None)
+    eac_decision_by_id = Column(ForeignKey('staffs.id'), nullable=False)
+    decision_by_id = Column(ForeignKey('staffs.id'), nullable=False)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')
@@ -62,9 +62,10 @@ class Work(BaseModel):
     responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')
     work_lead = relationship('Staff', foreign_keys=[work_lead_id], lazy='select')
     work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
-
     current_phase = relationship("PhaseCode", foreign_keys=[current_phase_id], lazy='select')
     substitution_act = relationship("SubstitutionAct", foreign_keys=[substitution_act_id], lazy='select')
+    eac_decision_by = relationship("Staff", foreign_keys=[eac_decision_by_id], lazy='select')
+    decision_by = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""

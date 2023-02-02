@@ -33,7 +33,9 @@ def test_sync_form_data_create(client, new_project, new_staff):
             "federal_involvement_id": 1,
             "work_lead_id": new_staff.id,
             "responsible_epd_id": new_staff.id,
-            "eao_team_id": 1
+            "eac_decision_by_id": new_staff.id,
+            "decision_by_id": new_staff.id,
+            "eao_team_id": 1,
         },
         "works-work_statuses": {
             "status_text": "Testing foreign key entry creation",
@@ -57,6 +59,8 @@ def test_sync_form_data_update(client, new_project, new_staff):
             "federal_involvement_id": 1,
             "work_lead_id": new_staff.id,
             "responsible_epd_id": new_staff.id,
+            "eac_decision_by_id": new_staff.id,
+            "decision_by_id": new_staff.id,
             "eao_team_id": 1
         },
         "works-work_statuses": {
@@ -78,6 +82,8 @@ def test_sync_form_data_update(client, new_project, new_staff):
             "federal_involvement_id": 1,
             "work_lead_id": new_staff.id,
             "responsible_epd_id": new_staff.id,
+            "eac_decision_by_id": new_staff.id,
+            "decision_by_id": new_staff.id,
             "eao_team_id": 1
         },
         "works-work_statuses": {
