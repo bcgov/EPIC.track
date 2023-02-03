@@ -33,6 +33,7 @@ from .ops import API as OPS_API
 from .outcome import API as OUTCOME_API
 from .phase import API as PHASE_API
 from .project import API as PROJECTS_API
+from .reports import API as REPORTS_API
 from .staff import API as STAFF_API
 from .sync_form_data import API as SYNC_FORM_DATA_API
 from .sub_types import API as SUB_TYPES_API
@@ -81,3 +82,4 @@ API.add_namespace(SUB_TYPES_API, path="/sub-types")
 API.add_namespace(INSPECTION_API, path="/inspections")
 API.add_namespace(WORK_API, path="/works")
 API.add_namespace(LOOKUP_API, path="/lookups")
+API.add_namespace(REPORTS_API, path="/reports")
