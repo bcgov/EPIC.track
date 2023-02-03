@@ -19,6 +19,7 @@ from .lookups import LookupService
 from .milestone import MilestoneService
 from .outcome import OutcomeService
 from .project import ProjectService
+from .report import ReportService
 from .staff import StaffService
 from .sub_type import SubTypeService
 from .work import WorkService

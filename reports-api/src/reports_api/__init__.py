@@ -25,6 +25,7 @@ from reports_api import config
 from reports_api.config import _Config
 from reports_api.models import db
 from reports_api.utils.auth import jwt
+from reports_api.utils.json_encoder import CustomJSONEncoder
 from reports_api.utils.logging import setup_logging
 from reports_api.utils.run_version import get_run_version
 from reports_api.utils.caching import AppCache
@@ -38,6 +39,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
     app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
+    app.json_encoder = CustomJSONEncoder
 
     db.init_app(app)
 
