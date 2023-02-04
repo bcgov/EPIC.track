@@ -20,8 +20,7 @@ from flask import send_file
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import ReportService
-from reports_api.utils import auth, constants, profiletime
-from reports_api.utils.caching import AppCache
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -37,7 +36,6 @@ class Report(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def post(report_type):
         """Generate report from given date."""
         report_date = datetime.fromisoformat(API.payload['report_date'])
@@ -54,7 +52,6 @@ class FileReport(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def post(report_type):
         """Generate report from given date."""
         report_date = datetime.fromisoformat(API.payload['report_date'])
