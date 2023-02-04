@@ -6,7 +6,7 @@ const GetRequest = <T>(url: string, params = {}, headers = {}) => {
         params: params,
         headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${UserService.getToken()}`,
+            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`,
             ...headers,
         },
     });
@@ -17,7 +17,7 @@ const PostRequest = <T>(url: string, data = {}, params = {}) => {
         params,
         headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${UserService.getToken()}`,
+            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`
         },
     });
 };
@@ -27,7 +27,7 @@ const PutRequest = <T>(url: string, data = {}, params = {}) => {
         params,
         headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${UserService.getToken()}`,
+            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`,
         },
     });
 };
@@ -36,7 +36,7 @@ const PatchRequest = <T>(url: string, data = {}) => {
     return axios.patch<T>(url, data, {
         headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${UserService.getToken()}`,
+            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`,
         },
     });
 };
@@ -46,7 +46,7 @@ const DeleteRequest = <T>(url: string, params = {}) => {
         params: params,
         headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${UserService.getToken()}`,
+            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`,
         },
     });
 };

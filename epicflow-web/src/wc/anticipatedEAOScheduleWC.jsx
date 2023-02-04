@@ -15,9 +15,10 @@ export class AnticipatedEAOScheduleWC extends HTMLElement {
         style.textContent = bootstrap;
         shadowRoot.appendChild(style);
         shadowRoot.appendChild(mountPoint);
+        const apiUrl = this.getAttribute('apiUrl');
         ReactDOM.render(
         <Provider store={store}>
-        <AnticipatedEAOSchedule />
+        <AnticipatedEAOSchedule apiUrl={apiUrl}/>
         </Provider>, mountPoint);
     }
 }

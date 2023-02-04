@@ -73,7 +73,8 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "build-wc": "webpack --config config-wc/webpack.config.js --node-env production  --mode production "
+    "build-wc": "webpack --config config-wc/webpack.config.js --node-env production  --mode production ",
+    "build-wc1": "webpack --config custom-config/webpack.config.js --node-env production  --mode production "
   },
   "eslintConfig": {
     "extends": [
@@ -95,6 +96,7 @@
   },
   "devDependencies": {
     "raw-loader": "^4.0.2",
+    "ts-loader": "^9.4.2",
     "webpack-cli": "^5.0.1"
   },
   "jest": {

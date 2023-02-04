@@ -8,7 +8,6 @@ import AnticipatedEAOSchedule from "./anticipatedEAOSchedule";
 
 
 export default function App() {
-    console.log(process.env.REACT_APP_API_URL);
     const dispatch = useDispatch();
     useEffect(() => {
         UserService.initKeycloak(dispatch);
@@ -18,7 +17,7 @@ export default function App() {
             <BrowserRouter>
                 <NavBar />
                 <Routes>
-                    <Route path="/anticipated-eao-schedule" element={<AnticipatedEAOSchedule />} />
+                    <Route path="/anticipated-eao-schedule" element={<AnticipatedEAOSchedule name="dinesh"/>} />
                 </Routes>
             </BrowserRouter>
         </>
