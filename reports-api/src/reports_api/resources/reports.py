@@ -37,7 +37,6 @@ class Report(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def post(report_type):
         """Generate report from given date."""
         report_date = datetime.fromisoformat(API.payload['report_date'])
@@ -54,7 +53,6 @@ class FileReport(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def post(report_type):
         """Generate report from given date."""
         report_date = datetime.fromisoformat(API.payload['report_date'])
