@@ -12,8 +12,8 @@ export class Project {
     project_tracking_number: string;
     name: string = "";
     proponent_id: string = "";
-    sector_id: string = "";
-    sub_sector_id: string = "";
+    type_id: string = "";
+    sub_type_id: string = "";
     description: string = "";
     address: string = "";
     latitude: string = "";
@@ -33,8 +33,8 @@ export class Project {
         project_tracking_number: string
         ,name: string
         ,proponent_id: string
-        ,sector_id: string
-        ,sub_sector_id: string
+        ,type_id: string
+        ,sub_type_id: string
         ,description: string
         ,address: string
         ,latitude: string
@@ -50,8 +50,8 @@ export class Project {
         this.name = name;
         this.project_tracking_number = project_tracking_number;
         this.proponent_id = proponent_id;
-        this.sector_id = sector_id;
-        this.sub_sector_id = sub_sector_id;
+        this.type_id = type_id;
+        this.sub_type_id = sub_type_id;
         this.description = description;
         this.address = address;
         this.latitude = latitude;

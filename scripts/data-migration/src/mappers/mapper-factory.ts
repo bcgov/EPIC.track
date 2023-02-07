@@ -2,7 +2,7 @@ import LookupRepository from "../infrastructure/lookup-repository";
 import DefaultMapper from "./default-mapper";
 import IndigenousNationMapper from "./indigenous-nation-mapper";
 import MapperBase from "./mapper-base";
-import OrganizationMapper from "./organization-mapper";
+import ProponentMapper from "./proponent-mapper";
 import ProjectMapper from "./project-mapper";
 import StaffMapper from "./staff-mapper";
 import WorkMapper from "./work-mapper";
@@ -11,7 +11,7 @@ export default  class MapperFactory {
     static create(formType: string, file: string, env: string): MapperBase {
         const lookupRepository = new LookupRepository(env);
         switch(formType){
-            case 'organization': return new OrganizationMapper(file, lookupRepository);
+            case 'proponent': return new ProponentMapper(file, lookupRepository);
             case 'work': return new WorkMapper(file, lookupRepository);
             case 'project': return new ProjectMapper(file, lookupRepository);
             case 'staff': return new StaffMapper(file, lookupRepository);

@@ -97,7 +97,7 @@ class LookupRepository {
                 sheet: sheetnames_const_1.default.SUBTYPES,
                 schema: Object.assign(Object.assign({}, this.masterSchema), { 'Short Name': { prop: 'short_name' }, 'Type': { prop: 'type' } })
             }, {
-                sheet: sheetnames_const_1.default.PROPONETS,
+                sheet: sheetnames_const_1.default.PROPONENTS,
                 schema: Object.assign({}, this.masterSchema)
             }];
     }

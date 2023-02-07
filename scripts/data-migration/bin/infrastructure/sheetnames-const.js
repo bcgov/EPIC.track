@@ -20,4 +20,4 @@ Sheetnames.OUTCOMES = 'Outcomes';
 Sheetnames.REGIONS = 'Regions';
 Sheetnames.TYPES = 'Types';
 Sheetnames.SUBTYPES = 'Sub Types';
-Sheetnames.PROPONETS = 'Proponents';
+Sheetnames.PROPONENTS = 'Proponents';

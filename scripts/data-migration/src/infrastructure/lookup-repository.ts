@@ -133,7 +133,7 @@ export default class LookupRepository {
                 'Type': { prop: 'type' }
             }
         },{
-            sheet: Sheetnames.PROPONETS,
+            sheet: Sheetnames.PROPONENTS,
             schema: {
                 ...this.masterSchema
             }

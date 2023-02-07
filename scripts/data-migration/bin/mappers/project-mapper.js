@@ -72,6 +72,9 @@ class ProjectMapper extends mapper_base_1.default {
             },
             'Project Closed': {
                 prop: 'project_closed'
+            },
+            'Completed': {
+                prop: 'import_completed'
             }
         };
     }
@@ -81,7 +84,7 @@ class ProjectMapper extends mapper_base_1.default {
             this.types = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.TYPES);
             this.subtypes = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.SUBTYPES);
             this.regions = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.REGIONS);
-            this.proponents = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.PROPONETS);
+            this.proponents = this.lookupRepository.getDataBySheet(sheetnames_const_1.default.PROPONENTS);
             let excelProjects = yield this.mapFile(this.file, this.schema).catch(errors => {
                 throw Error(`Schema mismatch. Make sure the given template is followed correctly. Error: ${JSON.stringify(errors)}`);
             });
@@ -98,6 +101,7 @@ class ProjectMapper extends mapper_base_1.default {
                 const flnroRegion = this.regions.filter(p => p.name === project.flnro_region && p.entity === 'FLNR')[0];
                 console.log(flnroRegion);
                 const proponent = this.proponents.filter(p => p.name === project.proponent)[0];
+                console.log(project.proponent);
                 console.log(proponent);
                 const projectData = new project_formdata_1.Project(project.project_tracking_number, project.name, proponent.id, type.id, subtype.id, project.description, project.address, project.latitude, project.longitude, `${project.latitude},${project.longitude}`, envRegion.id, flnroRegion.id, project.capital_investment, project.epic_guid, project.abbreviation, project.ea_certificate, project.project_closed);
                 const projectFormData = new project_formdata_1.ProjectFormData(projectData);

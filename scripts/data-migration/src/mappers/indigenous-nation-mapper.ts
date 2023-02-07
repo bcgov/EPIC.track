@@ -34,10 +34,10 @@ export default class IndigenousNationMapper extends MapperBase {
         });
         let mapped_data:any[] = [];
         for(let indigenousNation of excelIndigenousNations) {
-            const epd = this.staffs.filter(p=> p.name === indigenousNation.epd)[0];
+            const relationship_holder = this.staffs.filter(p=> p.name === indigenousNation.epd)[0];
             const indigenousNationData = new IndigenousNation(
                indigenousNation.name
-               ,epd?.id
+               ,relationship_holder?.id
             );
             const indigenousNationFormData = new IndigenousNationFormData(indigenousNationData);
             mapped_data.push({

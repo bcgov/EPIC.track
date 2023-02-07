@@ -63,6 +63,9 @@ export default class ProjectMapper extends MapperBase {
             },
             'Project Closed': {
                 prop: 'project_closed'
+            },
+            'Completed': {
+                prop: 'import_completed'
             }
         };
         
@@ -72,7 +75,7 @@ export default class ProjectMapper extends MapperBase {
         this.types = this.lookupRepository.getDataBySheet(Sheetnames.TYPES); 
         this.subtypes = this.lookupRepository.getDataBySheet(Sheetnames.SUBTYPES); 
         this.regions = this.lookupRepository.getDataBySheet(Sheetnames.REGIONS); 
-        this.proponents = this.lookupRepository.getDataBySheet(Sheetnames.PROPONETS);   
+        this.proponents = this.lookupRepository.getDataBySheet(Sheetnames.PROPONENTS);   
         let excelProjects = await this.mapFile(this.file, this.schema).catch(errors => {
             throw Error(`Schema mismatch. Make sure the given template is followed correctly. Error: ${JSON.stringify(errors)}`);
         });
@@ -89,6 +92,7 @@ export default class ProjectMapper extends MapperBase {
             const flnroRegion = this.regions.filter(p=> p.name === project.flnro_region && p.entity === 'FLNR')[0];
             console.log(flnroRegion);
             const proponent = this.proponents.filter(p=> p.name === project.proponent)[0];
+            console.log(project.proponent)
             console.log(proponent);
             const projectData = new Project(
                 project.project_tracking_number

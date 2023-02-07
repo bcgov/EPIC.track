@@ -29,3 +29,6 @@ postgres
 /forms-flow-bpm/.env
 
 /scripts/data-migration/bin
+
+
+node_modules

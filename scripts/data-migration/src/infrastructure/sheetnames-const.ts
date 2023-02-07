@@ -16,5 +16,5 @@ export default class Sheetnames {
     static REGIONS = 'Regions';
     static TYPES = 'Types';
     static SUBTYPES = 'Sub Types';
-    static PROPONETS = 'Proponents';
+    static PROPONENTS = 'Proponents';
 }

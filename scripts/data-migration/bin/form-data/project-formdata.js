@@ -16,12 +16,12 @@ class Project {
     /**
      *
      */
-    constructor(project_tracking_number, name, proponent_id, sector_id, sub_sector_id, description, address, latitude, longitude, location, region_id_env, region_id_flnro, capital_investment, epic_guid, abbreviation, ea_certificate, is_project_closed) {
+    constructor(project_tracking_number, name, proponent_id, type_id, sub_type_id, description, address, latitude, longitude, location, region_id_env, region_id_flnro, capital_investment, epic_guid, abbreviation, ea_certificate, is_project_closed) {
         this.id = "";
         this.name = "";
         this.proponent_id = "";
-        this.sector_id = "";
-        this.sub_sector_id = "";
+        this.type_id = "";
+        this.sub_type_id = "";
         this.description = "";
         this.address = "";
         this.latitude = "";
@@ -37,8 +37,8 @@ class Project {
         this.name = name;
         this.project_tracking_number = project_tracking_number;
         this.proponent_id = proponent_id;
-        this.sector_id = sector_id;
-        this.sub_sector_id = sub_sector_id;
+        this.type_id = type_id;
+        this.sub_type_id = sub_type_id;
         this.description = description;
         this.address = address;
         this.latitude = latitude;
