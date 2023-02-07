@@ -59,6 +59,7 @@ class WorkEngagement(BaseModel):
     work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     engagement = relationship('Engagement', foreign_keys=[engagement_id], lazy='select')
+    milestone = relationship('Milestone', foreign_keys=[milestone_id], lazy='select')
 
     def as_dict(self, recursive=False):
         """Return a JSON representation"""

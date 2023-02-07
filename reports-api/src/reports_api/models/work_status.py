@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to WorkStatus."""
 
-from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -26,6 +26,7 @@ class WorkStatus(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     status_text = Column(String(255), nullable=False)
+    work_status_notes = Column(Text)
     is_deleted = Column(Boolean(), default=False)
     posted_date = Column(Date, nullable=False)
     work_id = Column(ForeignKey('works.id'), nullable=False)
@@ -36,6 +37,7 @@ class WorkStatus(BaseModel):
         return {
             'id': self.id,
             'status_text': self.status_text,
+            'work_status_notes': self.work_status_notes,
             'created_at': self.created_at,
             'updated_at': self.updated_at,
             'posted_date': self.posted_date,
