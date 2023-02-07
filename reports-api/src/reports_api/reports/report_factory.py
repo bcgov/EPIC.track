@@ -44,7 +44,9 @@ class ReportFactory(ABC):
 
     def generate_template(self):
         """Generates template file to use with CDOGS API"""
-        with self.template_path.open("rb") as template_file:
+        print(self.template_path)
+        print(self.template_path.resolve())
+        with self.template_path.resolve().open("rb") as template_file:
             output_stream = BytesIO(template_file.read())
             output_stream = b64encode(output_stream.getvalue())
             return output_stream.decode("ascii")
