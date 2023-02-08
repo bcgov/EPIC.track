@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Form, Col, Row, Button, Container, Accordion, Tabs, Tab, Table } from 'react-bootstrap';
-import AccordionItem from "react-bootstrap/esm/AccordionItem";
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import ReportService from "../services/reportService";
 
@@ -60,7 +59,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                 {
                                     ((reports as any)[key] as []).map((item, itemIndex) => {
                                         return <Accordion>
-                                            <AccordionItem eventKey={itemIndex.toString()}>
+                                            <Accordion.Item eventKey={itemIndex.toString()}>
                                                 <Accordion.Header>{item['project_name']}</Accordion.Header>
                                                 <Accordion.Body>
                                                     <Tabs
@@ -125,7 +124,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                                         </Tab>
                                                     </Tabs>
                                                 </Accordion.Body>
-                                            </AccordionItem>
+                                            </Accordion.Item>
                                         </Accordion>
                                     })
                                 }
