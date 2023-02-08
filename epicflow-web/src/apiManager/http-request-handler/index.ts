@@ -12,13 +12,14 @@ const GetRequest = <T>(url: string, params = {}, headers = {}) => {
     });
 };
 
-const PostRequest = <T>(url: string, data = {}, params = {}) => {
+const PostRequest = <T>(url: string, data = {}, params = {}, config = {}) => {
     return axios.post<T>(url, data, {
         params,
         headers: {
             'Content-type': 'application/json',
-            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`
+            Authorization: `Bearer ${UserService.getToken() || window.localStorage.getItem('authToken')}`, 
         },
+        ...config
     });
 };
 
