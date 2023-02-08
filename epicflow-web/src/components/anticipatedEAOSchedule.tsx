@@ -10,7 +10,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     const [reportDate, setReportDate] = useState();
     const fetchReportData = async () => {
         const reportData = await ReportService.fetchReportData(props.apiUrl, 'ea_anticipated_schedule', {
-            report_date: '2023-02-07'
+            report_date: reportDate
         });
 
         if (reportData.status === 200) {
@@ -23,7 +23,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     }
     const downloadPDFReport = async() =>{
         const binaryReponse = await ReportService.downloadPDF(props.apiUrl, 'ea_anticipated_schedule', {
-            report_date: '2023-02-07'
+            report_date: reportDate
         });
         const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
         const link = document.createElement("a");
@@ -40,7 +40,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                         Report Date
                     </Form.Label>
                     <Col sm="4">
-                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate" value={reportDate} />
+                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate" value={reportDate} onChangeCapture={(e:any)=>setReportDate(e.target.value)} />
                     </Col>
                     <Col sm="4"></Col>
                     <Col sm="1">

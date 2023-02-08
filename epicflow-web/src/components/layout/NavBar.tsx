@@ -14,6 +14,7 @@ export default function NavBar() {
             <Nav.Link href="#home">Home</Nav.Link>
             <NavDropdown title="Reports" id="basic-nav-dropdown">
               <NavDropdown.Item href="/anticipated-eao-schedule">Referal Schedule</NavDropdown.Item>
+              <NavDropdown.Item href="/anticipated-eao-schedule-sm">Referal Schedule-SM</NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>

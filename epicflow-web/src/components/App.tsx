@@ -5,6 +5,7 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import NavBar from "./layout/NavBar";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AnticipatedEAOSchedule from "./anticipatedEAOSchedule";
+import AnticipatedEAOScheduleSemantic from "./anticipatedEAOScheduleSemantic";
 
 
 export default function App() {
@@ -18,6 +19,9 @@ export default function App() {
                 <NavBar />
                 <Routes>
                     <Route path="/anticipated-eao-schedule" element={<AnticipatedEAOSchedule name="dinesh"/>} />
+                </Routes>
+                <Routes>
+                    <Route path="/anticipated-eao-schedule-sm" element={<AnticipatedEAOScheduleSemantic name="dinesh"/>} />
                 </Routes>
             </BrowserRouter>
         </>
