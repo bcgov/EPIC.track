@@ -83,6 +83,7 @@ RUN cp -r /tmp/forms-flow-ai/forms-flow-web/. /web/
 ARG CUSTOM_SRC_DIR=src
 COPY ./  /tmp/${CUSTOM_SRC_DIR}/
 RUN cp -R /tmp/${CUSTOM_SRC_DIR}/* /web/ && rm -Rf /tmp/${CUSTOM_SRC_DIR}/
+RUN cp ./.eslintignore /web/
 
 ARG CUSTOM_PUBLIC_DIR=public
 COPY ./  /tmp/${CUSTOM_PUBLIC_DIR}/
