@@ -62,7 +62,7 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
     @classmethod
     def _process_model_instance_data(cls, model_class, data: dict, result: dict):  # pylint:disable=too-many-locals
         """Process data for a single instance of a model"""
-        if not data:
+        if not data or ('is_valid' in data and data['is_valid'] is False):
             return {}
         dependants = [{k: v} for k, v in data.items() if isinstance(v, (dict, list))]
         instance = cls._update_or_create(model_class, data)
