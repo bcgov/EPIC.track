@@ -120,6 +120,18 @@ const NavBar = React.memo(() => {
                   <i className="fa fa-wpforms fa-fw fa-lg mr-2" />
                   {t("Forms")}
                 </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to={`${baseUrl}reports`}
+                  className={`main-nav nav-item ${
+                    pathname.match(createURLPathMatchExp("reports", baseUrl))
+                      ? "active-tab"
+                      : ""
+                  }`}
+                >
+                  <i className="fa fa-wpforms fa-fw fa-lg mr-2" />
+                  Reports
+                </Nav.Link>
                 {getUserRolePermission(userRoles, STAFF_DESIGNER) ? (
                   <Nav.Link
                     as={Link}
