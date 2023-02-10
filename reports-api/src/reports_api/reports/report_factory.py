@@ -7,12 +7,12 @@ from io import BytesIO
 from pathlib import Path
 
 from flask import jsonify
-from sqlalchemy import and_
+from sqlalchemy import and_, func
 from sqlalchemy.orm import aliased
 
 from reports_api.models import (
     EAAct, Engagement, Event, Milestone, Ministry, PhaseCode, Project, Proponent, Region, SubstitutionAct, Work,
-    WorkEngagement, WorkStatus)
+    WorkEngagement, WorkStatus, db)
 
 from .cdog_client import CDOGClient
 
@@ -44,7 +44,7 @@ class ReportFactory(ABC):
 
     def generate_template(self):
         """Generates template file to use with CDOGS API"""
-        with self.template_path.open("rb") as template_file:
+        with self.template_path.resolve().open("rb") as template_file:
             output_stream = BytesIO(template_file.read())
             output_stream = b64encode(output_stream.getvalue())
             return output_stream.decode("ascii")
@@ -88,6 +88,40 @@ class EAAnticipatedScheduleReport(ReportFactory):
         pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
         pecps = [x.id for x in pecps]
 
+        decision_miletones = Milestone.query.filter(
+            Milestone.milestone_type_id.in_((1, 4))
+        ).all()
+        decision_miletones = [x.id for x in decision_miletones]
+
+        next_decision_event_query = (
+            db.session.query(
+                Event.work_id,
+                func.min(Event.anticipated_start_date).label(
+                    "min_anticipated_start_date"
+                ),
+            )
+            .filter(
+                Event.anticipated_start_date >= start_date,
+                Event.milestone_id.in_(decision_miletones),
+            )
+            .group_by(Event.work_id)
+            .subquery()
+        )
+
+        next_pecp_query = (
+            db.session.query(
+                Engagement.work_id,
+                func.min(Engagement.start_date).label("min_start_date"),
+            )
+            .join(WorkEngagement)
+            .filter(
+                Engagement.start_date >= start_date,
+                WorkEngagement.milestone_id.in_(pecps),
+            )
+            .group_by(Engagement.work_id)
+            .subquery()
+        )
+
         latest_status_updates = WorkStatus.query.filter(
             WorkStatus.posted_date >= start_date
         )
@@ -96,10 +130,18 @@ class EAAnticipatedScheduleReport(ReportFactory):
             latest_status_updates.join(Work)
             .join(Event)
             .join(
+                next_decision_event_query,
+                and_(
+                    Event.work_id == next_decision_event_query.c.work_id,
+                    Event.anticipated_start_date ==
+                    next_decision_event_query.c.min_anticipated_start_date,
+                ),
+            )
+            .join(
                 Milestone,
                 and_(
                     Milestone.id == Event.milestone_id,
-                    Milestone.milestone_type_id.in_((1, 4)),
+                    Milestone.id.in_(decision_miletones),
                 ),
             )
             .join(PhaseCode, Milestone.phase_id == PhaseCode.id)
@@ -115,12 +157,17 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 WorkEngagement,
                 and_(
                     WorkEngagement.project_id == Work.project_id,
-                    WorkEngagement.phase_id == PhaseCode.id,
-                    WorkEngagement.milestone_id.in_(pecps),
                 ),
             )
-            # .outerjoin(pecp, and_(WorkEngagement.milestone, pecp.milestone_type_id == 11))
             .outerjoin(Engagement, WorkEngagement.engagement)
+            .join(
+                next_pecp_query,
+                and_(
+                    next_pecp_query.c.work_id == Work.id,
+                    WorkEngagement.project_id == Work.project_id,
+                    next_pecp_query.c.min_start_date == Engagement.start_date,
+                ),
+            )
             .add_columns(
                 PhaseCode.name.label("phase_name"),
                 WorkStatus.posted_date.label("date_updated"),
@@ -141,11 +188,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Milestone.milestone_type_id.label("milestone_type"),
             )
         )
-
         return results_qry.all()
-
-    # def generate_template(self):
-    #     """Generates template file to use with CDOGS API"""
 
     def generate_report(self, report_date, return_type):
         """Generates a report and returns it"""

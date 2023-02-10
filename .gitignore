@@ -28,4 +28,3 @@ postgres
 /forms-flow-web/.env
 /forms-flow-bpm/.env
 wc-lib
-scripts
