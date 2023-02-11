@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0veyoz6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0">
-  <bpmn:process id="reminder_configuration_process" name="Reminder Configuration" isExecutable="true">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0veyoz6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1">
+  <bpmn:process id="Reminder_Configuration_Process" name="Reminder Configuration" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Start">
       <bpmn:outgoing>Flow_0aztjh5</bpmn:outgoing>
     </bpmn:startEvent>
@@ -45,7 +45,9 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
     </bpmn:userTask>
     <bpmn:boundaryEvent id="Event_11xg5pr" cancelActivity="false" attachedToRef="Activity_15syc12">
       <bpmn:outgoing>Flow_01g2qzu</bpmn:outgoing>
-      <bpmn:timerEventDefinition id="TimerEventDefinition_1k96yyw" />
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1k96yyw">
+        <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">${interval}</bpmn:timeCycle>
+      </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
     <bpmn:exclusiveGateway id="Gateway_1sknb7w">
       <bpmn:incoming>Flow_05rvlf1</bpmn:incoming>
@@ -84,7 +86,16 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
     <bpmn:sequenceFlow id="Flow_1nms7e0" sourceRef="Activity_016r1bw" targetRef="Activity_0mg8r2n" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
-    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="reminder_configuration_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="Reminder_Configuration_Process">
+      <bpmndi:BPMNEdge id="Flow_1nms7e0_di" bpmnElement="Flow_1nms7e0">
+        <di:waypoint x="660" y="300" />
+        <di:waypoint x="720" y="300" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_01g2qzu_di" bpmnElement="Flow_01g2qzu">
+        <di:waypoint x="490" y="235" />
+        <di:waypoint x="490" y="300" />
+        <di:waypoint x="560" y="300" />
+      </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0byh67n_di" bpmnElement="Flow_0byh67n">
         <di:waypoint x="610" y="152" />
         <di:waypoint x="610" y="80" />
@@ -109,15 +120,6 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
       <bpmndi:BPMNEdge id="Flow_0aztjh5_di" bpmnElement="Flow_0aztjh5">
         <di:waypoint x="215" y="177" />
         <di:waypoint x="270" y="177" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_01g2qzu_di" bpmnElement="Flow_01g2qzu">
-        <di:waypoint x="490" y="235" />
-        <di:waypoint x="490" y="300" />
-        <di:waypoint x="560" y="300" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_1nms7e0_di" bpmnElement="Flow_1nms7e0">
-        <di:waypoint x="660" y="300" />
-        <di:waypoint x="720" y="300" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_1">
         <dc:Bounds x="179" y="159" width="36" height="36" />
