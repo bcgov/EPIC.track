@@ -54,3 +54,4 @@ from .work import Work
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
+from .reminder_configuration import ReminderConfiguration
