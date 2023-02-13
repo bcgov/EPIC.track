@@ -131,7 +131,9 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             if isinstance(dataset, dict):
                 dataset.update(foreign_keys)
             elif isinstance(dataset, list):
-                object_ids = [x['id'] for x in dataset if 'id' in x and x['id']]
+                # Filter out invalid datasets
+                dataset = list(filter(lambda x: isinstance(x, (dict, list)), dataset))
+                object_ids = [x['id'] for x in dataset if isinstance(x, dict) and 'id' in x and x['id']]
                 cls._sync_deletions(model_name, object_ids, foreign_keys)
                 dataset = [{**x, **foreign_keys} for x in dataset if x]
             current_app.logger.info(f'Processing model data for {model_name}')
