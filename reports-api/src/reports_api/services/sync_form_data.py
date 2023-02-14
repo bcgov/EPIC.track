@@ -14,6 +14,7 @@
 """Service to manage work form sync with database."""
 
 from typing import Union
+import json
 from flask import current_app
 from inflector import English, Inflector
 
@@ -65,6 +66,11 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         if not data or ('is_valid' in data and data['is_valid'] is False):
             return {}
         dependants = [{k: v} for k, v in data.items() if isinstance(v, (dict, list))]
+        if len(dependants) > 0:
+            for dep in dependants:
+                for key in dep.keys():
+                    if find_model_from_table_name(key) is None:
+                        data[key] = json.dumps(data[key])
         instance = cls._update_or_create(model_class, data)
         current_app.logger.info(f'Model class ---> {model_class}')
         instance = instance.as_dict()
