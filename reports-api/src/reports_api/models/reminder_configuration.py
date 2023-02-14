@@ -27,6 +27,7 @@ class ReminderConfiguration(BaseModel):
     interval = Column(Text, nullable=False)
     email_addresses = Column(Text, nullable=False)
     reminder_text = Column(Text, nullable=True)
+    position_id = Column(Integer, nullable=False)
   
 
     def as_dict(self, recursive=False):
