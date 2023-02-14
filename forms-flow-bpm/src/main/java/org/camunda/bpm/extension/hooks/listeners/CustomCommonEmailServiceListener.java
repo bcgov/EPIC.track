@@ -28,6 +28,8 @@ import static org.camunda.bpm.extension.commons.utils.VariableConstants.TEMPLATE
 @Named("CustomCommonEmailServiceListener")
 public class CustomCommonEmailServiceListener extends BaseListener implements ExecutionListener, TaskListener {
 
+    private final Logger LOGGER = Logger.getLogger(CustomCommonEmailServiceListener.class.getName());
+
     private WebClient webClient = null;
 
     @Value("${ches.auth.tokenUri}")
@@ -67,6 +69,7 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
                     .toEntity(String.class);
 
             ResponseEntity<String> response = entityMono.block();
+            LOGGER.info("Email Response : " + response);
 
         } catch (Exception exception) {
             exception.printStackTrace();
@@ -90,6 +93,7 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
                 .bodyToMono(TokenResponse.class)
                 .block();
         return response.getAccess_token();
+        LOGGER.info("Access Token : " + response.getAccess_token());
 
     }
 
