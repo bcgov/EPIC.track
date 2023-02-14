@@ -14,11 +14,11 @@
 """Service to manage work form sync with database."""
 
 from typing import Union
+import json
 from flask import current_app
 from inflector import English, Inflector
 
 from reports_api.utils.helpers import find_model_from_table_name
-import json
 
 
 class SyncFormDataService:  # pylint:disable=too-few-public-methods

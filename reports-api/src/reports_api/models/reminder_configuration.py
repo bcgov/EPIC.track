@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Reminder Configuration."""
 
-from sqlalchemy import Column, DateTime, Text, Integer, String
+from sqlalchemy import Column, Integer, String, Text
+
 from .base_model import BaseModel
 
 
@@ -28,7 +29,6 @@ class ReminderConfiguration(BaseModel):
     email_addresses = Column(Text, nullable=False)
     reminder_text = Column(Text, nullable=True)
     position_id = Column(Integer, nullable=False)
-  
 
     def as_dict(self, recursive=False):
         """Return a JSON representation"""
