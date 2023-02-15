@@ -93,9 +93,9 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
                 .retrieve()
                 .bodyToMono(TokenResponse.class)
                 .block();
-        LOGGER.info("Access Token : " + response.getAccess_token());
+       // LOGGER.info("Access Token : " + response.getAccess_token());
         return response.getAccess_token();
-        LOGGER.info("Access Token : " + response.getAccess_token());
+
 
 
     }
