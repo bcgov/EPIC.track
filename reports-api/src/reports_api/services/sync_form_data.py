@@ -14,6 +14,7 @@
 """Service to manage work form sync with database."""
 
 from typing import Union
+import json
 from flask import current_app
 from inflector import English, Inflector
 
@@ -62,9 +63,14 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
     @classmethod
     def _process_model_instance_data(cls, model_class, data: dict, result: dict):  # pylint:disable=too-many-locals
         """Process data for a single instance of a model"""
-        if not data:
+        if not data or ('is_valid' in data and data['is_valid'] is False):
             return {}
         dependants = [{k: v} for k, v in data.items() if isinstance(v, (dict, list))]
+        if len(dependants) > 0:
+            for dep in dependants:
+                for key in dep.keys():
+                    if find_model_from_table_name(key) is None:
+                        data[key] = json.dumps(data[key])
         instance = cls._update_or_create(model_class, data)
         current_app.logger.info(f'Model class ---> {model_class}')
         instance = instance.as_dict()
@@ -131,7 +137,9 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             if isinstance(dataset, dict):
                 dataset.update(foreign_keys)
             elif isinstance(dataset, list):
-                object_ids = [x['id'] for x in dataset if 'id' in x and x['id']]
+                # Filter out invalid datasets
+                dataset = list(filter(lambda x: isinstance(x, (dict, list)), dataset))
+                object_ids = [x['id'] for x in dataset if isinstance(x, dict) and 'id' in x and x['id']]
                 cls._sync_deletions(model_name, object_ids, foreign_keys)
                 dataset = [{**x, **foreign_keys} for x in dataset if x]
             current_app.logger.info(f'Processing model data for {model_name}')

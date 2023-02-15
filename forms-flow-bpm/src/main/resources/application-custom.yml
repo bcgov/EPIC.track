@@ -1,2 +1,8 @@
 report.url: ${REPORT_API_URL:}
 formsflow.ai.camunda.spring.webclient.connectionTimeout: ${BPM_CLIENT_CONN_TIMEOUT:55000}
+ches:
+  auth:
+    tokenUri: ${CHES_TOKEN_URI}
+    clientId: ${CHES_CLIENT_ID}
+    clientSecret: ${CHES_CLIENT_SECRET}
+  reminderConfigurationUri: ${CHES_REMINDER_CONFIGURATION_URI}
