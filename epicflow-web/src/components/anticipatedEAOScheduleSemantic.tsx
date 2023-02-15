@@ -1,8 +1,5 @@
-import React, { useEffect, useState } from "react";
-// import { Form, Col, Row, Button, Container, Accordion, Tabs, Tab, Table } from 'react-bootstrap';
-import { Form, Label, GridColumn, GridRow, Button, Container, Accordion, Tab, Table } from 'semantic-ui-react';
-import AccordionItem from "react-bootstrap/esm/AccordionItem";
-// import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import { useState } from "react";
+import { Form, Label, Button, Container, Accordion, Tab, Table } from 'semantic-ui-react';
 import '../../node_modules/semantic-ui-css/semantic.min.css';
 import ReportService from "../services/reportService";
 

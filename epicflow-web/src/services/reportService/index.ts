@@ -1,4 +1,4 @@
-import Endpoints from '../../apiManager/endpoints';
+import Endpoints from '../../constants/api-endpoint';
 import http from '../../apiManager/http-request-handler'
 import { AppConfig } from '../../config';
 const fetchReportData = async(apiUrl: string, reportType: string, reportParams: any) => {
