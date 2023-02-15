@@ -17,6 +17,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import java.util.logging.Logger;
 
 import javax.inject.Named;
 import java.nio.charset.StandardCharsets;
