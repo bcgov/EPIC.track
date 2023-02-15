@@ -33,7 +33,11 @@ class CodeService:
         model: CodeTable = find_model_from_table_name(code_type)
         response = {'codes': []}
         filters = {k: v for k, v in filters.items() if hasattr(model, k)}
-        for row in model.query.filter_by(**filters):
+        if hasattr(cls, 'is_active'):
+            filters['is_active'] = True
+        if hasattr(cls, 'is_deleted'):
+            filters['is_deleted'] = False
+        for row in model.query.filter_by(**filters).order_by(model.sort_order, model.id):
             response['codes'].append(row.as_dict())
 
         current_app.logger.debug('>find_code_values_by_type')
