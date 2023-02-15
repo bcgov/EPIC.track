@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import { Form, Col, Row, Button, Container, Accordion, Tabs, Tab, Table } from 'react-bootstrap';
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import ReportService from "../services/reportService";
+import ApplicationConstant from "../constants/application-constant";
+import moment from 'moment';
 
 export default function AnticipatedEAOSchedule({ ...props }) {
     const [reports, setReports] = useState({});
@@ -20,7 +22,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
         }
 
     }
-    const downloadPDFReport = async() =>{
+    const downloadPDFReport = async () => {
         const binaryReponse = await ReportService.downloadPDF(props.apiUrl, 'ea_anticipated_schedule', {
             report_date: reportDate
         });
@@ -31,6 +33,9 @@ export default function AnticipatedEAOSchedule({ ...props }) {
         document.body.appendChild(link);
         link.click();
     }
+    const formatDate = (date: string) => {
+        return moment(date).format(ApplicationConstant.DateFormat);
+    }
     return (
         <Container>
             <Form id="reportParams">
@@ -39,7 +44,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                         Report Date
                     </Form.Label>
                     <Col sm="4">
-                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate" value={reportDate} onChangeCapture={(e:any)=>setReportDate(e.target.value)} />
+                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate" value={reportDate} onChangeCapture={(e: any) => setReportDate(e.target.value)} />
                     </Col>
                     <Col sm="4"></Col>
                     <Col sm="1">
@@ -65,36 +70,36 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                                     <Tabs
                                                         id={itemIndex.toString()}
                                                         activeKey={tabKey}
-                                                        onSelect={(k:any)=>setTabKey(k)}
+                                                        onSelect={(k: any) => setTabKey(k)}
                                                         className="mb-3"
                                                     >
                                                         <Tab eventKey="basic" title="Basic">
                                                             <Table striped="columns">
                                                                 <tbody>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>Proponent</td>
                                                                         <td>{item['proponent']}</td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>Region</td>
                                                                         <td>{item['region']}</td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>Location</td>
                                                                         <td>{item['location']}</td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>EA Type</td>
                                                                         <td>
                                                                             {item['ea_act']}
-                                                                            {item['substitution_act']?', '+item['substitution_act']:''}
+                                                                            {item['substitution_act'] ? ', ' + item['substitution_act'] : ''}
                                                                         </td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>Responsible Minister</td>
                                                                         <td>{item['ministry_name']}</td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>Decision to be made by</td>
                                                                         <td>{item['decision_by']}</td>
                                                                     </tr>
@@ -105,17 +110,38 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                                             {item['project_description']}
                                                         </Tab>
                                                         <Tab eventKey="decision" title="Anticipated Referral Date/Next PCP/Additional Information">
-                                                        <Table striped="columns">
+                                                            <Table striped="columns">
                                                                 <tbody>
-                                                                    <tr> 
-                                                                        <td>Referral Date</td>
-                                                                        <td>{item['referral_date']}</td>
+                                                                    <tr>
+                                                                        <td>{item['milestone_type'] === 4 ? 'Referral Date' : 'Decision Date'}</td>
+                                                                        <td>{formatDate(item['referral_date'])}</td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    <tr>
                                                                         <td>Updated Date</td>
-                                                                        <td>{item['date_updated']}</td>
+                                                                        <td>{formatDate(item['date_updated'])}</td>
                                                                     </tr>
-                                                                    <tr> 
+                                                                    {
+                                                                        item['next_pecp_date'] !== null &&
+                                                                        <tr>
+                                                                            <td>Next PECP Date</td>
+                                                                            <td>{formatDate(item['next_pecp_date'])}</td>
+                                                                        </tr>
+                                                                    }
+                                                                    {
+                                                                        item['next_pecp_title'] !== null &&
+                                                                        <tr>
+                                                                            <td>PECP Title</td>
+                                                                            <td>{item['next_pecp_title']}</td>
+                                                                        </tr>
+                                                                    }
+                                                                    {
+                                                                        item['next_pecp_short_description'] !== null &&
+                                                                        <tr>
+                                                                            <td>PECP Description</td>
+                                                                            <td>{item['next_pecp_short_description']}</td>
+                                                                        </tr>
+                                                                    }
+                                                                    <tr>
                                                                         <td>Additional Info</td>
                                                                         <td>{item['additional_info']}</td>
                                                                     </tr>
