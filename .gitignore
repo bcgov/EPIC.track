@@ -27,4 +27,10 @@ hs_err_pid*
 postgres
 /forms-flow-web/.env
 /forms-flow-bpm/.env
+
+/scripts/data-migration/bin
+
+
+node_modules
 wc-lib
+data

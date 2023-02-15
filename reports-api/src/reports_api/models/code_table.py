@@ -30,6 +30,7 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     updated_at = Column(DateTime, onupdate=func.now())
     is_active = Column(Boolean, default=True, server_default='t')
     is_deleted = Column(Boolean, default=False, server_default='f')
+    sort_order = Column(Integer, nullable=False)
 
     @declared_attr
     def id(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
@@ -71,6 +72,11 @@ class CodeTable():  # pylint: disable=too-few-public-methods
         """Return code deleted status."""
         return Column(Boolean)
 
+    @declared_attr
+    def sort_order(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+        """Return sort order."""
+        return Column(Integer)
+
     @classmethod
     def find_by_id(cls, _id):
         """Given a id, this will return code master details."""
@@ -85,7 +91,7 @@ class CodeTable():  # pylint: disable=too-few-public-methods
             query['is_active'] = True
         if hasattr(cls, 'is_deleted'):
             query['is_deleted'] = False
-        codes = cls.query.filter_by(**query)  # pylint: disable=no-member
+        codes = cls.query.filter_by(**query).order_by(cls.sort_order)  # pylint: disable=no-member
         return codes
 
     @staticmethod

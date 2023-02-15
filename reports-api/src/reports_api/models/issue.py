@@ -26,7 +26,7 @@ class Issue(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), nullable=False)
-    short_description = Column(String(255), nullable=False)
+    short_description = Column(String(2000), nullable=False)
     long_description = Column(Text, nullable=True)
     is_key_issue = Column(Boolean(), default=False)
     is_sensitive = Column(Boolean(), default=False)

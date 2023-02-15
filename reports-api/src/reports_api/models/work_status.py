@@ -25,7 +25,7 @@ class WorkStatus(BaseModel):
     __tablename__ = 'work_statuses'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    status_text = Column(String(255), nullable=False)
+    status_text = Column(String(2000), nullable=False)
     work_status_notes = Column(Text)
     is_deleted = Column(Boolean(), default=False)
     posted_date = Column(Date, nullable=False)

@@ -26,7 +26,7 @@ class Work(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(80), nullable=False)
-    short_description = Column(String(255))
+    short_description = Column(String(2000))
     long_description = Column(Text)
     is_pecp_required = Column(Boolean, default=False)
     is_cac_recommended = Column(Boolean, default=False)

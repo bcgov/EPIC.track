@@ -28,8 +28,8 @@ class InspectionDetail(BaseModel):
     title = Column(String(255), nullable=False)
     title_summary = Column(Text, nullable=False)
     findings = Column(Text, nullable=False)
-    compliance_status = Column(String(255), nullable=False)
-    requirement = Column(String(255), nullable=False)
+    compliance_status = Column(String(2000), nullable=False)
+    requirement = Column(String(2000), nullable=False)
     reference_number = Column(String(255), nullable=False)
     is_deleted = Column(Boolean(), default=False)
 
