@@ -5,20 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
-            "request": "launch",
-            "name": "Debug Data Migration",
-            "program": "${workspaceFolder}/scripts/data-migration/src/index.ts",
-            "args": ["--type=project","--env=dev"],
-            "preLaunchTask": "npm: build",
-            "sourceMaps": true,
-            "smartStep": true,
-            "internalConsoleOptions": "openOnSessionStart",
-            "outFiles": [
-                "${workspaceFolder}/scripts/data-migration/bin/**/*.js"
-            ]
-          },
-        {
             "name": "ReportsAPI",
             "type": "python",
             "request": "launch",
