@@ -35,6 +35,7 @@ class ReportFactory(ABC):
         formatted_data = defaultdict(list)
         for item in data:
             obj = {k: getattr(item, k) for k in self.data_keys}
+            obj['sl_no'] = len(formatted_data[obj.get(self.group_by)]) + 1
             formatted_data[obj.get(self.group_by)].append(obj)
         return formatted_data
 
@@ -71,7 +72,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "referral_date",
             "eac_decision_by",
             "decision_by",
-            "next_pecp",
+            "next_pecp_date",
+            "next_pecp_title",
+            "next_pecp_short_description",
             "milestone_type",
         ]
         group_by = "phase_name"
@@ -84,6 +87,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         start_date = report_date + timedelta(days=-7)
         eac_decision_by = aliased(Work.eac_decision_by)
         decision_by = aliased(Work.decision_by)
+        pecp_event = aliased(Event)
 
         pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
         pecps = [x.id for x in pecps]
@@ -157,6 +161,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 WorkEngagement,
                 and_(
                     WorkEngagement.project_id == Work.project_id,
+                    WorkEngagement.milestone_id.in_(pecps),
                 ),
             )
             .outerjoin(Engagement, WorkEngagement.engagement)
@@ -166,6 +171,14 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     next_pecp_query.c.work_id == Work.id,
                     WorkEngagement.project_id == Work.project_id,
                     next_pecp_query.c.min_start_date == Engagement.start_date,
+                ),
+            )
+            .outerjoin(
+                pecp_event,
+                and_(
+                    next_pecp_query.c.work_id == pecp_event.work_id,
+                    next_pecp_query.c.min_start_date == pecp_event.start_date,
+                    pecp_event.milestone_id.in_(pecps),
                 ),
             )
             .add_columns(
@@ -184,8 +197,16 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Event.anticipated_end_date.label("referral_date"),
                 eac_decision_by.full_name.label("eac_decision_by"),
                 decision_by.full_name.label("decision_by"),
-                Engagement.start_date.label("next_pecp"),
                 Milestone.milestone_type_id.label("milestone_type"),
+                func.coalesce(pecp_event.title, Engagement.title).label(
+                    "next_pecp_title"
+                ),
+                func.coalesce(
+                    pecp_event.start_date,
+                    pecp_event.anticipated_start_date,
+                    Engagement.start_date,
+                ).label("next_pecp_date"),
+                pecp_event.short_description.label("next_pecp_short_description"),
             )
         )
         return results_qry.all()
