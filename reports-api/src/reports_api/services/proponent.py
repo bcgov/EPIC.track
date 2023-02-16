@@ -11,21 +11,19 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Service to manage Works."""
-from sqlalchemy import and_, func, or_
+"""Service to manage Proponent."""
+from sqlalchemy import func
+from reports_api.models import Proponent
 
-from reports_api.models import Work
 
-
-class WorkService:  # pylint: disable=too-few-public-methods
-    """Service to manage work related operations."""
+class ProponentService:  # pylint: disable=too-few-public-methods
+    """Service to manage proponent related operations."""
 
     @classmethod
-    def check_existence(cls, project_id, work_type_id, title):
-        """Checks if a work exists for a given project and work type"""
-        if Work.query.filter(
-                    or_(func.lower(Work.title) == func.lower(title), and_(Work.work_type_id ==
-                        work_type_id, Work.project_id == project_id)), Work.is_deleted.is_(False)
+    def check_existence(cls, name):
+        """Checks if an proponent exists with given name"""
+        if Proponent.query.filter(
+                    func.lower(Proponent.name) == func.lower(name), Proponent.is_deleted.is_(False)
         ).count() > 0:
             return {"exists": True}
         return {"exists": False}
