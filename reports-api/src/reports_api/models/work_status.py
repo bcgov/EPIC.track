@@ -29,6 +29,7 @@ class WorkStatus(BaseModel):
     work_status_notes = Column(Text)
     is_deleted = Column(Boolean(), default=False)
     posted_date = Column(Date, nullable=False)
+    posted_by = Column(String(100), nullable=True)
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
 
