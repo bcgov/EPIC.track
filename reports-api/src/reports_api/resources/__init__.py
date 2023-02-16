@@ -39,6 +39,8 @@ from .sync_form_data import API as SYNC_FORM_DATA_API
 from .sub_types import API as SUB_TYPES_API
 from .inspection import API as INSPECTION_API
 from .work import API as WORK_API
+from .indigenous_nation import API as INDIGENOUS_NATION_API
+from .proponent import API as PROPONENT_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -83,3 +85,5 @@ API.add_namespace(INSPECTION_API, path="/inspections")
 API.add_namespace(WORK_API, path="/works")
 API.add_namespace(LOOKUP_API, path="/lookups")
 API.add_namespace(REPORTS_API, path="/reports")
+API.add_namespace(INDIGENOUS_NATION_API, path="/indigenous-nations")
+API.add_namespace(PROPONENT_API, path="/proponents")

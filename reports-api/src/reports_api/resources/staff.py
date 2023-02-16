@@ -14,7 +14,7 @@
 """Resource for staff endpoints."""
 from http import HTTPStatus
 
-from flask import current_app
+from flask import current_app, request
 from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import StaffService
@@ -79,3 +79,19 @@ class StaffPosition(Resource):
     def get(position_id):
         """Return a staff detail based on id."""
         return StaffService.find_by_position_id(position_id), HTTPStatus.OK
+
+
+@cors_preflight('GET')
+@API.route('/exists', methods=['GET', 'OPTIONS'])
+class ValidateStaff(Resource):
+    """Endpoint resource to check for existing staff."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def get():
+        """Checks for existing staffs."""
+        first_name = request.args.get('first_name', None)
+        last_name = request.args.get('last_name', None)
+        return StaffService.check_existence(first_name, last_name), HTTPStatus.OK

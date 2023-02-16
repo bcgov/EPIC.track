@@ -11,32 +11,30 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Resource for work endpoints."""
+"""Resource for indigenous nation endpoints."""
 from http import HTTPStatus
 
 from flask import request
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.services import WorkService
+from reports_api.services import IndigenousNationService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace('works', description='Works')
+API = Namespace('indigenous_nations', description='Indigenous Nations')
 
 
 @cors_preflight('GET')
 @API.route('/exists', methods=['GET', 'OPTIONS'])
-class ValidateWork(Resource):
-    """Endpoint resource to check for existing work."""
+class ValidateIndigenousNation(Resource):
+    """Endpoint resource to check for existing indigenous nation."""
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
     def get():
-        """Check for existing works."""
-        project_id = request.args.get('project_id', None)
-        work_type_id = request.args.get('work_type_id', None)
-        title = request.args.get('title', None)
-        return WorkService.check_existence(project_id, work_type_id, title), HTTPStatus.OK
+        """Check for existing indigenous nations."""
+        name = request.args.get('name', None)
+        return IndigenousNationService.check_existence(name), HTTPStatus.OK
