@@ -18,7 +18,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import java.util.logging.Logger;
-
+import java.util.List;
 import javax.inject.Named;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -82,7 +82,7 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
 
         String encodedClientData =
 
-                Base64Utils.encodeToString(String.format("%0:%1", clientId, clientSecret).getBytes(StandardCharsets.UTF_8));
+                Base64Utils.encodeToString(String.format(clientId + ":" + clientSecret).getBytes(StandardCharsets.UTF_8));
 
         TokenResponse response = webClient
                 .post()
@@ -93,8 +93,10 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
                 .retrieve()
                 .bodyToMono(TokenResponse.class)
                 .block();
+       // LOGGER.info("Access Token : " + response.getAccess_token());
         return response.getAccess_token();
-        LOGGER.info("Access Token : " + response.getAccess_token());
+
+
 
     }
 
@@ -109,16 +111,17 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
     private Email getEmailData(DelegateExecution execution) throws JsonProcessingException {
         Map<String, Object> dmnMap = getDMNTemplate(execution);
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        Email email = objectMapper.convertValue(dmnMap, Email.class);
+//        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+//        Email email = objectMapper.convertValue(dmnMap, Email.class);
 
-  /*    Email email = new Email();
-        email.setTo(Collections.singletonList(String.valueOf(getDmnValue(dmnMap, "to"))));
+        Email email = new Email();
+        List<String> toAddress = objectMapper.readValue(getDmnValue(dmnMap, "to"), List.class);
+        email.setTo(toAddress);
         email.setFrom(getDmnValue(dmnMap, "from"));
         email.setBody(getDmnValue(dmnMap, "body"));
         email.setSubject(getDmnValue(dmnMap, "subject"));
-        email.setBodyType(getDmnValue(dmnMap, "bodyType"));*/
-
+        email.setBodyType(getDmnValue(dmnMap, "bodyType"));
+        LOGGER.info("Email Data : " + email.toString());
         return email;
     }
 
@@ -126,8 +129,8 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
         return (Map<String, Object>) execution.getVariables().get(TEMPLATE);
     }
 
-//    private String getDmnValue(Map<String, Object> dmnMap, String name) {
-//        return String.valueOf(dmnMap.get(name));
-//    }
+    private String getDmnValue(Map<String, Object> dmnMap, String name) {
+        return String.valueOf(dmnMap.get(name));
+    }
 
 }
