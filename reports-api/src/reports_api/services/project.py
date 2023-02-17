@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage Project."""
 from flask import current_app
+from sqlalchemy import func
 
 from reports_api.models import Project
 
@@ -54,3 +55,12 @@ class ProjectService:
         project = Project.find_by_id(project_id)
         project.delete()
         return True
+
+    @classmethod
+    def check_existence(cls, name):
+        """Checks if a project exists with given name"""
+        if Project.query.filter(
+                    func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
+        ).count() > 0:
+            return {"exists": True}
+        return {"exists": False}

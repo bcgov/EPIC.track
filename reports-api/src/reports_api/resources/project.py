@@ -13,6 +13,7 @@
 # limitations under the License.
 """Resource for project endpoints."""
 from http import HTTPStatus
+from flask import request
 
 from flask_restx import Namespace, Resource, cors
 
@@ -77,3 +78,18 @@ class Project(Resource):
         """Delete a project"""
         ProjectService.delete_project(project_id)
         return {"message": "Project successfully deleted"}, HTTPStatus.OK
+
+
+@cors_preflight('GET')
+@API.route('/exists', methods=['GET', 'OPTIONS'])
+class ValidateProject(Resource):
+    """Endpoint resource to check for existing project."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def get():
+        """Checks for existing projects."""
+        name = request.args.get('name', None)
+        return ProjectService.check_existence(name), HTTPStatus.OK

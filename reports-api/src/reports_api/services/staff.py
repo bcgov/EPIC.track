@@ -14,6 +14,7 @@
 """Service to manage Staffs."""
 
 from flask import current_app
+from sqlalchemy import func
 
 from reports_api.models import Staff
 
@@ -61,3 +62,13 @@ class StaffService:
         if staff:
             response['staff'] = staff.as_dict()
         return response
+
+    @classmethod
+    def check_existence(cls, first_name, last_name):
+        """Checks if a staff exists with given first name and last name"""
+        if Staff.query.filter(
+                    func.lower(Staff.last_name) == func.lower(last_name), func.lower(
+                        Staff.first_name) == func.lower(first_name), Staff.is_deleted.is_(False)
+        ).count() > 0:
+            return {"exists": True}
+        return {"exists": False}
