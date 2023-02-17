@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.util.logging.Logger;
 import java.util.List;
 import javax.inject.Named;
+import org.apache.commons.lang3.StringUtils;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
@@ -118,6 +119,13 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
         List<String> toAddress = objectMapper.readValue(getDmnValue(dmnMap, "to"), List.class);
         email.setTo(toAddress);
         email.setFrom(getDmnValue(dmnMap, "from"));
+        String emailBody = getDmnValue(dmnMap, "body");
+        for(Map.Entry<String,Object> entry : execution.getVariables().entrySet()) {
+            if(!TEMPLATE.equals(entry.getKey())) {
+                emailBody = StringUtils.replace(emailBody,"@"+entry.getKey(), entry.getValue()+StringUtils.EMPTY);
+            }
+        }
+        email.setBody(emailBody);
         email.setBody(getDmnValue(dmnMap, "body"));
         email.setSubject(getDmnValue(dmnMap, "subject"));
         email.setBodyType(getDmnValue(dmnMap, "bodyType"));
