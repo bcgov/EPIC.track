@@ -39,7 +39,8 @@ class Report(Resource):
     def post(report_type):
         """Generate report from given date."""
         report_date = datetime.fromisoformat(API.payload['report_date'])
-        report = ReportService.generate_report(report_type, report_date, 'json')
+        filters = API.payload.get('filters', None)
+        report = ReportService.generate_report(report_type, report_date, 'json', filters=filters)
         return report, HTTPStatus.OK
 
 
@@ -55,5 +56,6 @@ class FileReport(Resource):
     def post(report_type):
         """Generate report from given date."""
         report_date = datetime.fromisoformat(API.payload['report_date'])
-        report, file_name = ReportService.generate_report(report_type, report_date, 'file')
+        filters = API.payload.get('filters', None)
+        report, file_name = ReportService.generate_report(report_type, report_date, 'file', filters=filters)
         return send_file(BytesIO(report), as_attachment=True, attachment_filename=file_name)
