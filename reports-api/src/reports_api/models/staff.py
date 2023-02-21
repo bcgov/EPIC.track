@@ -30,9 +30,9 @@ class Staff(BaseModel):
     last_name = Column(String(100), nullable=False)
     phone = Column(String(), nullable=False)
     email = Column(String(), nullable=False)
-    is_active = Column(Boolean(), default=True)
+    is_active = Column(Boolean(), default=True, nullable=False)
     position_id = Column(ForeignKey('positions.id'), nullable=False)
-    is_deleted = Column(Boolean(), default=False)
+    is_deleted = Column(Boolean(), default=False, nullable=False)
 
     position = relationship('Position', foreign_keys=[position_id], lazy='select')
 

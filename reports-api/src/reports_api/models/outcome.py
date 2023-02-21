@@ -28,7 +28,7 @@ class Outcome(BaseModel):
     name = Column(String, nullable=False)
     milestone_id = Column(ForeignKey('milestones.id'), nullable=False)
     sort_order = Column(Integer, nullable=False)
-    terminates_work = Column(Boolean, default=False)
+    terminates_work = Column(Boolean, default=False, nullable=False)
 
     milestone = relationship('Milestone', foreign_keys=[milestone_id], lazy='select')
 

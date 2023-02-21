@@ -31,7 +31,7 @@ class Project(BaseModel):
     location = Column(String())
     capital_investment = Column(Float())
     epic_guid = Column(String(), nullable=True, default=None)
-    is_project_closed = Column(Boolean(), default=False)
+    is_project_closed = Column(Boolean(), default=False, nullable=False)
     address = Column(Text, nullable=True, default=None)
 
     ea_certificate = Column(String(255), nullable=True, default=None)

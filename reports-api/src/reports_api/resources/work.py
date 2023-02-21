@@ -36,7 +36,5 @@ class ValidateWork(Resource):
     @profiletime
     def get():
         """Check for existing works."""
-        project_id = request.args.get('project_id', None)
-        work_type_id = request.args.get('work_type_id', None)
         title = request.args.get('title', None)
-        return WorkService.check_existence(project_id, work_type_id, title), HTTPStatus.OK
+        return WorkService.check_existence(title), HTTPStatus.OK

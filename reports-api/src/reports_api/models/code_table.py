@@ -28,8 +28,8 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     created_at = Column(DateTime, server_default=func.now())
     updated_by = Column(String(255), default=None, nullable=True)
     updated_at = Column(DateTime, onupdate=func.now())
-    is_active = Column(Boolean, default=True, server_default='t')
-    is_deleted = Column(Boolean, default=False, server_default='f')
+    is_active = Column(Boolean, default=True, server_default='t', nullable=False)
+    is_deleted = Column(Boolean, default=False, server_default='f', nullable=False)
     sort_order = Column(Integer, nullable=False)
 
     @declared_attr
@@ -50,7 +50,7 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     @declared_attr
     def created_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code created timestamp."""
-        return Column(DateTime)
+        return Column(DateTime, server_default=func.now())
 
     @declared_attr
     def updated_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
@@ -60,17 +60,17 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     @declared_attr
     def updated_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code updated timestamp."""
-        return Column(DateTime)
+        return Column(DateTime, onupdate=func.now())
 
     @declared_attr
     def is_active(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code active status."""
-        return Column(Boolean)
+        return Column(Boolean, default=True)
 
     @declared_attr
     def is_deleted(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code deleted status."""
-        return Column(Boolean)
+        return Column(Boolean, default=False)
 
     @declared_attr
     def sort_order(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805

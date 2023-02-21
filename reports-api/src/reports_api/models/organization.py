@@ -28,8 +28,8 @@ class Organization(db.Model, CodeTable):
     __tablename__ = "organizations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    is_active = Column(BOOLEAN(), default=True)
-    is_deleted = Column(Boolean(), default=False)
+    is_active = Column(BOOLEAN(), default=True, nullable=False)
+    is_deleted = Column(Boolean(), default=False, nullable=False)
 
     relationship_holder_id = Column(
         ForeignKey("staffs.id"), nullable=True, default=None

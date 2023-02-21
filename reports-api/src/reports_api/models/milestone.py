@@ -49,7 +49,7 @@ class Milestone(BaseModel):
                             primaryjoin="Milestone.id==Outcome.milestone_id",
                             back_populates="milestone")
     kind = Column(String, nullable=False, default='EVENT')
-    auto = Column(Boolean, default=False)
+    auto = Column(Boolean, default=False, nullable=False)
 
     @classmethod
     def find_by_phase_id(cls, _phase_id):

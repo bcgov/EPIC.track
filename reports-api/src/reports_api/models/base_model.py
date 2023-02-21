@@ -25,8 +25,8 @@ class BaseModel(db.Model):
     created_at = Column(DateTime, server_default=func.now())
     updated_by = Column(String(255), default=None, nullable=True)
     updated_at = Column(DateTime, onupdate=func.now())
-    is_active = Column(Boolean, default=True, server_default='t')
-    is_deleted = Column(Boolean, default=False, server_default='f')
+    is_active = Column(Boolean, default=True, server_default='t', nullable=False)
+    is_deleted = Column(Boolean, default=False, server_default='f', nullable=False)
 
     @staticmethod
     def commit():
