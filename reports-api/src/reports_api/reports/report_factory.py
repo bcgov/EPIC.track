@@ -20,11 +20,12 @@ from .cdog_client import CDOGClient
 class ReportFactory(ABC):
     """Basic representation of report generator."""
 
-    def __init__(self, data_keys, group_by, template_name):
+    def __init__(self, data_keys, group_by, template_name, filters):
         """Constructor"""
         self.data_keys = data_keys
         self.group_by = group_by
         self.template_path = Path(__file__, f"../report_templates/{template_name}")
+        self.filters = filters
 
     @abstractmethod
     def _fetch_data(self, report_date):
@@ -33,9 +34,12 @@ class ReportFactory(ABC):
     def _format_data(self, data):
         """Formats the given data for the given report"""
         formatted_data = defaultdict(list)
+        excluded_items = []
+        if self.filters and 'exclude' in self.filters:
+            excluded_items = self.filters['exclude']
         for item in data:
-            obj = {k: getattr(item, k) for k in self.data_keys}
-            obj['sl_no'] = len(formatted_data[obj.get(self.group_by)]) + 1
+            obj = {k: getattr(item, k) for k in self.data_keys if k not in excluded_items}
+            obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
             formatted_data[obj.get(self.group_by)].append(obj)
         return formatted_data
 
@@ -54,7 +58,7 @@ class ReportFactory(ABC):
 class EAAnticipatedScheduleReport(ReportFactory):
     """EA Anticipated Schedule Report Generator"""
 
-    def __init__(self):
+    def __init__(self, filters):
         """Initialize the ReportFactory"""
         data_keys = [
             "phase_name",
@@ -79,7 +83,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
-        super().__init__(data_keys, group_by, template_name)
+        super().__init__(data_keys, group_by, template_name, filters)
         self.report_title = "Anticipated EA Referral Schedule"
 
     def _fetch_data(self, report_date):
@@ -126,8 +130,23 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .subquery()
         )
 
+        status_update_max_date_query = (
+            db.session.query(
+                WorkStatus.work_id,
+                func.max(WorkStatus.posted_date).label("max_posted_date"),
+            )
+            .group_by(WorkStatus.work_id)
+            .subquery()
+        )
+
         latest_status_updates = WorkStatus.query.filter(
             WorkStatus.posted_date >= start_date
+        ).join(
+            status_update_max_date_query,
+            and_(
+                WorkStatus.work_id == status_update_max_date_query.c.work_id,
+                WorkStatus.posted_date == status_update_max_date_query.c.max_posted_date,
+            ),
         )
 
         results_qry = (

@@ -20,9 +20,9 @@ class ReportService:  # pylint: disable=too-few-public-methods
     """Service to manage report related operations."""
 
     @classmethod
-    def generate_report(cls, report_type, report_date, return_type='json'):
+    def generate_report(cls, report_type, report_date, return_type='json', filters=None):
         """Generate a report"""
-        report_generator = get_report_generator(report_type)
+        report_generator = get_report_generator(report_type, filters)
         report, file_name = report_generator.generate_report(report_date, return_type)
         if return_type == 'json':
             return report
