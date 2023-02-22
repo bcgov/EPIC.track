@@ -126,10 +126,9 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
             }
         }
         email.setBody(emailBody);
-        email.setBody(getDmnValue(dmnMap, "body"));
+        LOGGER.info("Email Body : " + emailBody);
         email.setSubject(getDmnValue(dmnMap, "subject"));
         email.setBodyType(getDmnValue(dmnMap, "bodyType"));
-        LOGGER.info("Email Body : " + email.getBody());
         return email;
     }
 

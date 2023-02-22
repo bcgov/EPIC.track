@@ -2,9 +2,9 @@
 <definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/" xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/" xmlns:camunda="http://camunda.org/schema/1.0/dmn" xmlns:biodi="http://bpmn.io/schema/dmn/biodi/2.0" id="Definitions_31hftwts" name="DRD" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="4.11.1"><decision id="common-email-template" name="common-email-template" camunda:versionTag="1"><decisionTable id="decisionTable_1"><input id="input_1" label="category"><inputExpression id="inputExpression_1" typeRef="string"><text>category</text></inputExpression></input><output id="OutputClause_1aekr4b" label="to" name="to" typeRef="string" /><output id="OutputClause_0o4agai" name="from" typeRef="string" /><output id="OutputClause_0f8t1qe" label="subject" name="subject" typeRef="string" /><output id="OutputClause_1o2aisg" label="body" name="body" typeRef="string" /><output id="OutputClause_15cc0sk" name="bodyType" typeRef="string" biodi:width="192" /><rule id="DecisionRule_0ycnss6"><inputEntry id="UnaryTests_1g3piq1"><text>"assignment_notification"</text></inputEntry><outputEntry id="LiteralExpression_1w28m1k" expressionLanguage="juel"><text>${ToEmailAddresses}</text></outputEntry><outputEntry id="LiteralExpression_1a8dr30" expressionLanguage="juel"><text>"BC Gov - Environmental Assessment Office &lt;noreply@gov.bc.ca&gt;"</text></outputEntry><outputEntry id="LiteralExpression_1czkz3j" expressionLanguage="juel"><text>"Anticipated EAO Schedule Report Reminder"</text></outputEntry><outputEntry id="LiteralExpression_1qfdlgl" expressionLanguage="juel"><text>
 
 
-"Good morning,
+" &lt;h&gt;Good morning&lt;/h&gt;
  
-Please review and update the Anticipated EA Referral Schedule for your projects by EOD Tuesday, January 17th.
+&lt;p&gt;Please review and update the Anticipated EA Referral Schedule for your projects by EOD Tuesday, January 17th.&lt;/p&gt;
       
 
 @NotificationContent
