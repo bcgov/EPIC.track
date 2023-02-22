@@ -123,10 +123,10 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
         for(Map.Entry<String,Object> entry : execution.getVariables().entrySet()) {
             if(!TEMPLATE.equals(entry.getKey())) {
                 emailBody = StringUtils.replace(emailBody,"@"+entry.getKey(), entry.getValue()+StringUtils.EMPTY);
-                LOGGER.info("Email Body : " + emailBody);
             }
         }
         email.setBody(emailBody);
+        LOGGER.info("Email Body : " + emailBody);
         email.setSubject(getDmnValue(dmnMap, "subject"));
         email.setBodyType(getDmnValue(dmnMap, "bodyType"));
         return email;
