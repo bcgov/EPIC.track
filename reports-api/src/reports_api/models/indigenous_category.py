@@ -27,7 +27,7 @@ class IndigenousCategory(db.Model, CodeTable):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     sort_order = Column(Integer, nullable=False)
-    is_active = Column(Boolean(), default=True)
+    is_active = Column(Boolean(), default=True, nullable=False)
 
     def as_dict(self):
         """Return Json representation."""

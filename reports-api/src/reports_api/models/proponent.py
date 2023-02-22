@@ -25,8 +25,8 @@ class Proponent(db.Model, CodeTable):
     __tablename__ = 'proponents'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    is_active = Column(BOOLEAN(), default=False)
-    is_deleted = Column(Boolean(), default=False)
+    is_active = Column(BOOLEAN(), default=False, nullable=False)
+    is_deleted = Column(Boolean(), default=False, nullable=False)
 
     def as_dict(self):
         """Return JSON Representation."""

@@ -27,7 +27,7 @@ class IndigenousNation(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True, nullable=False)
 
     responsible_epd_id = Column(ForeignKey('staffs.id'), nullable=True, default=None)
     responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')

@@ -27,7 +27,7 @@ class WorkStatus(BaseModel):
     id = Column(Integer, primary_key=True, autoincrement=True)
     status_text = Column(String(2000), nullable=False)
     work_status_notes = Column(Text)
-    is_deleted = Column(Boolean(), default=False)
+    is_deleted = Column(Boolean(), default=False, nullable=False)
     posted_date = Column(Date, nullable=False)
     posted_by = Column(String(100), nullable=True)
     work_id = Column(ForeignKey('works.id'), nullable=False)

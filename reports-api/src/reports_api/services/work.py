@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Works."""
-from sqlalchemy import and_, func, or_
+from sqlalchemy import func
 
 from reports_api.models import Work
 
@@ -21,11 +21,10 @@ class WorkService:  # pylint: disable=too-few-public-methods
     """Service to manage work related operations."""
 
     @classmethod
-    def check_existence(cls, project_id, work_type_id, title):
-        """Checks if a work exists for a given project and work type"""
+    def check_existence(cls, title):
+        """Checks if a work exists for a given title"""
         if Work.query.filter(
-                    or_(func.lower(Work.title) == func.lower(title), and_(Work.work_type_id ==
-                        work_type_id, Work.project_id == project_id)), Work.is_deleted.is_(False)
+            func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
         ).count() > 0:
             return {"exists": True}
         return {"exists": False}

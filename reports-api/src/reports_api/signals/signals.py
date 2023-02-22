@@ -11,7 +11,8 @@ def before_commit(session):
     new_objects = session.new
     updated_objects = session.dirty
     for new_object in new_objects:
-        setattr(new_object, 'created_by', g.jwt_oidc_token_info.get('email'))
+        setattr(new_object, 'created_by', g.jwt_oidc_token_info.get('name', None) or g.jwt_oidc_token_info.get('email'))
 
     for updated_object in updated_objects:
-        setattr(updated_object, 'updated_by', g.jwt_oidc_token_info.get('email'))
+        setattr(updated_object, 'updated_by', g.jwt_oidc_token_info.get(
+            'name', None) or g.jwt_oidc_token_info.get('email'))

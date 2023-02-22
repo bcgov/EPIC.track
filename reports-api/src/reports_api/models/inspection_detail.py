@@ -31,7 +31,7 @@ class InspectionDetail(BaseModel):
     compliance_status = Column(String(2000), nullable=False)
     requirement = Column(String(2000), nullable=False)
     reference_number = Column(String(255), nullable=False)
-    is_deleted = Column(Boolean(), default=False)
+    is_deleted = Column(Boolean(), default=False, nullable=False)
 
     inspection_id = Column(ForeignKey('inspections.id'), nullable=False)
     inspection = relationship('Inspection', foreign_keys=[inspection_id], lazy='select')
