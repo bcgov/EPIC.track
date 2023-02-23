@@ -14,8 +14,7 @@
 """Resource for work endpoints."""
 from http import HTTPStatus
 
-from flask import request
-from flask_restx import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import WorkService
 from reports_api.utils import auth, profiletime
@@ -23,6 +22,11 @@ from reports_api.utils.util import cors_preflight
 
 
 API = Namespace('works', description='Works')
+
+parser = reqparse.RequestParser(bundle_errors=True)
+parser.add_argument('title', type=str, required=True,
+                    help='Title of the work to be checked.', location='args', trim=True)
+parser.add_argument('id', type=int, help='ID of the work in case of updates.', location='args')
 
 
 @cors_preflight('GET')
@@ -33,8 +37,11 @@ class ValidateWork(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @API.expect(parser)
     @profiletime
     def get():
         """Check for existing works."""
-        title = request.args.get('title', None)
-        return WorkService.check_existence(title), HTTPStatus.OK
+        args = parser.parse_args()
+        title = args['title']
+        instance_id = args['id']
+        return WorkService.check_existence(title=title, instance_id=instance_id), HTTPStatus.OK

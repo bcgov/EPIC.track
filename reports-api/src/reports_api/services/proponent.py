@@ -20,10 +20,13 @@ class ProponentService:  # pylint: disable=too-few-public-methods
     """Service to manage proponent related operations."""
 
     @classmethod
-    def check_existence(cls, name):
+    def check_existence(cls, name, instance_id):
         """Checks if an proponent exists with given name"""
-        if Proponent.query.filter(
+        query = Proponent.query.filter(
                     func.lower(Proponent.name) == func.lower(name), Proponent.is_deleted.is_(False)
-        ).count() > 0:
+        )
+        if instance_id:
+            query = query.filter(Proponent.id != instance_id)
+        if query.count() > 0:
             return {"exists": True}
         return {"exists": False}

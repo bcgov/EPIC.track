@@ -14,8 +14,7 @@
 """Resource for indigenous nation endpoints."""
 from http import HTTPStatus
 
-from flask import request
-from flask_restx import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import IndigenousNationService
 from reports_api.utils import auth, profiletime
@@ -23,6 +22,11 @@ from reports_api.utils.util import cors_preflight
 
 
 API = Namespace('indigenous_nations', description='Indigenous Nations')
+
+parser = reqparse.RequestParser(bundle_errors=True)
+parser.add_argument('name', type=str, required=True,
+                    help='Name of indigenous nation to be checked.', location='args', trim=True)
+parser.add_argument('id', type=int, help='ID of the indigenous nation in case of updates.', location='args')
 
 
 @cors_preflight('GET')
@@ -33,8 +37,11 @@ class ValidateIndigenousNation(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @API.expect(parser)
     @profiletime
     def get():
         """Check for existing indigenous nations."""
-        name = request.args.get('name', None)
-        return IndigenousNationService.check_existence(name), HTTPStatus.OK
+        args = parser.parse_args()
+        name = args['name']
+        instance_id = args['id']
+        return IndigenousNationService.check_existence(name=name, instance_id=instance_id), HTTPStatus.OK

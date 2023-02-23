@@ -25,3 +25,4 @@ from .sub_type import SubTypeService
 from .work import WorkService
 from .indigenous_nation import IndigenousNationService
 from .proponent import ProponentService
+from .reminder_configuration import ReminderConfigurationService
