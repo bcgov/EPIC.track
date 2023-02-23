@@ -21,10 +21,13 @@ class WorkService:  # pylint: disable=too-few-public-methods
     """Service to manage work related operations."""
 
     @classmethod
-    def check_existence(cls, title):
+    def check_existence(cls, title, instance_id):
         """Checks if a work exists for a given title"""
-        if Work.query.filter(
+        query = Work.query.filter(
             func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
-        ).count() > 0:
+        )
+        if instance_id:
+            query = query.filter(Work.id != instance_id)
+        if query.count() > 0:
             return {"exists": True}
         return {"exists": False}
