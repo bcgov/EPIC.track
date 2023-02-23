@@ -2,7 +2,7 @@
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1j5tgi9" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0" modeler:executionPlatform="Camunda Platform" modeler:executionPlatformVersion="7.15.0">
   <bpmn:message id="Message_0nfy4o1" name="application_resubmitted" />
   <bpmn:process id="Master_Staffs" name="Master Process Staffs" isExecutable="true">
-    <bpmn:startEvent id="Event_1n7d5" name="Submit Application" camunda:asyncAfter="true">
+    <bpmn:startEvent id="Event_1n7d5" name="Submit Application">
       <bpmn:outgoing>Flow_1ossa</bpmn:outgoing>
     </bpmn:startEvent>
     <bpmn:sequenceFlow id="Flow_1ossa" sourceRef="Event_1n7d5" targetRef="Activity_0ndaj">
@@ -11,9 +11,7 @@
           <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', 'Created');
 
 
-execution.setVariable("authentication",org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
-
-org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable("authentication"));</camunda:script>
+execution.setVariable('authentication', org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
@@ -24,8 +22,14 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0ygn0j" sourceRef="Activity_0ndaj" targetRef="Activity_kon3fn" />
-    <bpmn:userTask id="Activity_kon3fn" name="${LastName.concat(&#39;, &#39;).concat(FirstName)}" default="Flow_02pa8" camunda:asyncAfter="true">
+    <bpmn:sequenceFlow id="Flow_0ygn0j" sourceRef="Activity_0ndaj" targetRef="Activity_kon3fn">
+      <bpmn:extensionElements>
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable('authentication'));</camunda:script>
+        </camunda:executionListener>
+      </bpmn:extensionElements>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Activity_kon3fn" name="${LastName.concat(&#39;, &#39;).concat(FirstName)}" default="Flow_02pa8" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:extensionElements>
         <camunda:taskListener event="complete">
           <camunda:script scriptFormat="javascript">task.execution.setVariable('applicationStatus', "Modified");
@@ -53,7 +57,7 @@ task.execution.setVariable('deleteReason', "completed");</camunda:script>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:task id="Activity_0ndaj" name="Report API" camunda:asyncBefore="true">
+    <bpmn:task id="Activity_0ndaj" name="Report API" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
       </bpmn:extensionElements>
