@@ -65,12 +65,12 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     @declared_attr
     def is_active(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code active status."""
-        return Column(Boolean, default=True)
+        return Column(Boolean, default=True, nullable=False)
 
     @declared_attr
     def is_deleted(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
         """Return code deleted status."""
-        return Column(Boolean, default=False)
+        return Column(Boolean, default=False, nullable=False)
 
     @declared_attr
     def sort_order(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
