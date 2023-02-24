@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0veyoz6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.11.1">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0veyoz6" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.6.0">
   <bpmn:process id="Reminder_Configuration_Process" name="Reminder Configuration" isExecutable="true">
     <bpmn:startEvent id="StartEvent_1" name="Start">
       <bpmn:outgoing>Flow_0aztjh5</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:task id="Activity_1odqmcc" name="Sync data">
+    <bpmn:task id="Activity_1odqmcc" name="Sync data" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
       </bpmn:extensionElements>
@@ -18,7 +18,8 @@
           <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', 'Created');
 
 
-org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable("authentication"));</camunda:script>
+execution.setVariable('authentication', org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
@@ -31,10 +32,12 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0ok76n6" sourceRef="Activity_1odqmcc" targetRef="Activity_15syc12">
       <bpmn:extensionElements>
-        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable('authentication'));</camunda:script>
+        </camunda:executionListener>
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:userTask id="Activity_15syc12" name="Reminder configuration">
+    <bpmn:userTask id="Activity_15syc12" name="Reminder configuration" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:extensionElements>
         <camunda:taskListener event="complete">
           <camunda:script scriptFormat="javascript">task.execution.setVariable('deleteReason', "completed");</camunda:script>
@@ -49,7 +52,7 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
         <bpmn:timeCycle xsi:type="bpmn:tFormalExpression">${Duration}</bpmn:timeCycle>
       </bpmn:timerEventDefinition>
     </bpmn:boundaryEvent>
-    <bpmn:exclusiveGateway id="Gateway_1sknb7w">
+    <bpmn:exclusiveGateway id="Gateway_1sknb7w" camunda:asyncBefore="true" camunda:asyncAfter="true">
       <bpmn:incoming>Flow_05rvlf1</bpmn:incoming>
       <bpmn:outgoing>Flow_19bcsui</bpmn:outgoing>
       <bpmn:outgoing>Flow_0byh67n</bpmn:outgoing>
@@ -63,10 +66,19 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
       <bpmn:incoming>Flow_19bcsui</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_19bcsui" sourceRef="Gateway_1sknb7w" targetRef="Event_1olxk4j">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${action == 'end'}</bpmn:conditionExpression>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${applicationStatus == 'End'}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0byh67n" name="Resubmit" sourceRef="Gateway_1sknb7w" targetRef="Activity_1odqmcc">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${resubmit==true}</bpmn:conditionExpression>
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${IsActive == false}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_01g2qzu" sourceRef="Event_11xg5pr" targetRef="Activity_016r1bw">
       <bpmn:extensionElements>

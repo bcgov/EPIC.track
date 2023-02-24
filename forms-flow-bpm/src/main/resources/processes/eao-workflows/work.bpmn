@@ -5,6 +5,15 @@
   </bpmn:collaboration>
   <bpmn:process id="Works" name="Work" isExecutable="true">
     <bpmn:sequenceFlow id="Flow_0jo372u" name="Re-submit without completing a phase/event" sourceRef="Gateway_0kyl34x" targetRef="Activity_0m1cbhk">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1nu0fsx" sourceRef="Activity_1cxdn4p" targetRef="Gateway_0kyl34x">
@@ -13,6 +22,15 @@
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_0i6xbxb" name="Completed an event" sourceRef="Gateway_0kyl34x" targetRef="Activity_05cd0w9">
+      <bpmn:extensionElements>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.ApplicationStateListener" event="take" />
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
+          <camunda:field name="fields">
+            <camunda:expression>["applicationId", "applicationStatus"]</camunda:expression>
+          </camunda:field>
+        </camunda:executionListener>
+        <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+      </bpmn:extensionElements>
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${!empty completedEvent}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_1ugdx1f" sourceRef="Event_08in3hw" targetRef="Activity_0m1cbhk">
@@ -21,7 +39,8 @@
           <camunda:script scriptFormat="javascript">execution.setVariable('applicationStatus', 'Created');
 
 
-org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable("authentication"));</camunda:script>
+execution.setVariable('authentication', org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication());
+</camunda:script>
         </camunda:executionListener>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.BPMFormDataPipelineListener" event="take">
           <camunda:field name="fields">
@@ -32,7 +51,7 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:task id="Activity_0m1cbhk" name="Sync Data">
+    <bpmn:task id="Activity_0m1cbhk" name="Sync Data" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.SyncFormDataPipelineListener" event="start" />
       </bpmn:extensionElements>
@@ -47,9 +66,12 @@ org.springframework.security.core.context.SecurityContextHolder.getContext().set
     <bpmn:sequenceFlow id="Flow_0ey06ib" sourceRef="Activity_0m1cbhk" targetRef="Activity_1cxdn4p">
       <bpmn:extensionElements>
         <camunda:executionListener class="org.camunda.bpm.extension.hooks.listeners.FormBPMFilteredDataPipelineListener" event="take" />
+        <camunda:executionListener event="take">
+          <camunda:script scriptFormat="javascript">org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(execution.getVariable('authentication'));</camunda:script>
+        </camunda:executionListener>
       </bpmn:extensionElements>
     </bpmn:sequenceFlow>
-    <bpmn:userTask id="Activity_1cxdn4p" name="${workTitle.concat(&#39; ( &#39;).concat(currentPhaseName).concat(&#39; )&#39;)}">
+    <bpmn:userTask id="Activity_1cxdn4p" name="${workTitle.concat(&#39; ( &#39;).concat(currentPhaseName).concat(&#39; )&#39;)}" camunda:asyncAfter="true" camunda:exclusive="false">
       <bpmn:extensionElements>
         <camunda:taskListener event="complete">
           <camunda:script scriptFormat="javascript">task.execution.setVariable('deleteReason', "completed");</camunda:script>

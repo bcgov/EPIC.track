@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Proponent."""
 
-from sqlalchemy import BOOLEAN, Boolean, Column, Integer
+from sqlalchemy import BOOLEAN, Boolean, Column, ForeignKey, Integer
+from sqlalchemy.orm import relationship
 
 from .code_table import CodeTable
 from .db import db
@@ -27,6 +28,13 @@ class Proponent(db.Model, CodeTable):
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     is_active = Column(BOOLEAN(), default=False, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
+
+    relationship_holder_id = Column(
+        ForeignKey("staffs.id"), nullable=True, default=None
+    )
+    relationship_holder = relationship(
+        "Staff", foreign_keys=[relationship_holder_id], lazy="select"
+    )
 
     def as_dict(self):
         """Return JSON Representation."""

@@ -1,14 +1,14 @@
 package org.camunda.bpm.extension.hooks.listeners;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.camunda.bpm.engine.delegate.DelegateExecution;
-import org.camunda.bpm.engine.delegate.DelegateTask;
-import org.camunda.bpm.engine.delegate.ExecutionListener;
-import org.camunda.bpm.engine.delegate.TaskListener;
+import org.apache.commons.lang3.StringUtils;
+import org.camunda.bpm.engine.delegate.*;
 import org.camunda.bpm.extension.hooks.listeners.data.Email;
 import org.camunda.bpm.extension.hooks.listeners.data.TokenResponse;
+import org.camunda.bpm.extension.hooks.services.IMessageEvent;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,22 +17,23 @@ import org.springframework.util.Base64Utils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import java.util.logging.Logger;
-import java.util.List;
+
 import javax.inject.Named;
-import org.apache.commons.lang3.StringUtils;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static org.camunda.bpm.extension.commons.utils.VariableConstants.TEMPLATE;
 
 @Named("CustomCommonEmailServiceListener")
-public class CustomCommonEmailServiceListener extends BaseListener implements ExecutionListener, TaskListener {
+public class CustomCommonEmailServiceListener extends BaseListener implements ExecutionListener, TaskListener, IMessageEvent {
 
     private final Logger LOGGER = Logger.getLogger(CustomCommonEmailServiceListener.class.getName());
 
     private WebClient webClient = null;
+
+    private Expression currentDate;
 
     @Value("${ches.auth.tokenUri}")
     private String authTokenUri;
@@ -94,7 +95,7 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
                 .retrieve()
                 .bodyToMono(TokenResponse.class)
                 .block();
-       // LOGGER.info("Access Token : " + response.getAccess_token());
+        // LOGGER.info("Access Token : " + response.getAccess_token());
         return response.getAccess_token();
 
 
@@ -119,6 +120,7 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
         List<String> toAddress = objectMapper.readValue(getDmnValue(dmnMap, "to"), List.class);
         email.setTo(toAddress);
         email.setFrom(getDmnValue(dmnMap, "from"));
+        execution.setVariable("dueDate", getDueDate(execution));
         String emailBody = getDmnValue(dmnMap, "body");
         for(Map.Entry<String,Object> entry : execution.getVariables().entrySet()) {
             if(!TEMPLATE.equals(entry.getKey())) {
@@ -134,6 +136,13 @@ public class CustomCommonEmailServiceListener extends BaseListener implements Ex
 
     private Map<String, Object> getDMNTemplate(DelegateExecution execution) {
         return (Map<String, Object>) execution.getVariables().get(TEMPLATE);
+    }
+
+    private String getDueDate(DelegateExecution execution) {
+        DateTime currentDate = this.currentDate != null && this.currentDate.getValue(execution) != null ?
+                new DateTime(String.valueOf(this.currentDate.getValue(execution))) : new DateTime();
+        DateTime dueDate = addBusinessDays(currentDate, 7);
+        return  dueDate.toString(DateTimeFormat.fullDate());
     }
 
     private String getDmnValue(Map<String, Object> dmnMap, String name) {
