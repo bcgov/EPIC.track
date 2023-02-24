@@ -11,22 +11,24 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Service to manage IndigenousNation."""
+"""Service to manage Reminder configuration."""
 from sqlalchemy import func
-from reports_api.models import IndigenousNation
+
+from reports_api.models import ReminderConfiguration
 
 
-class IndigenousNationService:  # pylint: disable=too-few-public-methods
-    """Service to manage indigenous nation related operations."""
+class ReminderConfigurationService:  # pylint: disable=too-few-public-methods
+    """Service to manage reminder configuration related operations."""
 
     @classmethod
-    def check_existence(cls, name, instance_id):
-        """Checks if an indigenous nation exists with given name"""
-        query = IndigenousNation.query.filter(
-                    func.lower(IndigenousNation.name) == func.lower(name), IndigenousNation.is_deleted.is_(False)
-        )
+    def check_existence(cls, reminder_type, position_id, instance_id):
+        """Checks if a reminder configuration exists for given reminder type and position"""
+        query = ReminderConfiguration.query.filter(
+                func.lower(ReminderConfiguration.reminder_type) == func.lower(reminder_type),
+                ReminderConfiguration.position_id == position_id,
+                ReminderConfiguration.is_deleted.is_(False))
         if instance_id:
-            query = query.filter(IndigenousNation.id != instance_id)
+            query = query.filter(ReminderConfiguration.id != instance_id)
         if query.count() > 0:
             return {"exists": True}
         return {"exists": False}

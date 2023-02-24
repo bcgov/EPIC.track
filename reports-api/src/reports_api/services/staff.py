@@ -64,11 +64,14 @@ class StaffService:
         return response
 
     @classmethod
-    def check_existence(cls, first_name, last_name):
+    def check_existence(cls, first_name, last_name, instance_id):
         """Checks if a staff exists with given first name and last name"""
-        if Staff.query.filter(
+        query = Staff.query.filter(
                     func.lower(Staff.last_name) == func.lower(last_name), func.lower(
                         Staff.first_name) == func.lower(first_name), Staff.is_deleted.is_(False)
-        ).count() > 0:
+        )
+        if instance_id:
+            query = query.filter(Staff.id != instance_id)
+        if query.count() > 0:
             return {"exists": True}
         return {"exists": False}

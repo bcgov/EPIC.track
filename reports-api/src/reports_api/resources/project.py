@@ -13,9 +13,8 @@
 # limitations under the License.
 """Resource for project endpoints."""
 from http import HTTPStatus
-from flask import request
 
-from flask_restx import Namespace, Resource, cors
+from flask_restx import Namespace, Resource, cors, reqparse
 
 from reports_api.services import ProjectService
 from reports_api.utils import auth, profiletime
@@ -23,6 +22,11 @@ from reports_api.utils.util import cors_preflight
 
 
 API = Namespace('projects', description='Projects')
+
+parser = reqparse.RequestParser(bundle_errors=True)
+parser.add_argument('name', type=str, required=True,
+                    help='Name of the project to be checked.', location='args', trim=True)
+parser.add_argument('id', type=int, help='ID of the project in case of updates.', location='args')
 
 
 @cors_preflight('GET')
@@ -88,8 +92,11 @@ class ValidateProject(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
+    @API.expect(parser)
     @profiletime
     def get():
         """Checks for existing projects."""
-        name = request.args.get('name', None)
-        return ProjectService.check_existence(name), HTTPStatus.OK
+        args = parser.parse_args()
+        name = args['name']
+        instance_id = args['id']
+        return ProjectService.check_existence(name=name, instance_id=instance_id), HTTPStatus.OK

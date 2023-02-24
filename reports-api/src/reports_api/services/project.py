@@ -57,10 +57,13 @@ class ProjectService:
         return True
 
     @classmethod
-    def check_existence(cls, name):
+    def check_existence(cls, name, instance_id):
         """Checks if a project exists with given name"""
-        if Project.query.filter(
+        query = Project.query.filter(
                     func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
-        ).count() > 0:
+        )
+        if instance_id:
+            query = query.filter(Project.id != instance_id)
+        if query.count() > 0:
             return {"exists": True}
         return {"exists": False}
