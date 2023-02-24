@@ -36,7 +36,9 @@ export default class ProponentMapper extends MapperBase {
         let mapped_data:any[] = [];
         for(let i = 0;i<excelRows.length;i++) {
             const row = excelRows[i];
-            const relationship_holder = this.staffs.filter(p=> p.name === row['relationship_holder'])[0];
+            const relationship_holder = this.staffs.filter(p=> `${p.lastname}, ${p.firstname}` === row['relationship_holder'])[0];
+            console.log(row['relationship_holder']);
+            console.log(relationship_holder);
             const proponent = new Proponent(row.name, relationship_holder?.id);
             const propFormData = new ProponentFormData(proponent);
             mapped_data.push({
