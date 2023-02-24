@@ -34,7 +34,7 @@ export default class IndigenousNationMapper extends MapperBase {
         });
         let mapped_data:any[] = [];
         for(let indigenousNation of excelIndigenousNations) {
-            const relationship_holder = this.staffs.filter(p=> p.name === indigenousNation.epd)[0];
+            const relationship_holder = this.staffs.filter(p=> `${p.lastname}, ${p.firstname}` === indigenousNation['relationship_holder'])[0];
             const indigenousNationData = new IndigenousNation(
                indigenousNation.name
                ,relationship_holder?.id
