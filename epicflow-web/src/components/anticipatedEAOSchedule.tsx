@@ -7,6 +7,7 @@ import moment from 'moment';
 
 export default function AnticipatedEAOSchedule({ ...props }) {
     const [reports, setReports] = useState({});
+    const [noRecords, setNoRecords] = useState(true);
     const [tabKey, setTabKey] = useState('basic');
     const [reportDate, setReportDate] = useState();
     const fetchReportData = async () => {
@@ -15,9 +16,6 @@ export default function AnticipatedEAOSchedule({ ...props }) {
         });
 
         if (reportData.status === 200) {
-            Object.keys(reportData.data as {}).forEach(key => {
-                console.log((reportData.data as any)[key]);
-            })
             setReports(reportData.data as never);
         }
 

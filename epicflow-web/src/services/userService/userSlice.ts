@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { UserState } from "./type";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { UserState } from './type';
 
 const initialState: UserState = {
     bearerToken: '',
