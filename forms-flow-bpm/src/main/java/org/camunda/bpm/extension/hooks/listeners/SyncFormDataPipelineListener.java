@@ -107,15 +107,19 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 				for (int i = 0; i < jsonData.size(); i++) {
 					if (jsonData.get(i).has("id")) {
 						String jsonPath = "$." + entry + "[" + i + "]" + ".id";
-						Integer elementValue = jsonContext.read(jsonPath);
-						elements.add(new FormElement(entry + "/" + i + "/id", String.valueOf(elementValue)));
+						Integer elementValue = readJsonPath(jsonContext, jsonPath);
+						if(elementValue != 0) {
+							elements.add(new FormElement(entry + "/" + i + "/id", String.valueOf(elementValue)));
+						}
 					}
 					readInnerDataElements(i, jsonData, elements, entry, jsonContext);
 				}
 			} else if (jsonData.has("id") && jsonData.isObject()) {
 				String jsonPath = "$." + entry + ".id";
-				Integer elementValue = jsonContext.read(jsonPath);
-				elements.add(new FormElement(entry + "/id", String.valueOf(elementValue)));
+				Integer elementValue = readJsonPath(jsonContext, jsonPath);
+				if(elementValue != 0) {
+					elements.add(new FormElement(entry + "/id", String.valueOf(elementValue)));
+				}
 			}
 		});
 		LOGGER.info("Patch Elements : " + elements);
@@ -131,19 +135,32 @@ public class SyncFormDataPipelineListener extends BaseListener implements TaskLi
 				for (int j = 0; j < nestedData.size(); j++) {
 					if (nestedData.get(j).has("id")) {
 						String jsonPath = "$." + entry + "[" + i + "]" + "." + innerEntry + "[" + j + "]" + ".id";
-						Integer innerElementValue = jsonContext.read(jsonPath);
-						elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/" + j + "/" + "id",
-								String.valueOf(innerElementValue)));
+						Integer innerElementValue = readJsonPath(jsonContext, jsonPath);
+						if(innerElementValue != 0) {
+							elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/" + j + "/" + "id",
+							String.valueOf(innerElementValue)));
+						}
 					}
 				}
 			} else if (nestedData.has("id") && nestedData.isObject()) {
 				String jsonPath = "$." + entry + "[" + i + "]" + "." + innerEntry + ".id";
-				Integer innerElementValue = jsonContext.read(jsonPath);
-				elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/id", String.valueOf(innerElementValue)));
+				Integer innerElementValue = readJsonPath(jsonContext, jsonPath);
+				if(innerElementValue != 0 ) {
+					elements.add(new FormElement(entry + "/" + i + "/" + innerEntry + "/id", String.valueOf(innerElementValue)));
+				}
 			}
 		});
 	}
 
+	private Integer readJsonPath(DocumentContext jsonContext, String jsonPath) {
+		Integer value  = 0;
+		try {
+			value = jsonContext.read(jsonPath);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return value;
+	}
 	/**
 	 * This method invokes Sync API and returns the response.
 	 *
