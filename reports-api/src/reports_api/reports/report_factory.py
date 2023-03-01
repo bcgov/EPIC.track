@@ -35,10 +35,12 @@ class ReportFactory(ABC):
         """Formats the given data for the given report"""
         formatted_data = defaultdict(list)
         excluded_items = []
-        if self.filters and 'exclude' in self.filters:
-            excluded_items = self.filters['exclude']
+        if self.filters and "exclude" in self.filters:
+            excluded_items = self.filters["exclude"]
         for item in data:
-            obj = {k: getattr(item, k) for k in self.data_keys if k not in excluded_items}
+            obj = {
+                k: getattr(item, k) for k in self.data_keys if k not in excluded_items
+            }
             obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
             formatted_data[obj.get(self.group_by)].append(obj)
         return formatted_data
@@ -145,7 +147,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             status_update_max_date_query,
             and_(
                 WorkStatus.work_id == status_update_max_date_query.c.work_id,
-                WorkStatus.posted_date == status_update_max_date_query.c.max_posted_date,
+                WorkStatus.posted_date ==
+                status_update_max_date_query.c.max_posted_date,
             ),
         )
 
@@ -234,7 +237,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Generates a report and returns it"""
         data = self._fetch_data(report_date)
         data = self._format_data(data)
-        if return_type == "json":
+        if return_type == "json" or not data:
             return data, None
         api_payload = {
             "report_data": data,
