@@ -1,18 +1,20 @@
 {
     "extends": [
         "eslint:recommended",
-        "plugin:import/errors",
-        "plugin:react/recommended"
+        "plugin:react/recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended"
     ],
     "plugins": [
-        "react",
-        "import"
+        "react"
     ],
     "rules": {
+        "no-use-before-define": "off",
+        "@typescript-eslint/no-use-before-define": ["error"],
         "react/prop-types": 0,
         "indent": [
             "error",
-            2
+            4
         ],
         "linebreak-style": 0,
         "quotes": [
@@ -20,6 +22,7 @@
             "single"
         ]
     },
+    "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaVersion": 2021,
         "sourceType": "module",
