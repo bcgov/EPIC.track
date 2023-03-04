@@ -3,14 +3,14 @@ import Keycloak from 'keycloak-js';
 import { AnyAction, Dispatch } from 'redux';
 import { userToken, userAuthentication } from './userSlice';
 const KeycloakData: Keycloak = new Keycloak({
-    clientId:AppConfig.keycloak.clientId,
+    clientId: AppConfig.keycloak.clientId,
     realm: AppConfig.keycloak.realm,
     url: AppConfig.keycloak.url
 });
-    
-    /**
- * Initializes Keycloak instance.
- */
+
+/**
+* Initializes Keycloak instance.
+*/
 const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     try {
         const authenticated = await KeycloakData.init({
@@ -32,7 +32,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     }
 };
 const getToken = () => KeycloakData.token || window.localStorage.getItem('authToken');
-const doLogin =() => KeycloakData.login;
+const doLogin = () => KeycloakData.login;
 const UserService = {
     keycloakData: KeycloakData,
     initKeycloak,
