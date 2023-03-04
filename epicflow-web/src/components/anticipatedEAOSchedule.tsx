@@ -1,69 +1,107 @@
-import { useState } from "react";
-import { Form, Col, Row, Button, Container, Accordion, Tabs, Tab, Table } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { Form, Col, Row, Button, Accordion, Tabs, Tab, Table, Container, Alert, Placeholder } from 'react-bootstrap';
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import ReportService from "../services/reportService";
-import ApplicationConstant from "../constants/application-constant";
+import ReportService from '../services/reportService';
+import { ResultStatus, DateFormat } from '../constants/application-constant';
 import moment from 'moment';
 
 export default function AnticipatedEAOSchedule({ ...props }) {
     const [reports, setReports] = useState({});
     const [tabKey, setTabKey] = useState('basic');
     const [reportDate, setReportDate] = useState();
+    const [resultStatus, setResultStatus] = useState<string>();
+    const { register, trigger, formState: { errors, isValid } } = useForm({
+        mode: 'onChange'
+    });
+    const formatDate = (date: string) => {
+        return moment(date).format(DateFormat);
+    }
     const fetchReportData = async () => {
-        const reportData = await ReportService.fetchReportData(props.apiUrl, 'ea_anticipated_schedule', {
-            report_date: reportDate
-        });
-
-        if (reportData.status === 200) {
-            Object.keys(reportData.data as {}).forEach(key => {
-                console.log((reportData.data as any)[key]);
-            })
-            setReports(reportData.data as never);
+        trigger();
+        if(isValid) {
+            setResultStatus(ResultStatus.LOADING);
+            try {
+                const reportData = await ReportService.fetchReportData(props.apiUrl, 'ea_anticipated_schedule', {
+                    report_date: reportDate
+                });
+                setResultStatus(ResultStatus.LOADED);
+                if (reportData.status === 200) {
+                    setReports(reportData.data as never);
+                }
+    
+                if (reportData.status === 204) {
+                    setResultStatus(ResultStatus.NO_RECORD);
+                }
+            } catch (error) {
+                setResultStatus(ResultStatus.ERROR);
+            }
         }
-
     }
     const downloadPDFReport = async () => {
-        const binaryReponse = await ReportService.downloadPDF(props.apiUrl, 'ea_anticipated_schedule', {
-            report_date: reportDate
-        });
-        const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "file.pdf");
-        document.body.appendChild(link);
-        link.click();
-    }
-    const formatDate = (date: string) => {
-        return moment(date).format(ApplicationConstant.DateFormat);
+        trigger();
+        if(isValid){
+            try{
+                const binaryReponse = await ReportService.downloadPDF(props.apiUrl, 'ea_anticipated_schedule', {
+                    report_date: reportDate
+                });
+                const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `Anticipated_EA_Referral_Schedule-${formatDate(reportDate?reportDate:new Date().toISOString())}.pdf`);
+                document.body.appendChild(link);
+                console.log((binaryReponse as any));
+                link.click();
+            }catch(error){
+                setResultStatus(ResultStatus.ERROR);
+            }
+        }
     }
     return (
-        <Container>
-            <Form id="reportParams">
+        <>
+            <Form id="reportParams" onSubmit={(e)=>e.preventDefault()}>
                 <Form.Group as={Row} className="mb-3" controlId="formPlaintextEmail">
-                    <Form.Label column sm="2">
-                        Report Date
-                    </Form.Label>
-                    <Col sm="4">
-                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate" value={reportDate} onChangeCapture={(e: any) => setReportDate(e.target.value)} />
+                    <Col sm="3">
+                        <Form.Label>
+                            Report Date
+                        </Form.Label>
                     </Col>
-                    <Col sm="4"></Col>
-                    <Col sm="1">
-                        <Button onClick={fetchReportData}>Submit</Button>
+                    <Col sm="2">
+                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate"
+                            {...register('ReportDate', { required: 'Report date is required' })}
+                            onChangeCapture={(e: any) => setReportDate(e.target.value)} />
+                        <Form.Control.Feedback type='invalid'>
+                            Please select the report date
+                        </Form.Control.Feedback>
+                        {errors.ReportDate && <div style={{color:'red'}}>Please select the report date</div>}
+                    </Col>
+                    <Col sm="2">
+                        <Form.Label column sm="2">
+                            Filters
+                        </Form.Label>
+                    </Col>
+                    <Col sm="2">
+                        <Form.Select>
+                            <option key={0}>Select Report</option>
+                        </Form.Select>
                     </Col>
                     <Col sm="1">
-                        <Button onClick={downloadPDFReport}>Download</Button>
+                        <Button type='submit'  onClick={fetchReportData}>Submit</Button>
+                    </Col>
+                    <Col sm="1">
+                        {resultStatus === ResultStatus.LOADED &&  <Button onClick={downloadPDFReport}>Download</Button> }
                     </Col>
                 </Form.Group>
             </Form>
-            <Accordion defaultActiveKey="0">
+            {resultStatus === ResultStatus.LOADED && <Accordion defaultActiveKey="0">
                 {
                     Object.keys(reports).map((key, index) => {
-                        return <Accordion.Item eventKey={index.toString()}>
+                        return <Accordion.Item key={index} eventKey={index.toString()}>
                             <Accordion.Header>{key}</Accordion.Header>
                             <Accordion.Body>
                                 {
                                     ((reports as any)[key] as []).map((item, itemIndex) => {
-                                        return <Accordion>
+                                        return <Accordion key={itemIndex}>
                                             <Accordion.Item eventKey={itemIndex.toString()}>
                                                 <Accordion.Header>{item['project_name']}</Accordion.Header>
                                                 <Accordion.Body>
@@ -159,7 +197,28 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                     })
                 }
 
-            </Accordion>
-        </Container>
+            </Accordion>}
+            {resultStatus === ResultStatus.NO_RECORD &&
+                <Container>
+                    <Alert>
+                        No Records Found
+                    </Alert>
+                </Container>}
+            {resultStatus === ResultStatus.ERROR &&
+                <Container>
+                    <Alert variant='danger'>
+                        Error occured during processing. Please try again after some time.
+                    </Alert>
+                </Container>}
+            {resultStatus === ResultStatus.LOADING &&
+                <Container>
+                    <Placeholder as="p" animation="glow">
+                        <Placeholder xs={12} />
+                    </Placeholder>
+                    <Placeholder as="p" animation="wave">
+                        <Placeholder xs={12} />
+                    </Placeholder>
+                </Container>}
+        </>
     )
 }
