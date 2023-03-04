@@ -25,11 +25,9 @@ import {
   setMetricsDateChange,
 } from "../../actions/metricsActions";
 import LoadingOverlay from "@ronchalant/react-loading-overlay";
-import { Button } from "react-bootstrap";
 import { push } from "connected-react-router";
 import { MULTITENANCY_ENABLED } from "../../constants/constants";
 import Head from "../../containers/Head";
-import { getUserInsightsPermission } from "../../helper/user";
 const Dashboard = React.memo(() => {
   const { t } = useTranslation();
   const dispatch = useDispatch();

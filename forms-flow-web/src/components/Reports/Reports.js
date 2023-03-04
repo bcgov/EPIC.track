@@ -39,9 +39,9 @@ export default function Reports() {
                         <div className="col-12" data-testid="Report">
                             <Head items={headerList()} page="Reports" />
                             <div className='container'>
-                                <anticipated-eao-schedule-wc
+                                <report-selector-wc
                                     apiUrl={WEB_BASE_CUSTOM_URL}>
-                                </anticipated-eao-schedule-wc>
+                                </report-selector-wc>
                             </div>
                         </div>
                     </div>

@@ -4,6 +4,8 @@
   "private": true,
   "dependencies": {
     "@babel/core": "^7.16.0",
+    "@emotion/cache": "^11.10.5",
+    "@emotion/react": "^11.10.6",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.3",
     "@reduxjs/toolkit": "^1.9.2",
     "@svgr/webpack": "^5.5.0",
@@ -52,9 +54,11 @@
     "react-bootstrap": "^2.7.0",
     "react-dev-utils": "^12.0.1",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.43.3",
     "react-redux": "^8.0.5",
     "react-refresh": "^0.11.0",
     "react-router-dom": "^6.8.0",
+    "react-select": "^5.7.0",
     "resolve": "^1.20.0",
     "resolve-url-loader": "^4.0.0",
     "sass-loader": "^12.3.0",
@@ -76,8 +80,8 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "lint": "eslint \"src/**/*.{js,jsx}\"",
-    "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix",
+    "lint": "eslint \"src/**/*.{js,jsx,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{js,jsx,tsx}\" --fix",
     "build-wc": "webpack --config config-wc/webpack.config.js --node-env production  --mode production "
   },
   "eslintConfig": {
@@ -99,11 +103,16 @@
     ]
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.54.0",
+    "@typescript-eslint/parser": "^5.54.0",
     "eslint": "^8.34.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-jsx-a11y": "^6.7.1",
     "eslint-plugin-react": "^7.32.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
     "raw-loader": "^4.0.2",
+    "sass": "^1.58.3",
+    "sass-to-string": "^1.6.3",
     "ts-loader": "^9.4.2",
     "webpack-cli": "^5.0.1"
   },
