@@ -1,2 +1,6 @@
-import { AnticipatedEAOScheduleWC } from "./anticipatedEAOScheduleWC";
-export default AnticipatedEAOScheduleWC;
+import { AnticipatedEAOScheduleWC } from './anticipatedEAOScheduleWC';
+import { ReportSelectorWC } from './reportSelectorWC';
+export {
+    AnticipatedEAOScheduleWC,
+    ReportSelectorWC
+};
