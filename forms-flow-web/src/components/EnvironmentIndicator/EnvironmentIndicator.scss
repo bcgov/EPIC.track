@@ -1,14 +1,14 @@
 .indicator {
     position: absolute;
-    width: 40%;
-    left: 30%;
-    top: 100%;
     text-align: center;
-    box-shadow: 3px 3px #6c6767
+    padding: 0 0.5em 0 0.5em;
 }
 
 @media (max-width: 768px) {
     .indicator {
-        display: none;
+        
+        ::after {
+            content: ('Development')
+        }
     }
 }

@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo } from "react";
-import { Navbar, Container, Nav, NavDropdown } from "react-bootstrap";
+import { Navbar, Nav, NavDropdown } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import UserService from "../services/UserService";
 import {
-  getUserRoleName,
   getUserRolePermission,
   // TODO : modify insigth permission conditions
   // getUserInsightsPermission,
@@ -25,7 +24,8 @@ import { setLanguage } from "../actions/languageSetAction";
 import { updateUserlang } from "../apiManager/services/userservices";
 
 import { fetchSelectLanguages } from "../apiManager/services/languageServices";
-import EnvironmentalIndicator from '../components/EnvironmentIndicator/index'; 
+import EnvironmentalIndicator from '../components/EnvironmentIndicator/index';
+import { APP_ENV } from '../constants/additionalConstants';
 
 const NavBar = React.memo(() => {
   const isAuthenticated = useSelector((state) => state.user.isAuthenticated);
@@ -42,7 +42,7 @@ const NavBar = React.memo(() => {
   const baseUrl = MULTITENANCY_ENABLED ? `/tenant/${tenantKey}/` : "/";
   const selectLanguages = useSelector((state) => state.user.selectLanguages);
   const dispatch = useDispatch();
-  const logoPath = "/logo.svg";
+  const logoPath = "/bcgovlogo.png";
   const getAppName = useMemo(
     () => () => {
       if (!MULTITENANCY_ENABLED) {
@@ -80,33 +80,27 @@ const NavBar = React.memo(() => {
     <header>
       <Navbar
         expand="lg"
-        bg="white"
-        className="topheading-border-bottom"
+        className="topheading-border-bottom ef-nav-bar"
         fixed="top"
       >
-        <Container fluid>
-          {/* <div style={{width:'100px',height:'100px',background:'red'}}>
-            dineshdsss
-          </div> */}
-          <EnvironmentalIndicator></EnvironmentalIndicator>
-          <Navbar.Brand className="d-flex">
+        <div className={`ef-nav-bar-container${!(/^(prod)/i).test(APP_ENV) ? " ef-nav-bar-container__with-env" : ""}`}>
+          <Navbar.Brand className="d-flex ef-nav-bar-container__brand">
             <Link to={`${baseUrl}`}>
               <img
                 className="img-fluid"
                 src={logoPath}
-                width="50"
-                height="55"
+                width={55}
                 alt="Logo"
               />
             </Link>
-            <div className="custom-app-name">{appName}</div>
+            <div className="custom-app-name ef-custom-app-name">{appName}</div>
           </Navbar.Brand>
-          <Navbar.Toggle aria-controls="responsive-navbar-nav " />
+          <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           {isAuthenticated ? (
             <Navbar.Collapse id="responsive-navbar-nav" className="navbar-nav">
               <Nav
                 id="main-menu-nav"
-                className="mr-auto active align-items-lg-center"
+                className="mr-auto align-items-lg-center ef-main-nav"
               >
                 <Nav.Link
                   as={Link}
@@ -117,7 +111,7 @@ const NavBar = React.memo(() => {
                       : ""
                   }`}
                 >
-                  <i className="fa fa-wpforms fa-fw fa-lg mr-2" />
+                  <i className="fa fa-wpforms fa-fw fa-lg mr-2"/>
                   {t("Forms")}
                 </Nav.Link>
                 {getUserRolePermission(userRoles, STAFF_DESIGNER) ? (
@@ -130,7 +124,7 @@ const NavBar = React.memo(() => {
                         : ""
                     }`}
                   >
-                    <i className="fa fa-user-circle-o fa-lg mr-2" />
+                    <i className="fa fa-user-circle-o fa-lg mr-2"/>
                     {t("Admin")}
                   </Nav.Link>
                 ) : null}
@@ -147,7 +141,7 @@ const NavBar = React.memo(() => {
                         : ""
                     }`}
                   >
-                    <i className="fa fa-cogs fa-lg fa-fw mr-2" />
+                    <i className="fa fa-cogs fa-lg fa-fw mr-2"/>
                     {t("Processes")}
                   </Nav.Link>
                 ) : null}
@@ -171,7 +165,7 @@ const NavBar = React.memo(() => {
                       }`}
                     >
                       {" "}
-                      <i className="fa fa-list-alt fa-fw fa-lg mr-2" />
+                      <i className="fa fa-list-alt fa-fw fa-lg mr-2"/>
                       {t("Applications")}
                     </Nav.Link>
                   ) : null
@@ -188,7 +182,7 @@ const NavBar = React.memo(() => {
                     onClick={goToTask}
                   >
                     {" "}
-                    <i className="fa fa-list fa-lg fa-fw mr-2" />
+                    <i className="fa fa-list fa-lg fa-fw mr-2"/>
                     {t("Tasks")}
                   </Nav.Link>
                 ) : null}
@@ -208,13 +202,13 @@ const NavBar = React.memo(() => {
                     }`}
                   >
                     {" "}
-                    <i className="fa fa-tachometer fa-lg fa-fw mr-2" />
+                    <i className="fa fa-tachometer fa-lg fa-fw mr-2"/>
                     {t("Dashboards")}
                   </Nav.Link>
                 ) : null}
               </Nav>
 
-              <Nav className="ml-lg-auto mr-auto px-lg-0 px-3">
+              <Nav className="ml-lg-auto mr-auto px-lg-0 px-3" style={{display:'none'}}>
                 {selectLanguages.length === 1 ? (
                   selectLanguages.map((e, i) => {
                     return (
@@ -248,8 +242,9 @@ const NavBar = React.memo(() => {
                 )}
               </Nav>
 
-              <Nav className="ml-lg-auto mr-auto px-lg-0 px-3">
+              <Nav>
                 <NavDropdown
+                className="ef-user-nav"
                   title={
                     <>
                       <i className="fa fa-user fa-lg mr-1" />
@@ -261,8 +256,8 @@ const NavBar = React.memo(() => {
                     {" "}
                     {user?.name || user?.preferred_username}
                     <br />
-                    <i className="fa fa-users fa-lg fa-fw" />
-                    <b>{getUserRoleName(userRoles)}</b>
+                    {/* <i className="fa fa-users fa-lg fa-fw" />
+                    <b>{getUserRoleName(userRoles)}</b> */}
                   </NavDropdown.Item>
                   <NavDropdown.Divider />
                   <NavDropdown.Item onClick={logout}>
@@ -276,7 +271,8 @@ const NavBar = React.memo(() => {
               Login
             </Link>
           )}
-        </Container>
+        </div>
+        <EnvironmentalIndicator></EnvironmentalIndicator>
       </Navbar>
     </header>
   );
