@@ -5,12 +5,23 @@ import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import ReportService from '../services/reportService';
 import { ResultStatus, DateFormat } from '../constants/application-constant';
 import moment from 'moment';
+import Select from 'react-select'
+
 
 export default function AnticipatedEAOSchedule({ ...props }) {
     const [reports, setReports] = useState({});
     const [tabKey, setTabKey] = useState('basic');
     const [reportDate, setReportDate] = useState();
     const [resultStatus, setResultStatus] = useState<string>();
+    const [filter, setFilter] = useState<string[]>([]);
+
+    const referralReportFilters = [{
+        label: 'PECP Title',
+        value: 'next_pecp_title'
+    }, {
+        label: 'PECP Date',
+        value: 'next_pecp_date'
+    }];
     const { register, trigger, formState: { errors, isValid } } = useForm({
         mode: 'onChange'
     });
@@ -19,17 +30,20 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     }
     const fetchReportData = async () => {
         trigger();
-        if(isValid) {
+        if (isValid) {
             setResultStatus(ResultStatus.LOADING);
             try {
                 const reportData = await ReportService.fetchReportData(props.apiUrl, 'ea_anticipated_schedule', {
-                    report_date: reportDate
+                    report_date: reportDate,
+                    filters: {
+                        exclude: filter
+                    }
                 });
                 setResultStatus(ResultStatus.LOADED);
                 if (reportData.status === 200) {
                     setReports(reportData.data as never);
                 }
-    
+
                 if (reportData.status === 204) {
                     setResultStatus(ResultStatus.NO_RECORD);
                 }
@@ -40,45 +54,57 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     }
     const downloadPDFReport = async () => {
         trigger();
-        if(isValid){
-            try{
+        if (isValid) {
+            try {
+                fetchReportData();
                 const binaryReponse = await ReportService.downloadPDF(props.apiUrl, 'ea_anticipated_schedule', {
-                    report_date: reportDate
+                    report_date: reportDate,
+                    filters: {
+                        exclude: filter
+                    }
                 });
                 const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', `Anticipated_EA_Referral_Schedule-${formatDate(reportDate?reportDate:new Date().toISOString())}.pdf`);
+                link.setAttribute('download', `Anticipated_EA_Referral_Schedule-${formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
                 document.body.appendChild(link);
                 console.log((binaryReponse as any));
                 link.click();
-            }catch(error){
+            } catch (error) {
                 setResultStatus(ResultStatus.ERROR);
             }
         }
     }
     return (
         <>
-            <Form id="reportParams" onSubmit={(e)=>e.preventDefault()}>
+            <Form id="reportParams" onSubmit={(e) => e.preventDefault()}>
                 <Form.Group as={Row} className="mb-3" controlId="formPlaintextEmail">
-                    <Form.Label column sm="2">
+                    <Form.Label column sm={2}>
                         Report Date
                     </Form.Label>
-                    <Col sm="4">
+                    <Col sm="2">
                         <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate"
                             {...register('ReportDate', { required: 'Report date is required' })}
                             onChangeCapture={(e: any) => setReportDate(e.target.value)} />
                         <Form.Control.Feedback type='invalid'>
                             Please select the report date
                         </Form.Control.Feedback>
-                        {errors.ReportDate && <div style={{color:'red'}}>Please select the report date</div>}
+                        {errors.ReportDate && <div style={{ color: 'red' }}>Please select the report date</div>}
                     </Col>
-                    <Col sm="4"></Col>
-                    <Col sm="1">
-                        <Button type='submit'  onClick={fetchReportData}>Submit</Button>
+                    <Form.Label column sm={2}>
+                        Filters
+                    </Form.Label>
+                    <Col sm="2">
+                        <Select
+                            options={referralReportFilters}
+                            isMulti
+                            onChange={(option: any) => setFilter(option.map((p: any) => p.value))} />
                     </Col>
                     <Col sm="1">
-                        {resultStatus === ResultStatus.LOADED &&  <Button onClick={downloadPDFReport}>Download</Button> }
+                        <Button type='submit' onClick={fetchReportData}>Submit</Button>
+                    </Col>
+                    <Col sm="1">
+                        {resultStatus === ResultStatus.LOADED && <Button onClick={downloadPDFReport}>Download</Button>}
                     </Col>
                 </Form.Group>
             </Form>
@@ -103,10 +129,10 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                                         <Tab eventKey="basic" title="Basic">
                                                             <Table striped="columns">
                                                                 <tbody>
-                                                                    <tr>
+                                                                    {item['proponent'] && <tr>
                                                                         <td>Proponent</td>
                                                                         <td>{item['proponent']}</td>
-                                                                    </tr>
+                                                                    </tr>}
                                                                     <tr>
                                                                         <td>Region</td>
                                                                         <td>{item['region']}</td>
@@ -148,14 +174,14 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                                                         <td>{formatDate(item['date_updated'])}</td>
                                                                     </tr>
                                                                     {
-                                                                        item['next_pecp_date'] !== null &&
+                                                                        item['next_pecp_date'] &&
                                                                         <tr>
                                                                             <td>Next PECP Date</td>
                                                                             <td>{formatDate(item['next_pecp_date'])}</td>
                                                                         </tr>
                                                                     }
                                                                     {
-                                                                        item['next_pecp_title'] !== null &&
+                                                                        item['next_pecp_title'] &&
                                                                         <tr>
                                                                             <td>PECP Title</td>
                                                                             <td>{item['next_pecp_title']}</td>
