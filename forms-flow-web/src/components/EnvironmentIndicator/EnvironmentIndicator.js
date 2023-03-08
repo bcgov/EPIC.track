@@ -3,7 +3,6 @@ import './EnvironmentIndicator.scss';
 import React from "react";
 
 function EnvironmentIndicator(){
-    console.log('APP_ENV',APP_ENV);
     const backgroundColor = APP_ENV.startsWith('test') ? '#5b9f66' : '#c97575';
     const text = `This is ${APP_ENV} environment. 
         The content you are viewing is not final and subject to change`;
