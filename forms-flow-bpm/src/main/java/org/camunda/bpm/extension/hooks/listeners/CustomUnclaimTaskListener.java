@@ -31,9 +31,7 @@ public class CustomUnclaimTaskListener extends BaseListener implements TaskListe
         List<Task> taskList = execution.getProcessEngine().getTaskService().createTaskQuery().taskAssigned().list();
 
         for (Task task : taskList) {
-            String taskId = task.getId();
-            LOGGER.debug(taskId + "Task ID : ");
-            execution.getProcessEngine().getTaskService().setAssignee(taskId, null);
+            execution.getProcessEngine().getTaskService().setAssignee(task.getId(), null);
         }
     }
 }
