@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Form, Col, Row, Button, Accordion, Tabs, Tab, Table, Container, Alert, Placeholder } from 'react-bootstrap';
-import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import ReportService from '../services/reportService';
-import { ResultStatus, DateFormat } from '../constants/application-constant';
+import '../../../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import ReportService from '../../../services/reportService';
+import { RESULT_STATUS, REPORT_TYPE } from '../../../constants/application-constant';
 import moment from 'moment';
-import Select from 'react-select'
+import Select from 'react-select';
+import { dateUtils } from '../../../utils';
 
 
 export default function AnticipatedEAOSchedule({ ...props }) {
@@ -25,30 +26,27 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     const { register, trigger, formState: { errors, isValid } } = useForm({
         mode: 'onChange'
     });
-    const formatDate = (date: string) => {
-        return moment(date).format(DateFormat);
-    }
     const fetchReportData = async () => {
         trigger();
         if (isValid) {
-            setResultStatus(ResultStatus.LOADING);
+            setResultStatus(RESULT_STATUS.LOADING);
             try {
-                const reportData = await ReportService.fetchReportData(props.apiUrl, 'ea_anticipated_schedule', {
+                const reportData = await ReportService.fetchReportData(props.apiUrl, REPORT_TYPE.EA_REFERRAL, {
                     report_date: reportDate,
                     filters: {
                         exclude: filter
                     }
                 });
-                setResultStatus(ResultStatus.LOADED);
+                setResultStatus(RESULT_STATUS.LOADED);
                 if (reportData.status === 200) {
                     setReports(reportData.data as never);
                 }
 
                 if (reportData.status === 204) {
-                    setResultStatus(ResultStatus.NO_RECORD);
+                    setResultStatus(RESULT_STATUS.NO_RECORD);
                 }
             } catch (error) {
-                setResultStatus(ResultStatus.ERROR);
+                setResultStatus(RESULT_STATUS.ERROR);
             }
         }
     }
@@ -57,7 +55,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
         if (isValid) {
             try {
                 fetchReportData();
-                const binaryReponse = await ReportService.downloadPDF(props.apiUrl, 'ea_anticipated_schedule', {
+                const binaryReponse = await ReportService.downloadPDF(props.apiUrl, REPORT_TYPE.EA_REFERRAL, {
                     report_date: reportDate,
                     filters: {
                         exclude: filter
@@ -66,12 +64,12 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                 const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', `Anticipated_EA_Referral_Schedule-${formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
+                link.setAttribute('download', `Anticipated_EA_Referral_Schedule-${dateUtils.formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
                 document.body.appendChild(link);
                 console.log((binaryReponse as any));
                 link.click();
             } catch (error) {
-                setResultStatus(ResultStatus.ERROR);
+                setResultStatus(RESULT_STATUS.ERROR);
             }
         }
     }
@@ -104,11 +102,11 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                         <Button type='submit' onClick={fetchReportData}>Submit</Button>
                     </Col>
                     <Col sm="1">
-                        {resultStatus === ResultStatus.LOADED && <Button onClick={downloadPDFReport}>Download</Button>}
+                        {resultStatus === RESULT_STATUS.LOADED && <Button onClick={downloadPDFReport}>Download</Button>}
                     </Col>
                 </Form.Group>
             </Form>
-            {resultStatus === ResultStatus.LOADED && <Accordion defaultActiveKey="0">
+            {resultStatus === RESULT_STATUS.LOADED && <Accordion defaultActiveKey="0">
                 {
                     Object.keys(reports).map((key, index) => {
                         return <Accordion.Item key={index} eventKey={index.toString()}>
@@ -167,17 +165,17 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                                                                 <tbody>
                                                                     <tr>
                                                                         <td>{item['milestone_type'] === 4 ? 'Referral Date' : 'Decision Date'}</td>
-                                                                        <td>{formatDate(item['referral_date'])}</td>
+                                                                        <td>{dateUtils.formatDate(item['referral_date'])}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td>Updated Date</td>
-                                                                        <td>{formatDate(item['date_updated'])}</td>
+                                                                        <td>{dateUtils.formatDate(item['date_updated'])}</td>
                                                                     </tr>
                                                                     {
                                                                         item['next_pecp_date'] &&
                                                                         <tr>
                                                                             <td>Next PECP Date</td>
-                                                                            <td>{formatDate(item['next_pecp_date'])}</td>
+                                                                            <td>{dateUtils.formatDate(item['next_pecp_date'])}</td>
                                                                         </tr>
                                                                     }
                                                                     {
@@ -213,19 +211,19 @@ export default function AnticipatedEAOSchedule({ ...props }) {
                 }
 
             </Accordion>}
-            {resultStatus === ResultStatus.NO_RECORD &&
+            {resultStatus === RESULT_STATUS.NO_RECORD &&
                 <Container>
                     <Alert>
                         No Records Found
                     </Alert>
                 </Container>}
-            {resultStatus === ResultStatus.ERROR &&
+            {resultStatus === RESULT_STATUS.ERROR &&
                 <Container>
                     <Alert variant='danger'>
                         Error occured during processing. Please try again after some time.
                     </Alert>
                 </Container>}
-            {resultStatus === ResultStatus.LOADING &&
+            {resultStatus === RESULT_STATUS.LOADING &&
                 <Container>
                     <Placeholder as="p" animation="glow">
                         <Placeholder xs={12} />

@@ -4,7 +4,7 @@ import UserService from '../services/userService';
 import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
 import NavBar from './layout/NavBar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import AnticipatedEAOSchedule from './anticipatedEAOSchedule';
+import AnticipatedEAOSchedule from './reports/eaReferral/anticipatedEAOSchedule';
 import ReportSelector from './reportSelector';
 
 
