@@ -116,11 +116,12 @@ class CodeTable():  # pylint: disable=too-few-public-methods
         """RollBack."""
         db.session.rollback()
 
-    def update(self, payload: dict):
+    def update(self, payload: dict, commit=True):
         """Update and commit."""
         for key, value in payload.items():
             setattr(self, key, value)
-        self.commit()
+        if commit:
+            self.commit()
         return self
 
     def delete(self):

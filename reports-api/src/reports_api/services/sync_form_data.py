@@ -17,6 +17,7 @@ from typing import Union
 import json
 from flask import current_app
 from inflector import English, Inflector
+from reports_api.models import db
 
 from reports_api.utils.helpers import find_model_from_table_name
 
@@ -38,10 +39,10 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         data = {k: v for k, v in data.items() if k in columns and v}
         if 'id' in data and data['id']:
             obj = model_class.find_by_id(data['id'])
-            obj = obj.update(data)
+            obj = obj.update(data, commit=False)
         else:
             obj = model_class(**data)
-            obj = obj.save()
+            obj = obj.flush()
         return obj
 
     @classmethod
@@ -146,4 +147,5 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
             obj = cls._process_model_data(model_name, dataset, result)
             if obj:
                 result[model_key] = obj
+        db.session.commit()
         return result

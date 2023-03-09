@@ -61,11 +61,12 @@ class BaseModel(db.Model):
         rows = cls.query.all()  # pylint: disable=no-member
         return rows
 
-    def update(self, payload: dict):
+    def update(self, payload: dict, commit=True):
         """Update and commit."""
         for key, value in payload.items():
             setattr(self, key, value)
-        self.commit()
+        if commit:
+            self.commit()
         return self
 
     def delete(self):
