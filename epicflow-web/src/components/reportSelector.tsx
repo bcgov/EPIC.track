@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Col, Container, Form, Row } from 'react-bootstrap';
-import { ReportTypes } from '../constants/application-constant';
-import AnticipatedEAOSchedule from './anticipatedEAOSchedule';
+import { REPORT_TYPES, REPORT_TYPE } from '../constants/application-constant';
+import AnticipatedEAOSchedule from './reports/eaReferral/anticipatedEAOSchedule';
+import ResourceForecast from './reports/resourceForecast/resourceForecast';
+
 export default function ReportSelector({ ...props }) {
     const [selectedReport, setSelectedReport] = useState<string>();
     const apiUrl = props.apiUrl;
-    const reportTypeOptions = ReportTypes.map((p, index) => (<option key={index + 1} value={p.Value}>{p.Text}</option>))
+    const reportTypeOptions = REPORT_TYPES.map((p, index) => (<option key={index + 1} value={p.Value}>{p.Text}</option>))
     return (
         <>
             <Container>
@@ -24,7 +26,8 @@ export default function ReportSelector({ ...props }) {
                 </Form>
             </Container>
             <Container>
-                {selectedReport === 'ea_anticipated_schedule' && <AnticipatedEAOSchedule apiUrl={apiUrl} />}
+                {selectedReport === REPORT_TYPE.EA_REFERRAL && <AnticipatedEAOSchedule apiUrl={apiUrl} />}
+                {selectedReport === REPORT_TYPE.RESOURCE_FORECAST && <ResourceForecast apiUrl={apiUrl} />}
             </Container>
         </>
     );

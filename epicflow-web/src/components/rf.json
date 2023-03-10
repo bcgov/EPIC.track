@@ -1,0 +1,44 @@
+[
+    {
+        "analyst": "Trumpy, Chris",
+        "capital_investment": "3,500,000,000",
+        "ea_act": "EA Act (2018)",
+        "ea_type": "Assessment",
+        "eao_team": "CIAR",
+        "env_region": "Lower Mainland",
+        "fn_cairt_lead": "Arend, Elenore",
+        "iaac": "To Be Determined",
+        "months": [
+            {
+                "color": "#CCFFFF",
+                "label": "September",
+                "phase": "Proponent Time: Early Engagement"
+            },
+            {
+                "color": "#CCFFFF",
+                "label": "October",
+                "phase": "Proponent Time: Early Engagement"
+            },
+            {
+                "color": "#CCFFFF",
+                "label": "November",
+                "phase": "Proponent Time: Early Engagement"
+            },
+            {
+                "color": "#CCFFFF",
+                "label": "Dec2023JanFeb2024",
+                "phase": "Proponent Time: Early Engagement"
+            }
+        ],
+        "nrs_region": "Lower Mainland",
+        "project_name": "Fraser River Tunnel Project",
+        "project_phase": "Early Engagement",
+        "referral_timing": "September, 2029",
+        "responsible_epd": "Grace, David",
+        "sl_no": 1,
+        "sub_type": "Public Highways",
+        "type": "Transportation",
+        "work_lead": "Dodd, Nikki",
+        "work_team_members": "Goodsell, Todd; Grace, David"
+    }
+]
