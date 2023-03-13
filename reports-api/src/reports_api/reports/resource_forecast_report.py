@@ -393,7 +393,6 @@ class EAResourceForeCastReport(ReportFactory):
                 .group_by(PhaseCode.id)
                 .order_by(PhaseCode.id.desc())
             )
-            print(referral_timing_query.statement.compile(compile_kwargs={"literal_binds": True}))
             if project_data["ea_type"] == "Assessment":
                 referral_timing_obj = referral_timing_query.offset(1).first()
                 referral_timing_milestone = next(
