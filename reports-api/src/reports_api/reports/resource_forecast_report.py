@@ -350,7 +350,7 @@ class EAResourceForeCastReport(ReportFactory):
         )
         return results_qry.all()
 
-    def _format_data(self, data):
+    def _format_data(self, data):  # pylint: disable=too-many-locals
         result = super()._format_data(data)
         response = []
         for _, values in result.items():
