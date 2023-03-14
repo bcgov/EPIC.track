@@ -26,11 +26,11 @@ export default function StaffList() {
 
     }
     useEffect(() => {
-        setTimeout(()=>getStaff(),10);
+        getStaff();
     });
     return (
-        <Container maxWidth="xl">
-            <Grid container spacing={0.5}  justifyContent='space-between'>
+        <>
+            <Grid container spacing={0.5} justifyContent='space-between'>
                 <Grid item>
                     <TextField placeholder='Search' />
                 </Grid>
@@ -76,6 +76,6 @@ export default function StaffList() {
                 onPageChange={handleChangePage}
                 onRowsPerPageChange={handleChangeRowsPerPage}
             />
-        </Container>
+        </>
     );
 }

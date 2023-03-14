@@ -1,30 +1,60 @@
+import { Alert, Button, Chip, Container, FormControl, FormLabel, Grid, MenuItem, OutlinedInput, Paper, Skeleton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import React, { useEffect, useState } from 'react';
-import { Button, Col, Form, Row, Table } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
-import { RESULT_STATUS, REPORT_TYPE } from '../../../constants/application-constant';
+import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
-import rf_data from '../../rf.json';
-// import Select from 'react-select';
+import { dateUtils } from '../../../utils';
+import Select from '@mui/material/Select';
+import { Box } from '@mui/system';
 
 export default function ResourceForecast({ ...props }) {
-    const [reportDate, setReportDate] = useState();
+    const [reportDate, setReportDate] = useState<string>();
     const [resultStatus, setResultStatus] = useState<string>();
     const [rfData, setRFData] = useState<any[]>([]);
+    const [selectedFilters, setSelectedFilter] = useState<string[]>([]);
 
+    const filters = [
+        {
+            label: 'Capital Investment',
+            value: 'capital_investment'
+        },
+        {
+            label: 'Responsible EPD',
+            value: 'responsible_epd'
+        },
+        {
+            label: 'EAO Team',
+            value: 'eao_team'
+        },
+        {
+            label: 'Work Team Members',
+            value: 'work_team_members'
+        },
+        {
+            label: 'Referral Timing',
+            value: 'referral_timing'
+        }];
     const { register, trigger, formState: { errors, isValid } } = useForm({
         mode: 'onChange'
     });
-
+    const getSelectedFilterLabels = (selected: string[]) => {
+        const labels = selected.map(val => {
+            return filters.filter(p => p.value === val)[0].label
+        });
+        return labels;
+    }
     const fetchReportData = async () => {
         trigger();
         if (isValid) {
             setResultStatus(RESULT_STATUS.LOADING);
             try {
                 const reportData = await ReportService.fetchReportData(props.apiUrl, REPORT_TYPE.RESOURCE_FORECAST, {
-                    report_date: reportDate
-                    // filters: {
-                    //     exclude: filter
-                    // }
+                    report_date: reportDate,
+                    filters: {
+                        exclude: selectedFilters
+                    }
                 });
                 setResultStatus(RESULT_STATUS.LOADED);
                 if (reportData.status === 200) {
@@ -41,100 +71,133 @@ export default function ResourceForecast({ ...props }) {
     }
     return (
         <>
-            <Form id="reportParams" onSubmit={(e) => e.preventDefault()}>
-                <Form.Group as={Row} className="mb-3" controlId="formPlaintextEmail">
-                    <Form.Label column sm={2}>
-                        Report Date
-                    </Form.Label>
-                    <Col sm="2">
-                        <Form.Control type="date" data-date-format="YYYY MMMM DD" id="ReportDate"
-                            {...register('ReportDate', { required: 'Report date is required' })}
-                            onChangeCapture={(e: any) => setReportDate(e.target.value)} />
-                        <Form.Control.Feedback type='invalid'>
-                            Please select the report date
-                        </Form.Control.Feedback>
-                        {errors.ReportDate && <div style={{ color: 'red' }}>Please select the report date</div>}
-                    </Col>
-                    {/* <Form.Label column sm={2}>
-                        Filters
-                    </Form.Label> */}
-                    <Col sm="4">
-                    </Col>
-                    <Col sm="1">
-                        <Button type='submit' onClick={fetchReportData}>Submit</Button>
-                    </Col>
-                    <Col sm="1">
-                        {/* {resultStatus === RESULT_STATUS.LOADED && <Button onClick={downloadPDFReport}>Download</Button>} */}
-                    </Col>
-                </Form.Group>
-            </Form>
-            {rfData && rfData.length > 0 && <Table responsive bordered striped>
-                <thead>
-                    <tr>
-                        <th>Project</th>
-                        <th>EA Type</th>
-                        <th>Project Phase</th>
-                        <th>EA Act</th>
-                        <th>IAAC</th>
-                        <th>Sector (Sub)</th>
-                        <th>ENV Region</th>
-                        <th>NRS Region</th>
-                        <th>EPD Lead</th>
+            <Grid component="form" onSubmit={(e) => e.preventDefault()} container spacing={2} sx={{ marginTop: '5px' }}>
+                <Grid item sm={2}><FormLabel>Report Date</FormLabel></Grid>
+                <Grid item sm={2}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker format={DATE_FORMAT}
+                            onChange={(dateVal: any) => setReportDate(dateUtils.formatDate(dateVal.$d))} slotProps={{
+                                textField: {
+                                    id: 'ReportDate'
+                                }
+                            }} />
+                    </LocalizationProvider>
+                </Grid>
+                <Grid item sm={2}><FormLabel>Filter</FormLabel></Grid>
+                <Grid item sm={2}>
+                    <FormControl sx={{ width: 300 }}>
+                        <Select
+                            multiple
+                            value={selectedFilters}
+                            input={<OutlinedInput />}
+                            onChange={(e: any) => setSelectedFilter(e.target.value)}
+                            renderValue={(selected) => {
+                                if (selected.length === 0) {
+                                    return <em>Placeholder</em>;
+                                }
+
+                                return getSelectedFilterLabels(selected).join(', ');
+                            }}
+                        >
+                            {
+                                filters.map(filter => (
+                                    <MenuItem key={filter.value} value={filter.value}>{filter.label}</MenuItem>
+                                )
+                                )}
+                        </Select>
+                    </FormControl>
+                </Grid>
+                <Grid item sm={resultStatus === RESULT_STATUS.LOADED ? 3 : 4}>
+                    <Button variant='contained' type='submit' onClick={fetchReportData} sx={{ float: 'right' }}>Submit</Button>
+                </Grid>
+                <Grid item sm={1}>
+                    {resultStatus === RESULT_STATUS.LOADED && <Button variant='contained'>Download</Button>}
+                </Grid>
+            </Grid>
+            {resultStatus === RESULT_STATUS.LOADED && rfData && rfData.length > 0 && <Table sx={{ mt: '15px' }}>
+                <TableHead sx={{
+                    bgcolor: '#ebe6e6',
+                    '& th': {
+                        fontWeight: '600'
+                    }
+                }}>
+                    <TableRow>
+                        {['Project', 'EA Type', 'Project Phase', 'EA Act', 'IAAC', 'Sector', 'ENV Region', 'NRS Region', 'EPD Lead']
+                            .map((col, colIndex) => <TableCell key={colIndex}>{col}</TableCell>)}
                         {
                             (rfData[0]['months'] as []).map((rfMonth, rfMonthIndex) => (
-                                <th key={rfMonthIndex}>
+                                <TableCell key={rfMonthIndex}>
                                     {rfMonth['label']}
-                                </th>
+                                </TableCell>
                             ))
                         }
-                    </tr>
-                </thead>
-                <tbody>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
                     {rfData.map((rf, rfIndex) => (
-                        <tr key={rfIndex}>
-                            <td>
+                        <TableRow key={rfIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            <TableCell>
                                 {rf['project_name']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['ea_type']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['project_phase']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['ea_act']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['iaac']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {`${rf['type']} (${rf['sub_type']})`}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['env_region']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['nrs_region']}
-                            </td>
-                            <td>
+                            </TableCell>
+                            <TableCell>
                                 {rf['work_lead']}
-                            </td>
-                            <td style={{ background: rf['months'][0]['color'] }}>
+                            </TableCell>
+                            <TableCell style={{ background: rf['months'][0]['color'] }}>
                                 {rf['months'][0]['phase']}
-                            </td>
-                            <td style={{ background: rf['months'][0]['color'] }}>
+                            </TableCell>
+                            <TableCell style={{ background: rf['months'][1]['color'] }}>
                                 {rf['months'][1]['phase']}
-                            </td>
-                            <td style={{ background: rf['months'][0]['color'] }}>
+                            </TableCell>
+                            <TableCell style={{ background: rf['months'][2]['color'] }}>
                                 {rf['months'][2]['phase']}
-                            </td>
-                            <td style={{ background: rf['months'][0]['color'] }}>
+                            </TableCell>
+                            <TableCell style={{ background: rf['months'][3]['color'] }}>
                                 {rf['months'][3]['phase']}
-                            </td>
-                        </tr>
+                            </TableCell>
+                        </TableRow>
                     ))}
-                </tbody>
+                </TableBody>
             </Table>}
+            {resultStatus === RESULT_STATUS.NO_RECORD &&
+                <Container>
+                    <Alert severity="warning">
+                        No Records Found
+                    </Alert>
+                </Container>}
+            {resultStatus === RESULT_STATUS.ERROR &&
+                <Container>
+                    <Alert severity="error">
+                        Error occured during processing. Please try again after some time.
+                    </Alert>
+                </Container>}
+            {resultStatus === RESULT_STATUS.LOADING &&
+                <>
+                    <Skeleton />
+                    <Skeleton animation="wave" />
+                    <Skeleton animation={false} />
+                </>
+            }
         </>
     );
 }

@@ -1,13 +1,12 @@
 import React, { Suspense, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import UserService from '../services/userService';
-import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
-import NavBar from './layout/NavBar';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AnticipatedEAOSchedule from './reports/eaReferral/anticipatedEAOSchedule';
 import ReportSelector from './reportSelector';
 import StaffForm from './staff/form/staffForm';
 import StaffList from './staff/list/staffList';
+import NavBar from './layout/NavBar';
 
 
 export default function App() {
@@ -28,7 +27,6 @@ export default function App() {
                         <Route path='/staff-list' element={<StaffList />} />
                     </Routes>
                 </Suspense>
-
             </BrowserRouter>}
         </>
     )
