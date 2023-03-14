@@ -26,21 +26,21 @@ class EAResourceForeCastReport(ReportFactory):
         """Initialize the ReportFactory"""
         data_keys = [
             "project_name",
-            # "capital_investment",
+            "capital_investment",
             "ea_type",
             "project_phase",
             "ea_act",
             "iaac",
             "sub_type",
             "type",
-            # "eao_team",
-            # "responsible_epd",
+            "eao_team",
+            "responsible_epd",
             "work_lead",
             "env_region",
             "nrs_region",
-            # "staff_first_name",
-            # "staff_last_name",
-            # "role_id",
+            "staff_first_name",
+            "staff_last_name",
+            "role_id",
         ]
         group_by = "project_name"
         template_name = "anticipated_schedule.docx"
@@ -78,7 +78,9 @@ class EAResourceForeCastReport(ReportFactory):
         """Fetches the relevant data for EA Resource Forecast Report"""
         report_date = report_date.date()
         year = report_date.year
-        year_offset, end_month = divmod(report_date.month + 6, 13)
+        year_offset, end_month = divmod(report_date.month + 5, 13)
+        if year_offset > 0:
+            end_month += 1
         start_date = report_date.replace(day=1)
         end_date = report_date.replace(
             year=year + year_offset,
@@ -177,11 +179,11 @@ class EAResourceForeCastReport(ReportFactory):
         ]
 
         results_qry = (
-            Project.query.filter()
+            Project.query.filter(Project.is_project_closed.is_(False), Project.is_deleted.is_(False))
             .join(Work)
             .join(WorkType)
             .join(EAAct)
-            .join(EAOTeam)
+            .outerjoin(EAOTeam)
             .join(FederalInvolvement)
             .join(project_phase_query, project_phase_query.c.work_id == Work.id)
             .join(
@@ -189,6 +191,7 @@ class EAResourceForeCastReport(ReportFactory):
                 and_(
                     project_phase_query.c.work_id == Event.work_id,
                     Event.start_date == project_phase_query.c.max_start_date,
+                    Event.milestone_id.in_(self.start_event_milestones)
                 ),
             )
             .join(Milestone, Event.milestone_id == Milestone.id)
@@ -347,17 +350,71 @@ class EAResourceForeCastReport(ReportFactory):
         )
         return results_qry.all()
 
-    def _format_data(self, data):
+    def _format_data(self, data):  # pylint: disable=too-many-locals
         result = super()._format_data(data)
         response = []
         for _, values in result.items():
+            staffs = []
             project_data = values[0]
+            for value in values:
+                role = value.pop("role_id")
+                first_name = value.pop("staff_first_name")
+                last_name = value.pop("staff_last_name")
+                if role == 3:
+                    project_data["analyst"] = f"{last_name}, {first_name}"
+                elif role == 4:
+                    project_data["fn_cairt_lead"] = f"{last_name}, {first_name}"
+                elif role in [5]:
+                    staffs.append({"first_name": first_name, "last_name": last_name})
+            staffs = sorted(staffs, key=lambda x: x["last_name"])
+            staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
+            project_data["work_team_members"] = "; ".join(staffs)
+            if project_data.get("capital_investment", None):
+                project_data[
+                    "capital_investment"
+                ] = f"{project_data['capital_investment']:,.0f}"
             months = []
             for month in self.month_labels:
                 month_data = project_data.pop(month)
                 color = project_data.pop(f"{month}_color")
                 months.append({"label": month, "phase": month_data, "color": color})
             project_data["months"] = months
+            referral_timing_query = (
+                db.session.query(PhaseCode)
+                .join(WorkType)
+                .join(Milestone)
+                .join(Event)
+                .filter(
+                    and_(
+                        WorkType.id == PhaseCode.work_type_id,
+                        WorkType.name == project_data["ea_type"],
+                    )
+                )
+                .group_by(PhaseCode.id)
+                .order_by(PhaseCode.id.desc())
+            )
+            if project_data["ea_type"] == "Assessment":
+                referral_timing_obj = referral_timing_query.offset(1).first()
+                referral_timing_milestone = next(
+                    obj
+                    for obj in referral_timing_obj.milestones
+                    if obj.milestone_type_id == 14
+                )
+            else:
+                referral_timing_obj = referral_timing_query.first()
+                referral_timing_milestone = next(
+                    obj
+                    for obj in referral_timing_obj.milestones
+                    if obj.milestone_type_id == 13
+                )
+            # else:
+            #     pass
+            referral_timing = Event.query.filter(
+                Event.milestone_id == referral_timing_milestone.id
+            ).first()
+            project_data[
+                "referral_timing"
+            ] = f"{referral_timing.anticipated_start_date:%B, %Y}"
             response.append(project_data)
         return response
 
