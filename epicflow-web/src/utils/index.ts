@@ -1,4 +1,4 @@
 import dateUtils from './dateUtils';
-export  {
-    dateUtils
+export {
+  dateUtils
 }

@@ -8,9 +8,9 @@ import { DATE_FORMAT } from '../constants/application-constant';
  * @returns Formatted date string
  */
 const formatDate = (date: string, format?: string) => {
-    return moment(date).format(format || DATE_FORMAT);
+  return moment(date).format(format || DATE_FORMAT);
 }
 
 export default {
-    formatDate
+  formatDate
 }

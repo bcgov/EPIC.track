@@ -9,12 +9,14 @@
         "react"
     ],
     "rules": {
+        "max-len": ["error" , {"code": 100}],
+        "no-unused-vars": ["error", {"varsIgnorePattern": "[Rr]eact" }],
         "no-use-before-define": "off",
         "@typescript-eslint/no-use-before-define": ["error"],
         "react/prop-types": 0,
         "indent": [
             "error",
-            4
+            2
         ],
         "linebreak-style": 0,
         "quotes": [
