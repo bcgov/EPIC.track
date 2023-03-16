@@ -1,9 +1,9 @@
 export interface UserAuthentication {
-    authenticated: boolean;
-    loading: boolean;
+  authenticated: boolean;
+  loading: boolean;
 }
 export interface UserState {
-    bearerToken: string | undefined;
-    authentication: UserAuthentication;
-    isAuthorized: boolean;
+  bearerToken: string | undefined;
+  authentication: UserAuthentication;
+  isAuthorized: boolean;
 }

@@ -2,6 +2,7 @@ import axios from 'axios';
 import UserService from '../../services/userService';
 
 const GetRequest = <T>(url: string, params = {}, headers = {}) => {
+    console.log('TOKEN: ',UserService.getToken());
     return axios.get<T>(url, {
         params: params,
         headers: {
@@ -13,6 +14,7 @@ const GetRequest = <T>(url: string, params = {}, headers = {}) => {
 };
 
 const PostRequest = <T>(url: string, data = {}, params = {}, config = {}) => {
+    console.log('TOKEN: ',UserService.getToken());
     return axios.post<T>(url, data, {
         params,
         headers: {

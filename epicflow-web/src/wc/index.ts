@@ -1,6 +1,4 @@
-import { AnticipatedEAOScheduleWC } from './anticipatedEAOScheduleWC';
-import { ReportSelectorWC } from './reportSelectorWC';
+import { ReportSelectorWC } from './components/reportSelectorWC';
 export {
-    AnticipatedEAOScheduleWC,
-    ReportSelectorWC
+  ReportSelectorWC
 };
