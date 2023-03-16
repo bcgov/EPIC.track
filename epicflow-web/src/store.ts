@@ -3,9 +3,9 @@ import userSlice from './services/userService/userSlice';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 export const store = configureStore({
-    reducer: {
-        user: userSlice,
-    },
+  reducer: {
+    user: userSlice,
+  },
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
