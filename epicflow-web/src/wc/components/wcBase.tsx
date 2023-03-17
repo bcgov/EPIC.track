@@ -9,34 +9,53 @@ import { store } from '../../store';
 
 class WCBaseELement extends HTMLElement {
   ComponentToMount: React.ComponentType;
+  root: any;
+  observer: MutationObserver;
+  cache: any;
+  shadowTheme: any;
+  shadowContainer: any;
   constructor(componentToMount: React.ComponentType) {
     super();
     this.ComponentToMount = componentToMount;
+    this.observer = new MutationObserver(() => this.update());
+    this.observer.observe(this, { attributes: true })
   }
   connectedCallback() {
+
+    this.shadowContainer = this.attachShadow({ mode: 'open' });
+
+    this.mount();
+  }
+
+  disconnectedCallback() {
+    this.unmount();
+    this.observer.disconnect();
+  }
+
+  mount() {
+    console.log('Mounting the component');
     const ComponentToMount: React.ComponentType = this.ComponentToMount;
-    const shadowContainer = this.attachShadow({ mode: 'open' });
     const emotionRoot = document.createElement('style');
     const shadowRootElement = document.createElement('div');
-    shadowContainer.appendChild(emotionRoot);
-    shadowContainer.appendChild(shadowRootElement);
+    this.shadowContainer.appendChild(emotionRoot);
+    this.shadowContainer.appendChild(shadowRootElement);
 
-    const cache = createCache({
+    this.cache = createCache({
       key: 'css',
       prepend: true,
       container: emotionRoot,
     });
-    const shadowTheme = createWcTheme(shadowRootElement);
-    console.log(shadowTheme);
+    this.shadowTheme = createWcTheme(shadowRootElement);
+    this.root = ReactDOM.createRoot(shadowRootElement);
     const props = {
       ...this.getProps(this.attributes),
       ...this.getEvents()
     };
-    ReactDOM.createRoot(shadowRootElement).render(
+    this.root.render(
       <React.StrictMode>
         <Provider store={store}>
-          <CacheProvider value={cache}>
-            <ThemeProvider theme={shadowTheme}>
+          <CacheProvider value={this.cache}>
+            <ThemeProvider theme={this.shadowTheme}>
               <ComponentToMount {...props} />
             </ThemeProvider>
           </CacheProvider>
@@ -45,6 +64,16 @@ class WCBaseELement extends HTMLElement {
     );
   }
 
+  unmount() {
+    console.log('Performing unmount');
+    this.root.unmount();
+  }
+
+  update() {
+    console.log('Updating attribute');
+    this.unmount();
+    this.mount();
+  }
   getProps(attributes: any) {
     return [...attributes]
       .filter(attr => attr.name !== 'style')

@@ -7,7 +7,7 @@ import Select from '@mui/material/Select';
 
 export default function ReportSelector({ ...props }) {
   const [selectedReport, setSelectedReport] = useState<string>('none');
-  const apiUrl = props.apiUrl;
+  const apiUrl = props.apiurl;
   const reportTypeOptions = REPORT_TYPES
     .map((p, index) => (<MenuItem key={index + 1} value={p.Value}>{p.Text}</MenuItem>))
   return (
