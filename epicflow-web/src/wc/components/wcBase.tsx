@@ -9,11 +9,25 @@ import { store } from '../../store';
 
 class WCBaseELement extends HTMLElement {
   ComponentToMount: React.ComponentType;
+  root: any;
+  observer: MutationObserver;
   constructor(componentToMount: React.ComponentType) {
     super();
     this.ComponentToMount = componentToMount;
+    this.observer = new MutationObserver(() => this.update());
+    this.observer.observe(this, { attributes: true })
   }
   connectedCallback() {
+    this.mount();
+  }
+
+  disconnectedCallback() {
+    this.unmount();
+    this.observer.disconnect();
+  }
+
+  mount() {
+    console.log('Mounting the component');
     const ComponentToMount: React.ComponentType = this.ComponentToMount;
     const shadowContainer = this.attachShadow({ mode: 'open' });
     const emotionRoot = document.createElement('style');
@@ -27,12 +41,12 @@ class WCBaseELement extends HTMLElement {
       container: emotionRoot,
     });
     const shadowTheme = createWcTheme(shadowRootElement);
-    console.log(shadowTheme);
     const props = {
       ...this.getProps(this.attributes),
       ...this.getEvents()
     };
-    ReactDOM.createRoot(shadowRootElement).render(
+    this.root = ReactDOM.createRoot(shadowRootElement);
+    this.root.render(
       <React.StrictMode>
         <Provider store={store}>
           <CacheProvider value={cache}>
@@ -45,6 +59,16 @@ class WCBaseELement extends HTMLElement {
     );
   }
 
+  unmount() {
+    console.log('Performing unmount');
+    this.root.unmount();
+  }
+
+  update() {
+    console.log('Updating attribute');
+    this.unmount();
+    this.mount();
+  }
   getProps(attributes: any) {
     return [...attributes]
       .filter(attr => attr.name !== 'style')
