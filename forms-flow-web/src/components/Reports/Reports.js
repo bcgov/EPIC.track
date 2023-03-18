@@ -40,7 +40,7 @@ export default function Reports() {
                             <Head items={headerList()} page="Reports" />
                             <div className='container'>
                                 <report-selector-wc
-                                    apiUrl={WEB_BASE_CUSTOM_URL}>
+                                    apiurl={WEB_BASE_CUSTOM_URL}>
                                 </report-selector-wc>
                             </div>
                         </div>
