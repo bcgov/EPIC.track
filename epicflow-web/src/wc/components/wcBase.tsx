@@ -11,8 +11,6 @@ class WCBaseELement extends HTMLElement {
   ComponentToMount: React.ComponentType;
   root: any;
   observer: MutationObserver;
-  cache: any;
-  shadowTheme: any;
   shadowContainer: any;
   constructor(componentToMount: React.ComponentType) {
     super();
@@ -40,12 +38,12 @@ class WCBaseELement extends HTMLElement {
     this.shadowContainer.appendChild(emotionRoot);
     this.shadowContainer.appendChild(shadowRootElement);
 
-    this.cache = createCache({
+    const cache = createCache({
       key: 'css',
       prepend: true,
       container: emotionRoot,
     });
-    this.shadowTheme = createWcTheme(shadowRootElement);
+    const shadowTheme = createWcTheme(shadowRootElement);
     this.root = ReactDOM.createRoot(shadowRootElement);
     const props = {
       ...this.getProps(this.attributes),
@@ -54,8 +52,8 @@ class WCBaseELement extends HTMLElement {
     this.root.render(
       <React.StrictMode>
         <Provider store={store}>
-          <CacheProvider value={this.cache}>
-            <ThemeProvider theme={this.shadowTheme}>
+          <CacheProvider value={cache}>
+            <ThemeProvider theme={shadowTheme}>
               <ComponentToMount {...props} />
             </ThemeProvider>
           </CacheProvider>

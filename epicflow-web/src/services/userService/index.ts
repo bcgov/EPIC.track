@@ -39,7 +39,6 @@ const refreshToken = (dispatch: Dispatch<Action>) => {
 */
 const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
   try {
-    console.log('INIT KEYCLOAK');
     const authenticated = await KeycloakData.init({
       onLoad: 'login-required',
       pkceMethod: 'S256',

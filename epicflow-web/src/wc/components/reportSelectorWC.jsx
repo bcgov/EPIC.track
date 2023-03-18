@@ -1,5 +1,5 @@
 import React from 'react';
-import ReportSelector from '../../components/reportSelector';
+import ReportSelector from '../../components/reportSelector/reportSelector';
 import WCBaseELement from './wcBase';
 
 export class ReportSelectorWC extends WCBaseELement {

@@ -13,7 +13,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Container } from '@mui/system';
 
-export default function AnticipatedEAOSchedule({ ...props }) {
+export default function AnticipatedEAOSchedule() {
   const [reports, setReports] = useState({});
   const [selectedTab, setSelectedTab] = useState(0);
   const [reportDate, setReportDate] = useState<string>();
@@ -25,7 +25,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const reportData =
-        await ReportService.fetchReportData(props.apiUrl, REPORT_TYPE.EA_REFERRAL, {
+        await ReportService.fetchReportData(REPORT_TYPE.EA_REFERRAL, {
           report_date: reportDate
         });
       setResultStatus(RESULT_STATUS.LOADED);
@@ -45,7 +45,7 @@ export default function AnticipatedEAOSchedule({ ...props }) {
     try {
       fetchReportData();
       const binaryReponse =
-        await ReportService.downloadPDF(props.apiUrl, REPORT_TYPE.EA_REFERRAL, {
+        await ReportService.downloadPDF(REPORT_TYPE.EA_REFERRAL, {
           report_date: reportDate
         });
       const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));

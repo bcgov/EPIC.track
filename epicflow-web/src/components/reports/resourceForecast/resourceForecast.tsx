@@ -5,12 +5,12 @@ import {
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import Select from '@mui/material/Select';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
-import Select from '@mui/material/Select';
 
-export default function ResourceForecast({ ...props }) {
+export default function ResourceForecast() {
   const [reportDate, setReportDate] = useState<string>();
   const [resultStatus, setResultStatus] = useState<string>();
   const [rfData, setRFData] = useState<any[]>([]);
@@ -58,7 +58,7 @@ export default function ResourceForecast({ ...props }) {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const reportData =
-        await ReportService.fetchReportData(props.apiUrl, REPORT_TYPE.RESOURCE_FORECAST, {
+        await ReportService.fetchReportData(REPORT_TYPE.RESOURCE_FORECAST, {
           report_date: reportDate,
           filters: {
             exclude: selectedFilters

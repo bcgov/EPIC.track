@@ -39,3 +39,18 @@ class PhasesByEaActWorkType(Resource):
     def get(ea_act_id, work_type_id):
         """Return all phase codes based on ea_act_id and work_type_id."""
         return PhaseService.find_phase_codes_by_ea_act_and_work_type(ea_act_id, work_type_id), HTTPStatus.OK
+
+
+@cors_preflight('GET')
+@API.route('/')
+class Phases(Resource):
+    """Endpoint resource to manage phases"""
+
+    @staticmethod
+    @cors.crossdomain('*')
+    @auth.require
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @profiletime
+    def get():
+        """Returns all the phase codes regardless of act or work type"""
+        return PhaseService.find_all_phases(), HTTPStatus.OK
