@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import UserService from '../services/userService';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AnticipatedEAOSchedule from './reports/eaReferral/anticipatedEAOSchedule';
-import ReportSelector from './reportSelector';
+import ReportSelector from './reportSelector/reportSelector';
 import StaffForm from './staff/form/staffForm';
 import StaffList from './staff/list/staffList';
 import NavBar from './layout/NavBar';

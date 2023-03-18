@@ -10,7 +10,8 @@ declare global {
     };
   }
 }
-const API_URL = localStorage.getItem('customApiUrl') || window._env_?.REACT_APP_API_URL || process.env.REACT_APP_API_URL;
+const API_URL = localStorage.getItem('customApiUrl')
+  || window._env_?.REACT_APP_API_URL || process.env.REACT_APP_API_URL;
 
 // Keycloak Environment Variables
 const KC_URL = window._env_?.REACT_APP_KEYCLOAK_URL || process.env.REACT_APP_KEYCLOAK_URL;
