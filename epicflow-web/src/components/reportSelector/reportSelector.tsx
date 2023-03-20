@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { FormLabel, Grid, MenuItem } from '@mui/material';
-import { REPORT_TYPES, REPORT_TYPE } from '../constants/application-constant';
-import AnticipatedEAOSchedule from './reports/eaReferral/anticipatedEAOSchedule';
-import ResourceForecast from './reports/resourceForecast/resourceForecast';
+import { REPORT_TYPES, REPORT_TYPE } from '../../constants/application-constant';
+import AnticipatedEAOSchedule from '../reports/eaReferral/anticipatedEAOSchedule';
+import ResourceForecast from '../reports/resourceForecast/resourceForecast';
 import Select from '@mui/material/Select';
 
-export default function ReportSelector({ ...props }) {
+export default function ReportSelector() {
   const [selectedReport, setSelectedReport] = useState<string>('none');
-  const apiUrl = props.apiUrl;
   const reportTypeOptions = REPORT_TYPES
     .map((p, index) => (<MenuItem key={index + 1} value={p.Value}>{p.Text}</MenuItem>))
   return (
@@ -23,8 +22,8 @@ export default function ReportSelector({ ...props }) {
           </Select>
         </Grid>
       </Grid>
-      {selectedReport === REPORT_TYPE.EA_REFERRAL && <AnticipatedEAOSchedule apiUrl={apiUrl} />}
-      {selectedReport === REPORT_TYPE.RESOURCE_FORECAST && <ResourceForecast apiUrl={apiUrl} />}
+      {selectedReport === REPORT_TYPE.EA_REFERRAL && <AnticipatedEAOSchedule/>}
+      {selectedReport === REPORT_TYPE.RESOURCE_FORECAST && <ResourceForecast/>}
     </>
   );
 }

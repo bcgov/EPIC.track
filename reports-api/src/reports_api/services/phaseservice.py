@@ -30,3 +30,11 @@ class PhaseService():  # pylint:disable=too-few-public-methods
         current_app.logger.debug(f'<find_phase_codes_by_ea_act_and_work_type : {_ea_act_id} - {_work_type_id}')
         code_table = PhaseCode.find_by_ea_act_and_work_type(_ea_act_id, _work_type_id)
         return jsonify([item.as_dict() for item in code_table])
+
+    @classmethod
+    def find_all_phases(
+        cls
+    ):
+        """Find all phases"""
+        phases = PhaseCode.find_all()
+        return jsonify([item.as_dict() for item in phases])
