@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
-  Alert, Button, Container, FormControl, FormLabel, Grid, MenuItem, OutlinedInput,
-  Skeleton, Table, TableBody, TableCell, TableHead, TableRow
+  Alert, Box, Button, Container, FormControl, FormLabel, Grid, MenuItem, OutlinedInput,
+  Skeleton
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import Select from '@mui/material/Select';
+import MaterialReactTable from 'material-react-table';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
@@ -37,17 +38,88 @@ export default function ResourceForecast() {
       label: 'Referral Timing',
       value: 'referral_timing'
     }];
-  const columns = [
-    'Project',
-    'EA Type',
-    'Project Phase',
-    'EA Act',
-    'IAAC',
-    'Sector',
-    'ENV Region',
-    'NRS Region',
-    'EPD Lead'];
+  // const columns = [
+  //   'Project',
+  //   'EA Type',
+  //   'Project Phase',
+  //   'EA Act',
+  //   'IAAC',
+  //   'Sector',
+  //   'ENV Region',
+  //   'NRS Region',
+  //   'EPD Lead'];
+  const setDynamicColumns = useCallback(() => {
+    let columns = [];
+    if (rfData && rfData.length > 0) {
+      columns = rfData[0].months.map((rfMonth: any, index: number) => {
+        return {
+          header: rfMonth['label'],
+          accessorFn: (row: any) => `${row.months[index].phase}`,
+          Cell: ({ row }: any) => (
+            <Box sx={{
+              bgcolor: row.original.months[index].color,
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignContent: 'center',
+              justifyContent: 'center',
+              padding: '1rem'
+            }
+            }>
+              {row.original.months[index].phase}
+            </Box>
+          )
+        }
+      })
+    }
+    return columns;
+  }, [rfData]);
+  const newColumns = useMemo(
+    () => [
+      {
+        accessorKey: 'project_name', //access nested data with dot notation
+        header: 'Project'
+      },
+      {
+        accessorKey: 'ea_type', //access nested data with dot notation
+        header: 'EA Type'
+      },
+      {
+        accessorKey: 'project_phase', //access nested data with dot notation
+        header: 'Project Phase',
+      },
+      {
+        accessorKey: 'ea_act', //access nested data with dot notation
+        header: 'EA Act',
+      },
+      {
+        accessorKey: 'iaac',
+        header: 'IAAC',
+      },
+      {
+        accessorFn: (row: any): any => `${row.type}( ${row.sub_type})`,
+        accessorKey: 'sector',
+        header: 'Sector',
+        maxSize: 100
+      },
+      {
+        accessorKey: 'env_region',
+        header: 'ENV Region'
+      },
+      {
+        accessorKey: 'nrs_region',
+        header: 'NRS Region'
+      },
+      {
+        accessorKey: 'work_lead',
+        header: 'EPD Lead'
+      },
+      ...setDynamicColumns()
+    ], [rfData, setDynamicColumns]
+  );
 
+
+
+  console.log(setDynamicColumns());
   const getSelectedFilterLabels = (selected: string[]) => {
     const labels = selected.map(val => {
       return filters.filter(p => p.value === val)[0].label
@@ -133,72 +205,16 @@ export default function ResourceForecast() {
       {resultStatus === RESULT_STATUS.LOADED &&
         rfData &&
         rfData.length > 0 &&
-        <Table sx={{ mt: '15px' }}>
-          <TableHead
-            sx={{
-              bgcolor: '#ebe6e6',
-              '& th': {
-                fontWeight: '600'
-              }
-            }}>
-            <TableRow>
-              {columns
-                .map((col, colIndex) => <TableCell key={colIndex}>{col}</TableCell>)}
-              {
-                (rfData[0]['months'] as []).map((rfMonth, rfMonthIndex) => (
-                  <TableCell key={rfMonthIndex}>
-                    {rfMonth['label']}
-                  </TableCell>
-                ))
-              }
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rfData.map((rf, rfIndex) => (
-              <TableRow key={rfIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                <TableCell>
-                  {rf['project_name']}
-                </TableCell>
-                <TableCell>
-                  {rf['ea_type']}
-                </TableCell>
-                <TableCell>
-                  {rf['project_phase']}
-                </TableCell>
-                <TableCell>
-                  {rf['ea_act']}
-                </TableCell>
-                <TableCell>
-                  {rf['iaac']}
-                </TableCell>
-                <TableCell>
-                  {`${rf['type']} (${rf['sub_type']})`}
-                </TableCell>
-                <TableCell>
-                  {rf['env_region']}
-                </TableCell>
-                <TableCell>
-                  {rf['nrs_region']}
-                </TableCell>
-                <TableCell>
-                  {rf['work_lead']}
-                </TableCell>
-                <TableCell style={{ background: rf['months'][0]['color'] }}>
-                  {rf['months'][0]['phase']}
-                </TableCell>
-                <TableCell style={{ background: rf['months'][1]['color'] }}>
-                  {rf['months'][1]['phase']}
-                </TableCell>
-                <TableCell style={{ background: rf['months'][2]['color'] }}>
-                  {rf['months'][2]['phase']}
-                </TableCell>
-                <TableCell style={{ background: rf['months'][3]['color'] }}>
-                  {rf['months'][3]['phase']}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>}
+        <MaterialReactTable
+          initialState={{
+            density: 'compact'
+          }}
+          columns={newColumns}
+          enableDensityToggle={false}
+          enableStickyHeader={true}
+          
+          data={rfData} />
+      }
       {resultStatus === RESULT_STATUS.NO_RECORD &&
         <Container>
           <Alert severity="warning">
