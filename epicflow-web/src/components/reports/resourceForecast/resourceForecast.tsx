@@ -38,16 +38,6 @@ export default function ResourceForecast() {
       label: 'Referral Timing',
       value: 'referral_timing'
     }];
-  // const columns = [
-  //   'Project',
-  //   'EA Type',
-  //   'Project Phase',
-  //   'EA Act',
-  //   'IAAC',
-  //   'Sector',
-  //   'ENV Region',
-  //   'NRS Region',
-  //   'EPD Lead'];
   const setDynamicColumns = useCallback(() => {
     let columns = [];
     if (rfData && rfData.length > 0) {
@@ -55,6 +45,8 @@ export default function ResourceForecast() {
         return {
           header: rfMonth['label'],
           accessorFn: (row: any) => `${row.months[index].phase}`,
+          enableHiding: false,
+          enableColumnFilter: false,
           Cell: ({ row }: any) => (
             <Box sx={{
               bgcolor: row.original.months[index].color,
@@ -73,51 +65,84 @@ export default function ResourceForecast() {
     }
     return columns;
   }, [rfData]);
+
+  const filterFn = useCallback((filterField: string) => rfData
+    .filter(p => p[filterField])
+    .map(p => p[filterField])
+    .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData])
+
+  const projectFilter = filterFn('project_name');
+  const eaTypeFilter = filterFn('ea_type');
+  const projectPhaseFilter = filterFn('project_phase');
+  const eaActFilter = filterFn('ea_act');
+  const iaacFilter = filterFn('iaac');
+  const typeFilter = useMemo(() => rfData.map(p => `${p.type}( ${p.sub_type} )`)
+    .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData]);
+  const envRegionFilter = filterFn('env_region');
+  const nrsRegionFilter = filterFn('nrs_region');
+  const workLeadFilter = filterFn('work_lead');
+
   const newColumns = useMemo(
     () => [
       {
-        accessorKey: 'project_name', //access nested data with dot notation
-        header: 'Project'
+        accessorKey: 'project_name',
+        header: 'Project',
+        enableHiding: false,
+        filterVariant: 'select',
+        filterSelectOptions: projectFilter
       },
       {
-        accessorKey: 'ea_type', //access nested data with dot notation
-        header: 'EA Type'
+        accessorKey: 'ea_type',
+        header: 'EA Type',
+        filterVariant: 'select',
+        filterSelectOptions: eaTypeFilter
       },
       {
-        accessorKey: 'project_phase', //access nested data with dot notation
+        accessorKey: 'project_phase',
         header: 'Project Phase',
+        filterVariant: 'select',
+        filterSelectOptions: projectPhaseFilter
       },
       {
-        accessorKey: 'ea_act', //access nested data with dot notation
+        accessorKey: 'ea_act',
         header: 'EA Act',
+        filterVariant: 'select',
+        filterSelectOptions: eaActFilter
       },
       {
         accessorKey: 'iaac',
         header: 'IAAC',
+        filterVariant: 'select',
+        filterSelectOptions: iaacFilter
       },
       {
-        accessorFn: (row: any): any => `${row.type}( ${row.sub_type})`,
+        accessorFn: (row: any): any => `${row.type}( ${row.sub_type} )`,
         accessorKey: 'sector',
         header: 'Sector',
-        maxSize: 100
+        filterVariant: 'select',
+        filterSelectOptions: typeFilter
       },
       {
         accessorKey: 'env_region',
-        header: 'ENV Region'
+        header: 'ENV Region',
+        filterVariant: 'select',
+        filterSelectOptions: envRegionFilter
       },
       {
         accessorKey: 'nrs_region',
-        header: 'NRS Region'
+        header: 'NRS Region',
+        filterVariant: 'select',
+        filterSelectOptions: nrsRegionFilter
       },
       {
         accessorKey: 'work_lead',
-        header: 'EPD Lead'
+        header: 'EPD Lead',
+        filterVariant: 'select',
+        filterSelectOptions: workLeadFilter
       },
       ...setDynamicColumns()
     ], [rfData, setDynamicColumns]
   );
-
-
 
   console.log(setDynamicColumns());
   const getSelectedFilterLabels = (selected: string[]) => {
@@ -212,7 +237,9 @@ export default function ResourceForecast() {
           columns={newColumns}
           enableDensityToggle={false}
           enableStickyHeader={true}
-          
+          onColumnVisibilityChange={(state: any) => {
+            console.log(state);
+          }}
           data={rfData} />
       }
       {resultStatus === RESULT_STATUS.NO_RECORD &&
