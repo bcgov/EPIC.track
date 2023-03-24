@@ -1,9 +1,16 @@
 """Classes for specific report types."""
 from calendar import monthrange
+from collections import defaultdict
 from datetime import datetime
 from functools import partial
+from io import BytesIO
 
 from dateutil import rrule
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import A3, landscape
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.platypus import Paragraph, Table, TableStyle
 from sqlalchemy import Date, and_, func
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
@@ -41,11 +48,14 @@ class EAResourceForeCastReport(ReportFactory):
             "staff_first_name",
             "staff_last_name",
             "role_id",
+            "work_id",
         ]
         group_by = "project_name"
-        template_name = "anticipated_schedule.docx"
-        super().__init__(data_keys, group_by, template_name, filters)
-        self.report_title = "Anticipated EA Referral Schedule"
+        super().__init__(data_keys, group_by, None, filters)
+        self.excluded_items = []
+        if filters and "exclude" in filters:
+            self.excluded_items = self.filters["exclude"]
+        self.report_title = "EAO Resource Forecast"
         start_event_milestones = (
             db.session.query(
                 func.min(Milestone.id).label("milestone_id"), Milestone.phase_id
@@ -55,6 +65,40 @@ class EAResourceForeCastReport(ReportFactory):
         )
         self.start_event_milestones = [x.milestone_id for x in start_event_milestones]
         self.month_labels = []
+        self.report_cells = {
+            "[PROJECT BACKGROUND]": [
+                {"data_key": "project_name", "label": "PROJECT NAME"},
+                {
+                    "data_key": "capital_investment",
+                    "label": "ESTIMATED CAPITAL INVESTMENT",
+                },
+                {"data_key": "ea_type", "label": "EA TYPE"},
+                {"data_key": "project_phase", "label": "PROJECT PHASE"},
+                {
+                    "data_key": "ea_act",
+                    "label": "BC EA ACT (2002) OR\nBC EA ACT (2018)",
+                },
+                {"data_key": "iaac", "label": "IAAC"},
+                {"data_key": "sector(sub)", "label": "SECTOR (SUB)"},
+                {"data_key": "env_region", "label": "MOE REGION"},
+                {"data_key": "nrs_region", "label": "NRS REGION"},
+            ],
+            "[EAO RESOURCING]": [
+                {"data_key": "responsible_epd", "label": "EPD LEAD"},
+                {"data_key": "cairt_lead", "label": "FN CAIRT LEAD"},
+                {"data_key": "eao_team", "label": "LEAD'S TEAM"},
+                {"data_key": "work_lead", "label": "PROJECT LEAD"},
+                {"data_key": "work_team_members", "label": "WORK TEAM MEMBERS"},
+            ],
+            "QUARTERS": [],
+            "Potential EAC or Amendment referral timing": [
+                {
+                    "data_key": "referral_timing",
+                    "label": "Potential EAC or Amendment referral timing",
+                }
+            ],
+        }
+        self.end_date = None
 
     def _get_latest_event_subquery(self, date: datetime):
         """Return the subquery to find the latest event for a given date"""
@@ -74,6 +118,77 @@ class EAResourceForeCastReport(ReportFactory):
         )
         return latest_event_query
 
+    def _get_report_meta_data(self, report_date: datetime):
+        section_headings = []
+        cell_headings = []
+        styles = []
+        cell_keys = []
+        quarter1, remaining = divmod(report_date.month, 3)
+        if remaining > 0:
+            quarter1 += 1
+        if quarter1 == 4:
+            quarter2 = 1
+        else:
+            quarter2 = quarter1 + 1
+        cell_index = 0
+        for section_heading, cells in self.report_cells.items():
+            filtered_cells = [
+                x for x in cells if x["data_key"] not in self.excluded_items
+            ]
+            if section_heading == "QUARTERS":
+                section_headings += [
+                    f"{report_date.year} Q{quarter1}",
+                    "",
+                    "",
+                    f"{self.end_date.year} Q{quarter2}",
+                ]
+                styles.append(("SPAN", (cell_index, 0), (cell_index + 2, 0)))
+                styles.append(
+                    (
+                        "BACKGROUND",
+                        (cell_index, 0),
+                        (cell_index + 3, 2),
+                        (0.3, 0.663, 0.749),
+                    )
+                )
+                cell_index += 3
+                cell_headings += self.month_labels
+            else:
+                section_headings.append(section_heading)
+                if len(filtered_cells) > 1:
+                    section_headings += [""] * (len(filtered_cells) - 1)  # for colspan
+                    styles.append(
+                        (
+                            "SPAN",
+                            (cell_index, 0),
+                            (cell_index + len(filtered_cells) - 1, 0),
+                        )
+                    )
+                    if section_heading == "[PROJECT BACKGROUND]":
+                        styles.append(
+                            (
+                                "BACKGROUND",
+                                (0, 0),
+                                (len(filtered_cells) - 1, 2),
+                                (0.749, 0.749, 0.749),
+                            )
+                        )
+                    elif section_heading == "[EAO RESOURCING]":
+                        styles.append(
+                            (
+                                "BACKGROUND",
+                                (cell_index, 0),
+                                (cell_index + len(filtered_cells) - 1, -1),
+                                (0.949, 0.949, 0.949),
+                            )
+                        )
+            for cell in filtered_cells:
+                cell_headings.append(cell["label"])
+                cell_keys.append(cell["data_key"])
+            cell_index += len(filtered_cells)
+        headers = [section_headings, cell_headings]
+        return headers, cell_keys, styles
+
     def _fetch_data(self, report_date: datetime):  # pylint: disable=too-many-locals
         """Fetches the relevant data for EA Resource Forecast Report"""
         report_date = report_date.date()
@@ -82,7 +197,7 @@ class EAResourceForeCastReport(ReportFactory):
         if year_offset > 0:
             end_month += 1
         start_date = report_date.replace(day=1)
-        end_date = report_date.replace(
+        self.end_date = report_date.replace(
             year=year + year_offset,
             month=end_month,
             day=monthrange(year + year_offset, end_month)[1],
@@ -145,17 +260,17 @@ class EAResourceForeCastReport(ReportFactory):
             month=remaining_start,
             day=1,
         )
-        remaining_month_query = self._get_latest_event_subquery(end_date)
+        remaining_month_query = self._get_latest_event_subquery(self.end_date)
         month_labels = []
         for date in rrule.rrule(
-            rrule.MONTHLY, dtstart=remaining_start_date, until=end_date
+            rrule.MONTHLY, dtstart=remaining_start_date, until=self.end_date
         ):
             month_label = f"{date:%b}"
             if date.month == 12:
                 month_label += f"{date:%Y}"
             month_labels.append(month_label)
-        if end_date.year > report_date.year:
-            month_labels[-1] += f"{end_date:%Y}"
+        if self.end_date.year > report_date.year:
+            month_labels[-1] += f"{self.end_date:%Y}"
         remaining_month_aliases = {
             "phase": aliased(PhaseCode),
             "event": aliased(Event),
@@ -179,7 +294,11 @@ class EAResourceForeCastReport(ReportFactory):
         ]
 
         results_qry = (
-            Project.query.filter(Project.is_project_closed.is_(False), Project.is_deleted.is_(False))
+            Project.query.filter(
+                Project.is_project_closed.is_(False),
+                Project.is_deleted.is_(False),
+                Project.is_active.is_(True),
+            )
             .join(Work)
             .join(WorkType)
             .join(EAAct)
@@ -191,7 +310,7 @@ class EAResourceForeCastReport(ReportFactory):
                 and_(
                     project_phase_query.c.work_id == Event.work_id,
                     Event.start_date == project_phase_query.c.max_start_date,
-                    Event.milestone_id.in_(self.start_event_milestones)
+                    Event.milestone_id.in_(self.start_event_milestones),
                 ),
             )
             .join(Milestone, Event.milestone_id == Milestone.id)
@@ -308,7 +427,7 @@ class EAResourceForeCastReport(ReportFactory):
                         Work.anticipated_decision_date.cast(Date),
                     ),
                     "[)",
-                ).overlaps(daterange(start_date, end_date, "[)"))
+                ).overlaps(daterange(start_date, self.end_date, "[)"))
             )
             .add_columns(
                 Project.name.label("project_name"),
@@ -356,15 +475,14 @@ class EAResourceForeCastReport(ReportFactory):
         for _, values in result.items():
             staffs = []
             project_data = values[0]
+            project_data["cairt_lead"] = ""
             for value in values:
                 role = value.pop("role_id")
                 first_name = value.pop("staff_first_name")
                 last_name = value.pop("staff_last_name")
-                if role == 3:
-                    project_data["analyst"] = f"{last_name}, {first_name}"
-                elif role == 4:
-                    project_data["fn_cairt_lead"] = f"{last_name}, {first_name}"
-                elif role in [5]:
+                if role == 4:
+                    project_data["cairt_lead"] = f"{last_name}, {first_name}"
+                elif role in [3, 5]:
                     staffs.append({"first_name": first_name, "last_name": last_name})
             staffs = sorted(staffs, key=lambda x: x["last_name"])
             staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
@@ -379,6 +497,9 @@ class EAResourceForeCastReport(ReportFactory):
                 color = project_data.pop(f"{month}_color")
                 months.append({"label": month, "phase": month_data, "color": color})
             project_data["months"] = months
+            project_data[
+                "sector(sub)"
+            ] = f"{project_data['type']}({project_data['sub_type']})"
             referral_timing_query = (
                 db.session.query(PhaseCode)
                 .join(WorkType)
@@ -388,6 +509,7 @@ class EAResourceForeCastReport(ReportFactory):
                     and_(
                         WorkType.id == PhaseCode.work_type_id,
                         WorkType.name == project_data["ea_type"],
+                        Event.work_id == project_data["work_id"],
                     )
                 )
                 .group_by(PhaseCode.id)
@@ -414,14 +536,110 @@ class EAResourceForeCastReport(ReportFactory):
             ).first()
             project_data[
                 "referral_timing"
-            ] = f"{referral_timing.anticipated_start_date:%B, %Y}"
+            ] = f"{referral_timing.anticipated_start_date:%B %d, %Y}"
             response.append(project_data)
+
         return response
 
-    def generate_report(self, report_date, return_type):
+    def generate_report(
+        self, report_date, return_type
+    ):  # pylint: disable=too-many-locals,too-many-statements
         """Generates a report and returns it"""
         data = self._fetch_data(report_date)
         data = self._format_data(data)
-        if return_type == "json" or not data:
+        if return_type == "json" and data:
             return {"data": data}, None
-        return {}, None
+        if not data:
+            return {}, None
+        formatted_data = defaultdict(list)
+        for item in data:
+            formatted_data[item["ea_type"]].append(item)
+        pdf_stream = BytesIO()
+        page_size = landscape(A3)
+        width, height = page_size
+        canv = Canvas(pdf_stream, pagesize=page_size)
+        table_headers, table_cells, styles = self._get_report_meta_data(report_date)
+        table_data = []
+        row_index = 2
+        for ea_type, projects in formatted_data.items():
+            table_data.append([ea_type.upper()] + [""] * (len(table_headers[1]) - 1))
+            styles.append(("SPAN", (0, row_index), (-1, row_index)))
+            styles.append(("BACKGROUND", (0, row_index), (-1, row_index), colors.black))
+            styles.append(("TEXTCOLOR", (0, row_index), (-1, row_index), colors.white))
+            row_index += 1
+            for project in projects:
+                row = []
+                for cell in table_cells[:-1]:
+                    row.append(project[cell])
+                month_cell_start = len(table_cells) - 1
+                for month_index, month in enumerate(self.month_labels):
+                    month_data = next(
+                        x for x in project["months"] if x["label"] == month
+                    )
+                    row.append(month_data["phase"])
+                    cell_index = month_cell_start + month_index
+                    color = month_data["color"][1:]
+                    bg_color = [int(color[i: i + 2], 16) / 255 for i in (0, 2, 4)]
+                    styles.append(
+                        (
+                            "BACKGROUND",
+                            (cell_index, row_index),
+                            (cell_index, row_index),
+                            bg_color,
+                        )
+                    )
+                row.append(project[table_cells[-1]])
+                table_data.append(row)
+                row_index += 1
+        table = Table(
+            table_headers + table_data, repeatRows=3, spaceBefore=16, spaceAfter=6
+        )
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
+                    ("FONTSIZE", (0, 0), (-1, -1), 4.45),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("ALIGN", (0, 0), (-1, 1), "CENTER"),
+                    ("ALIGN", (0, 2), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
+                    ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
+                ] +
+                styles
+            )
+        )
+        stylesheet = getSampleStyleSheet()
+        normal_style = stylesheet["Normal"]
+        normal_style.fontSize = 5
+        tables = table.split(width, height - 100)
+        left_margin = 15
+        for table in tables:
+            top_margin = 25
+            para = Paragraph(
+                "<b>Document Title: EAO Resource Forecast</b>", normal_style
+            )
+            _, top_offset = para.wrap(width, height)
+            para.drawOn(canv, left_margin, height - (top_offset + top_margin))
+            top_margin = top_margin + top_offset
+            para = Paragraph("Month of January 2023", normal_style)
+            _, top_offset = para.wrap(width, height)
+            para.drawOn(canv, left_margin, height - (top_offset + top_margin))
+            top_margin = top_margin + top_offset
+            para = Paragraph("EAO Operations Division ADMO", normal_style)
+            _, top_offset = para.wrap(width, height)
+            para.drawOn(canv, left_margin, height - (top_offset + top_margin))
+            top_margin = top_margin + top_offset
+            normal_style.fontSize = 6
+            para = Paragraph(
+                "<b>PREPARED FOR INTERNAL DISCUSSION PURPOSES</b>", normal_style
+            )
+            _, top_offset = para.wrap(width, height)
+            para.drawOn(canv, left_margin + 300, height - (top_offset + top_margin))
+            top_margin = top_margin + top_offset
+            _, top_offset = table.wrap(width, height - 100)
+            table.drawOn(canv, left_margin, height - (top_offset + top_margin))
+            canv.showPage()
+        canv.save()
+        pdf_stream.seek(0)
+        return pdf_stream.getvalue(), f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
