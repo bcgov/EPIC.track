@@ -14,6 +14,8 @@ export default function ResourceForecast() {
   const [resultStatus, setResultStatus] = useState<string>();
   const [rfData, setRFData] = useState<any[]>([]);
  
+  const FILENAME_PREFIX = 'EAO_Resource_Forecast';
+
   const setMonthColumns = useCallback(() => {
     let columns = [];
     if (rfData && rfData.length > 0) {
@@ -61,12 +63,6 @@ export default function ResourceForecast() {
   const teamFilter = filterFn('eao_team');
   const cairtLeadFilter = filterFn('cairt_lead');
 
-  // const getSelectedProjectLabels = (selected: string[]) => {
-  //   const labels = selected.map(val => {
-  //     return projectFilter.filter(p => p === val)[0];
-  //   });
-  //   return labels;
-  // }
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
@@ -191,6 +187,25 @@ export default function ResourceForecast() {
       setResultStatus(RESULT_STATUS.ERROR);
     }
   }
+  const downloadPDFReport = async () => {
+    try {
+      fetchReportData();
+      const binaryReponse =
+        await ReportService.downloadPDF(REPORT_TYPE.RESOURCE_FORECAST, {
+          report_date: reportDate
+        });
+      const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download',
+        `${FILENAME_PREFIX}-
+          ${dateUtils.formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {
+      setResultStatus(RESULT_STATUS.ERROR);
+    }
+  }
   return (
     <>
       <Grid component="form" onSubmit={(e) => e.preventDefault()}
@@ -216,7 +231,7 @@ export default function ResourceForecast() {
         </Grid>
         <Grid item sm={1}>
           {resultStatus === RESULT_STATUS.LOADED &&
-            <Button variant='contained'>Download</Button>}
+            <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
         </Grid>
       </Grid>
       {resultStatus !== RESULT_STATUS.ERROR && <MaterialReactTable
