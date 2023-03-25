@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  Alert, Box, Button, Container, FormLabel, Grid
+  Alert, Autocomplete, Box, Button, Container, FormLabel, Grid, TextField
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import MaterialReactTable from 'material-react-table';
+import MaterialReactTable, { MRT_ColumnDef } from 'material-react-table';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
@@ -13,29 +13,7 @@ export default function ResourceForecast() {
   const [reportDate, setReportDate] = useState<string>();
   const [resultStatus, setResultStatus] = useState<string>();
   const [rfData, setRFData] = useState<any[]>([]);
-  // const [selectedFilters, setSelectedFilter] = useState<string[]>([]);
-
-  // const filters = [
-  //   {
-  //     label: 'Capital Investment',
-  //     value: 'capital_investment'
-  //   },
-  //   {
-  //     label: 'Responsible EPD',
-  //     value: 'responsible_epd'
-  //   },
-  //   {
-  //     label: 'EAO Team',
-  //     value: 'eao_team'
-  //   },
-  //   {
-  //     label: 'Work Team Members',
-  //     value: 'work_team_members'
-  //   },
-  //   {
-  //     label: 'Referral Timing',
-  //     value: 'referral_timing'
-  //   }];
+ 
   const setMonthColumns = useCallback(() => {
     let columns = [];
     if (rfData && rfData.length > 0) {
@@ -83,14 +61,35 @@ export default function ResourceForecast() {
   const teamFilter = filterFn('eao_team');
   const cairtLeadFilter = filterFn('cairt_lead');
 
-  const columns = useMemo(
+  // const getSelectedProjectLabels = (selected: string[]) => {
+  //   const labels = selected.map(val => {
+  //     return projectFilter.filter(p => p === val)[0];
+  //   });
+  //   return labels;
+  // }
+  const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         accessorKey: 'project_name',
         header: 'Project',
         enableHiding: false,
-        filterVariant: 'select',
-        filterSelectOptions: projectFilter
+        filterVariant: 'multi-select',
+        filterSelectOptions: projectFilter,
+        Filter: ({...props}) => <Autocomplete
+          multiple
+          options={projectFilter}
+          onChange={(e, value)=>props.header.column.setFilterValue(value)}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              variant="standard"
+              placeholder="Select to Hide"
+            />
+          )}
+        />,
+        filterFn: (row, id, filterValue) => {
+          return !filterValue.includes(row.getValue(id))
+        }
       },
       {
         accessorKey: 'capital_investment',
@@ -174,13 +173,6 @@ export default function ResourceForecast() {
       }
     ], [setMonthColumns]
   );
-
-  // const getSelectedFilterLabels = (selected: string[]) => {
-  //   const labels = selected.map(val => {
-  //     return filters.filter(p => p.value === val)[0].label
-  //   });
-  //   return labels;
-  // }
   const fetchReportData = async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -215,32 +207,6 @@ export default function ResourceForecast() {
               }} />
           </LocalizationProvider>
         </Grid>
-        {/* <Grid item sm={2}><FormLabel>Filter</FormLabel></Grid>
-        <Grid item sm={2}>
-          <FormControl sx={{ width: 300 }}>
-            <Select
-              multiple
-              value={selectedFilters}
-              input={<OutlinedInput />}
-              onChange={(e: any) => setSelectedFilter(e.target.value)}
-              renderValue={(selected) => {
-                if (selected.length === 0) {
-                  return <em>Placeholder</em>;
-                }
-
-                return getSelectedFilterLabels(selected).join(', ');
-              }}
-            >
-              {
-                filters.map(filter => (
-                  <MenuItem key={filter.value} value={filter.value}>
-                    {filter.label}
-                  </MenuItem>
-                )
-                )}
-            </Select>
-          </FormControl>
-        </Grid> */}
         <Grid item sm={resultStatus === RESULT_STATUS.LOADED ? 7 : 8}>
           <Button variant='contained'
             type='submit'
@@ -253,7 +219,7 @@ export default function ResourceForecast() {
             <Button variant='contained'>Download</Button>}
         </Grid>
       </Grid>
-      <MaterialReactTable
+      {resultStatus !== RESULT_STATUS.ERROR && <MaterialReactTable
         initialState={{
           density: 'compact'
         }}
@@ -263,7 +229,7 @@ export default function ResourceForecast() {
         state={{
           isLoading: resultStatus === RESULT_STATUS.LOADING
         }}
-        data={rfData} />
+        data={rfData} />}
       {resultStatus === RESULT_STATUS.ERROR &&
         <Container>
           <Alert severity="error">
