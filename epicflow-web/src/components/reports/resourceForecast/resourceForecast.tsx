@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import MaterialReactTable, { MRT_ColumnDef } from 'material-react-table';
+import MaterialReactTable, { MRT_ColumnDef, MRT_ColumnFiltersState } from 'material-react-table';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
@@ -13,9 +13,15 @@ export default function ResourceForecast() {
   const [reportDate, setReportDate] = useState<string>();
   const [resultStatus, setResultStatus] = useState<string>();
   const [rfData, setRFData] = useState<any[]>([]);
- 
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([]);
+  // const [projectSelected, setProjectSelected] = useState([]);
+  console.log('COLUMN FILTERS', columnFilters);
   const FILENAME_PREFIX = 'EAO_Resource_Forecast';
-
+  // useEffect(()=>{
+  //   const projectSelected = columnFilters.find(d=>d.id === 'project_name')?.value as [];
+  //   console.log('Project Selected ', projectSelected);
+  //   setProjectSelected(projectSelected);
+  // },[columnFilters]);
   const setMonthColumns = useCallback(() => {
     let columns = [];
     if (rfData && rfData.length > 0) {
@@ -71,10 +77,12 @@ export default function ResourceForecast() {
         enableHiding: false,
         filterVariant: 'multi-select',
         filterSelectOptions: projectFilter,
-        Filter: ({...props}) => <Autocomplete
+        Filter: ({ ...props }) => <Autocomplete
           multiple
           options={projectFilter}
-          onChange={(e, value)=>props.header.column.setFilterValue(value)}
+          onChange={(e, value) => props.header.column.setFilterValue(value)}
+          value={props.header.column.getFilterValue() ?
+            props.header.column.getFilterValue() as [] : []}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -241,9 +249,13 @@ export default function ResourceForecast() {
         columns={columns}
         enableDensityToggle={false}
         enableStickyHeader={true}
-        state={{
-          isLoading: resultStatus === RESULT_STATUS.LOADING
-        }}
+        state={
+          {
+            columnFilters,
+            isLoading: resultStatus === RESULT_STATUS.LOADING
+          }
+        }
+        onColumnFiltersChange={setColumnFilters}
         data={rfData} />}
       {resultStatus === RESULT_STATUS.ERROR &&
         <Container>
