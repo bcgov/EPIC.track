@@ -11,7 +11,7 @@ export type ResourceForecastModel = {
     project_phase: string;
     referral_timing: string;
     responsible_epd: string;
-    sector_sub: string;
+    ['sector(sub)']: string;
     sl_no: number;
     sub_type: string;
     type: string;
