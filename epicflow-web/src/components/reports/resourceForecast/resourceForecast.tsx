@@ -1,29 +1,44 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React from 'react';
 import {
   Alert, Autocomplete, Box, Button, Container, FormLabel, Grid, TextField
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import MaterialReactTable, { MRT_ColumnDef, MRT_ColumnFiltersState } from 'material-react-table';
+import MaterialReactTable, {
+  MRT_ColumnDef, MRT_ColumnFiltersState, MRT_VisibilityState
+} from 'material-react-table';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
+import { ResourceForecastModel } from './type';
 
 export default function ResourceForecast() {
-  const [reportDate, setReportDate] = useState<string>();
-  const [resultStatus, setResultStatus] = useState<string>();
-  const [rfData, setRFData] = useState<any[]>([]);
-  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>([]);
-  // const [projectSelected, setProjectSelected] = useState([]);
+  const [reportDate, setReportDate] = React.useState<string>();
+  const [resultStatus, setResultStatus] = React.useState<string>();
+  const [rfData, setRFData] = React.useState<ResourceForecastModel[]>([]);
+  const [columnFilters, setColumnFilters] = React.useState<MRT_ColumnFiltersState>([]);
+  const [columnVisibility, setColumnVisibility] = React.useState<MRT_VisibilityState>({});
+  const [globalFilter, setGlobalFilter] = React.useState();
+  const [filters, setFilters] = React.useState({});
+
   console.log('COLUMN FILTERS', columnFilters);
+  console.log('COLUMN VISIBILITY', columnVisibility, filters);
+  console.log('GLOBAL FILTER', globalFilter);
+  console.log('FILTERS ', filters);
+  React.useEffect(() => {
+    setFilters((prev) => {
+      const state = {
+        ...prev,
+        exclude: Object.keys(columnVisibility).filter(p => !!p),
+        filter_search: columnFilters.map(p => { return { [p.id]: p.value } }),
+        global_search: globalFilter
+      };
+      return state;
+    });
+  }, [columnFilters, columnVisibility, globalFilter]);
   const FILENAME_PREFIX = 'EAO_Resource_Forecast';
-  // useEffect(()=>{
-  //   const projectSelected = columnFilters.find(d=>d.id === 'project_name')?.value as [];
-  //   console.log('Project Selected ', projectSelected);
-  //   setProjectSelected(projectSelected);
-  // },[columnFilters]);
-  const setMonthColumns = useCallback(() => {
-    let columns = [];
+  const setMonthColumns = React.useCallback(() => {
+    let columns: Array<MRT_ColumnDef<ResourceForecastModel>> = [];
     if (rfData && rfData.length > 0) {
       columns = rfData[0].months.map((rfMonth: any, index: number) => {
         return {
@@ -44,15 +59,15 @@ export default function ResourceForecast() {
               {row.original.months[index].phase}
             </Box>
           )
-        }
+        } as MRT_ColumnDef<ResourceForecastModel>
       })
     }
     return columns;
   }, [rfData]);
 
-  const filterFn = useCallback((filterField: string) => rfData
+  const filterFn = React.useCallback((filterField: keyof ResourceForecastModel) => rfData
     .filter(p => p[filterField])
-    .map(p => p[filterField])
+    .map(p => p[filterField]?.toString())
     .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData])
 
   const projectFilter = filterFn('project_name');
@@ -60,7 +75,7 @@ export default function ResourceForecast() {
   const projectPhaseFilter = filterFn('project_phase');
   const eaActFilter = filterFn('ea_act');
   const iaacFilter = filterFn('iaac');
-  const typeFilter = useMemo(() => rfData.map(p => `${p.type}( ${p.sub_type} )`)
+  const typeFilter = React.useMemo(() => rfData.map(p => `${p.type}( ${p.sub_type} )`)
     .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData]);
   const envRegionFilter = filterFn('env_region');
   const nrsRegionFilter = filterFn('nrs_region');
@@ -69,7 +84,7 @@ export default function ResourceForecast() {
   const teamFilter = filterFn('eao_team');
   const cairtLeadFilter = filterFn('cairt_lead');
 
-  const columns = useMemo<MRT_ColumnDef<any>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
       {
         accessorKey: 'project_name',
@@ -97,7 +112,7 @@ export default function ResourceForecast() {
       },
       {
         accessorKey: 'capital_investment',
-        header: 'Estimated Capital Investment'
+        header: 'Capital Investment'
       },
       {
         accessorKey: 'ea_type',
@@ -177,7 +192,7 @@ export default function ResourceForecast() {
       }
     ], [setMonthColumns]
   );
-  const fetchReportData = async () => {
+  const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const reportData =
@@ -194,26 +209,27 @@ export default function ResourceForecast() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }
-  const downloadPDFReport = async () => {
+  }, [reportDate]);
+  const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
       const binaryReponse =
         await ReportService.downloadPDF(REPORT_TYPE.RESOURCE_FORECAST, {
-          report_date: reportDate
+          report_date: reportDate,
+          filters
         });
       const url = window.URL.createObjectURL(new Blob([(binaryReponse as any).data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download',
-        `${FILENAME_PREFIX}-
-          ${dateUtils.formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
+        `${FILENAME_PREFIX}-${dateUtils.formatDate(reportDate ? reportDate :
+          new Date().toISOString())}.pdf`);
       document.body.appendChild(link);
       link.click();
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }
+  }, [reportDate, filters]);
   return (
     <>
       <Grid component="form" onSubmit={(e) => e.preventDefault()}
@@ -252,10 +268,13 @@ export default function ResourceForecast() {
         state={
           {
             columnFilters,
+            columnVisibility,
             isLoading: resultStatus === RESULT_STATUS.LOADING
           }
         }
         onColumnFiltersChange={setColumnFilters}
+        onColumnVisibilityChange={setColumnVisibility}
+        onGlobalFilterChange={setGlobalFilter}
         data={rfData} />}
       {resultStatus === RESULT_STATUS.ERROR &&
         <Container>
