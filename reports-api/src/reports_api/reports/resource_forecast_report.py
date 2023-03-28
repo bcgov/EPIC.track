@@ -72,29 +72,28 @@ class EAResourceForeCastReport(ReportFactory):
                     "data_key": "capital_investment",
                     "label": "ESTIMATED CAPITAL INVESTMENT",
                 },
-                {"data_key": "ea_type", "label": "EA TYPE"},
                 {"data_key": "project_phase", "label": "PROJECT PHASE"},
                 {
                     "data_key": "ea_act",
-                    "label": "BC EA ACT (2002) OR\nBC EA ACT (2018)",
+                    "label": "EA ACT",
                 },
                 {"data_key": "iaac", "label": "IAAC"},
-                {"data_key": "sector(sub)", "label": "SECTOR (SUB)"},
+                {"data_key": "sector(sub)", "label": "TYPE (SUB)"},
                 {"data_key": "env_region", "label": "MOE REGION"},
                 {"data_key": "nrs_region", "label": "NRS REGION"},
             ],
             "[EAO RESOURCING]": [
                 {"data_key": "responsible_epd", "label": "EPD LEAD"},
                 {"data_key": "cairt_lead", "label": "FN CAIRT LEAD"},
-                {"data_key": "eao_team", "label": "LEAD'S TEAM"},
+                {"data_key": "eao_team", "label": "TEAM"},
                 {"data_key": "work_lead", "label": "PROJECT LEAD"},
                 {"data_key": "work_team_members", "label": "WORK TEAM MEMBERS"},
             ],
             "QUARTERS": [],
-            "Potential EAC or Amendment referral timing": [
+            "Expected Referral Date": [
                 {
                     "data_key": "referral_timing",
-                    "label": "Potential EAC or Amendment referral timing",
+                    "label": "Expected Referral Date",
                 }
             ],
         }
@@ -562,7 +561,7 @@ class EAResourceForeCastReport(ReportFactory):
         table_data = []
         row_index = 2
         for ea_type, projects in formatted_data.items():
-            table_data.append([ea_type.upper()] + [""] * (len(table_headers[1]) - 1))
+            table_data.append([f"{ea_type.upper()}({len(projects)})"] + [""] * (len(table_headers[1]) - 1))
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
             styles.append(("BACKGROUND", (0, row_index), (-1, row_index), colors.black))
             styles.append(("TEXTCOLOR", (0, row_index), (-1, row_index), colors.white))
@@ -599,7 +598,7 @@ class EAResourceForeCastReport(ReportFactory):
                 [
                     ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
                     ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
-                    ("FONTSIZE", (0, 0), (-1, -1), 4.45),
+                    ("FONTSIZE", (0, 0), (-1, -1), 5),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("ALIGN", (0, 0), (-1, 1), "CENTER"),
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
@@ -622,7 +621,7 @@ class EAResourceForeCastReport(ReportFactory):
             _, top_offset = para.wrap(width, height)
             para.drawOn(canv, left_margin, height - (top_offset + top_margin))
             top_margin = top_margin + top_offset
-            para = Paragraph("Month of January 2023", normal_style)
+            para = Paragraph(f"Month of {report_date:%B %Y}", normal_style)
             _, top_offset = para.wrap(width, height)
             para.drawOn(canv, left_margin, height - (top_offset + top_margin))
             top_margin = top_margin + top_offset
