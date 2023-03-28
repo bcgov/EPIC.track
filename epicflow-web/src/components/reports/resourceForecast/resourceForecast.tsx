@@ -75,8 +75,9 @@ export default function ResourceForecast() {
   const projectPhaseFilter = filterFn('project_phase');
   const eaActFilter = filterFn('ea_act');
   const iaacFilter = filterFn('iaac');
-  const typeFilter = React.useMemo(() => rfData.map(p => `${p.type}( ${p.sub_type} )`)
-    .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData]);
+  const typeFilter = filterFn('sector(sub)');
+  // const typeFilter = React.useMemo(() => rfData.map(p => `${p.type}( ${p.sub_type} )`)
+  //   .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData]);
   const envRegionFilter = filterFn('env_region');
   const nrsRegionFilter = filterFn('nrs_region');
   const workLeadFilter = filterFn('work_lead');
@@ -139,8 +140,8 @@ export default function ResourceForecast() {
         filterSelectOptions: iaacFilter
       },
       {
-        accessorFn: (row: any): any => `${row.type}( ${row.sub_type} )`,
-        header: 'Project Type (Subtype)',
+        accessorKey: 'sector(sub)',
+        header: 'Type (Subtype)',
         filterVariant: 'select',
         filterSelectOptions: typeFilter
       },
@@ -190,7 +191,19 @@ export default function ResourceForecast() {
         header: 'Referral Timing',
         enableHiding: true
       }
-    ], [setMonthColumns]
+    ], [setMonthColumns,
+      cairtLeadFilter,
+      eaActFilter,
+      eaTypeFilter,
+      envRegionFilter,
+      epdFilter,
+      iaacFilter,
+      nrsRegionFilter,
+      projectFilter,
+      projectPhaseFilter,
+      teamFilter,
+      typeFilter,
+      workLeadFilter]
   );
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
@@ -229,7 +242,7 @@ export default function ResourceForecast() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, filters]);
+  }, [reportDate, filters, fetchReportData]);
   return (
     <>
       <Grid component="form" onSubmit={(e) => e.preventDefault()}
