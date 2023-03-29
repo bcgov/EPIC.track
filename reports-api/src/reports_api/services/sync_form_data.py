@@ -35,8 +35,8 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
         mapper = model_class.__mapper__
         columns = dict(mapper.columns).keys()
         # set data only if key is in column names and has a valid value
-        # To avoid passing empty strings to integer / float fields
-        data = {k: v for k, v in data.items() if k in columns and v is not None}
+        # To avoid passing empty strings to integer / float fields / Boolean False
+        data = {k: v for k, v in data.items() if k in columns and (v is not None and v != '')}
         if 'id' in data and data['id']:
             obj = model_class.find_by_id(data['id'])
             obj = obj.update(data, commit=False)
