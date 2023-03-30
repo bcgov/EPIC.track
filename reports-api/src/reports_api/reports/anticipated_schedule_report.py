@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 from flask import jsonify
-from sqlalchemy import and_, func
+from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import aliased
 
 from reports_api.models import (
@@ -132,8 +132,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(Region, Region.id == Project.region_id_env)
             .join(EAAct, EAAct.id == Work.ea_act_id)
             .join(Ministry)
-            .join(eac_decision_by, Work.eac_decision_by)
-            .join(decision_by, Work.decision_by)
+            .outerjoin(eac_decision_by, Work.eac_decision_by)
+            .outerjoin(decision_by, Work.decision_by)
             .outerjoin(SubstitutionAct)
             .outerjoin(
                 WorkEngagement,
@@ -143,13 +143,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 ),
             )
             .outerjoin(Engagement, WorkEngagement.engagement)
-            .join(
+            .outerjoin(
                 next_pecp_query,
                 and_(
                     next_pecp_query.c.work_id == Work.id,
                     WorkEngagement.project_id == Work.project_id,
-                    next_pecp_query.c.min_start_date == Engagement.start_date,
                 ),
+            )
+            # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
+            .filter(
+                or_(
+                    next_pecp_query.c.min_start_date == Engagement.start_date,
+                    WorkEngagement.id.is_(None),
+                )
             )
             .outerjoin(
                 pecp_event,
