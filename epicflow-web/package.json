@@ -44,6 +44,7 @@
     "jest": "^27.4.3",
     "jest-resolve": "^27.4.2",
     "jest-watch-typeahead": "^1.0.0",
+    "json-2-csv": "^4.0.0",
     "keycloak-js": "^20.0.3",
     "material-react-table": "^1.9.0",
     "material-ui-popup-state": "^5.0.4",

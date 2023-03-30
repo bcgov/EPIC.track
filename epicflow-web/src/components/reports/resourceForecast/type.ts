@@ -1,23 +1,24 @@
 export type ResourceForecastModel = {
-    cairt_lead: string;
-    capital_investment: number;
-    ea_act: string;
-    ea_type: string;
-    eao_team: string;
-    env_region: string;
-    iaac: string;
-    nrs_region: string;
     project_name: string;
+    capital_investment: number;
+    ea_type: string;
     project_phase: string;
-    referral_timing: string;
-    responsible_epd: string;
+    ea_act: string;
+    iaac: string;
     ['sector(sub)']: string;
+    env_region: string;
+    nrs_region: string;
+    responsible_epd: string;
+    cairt_lead: string;
+    eao_team: string;
+    work_lead: string;
+    work_team_members: string;
+    referral_timing: string;
+    
     sl_no: number;
     sub_type: string;
     type: string;
     work_id: number;
-    work_lead: string;
-    work_team_members: string;
     months: Array<MonthColumn>;
 }
 
