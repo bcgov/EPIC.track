@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Payment Disbursement status code."""
 
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, String
 
 from .code_table import CodeTable
 from .db import db
@@ -26,9 +26,11 @@ class WorkType(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     sort_order = Column(Integer())
+    report_title = Column(String())
 
     def as_dict(self):
         """Return Json representation."""
         result = CodeTable.as_dict(self)
         result['sort_order'] = self.sort_order
+        result['report_title'] = self.report_title
         return result
