@@ -1,16 +1,26 @@
 import React from 'react';
 import {
-  Alert, Autocomplete, Box, Button, Container, FormLabel, Grid, TextField
+  Alert, Autocomplete, Box, Button, Container, FormLabel, Grid, IconButton, TextField, Tooltip
 } from '@mui/material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import MaterialReactTable, {
-  MRT_ColumnDef, MRT_ColumnFiltersState, MRT_VisibilityState
+  MRT_ColumnDef,
+  MRT_ColumnFiltersState,
+  MRT_FullScreenToggleButton,
+  MRT_ShowHideColumnsButton,
+  MRT_TableInstance,
+  MRT_ToggleFiltersButton,
+  MRT_VisibilityState
 } from 'material-react-table';
+import { json2csv } from 'json-2-csv';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
 import { ResourceForecastModel } from './type';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+
 
 export default function ResourceForecast() {
   const [reportDate, setReportDate] = React.useState<string>();
@@ -21,10 +31,36 @@ export default function ResourceForecast() {
   const [globalFilter, setGlobalFilter] = React.useState();
   const [filters, setFilters] = React.useState({});
 
+  const FILENAME_PREFIX = 'EAO_Resource_Forecast';
+
   console.log('COLUMN FILTERS', columnFilters);
   console.log('COLUMN VISIBILITY', columnVisibility, filters);
-  console.log('GLOBAL FILTER', globalFilter);
+  // console.log('GLOBAL FILTER', globalFilter);
   console.log('FILTERS ', filters);
+  const exportToCsv = React.useCallback(async(table: MRT_TableInstance<ResourceForecastModel>)=>{
+    const filteredResult = table.getFilteredRowModel().flatRows.map(p=>{
+      return {
+        ...p.original,
+        [p.original.months[0].label]: p.original.months[0].phase,
+        [p.original.months[1].label]: p.original.months[1].phase,
+        [p.original.months[2].label]: p.original.months[2].phase,
+        [p.original.months[3].label]: p.original.months[3].phase,
+      }
+    });
+    const columns = table.getVisibleFlatColumns().map(p=>p.columnDef.id?.toString());
+    const csv = await json2csv(filteredResult,{
+      emptyFieldValue: '',
+      keys: columns as string[]
+    });
+    const url = window.URL.createObjectURL(new Blob([(csv as any)]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download',
+      `${FILENAME_PREFIX}-${dateUtils.formatDate(reportDate ? reportDate :
+        new Date().toISOString())}.csv`);
+    document.body.appendChild(link);
+    link.click();
+  },[]);
   React.useEffect(() => {
     setFilters((prev) => {
       const state = {
@@ -36,7 +72,7 @@ export default function ResourceForecast() {
       return state;
     });
   }, [columnFilters, columnVisibility, globalFilter]);
-  const FILENAME_PREFIX = 'EAO_Resource_Forecast';
+  
   const setMonthColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<ResourceForecastModel>> = [];
     if (rfData && rfData.length > 0) {
@@ -282,12 +318,42 @@ export default function ResourceForecast() {
           {
             columnFilters,
             columnVisibility,
-            isLoading: resultStatus === RESULT_STATUS.LOADING
+            globalFilter,
+            isLoading: resultStatus === RESULT_STATUS.LOADING,
+            showGlobalFilter: true
           }
         }
+        positionGlobalFilter='left' 
+        muiSearchTextFieldProps={{
+          placeholder: 'Search',
+          sx: { minWidth: '300px' },
+          variant: 'outlined',
+        }}
         onColumnFiltersChange={setColumnFilters}
         onColumnVisibilityChange={setColumnVisibility}
         onGlobalFilterChange={setGlobalFilter}
+        renderToolbarInternalActions={({ table }) => (
+          <>
+            <MRT_ToggleFiltersButton table={table} />
+            <MRT_ShowHideColumnsButton table={table} />
+            {/* add your own custom print button or something */}
+            <Tooltip title='Clear all filters'>
+              <IconButton onClick={() => {
+                setColumnFilters([]);
+                setColumnVisibility({});
+                setGlobalFilter(undefined);
+              }}>
+                <ClearAllIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title='Export to csv'>
+              <IconButton onClick={() =>exportToCsv(table)}>
+                <FileDownloadIcon />
+              </IconButton>
+            </Tooltip>
+            <MRT_FullScreenToggleButton table={table} />
+          </>
+        )}
         data={rfData} />}
       {resultStatus === RESULT_STATUS.ERROR &&
         <Container>
