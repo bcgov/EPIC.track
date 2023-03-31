@@ -42,40 +42,42 @@ class CodeTable():  # pylint: disable=too-few-public-methods
         """Return code name."""
         return Column(String)
 
-    @declared_attr
-    def created_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code created by."""
-        return Column(String)
+    # TODO: Delete these if everything goes okay on deployment
 
-    @declared_attr
-    def created_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code created timestamp."""
-        return Column(DateTime, server_default=func.now())
+    # @declared_attr
+    # def created_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code created by."""
+    #     return Column(String)
 
-    @declared_attr
-    def updated_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code updated  by."""
-        return Column(String)
+    # @declared_attr
+    # def created_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code created timestamp."""
+    #     return Column(DateTime, server_default=func.now())
 
-    @declared_attr
-    def updated_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code updated timestamp."""
-        return Column(DateTime, onupdate=func.now())
+    # @declared_attr
+    # def updated_by(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code updated  by."""
+    #     return Column(String)
 
-    @declared_attr
-    def is_active(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code active status."""
-        return Column(Boolean, default=True, nullable=False)
+    # @declared_attr
+    # def updated_at(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code updated timestamp."""
+    #     return Column(DateTime, onupdate=func.now())
 
-    @declared_attr
-    def is_deleted(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code deleted status."""
-        return Column(Boolean, default=False, nullable=False)
+    # @declared_attr
+    # def is_active(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code active status."""
+    #     return Column(Boolean, default=True, nullable=False)
 
-    @declared_attr
-    def sort_order(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return sort order."""
-        return Column(Integer)
+    # @declared_attr
+    # def is_deleted(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code deleted status."""
+    #     return Column(Boolean, default=False, nullable=False)
+
+    # @declared_attr
+    # def sort_order(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return sort order."""
+    #     return Column(Integer)
 
     @classmethod
     def find_by_id(cls, _id):
