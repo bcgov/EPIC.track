@@ -10,7 +10,7 @@
         "react-hooks"
     ],
     "rules": {
-        "max-len": ["error" , {"code": 100}],
+        "max-len": ["error" , {"code": 115}],
         "no-unused-vars": ["error", {"varsIgnorePattern": "[Rr]eact" }],
         "no-use-before-define": "off",
         "@typescript-eslint/no-use-before-define": ["error"],

@@ -49,6 +49,7 @@ class EAResourceForeCastReport(ReportFactory):
             "staff_last_name",
             "role_id",
             "work_id",
+            "ea_type_label"
         ]
         group_by = "project_name"
         super().__init__(data_keys, group_by, None, filters)
@@ -432,6 +433,7 @@ class EAResourceForeCastReport(ReportFactory):
                 Project.name.label("project_name"),
                 Project.capital_investment.label("capital_investment"),
                 WorkType.name.label("ea_type"),
+                WorkType.report_title.label("ea_type_label"),
                 project_phase.name.label("project_phase"),
                 EAAct.name.label("ea_act"),
                 FederalInvolvement.name.label("iaac"),
@@ -552,7 +554,7 @@ class EAResourceForeCastReport(ReportFactory):
             return {}, None
         formatted_data = defaultdict(list)
         for item in data:
-            formatted_data[item["ea_type"]].append(item)
+            formatted_data[item["ea_type_label"]].append(item)
         pdf_stream = BytesIO()
         page_size = landscape(A3)
         width, height = page_size
@@ -560,8 +562,8 @@ class EAResourceForeCastReport(ReportFactory):
         table_headers, table_cells, styles = self._get_report_meta_data(report_date)
         table_data = []
         row_index = 2
-        for ea_type, projects in formatted_data.items():
-            table_data.append([f"{ea_type.upper()}({len(projects)})"] + [""] * (len(table_headers[1]) - 1))
+        for ea_type_label, projects in formatted_data.items():
+            table_data.append([f"{ea_type_label.upper()}({len(projects)})"] + [""] * (len(table_headers[1]) - 1))
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
             styles.append(("BACKGROUND", (0, row_index), (-1, row_index), colors.black))
             styles.append(("TEXTCOLOR", (0, row_index), (-1, row_index), colors.white))

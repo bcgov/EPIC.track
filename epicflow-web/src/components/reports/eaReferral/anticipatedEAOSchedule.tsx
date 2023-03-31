@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import ReportService from '../../../services/reportService';
-import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT }
-  from '../../../constants/application-constant';
-import { dateUtils } from '../../../utils';
+import React from 'react';
+import { Container } from '@mui/system';
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, FormLabel,
-  Grid, Skeleton, Tab, Table, Tabs, Typography
+  Grid, Skeleton, Tab, Table, TableBody, TableCell, TableRow, Tabs, Typography
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { Container } from '@mui/system';
+import ReportService from '../../../services/reportService';
+import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT }
+  from '../../../constants/application-constant';
+import { dateUtils } from '../../../utils';
 
 export default function AnticipatedEAOSchedule() {
-  const [reports, setReports] = useState({});
-  const [selectedTab, setSelectedTab] = useState(0);
-  const [reportDate, setReportDate] = useState<string>();
-  const [resultStatus, setResultStatus] = useState<string>();
+  const [reports, setReports] = React.useState({});
+  const [selectedTab, setSelectedTab] = React.useState(0);
+  const [reportDate, setReportDate] = React.useState<string>();
+  const [resultStatus, setResultStatus] = React.useState<string>();
 
   const FILENAME_PREFIX = 'Anticipated_EA_Referral_Schedule';
 
-  const fetchReportData = async () => {
+  const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const reportData =
@@ -40,8 +40,8 @@ export default function AnticipatedEAOSchedule() {
       setResultStatus(RESULT_STATUS.ERROR);
     }
 
-  }
-  const downloadPDFReport = async () => {
+  },[reportDate]);
+  const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
       const binaryReponse =
@@ -59,16 +59,19 @@ export default function AnticipatedEAOSchedule() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }
+  },[reportDate]);
+
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
+
   interface TabPanelProps {
     children?: React.ReactNode;
     dir?: string;
     index: number;
     value: number;
   }
+
   function TabPanel(props: TabPanelProps) {
     const { children, value, index, ...other } = props;
 
@@ -114,118 +117,116 @@ export default function AnticipatedEAOSchedule() {
             <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
         </Grid>
       </Grid>
-      {resultStatus === RESULT_STATUS.LOADED && <Accordion sx={{ mt: '15px' }}>
-        {
-          Object.keys(reports).map((key) => {
-            return <>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography>{key}</Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                {
-                  ((reports as any)[key] as []).map((item, itemIndex) => {
-                    return <Accordion key={itemIndex}>
-                      <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography>{item['project_name']}</Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <Tabs
-                          id={itemIndex.toString()}
-                          onChange={handleTabChange}
-                          value={selectedTab}
-                        >
-                          <Tab label="Basic" />
-                          <Tab label="Project Description" />
-                          <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
-                        </Tabs>
-                        <TabPanel value={selectedTab} index={0}>
-                          <Table>
-                            <tbody>
-                              {item['proponent'] && <tr>
-                                <td>Proponent</td>
-                                <td>{item['proponent']}</td>
-                              </tr>}
-                              <tr>
-                                <td>Region</td>
-                                <td>{item['region']}</td>
-                              </tr>
-                              <tr>
-                                <td>Location</td>
-                                <td>{item['location']}</td>
-                              </tr>
-                              <tr>
-                                <td>EA Type</td>
-                                <td>
-                                  {item['ea_act']}
-                                  {item['substitution_act'] ? ', ' + item['substitution_act'] : ''}
-                                </td>
-                              </tr>
-                              <tr>
-                                <td>Responsible Minister</td>
-                                <td>{item['ministry_name']}</td>
-                              </tr>
-                              <tr>
-                                <td>Decision to be made by</td>
-                                <td>{item['decision_by']}</td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </TabPanel>
-                        <TabPanel value={selectedTab} index={1}>
-                          {item['project_description']}
-                        </TabPanel>
-                        <TabPanel value={selectedTab} index={2}>
-                          <Table>
-                            <tbody>
-                              <tr>
-                                <td>
-                                  {item['milestone_type'] === 4 ?
-                                    'Referral Date' : 'Decision Date'}
-                                </td>
-                                <td>{dateUtils.formatDate(item['referral_date'])}</td>
-                              </tr>
-                              <tr>
-                                <td>Updated Date</td>
-                                <td>{dateUtils.formatDate(item['date_updated'])}</td>
-                              </tr>
-                              {
-                                item['next_pecp_date'] &&
-                                <tr>
-                                  <td>Next PECP Date</td>
-                                  <td>{dateUtils.formatDate(item['next_pecp_date'])}</td>
-                                </tr>
-                              }
-                              {
-                                item['next_pecp_title'] &&
-                                <tr>
-                                  <td>PECP Title</td>
-                                  <td>{item['next_pecp_title']}</td>
-                                </tr>
-                              }
-                              {
-                                item['next_pecp_short_description'] !== null &&
-                                <tr>
-                                  <td>PECP Description</td>
-                                  <td>{item['next_pecp_short_description']}</td>
-                                </tr>
-                              }
-                              <tr>
-                                <td>Additional Info</td>
-                                <td>{item['additional_info']}</td>
-                              </tr>
-                            </tbody>
-                          </Table>
-                        </TabPanel>
-                      </AccordionDetails>
-                    </Accordion>
-                  })
-                }
-              </AccordionDetails>
-            </>
-          })
-
-        }
-      </Accordion>
+      {resultStatus === RESULT_STATUS.LOADED &&
+        Object.keys(reports).map((key) => {
+          console.log(key);
+          return <>
+            <Accordion sx={{ mt: '15px' }}><AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Typography>{key}</Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {
+                ((reports as any)[key] as []).map((item, itemIndex) => {
+                  return <Accordion key={itemIndex}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography>{item['project_name']}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Tabs
+                        id={itemIndex.toString()}
+                        onChange={handleTabChange}
+                        value={selectedTab}
+                      >
+                        <Tab label="Basic" />
+                        <Tab label="Project Description" />
+                        <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
+                      </Tabs>
+                      <TabPanel value={selectedTab} index={0}>
+                        <Table>
+                          <TableBody>
+                            {item['proponent'] && <TableRow>
+                              <TableCell>Proponent</TableCell>
+                              <TableCell>{item['proponent']}</TableCell>
+                            </TableRow>}
+                            <TableRow>
+                              <TableCell>Region</TableCell>
+                              <TableCell>{item['region']}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>Location</TableCell>
+                              <TableCell>{item['location']}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>EA Type</TableCell>
+                              <TableCell>
+                                {item['ea_act']}
+                                {item['substitution_act'] ? ', ' + item['substitution_act'] : ''}
+                              </TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>Responsible Minister</TableCell>
+                              <TableCell>{item['ministry_name']}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>Decision to be made by</TableCell>
+                              <TableCell>{item['decision_by']}</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </TabPanel>
+                      <TabPanel value={selectedTab} index={1}>
+                        {item['project_description']}
+                      </TabPanel>
+                      <TabPanel value={selectedTab} index={2}>
+                        <Table>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell>
+                                {item['milestone_type'] === 4 ?
+                                  'Referral Date' : 'Decision Date'}
+                              </TableCell>
+                              <TableCell>{dateUtils.formatDate(item['referral_date'])}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell>Updated Date</TableCell>
+                              <TableCell>{dateUtils.formatDate(item['date_updated'])}</TableCell>
+                            </TableRow>
+                            {
+                              item['next_pecp_date'] &&
+                              <TableRow>
+                                <TableCell>Next PECP Date</TableCell>
+                                <TableCell>{dateUtils.formatDate(item['next_pecp_date'])}</TableCell>
+                              </TableRow>
+                            }
+                            {
+                              item['next_pecp_title'] &&
+                              <TableRow>
+                                <TableCell>PECP Title</TableCell>
+                                <TableCell>{item['next_pecp_title']}</TableCell>
+                              </TableRow>
+                            }
+                            {
+                              item['next_pecp_short_description'] !== null &&
+                              <TableRow>
+                                <TableCell>PECP Description</TableCell>
+                                <TableCell>{item['next_pecp_short_description']}</TableCell>
+                              </TableRow>
+                            }
+                            <TableRow>
+                              <TableCell>Additional Info</TableCell>
+                              <TableCell>{item['additional_info']}</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </TabPanel>
+                    </AccordionDetails>
+                  </Accordion>
+                })
+              }
+            </AccordionDetails>
+            </Accordion>
+          </>
+        })
       }
 
       {resultStatus === RESULT_STATUS.NO_RECORD &&
