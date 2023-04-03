@@ -25,3 +25,4 @@ class FederalInvolvement(db.Model, CodeTable):
     __tablename__ = 'federal_involvements'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    sort_order = Column(Integer, nullable=False)

@@ -25,3 +25,4 @@ class EAAct(db.Model, CodeTable):
     __tablename__ = 'ea_acts'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    sort_order = Column(Integer, nullable=False)

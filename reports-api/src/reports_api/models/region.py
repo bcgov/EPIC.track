@@ -26,6 +26,7 @@ class Region(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     entity = Column(String())
+    sort_order = Column(Integer, nullable=False)
 
     def as_dict(self):
         """Return Json representation."""
