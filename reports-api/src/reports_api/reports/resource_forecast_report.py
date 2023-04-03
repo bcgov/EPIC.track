@@ -50,7 +50,7 @@ class EAResourceForeCastReport(ReportFactory):
             "staff_last_name",
             "role_id",
             "work_id",
-            "ea_type_label"
+            "ea_type_label",
         ]
         group_by = "project_name"
         super().__init__(data_keys, group_by, None, filters)
@@ -72,13 +72,10 @@ class EAResourceForeCastReport(ReportFactory):
                 {"data_key": "project_name", "label": "PROJECT NAME"},
                 {
                     "data_key": "capital_investment",
-                    "label": "ESTIMATED CAPITAL INVESTMENT"
+                    "label": "ESTIMATED CAPITAL INVESTMENT",
                 },
                 {"data_key": "project_phase", "label": "PROJECT PHASE"},
-                {
-                    "data_key": "ea_act",
-                    "label": "EA ACT"
-                },
+                {"data_key": "ea_act", "label": "EA ACT"},
                 {"data_key": "iaac", "label": "IAAC"},
                 {"data_key": "sector(sub)", "label": "TYPE (SUB)"},
                 {"data_key": "env_region", "label": "MOE REGION"},
@@ -93,10 +90,7 @@ class EAResourceForeCastReport(ReportFactory):
             ],
             "QUARTERS": [],
             "Expected Referral Date": [
-                {
-                    "data_key": "referral_timing",
-                    "label": "Expected Referral Date"
-                }
+                {"data_key": "referral_timing", "label": "Expected Referral Date"}
             ],
         }
         self.end_date = None
@@ -561,7 +555,7 @@ class EAResourceForeCastReport(ReportFactory):
         pdf_stream = BytesIO()
         page_size = landscape(A3)
         width, height = page_size
-        side_margin = (.75 * inch)
+        side_margin = 0.75 * inch
         available_table_width = width - (side_margin * 2)
         canv = Canvas(pdf_stream, pagesize=page_size)
         table_headers, table_cells, styles = self._get_report_meta_data(report_date)
@@ -571,7 +565,10 @@ class EAResourceForeCastReport(ReportFactory):
         normal_style = stylesheet["Normal"]
         normal_style.fontSize = 5
         for ea_type_label, projects in formatted_data.items():
-            table_data.append([f"{ea_type_label.upper()}({len(projects)})"] + [""] * (len(table_headers[1]) - 1))
+            table_data.append(
+                [f"{ea_type_label.upper()}({len(projects)})"] +
+                [""] * (len(table_headers[1]) - 1)
+            )
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
             styles.append(("BACKGROUND", (0, row_index), (-1, row_index), colors.black))
             styles.append(("TEXTCOLOR", (0, row_index), (-1, row_index), colors.white))
@@ -600,9 +597,7 @@ class EAResourceForeCastReport(ReportFactory):
                 row.append(Paragraph(project[table_cells[-1]], normal_style))
                 table_data.append(row)
                 row_index += 1
-        table = Table(
-            table_headers + table_data, repeatRows=3
-        )
+        table = Table(table_headers + table_data, repeatRows=3)
         table.setStyle(
             TableStyle(
                 [
