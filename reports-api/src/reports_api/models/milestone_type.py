@@ -25,3 +25,4 @@ class MilestoneType(db.Model, CodeTable):
     __tablename__ = 'milestone_types'
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     name = Column(String, nullable=False)
+    sort_order = Column(Integer, nullable=False)
