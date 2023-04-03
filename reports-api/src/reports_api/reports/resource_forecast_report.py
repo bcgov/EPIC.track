@@ -576,7 +576,7 @@ class EAResourceForeCastReport(ReportFactory):
             for project in projects:
                 row = []
                 for cell in table_cells[:-1]:
-                    row.append(Paragraph(project[cell], normal_style))
+                    row.append(Paragraph(project[cell] if project[cell] else '', normal_style))
                 month_cell_start = len(table_cells) - 1
                 for month_index, month in enumerate(self.month_labels):
                     month_data = next(
