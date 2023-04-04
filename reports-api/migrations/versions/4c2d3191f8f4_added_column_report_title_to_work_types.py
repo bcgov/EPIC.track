@@ -137,9 +137,9 @@ def upgrade():
     op.alter_column(
         "positions", "sort_order", existing_type=sa.INTEGER(), nullable=False
     )
-    op.alter_column(
-        "proponents", "sort_order", existing_type=sa.INTEGER(), nullable=False
-    )
+    # op.alter_column(
+    #     "proponents", "sort_order", existing_type=sa.INTEGER(), nullable=False
+    # )
     op.alter_column(
         "regions",
         "is_active",

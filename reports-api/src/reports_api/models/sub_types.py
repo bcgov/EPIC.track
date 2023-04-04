@@ -29,6 +29,7 @@ class SubType(db.Model, CodeTable):
     short_name = Column(String())
     type_id = Column(ForeignKey("types.id"), nullable=False)
     type = relationship("Type", foreign_keys=[type_id], lazy="select")
+    sort_order = Column(Integer, nullable=False)
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return Json representation."""

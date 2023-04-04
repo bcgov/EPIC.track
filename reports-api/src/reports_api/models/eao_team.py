@@ -26,6 +26,7 @@ class EAOTeam(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(), nullable=False)
+    sort_order = Column(Integer, nullable=False)
 
     def as_dict(self):
         """Return Json representation."""

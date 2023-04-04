@@ -26,6 +26,7 @@ class Type(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     short_name = Column(String())
+    sort_order = Column(Integer, nullable=False)
 
     def as_dict(self):
         """Return JSON Representation."""
