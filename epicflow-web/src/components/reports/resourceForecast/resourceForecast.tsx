@@ -33,10 +33,6 @@ export default function ResourceForecast() {
 
   const FILENAME_PREFIX = 'EAO_Resource_Forecast';
 
-  console.log('COLUMN FILTERS', columnFilters);
-  console.log('COLUMN VISIBILITY', columnVisibility, filters);
-  // console.log('GLOBAL FILTER', globalFilter);
-  console.log('FILTERS ', filters);
   const exportToCsv = React.useCallback(async(table: MRT_TableInstance<ResourceForecastModel>)=>{
     const filteredResult = table.getFilteredRowModel().flatRows.map(p=>{
       return {
@@ -61,6 +57,7 @@ export default function ResourceForecast() {
     document.body.appendChild(link);
     link.click();
   },[]);
+
   React.useEffect(() => {
     setFilters((prev) => {
       const state = {
@@ -112,8 +109,6 @@ export default function ResourceForecast() {
   const eaActFilter = filterFn('ea_act');
   const iaacFilter = filterFn('iaac');
   const typeFilter = filterFn('sector(sub)');
-  // const typeFilter = React.useMemo(() => rfData.map(p => `${p.type}( ${p.sub_type} )`)
-  //   .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [rfData]);
   const envRegionFilter = filterFn('env_region');
   const nrsRegionFilter = filterFn('nrs_region');
   const workLeadFilter = filterFn('work_lead');
@@ -254,6 +249,7 @@ export default function ResourceForecast() {
       }
       if (reportData.status === 204) {
         setResultStatus(RESULT_STATUS.NO_RECORD);
+        setRFData([]);
       }
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
