@@ -3,7 +3,7 @@ name: Report API CI
 on:
   pull_request:
     branches:
-      - main
+      - develop
     paths:
       - "reports-api/**"
 
