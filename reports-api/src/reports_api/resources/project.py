@@ -29,7 +29,7 @@ parser.add_argument('name', type=str, required=True,
 parser.add_argument('id', type=int, help='ID of the project in case of updates.', location='args')
 
 
-@cors_preflight('GET')
+@cors_preflight('GET', 'DELETE', 'POST', 'OPTIONS')
 @API.route('', methods=['GET', 'POST', 'OPTIONS'])
 class Projects(Resource):
     """Endpoint resource to manage projects."""
@@ -51,8 +51,7 @@ class Projects(Resource):
         project = ProjectService.create_project(API.payload)
         return project.as_dict(), HTTPStatus.CREATED
 
-
-@cors_preflight('GET')
+@cors_preflight('GET', 'DELETE', 'POST', 'OPTIONS')
 @API.route('/<int:project_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class Project(Resource):
     """Endpoint resource to manage a project."""
@@ -84,7 +83,7 @@ class Project(Resource):
         return {"message": "Project successfully deleted"}, HTTPStatus.OK
 
 
-@cors_preflight('GET')
+@cors_preflight('GET', 'DELETE', 'POST', 'OPTIONS')
 @API.route('/exists', methods=['GET', 'OPTIONS'])
 class ValidateProject(Resource):
     """Endpoint resource to check for existing project."""

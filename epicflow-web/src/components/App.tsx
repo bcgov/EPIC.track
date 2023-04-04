@@ -8,6 +8,8 @@ import StaffForm from './staff/form/staffForm';
 import StaffList from './staff/list/staffList';
 import NavBar from './layout/NavBar';
 import { RootState } from '../store';
+import ProjectForm from './project/form/projectForm';
+import ProjectList from './project/list/projectList';
 
 
 export default function App() {
@@ -27,6 +29,8 @@ export default function App() {
             <Route path='/report-selector' element={<ReportSelector />} />
             <Route path='/staff' element={<StaffForm />} />
             <Route path='/staff-list' element={<StaffList />} />
+            <Route path='/project' element={<ProjectForm />} />
+            <Route path='/project-list' element={<ProjectList />} />
           </Routes>
         </Suspense>
       </BrowserRouter>}
