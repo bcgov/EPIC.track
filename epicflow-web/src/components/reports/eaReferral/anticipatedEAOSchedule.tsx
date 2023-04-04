@@ -7,7 +7,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ArrowForwardIosSharpIcon  from '@mui/icons-material/ArrowForwardIosSharp';
 import ReportService from '../../../services/reportService';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT }
   from '../../../constants/application-constant';
@@ -121,109 +121,110 @@ export default function AnticipatedEAOSchedule() {
         Object.keys(reports).map((key) => {
           console.log(key);
           return <>
-            <Accordion sx={{ mt: '15px' }}><AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography>{key}</Typography>
-            </AccordionSummary>
-            <AccordionDetails>
-              {
-                ((reports as any)[key] as []).map((item, itemIndex) => {
-                  return <Accordion key={itemIndex}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>{item['project_name']}</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Tabs
-                        id={itemIndex.toString()}
-                        onChange={handleTabChange}
-                        value={selectedTab}
-                      >
-                        <Tab label="Basic" />
-                        <Tab label="Project Description" />
-                        <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
-                      </Tabs>
-                      <TabPanel value={selectedTab} index={0}>
-                        <Table>
-                          <TableBody>
-                            {item['proponent'] && <TableRow>
-                              <TableCell>Proponent</TableCell>
-                              <TableCell>{item['proponent']}</TableCell>
-                            </TableRow>}
-                            <TableRow>
-                              <TableCell>Region</TableCell>
-                              <TableCell>{item['region']}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Location</TableCell>
-                              <TableCell>{item['location']}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>EA Type</TableCell>
-                              <TableCell>
-                                {item['ea_act']}
-                                {item['substitution_act'] ? ', ' + item['substitution_act'] : ''}
-                              </TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Responsible Minister</TableCell>
-                              <TableCell>{item['ministry_name']}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Decision to be made by</TableCell>
-                              <TableCell>{item['decision_by']}</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </TabPanel>
-                      <TabPanel value={selectedTab} index={1}>
-                        {item['project_description']}
-                      </TabPanel>
-                      <TabPanel value={selectedTab} index={2}>
-                        <Table>
-                          <TableBody>
-                            <TableRow>
-                              <TableCell>
-                                {item['milestone_type'] === 4 ?
-                                  'Referral Date' : 'Decision Date'}
-                              </TableCell>
-                              <TableCell>{dateUtils.formatDate(item['referral_date'])}</TableCell>
-                            </TableRow>
-                            <TableRow>
-                              <TableCell>Updated Date</TableCell>
-                              <TableCell>{dateUtils.formatDate(item['date_updated'])}</TableCell>
-                            </TableRow>
-                            {
-                              item['next_pecp_date'] &&
+            <Accordion sx={{ mt: '15px',bgcolor: 'rgba(0, 0, 0, .03)' }} square disableGutters elevation={0}>
+              <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
+                <Typography>{key}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {
+                  ((reports as any)[key] as []).map((item, itemIndex) => {
+                    return <Accordion key={itemIndex} elevation={0}>
+                      <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
+                        <Typography>{item['project_name']} - <b>{(item['date_updated'])}</b></Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Tabs
+                          id={itemIndex.toString()}
+                          onChange={handleTabChange}
+                          value={selectedTab}
+                        >
+                          <Tab label="Basic" />
+                          <Tab label="Project Description" />
+                          <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
+                        </Tabs>
+                        <TabPanel value={selectedTab} index={0}>
+                          <Table>
+                            <TableBody>
+                              {item['proponent'] && <TableRow>
+                                <TableCell>Proponent</TableCell>
+                                <TableCell>{item['proponent']}</TableCell>
+                              </TableRow>}
                               <TableRow>
-                                <TableCell>Next PECP Date</TableCell>
-                                <TableCell>{dateUtils.formatDate(item['next_pecp_date'])}</TableCell>
+                                <TableCell>Region</TableCell>
+                                <TableCell>{item['region']}</TableCell>
                               </TableRow>
-                            }
-                            {
-                              item['next_pecp_title'] &&
                               <TableRow>
-                                <TableCell>PECP Title</TableCell>
-                                <TableCell>{item['next_pecp_title']}</TableCell>
+                                <TableCell>Location</TableCell>
+                                <TableCell>{item['location']}</TableCell>
                               </TableRow>
-                            }
-                            {
-                              item['next_pecp_short_description'] !== null &&
                               <TableRow>
-                                <TableCell>PECP Description</TableCell>
-                                <TableCell>{item['next_pecp_short_description']}</TableCell>
+                                <TableCell>EA Type</TableCell>
+                                <TableCell>
+                                  {item['ea_act']}
+                                  {item['substitution_act'] ? ', ' + item['substitution_act'] : ''}
+                                </TableCell>
                               </TableRow>
-                            }
-                            <TableRow>
-                              <TableCell>Additional Info</TableCell>
-                              <TableCell>{item['additional_info']}</TableCell>
-                            </TableRow>
-                          </TableBody>
-                        </Table>
-                      </TabPanel>
-                    </AccordionDetails>
-                  </Accordion>
-                })
-              }
-            </AccordionDetails>
+                              <TableRow>
+                                <TableCell>Responsible Minister</TableCell>
+                                <TableCell>{item['ministry_name']}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>Decision to be made by</TableCell>
+                                <TableCell>{item['decision_by']}</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </TabPanel>
+                        <TabPanel value={selectedTab} index={1}>
+                          {item['project_description']}
+                        </TabPanel>
+                        <TabPanel value={selectedTab} index={2}>
+                          <Table>
+                            <TableBody>
+                              <TableRow>
+                                <TableCell>
+                                  {item['milestone_type'] === 4 ?
+                                    'Referral Date' : 'Decision Date'}
+                                </TableCell>
+                                <TableCell>{dateUtils.formatDate(item['referral_date'])}</TableCell>
+                              </TableRow>
+                              <TableRow>
+                                <TableCell>Updated Date</TableCell>
+                                <TableCell>{dateUtils.formatDate(item['date_updated'])}</TableCell>
+                              </TableRow>
+                              {
+                                item['next_pecp_date'] &&
+                                <TableRow>
+                                  <TableCell>Next PECP Date</TableCell>
+                                  <TableCell>{dateUtils.formatDate(item['next_pecp_date'])}</TableCell>
+                                </TableRow>
+                              }
+                              {
+                                item['next_pecp_title'] &&
+                                <TableRow>
+                                  <TableCell>PECP Title</TableCell>
+                                  <TableCell>{item['next_pecp_title']}</TableCell>
+                                </TableRow>
+                              }
+                              {
+                                item['next_pecp_short_description'] !== null &&
+                                <TableRow>
+                                  <TableCell>PECP Description</TableCell>
+                                  <TableCell>{item['next_pecp_short_description']}</TableCell>
+                                </TableRow>
+                              }
+                              <TableRow>
+                                <TableCell>Additional Info</TableCell>
+                                <TableCell>{item['additional_info']}</TableCell>
+                              </TableRow>
+                            </TableBody>
+                          </Table>
+                        </TabPanel>
+                      </AccordionDetails>
+                    </Accordion>
+                  })
+                }
+              </AccordionDetails>
             </Accordion>
           </>
         })
