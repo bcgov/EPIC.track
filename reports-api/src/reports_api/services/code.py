@@ -14,6 +14,7 @@
 """Service to manage Fee Calculation."""
 
 from flask import current_app
+from sqlalchemy import text
 
 from reports_api.models import CodeTable
 from reports_api.utils.helpers import find_model_from_table_name
@@ -33,11 +34,14 @@ class CodeService:
         model: CodeTable = find_model_from_table_name(code_type)
         response = {'codes': []}
         filters = {k: v for k, v in filters.items() if hasattr(model, k)}
-        if hasattr(cls, 'is_active'):
+        order_by_fields = ["id"]
+        if hasattr(model, 'is_active'):
             filters['is_active'] = True
-        if hasattr(cls, 'is_deleted'):
+        if hasattr(model, 'is_deleted'):
             filters['is_deleted'] = False
-        for row in model.query.filter_by(**filters).order_by(model.sort_order, model.id):
+        if hasattr(model, 'sort_order'):
+            order_by_fields.insert(0, "sort_order")
+        for row in model.query.filter_by(**filters).order_by(text(*order_by_fields)):
             response['codes'].append(row.as_dict())
 
         current_app.logger.debug('>find_code_values_by_type')

@@ -13,8 +13,7 @@
 # limitations under the License.
 """Service to manage Milestone."""
 from flask import current_app, jsonify
-
-from reports_api.models import Milestone
+from reports_api.models import Milestone, PhaseCode, db
 
 
 class MilestoneService():  # pylint:disable=too-few-public-methods
@@ -39,4 +38,13 @@ class MilestoneService():  # pylint:disable=too-few-public-methods
         """Find all active milestones"""
         current_app.logger.debug('Find all active milestones')
         milestones = Milestone.find_all()
+        return jsonify([item.as_dict() for item in milestones])
+
+    @classmethod
+    def find_milestones_per_work_type(cls, work_type_id: int):
+        """Find all active milestones"""
+        current_app.logger.debug('Find all active milestones')
+        milestones = db.session.query(Milestone).filter(Milestone.phase_id.in_(
+            db.session.query(PhaseCode.id)
+            .filter(PhaseCode.work_type_id == work_type_id)))
         return jsonify([item.as_dict() for item in milestones])
