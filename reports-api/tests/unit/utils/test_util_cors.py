@@ -25,12 +25,11 @@ TEST_CORS_METHODS_DATA = [
     ('GET'),
     ('PUT'),
     ('POST'),
-		('DELETE')
+    ('DELETE'),
     ('GET,PUT'),
     ('GET,POST'),
     ('PUT,POST'),
     ('GET,PUT,POST'),
-		('GET', 'DELETE', 'POST', 'OPTIONS')
 ]
 
 

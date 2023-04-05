@@ -51,6 +51,7 @@ class Projects(Resource):
         project = ProjectService.create_project(API.payload)
         return project.as_dict(), HTTPStatus.CREATED
 
+
 @cors_preflight('GET, DELETE, PUT')
 @API.route('/<int:project_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class Project(Resource):
