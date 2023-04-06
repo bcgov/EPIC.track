@@ -28,6 +28,7 @@ class Event(BaseModel):
     title = Column(String(255), nullable=False)
     short_description = Column(String(2000), nullable=True)
     long_description = Column(Text, nullable=True)
+    decision_information = Column(Text, nullable=True)
     topic = Column(String(2000), nullable=True, default=None)
     explanation = Column(Text, nullable=True, default=None)
     is_active = Column(Boolean(), default=False, nullable=False)
