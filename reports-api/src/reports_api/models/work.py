@@ -32,6 +32,7 @@ class Work(BaseModel):
     is_cac_recommended = Column(Boolean, default=False, nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     is_completed = Column(Boolean, default=False, nullable=False)
+    is_watched = Column(Boolean, default=False, nullable=False)
     work_status_stoplight = Column(String(6))
     is_deleted = Column(Boolean(), default=False, nullable=False)
     project_tracking_number = Column(String(255), nullable=True, default=None)
