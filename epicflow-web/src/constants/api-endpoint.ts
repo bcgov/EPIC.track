@@ -5,6 +5,9 @@ const Endpoints = {
   },
   Staffs: {
     GET_STAFFS: 'staffs'
+  },
+  Projects: {
+    GET_PROJECTS: 'projects'
   }
 }
 export default Endpoints;

@@ -54,6 +54,9 @@ export default function NavBar() {
           <ListItem>
             <Link to="/report-selector" >Report Selector</Link>
           </ListItem>
+          <ListItem>
+            <Link to="/project-list" >Project List</Link>
+          </ListItem>
         </List>
       </Drawer>
     </Box>
