@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      POSTGRES_DB: ${CAMUNDA_JDBC_DB_NAME:-formsflow-bpm}
+      POSTGRES_DB: ${CAMUNDA_JDBC_DB_NAME:-reports-db}
     volumes:
       - ./postgres/reports-db:/var/lib/postgresql/data
     ports:
