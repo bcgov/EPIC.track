@@ -72,7 +72,7 @@ class EAResourceForeCastReport(ReportFactory):
                 {"data_key": "project_name", "label": "PROJECT NAME"},
                 {
                     "data_key": "capital_investment",
-                    "label": "ESTIMATED CAPITAL INVESTMENT",
+                    "label": "EST. CAP. INVESTMENT",
                 },
                 {"data_key": "project_phase", "label": "PROJECT PHASE"},
                 {"data_key": "ea_act", "label": "EA ACT"},
@@ -497,7 +497,7 @@ class EAResourceForeCastReport(ReportFactory):
             project_data["months"] = months
             project_data[
                 "sector(sub)"
-            ] = f"{project_data['type']}({project_data['sub_type']})"
+            ] = f"{project_data['type']} ({project_data['sub_type']})"
             referral_timing_query = (
                 db.session.query(PhaseCode)
                 .join(WorkType)
@@ -563,12 +563,15 @@ class EAResourceForeCastReport(ReportFactory):
         row_index = 2
         stylesheet = getSampleStyleSheet()
         normal_style = stylesheet["Normal"]
-        normal_style.fontSize = 5
+        normal_style.fontSize = 6.5
+
         for ea_type_label, projects in formatted_data.items():
+            normal_style.textColor = colors.white
             table_data.append(
-                [f"{ea_type_label.upper()}({len(projects)})"] +
+                [Paragraph(f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style)] +
                 [""] * (len(table_headers[1]) - 1)
             )
+            normal_style.textColor = colors.black
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
             styles.append(("BACKGROUND", (0, row_index), (-1, row_index), colors.black))
             styles.append(("TEXTCOLOR", (0, row_index), (-1, row_index), colors.white))
@@ -603,7 +606,7 @@ class EAResourceForeCastReport(ReportFactory):
                 [
                     ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
                     ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
-                    ("FONTSIZE", (0, 0), (-1, -1), 5),
+                    ("FONTSIZE", (0, 0), (-1, -1), 6.5),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("ALIGN", (0, 0), (-1, 1), "CENTER"),
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
@@ -631,7 +634,7 @@ class EAResourceForeCastReport(ReportFactory):
             _, top_offset = para.wrap(width, height)
             para.drawOn(canv, side_margin, height - (top_offset + top_margin))
             top_margin = top_margin + top_offset
-            normal_style.fontSize = 6
+            normal_style.fontSize = 7.5
             para = Paragraph(
                 "<b>PREPARED FOR INTERNAL DISCUSSION PURPOSES</b>", normal_style
             )

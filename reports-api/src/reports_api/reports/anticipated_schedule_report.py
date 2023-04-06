@@ -199,8 +199,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Generates a report and returns it"""
         data = self._fetch_data(report_date)
         data = self._format_data(data)
-        if return_type == "json" or not data:
-            return data, None
+        if return_type == "json" and data:
+            return {"data": data}, None
+        if not data:
+            return {}, None
         api_payload = {
             "report_data": data,
             "report_title": self.report_title,
