@@ -7,7 +7,6 @@ Create Date: 2023-02-08 22:59:38.656988
 """
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
 from datetime import datetime
 
 # revision identifiers, used by Alembic.
@@ -15,10 +14,29 @@ revision = '4f89baa1d849'
 down_revision = '7c7efec93955'
 branch_labels = None
 depends_on = None
-conn = op.get_bind()
+
+types = sa.table(
+      'types',
+      sa.Column('id', sa.Integer),
+      sa.Column('name', sa.Text),
+      sa.Column('updated_by', sa.Text),
+      sa.Column('updated_at', sa.DateTime)
+)
+
+sub_types = sa.table(
+      'sub_types',
+      sa.Column('id', sa.Integer),
+      sa.Column('name', sa.Text),
+      sa.Column('updated_by', sa.Text),
+      sa.Column('updated_at', sa.DateTime)
+)
 
 def upgrade():
-    conn.execute(sa.text("UPDATE types SET name=:name,updated_by='u1',updated_at=:date WHERE id=:id"),**{'name':'Energy - Petroleum & Natural Gas','id':2,'date':datetime.now()})
+    op.execute(types.update().\
+               where(types.c.id==op.inline_literal(2)).\
+               values({'name':op.inline_literal('Energy - Petroleum & Natural Gas'),\
+                      'updated_by':op.inline_literal('u1'),\
+                      'updated_at':datetime.now()}))
     subtypes_updates = [
         {
             'name':'Natural Gas Processing Plants',
@@ -58,13 +76,21 @@ def upgrade():
         }
     ]
     for item in subtypes_updates:
-            conn.execute(sa.text("UPDATE sub_types SET name=:name,updated_by='u1',updated_at=:date WHERE id=:id"),**{'name':item['name'],'id':item['id'],'date':datetime.now()})
+             op.execute(sub_types.update().\
+               where(sub_types.c.id==op.inline_literal(item['id'])).\
+               values({'name':op.inline_literal(item['name']),\
+                      'updated_by':op.inline_literal('u1'),\
+                      'updated_at':datetime.now()}))
 
     # ### end Alembic commands ###
 
 
 def downgrade():
-    conn.execute(sa.text("UPDATE types SET name=:name,updated_by='u1',updated_at=:date WHERE id=:id"),**{'name':'Energy - Oil and Natural Gas','id':2,'date':datetime.now()})
+    op.execute(types.update().\
+               where(types.c.id==op.inline_literal(2)).\
+               values({'name':op.inline_literal('Energy - Oil and Natural Gas'),\
+                      'updated_by':op.inline_literal('u1'),\
+                      'updated_at':datetime.now()}))
     subtypes_updates = [
         {
             'name':'Processing Plants',
@@ -104,6 +130,9 @@ def downgrade():
         }
     ]
     for item in subtypes_updates:
-            conn.execute(sa.text("UPDATE sub_types SET name=:name,updated_by:'u1',updated_at=:date WHERE id=:id"),**{'name':item['name'],'id':item['id'],'date':datetime.now()})
-
+            op.execute(sub_types.update().\
+               where(sub_types.c.id==op.inline_literal(item['id'])).\
+               values({'name':op.inline_literal(item['name']),\
+                      'updated_by':op.inline_literal('u1'),\
+                      'updated_at':datetime.now()}))
     # ### end Alembic commands ###
