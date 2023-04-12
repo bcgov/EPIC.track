@@ -73,7 +73,6 @@ def upgrade():
 
         for phase in phase_data:
             work_types[phase["work_type_id"]].append(phase)
-            print(phase)
 
         for _, work_type_data in work_types.items():
             for index, phase in enumerate(work_type_data):
@@ -88,22 +87,18 @@ def upgrade():
                 query = text(f"SELECT id from phase_codes {conditions}")
                 phase_obj = conn.execute(query, phase).fetchone()
                 if phase_obj is None:
-                    print("INSERT",phase["name"])
                     phase_obj = conn.execute(
                         phase_table.insert(phase).returning(
                             (phase_table.c.id).label("id")
                         )
                     )
                 else:
-                    print("UPDATE",phase["name"])
                     conn.execute(
                         phase_table.update()
                         .where(phase_table.c.id == phase_obj.id)
                         .values(**phase)
                     )
-                print("PHASE OBJECT",type(phase_obj))
                 phase_id = phase_obj.id if hasattr(phase_obj,"id") else phase_obj.first()["id"]
-                print("PHASE ID ",phase_id)
                 milestones = _filter_dataset(milestones_data, "phase_id", phase_ref)
                 milestone_sort_order = 0
                 for milestone in milestones:
@@ -117,22 +112,19 @@ def upgrade():
                         f"SELECT id, name, phase_id, auto, kind from milestones {conditions}"
                     )
                     milestone_obj = conn.execute(query, milestone).fetchone()
-                    if milestone_obj is None:
-                        print("INSERT",milestone["name"])
+                    if milestone_obj is None: 
                         milestone_obj = conn.execute(
                             milestones_table.insert(milestone).returning(
                                 (milestones_table.c.id).label("id")
                             )
                         )
                     else:
-                        print("UPDATE",milestone["name"],*milestone_obj)
                         conn.execute(
                             milestones_table.update()
                             .where(milestones_table.c.id == milestone_obj.id)
                             .values(**milestone)
                         )
                     milestone_id = milestone_obj.id if hasattr(milestone_obj,"id") else milestone_obj.first()["id"]
-                    print("MILESTONE ID ", milestone_id)
                     if milestone_ref:
                         outcomes = _filter_dataset(
                             outcomes_data, "milestone_id", milestone_ref

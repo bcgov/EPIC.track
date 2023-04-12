@@ -30,7 +30,7 @@ export default function AnticipatedEAOSchedule() {
         });
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setReports(reportData.data as never);
+        setReports((reportData.data as never)['data']);
       }
 
       if (reportData.status === 204) {
@@ -52,14 +52,14 @@ export default function AnticipatedEAOSchedule() {
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download',
-        `${FILENAME_PREFIX}-
-          ${dateUtils.formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
+        `${FILENAME_PREFIX}-${dateUtils.formatDate(reportDate ? reportDate :
+          new Date().toISOString())}.pdf`);
       document.body.appendChild(link);
       link.click();
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  },[reportDate]);
+  },[reportDate, fetchReportData]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
