@@ -139,10 +139,10 @@ export default function AnticipatedEAOSchedule() {
                     return <Accordion key={itemIndex} elevation={0}>
                       <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
                         <Typography>
-                          {item['project_name']}
-                          <Chip style={{marginLeft: '0.5rem'}} label={<>
+                          <Chip style={{marginRight: '0.5rem'}} label={<>
                             <b>{item['date_updated']}</b>
                           </>} color={staleLevel(item['date_updated'])} />
+                          {item['project_name']}
                         </Typography>
                       </AccordionSummary>
                       <AccordionDetails>
