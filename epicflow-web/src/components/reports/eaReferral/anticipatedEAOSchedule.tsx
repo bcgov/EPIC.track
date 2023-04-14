@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from '@mui/system';
 import {
-  Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, FormLabel,
+  Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, FormLabel,
   Grid, Skeleton, Tab, Table, TableBody, TableCell, TableRow, Tabs, Typography
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -12,6 +12,7 @@ import ReportService from '../../../services/reportService';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT }
   from '../../../constants/application-constant';
 import { dateUtils } from '../../../utils';
+import moment from 'moment';
 
 export default function AnticipatedEAOSchedule() {
   const [reports, setReports] = React.useState({});
@@ -30,7 +31,7 @@ export default function AnticipatedEAOSchedule() {
         });
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setReports(reportData.data as never);
+        setReports((reportData.data as never)['data']);
       }
 
       if (reportData.status === 204) {
@@ -52,18 +53,25 @@ export default function AnticipatedEAOSchedule() {
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download',
-        `${FILENAME_PREFIX}-
-          ${dateUtils.formatDate(reportDate ? reportDate : new Date().toISOString())}.pdf`);
+        `${FILENAME_PREFIX}-${dateUtils.formatDate(reportDate ? reportDate :
+          new Date().toISOString())}.pdf`);
       document.body.appendChild(link);
       link.click();
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  },[reportDate]);
+  },[reportDate, fetchReportData]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
+
+  const staleLevel = React.useCallback((date: string)=>{
+    const dateObj = moment(date);
+    const diff = dateObj.diff(moment(),'days');
+    console.log(date,diff);
+    return diff >=0 ? 'success': (diff == -1)? 'warning': 'error';
+  }, [])
 
   interface TabPanelProps {
     children?: React.ReactNode;
@@ -130,7 +138,12 @@ export default function AnticipatedEAOSchedule() {
                   ((reports as any)[key] as []).map((item, itemIndex) => {
                     return <Accordion key={itemIndex} elevation={0}>
                       <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
-                        <Typography>{item['project_name']} - <b>{(item['date_updated'])}</b></Typography>
+                        <Typography>
+                          <Chip style={{marginRight: '0.5rem'}} label={<>
+                            <b>{item['date_updated']}</b>
+                          </>} color={staleLevel(item['date_updated'])} />
+                          {item['project_name']}
+                        </Typography>
                       </AccordionSummary>
                       <AccordionDetails>
                         <Tabs
