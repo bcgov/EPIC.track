@@ -128,7 +128,9 @@ class EAResourceForeCastReport(ReportFactory):
         )
         return latest_event_query
 
-    def _get_report_meta_data(self, report_date: datetime, available_width: float):  # pylint: disable=too-many-locals
+    def _get_report_meta_data(
+        self, report_date: datetime, available_width: float
+    ):  # pylint: disable=too-many-locals
         section_headings = []
         cell_headings = []
         styles = []
@@ -161,7 +163,9 @@ class EAResourceForeCastReport(ReportFactory):
                     )
                 )
                 cell_index += 3
-                cell_headings += [Paragraph(month_label) for month_label in self.month_labels]
+                cell_headings += [
+                    Paragraph(month_label) for month_label in self.month_labels
+                ]
                 cell_widths.extend([0.0584 * available_width] * 4)
             else:
                 filtered_cells = [
@@ -495,8 +499,9 @@ class EAResourceForeCastReport(ReportFactory):
             for work in works:
                 work_data = next(x for x in values if x["work_id"] == work)
                 work_data["cairt_lead"] = ""
-                work_values = filter(lambda x: x if x["work_id"] == work else False,  # pylint: disable=cell-var-from-loop
-                                     values)
+                work_values = filter(
+                    lambda x: x if x["work_id"] == work else False, values  # pylint: disable=cell-var-from-loop
+                )
                 for value in work_values:
                     role = value.pop("role_id")
                     first_name = value.pop("staff_first_name")
