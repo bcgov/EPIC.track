@@ -9,11 +9,12 @@ from pathlib import Path
 class ReportFactory(ABC):
     """Basic representation of report generator."""
 
-    def __init__(self, data_keys, group_by, template_name, filters):
+    def __init__(self, data_keys, group_by=None, template_name=None, filters=None):
         """Constructor"""
         self.data_keys = data_keys
         self.group_by = group_by
-        self.template_path = Path(__file__, f"../report_templates/{template_name}")
+        if template_name is not None:
+            self.template_path = Path(__file__, f"../report_templates/{template_name}")
         self.filters = filters
 
     @abstractmethod
@@ -22,7 +23,9 @@ class ReportFactory(ABC):
 
     def _format_data(self, data):
         """Formats the given data for the given report"""
-        formatted_data = defaultdict(list)
+        formatted_data = []
+        if self.group_by:
+            formatted_data = defaultdict(list)
         excluded_items = []
         if self.filters and "exclude" in self.filters:
             excluded_items = self.filters["exclude"]
@@ -30,8 +33,11 @@ class ReportFactory(ABC):
             obj = {
                 k: getattr(item, k) for k in self.data_keys if k not in excluded_items
             }
-            obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
-            formatted_data[obj.get(self.group_by)].append(obj)
+            if self.group_by:
+                obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
+                formatted_data[obj.get(self.group_by)].append(obj)
+            else:
+                formatted_data.append(obj)
         return formatted_data
 
     @abstractmethod
