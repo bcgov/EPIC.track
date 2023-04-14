@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Ministry."""
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
 
 from .code_table import CodeTable
 from .db import db
@@ -26,11 +27,15 @@ class Ministry(db.Model, CodeTable):
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     abbreviation = Column(String())
+    minister_id = Column(ForeignKey('staffs.id'), nullable=True)
     sort_order = Column(Integer, nullable=False)
+
+    minister = relationship('Staff', foreign_keys=[minister_id], lazy='select')
 
     def as_dict(self):
         """Return JSON representation."""
         result = CodeTable.as_dict(self)
         result['abbreviation'] = self.abbreviation
         result['combined'] = "-".join([self.name, self.abbreviation])
+        result['minister'] = self.minister.as_dict() if self.minister else None
         return result
