@@ -1,7 +1,7 @@
 import React from 'react';
 import { Container } from '@mui/system';
 import {
-  Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, FormLabel,
+  Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, Chip, FormLabel,
   Grid, Skeleton, Tab, Table, TableBody, TableCell, TableRow, Tabs, Typography
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -12,7 +12,6 @@ import ReportService from '../../../services/reportService';
 import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT }
   from '../../../constants/application-constant';
 import { dateUtils } from '../../../utils';
-import EFChip from '../../shared/efChip';
 import moment from 'moment';
 
 export default function AnticipatedEAOSchedule() {
@@ -70,8 +69,22 @@ export default function AnticipatedEAOSchedule() {
   const staleLevel = React.useCallback((date: string)=>{
     const dateObj = moment(date);
     const diff = dateObj.diff(moment(),'days');
-    console.log(date,diff);
-    return diff >=0 ? 'rgb(46, 125, 50, 0.1)': (diff == -1)? 'rgb(237, 108, 2, 0.1)': 'rgba(213, 4, 4, 0.1)';
+    if (diff >= 0) {
+      return {
+        backgroundColor: 'rgba(19, 129, 10, 0.1)',
+        color: 'rgba(19, 129, 10)'
+      }
+    }else if (diff === -1) {
+      return {
+        backgroundColor: 'rgba(240, 134, 11, 0.1)',
+        color: 'rgba(240, 134, 11)'
+      }
+    }else {
+      return {
+        backgroundColor: 'rgba(213, 4, 4, 0.1)',
+        color: 'rgba(213, 4, 4)'
+      }
+    }
   }, [])
 
   interface TabPanelProps {
@@ -140,9 +153,11 @@ export default function AnticipatedEAOSchedule() {
                     return <Accordion key={itemIndex} elevation={0}>
                       <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
                         <Typography>
-                          <EFChip style={{
+                          <Chip style={{
                             marginRight: '0.5rem',
-                            backgroundColor: `${staleLevel(item['date_updated'])}`
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            ...staleLevel(item['date_updated'])
                           }} label={<>
                             <b>{item['date_updated']}</b>
                           </>} />
