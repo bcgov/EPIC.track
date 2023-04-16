@@ -2,9 +2,14 @@
 import React, { Fragment } from "react";
 import { Route, Redirect } from "react-router";
 import Head from "../../containers/Head";
+import { useDispatch } from "react-redux";
+import { push } from "connected-react-router";
 import { METRICS_URL } from '../../constants/additionalConstants';
-const Dashboard = React.memo(() => {
+import { MULTITENANCY_ENABLED } from "../../constants/constants";
 
+const Dashboard = React.memo(() => {
+  const dispatch = useDispatch();
+  const redirectUrl = MULTITENANCY_ENABLED ? `/tenant/${tenantKey}/` : "/";
   const headerList = () => {
     return [
       {
