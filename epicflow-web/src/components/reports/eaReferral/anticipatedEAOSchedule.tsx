@@ -71,7 +71,7 @@ export default function AnticipatedEAOSchedule() {
     const dateObj = moment(date);
     const diff = dateObj.diff(moment(),'days');
     console.log(date,diff);
-    return diff >=0 ? 'success': (diff == -1)? 'warning': 'error';
+    return diff >=0 ? 'rgb(46, 125, 50, 0.1)': (diff == -1)? 'rgb(237, 108, 2, 0.1)': 'rgba(213, 4, 4, 0.1)';
   }, [])
 
   interface TabPanelProps {
@@ -140,9 +140,12 @@ export default function AnticipatedEAOSchedule() {
                     return <Accordion key={itemIndex} elevation={0}>
                       <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
                         <Typography>
-                          <EFChip style={{marginRight: '0.5rem'}} label={<>
+                          <EFChip style={{
+                            marginRight: '0.5rem',
+                            backgroundColor: `${staleLevel(item['date_updated'])}`
+                          }} label={<>
                             <b>{item['date_updated']}</b>
-                          </>} color={staleLevel(item['date_updated'])} />
+                          </>} />
                           {item['project_name']}
                         </Typography>
                       </AccordionSummary>
