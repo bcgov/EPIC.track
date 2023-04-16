@@ -69,8 +69,22 @@ export default function AnticipatedEAOSchedule() {
   const staleLevel = React.useCallback((date: string)=>{
     const dateObj = moment(date);
     const diff = dateObj.diff(moment(),'days');
-    console.log(date,diff);
-    return diff >=0 ? 'success': (diff == -1)? 'warning': 'error';
+    if (diff >= 0) {
+      return {
+        backgroundColor: 'rgba(19, 129, 10, 0.1)',
+        color: 'rgba(19, 129, 10)'
+      }
+    }else if (diff === -1) {
+      return {
+        backgroundColor: 'rgba(240, 134, 11, 0.1)',
+        color: 'rgba(240, 134, 11)'
+      }
+    }else {
+      return {
+        backgroundColor: 'rgba(213, 4, 4, 0.1)',
+        color: 'rgba(213, 4, 4)'
+      }
+    }
   }, [])
 
   interface TabPanelProps {
@@ -139,9 +153,14 @@ export default function AnticipatedEAOSchedule() {
                     return <Accordion key={itemIndex} elevation={0}>
                       <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
                         <Typography>
-                          <Chip style={{marginRight: '0.5rem'}} label={<>
+                          <Chip style={{
+                            marginRight: '0.5rem',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            ...staleLevel(item['date_updated'])
+                          }} label={<>
                             <b>{item['date_updated']}</b>
-                          </>} color={staleLevel(item['date_updated'])} />
+                          </>} />
                           {item['project_name']}
                         </Typography>
                       </AccordionSummary>
