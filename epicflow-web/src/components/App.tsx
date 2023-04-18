@@ -10,7 +10,7 @@ import NavBar from './layout/NavBar';
 import { RootState } from '../store';
 import ProjectForm from './project/form/projectForm';
 import ProjectList from './project/list/projectList';
-
+import ReportSample from './reports/30-60-90Report/reportSample';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -31,6 +31,7 @@ export default function App() {
             <Route path='/staff-list' element={<StaffList />} />
             <Route path='/project' element={<ProjectForm />} />
             <Route path='/project-list' element={<ProjectList />} />
+            <Route path='/report-30-60-90' element={<ReportSample />} />
           </Routes>
         </Suspense>
       </BrowserRouter>}

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { FormLabel, Grid, MenuItem } from '@mui/material';
 import { REPORT_TYPES, REPORT_TYPE } from '../../constants/application-constant';
+import Select from '@mui/material/Select';
 import AnticipatedEAOSchedule from '../reports/eaReferral/anticipatedEAOSchedule';
 import ResourceForecast from '../reports/resourceForecast/resourceForecast';
-import Select from '@mui/material/Select';
+import ReportSample from '../reports/30-60-90Report/reportSample';
 
 export default function ReportSelector() {
   const [selectedReport, setSelectedReport] = useState<string>('none');
@@ -24,6 +25,7 @@ export default function ReportSelector() {
       </Grid>
       {selectedReport === REPORT_TYPE.EA_REFERRAL && <AnticipatedEAOSchedule/>}
       {selectedReport === REPORT_TYPE.RESOURCE_FORECAST && <ResourceForecast/>}
+      {selectedReport === REPORT_TYPE.REPORT_30_60_90 && <ReportSample/>}
     </>
   );
 }
