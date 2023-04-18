@@ -71,20 +71,20 @@ class EAResourceForeCastReport(ReportFactory):
         self.month_labels = []
         self.report_cells = {
             "[PROJECT BACKGROUND]": [
-                {"data_key": "project_name", "label": "PROJECT NAME", "width": 0.068},
+                {"data_key": "project_name", "label": "PROJECT NAME", "width": 0.053},
                 {
                     "data_key": "capital_investment",
                     "label": "EST. CAP. INVESTMENT",
-                    "width": 0.0887,
+                    "width": 0.082,
                 },
                 {
                     "data_key": "project_phase",
                     "label": "PROJECT PHASE",
-                    "width": 0.0519,
+                    "width": 0.0579,
                 },
                 {"data_key": "ea_act", "label": "EA ACT", "width": 0.0424},
-                {"data_key": "iaac", "label": "IAAC", "width": 0.0505},
-                {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.0775},
+                {"data_key": "iaac", "label": "IAAC", "width": 0.0355},
+                {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.06},
                 {"data_key": "env_region", "label": "MOE REGION", "width": 0.046},
                 {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.046},
             ],
@@ -163,10 +163,8 @@ class EAResourceForeCastReport(ReportFactory):
                     )
                 )
                 cell_index += 3
-                cell_headings += [
-                    Paragraph(month_label) for month_label in self.month_labels
-                ]
-                cell_widths.extend([0.0584 * available_width] * 4)
+                cell_headings += self.month_labels
+                cell_widths.extend([0.0625 * available_width] * 4)
             else:
                 filtered_cells = [
                     x for x in cells if x["data_key"] not in self.excluded_items
@@ -200,7 +198,7 @@ class EAResourceForeCastReport(ReportFactory):
                             )
                         )
             for cell in filtered_cells:
-                cell_headings.append(Paragraph(cell["label"]))
+                cell_headings.append(cell["label"])
                 cell_keys.append(cell["data_key"])
                 cell_widths.append(available_width * cell["width"])
             cell_index += len(filtered_cells)
@@ -594,7 +592,7 @@ class EAResourceForeCastReport(ReportFactory):
         pdf_stream = BytesIO()
         page_size = landscape(A3)
         width, height = page_size
-        side_margin = 0.75 * inch
+        side_margin = 0.5 * inch
         available_table_width = width - (side_margin * 2)
         canv = Canvas(pdf_stream, pagesize=page_size)
         table_headers, table_cells, styles, cell_widths = self._get_report_meta_data(
