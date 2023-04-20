@@ -23,7 +23,8 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
 
 
 export default function ResourceForecast() {
-  const [reportDate, setReportDate] = React.useState<string>();
+  const [reportDate, setReportDate] = React.useState<string>('');
+  const [showReportDateBanner, setShowReportDateBanner] = React.useState<boolean>(false);
   const [resultStatus, setResultStatus] = React.useState<string>();
   const [rfData, setRFData] = React.useState<ResourceForecastModel[]>([]);
   const [columnFilters, setColumnFilters] = React.useState<MRT_ColumnFiltersState>([]);
@@ -58,6 +59,10 @@ export default function ResourceForecast() {
     link.click();
   },[]);
 
+  React.useEffect(()=>{
+    const diff = dateUtils.diff(reportDate,new Date(2019,11,19).toISOString(),'days')
+    setShowReportDateBanner(diff<0 && !Number.isNaN(diff));
+  },[reportDate]);
   React.useEffect(() => {
     setFilters((prev) => {
       const state = {
@@ -303,6 +308,9 @@ export default function ResourceForecast() {
             <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
         </Grid>
       </Grid>
+      {showReportDateBanner && <Alert severity="warning">
+      Currently EPIC.track only contains EA Act (2018) data and can&apost produce reports dated before January 2020
+      </Alert>}
       {resultStatus !== RESULT_STATUS.ERROR && <MaterialReactTable
         initialState={{
           density: 'compact'
