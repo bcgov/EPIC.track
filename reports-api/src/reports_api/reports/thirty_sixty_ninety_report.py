@@ -1,6 +1,14 @@
 """Classes for specific report types."""
 from datetime import timedelta
+from io import BytesIO
 
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
+from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
+from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import aliased
 
@@ -22,18 +30,23 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "work_status_text",
             "decision_information",
             "pecp_explanation",
+            "event_description",
+            "work_id",
+            "milestone_id",
+            "event_id"
         ]
         super().__init__(data_keys, filters=filters)
         self.report_date = None
+        self.report_title = "30-60-90"
+        self.decision_miletones = Milestone.query.filter(Milestone.outcomes.any())
+        self.decision_miletones = [x.id for x in self.decision_miletones]
+        self.pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
+        self.pecps = [x.id for x in self.pecps]
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA 30-60-90 Report"""
         max_date = report_date + timedelta(days=90)
-        decision_miletones = Milestone.query.filter(Milestone.outcomes.any())
-        decision_miletones = [x.id for x in decision_miletones]
         pecp_event = aliased(Event)
-        pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
-        pecps = [x.id for x in pecps]
         status_update_max_date_query = (
             db.session.query(
                 WorkStatus.work_id,
@@ -51,7 +64,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .join(WorkEngagement)
             .filter(
                 Engagement.start_date >= report_date,
-                WorkEngagement.milestone_id.in_(pecps),
+                WorkEngagement.milestone_id.in_(self.pecps),
             )
             .group_by(Engagement.work_id)
             .subquery()
@@ -69,7 +82,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                         Event.anticipated_start_date.between(
                             report_date.date(), max_date.date()
                         ),
-                        Event.milestone_id.in_(decision_miletones),
+                        Event.milestone_id.in_(self.decision_miletones),
                     ),
                     and_(
                         Event.work_id == Work.id,
@@ -81,6 +94,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ),
                 ),
             )
+            .join(Milestone)
             .join(
                 WorkEngagement,
                 and_(
@@ -114,7 +128,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 and_(
                     next_pecp_query.c.work_id == pecp_event.work_id,
                     next_pecp_query.c.min_start_date == pecp_event.start_date,
-                    pecp_event.milestone_id.in_(pecps),
+                    pecp_event.milestone_id.in_(self.pecps),
                 ),
             )
             .outerjoin(WorkStatus)
@@ -136,7 +150,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 Work.short_description.label("work_short_description"),
                 WorkStatus.status_text.label("work_status_text"),
                 Event.decision_information.label("decision_information"),
+                Event.long_description.label("event_description"),
                 pecp_event.explanation.label("pecp_explanation"),
+                Work.id.label("work_id"),
+                Event.id.label("event_id"),
+                Milestone.id.label("milestone_id"),
             )
         )
 
@@ -145,12 +163,50 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _format_data(self, data):
         data = super()._format_data(data)
+        major_decision_miletones = Milestone.query.filter(
+            Milestone.milestone_type_id.in_((1, 4))
+        ).all()
+        major_decision_miletones = [x.id for x in major_decision_miletones]
         response = {
             "30": [],
             "60": [],
             "90": [],
         }
         for work in data:
+            next_major_decision_event_query = (
+                db.session.query(
+                    Event.work_id,
+                    func.min(Event.anticipated_start_date).label(
+                        "min_anticipated_start_date"
+                    ),
+                )
+                .filter(
+                    Event.anticipated_start_date >= work["anticipated_decision_date"],
+                    Event.milestone_id.in_(major_decision_miletones),
+                )
+                .group_by(Event.work_id)
+                .subquery()
+            )
+            next_major_decision_event = (
+                Event.query.filter(Event.work_id == work["work_id"])
+                .join(
+                    next_major_decision_event_query,
+                    and_(
+                        Event.work_id == next_major_decision_event_query.c.work_id,
+                        Event.anticipated_start_date ==
+                        next_major_decision_event_query.c.min_anticipated_start_date,
+                    ),
+                )
+                .first()
+            )
+            work["anticipated_decision_date"] = next_major_decision_event.anticipated_end_date
+            work.update({"is_decision_event": False, "is_pecp_event": False, "is_reportable_event": False})
+            if work["milestone_id"] in self.decision_miletones:
+                work["is_decision_event"] = True
+            elif work["milestone_id"] in self.pecps:
+                work["is_pecp_event"] = True
+            else:
+                work["is_reportable_event"] = True
             if work["anticipated_decision_date"] <= (
                 self.report_date + timedelta(days=30)
             ):
@@ -165,7 +221,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 response["90"].append(work)
         return response
 
-    def generate_report(self, report_date, return_type):
+    def generate_report(self, report_date, return_type):  # pylint: disable=too-many-locals
         """Generates a report and returns it"""
         self.report_date = report_date
         data = self._fetch_data(report_date)
@@ -174,4 +230,103 @@ class ThirtySixtyNinetyReport(ReportFactory):
             return {"data": data}, None
         if not data:
             return {}, None
-        return None, None
+        pdf_stream = BytesIO()
+        stylesheet = getSampleStyleSheet()
+        doc = BaseDocTemplate(pdf_stream, pagesize=A4)
+        doc.page_width = doc.width + doc.leftMargin * 2  # pylint: disable=no-member
+        doc.page_height = doc.height + doc.bottomMargin * 2  # pylint: disable=no-member
+        page_table_frame = Frame(
+            doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="large_table"  # pylint: disable=no-member
+        )
+        page_template = PageTemplate(
+            id="LaterPages", frames=[page_table_frame], onPage=self.add_default_info
+        )
+        doc.addPageTemplates(page_template)
+        heading_style = stylesheet["Heading2"]
+        heading_style.alignment = TA_CENTER
+        story = [NextPageTemplate(["*", "LaterPages"])]
+        story.append(Paragraph("30-60-90", heading_style))
+        story.append(Paragraph("Environmental Assessment Office", heading_style))
+        story.append(
+            Paragraph(f"Submitted for: {report_date:%B %d, %Y}", heading_style)
+        )
+
+        table_data = [["Issue", "Status/Key Milestones/Next Steps"]]
+        styles = []
+        row_index = 1
+
+        normal_style = stylesheet["Normal"]
+        normal_style.fontSize = 6.5
+        for period, item in data.items():
+            table_data.append([f"{period} days", ""])
+            styles.append(
+                (
+                    "SPAN",
+                    (0, row_index),
+                    (-1, row_index),
+                )
+            )
+            styles.append(("ALIGN", (0, row_index), (-1, row_index), "LEFT"))
+            styles.append(
+                ("FONTNAME", (0, row_index), (-1, row_index), "Helvetica-Bold"),
+            )
+            row_index += 1
+            for work in item:
+                event_description = ""
+                if work["is_decision_event"] and work["decision_information"]:
+                    event_description = work["decision_information"]
+                elif work["is_pecp_event"] and work["pecp_explanation"]:
+                    event_description = work["pecp_explanation"]
+                elif work["event_description"]:
+                    event_description = work["event_description"]
+                table_data.append(
+                    [
+                        [
+                            Paragraph(
+                                f"{work['project_name']} - {work['work_report_title']}",
+                                normal_style,
+                            ),
+                            Paragraph(
+                                f"{work['anticipated_decision_date']: %B %d, %Y}",
+                                normal_style,
+                            ),
+                        ],
+                        [
+                            Paragraph(work["work_short_description"], normal_style),
+                            Paragraph(work["work_status_text"], normal_style),
+                            Paragraph(event_description, normal_style),
+                        ],
+                    ]
+                )
+                row_index += 1
+        table = Table(table_data)
+        table.setStyle(
+            TableStyle(
+                [
+                    ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
+                    ("FONTSIZE", (0, 0), (-1, -1), 6.5),
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("ALIGN", (0, 0), (-1, -1), "LEFT"),
+                    ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
+                    ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
+                ] +
+                styles
+            )
+        )
+        story.append(table)
+        doc.build(story)
+        pdf_stream.seek(0)
+        return pdf_stream.getvalue(), f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
+
+    def add_default_info(self, canvas, doc):
+        """Adds default information for each page."""
+        canvas.saveState()
+        last_updated = self.report_date + timedelta(days=-1)
+        canvas.drawString(doc.leftMargin, doc.bottomMargin, "Draft and Confidential")
+        canvas.drawRightString(
+            doc.page_width - doc.rightMargin,
+            doc.bottomMargin,
+            f"Last updated: {last_updated:%B %d, %Y}",
+        )
+        canvas.restoreState()
