@@ -15,13 +15,17 @@ import { dateUtils } from '../../../utils';
 
 export default function ReportSample() {
   const [reports, setReports] = React.useState({});
+  const [showReportDateBanner, setShowReportDateBanner] = React.useState<boolean>(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [reportDate, setReportDate] = React.useState<string>();
   const [resultStatus, setResultStatus] = React.useState<string>();
 
 
   const FILENAME_PREFIX = '30_60_90_Report';
-
+  React.useEffect(()=>{
+    const diff = dateUtils.diff(reportDate || '',new Date(2019,11,19).toISOString(),'days')
+    setShowReportDateBanner(diff<0 && !Number.isNaN(diff));
+  },[reportDate]);
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -118,6 +122,9 @@ export default function ReportSample() {
             <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
         </Grid>
       </Grid>
+      {showReportDateBanner && <Alert severity="warning">
+      Currently EPIC.track only contains EA Act (2018) data and can&apost produce reports dated before January 2020
+      </Alert>}
       {resultStatus === RESULT_STATUS.LOADED &&
         Object.keys(reports).map((key) => {
           console.log(key);
