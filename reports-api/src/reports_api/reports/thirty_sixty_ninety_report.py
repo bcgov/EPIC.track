@@ -279,9 +279,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
                             ),
                         ],
                         [
-                            Paragraph(work["work_short_description"], normal_style),
-                            Paragraph(work["work_status_text"], normal_style),
-                            Paragraph(event_description, normal_style),
+                            Paragraph(work["work_short_description"] if work["work_short_description"]
+                                      else "", normal_style),
+                            Paragraph(work["work_status_text"] if work["work_status_text"] else "", normal_style),
+                            Paragraph(event_description if event_description else "", normal_style),
                         ],
                     ]
                 )
