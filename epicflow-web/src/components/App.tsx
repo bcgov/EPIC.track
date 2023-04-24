@@ -10,7 +10,7 @@ import NavBar from './layout/NavBar';
 import { RootState } from '../store';
 import ProjectForm from './project/form/projectForm';
 import ProjectList from './project/list/projectList';
-import ReportSample from './reports/30-60-90Report/reportSample';
+import ReportSample from './reports/30-60-90Report/thirtySixtyNinety';
 
 export default function App() {
   const dispatch = useDispatch();

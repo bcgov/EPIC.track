@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  Alert, Autocomplete, Box, Button, Container, FormLabel, Grid, IconButton, TextField, Tooltip
+  Alert, Autocomplete, Box, Container, IconButton, TextField, Tooltip
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import MaterialReactTable, {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
@@ -14,12 +12,13 @@ import MaterialReactTable, {
   MRT_VisibilityState
 } from 'material-react-table';
 import { json2csv } from 'json-2-csv';
-import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
+import { RESULT_STATUS, REPORT_TYPE } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
 import { ResourceForecastModel } from './type';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ReportHeader from '../shared/report-header/ReportHeader';
 
 
 export default function ResourceForecast() {
@@ -282,35 +281,12 @@ export default function ResourceForecast() {
   }, [reportDate, filters, fetchReportData]);
   return (
     <>
-      <Grid component="form" onSubmit={(e) => e.preventDefault()}
-        container spacing={2} sx={{ mt: '5px', mb: '15px' }}>
-        <Grid item sm={2}><FormLabel>Report Date</FormLabel></Grid>
-        <Grid item sm={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker format={DATE_FORMAT}
-              onChange={(dateVal: any) => setReportDate(dateUtils.formatDate(dateVal.$d))}
-              slotProps={{
-                textField: {
-                  id: 'ReportDate'
-                }
-              }} />
-          </LocalizationProvider>
-        </Grid>
-        <Grid item sm={resultStatus === RESULT_STATUS.LOADED ? 7 : 8}>
-          <Button variant='contained'
-            type='submit'
-            onClick={fetchReportData}
-            sx={{ float: 'right' }}>Submit
-          </Button>
-        </Grid>
-        <Grid item sm={1}>
-          {resultStatus === RESULT_STATUS.LOADED &&
-            <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
-        </Grid>
-      </Grid>
-      {showReportDateBanner && <Alert severity="warning">
-      Currently EPIC.track only contains EA Act (2018) data and can&apost produce reports dated before January 2020
-      </Alert>}
+      <ReportHeader
+        setReportDate={setReportDate}
+        fetchReportData={fetchReportData}
+        downloadPDFReport={downloadPDFReport}
+        showReportDateBanner={showReportDateBanner}
+      />
       {resultStatus !== RESULT_STATUS.ERROR && <MaterialReactTable
         initialState={{
           density: 'compact'
