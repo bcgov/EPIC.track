@@ -137,7 +137,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 Event.title.label("event_title"),
                 func.coalesce(
                             Event.start_date, Event.anticipated_start_date
-                        ).label("event_date"), 
+                        ).label("event_date"),
                 Milestone.id.label("milestone_id"),
             )
         )
