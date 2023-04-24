@@ -123,33 +123,6 @@ export default function AnticipatedEAOSchedule() {
         downloadPDFReport={downloadPDFReport}
         showReportDateBanner={showReportDateBanner}
       />
-      {/* <Grid component="form" onSubmit={(e) => e.preventDefault()}
-        container spacing={2} sx={{ marginTop: '5px' }}>
-        <Grid item sm={2}><FormLabel>Report Date</FormLabel></Grid>
-        <Grid item sm={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker format={DATE_FORMAT}
-              onChange={(dateVal: any) =>
-                setReportDate(dateUtils.formatDate(dateVal.$d))}
-              slotProps={{
-                textField: {
-                  id: 'ReportDate'
-                }
-              }} />
-          </LocalizationProvider>
-        </Grid>
-        <Grid item sm={resultStatus === RESULT_STATUS.LOADED ? 7 : 8}>
-          <Button variant='contained' type='submit'
-            onClick={fetchReportData} sx={{ float: 'right' }}>Submit</Button>
-        </Grid>
-        <Grid item sm={1}>
-          {resultStatus === RESULT_STATUS.LOADED &&
-            <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
-        </Grid>
-      </Grid>
-      {showReportDateBanner && <Alert severity="warning">
-      Currently EPIC.track only contains EA Act (2018) data and can&apost produce reports dated before January 2020
-      </Alert>} */}
       {resultStatus === RESULT_STATUS.LOADED &&
         Object.keys(reports).map((key) => {
           console.log(key);

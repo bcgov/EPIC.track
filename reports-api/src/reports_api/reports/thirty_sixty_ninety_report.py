@@ -34,6 +34,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "work_id",
             "milestone_id",
             "event_id",
+            "event_title",
+            "event_date"
         ]
         super().__init__(data_keys, filters=filters)
         self.report_date = None
@@ -132,6 +134,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 pecp_event.explanation.label("pecp_explanation"),
                 Work.id.label("work_id"),
                 Event.id.label("event_id"),
+                Event.title.label("event_title"),
+                func.coalesce(
+                            Event.start_date, Event.anticipated_start_date
+                        ).label("event_date"), 
                 Milestone.id.label("milestone_id"),
             )
         )
