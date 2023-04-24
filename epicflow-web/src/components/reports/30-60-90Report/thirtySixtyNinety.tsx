@@ -115,7 +115,9 @@ export default function ThirtySixtyNinety() {
                   console.log(itemIndex);
                   return <Accordion key={itemIndex}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>{item['project_name']}</Typography>
+                      <Typography>
+                        {item['project_name']} - {item['event_title']}:{dateUtils.formatDate(item['event_date'])}
+                      </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Tabs
