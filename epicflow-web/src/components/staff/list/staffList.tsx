@@ -1,83 +1,61 @@
-import {
-  Paper, Table, TableBody, TableCell, TableContainer, TableHead,
-  TableRow, TablePagination, Grid, TextField, Button
-} from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import StaffService from '../../../services/staffService';
-import DeleteIcon from '@mui/icons-material/Delete'
-import { PAGINATION_DEFAULT } from '../../../constants/application-constant';
+import MaterialReactTable, { MRT_ColumnDef } from 'material-react-table';
+import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+import { Staff } from '../../../models/staff';
+import TrackTable from '../../shared/TrackTable';
 
 export default function StaffList() {
-  const [page, setPage] = React.useState(PAGINATION_DEFAULT.PAGE_INDEX);
-  const [rowsPerPage, setRowsPerPage] = React.useState(PAGINATION_DEFAULT.PAGE_SIZE);
-  const [staffs, setStaffs] = useState([]);
-
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
-  const getStaff = async () => {
+  const [staffs, setStaffs] = React.useState<Staff[]>([]);
+  console.log(staffs);
+  const getStaff = React.useCallback(async () => {
     const staffResult = await StaffService.getStaffs();
     if (staffResult.status === 200) {
       setStaffs((staffResult.data as never)['staffs']);
     }
 
-  }
-  useEffect(() => {
+  }, []);
+  React.useEffect(() => {
     getStaff();
-  });
+  }), [];
+
+  const columns = React.useMemo<MRT_ColumnDef<Staff>[]>(
+    () => [
+      {
+        accessorKey: 'full_name',
+        header: 'Name'
+      },
+      {
+        accessorKey: 'phone',
+        header: 'Phone Number'
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email'
+      },
+      {
+        accessorKey: 'position.name',
+        header: 'Position'
+      },
+      {
+        accessorKey: 'is_active',
+        header: 'Active',
+        Cell: ({ cell }) => (
+          <span>
+            {cell.getValue<Staff>().is_active}
+            {cell.getValue<Staff>().is_active && <ToggleOffIcon />}
+            {!cell.getValue<Staff>().is_active && <ToggleOnIcon/>}
+          </span>
+        ),
+      }
+    ], []
+  )
   return (
     <>
-      <Grid container spacing={0.5} justifyContent='space-between'>
-        <Grid item>
-          <TextField placeholder='Search' />
-        </Grid>
-        <Grid item>
-          <Button variant='contained' startIcon={<DeleteIcon />}>Add Staff</Button>
-        </Grid>
-      </Grid>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} size='small' aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell align="right">Email</TableCell>
-              <TableCell align="right">Phone</TableCell>
-              <TableCell align="right">Position</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {staffs
-              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((row: any, index) => (
-                <TableRow
-                  key={index}
-                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row">
-                    {row.full_name}
-                  </TableCell>
-                  <TableCell align="right">{row.email}</TableCell>
-                  <TableCell align="right">{row.phone}</TableCell>
-                  <TableCell align="right">{row.position?.name}</TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={staffs.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+      <TrackTable
+        columns={columns}
+        data={staffs}
       />
     </>
   );

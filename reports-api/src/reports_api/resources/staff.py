@@ -73,9 +73,18 @@ class Staffs(Resource):
             return StaffService.find_by_position_ids(positions), HTTPStatus.OK
         return StaffService.find_all_active_staff(), HTTPStatus.OK
 
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def post():
+        """Create new staff"""
+        staff = StaffService.create_staff(API.payload)
+        return staff.as_dict(), HTTPStatus.CREATED
 
-@cors_preflight("GET")
-@API.route("/<int:_id>", methods=["GET", "OPTIONS"])
+
+@cors_preflight("GET, DELETE, PUT")
+@API.route("/<int:staff_id>", methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class Staff(Resource):
     """Endpoint resource to return staff details."""
 
@@ -83,9 +92,27 @@ class Staff(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get(_id):
+    def get(staff_id):
         """Return a staff detail based on id."""
-        return StaffService.find_by_id(_id), HTTPStatus.OK
+        return StaffService.find_by_id(staff_id), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def put(staff_id):
+        """Update and return a staff."""
+        staff = StaffService.update_staff(staff_id, API.payload)
+        return staff.as_dict(), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def delete(staff_id):
+        """Delete a staff"""
+        StaffService.delete_staff(staff_id)
+        return {"message": "Staff successfully deleted"}, HTTPStatus.OK
 
 
 @cors_preflight("GET")

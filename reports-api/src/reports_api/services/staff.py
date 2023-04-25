@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service to manage Staffs."""
 
-from flask import current_app
+from flask import current_app, jsonify
 from sqlalchemy import func
 
 from reports_api.models import Staff
@@ -53,6 +53,30 @@ class StaffService:
         for row in Staff.find_all_active_staff():
             response['staffs'].append(row.as_dict())
         return response
+
+
+    @classmethod
+    def create_staff(cls, payload: dict):
+        """Create a new staff."""
+        staff = Staff(**payload)
+        current_app.logger.info(f'Staff obj {dir(staff)}')
+        staff.save()
+        return staff
+
+    @classmethod
+    def update_staff(cls, staff_id: int, payload: dict):
+        """Update existing staff."""
+        staff = Staff.find_by_id(staff_id)
+        staff = staff.update(payload)
+        return staff
+
+    @classmethod
+    def delete_staff(cls, staff_id: int):
+        """Delete staff by id."""
+        staff = Staff.find_by_id(staff_id)
+        staff.is_deleted = True
+        staff = staff.update(staff.__dict__)
+        return True
 
     @classmethod
     def find_by_id(cls, _id):
