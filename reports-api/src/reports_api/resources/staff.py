@@ -51,7 +51,7 @@ validation_parser.add_argument(
 
 
 @cors_preflight("GET")
-@API.route("", methods=["GET", "OPTIONS"])
+@API.route("", methods=["GET", "POST", "OPTIONS"])
 class Staffs(Resource):
     """Endpoint resource to return staffs."""
 
@@ -71,7 +71,7 @@ class Staffs(Resource):
         current_app.logger.info(f"Position ids are {positions}")
         if positions:
             return StaffService.find_by_position_ids(positions), HTTPStatus.OK
-        return StaffService.find_all_active_staff(), HTTPStatus.OK
+        return StaffService.find_all_non_deleted_staff(), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin='*')

@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service to manage Staffs."""
 
-from flask import current_app, jsonify
+from flask import current_app
 from sqlalchemy import func
 
 from reports_api.models import Staff
@@ -54,6 +54,13 @@ class StaffService:
             response['staffs'].append(row.as_dict())
         return response
 
+    @classmethod
+    def find_all_non_deleted_staff(cls):
+        """Find all non-deleted staff"""
+        response = {'staffs': []}
+        for row in Staff.find_all_non_deleted_staff():
+            response['staffs'].append(row.as_dict())
+        return response
 
     @classmethod
     def create_staff(cls, payload: dict):
@@ -67,7 +74,13 @@ class StaffService:
     def update_staff(cls, staff_id: int, payload: dict):
         """Update existing staff."""
         staff = Staff.find_by_id(staff_id)
-        staff = staff.update(payload)
+        staff.first_name = payload['first_name']
+        staff.last_name = payload['last_name']
+        staff.email = payload['email']
+        staff.position_id = payload['position_id']
+        staff.phone = payload['phone']
+        staff.is_active = payload['is_active']
+        Staff.commit()
         return staff
 
     @classmethod
@@ -75,7 +88,7 @@ class StaffService:
         """Delete staff by id."""
         staff = Staff.find_by_id(staff_id)
         staff.is_deleted = True
-        staff = staff.update(staff.__dict__)
+        Staff.commit()
         return True
 
     @classmethod

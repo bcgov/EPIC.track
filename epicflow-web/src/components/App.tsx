@@ -27,8 +27,9 @@ export default function App() {
           <Routes>
             <Route path='/anticipated-eao-schedule' element={<AnticipatedEAOSchedule />} />
             <Route path='/report-selector' element={<ReportSelector />} />
-            <Route path='/staff' element={<StaffForm />} />
-            <Route path='/staff-list' element={<StaffList />} />
+            <Route path='/staffs/create' element={<StaffForm />} />
+            <Route path='/staffs/edit/:staff_id' element={<StaffForm />} />
+            <Route path='/staffs/list' element={<StaffList />} />
             <Route path='/project' element={<ProjectForm />} />
             <Route path='/project-list' element={<ProjectList />} />
             <Route path='/report-30-60-90' element={<ReportSample />} />

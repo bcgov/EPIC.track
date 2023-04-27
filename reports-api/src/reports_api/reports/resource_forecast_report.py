@@ -486,6 +486,7 @@ class EAResourceForeCastReport(ReportFactory):
                 Work.id.label("work_id"),
             )
         )
+        print(results_qry.statement.compile(compile_kwargs={"literal_binds": True}))
         return results_qry.all()
 
     def _format_data(self, data):  # pylint: disable=too-many-locals
