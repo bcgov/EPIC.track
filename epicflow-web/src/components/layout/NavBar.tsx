@@ -49,7 +49,7 @@ export default function NavBar() {
       >
         <List>
           <ListItem>
-            <Link to="/staff-list" >Staff List</Link>
+            <Link to="/staffs/list" >Staff List</Link>
           </ListItem>
           <ListItem>
             <Link to="/report-selector" >Report Selector</Link>

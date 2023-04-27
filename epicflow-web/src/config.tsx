@@ -19,7 +19,7 @@ const KC_CLIENT = window._env_?.REACT_APP_KEYCLOAK_CLIENT || process.env.REACT_A
 const KC_REALM = window._env_?.REACT_APP_KEYCLOAK_REALM || process.env.REACT_APP_KEYCLOAK_REALM;
 
 export const AppConfig = {
-  apiUrl: API_URL,
+  apiUrl: API_URL || 'http://localhost:3200/api/v1/',
   keycloak: {
     url: KC_URL || '',
     clientId: KC_CLIENT || '',
