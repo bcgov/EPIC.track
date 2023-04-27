@@ -187,8 +187,8 @@ const NavBar = React.memo(() => {
                   </Nav.Link>
                 ) : null}
                 <NavDropdown title="Data Management" id="basic-nav-dropdown">
-                  <NavDropdown.Item as={Link} to={`data-management/staffs`}>
-                    Staffs
+                  <NavDropdown.Item as={Link} to={`${baseUrl}data-management/staff`}>
+                    Staff
                   </NavDropdown.Item>
                   <NavDropdown.Item href="#">Proponents</NavDropdown.Item>
                   <NavDropdown.Item href="#">Indigenous Nations</NavDropdown.Item>

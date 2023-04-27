@@ -1,20 +1,21 @@
 import React from 'react';
 import { MRT_ColumnDef } from 'material-react-table';
-import ToggleOffIcon from '@mui/icons-material/ToggleOff';
-import ToggleOnIcon from '@mui/icons-material/ToggleOn';
+// import ToggleOffIcon from '@mui/icons-material/ToggleOff';
+// import ToggleOnIcon from '@mui/icons-material/ToggleOn';
 import {
   Edit as EditIcon,
   Delete as DeleteIcon
 } from '@mui/icons-material';
 import {
-  Box, Button, IconButton
+  Box, Button, Chip, IconButton
 } from '@mui/material';
 import { RESULT_STATUS } from '../../../constants/application-constant';
 import StaffForm from '../form/staffForm';
-import { Staff } from '../../../models/staff';
+import { Position, Staff } from '../../../models/staff';
 import StaffService from '../../../services/staffService';
 import MasterTrackTable from '../../shared/MasterTrackTable';
 import TrackDialog from '../../shared/TrackDialog';
+import codeService from '../../../services/codeService';
 
 const StaffList = () => {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
@@ -23,6 +24,7 @@ const StaffList = () => {
   const [deleteStaffId, setDeleteStaffId] = React.useState<number>();
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] = React.useState<boolean>(false);
+  const [positions, setPositions] = React.useState<Position[]>([]);
 
   const titleSuffix = 'Staff Details';
   const onDialogClose = (event: any, reason: any) => {
@@ -48,18 +50,29 @@ const StaffList = () => {
       setResultStatus(RESULT_STATUS.LOADED);
     }
   }, []);
+
   React.useEffect(() => {
     getStaff();
-  }, []);
+  }, [getStaff]);
+
+  const getPositions = async () => {
+    const positionResult = await codeService.getCodes('positions');
+    if (positionResult.status === 200) {
+      setPositions((positionResult.data as never)['codes']);
+    }
+  }
+  React.useEffect(() => {
+    getPositions();
+  }, [getPositions]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
     setDeleteStaffId(id);
   }
 
-  const deleteStaff = async(id?:number) =>{
+  const deleteStaff = async (id?: number) => {
     const result = await StaffService.deleteStaff(id);
-    if(result.status === 200) {
+    if (result.status === 200) {
       setDeleteStaffId(undefined);
       setShowDeleteDialog(false);
       getStaff();
@@ -82,20 +95,22 @@ const StaffList = () => {
       },
       {
         accessorKey: 'position.name',
-        header: 'Position'
+        header: 'Position',
+        filterVariant: 'multi-select',
+        filterSelectOptions: positions.map(p=>p.name)
       },
       {
         accessorKey: 'is_active',
         header: 'Active',
+        filterVariant: 'checkbox',
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<Staff>().is_active}
-            {cell.getValue<Staff>().is_active && <ToggleOffIcon />}
-            {!cell.getValue<Staff>().is_active && <ToggleOnIcon />}
+            {cell.getValue<boolean>() && <Chip label='Active' color='info' />}
+            {!cell.getValue<boolean>() && <Chip label='Inactive' color='error' />}
           </span>
         ),
       }
-    ], []
+    ], [positions]
   )
   return (
     <>
@@ -155,8 +170,8 @@ const StaffList = () => {
         okButtonText='Yes'
         cancelButtonText='No'
         isActionsRequired
-        onCancel={()=>setShowDeleteDialog(!showDeleteDialog)}
-        onOk={()=>deleteStaff(deleteStaffId)}
+        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
+        onOk={() => deleteStaff(deleteStaffId)}
       />
     </>
   );

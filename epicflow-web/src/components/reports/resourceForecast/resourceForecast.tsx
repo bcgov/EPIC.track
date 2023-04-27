@@ -56,7 +56,7 @@ export default function ResourceForecast() {
         new Date().toISOString())}.csv`);
     document.body.appendChild(link);
     link.click();
-  },[]);
+  },[reportDate]);
 
   React.useEffect(()=>{
     const diff = dateUtils.diff(reportDate,new Date(2019,11,19).toISOString(),'days')
