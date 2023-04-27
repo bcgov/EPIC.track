@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 import ReportService from '../../../services/reportService';
-import { RESULT_STATUS, REPORT_TYPE }
+import { RESULT_STATUS, REPORT_TYPE, DISPLAY_DATE_FORMAT }
   from '../../../constants/application-constant';
 import { dateUtils } from '../../../utils';
 import moment from 'moment';
@@ -143,7 +143,7 @@ export default function AnticipatedEAOSchedule() {
                             fontSize: '12px',
                             ...staleLevel(item['date_updated'])
                           }} label={<>
-                            <b>{item['date_updated']}</b>
+                            <b>{dateUtils.formatDate(item['date_updated'], DISPLAY_DATE_FORMAT)}</b>
                           </>} />
                           {item['project_name']}
                         </Typography>
@@ -202,11 +202,13 @@ export default function AnticipatedEAOSchedule() {
                                   {item['milestone_type'] === 4 ?
                                     'Referral Date' : 'Decision Date'}
                                 </TableCell>
-                                <TableCell>{dateUtils.formatDate(item['referral_date'])}</TableCell>
+                                <TableCell>{dateUtils.formatDate(item['referral_date'],
+                                  DISPLAY_DATE_FORMAT)}</TableCell>
                               </TableRow>
                               <TableRow>
                                 <TableCell>Updated Date</TableCell>
-                                <TableCell>{dateUtils.formatDate(item['date_updated'])}</TableCell>
+                                <TableCell>{dateUtils.formatDate(item['date_updated'],
+                                  DISPLAY_DATE_FORMAT)}</TableCell>
                               </TableRow>
                               {
                                 item['next_pecp_date'] &&

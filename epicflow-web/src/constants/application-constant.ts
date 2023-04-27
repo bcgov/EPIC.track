@@ -1,4 +1,5 @@
 export const DATE_FORMAT = 'YYYY-MM-DD';
+export const DISPLAY_DATE_FORMAT = 'DD MMM YYYY';
 export const REPORT_TYPES = [{
   Text: 'Anticipated EA Referral Schedule',
   Value: 'ea_anticipated_schedule'
