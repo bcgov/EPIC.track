@@ -13,6 +13,7 @@ import { CLIENT, STAFF_REVIEWER, STAFF_DESIGNER } from "../constants/constants";
 import Loading from "../containers/Loading";
 import NotFound from "./NotFound";
 import { setTenantFromId } from "../apiManager/services/tenantServices";
+import StaffList from "./Staffs/StaffList";
 
 const Form = lazy(() => import("./Form"));
 const ServiceFlow = lazy(() => import("./ServiceFlow"));
@@ -139,6 +140,7 @@ const PrivateRoute = React.memo((props) => {
           <Switch>
             <Route path={`${BASE_ROUTE}form`} component={Form} />
             <Route path={`${BASE_ROUTE}reports`} component={Reports} />
+            <Route path={`${BASE_ROUTE}data-management/staffs`} component={StaffList} />
             <DraftRoute path={`${BASE_ROUTE}draft`} component={Drafts} />
             <DesignerRoute path={`${BASE_ROUTE}admin`} component={Admin} />
             <DesignerRoute path={`${BASE_ROUTE}formflow`} component={Form} />
