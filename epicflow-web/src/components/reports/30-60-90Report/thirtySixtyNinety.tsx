@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReportService from '../../../services/reportService';
-import { RESULT_STATUS, REPORT_TYPE }
+import { RESULT_STATUS, REPORT_TYPE, DISPLAY_DATE_FORMAT }
   from '../../../constants/application-constant';
 import { dateUtils } from '../../../utils';
 import ReportHeader from '../shared/report-header/ReportHeader';
@@ -116,7 +116,8 @@ export default function ThirtySixtyNinety() {
                   return <Accordion key={itemIndex}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography>
-                        {item['project_name']} - {item['event_title']}:{dateUtils.formatDate(item['event_date'])}
+                        {item['project_name']} - {item['event_title']}:{dateUtils.formatDate(item['event_date'],
+                          DISPLAY_DATE_FORMAT)}
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
@@ -143,7 +144,8 @@ export default function ThirtySixtyNinety() {
                             </TableRow>
                             <TableRow>
                               <TableCell>Anticipated Decision Date</TableCell>
-                              <TableCell>{dateUtils.formatDate(item['anticipated_decision_date'])}</TableCell>
+                              <TableCell>{dateUtils.formatDate(item['anticipated_decision_date'],
+                                DISPLAY_DATE_FORMAT)}</TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>

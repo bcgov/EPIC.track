@@ -12,7 +12,7 @@ import MaterialReactTable, {
   MRT_VisibilityState
 } from 'material-react-table';
 import { json2csv } from 'json-2-csv';
-import { RESULT_STATUS, REPORT_TYPE } from '../../../constants/application-constant';
+import { RESULT_STATUS, REPORT_TYPE, DISPLAY_DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
 import { ResourceForecastModel } from './type';
@@ -223,6 +223,7 @@ export default function ResourceForecast() {
       ...setMonthColumns(),
       {
         accessorKey: 'referral_timing',
+        accessorFn: (row)=>dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT),
         header: 'Referral Timing',
         enableHiding: true
       }
