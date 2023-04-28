@@ -11,6 +11,8 @@ import { RootState } from '../store';
 import ProjectForm from './project/form/projectForm';
 import ProjectList from './project/list/projectList';
 import ReportSample from './reports/30-60-90Report/thirtySixtyNinety';
+import IndegenousNationList from './indegenousNations/list/indegenousNationsList';
+import IndegenousNationForm from './indegenousNations/form/indegenousNationsForm';
 
 export default function App() {
   const dispatch = useDispatch();
@@ -32,6 +34,8 @@ export default function App() {
             <Route path='/project' element={<ProjectForm />} />
             <Route path='/project-list' element={<ProjectList />} />
             <Route path='/report-30-60-90' element={<ReportSample />} />
+		  <Route path='/indegenousNation' element={<IndegenousNationForm />} />
+		  <Route path='/indegenousNation-list' element={<IndegenousNationList />} />
           </Routes>
         </Suspense>
       </BrowserRouter>}

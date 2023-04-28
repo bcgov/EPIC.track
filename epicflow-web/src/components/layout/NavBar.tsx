@@ -57,6 +57,9 @@ export default function NavBar() {
           <ListItem>
             <Link to="/project-list" >Project List</Link>
           </ListItem>
+		<ListItem>
+            <Link to="/indegenousNation-list" >Indegenous Nation List</Link>
+          </ListItem>
         </List>
       </Drawer>
     </Box>

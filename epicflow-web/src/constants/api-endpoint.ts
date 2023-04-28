@@ -8,6 +8,9 @@ const Endpoints = {
   },
   Projects: {
     GET_PROJECTS: 'projects'
+  },
+  IndegenousNations: {
+	GET_INDEGENOUS_NATION: 'indigenous_nations'
   }
 }
 export default Endpoints;
