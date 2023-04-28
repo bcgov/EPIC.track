@@ -76,7 +76,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
 
         results_qry = (
-            Work.query.filter()
+            Work.query.filter(Work.is_active.is_(True), Work.is_deleted.is_(False))
             .join(Project)
             .join(WorkType)
             .join(
