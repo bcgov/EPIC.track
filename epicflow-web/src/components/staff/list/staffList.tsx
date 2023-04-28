@@ -63,7 +63,7 @@ const StaffList = () => {
   }
   React.useEffect(() => {
     getPositions();
-  }, [getPositions]);
+  }, []);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);

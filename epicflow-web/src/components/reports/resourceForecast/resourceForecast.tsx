@@ -30,9 +30,14 @@ export default function ResourceForecast() {
   const [columnVisibility, setColumnVisibility] = React.useState<MRT_VisibilityState>({});
   const [globalFilter, setGlobalFilter] = React.useState();
   const [filters, setFilters] = React.useState({});
-
+ 
   const FILENAME_PREFIX = 'EAO_Resource_Forecast';
 
+  React.useEffect(()=>{
+    const hiddenColumns = Object.keys(columnVisibility).filter(p=>!columnVisibility[p]);
+    const filteredColumnFilters = columnFilters.filter(p=>!hiddenColumns.includes(p.id));
+    setColumnFilters(filteredColumnFilters);
+  },[columnVisibility, setColumnFilters])
   const exportToCsv = React.useCallback(async(table: MRT_TableInstance<ResourceForecastModel>)=>{
     const filteredResult = table.getFilteredRowModel().flatRows.map(p=>{
       return {

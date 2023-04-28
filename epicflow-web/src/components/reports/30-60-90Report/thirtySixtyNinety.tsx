@@ -62,7 +62,7 @@ export default function ThirtySixtyNinety() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  },[reportDate]);
+  },[reportDate, fetchReportData]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
