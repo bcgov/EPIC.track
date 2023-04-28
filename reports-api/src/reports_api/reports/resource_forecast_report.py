@@ -22,7 +22,6 @@ from reports_api.models import (
     EAAct, EAOTeam, Event, FederalInvolvement, Milestone, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType,
     Type, Work, WorkType, db)
 
-# from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
 
 
@@ -54,7 +53,7 @@ class EAResourceForeCastReport(ReportFactory):
             "work_id",
             "ea_type_label",
         ]
-        group_by = "project_name"
+        group_by = "work_id"
         super().__init__(data_keys, group_by, None, filters)
         self.excluded_items = []
         if self.filters and "exclude" in self.filters:
@@ -110,23 +109,9 @@ class EAResourceForeCastReport(ReportFactory):
         }
         self.end_date = None
 
-    def _get_latest_event_subquery(self, date: datetime):
-        """Return the subquery to find the latest event for a given date"""
-        latest_event_query = (
-            db.session.query(
-                Event.work_id,
-                func.max(
-                    func.coalesce(Event.start_date, Event.anticipated_start_date)
-                ).label("max_start_date"),
-            )
-            .filter(
-                Event.milestone_id.in_(self.start_event_milestones),
-                func.coalesce(Event.start_date, Event.anticipated_start_date) <= date,
-            )
-            .group_by(Event.work_id)
-            .subquery()
-        )
-        return latest_event_query
+    def _filter_work_events(self, work_id, events):
+        work_events = list(filter(lambda x: work_id == x.work_id, events))
+        return work_events
 
     def _get_report_meta_data(
         self, report_date: datetime, available_width: float
@@ -231,86 +216,55 @@ class EAResourceForeCastReport(ReportFactory):
                 func.max(Event.start_date).label("max_start_date"),
             )
             .filter(
-                Event.start_date <= report_start_date,
+                Event.start_date <= start_date,
                 Event.milestone_id.in_(self.start_event_milestones),
             )
             .group_by(Event.work_id)
             .subquery()
         )
 
-        first_month_query = self._get_latest_event_subquery(report_start_date)
-        first_month_aliases = {
-            "phase": aliased(PhaseCode),
-            "event": aliased(Event),
-            "milestone": aliased(Milestone),
-            "label": f"{report_start_date:%B}",
-        }
-        year_offset, second_month = divmod(report_start_date.month + 1, 13)
-        second_date = report_start_date.replace(
+        year_offset, second_month = divmod(start_date.month + 1, 13)
+        second_month = start_date.replace(
             year=year + year_offset,
             month=second_month or 1,
             day=monthrange(year + year_offset, second_month)[1],
         )
-        second_month_query = self._get_latest_event_subquery(second_date)
-        second_month_aliases = {
-            "phase": aliased(PhaseCode),
-            "event": aliased(Event),
-            "milestone": aliased(Milestone),
-            "label": f"{second_date:%B}",
-        }
-        year_offset, third_month = divmod(report_start_date.month + 2, 13)
-        third_date = report_start_date.replace(
+
+        year_offset, third_month = divmod(start_date.month + 2, 13)
+        third_month = start_date.replace(
             year=year + year_offset,
             month=third_month or 1,
             day=monthrange(year + year_offset, third_month or 1)[1],
         )
-        third_month_query = self._get_latest_event_subquery(third_date)
-        third_month_aliases = {
-            "phase": aliased(PhaseCode),
-            "event": aliased(Event),
-            "milestone": aliased(Milestone),
-            "label": f"{third_date:%B}",
-        }
-        year_offset, remaining_start = divmod(report_start_date.month + 3, 13)
-        remaining_start_date = report_start_date.replace(
+
+        year_offset, remaining_start = divmod(start_date.month + 3, 13)
+        remaining_start_month = start_date.replace(
             year=year + year_offset,
             month=remaining_start or 1,
             day=1,
         )
-        remaining_month_query = self._get_latest_event_subquery(self.end_date)
+        months = [
+            start_date.replace(
+                day=monthrange(report_start_date.year, report_start_date.month)[1]
+            ),
+            second_month,
+            third_month,
+            self.end_date,
+        ]
+        self.month_labels = list(map(lambda x: f"{x:%B}", months[:-1]))
         month_labels = []
-        for date in rrule.rrule(
-            rrule.MONTHLY, dtstart=remaining_start_date, until=self.end_date
+        for month in rrule.rrule(
+            rrule.MONTHLY, dtstart=remaining_start_month, until=self.end_date
         ):
-            month_label = f"{date:%b}"
-            if date.month == 12:
-                month_label += f"{date:%Y}"
+            month_label = f"{month:%b}"
+            if month.month == 12:
+                month_label += f"{month:%Y}"
             month_labels.append(month_label)
-        if self.end_date.year > report_start_date.year:
+        if self.end_date.year > start_date.year:
             month_labels[-1] += f"{self.end_date:%Y}"
-        remaining_month_aliases = {
-            "phase": aliased(PhaseCode),
-            "event": aliased(Event),
-            "milestone": aliased(Milestone),
-            "label": ", ".join(month_labels),
-        }
+        self.month_labels.append(", ".join(month_labels))
 
-        self.month_labels = [
-            first_month_aliases["label"],
-            second_month_aliases["label"],
-            third_month_aliases["label"],
-            remaining_month_aliases["label"],
-        ]
-
-        self.data_keys += self.month_labels
-        self.data_keys += [
-            f'{first_month_aliases["label"]}_color',
-            f'{second_month_aliases["label"]}_color',
-            f'{third_month_aliases["label"]}_color',
-            f'{remaining_month_aliases["label"]}_color',
-        ]
-
-        results_qry = (
+        works = (
             Project.query.filter(
                 Project.is_project_closed.is_(False),
                 Project.is_deleted.is_(False),
@@ -346,96 +300,6 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
             .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
-            .join(first_month_query, first_month_query.c.work_id == Work.id)
-            .join(
-                first_month_aliases["event"],
-                and_(
-                    first_month_query.c.work_id == first_month_aliases["event"].work_id,
-                    func.coalesce(
-                        first_month_aliases["event"].start_date,
-                        first_month_aliases["event"].anticipated_start_date,
-                    ) ==
-                    first_month_query.c.max_start_date,
-                ),
-            )
-            .join(
-                first_month_aliases["milestone"],
-                first_month_aliases["event"].milestone_id ==
-                first_month_aliases["milestone"].id,
-            )
-            .join(
-                first_month_aliases["phase"],
-                first_month_aliases["milestone"].phase_id ==
-                first_month_aliases["phase"].id,
-            )
-            .join(second_month_query, second_month_query.c.work_id == Work.id)
-            .join(
-                second_month_aliases["event"],
-                and_(
-                    second_month_query.c.work_id ==
-                    second_month_aliases["event"].work_id,
-                    func.coalesce(
-                        second_month_aliases["event"].start_date,
-                        second_month_aliases["event"].anticipated_start_date,
-                    ) ==
-                    second_month_query.c.max_start_date,
-                ),
-            )
-            .join(
-                second_month_aliases["milestone"],
-                second_month_aliases["event"].milestone_id ==
-                second_month_aliases["milestone"].id,
-            )
-            .join(
-                second_month_aliases["phase"],
-                second_month_aliases["milestone"].phase_id ==
-                second_month_aliases["phase"].id,
-            )
-            .join(third_month_query, third_month_query.c.work_id == Work.id)
-            .join(
-                third_month_aliases["event"],
-                and_(
-                    third_month_query.c.work_id == third_month_aliases["event"].work_id,
-                    func.coalesce(
-                        third_month_aliases["event"].start_date,
-                        third_month_aliases["event"].anticipated_start_date,
-                    ) ==
-                    third_month_query.c.max_start_date,
-                ),
-            )
-            .join(
-                third_month_aliases["milestone"],
-                third_month_aliases["event"].milestone_id ==
-                third_month_aliases["milestone"].id,
-            )
-            .join(
-                third_month_aliases["phase"],
-                third_month_aliases["milestone"].phase_id ==
-                third_month_aliases["phase"].id,
-            )
-            .join(remaining_month_query, remaining_month_query.c.work_id == Work.id)
-            .join(
-                remaining_month_aliases["event"],
-                and_(
-                    remaining_month_query.c.work_id ==
-                    remaining_month_aliases["event"].work_id,
-                    func.coalesce(
-                        remaining_month_aliases["event"].start_date,
-                        remaining_month_aliases["event"].anticipated_start_date,
-                    ) ==
-                    remaining_month_query.c.max_start_date,
-                ),
-            )
-            .join(
-                remaining_month_aliases["milestone"],
-                remaining_month_aliases["event"].milestone_id ==
-                remaining_month_aliases["milestone"].id,
-            )
-            .join(
-                remaining_month_aliases["phase"],
-                remaining_month_aliases["milestone"].phase_id ==
-                remaining_month_aliases["phase"].id,
-            )
             .filter(
                 daterange(
                     Work.start_date.cast(Date),
@@ -462,109 +326,119 @@ class EAResourceForeCastReport(ReportFactory):
                 Work.id.label("work_id"),
                 responsible_epd.full_name.label("responsible_epd"),
                 work_lead.full_name.label("work_lead"),
-                first_month_aliases["phase"].name.label(first_month_aliases["label"]),
-                first_month_aliases["phase"].color.label(
-                    f'{first_month_aliases["label"]}_color'
-                ),
-                second_month_aliases["phase"].name.label(second_month_aliases["label"]),
-                second_month_aliases["phase"].color.label(
-                    f'{second_month_aliases["label"]}_color'
-                ),
-                third_month_aliases["phase"].name.label(third_month_aliases["label"]),
-                third_month_aliases["phase"].color.label(
-                    f'{third_month_aliases["label"]}_color'
-                ),
-                remaining_month_aliases["phase"].name.label(
-                    remaining_month_aliases["label"]
-                ),
-                remaining_month_aliases["phase"].color.label(
-                    f'{remaining_month_aliases["label"]}_color'
-                ),
                 Staff.first_name.label("staff_first_name"),
                 Staff.last_name.label("staff_last_name"),
                 StaffWorkRole.role_id.label("role_id"),
                 Work.id.label("work_id"),
             )
+            .all()
         )
-        print(results_qry.statement.compile(compile_kwargs={"literal_binds": True}))
-        return results_qry.all()
+        work_ids = set((work.work_id for work in works))
+        works = super()._format_data(works)
+        events = (
+            Event.query.filter(
+                Event.work_id.in_(work_ids),
+                Event.milestone_id.in_(self.start_event_milestones),
+                func.coalesce(Event.start_date, Event.anticipated_start_date) <=
+                self.end_date,
+            )
+            .join(Milestone)
+            .join(PhaseCode)
+            .order_by(func.coalesce(Event.start_date, Event.anticipated_start_date))
+            .add_columns(
+                Event.work_id.label("work_id"),
+                func.coalesce(Event.start_date, Event.anticipated_start_date).label(
+                    "start_date"
+                ),
+                PhaseCode.name.label("event_phase"),
+                PhaseCode.color.label("phase_color"),
+            )
+            .all()
+        )
+        events = {
+            y: self._filter_work_events(y, events) for y in work_ids
+        }
+        results = defaultdict(list)
+        for work_id, work_data in works.items():
+            work = work_data[0]
+            for index, month in enumerate(months):
+                latest_event = events[work_id][-1]
+                work.update(
+                    {
+                        self.month_labels[index]: latest_event.event_phase,
+                        f"{self.month_labels[index]}_color": latest_event.phase_color,
+                    }
+                )
+            work_data[0] = work
+            results[work_id] = work_data
+        return results
 
     def _format_data(self, data):  # pylint: disable=too-many-locals
-        result = super()._format_data(data)
         response = []
-        for _, values in result.items():
+        for _, values in data.items():
             staffs = []
-            works = set(x["work_id"] for x in values)
-            for work in works:
-                work_data = next(x for x in values if x["work_id"] == work)
-                work_data["cairt_lead"] = ""
-                work_values = filter(
-                    lambda x: x if x["work_id"] == work else False, values  # pylint: disable=cell-var-from-loop
-                )
-                for value in work_values:
-                    role = value.pop("role_id")
-                    first_name = value.pop("staff_first_name")
-                    last_name = value.pop("staff_last_name")
-                    if role == 4:
-                        work_data["cairt_lead"] = f"{last_name}, {first_name}"
-                    elif role in [3, 5]:
-                        staffs.append(
-                            {"first_name": first_name, "last_name": last_name}
-                        )
-                staffs = sorted(staffs, key=lambda x: x["last_name"])
-                staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
-                work_data["work_team_members"] = "; ".join(staffs)
-                if work_data.get("capital_investment", None):
-                    work_data[
-                        "capital_investment"
-                    ] = f"{work_data['capital_investment']:,.0f}"
-                months = []
-                for month in self.month_labels:
-                    month_data = work_data.pop(month)
-                    color = work_data.pop(f"{month}_color")
-                    months.append({"label": month, "phase": month_data, "color": color})
-                work_data["months"] = months
+            work_data = values[0]
+            work_data["cairt_lead"] = ""
+            for value in values:
+                role = value.pop("role_id")
+                first_name = value.pop("staff_first_name")
+                last_name = value.pop("staff_last_name")
+                if role == 4:
+                    work_data["cairt_lead"] = f"{last_name}, {first_name}"
+                elif role in [3, 5]:
+                    staffs.append({"first_name": first_name, "last_name": last_name})
+            staffs = sorted(staffs, key=lambda x: x["last_name"])
+            staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
+            work_data["work_team_members"] = "; ".join(staffs)
+            if work_data.get("capital_investment", None):
                 work_data[
-                    "sector(sub)"
-                ] = f"{work_data.get('type', '')} ({work_data.get('sub_type', '')})"
-                referral_timing_query = (
-                    db.session.query(PhaseCode)
-                    .join(WorkType)
-                    .join(Milestone)
-                    .join(Event)
-                    .filter(
-                        and_(
-                            WorkType.id == PhaseCode.work_type_id,
-                            WorkType.name == work_data["ea_type"],
-                            Event.work_id == work_data["work_id"],
-                        )
+                    "capital_investment"
+                ] = f"{work_data['capital_investment']:,.0f}"
+            months = []
+            for month in self.month_labels:
+                month_data = work_data.pop(month)
+                color = work_data.pop(f"{month}_color")
+                months.append({"label": month, "phase": month_data, "color": color})
+            work_data["months"] = months
+            work_data[
+                "sector(sub)"
+            ] = f"{work_data.get('type', '')} ({work_data.get('sub_type', '')})"
+            referral_timing_query = (
+                db.session.query(PhaseCode)
+                .join(WorkType)
+                .join(Milestone)
+                .join(Event)
+                .filter(
+                    and_(
+                        WorkType.id == PhaseCode.work_type_id,
+                        WorkType.name == work_data["ea_type"],
+                        Event.work_id == work_data["work_id"],
                     )
-                    .group_by(PhaseCode.id)
-                    .order_by(PhaseCode.id.desc())
                 )
-                if work_data["ea_type"] == "Assessment":
-                    referral_timing_obj = referral_timing_query.offset(1).first()
-                    referral_timing_milestone = next(
-                        obj
-                        for obj in referral_timing_obj.milestones
-                        if obj.milestone_type_id == 14
-                    )
-                else:
-                    referral_timing_obj = referral_timing_query.first()
-                    referral_timing_milestone = next(
-                        obj
-                        for obj in referral_timing_obj.milestones
-                        if obj.milestone_type_id == 13
-                    )
-                # else:
-                #     pass
-                referral_timing = Event.query.filter(
-                    Event.milestone_id == referral_timing_milestone.id
-                ).first()
-                work_data[
-                    "referral_timing"
-                ] = f"{referral_timing.anticipated_start_date:%B %d, %Y}"
-                response.append(work_data)
+                .group_by(PhaseCode.id)
+                .order_by(PhaseCode.id.desc())
+            )
+            if work_data["ea_type"] == "Assessment":
+                referral_timing_obj = referral_timing_query.offset(1).first()
+                referral_timing_milestone = next(
+                    obj
+                    for obj in referral_timing_obj.milestones
+                    if obj.milestone_type_id == 14
+                )
+            else:
+                referral_timing_obj = referral_timing_query.first()
+                referral_timing_milestone = next(
+                    obj
+                    for obj in referral_timing_obj.milestones
+                    if obj.milestone_type_id == 13
+                )
+            referral_timing = Event.query.filter(
+                Event.milestone_id == referral_timing_milestone.id
+            ).first()
+            work_data[
+                "referral_timing"
+            ] = f"{referral_timing.anticipated_start_date:%B %d, %Y}"
+            response.append(work_data)
 
         return response
 
