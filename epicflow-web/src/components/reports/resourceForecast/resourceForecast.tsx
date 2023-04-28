@@ -12,7 +12,7 @@ import MaterialReactTable, {
   MRT_VisibilityState
 } from 'material-react-table';
 import { json2csv } from 'json-2-csv';
-import { RESULT_STATUS, REPORT_TYPE } from '../../../constants/application-constant';
+import { RESULT_STATUS, REPORT_TYPE, DISPLAY_DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
 import { ResourceForecastModel } from './type';
@@ -30,9 +30,14 @@ export default function ResourceForecast() {
   const [columnVisibility, setColumnVisibility] = React.useState<MRT_VisibilityState>({});
   const [globalFilter, setGlobalFilter] = React.useState();
   const [filters, setFilters] = React.useState({});
-
+ 
   const FILENAME_PREFIX = 'EAO_Resource_Forecast';
 
+  React.useEffect(()=>{
+    const hiddenColumns = Object.keys(columnVisibility).filter(p=>!columnVisibility[p]);
+    const filteredColumnFilters = columnFilters.filter(p=>!hiddenColumns.includes(p.id));
+    setColumnFilters(filteredColumnFilters);
+  },[columnVisibility, setColumnFilters])
   const exportToCsv = React.useCallback(async(table: MRT_TableInstance<ResourceForecastModel>)=>{
     const filteredResult = table.getFilteredRowModel().flatRows.map(p=>{
       return {
@@ -56,7 +61,7 @@ export default function ResourceForecast() {
         new Date().toISOString())}.csv`);
     document.body.appendChild(link);
     link.click();
-  },[]);
+  },[reportDate]);
 
   React.useEffect(()=>{
     const diff = dateUtils.diff(reportDate,new Date(2019,11,19).toISOString(),'days')
@@ -223,6 +228,7 @@ export default function ResourceForecast() {
       ...setMonthColumns(),
       {
         accessorKey: 'referral_timing',
+        accessorFn: (row)=>dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT),
         header: 'Referral Timing',
         enableHiding: true
       }

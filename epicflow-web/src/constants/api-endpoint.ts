@@ -4,13 +4,16 @@ const Endpoints = {
     GET_PDF_REPORT: 'reports/file'
   },
   Staffs: {
-    GET_STAFFS: 'staffs'
+    STAFF: 'staffs'
   },
   Projects: {
     GET_PROJECTS: 'projects'
   },
   IndegenousNations: {
-	GET_INDEGENOUS_NATION: 'indigenous_nations'
+	  GET_INDEGENOUS_NATION: 'indigenous_nations'
+  },
+  Codes: {
+    GET_CODES: 'codes'
   }
 }
 export default Endpoints;
