@@ -1,27 +1,29 @@
 import React from 'react';
 import { Container } from '@mui/system';
 import {
-  Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, FormLabel,
-  Grid, Skeleton, Tab, Table, TableBody, TableCell, TableRow, Tabs, Typography
+  Accordion, AccordionDetails, AccordionSummary, Alert, Box,
+  Skeleton, Tab, Table, TableBody, TableCell, TableRow, Tabs, Typography
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ReportService from '../../../services/reportService';
-import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT }
+import { RESULT_STATUS, REPORT_TYPE, DISPLAY_DATE_FORMAT }
   from '../../../constants/application-constant';
 import { dateUtils } from '../../../utils';
+import ReportHeader from '../shared/report-header/ReportHeader';
 
-export default function ReportSample() {
+export default function ThirtySixtyNinety() {
   const [reports, setReports] = React.useState({});
+  const [showReportDateBanner, setShowReportDateBanner] = React.useState<boolean>(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [reportDate, setReportDate] = React.useState<string>();
   const [resultStatus, setResultStatus] = React.useState<string>();
 
 
   const FILENAME_PREFIX = '30_60_90_Report';
-
+  React.useEffect(()=>{
+    const diff = dateUtils.diff(reportDate || '',new Date(2019,11,19).toISOString(),'days')
+    setShowReportDateBanner(diff<0 && !Number.isNaN(diff));
+  },[reportDate]);
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -31,7 +33,7 @@ export default function ReportSample() {
         });
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setReports(reportData.data as never);
+        setReports((reportData.data as never)['data']);
       }
 
       if (reportData.status === 204) {
@@ -60,7 +62,7 @@ export default function ReportSample() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  },[reportDate]);
+  },[reportDate, fetchReportData]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -94,35 +96,17 @@ export default function ReportSample() {
   }
   return (
     <>
-      <Grid component="form" onSubmit={(e) => e.preventDefault()}
-        container spacing={2} sx={{ marginTop: '5px' }}>
-        <Grid item sm={2}><FormLabel>Report Date</FormLabel></Grid>
-        <Grid item sm={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker format={DATE_FORMAT}
-              onChange={(dateVal: any) =>
-                setReportDate(dateUtils.formatDate(dateVal.$d))}
-              slotProps={{
-                textField: {
-                  id: 'ReportDate'
-                }
-              }} />
-          </LocalizationProvider>
-        </Grid>
-        <Grid item sm={resultStatus === RESULT_STATUS.LOADED ? 7 : 8}>
-          <Button variant='contained' type='submit'
-            onClick={fetchReportData} sx={{ float: 'right' }}>Submit</Button>
-        </Grid>
-        <Grid item sm={1}>
-          {resultStatus === RESULT_STATUS.LOADED &&
-            <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
-        </Grid>
-      </Grid>
+      <ReportHeader
+        setReportDate={setReportDate}
+        fetchReportData={fetchReportData}
+        downloadPDFReport={downloadPDFReport}
+        showReportDateBanner={showReportDateBanner}
+      />
       {resultStatus === RESULT_STATUS.LOADED &&
         Object.keys(reports).map((key) => {
           console.log(key);
           return <>
-            <Accordion sx={{ mt: '15px' }}><AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Accordion sx={{ mt: '15px' }} expanded><AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography>{key}</Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -131,7 +115,10 @@ export default function ReportSample() {
                   console.log(itemIndex);
                   return <Accordion key={itemIndex}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                      <Typography>{item['project_name']}</Typography>
+                      <Typography>
+                        {item['project_name']} - {item['event_title']}:{dateUtils.formatDate(item['event_date'],
+                          DISPLAY_DATE_FORMAT)}
+                      </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <Tabs
@@ -157,7 +144,8 @@ export default function ReportSample() {
                             </TableRow>
                             <TableRow>
                               <TableCell>Anticipated Decision Date</TableCell>
-                              <TableCell>{item['anticipated_decision_date']}</TableCell>
+                              <TableCell>{dateUtils.formatDate(item['anticipated_decision_date'],
+                                DISPLAY_DATE_FORMAT)}</TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>

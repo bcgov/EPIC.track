@@ -48,6 +48,7 @@ class Staff(BaseModel):
             'phone': self.phone,
             'email': self.email,
             'is_active': self.is_active,
+            'position_id': self.position_id,
             'position': self.position.as_dict()
         }
 
@@ -65,3 +66,8 @@ class Staff(BaseModel):
     def find_all_active_staff(cls):
         """Return all active staff."""
         return cls.query.filter_by(is_active=True)
+
+    @classmethod
+    def find_all_non_deleted_staff(cls):
+        """Return all non-deleted staff"""
+        return cls.query.filter_by(is_deleted=False)

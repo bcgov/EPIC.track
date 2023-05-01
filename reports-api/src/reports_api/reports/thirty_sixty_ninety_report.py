@@ -12,7 +12,7 @@ from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import aliased
 
-from reports_api.models import Engagement, Event, Milestone, Project, Work, WorkEngagement, WorkStatus, WorkType, db
+from reports_api.models import Event, Milestone, Project, Work, WorkStatus, WorkType, db
 
 from .report_factory import ReportFactory
 
@@ -33,7 +33,9 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "event_description",
             "work_id",
             "milestone_id",
-            "event_id"
+            "event_id",
+            "event_title",
+            "event_date"
         ]
         super().__init__(data_keys, filters=filters)
         self.report_date = None
@@ -58,20 +60,23 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
         next_pecp_query = (
             db.session.query(
-                Engagement.work_id,
-                func.min(Engagement.start_date).label("min_start_date"),
+                Event.work_id,
+                func.min(
+                    func.coalesce(Event.start_date, Event.anticipated_start_date)
+                ).label("min_start_date"),
             )
-            .join(WorkEngagement)
             .filter(
-                Engagement.start_date >= report_date,
-                WorkEngagement.milestone_id.in_(self.pecps),
+                func.coalesce(Event.start_date, Event.anticipated_start_date).between(
+                    report_date.date(), max_date.date()
+                ),
+                Event.milestone_id.in_(self.pecps),
             )
-            .group_by(Engagement.work_id)
+            .group_by(Event.work_id)
             .subquery()
         )
 
         results_qry = (
-            Work.query.filter()
+            Work.query.filter(Work.is_active.is_(True), Work.is_deleted.is_(False))
             .join(Project)
             .join(WorkType)
             .join(
@@ -79,49 +84,27 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 or_(
                     and_(
                         Event.work_id == Work.id,
-                        Event.anticipated_start_date.between(
-                            report_date.date(), max_date.date()
-                        ),
+                        func.coalesce(
+                            Event.start_date, Event.anticipated_start_date
+                        ).between(report_date.date(), max_date.date()),
                         Event.milestone_id.in_(self.decision_miletones),
                     ),
                     and_(
                         Event.work_id == Work.id,
                         Work.is_watched.is_(True),
                         Event.is_reportable.is_(True),
-                        Event.anticipated_start_date.between(
-                            report_date.date(), max_date.date()
-                        ),
+                        func.coalesce(
+                            Event.start_date, Event.anticipated_start_date
+                        ).between(report_date.date(), max_date.date()),
                     ),
                 ),
             )
             .join(Milestone)
-            .join(
-                WorkEngagement,
-                and_(
-                    WorkEngagement.project_id == Work.project_id,
-                    WorkEngagement.work_type_id == Work.work_type_id,
-                ),
-            )
-            .join(
-                Engagement,
-                and_(
-                    Engagement.id == WorkEngagement.engagement_id,
-                    Engagement.start_date.between(report_date.date(), max_date.date()),
-                ),
-            )
             .outerjoin(
                 next_pecp_query,
                 and_(
                     next_pecp_query.c.work_id == Work.id,
-                    WorkEngagement.project_id == Work.project_id,
                 ),
-            )
-            # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
-            .filter(
-                or_(
-                    next_pecp_query.c.min_start_date == Engagement.start_date,
-                    WorkEngagement.id.is_(None),
-                )
             )
             .outerjoin(
                 pecp_event,
@@ -132,15 +115,12 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 ),
             )
             .outerjoin(WorkStatus)
-            .join(
+            .outerjoin(
                 status_update_max_date_query,
-                or_(
-                    and_(
-                        status_update_max_date_query.c.work_id == WorkStatus.work_id,
-                        status_update_max_date_query.c.max_posted_date ==
-                        WorkStatus.posted_date,
-                    ),
-                    WorkStatus.id.is_(None),
+                and_(
+                    status_update_max_date_query.c.work_id == WorkStatus.work_id,
+                    status_update_max_date_query.c.max_posted_date ==
+                    WorkStatus.posted_date,
                 ),
             )
             .add_columns(
@@ -154,11 +134,15 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 pecp_event.explanation.label("pecp_explanation"),
                 Work.id.label("work_id"),
                 Event.id.label("event_id"),
+                Event.title.label("event_title"),
+                func.coalesce(
+                            Event.start_date, Event.anticipated_start_date
+                        ).label("event_date"),
                 Milestone.id.label("milestone_id"),
             )
         )
 
-        print(results_qry.statement.compile(compile_kwargs={"literal_binds": True}))
+        # print(results_qry.statement.compile(compile_kwargs={"literal_binds": True}))
         return results_qry.all()
 
     def _format_data(self, data):
@@ -199,29 +183,34 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 )
                 .first()
             )
-            work["anticipated_decision_date"] = next_major_decision_event.anticipated_end_date
-            work.update({"is_decision_event": False, "is_pecp_event": False, "is_reportable_event": False})
+            event_decision_date = work["anticipated_decision_date"]
+            work[
+                "anticipated_decision_date"
+            ] = next_major_decision_event.anticipated_end_date
+            work.update(
+                {
+                    "is_decision_event": False,
+                    "is_pecp_event": False,
+                    "is_reportable_event": False,
+                }
+            )
             if work["milestone_id"] in self.decision_miletones:
                 work["is_decision_event"] = True
             elif work["milestone_id"] in self.pecps:
                 work["is_pecp_event"] = True
             else:
                 work["is_reportable_event"] = True
-            if work["anticipated_decision_date"] <= (
-                self.report_date + timedelta(days=30)
-            ):
+            if event_decision_date <= (self.report_date + timedelta(days=30)):
                 response["30"].append(work)
-            elif work["anticipated_decision_date"] <= (
-                self.report_date + timedelta(days=60)
-            ):
+            elif event_decision_date <= (self.report_date + timedelta(days=60)):
                 response["60"].append(work)
-            elif work["anticipated_decision_date"] <= (
-                self.report_date + timedelta(days=90)
-            ):
+            elif event_decision_date <= (self.report_date + timedelta(days=90)):
                 response["90"].append(work)
         return response
 
-    def generate_report(self, report_date, return_type):  # pylint: disable=too-many-locals
+    def generate_report(
+        self, report_date, return_type
+    ):  # pylint: disable=too-many-locals
         """Generates a report and returns it"""
         self.report_date = report_date
         data = self._fetch_data(report_date)
@@ -236,7 +225,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
         doc.page_width = doc.width + doc.leftMargin * 2  # pylint: disable=no-member
         doc.page_height = doc.height + doc.bottomMargin * 2  # pylint: disable=no-member
         page_table_frame = Frame(
-            doc.leftMargin, doc.bottomMargin, doc.width, doc.height, id="large_table"  # pylint: disable=no-member
+            doc.leftMargin,  # pylint: disable=no-member
+            doc.bottomMargin,  # pylint: disable=no-member
+            doc.width,
+            doc.height,
+            id="large_table",
         )
         page_template = PageTemplate(
             id="LaterPages", frames=[page_table_frame], onPage=self.add_default_info
@@ -292,9 +285,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
                             ),
                         ],
                         [
-                            Paragraph(work["work_short_description"], normal_style),
-                            Paragraph(work["work_status_text"], normal_style),
-                            Paragraph(event_description, normal_style),
+                            Paragraph(work["work_short_description"] if work["work_short_description"]
+                                      else "", normal_style),
+                            Paragraph(work["work_status_text"] if work["work_status_text"] else "", normal_style),
+                            Paragraph(event_description if event_description else "", normal_style),
                         ],
                     ]
                 )

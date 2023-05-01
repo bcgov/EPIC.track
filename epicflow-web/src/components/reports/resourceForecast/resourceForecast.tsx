@@ -1,9 +1,7 @@
 import React from 'react';
 import {
-  Alert, Autocomplete, Box, Button, Container, FormLabel, Grid, IconButton, TextField, Tooltip
+  Alert, Autocomplete, Box, Container, IconButton, TextField, Tooltip
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import MaterialReactTable, {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
@@ -14,25 +12,32 @@ import MaterialReactTable, {
   MRT_VisibilityState
 } from 'material-react-table';
 import { json2csv } from 'json-2-csv';
-import { RESULT_STATUS, REPORT_TYPE, DATE_FORMAT } from '../../../constants/application-constant';
+import { RESULT_STATUS, REPORT_TYPE, DISPLAY_DATE_FORMAT } from '../../../constants/application-constant';
 import ReportService from '../../../services/reportService';
 import { dateUtils } from '../../../utils';
 import { ResourceForecastModel } from './type';
 import ClearAllIcon from '@mui/icons-material/ClearAll';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import ReportHeader from '../shared/report-header/ReportHeader';
 
 
 export default function ResourceForecast() {
-  const [reportDate, setReportDate] = React.useState<string>();
+  const [reportDate, setReportDate] = React.useState<string>('');
+  const [showReportDateBanner, setShowReportDateBanner] = React.useState<boolean>(false);
   const [resultStatus, setResultStatus] = React.useState<string>();
   const [rfData, setRFData] = React.useState<ResourceForecastModel[]>([]);
   const [columnFilters, setColumnFilters] = React.useState<MRT_ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<MRT_VisibilityState>({});
   const [globalFilter, setGlobalFilter] = React.useState();
   const [filters, setFilters] = React.useState({});
-
+ 
   const FILENAME_PREFIX = 'EAO_Resource_Forecast';
 
+  React.useEffect(()=>{
+    const hiddenColumns = Object.keys(columnVisibility).filter(p=>!columnVisibility[p]);
+    const filteredColumnFilters = columnFilters.filter(p=>!hiddenColumns.includes(p.id));
+    setColumnFilters(filteredColumnFilters);
+  },[columnVisibility, setColumnFilters])
   const exportToCsv = React.useCallback(async(table: MRT_TableInstance<ResourceForecastModel>)=>{
     const filteredResult = table.getFilteredRowModel().flatRows.map(p=>{
       return {
@@ -56,8 +61,12 @@ export default function ResourceForecast() {
         new Date().toISOString())}.csv`);
     document.body.appendChild(link);
     link.click();
-  },[]);
+  },[reportDate]);
 
+  React.useEffect(()=>{
+    const diff = dateUtils.diff(reportDate,new Date(2019,11,19).toISOString(),'days')
+    setShowReportDateBanner(diff<0 && !Number.isNaN(diff));
+  },[reportDate]);
   React.useEffect(() => {
     setFilters((prev) => {
       const state = {
@@ -219,6 +228,7 @@ export default function ResourceForecast() {
       ...setMonthColumns(),
       {
         accessorKey: 'referral_timing',
+        accessorFn: (row)=>dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT),
         header: 'Referral Timing',
         enableHiding: true
       }
@@ -277,32 +287,12 @@ export default function ResourceForecast() {
   }, [reportDate, filters, fetchReportData]);
   return (
     <>
-      <Grid component="form" onSubmit={(e) => e.preventDefault()}
-        container spacing={2} sx={{ mt: '5px', mb: '15px' }}>
-        <Grid item sm={2}><FormLabel>Report Date</FormLabel></Grid>
-        <Grid item sm={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker format={DATE_FORMAT}
-              onChange={(dateVal: any) => setReportDate(dateUtils.formatDate(dateVal.$d))}
-              slotProps={{
-                textField: {
-                  id: 'ReportDate'
-                }
-              }} />
-          </LocalizationProvider>
-        </Grid>
-        <Grid item sm={resultStatus === RESULT_STATUS.LOADED ? 7 : 8}>
-          <Button variant='contained'
-            type='submit'
-            onClick={fetchReportData}
-            sx={{ float: 'right' }}>Submit
-          </Button>
-        </Grid>
-        <Grid item sm={1}>
-          {resultStatus === RESULT_STATUS.LOADED &&
-            <Button variant='contained' onClick={downloadPDFReport}>Download</Button>}
-        </Grid>
-      </Grid>
+      <ReportHeader
+        setReportDate={setReportDate}
+        fetchReportData={fetchReportData}
+        downloadPDFReport={downloadPDFReport}
+        showReportDateBanner={showReportDateBanner}
+      />
       {resultStatus !== RESULT_STATUS.ERROR && <MaterialReactTable
         initialState={{
           density: 'compact'

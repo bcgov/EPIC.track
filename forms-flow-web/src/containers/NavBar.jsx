@@ -129,7 +129,7 @@ const NavBar = React.memo(() => {
                   </Nav.Link>
                 ) : null}
 
-                {getUserRolePermission(userRoles, STAFF_DESIGNER) ? (
+                {/* {getUserRolePermission(userRoles, STAFF_DESIGNER) ? (
                   <Nav.Link
                     as={Link}
                     to={`${baseUrl}processes`}
@@ -144,7 +144,7 @@ const NavBar = React.memo(() => {
                     <i className="fa fa-cogs fa-lg fa-fw mr-2"/>
                     {t("Processes")}
                   </Nav.Link>
-                ) : null}
+                ) : null} */}
 
                 {showApplications ? (
                   getUserRolePermission(userRoles, STAFF_REVIEWER) ||
@@ -186,7 +186,14 @@ const NavBar = React.memo(() => {
                     {t("Tasks")}
                   </Nav.Link>
                 ) : null}
-
+                <NavDropdown title="Data Management" id="basic-nav-dropdown">
+                  <NavDropdown.Item as={Link} to={`${baseUrl}data-management/staff`}>
+                    Staff
+                  </NavDropdown.Item>
+                  <NavDropdown.Item href="#">Proponents</NavDropdown.Item>
+                  <NavDropdown.Item href="#">Indigenous Nations</NavDropdown.Item>
+                  <NavDropdown.Item href="#">Projects</NavDropdown.Item>
+                </NavDropdown>
                 {getUserRolePermission(userRoles, STAFF_REVIEWER) ? (
                   <Nav.Link
                     as={Link}
