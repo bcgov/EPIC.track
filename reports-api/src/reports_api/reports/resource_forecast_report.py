@@ -20,7 +20,7 @@ from sqlalchemy.orm import aliased
 
 from reports_api.models import (
     EAAct, EAOTeam, Event, FederalInvolvement, Milestone, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType,
-    Type, Work, WorkType, db)
+    Type, Work, WorkPhase, WorkType, db)
 
 from .report_factory import ReportFactory
 
@@ -355,9 +355,7 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .all()
         )
-        events = {
-            y: self._filter_work_events(y, events) for y in work_ids
-        }
+        events = {y: self._filter_work_events(y, events) for y in work_ids}
         results = defaultdict(list)
         for work_id, work_data in works.items():
             work = work_data[0]
@@ -405,6 +403,13 @@ class EAResourceForeCastReport(ReportFactory):
             ] = f"{work_data.get('type', '')} ({work_data.get('sub_type', '')})"
             referral_timing_query = (
                 db.session.query(PhaseCode)
+                .join(
+                    WorkPhase,
+                    and_(
+                        PhaseCode.id == WorkPhase.phase_id,
+                        WorkPhase.work_id == work_data["work_id"],
+                    ),
+                )
                 .join(WorkType)
                 .join(Milestone)
                 .join(Event)
@@ -418,20 +423,16 @@ class EAResourceForeCastReport(ReportFactory):
                 .group_by(PhaseCode.id)
                 .order_by(PhaseCode.id.desc())
             )
-            if work_data["ea_type"] == "Assessment":
+            if referral_timing_query.count() > 1:
                 referral_timing_obj = referral_timing_query.offset(1).first()
-                referral_timing_milestone = next(
-                    obj
-                    for obj in referral_timing_obj.milestones
-                    if obj.milestone_type_id == 14
-                )
             else:
                 referral_timing_obj = referral_timing_query.first()
-                referral_timing_milestone = next(
-                    obj
-                    for obj in referral_timing_obj.milestones
-                    if obj.milestone_type_id == 13
-                )
+            referral_timing_milestone = next(
+                obj
+                for obj in referral_timing_obj.milestones[::-1]
+                if obj.name not in {"Other", "None"} and obj.auto
+            )
+
             referral_timing = Event.query.filter(
                 Event.milestone_id == referral_timing_milestone.id
             ).first()
