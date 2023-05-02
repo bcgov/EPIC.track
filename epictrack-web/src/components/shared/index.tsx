@@ -1,13 +1,9 @@
 import React from 'react';
+
 import {
-    Button as MuiButton,
-    Grid,
-    Paper as MuiPaper,
-    CircularProgress,
     Typography,
-    Stack,
-    IconButton,
-    Toolbar,
+    FormLabel,
+    Grid
 } from '@mui/material';
 import { SxProps, styled } from '@mui/system';
 import { MET_Header_Font_Family, MET_Header_Font_Weight } from '../../styles/constants';
@@ -19,6 +15,11 @@ interface HeaderProps {
     children?: React.ReactNode | string;
     [prop: string]: unknown;
 }
+
+export const EpicTrackPageGridContainer = styled(Grid)(() => ({
+    padding: '6em 1em 1em 1em',
+}));
+
 export const EpicTrackH1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     return (
         <Typography
@@ -84,3 +85,26 @@ export const EpicTrackH4 = ({ bold, color, children, sx, ...rest }: HeaderProps)
         </Typography>
     );
 };
+
+export const EpicTrackH5 = ({ bold, color, children, sx, ...rest }: HeaderProps) => {
+    return (
+        <Typography
+            color={color}
+            sx={{
+                ...sx,
+                fontSize: '1rem',
+                fontWeight: bold ? 'bold' : MET_Header_Font_Weight,
+                fontFamily: MET_Header_Font_Family,
+            }}
+            variant="h4"
+            {...rest}
+        >
+            {children}
+        </Typography>
+    );
+};
+
+export const TrackLabel = styled(FormLabel)(()=>({
+  fontSize: '16px',
+  fontWeight: 'bold'
+}));

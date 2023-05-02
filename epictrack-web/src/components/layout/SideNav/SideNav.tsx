@@ -8,7 +8,7 @@ import { Routes } from './SideNavElements';
 import { Palette } from '../../../styles/theme';
 import { SideNavProps } from './types';
 import { When, Unless } from 'react-if';
-import { EpicTrackH4 } from '../../common';
+import { EpicTrackH4, EpicTrackH5 } from '../../shared';
 
 const DrawerBox = () => {
     const navigate = useNavigate();
@@ -43,6 +43,7 @@ const DrawerBox = () => {
                     <>
                         <ListItem key={route.name}>
                             <ListItemButton
+                                key={`btn-${route.name}`}
                                 data-testid={`SideNav/${route.name}-button`}
                                 onClick={() => handleClick(route)}
                                 sx={{
@@ -52,13 +53,15 @@ const DrawerBox = () => {
                                 }}
                             >
                                 <When condition={currentBaseRoute === route.base}>
-                                    <EpicTrackH4>{route.name}</EpicTrackH4>
+                                    <EpicTrackH4 color={Palette.secondary.main}>
+                                        {route.name}
+                                    </EpicTrackH4>
                                 </When>
                                 <Unless condition={currentBaseRoute === route.base}>
                                     <EpicTrackH4 color={'white'}>{route.name}</EpicTrackH4>
                                 </Unless>
                                 <When condition={route.routes && route.routes?.length > 0} >
-                                    {open ? <ExpandLess/> : <ExpandMore/>}
+                                    {open ? <ExpandLess /> : <ExpandMore />}
                                 </When>
                             </ListItemButton>
                         </ListItem>
@@ -67,12 +70,20 @@ const DrawerBox = () => {
                                 <List disablePadding>
                                     {route.routes?.map(subRoute => (
                                         <ListItem key={subRoute.name}>
-                                            <ListItemButton onClick={() => handleClick(subRoute)}>
+                                            <ListItemButton
+                                                key={`btn=${subRoute.name}`}
+                                                onClick={() => handleClick(subRoute)}>
                                                 <When condition={location.pathname === subRoute.base}>
-                                                    <EpicTrackH4>{subRoute.name}</EpicTrackH4>
+                                                    <EpicTrackH5 color={Palette.secondary.main} sx={{
+                                                        ml: '0.5rem'
+                                                    }}>
+                                                        {subRoute.name}
+                                                    </EpicTrackH5>
                                                 </When>
                                                 <Unless condition={location.pathname === subRoute.base}>
-                                                    <EpicTrackH4 color={'white'}>{subRoute.name}</EpicTrackH4>
+                                                    <EpicTrackH5 color={'white'} sx={{
+                                                        ml: '0.5rem'
+                                                    }}>{subRoute.name}</EpicTrackH5>
                                                 </Unless>
                                             </ListItemButton>
                                         </ListItem>

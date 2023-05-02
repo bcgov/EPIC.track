@@ -2,16 +2,15 @@ import React, { useState } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
-import Button from '@mui/material/Button';
-import { useMediaQuery, Theme, IconButton } from '@mui/material';
+import { useMediaQuery, Theme, IconButton, Button } from '@mui/material';
 import { When } from 'react-if';
 import MenuIcon from '@mui/icons-material/Menu';
 import CssBaseline from '@mui/material/CssBaseline';
-import { Palette } from '../../../styles/theme'
 import EnvironmentBanner from './EnvironmentBanner';
 import SideNav from '../SideNav/SideNav';
 import {ReactComponent as BCLogo} from '../../../assets/images/bcgovlogo.svg'
-import { EpicTrackH1 } from '../../common';
+import { EpicTrackH1 } from '../../shared';
+import UserService from '../../../services/userService';
 
 const Header = ({ drawerWidth = 280 }) => {
     const [open, setOpen] = React.useState(false);
@@ -22,8 +21,8 @@ const Header = ({ drawerWidth = 280 }) => {
                 position="fixed"
                 sx={{
                     zIndex: (theme: Theme) => (isMediumScreen ? theme.zIndex.drawer + 1 : theme.zIndex.drawer),
-                    color: Palette.text.primary,
-                    bgcolor: Palette.primary.main
+                    //color: Palette.text.primary,
+                    //bgcolor: Palette.primary.main
                 }}
                 data-testid="appbar-header"
             >
@@ -55,6 +54,9 @@ const Header = ({ drawerWidth = 280 }) => {
                     ) : (
                         <EpicTrackH1 sx={{ flexGrow: 1 }}>EPIC Track</EpicTrackH1>
                     )}
+                    <Button data-testid="button-header" color="inherit" onClick={() => UserService.doLogout()}>
+                        Logout
+                    </Button>
                 </Toolbar>
                 <EnvironmentBanner />
             </AppBar>

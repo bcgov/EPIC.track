@@ -1,8 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
+import userSlice from './services/userService/userSlice';
 import { setupListeners } from '@reduxjs/toolkit/query';
 
 export const store = configureStore({
-    reducer: {}
+  reducer: {
+    user: userSlice,
+  },
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
