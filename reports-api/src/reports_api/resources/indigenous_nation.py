@@ -45,3 +45,59 @@ class ValidateIndigenousNation(Resource):
         name = args['name']
         instance_id = args['id']
         return IndigenousNationService.check_existence(name=name, instance_id=instance_id), HTTPStatus.OK
+
+
+@cors_preflight('GET, DELETE, PUT')
+@API.route('/<int:indigenous_nation_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+class IndigenousNation(Resource):
+    """Endpoint resource to manage an indigenous nation."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def get(indigenous_nation_id):
+        """Return details of an indigenous nation."""
+        return IndigenousNationService.find(indigenous_nation_id), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def put(indigenous_nation_id):
+        """Update and return an indigenous nation."""
+        indigenous_nation = IndigenousNationService.update_indigenous_nation(indigenous_nation_id, API.payload)
+        return indigenous_nation.as_dict(), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def delete(indigenous_nation_id):
+        """Delete an indigenous nation"""
+        IndigenousNationService.delete_indigenous_nation(indigenous_nation_id)
+        return {"message": "Indigenous nation successfully deleted"}, HTTPStatus.OK
+
+
+@cors_preflight("GET,POST")
+@API.route("", methods=["GET", "POST", "OPTIONS"])
+class IndigenousNations(Resource):
+    """Endpoint resource to return indigenous nations."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    @API.expect(parser)
+    def get():
+        """Return all indigenous nations."""
+        return IndigenousNationService.find_all_indigenous_nations(), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def post():
+        """Create new staff"""
+        indigenous_nation = IndigenousNationService.create_indigenous_nation(API.payload)
+        return indigenous_nation.as_dict(), HTTPStatus.CREATED

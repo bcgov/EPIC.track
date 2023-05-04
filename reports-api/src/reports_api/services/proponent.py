@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage Proponent."""
 from sqlalchemy import func
+from flask import jsonify
 from reports_api.models import Proponent
 
 
@@ -30,3 +31,37 @@ class ProponentService:  # pylint: disable=too-few-public-methods
         if query.count() > 0:
             return {"exists": True}
         return {"exists": False}
+
+    @classmethod
+    def find_all_proponents(cls):
+        """Find all active proponent"""
+        proponents = Proponent.find_all(default_filters=False)
+        return jsonify({"proponents": [item.as_dict() for item in proponents]})
+
+    @classmethod
+    def find(cls, proponent_id):
+        """Find by indigenous nation id."""
+        return {"proponent": Proponent.find_by_id(proponent_id).as_dict()}
+
+    @classmethod
+    def create_proponent(cls, payload: dict):
+        """Create a new proponent."""
+        proponent = Proponent(**payload)
+        proponent.save()
+        return proponent
+
+    @classmethod
+    def update_proponent(cls, proponent_id: int, payload: dict):
+        """Update existing proponent."""
+        proponent = Proponent.find_by_id(proponent_id)
+        del payload["relationship_holder"]
+        proponent = proponent.update(payload)
+        return proponent
+
+    @classmethod
+    def delete_proponent(cls, proponent_id: int):
+        """Delete proponent by id."""
+        proponent = Proponent.find_by_id(proponent_id)
+        proponent.is_deleted = True
+        proponent.save()
+        return True
