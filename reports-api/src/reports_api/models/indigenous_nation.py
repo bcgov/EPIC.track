@@ -38,7 +38,8 @@ class IndigenousNation(db.Model, CodeTable):
             'id': self.id,
             'name': self.name,
             'is_active': self.is_active,
-            'responsible_epd_id': self.responsible_epd_id
+            'responsible_epd_id': self.responsible_epd_id,
+            "responsible_epd": self.responsible_epd.as_dict() if self.responsible_epd else None,
         }
 
     @classmethod

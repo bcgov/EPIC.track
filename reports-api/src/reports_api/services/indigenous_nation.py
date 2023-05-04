@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage IndigenousNation."""
 from sqlalchemy import func
+from flask import jsonify
 from reports_api.models import IndigenousNation
 
 
@@ -30,3 +31,37 @@ class IndigenousNationService:  # pylint: disable=too-few-public-methods
         if query.count() > 0:
             return {"exists": True}
         return {"exists": False}
+
+    @classmethod
+    def find_all_indigenous_nations(cls):
+        """Find all active indigenous nations"""
+        indigenous_nations = IndigenousNation.find_all(default_filters=False)
+        return jsonify({"indigenous_nations": [item.as_dict() for item in indigenous_nations]})
+
+    @classmethod
+    def find(cls, indigenous_nation_id):
+        """Find by indigenous nation id."""
+        return {"indigenous_nation": IndigenousNation.find_by_id(indigenous_nation_id).as_dict()}
+
+    @classmethod
+    def create_indigenous_nation(cls, payload: dict):
+        """Create a new indigenous_nation."""
+        indigenous_nation = IndigenousNation(**payload)
+        indigenous_nation.save()
+        return indigenous_nation
+
+    @classmethod
+    def update_indigenous_nation(cls, indigenous_nation_id: int, payload: dict):
+        """Update existing indigenous_nation."""
+        indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
+        del payload["responsible_epd"]
+        indigenous_nation = indigenous_nation.update(payload)
+        return indigenous_nation
+
+    @classmethod
+    def delete_indigenous_nation(cls, indigenous_nation_id: int):
+        """Delete indigenous_nation by id."""
+        indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
+        indigenous_nation.is_deleted = True
+        indigenous_nation.save()
+        return True

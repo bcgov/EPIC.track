@@ -11,6 +11,12 @@ const Endpoints = {
   },
   Codes: {
     GET_CODES: 'codes'
+  },
+  IndigenousNations: {
+    GET_INDIGENOUS_NATIONS: 'indigenous-nations'
+  },
+  Proponents: {
+    GET_PROPONENTS: 'proponents'
   }
 }
 export default Endpoints;

@@ -6,6 +6,8 @@ import ReportSelector from '../components/reportSelector/reportSelector';
 import AnticipatedEAOSchedule from '../components/reports/eaReferral/AnticipatedEAOSchedule';
 import ResourceForecast from '../components/reports/resourceForecast/ResourceForecast';
 import ThirtySixtyNinety from '../components/reports/30-60-90Report/ThirtySixtyNinety';
+import IndigenousNationList from '../components/indigenousNation/IndigenousNationList';
+import ProponentList from '../components/proponent/ProponentList';
 
 const AuthenticatedRoutes = () => {
     return (
@@ -22,6 +24,8 @@ const AuthenticatedRoutes = () => {
             <Route path="/surveys/:surveyId/comments" element={<CommentReviewListing />} />
             <Route path="/surveys/:surveyId/comments/all" element={<CommentTextListing />} />
             <Route path="/surveys/:surveyId/submissions/:submissionId/review" element={<CommentReview />} /> */}
+            <Route path="/data-management/indigenous-nations" element={<IndigenousNationList />} />
+            <Route path="/data-management/proponents" element={<ProponentList />} />
             <Route path="*" element={<NotFound />} />
         </Routes>
     );

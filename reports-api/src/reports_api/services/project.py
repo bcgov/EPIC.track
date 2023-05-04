@@ -53,7 +53,8 @@ class ProjectService:
     def delete_project(cls, project_id: int):
         """Delete project by id."""
         project = Project.find_by_id(project_id)
-        project.delete()
+        project.is_deleted = True
+        project.save()
         return True
 
     @classmethod

@@ -45,3 +45,59 @@ class ValidateProponent(Resource):
         name = args['name']
         instance_id = args['id']
         return ProponentService.check_existence(name=name, instance_id=instance_id), HTTPStatus.OK
+
+
+@cors_preflight('GET, DELETE, PUT')
+@API.route('/<int:proponent_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+class IndigenousNation(Resource):
+    """Endpoint resource to manage a proponent."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def get(proponent_id):
+        """Return details of a proponent."""
+        return ProponentService.find(proponent_id), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def put(proponent_id):
+        """Update and return a proponent."""
+        proponent = ProponentService.update_proponent(proponent_id, API.payload)
+        return proponent.as_dict(), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def delete(proponent_id):
+        """Delete a proponent"""
+        ProponentService.delete_proponent(proponent_id)
+        return {"message": "proponent successfully deleted"}, HTTPStatus.OK
+
+
+@cors_preflight("GET,POST")
+@API.route("", methods=["GET", "POST", "OPTIONS"])
+class IndigenousNations(Resource):
+    """Endpoint resource to return proponents."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    @API.expect(parser)
+    def get():
+        """Return all proponents."""
+        return ProponentService.find_all_proponents(), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def post():
+        """Create new staff"""
+        proponent = ProponentService.create_proponent(API.payload)
+        return proponent.as_dict(), HTTPStatus.CREATED

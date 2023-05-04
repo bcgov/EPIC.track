@@ -40,4 +40,6 @@ class Proponent(db.Model, CodeTable):
         """Return JSON Representation."""
         result = CodeTable.as_dict(self)
         result['is_active'] = self.is_active
+        result['relationship_holder_id'] = self.relationship_holder_id
+        result['relationship_holder'] = self.relationship_holder.as_dict() if self.relationship_holder else None
         return result

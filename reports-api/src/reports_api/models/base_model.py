@@ -56,9 +56,14 @@ class BaseModel(db.Model):
         return cls.query.get(identifier)
 
     @classmethod
-    def find_all(cls):
+    def find_all(cls, default_filters=True):
         """Return all entries."""
-        rows = cls.query.all()  # pylint: disable=no-member
+        query = {}
+        if default_filters and hasattr(cls, 'is_active'):
+            query['is_active'] = True
+        if hasattr(cls, 'is_deleted'):
+            query['is_deleted'] = False
+        rows = cls.query.filter_by(**query).all()  # pylint: disable=no-member
         return rows
 
     def update(self, payload: dict, commit=True):
