@@ -48,14 +48,17 @@ class CodeTable():  # pylint: disable=too-few-public-methods
         return code_table
 
     @classmethod
-    def find_all(cls):
+    def find_all(cls, default_filters=True):
         """Return all of the code master details."""
         query = {}
-        if hasattr(cls, 'is_active'):
+        if default_filters and hasattr(cls, 'is_active'):
             query['is_active'] = True
         if hasattr(cls, 'is_deleted'):
             query['is_deleted'] = False
-        codes = cls.query.filter_by(**query).order_by(cls.sort_order).all()  # pylint: disable=no-member
+        if hasattr(cls, 'sort_order'):
+            codes = cls.query.filter_by(**query).order_by(cls.sort_order).all()  # pylint: disable=no-member
+        else:
+            codes = cls.query.filter_by(**query).order_by(cls.id).all()  # pylint: disable=no-member
         return codes
 
     @staticmethod
@@ -83,7 +86,8 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     def update(self, payload: dict, commit=True):
         """Update and commit."""
         for key, value in payload.items():
-            setattr(self, key, value)
+            if hasattr(self, key):
+                setattr(self, key, value)
         if commit:
             self.commit()
         return self
