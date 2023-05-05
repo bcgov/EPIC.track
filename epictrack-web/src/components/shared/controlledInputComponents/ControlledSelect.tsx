@@ -1,12 +1,16 @@
-import React, { FC } from 'react';
-import { TextField, TextFieldProps } from '@mui/material';
-import { Controller, useFormContext } from 'react-hook-form';
+import React, { FC } from "react";
+import { TextField, TextFieldProps } from "@mui/material";
+import { Controller, useFormContext } from "react-hook-form";
 
 type IFormInputProps = {
   name: string;
 } & TextFieldProps;
 
-const ControlledSelect: FC<IFormInputProps> = ({ name, children, ...otherProps }) => {
+const ControlledSelect: FC<IFormInputProps> = ({
+  name,
+  children,
+  ...otherProps
+}) => {
   const {
     control,
     formState: { errors, defaultValues },
@@ -16,14 +20,14 @@ const ControlledSelect: FC<IFormInputProps> = ({ name, children, ...otherProps }
     <Controller
       control={control}
       name={name}
-      defaultValue={defaultValues?.[name] || ''}
+      defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
         <TextField
           select
           {...otherProps}
           {...field}
           error={!!errors[name]}
-          helperText={String(errors[name]?.message || '')}
+          helperText={String(errors[name]?.message || "")}
         >
           {children}
         </TextField>

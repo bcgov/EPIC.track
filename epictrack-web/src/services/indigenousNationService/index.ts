@@ -1,33 +1,52 @@
-import Endpoints from '../../constants/api-endpoint';
-import http from '../../apiManager/http-request-handler'
-import { AppConfig } from '../../config';
-import { IndigenousNation } from '../../models/indigenousNation';
+import Endpoints from "../../constants/api-endpoint";
+import http from "../../apiManager/http-request-handler";
+import { AppConfig } from "../../config";
+import { IndigenousNation } from "../../models/indigenousNation";
 const getIndigenousNations = async (apiUrl?: string) => {
-  return await http.GetRequest((AppConfig.apiUrl || apiUrl) + Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS)
-}
+  return await http.GetRequest(
+    (AppConfig.apiUrl || apiUrl) +
+      Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS
+  );
+};
 
 const createIndigenousNation = async (indigenousNation: IndigenousNation) => {
-  return await http.PostRequest(AppConfig.apiUrl+Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS,JSON.stringify(indigenousNation));
-}
+  return await http.PostRequest(
+    AppConfig.apiUrl + Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS,
+    JSON.stringify(indigenousNation)
+  );
+};
 
 const updateIndigenousNation = async (indigenousNation: IndigenousNation) => {
-  return await http.PutRequest(AppConfig.apiUrl+Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS+`/${indigenousNation.id}`, JSON.stringify(indigenousNation));
-}
+  return await http.PutRequest(
+    AppConfig.apiUrl +
+      Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS +
+      `/${indigenousNation.id}`,
+    JSON.stringify(indigenousNation)
+  );
+};
 
 const deleteIndigenousNation = async (id: any) => {
-  return await http.DeleteRequest(AppConfig.apiUrl + Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS + `/${id}`)
-}
+  return await http.DeleteRequest(
+    AppConfig.apiUrl +
+      Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS +
+      `/${id}`
+  );
+};
 
 const getIndigenousNation = async (id: number) => {
-  return await http.GetRequest(AppConfig.apiUrl+Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS+`/${id}`);
-}
+  return await http.GetRequest(
+    AppConfig.apiUrl +
+      Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS +
+      `/${id}`
+  );
+};
 
 const IndigenousNationService = {
   getIndigenousNations,
   createIndigenousNation,
   updateIndigenousNation,
   deleteIndigenousNation,
-  getIndigenousNation
-}
+  getIndigenousNation,
+};
 
 export default IndigenousNationService;

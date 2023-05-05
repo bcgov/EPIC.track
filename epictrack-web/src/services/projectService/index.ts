@@ -1,6 +1,6 @@
-import Endpoints from '../../constants/api-endpoint';
-import http from '../../apiManager/http-request-handler'
-import { AppConfig } from '../../config';
+import Endpoints from "../../constants/api-endpoint";
+import http from "../../apiManager/http-request-handler"
+import { AppConfig } from "../../config";
 const getProjects = async (apiUrl?: string) => {
   return await http.GetRequest((AppConfig.apiUrl || apiUrl) + Endpoints.Projects.GET_PROJECTS)
 }

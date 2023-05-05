@@ -10,7 +10,7 @@ const Endpoints = {
     GET_PROJECTS: 'projects'
   },
   IndegenousNations: {
-	  GET_INDEGENOUS_NATION: 'indigenous_nations'
+    GET_INDEGENOUS_NATION: 'indigenous_nations'
   },
   Codes: {
     GET_CODES: 'codes'

@@ -1,11 +1,11 @@
-import { AppConfig } from '../../config';
-import Keycloak from 'keycloak-js';
-import { Action, AnyAction, Dispatch } from 'redux';
-import { userToken, userAuthentication } from './userSlice';
+import { AppConfig } from "../../config";
+import Keycloak from "keycloak-js";
+import { Action, AnyAction, Dispatch } from "redux";
+import { userToken, userAuthentication } from "./userSlice";
 const KeycloakData: Keycloak = new Keycloak({
   clientId: AppConfig.keycloak.clientId,
   realm: AppConfig.keycloak.realm,
-  url: AppConfig.keycloak.url
+  url: AppConfig.keycloak.url,
 });
 const doLogout = KeycloakData.logout;
 let refreshInterval: NodeJS.Timer;
@@ -35,17 +35,17 @@ const refreshToken = (dispatch: Dispatch<Action>) => {
   }, 60000);
 };
 /**
-* Initializes Keycloak instance.
-*/
+ *  Initializes Keycloak instance.
+ */
 const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
   try {
     const authenticated = await KeycloakData.init({
-      onLoad: 'login-required',
-      pkceMethod: 'S256',
+      onLoad: "login-required",
+      pkceMethod: "S256",
       checkLoginIframe: false,
-    })
+    });
     if (!authenticated) {
-      console.warn('not authenticated!');
+      console.warn("not authenticated!");
       dispatch(userAuthentication(authenticated));
       return;
     }
@@ -59,7 +59,8 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
   }
 };
 
-const getToken = () => KeycloakData.token || window.localStorage.getItem('authToken');
+const getToken = () =>
+  KeycloakData.token || window.localStorage.getItem("authToken");
 const doLogin = () => KeycloakData.login;
 
 const UserService = {
@@ -67,10 +68,7 @@ const UserService = {
   initKeycloak,
   getToken,
   doLogin,
-  doLogout
+  doLogout,
 };
 
-
 export default UserService;
-
-

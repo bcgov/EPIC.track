@@ -1,4 +1,2 @@
-import dateUtils from './dateUtils';
-export {
-  dateUtils
-}
+import dateUtils from "./dateUtils";
+export { dateUtils };
