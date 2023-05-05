@@ -1,12 +1,9 @@
 import React from "react";
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon
-} from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { RESULT_STATUS } from '../../constants/application-constant';
+import { RESULT_STATUS } from "../../constants/application-constant";
 import IndigenousNationService from "../../services/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
@@ -18,74 +15,83 @@ import StaffService from "../../services/staffService";
 
 export default function IndigenousNationList() {
   const [resultStatus, setResultStatus] = useState<string>();
-  const [indigenousNations, setIndigenousNations] = useState<IndigenousNation[]>([])
-  const [indigenousNationID, setIndigenousNationID] = useState<number>()
+  const [indigenousNations, setIndigenousNations] = useState<
+    IndigenousNation[]
+  >([]);
+  const [indigenousNationID, setIndigenousNationID] = useState<number>();
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState<boolean>(false);
-  const titleSuffix = 'Indigeneous Nation Details';
+  const [showDeleteDialog, setShowDeleteDialog] =
+    React.useState<boolean>(false);
+  const titleSuffix = "Indigeneous Nation Details";
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
-
 
   const columns = useMemo<MRT_ColumnDef<IndigenousNation>[]>(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: "name",
+        header: "Name",
       },
       {
-        accessorKey: 'responsible_epd.full_name',
-        header: 'Responsible EPD',
-        filterSelectOptions: staffs.map(s => s.full_name)
+        accessorKey: "responsible_epd.full_name",
+        header: "Responsible EPD",
+        filterSelectOptions: staffs.map((s) => s.full_name),
       },
       {
-        accessorKey: 'is_active',
-        header: 'Active',
-        filterVariant: 'checkbox',
+        accessorKey: "is_active",
+        header: "Active",
+        filterVariant: "checkbox",
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && <Chip label='Active' color='primary' />}
-            {!cell.getValue<boolean>() && <Chip label='Inactive' color='error' />}
+            {cell.getValue<boolean>() && (
+              <Chip label="Active" color="primary" />
+            )}
+            {!cell.getValue<boolean>() && (
+              <Chip label="Inactive" color="error" />
+            )}
           </span>
         ),
-      }
-    ], [staffs]
+      },
+    ],
+    [staffs]
   );
 
   const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == 'backdropClick')
-      return;
+    if (reason && reason == "backdropClick") return;
     setIndigenousNationID(undefined);
     setShowDialog(false);
-  }
+  };
   const onEdit = (id: number) => {
     setIndigenousNationID(id);
     setShowDialog(true);
-  }
+  };
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
     setIndigenousNationID(id);
-  }
+  };
 
   const getStaffs = async () => {
     const staffsResult = await StaffService.getStaffs();
     if (staffsResult.status === 200) {
-      setStaffs((staffsResult.data as never)['staffs']);
+      setStaffs((staffsResult.data as never)["staffs"]);
     }
-  }
+  };
   useEffect(() => {
     getStaffs();
   }, []);
 
   const getIndigenousNations = useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING)
+    setResultStatus(RESULT_STATUS.LOADING);
     try {
-      const indigenousNationsResult = await IndigenousNationService.getIndigenousNations();
+      const indigenousNationsResult =
+        await IndigenousNationService.getIndigenousNations();
       if (indigenousNationsResult.status === 200) {
-        setIndigenousNations((indigenousNationsResult.data as never)['indigenous_nations']);
+        setIndigenousNations(
+          (indigenousNationsResult.data as never)["indigenous_nations"]
+        );
       }
     } catch (error) {
-      console.error('Staff List: ', error);
+      console.error("Staff List: ", error);
     } finally {
       setResultStatus(RESULT_STATUS.LOADED);
     }
@@ -98,7 +104,7 @@ export default function IndigenousNationList() {
       setShowDeleteDialog(false);
       getIndigenousNations();
     }
-  }
+  };
 
   useEffect(() => {
     getIndigenousNations();
@@ -120,7 +126,7 @@ export default function IndigenousNationList() {
             data={indigenousNations}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
-              showGlobalFilter: true
+              showGlobalFilter: true,
             }}
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
@@ -134,11 +140,13 @@ export default function IndigenousNationList() {
               </Box>
             )}
             renderTopToolbarCustomActions={() => (
-              <Box sx={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'right'
-              }}>
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "right",
+                }}
+              >
                 <Button
                   onClick={() => {
                     setShowDialog(true);
@@ -154,11 +162,11 @@ export default function IndigenousNationList() {
       </EpicTrackPageGridContainer>
       <TrackDialog
         open={showDialog}
-        dialogTitle={(indigenousNationID ? 'Update ' : 'Create ') + titleSuffix}
+        dialogTitle={(indigenousNationID ? "Update " : "Create ") + titleSuffix}
         onClose={(event, reason) => onDialogClose(event, reason)}
         disableEscapeKeyDown
         fullWidth
-        maxWidth='md'
+        maxWidth="md"
       >
         <IndigenousNationForm
           onCancel={onDialogClose}
@@ -168,10 +176,10 @@ export default function IndigenousNationList() {
       </TrackDialog>
       <TrackDialog
         open={showDeleteDialog}
-        dialogTitle='Delete'
-        dialogContentText='Are you sure you want to delete?'
-        okButtonText='Yes'
-        cancelButtonText='No'
+        dialogTitle="Delete"
+        dialogContentText="Are you sure you want to delete?"
+        okButtonText="Yes"
+        cancelButtonText="No"
         isActionsRequired
         onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
         onOk={() => deleteIndigenousNation(indigenousNationID)}

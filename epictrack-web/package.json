@@ -36,12 +36,12 @@
     "yup": "^1.1.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "react-scripts start GENERATE_SOURCEMAP=false",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint '*/**/*.{ts,tsx}'",
-    "lintfix": "eslint '*/**/*.{ts,tsx}' --fix"
+    "lint": "eslint \"src/**/*.{js,jsx,tsx}\"",
+    "lint:fix": "eslint \"src/**/*.{js,jsx,tsx}\" --fix"
   },
   "eslintConfig": {
     "extends": [
@@ -66,6 +66,7 @@
     "@typescript-eslint/parser": "^5.59.2",
     "eslint": "^8.39.0",
     "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-prettier": "^4.2.1"
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.8"
   }
 }

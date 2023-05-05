@@ -1,17 +1,17 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { UserState } from './type';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { UserState } from "./type";
 
 const initialState: UserState = {
-  bearerToken: '',
+  bearerToken: "",
   authentication: {
     authenticated: false,
     loading: true,
   },
-  isAuthorized: false
-}
+  isAuthorized: false,
+};
 
 export const userSlice = createSlice({
-  name: 'user',
+  name: "user",
   initialState: initialState,
   reducers: {
     userToken: (state, action: PayloadAction<string | undefined>) => {
@@ -26,9 +26,10 @@ export const userSlice = createSlice({
         loading: false,
       };
     },
-  }
+  },
 });
 // Action creators are generated for each case reducer function
-export const { userToken, userAuthorization, userAuthentication } = userSlice.actions;
+export const { userToken, userAuthorization, userAuthentication } =
+  userSlice.actions;
 
 export default userSlice.reducer;

@@ -1,12 +1,9 @@
-import {
-  Button, Box, IconButton, Tooltip,
-} from '@mui/material';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { RESULT_STATUS } from '../../../constants/application-constant';
-import MaterialReactTable from 'material-react-table';
-import { Delete, Edit } from '@mui/icons-material';
-import ProjectService from '../../../services/projectService';
-
+import { Button, Box, IconButton, Tooltip } from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { RESULT_STATUS } from "../../../constants/application-constant";
+import MaterialReactTable from "material-react-table";
+import { Delete, Edit } from "@mui/icons-material";
+import ProjectService from "../../../services/projectService";
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<any[]>([]);
@@ -17,101 +14,105 @@ export default function ProjectList() {
     if (projects && projects.length > 0) {
       columns = projects[0].months.map((rfMonth: any, index: number) => {
         return {
-          header: rfMonth['label'],
+          header: rfMonth["label"],
           accessorFn: (row: any) => `${row.months[index].phase}`,
           enableHiding: false,
           enableColumnFilter: false,
           Cell: ({ row }: any) => (
-            <Box sx={{
-              bgcolor: row.original.months[index].color,
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignContent: 'center',
-              justifyContent: 'center',
-              padding: '1rem'
-            }
-            }>
+            <Box
+              sx={{
+                bgcolor: row.original.months[index].color,
+                display: "flex",
+                flexWrap: "wrap",
+                alignContent: "center",
+                justifyContent: "center",
+                padding: "1rem",
+              }}
+            >
               {row.original.months[index].phase}
             </Box>
-          )
-        }
-      })
+          ),
+        };
+      });
     }
     return columns;
   }, [projects]);
 
-  const filterFn = useCallback((filterField: string) => projects
-    .filter(p => p[filterField])
-    .map(p => p[filterField])
-    .filter((ele, index, arr) => arr.findIndex(t => t === ele) === index), [projects])
+  const filterFn = useCallback(
+    (filterField: string) =>
+      projects
+        .filter((p) => p[filterField])
+        .map((p) => p[filterField])
+        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
+    [projects]
+  );
 
-  const name = filterFn('name');
-  const location = filterFn('location');
-  const is_project_closed = filterFn('is_project_closed');
-  const capital_investment = filterFn('capital_investment');
-  const region_env = filterFn(' region_env');
-  const region_flnro = filterFn('region_flnro');
-  const id = filterFn('id');
+  const name = filterFn("name");
+  const location = filterFn("location");
+  const is_project_closed = filterFn("is_project_closed");
+  const capital_investment = filterFn("capital_investment");
+  const region_env = filterFn(" region_env");
+  const region_flnro = filterFn("region_flnro");
+  const id = filterFn("id");
 
   const columns = useMemo(
     () => [
       {
-        accessorKey: 'id',
-        header: 'Project ID',
+        accessorKey: "id",
+        header: "Project ID",
         enableHiding: false,
-        filterSelectOptions: id
+        filterSelectOptions: id,
       },
       {
-        accessorKey: 'name',
-        header: 'Project Name',
+        accessorKey: "name",
+        header: "Project Name",
         enableHiding: false,
-        filterSelectOptions: name
+        filterSelectOptions: name,
       },
       {
-        accessorKey: 'location',
-        header: 'Location',
-        filterSelectOptions: location
+        accessorKey: "location",
+        header: "Location",
+        filterSelectOptions: location,
       },
       {
-        accessorKey: 'capital_investment',
-        header: 'Capital Investment',
-        filterSelectOptions: capital_investment
+        accessorKey: "capital_investment",
+        header: "Capital Investment",
+        filterSelectOptions: capital_investment,
       },
       {
-        accessorKey: 'region_env.name',
-        header: 'ENV Region',
-        filterSelectOptions: region_env
+        accessorKey: "region_env.name",
+        header: "ENV Region",
+        filterSelectOptions: region_env,
       },
       {
-        accessorKey: 'region_flnro.name',
-        header: 'FLNR Region',
-        filterSelectOptions: region_flnro
+        accessorKey: "region_flnro.name",
+        header: "FLNR Region",
+        filterSelectOptions: region_flnro,
       },
       {
-        accessorKey: 'is_project_closed',
-        header: 'Is Project Closed',
-        filterSelectOptions: is_project_closed
-      }
-    ], [setMonthColumns]
+        accessorKey: "is_project_closed",
+        header: "Is Project Closed",
+        filterSelectOptions: is_project_closed,
+      },
+    ],
+    [setMonthColumns]
   );
-
 
   const getProject = async () => {
     const projectResult = await ProjectService.getProjects();
     setResultStatus(RESULT_STATUS.LOADED);
     if (projectResult.status === 200) {
-      setProjects((projectResult.data as never)['projects']);
-
+      setProjects((projectResult.data as never)["projects"]);
     }
-  }
+  };
 
-  const handleDeleteRow = async (row: { index: any; }) => {
+  const handleDeleteRow = async (row: { index: any }) => {
     const projectResult = await ProjectService.deleteProjects(row.index);
     setResultStatus(RESULT_STATUS.LOADED);
     if (projectResult.status === 200) {
-      setResultStatus('Delete Successful');
+      setResultStatus("Delete Successful");
     }
-  }
+  };
 
   useEffect(() => {
     getProject();
@@ -119,27 +120,28 @@ export default function ProjectList() {
 
   return (
     <>
-      <Button href="/project">
-        Add Project
-      </Button>
+      <Button href="/project">Add Project</Button>
       <MaterialReactTable
         initialState={{
-          density: 'compact'
+          density: "compact",
         }}
         columns={columns}
         enableDensityToggle={false}
         enableStickyHeader={true}
         state={{
-          isLoading: resultStatus === RESULT_STATUS.LOADING
+          isLoading: resultStatus === RESULT_STATUS.LOADING,
         }}
         data={projects}
         editingMode="modal" //default
         enableColumnOrdering
         enableEditing
         renderRowActions={({ row, table }) => (
-          <Box sx={{ display: 'flex', gap: '1rem' }}>
+          <Box sx={{ display: "flex", gap: "1rem" }}>
             <Tooltip arrow placement="left" title="Edit">
-              <IconButton onClick={() => table.setEditingRow(row)} color="primary">
+              <IconButton
+                onClick={() => table.setEditingRow(row)}
+                color="primary"
+              >
                 <Edit />
               </IconButton>
             </Tooltip>
@@ -149,7 +151,8 @@ export default function ProjectList() {
               </IconButton>
             </Tooltip>
           </Box>
-        )} />
+        )}
+      />
     </>
   );
 }
