@@ -16,7 +16,9 @@ from http import HTTPStatus
 
 from flask import current_app
 from flask_restx import Namespace, Resource, cors, reqparse
+from marshmallow import ValidationError
 
+from reports_api.schemas import StaffSchema
 from reports_api.services import StaffService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
@@ -74,17 +76,27 @@ class Staffs(Resource):
         return StaffService.find_all_non_deleted_staff(), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def post():
         """Create new staff"""
-        staff = StaffService.create_staff(API.payload)
-        return staff.as_dict(), HTTPStatus.CREATED
+        staff_schema = StaffSchema()
+        try:
+            request_json = staff_schema.load(API.payload)
+        except ValidationError as err:
+            return err.messages, HTTPStatus.BAD_REQUEST
+        exists = StaffService.check_existence(
+            request_json.get("first_name"), request_json.get("last_name")
+        )
+        if exists:
+            return "A staff with given name already exists.", HTTPStatus.CONFLICT
+        staff = StaffService.create_staff(request_json)
+        return staff_schema.dump(staff), HTTPStatus.CREATED
 
 
 @cors_preflight("GET, DELETE, PUT")
-@API.route("/<int:staff_id>", methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+@API.route("/<int:staff_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
 class Staff(Resource):
     """Endpoint resource to return staff details."""
 
@@ -94,19 +106,32 @@ class Staff(Resource):
     @profiletime
     def get(staff_id):
         """Return a staff detail based on id."""
-        return StaffService.find_by_id(staff_id), HTTPStatus.OK
+        staff = StaffService.find_by_id(staff_id)
+        if staff:
+            return staff, HTTPStatus.OK
+        return f"Staff with id '{staff_id}' not found", HTTPStatus.NOT_FOUND
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def put(staff_id):
         """Update and return a staff."""
-        staff = StaffService.update_staff(staff_id, API.payload)
-        return staff.as_dict(), HTTPStatus.OK
+        staff_schema = StaffSchema()
+        try:
+            request_json = staff_schema.load(API.payload)
+        except ValidationError as err:
+            return err.messages, HTTPStatus.BAD_REQUEST
+        exists = StaffService.check_existence(
+            request_json.get("first_name"), request_json.get("last_name"), staff_id
+        )
+        if exists:
+            return "A staff with given name already exists.", HTTPStatus.CONFLICT
+        staff = StaffService.update_staff(staff_id, request_json)
+        return staff_schema.dump(staff), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def delete(staff_id):
@@ -145,9 +170,10 @@ class ValidateStaff(Resource):
         first_name = args["first_name"]
         last_name = args["last_name"]
         instance_id = args["id"]
+        exists = StaffService.check_existence(
+            first_name=first_name, last_name=last_name, instance_id=instance_id
+        )
         return (
-            StaffService.check_existence(
-                first_name=first_name, last_name=last_name, instance_id=instance_id
-            ),
+            {"exists": exists},
             HTTPStatus.OK,
         )

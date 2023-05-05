@@ -15,62 +15,100 @@
 from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors, reqparse
+from marshmallow import ValidationError
 
+from reports_api.schemas import IndigenousNationSchema
 from reports_api.services import IndigenousNationService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace('indigenous_nations', description='Indigenous Nations')
+API = Namespace("indigenous_nations", description="Indigenous Nations")
 
 parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument('name', type=str, required=True,
-                    help='Name of indigenous nation to be checked.', location='args', trim=True)
-parser.add_argument('id', type=int, help='ID of the indigenous nation in case of updates.', location='args')
+parser.add_argument(
+    "name",
+    type=str,
+    required=True,
+    help="Name of indigenous nation to be checked.",
+    location="args",
+    trim=True,
+)
+parser.add_argument(
+    "id",
+    type=int,
+    help="ID of the indigenous nation in case of updates.",
+    location="args",
+)
 
 
-@cors_preflight('GET')
-@API.route('/exists', methods=['GET', 'OPTIONS'])
+@cors_preflight("GET")
+@API.route("/exists", methods=["GET", "OPTIONS"])
 class ValidateIndigenousNation(Resource):
     """Endpoint resource to check for existing indigenous nation."""
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @API.expect(parser)
     @profiletime
     def get():
         """Check for existing indigenous nations."""
         args = parser.parse_args()
-        name = args['name']
-        instance_id = args['id']
-        return IndigenousNationService.check_existence(name=name, instance_id=instance_id), HTTPStatus.OK
+        name = args["name"]
+        instance_id = args["id"]
+        exists = IndigenousNationService.check_existence(
+            name=name, instance_id=instance_id
+        )
+        return (
+            {"exists": exists},
+            HTTPStatus.OK,
+        )
 
 
-@cors_preflight('GET, DELETE, PUT')
-@API.route('/<int:indigenous_nation_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+@cors_preflight("GET, DELETE, PUT")
+@API.route("/<int:indigenous_nation_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
 class IndigenousNation(Resource):
     """Endpoint resource to manage an indigenous nation."""
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def get(indigenous_nation_id):
         """Return details of an indigenous nation."""
-        return IndigenousNationService.find(indigenous_nation_id), HTTPStatus.OK
+        indigenous_nation = IndigenousNationService.find(indigenous_nation_id)
+        if indigenous_nation:
+            return indigenous_nation, HTTPStatus.OK
+        return (
+            f"Indigenous nation with id '{indigenous_nation_id}' not found.",
+            HTTPStatus.NOT_FOUND,
+        )
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def put(indigenous_nation_id):
         """Update and return an indigenous nation."""
-        indigenous_nation = IndigenousNationService.update_indigenous_nation(indigenous_nation_id, API.payload)
-        return indigenous_nation.as_dict(), HTTPStatus.OK
+        indigenous_nation_schema = IndigenousNationSchema()
+        try:
+            request_json = indigenous_nation_schema.load(API.payload)
+        except ValidationError as err:
+            return err.messages, HTTPStatus.BAD_REQUEST
+        exists = IndigenousNationService.check_existence(
+            request_json.get("name"), indigenous_nation_id
+        )
+        if exists:
+            return "Indigenous nation with same name exists", HTTPStatus.CONFLICT
+        indigenous_nation = IndigenousNationService.update_indigenous_nation(
+            indigenous_nation_id, request_json
+        )
+
+        return indigenous_nation_schema.dump(indigenous_nation), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def delete(indigenous_nation_id):
@@ -94,10 +132,20 @@ class IndigenousNations(Resource):
         return IndigenousNationService.find_all_indigenous_nations(), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def post():
         """Create new staff"""
-        indigenous_nation = IndigenousNationService.create_indigenous_nation(API.payload)
-        return indigenous_nation.as_dict(), HTTPStatus.CREATED
+        indigenous_nation_schema = IndigenousNationSchema()
+        try:
+            request_json = indigenous_nation_schema.load(API.payload)
+        except ValidationError as err:
+            return err.messages, HTTPStatus.BAD_REQUEST
+        exists = IndigenousNationService.check_existence(request_json.get("name"))
+        if exists:
+            return "Indigenous nation with same name exists", HTTPStatus.CONFLICT
+        indigenous_nation = IndigenousNationService.create_indigenous_nation(
+            request_json
+        )
+        return indigenous_nation_schema.dump(indigenous_nation), HTTPStatus.CREATED

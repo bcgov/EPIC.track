@@ -14,7 +14,8 @@
 """Model to handle all operations related to Staff."""
 
 from typing import List
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import column_property, relationship
 
 from reports_api.models.base_model import BaseModel
@@ -23,7 +24,7 @@ from reports_api.models.base_model import BaseModel
 class Staff(BaseModel):
     """Model class for Staff."""
 
-    __tablename__ = 'staffs'
+    __tablename__ = "staffs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     first_name = Column(String(100), nullable=False)
@@ -31,25 +32,25 @@ class Staff(BaseModel):
     phone = Column(String(), nullable=False)
     email = Column(String(), nullable=False)
     is_active = Column(Boolean(), default=True, nullable=False)
-    position_id = Column(ForeignKey('positions.id'), nullable=False)
+    position_id = Column(ForeignKey("positions.id"), nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
 
-    position = relationship('Position', foreign_keys=[position_id], lazy='select')
+    position = relationship("Position", foreign_keys=[position_id], lazy="select")
 
     full_name = column_property(last_name + ", " + first_name)
 
     def as_dict(self):  # pylint: disable=arguments-differ
         """Return Json representation."""
         return {
-            'id': self.id,
-            'first_name': self.first_name,
-            'last_name': self.last_name,
-            'full_name': self.full_name,
-            'phone': self.phone,
-            'email': self.email,
-            'is_active': self.is_active,
-            'position_id': self.position_id,
-            'position': self.position.as_dict()
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "full_name": self.full_name,
+            "phone": self.phone,
+            "email": self.email,
+            "is_active": self.is_active,
+            "position_id": self.position_id,
+            "position": self.position.as_dict(),
         }
 
     @classmethod
@@ -60,14 +61,30 @@ class Staff(BaseModel):
     @classmethod
     def find_active_staff_by_positions(cls, position_ids: List[int]):
         """Return active staffs by position ids."""
-        return cls.query.filter(Staff.position_id.in_(position_ids), Staff.is_active.is_(True))
+        return cls.query.filter(
+            Staff.position_id.in_(position_ids), Staff.is_active.is_(True)
+        )
 
     @classmethod
     def find_all_active_staff(cls):
         """Return all active staff."""
-        return cls.query.filter_by(is_active=True)
+        return cls.query.filter_by(is_active=True, is_deleted=False)
 
     @classmethod
     def find_all_non_deleted_staff(cls):
         """Return all non-deleted staff"""
         return cls.query.filter_by(is_deleted=False)
+
+    @classmethod
+    def check_existence(cls, first_name, last_name, instance_id):
+        """Checks if a staff exists with given first name and last name"""
+        query = cls.query.filter(
+            func.lower(Staff.last_name) == func.lower(last_name),
+            func.lower(Staff.first_name) == func.lower(first_name),
+            Staff.is_deleted.is_(False),
+        )
+        if instance_id:
+            query = query.filter(Staff.id != instance_id)
+        if query.count() > 0:
+            return True
+        return False

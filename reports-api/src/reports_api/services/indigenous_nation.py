@@ -12,36 +12,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage IndigenousNation."""
-from sqlalchemy import func
 from flask import jsonify
+from sqlalchemy import func
+
 from reports_api.models import IndigenousNation
+from reports_api.schemas import IndigenousNationSchema
 
 
-class IndigenousNationService:  # pylint: disable=too-few-public-methods
+class IndigenousNationService:
     """Service to manage indigenous nation related operations."""
 
     @classmethod
-    def check_existence(cls, name, instance_id):
+    def check_existence(cls, name, instance_id=None):
         """Checks if an indigenous nation exists with given name"""
         query = IndigenousNation.query.filter(
-                    func.lower(IndigenousNation.name) == func.lower(name), IndigenousNation.is_deleted.is_(False)
+            func.lower(IndigenousNation.name) == func.lower(name),
+            IndigenousNation.is_deleted.is_(False),
         )
         if instance_id:
             query = query.filter(IndigenousNation.id != instance_id)
         if query.count() > 0:
-            return {"exists": True}
-        return {"exists": False}
+            return True
+        return False
 
     @classmethod
     def find_all_indigenous_nations(cls):
         """Find all active indigenous nations"""
         indigenous_nations = IndigenousNation.find_all(default_filters=False)
-        return jsonify({"indigenous_nations": [item.as_dict() for item in indigenous_nations]})
+        indigenous_nations = IndigenousNationSchema(many=True).dump(indigenous_nations)
+        return jsonify({"indigenous_nations": indigenous_nations})
 
     @classmethod
     def find(cls, indigenous_nation_id):
         """Find by indigenous nation id."""
-        return {"indigenous_nation": IndigenousNation.find_by_id(indigenous_nation_id).as_dict()}
+        response = None
+        indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
+        if indigenous_nation:
+            response = {
+                "indigenous_nation": IndigenousNationSchema().dump(indigenous_nation)
+            }
+        return response
 
     @classmethod
     def create_indigenous_nation(cls, payload: dict):
@@ -54,7 +64,7 @@ class IndigenousNationService:  # pylint: disable=too-few-public-methods
     def update_indigenous_nation(cls, indigenous_nation_id: int, payload: dict):
         """Update existing indigenous_nation."""
         indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
-        del payload["responsible_epd"]
+        # del payload["responsible_epd"]
         indigenous_nation = indigenous_nation.update(payload)
         return indigenous_nation
 
