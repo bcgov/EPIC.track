@@ -11,12 +11,16 @@ import SideNav from "../SideNav/SideNav";
 import { ReactComponent as BCLogo } from "../../../assets/images/bcgovlogo.svg";
 import { EpicTrackH1 } from "../../shared";
 import UserService from "../../../services/userService";
+import { UIState } from "../../../styles/type";
+import { useAppSelector } from "../../../hooks";
 
-const Header = ({ drawerWidth = 280 }) => {
+const Header = () => {
   const [open, setOpen] = React.useState(false);
   const isMediumScreen: boolean = useMediaQuery((theme: Theme) =>
     theme.breakpoints.up("md")
   );
+  const uiState: UIState = useAppSelector((state) => state.uiState);
+
   return (
     <>
       <AppBar
@@ -24,8 +28,6 @@ const Header = ({ drawerWidth = 280 }) => {
         sx={{
           zIndex: (theme: Theme) =>
             isMediumScreen ? theme.zIndex.drawer + 1 : theme.zIndex.drawer,
-          //color: Palette.text.primary,
-          //bgcolor: Palette.primary.main
         }}
         data-testid="appbar-header"
       >
@@ -72,7 +74,7 @@ const Header = ({ drawerWidth = 280 }) => {
         data-testid="sidenav-header"
         isMediumScreen={isMediumScreen}
         open={open}
-        drawerWidth={drawerWidth}
+        drawerWidth={uiState.drawerWidth}
       />
     </>
   );
