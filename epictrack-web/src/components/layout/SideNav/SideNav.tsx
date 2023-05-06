@@ -118,14 +118,16 @@ const SideNav = ({
   open,
   setOpen,
   isMediumScreen,
-  drawerWidth = 280,
+  drawerWidth,
 }: SideNavProps) => {
   return (
     <>
       {isMediumScreen ? (
         <Drawer
           variant="permanent"
+          anchor="left"
           sx={{
+            transition: "all 0.25s",
             width: drawerWidth,
             flexShrink: 0,
             [`& .MuiDrawer-paper`]: {

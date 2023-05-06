@@ -3,30 +3,80 @@ import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./components/layout/Header/Header";
 import UserService from "./services/userService";
 import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
-import { useAppDispatch } from "./hooks";
-import { Box } from "@mui/material";
+import { useAppDispatch, useAppSelector } from "./hooks";
+import { Box, IconButton, Theme, useMediaQuery } from "@mui/material";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { Palette } from "./styles/theme";
+import { toggleDrawer } from "./styles/uiStateSlice";
+import { Else, If, Then, Unless, When } from "react-if";
 
 export default function App() {
   const dispatch = useAppDispatch();
-  const drawerWidth = 280;
+  const isLoggedIn = useAppSelector(
+    (state) => state.user.authentication.authenticated
+  );
+  const isMediumScreen: boolean = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.up("md")
+  );
+  const uiState = useAppSelector((state) => state.uiState);
+  const drawerWidth = uiState.drawerWidth;
   React.useEffect(() => {
     UserService.initKeycloak(dispatch);
   }, [dispatch]);
   return (
-    <Router>
-      <Box sx={{ display: "flex" }}>
-        <Header />
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            width: `calc(100% - ${drawerWidth}px)`,
-            marginTop: "17px",
-          }}
-        >
-          <AuthenticatedRoutes />
-        </Box>
-      </Box>
-    </Router>
+    <>
+      {isLoggedIn && (
+        <Router>
+          <Box sx={{ display: "flex" }}>
+            <Header />
+            <Box
+              component="main"
+              sx={{
+                flexGrow: 1,
+                width: `calc(100% - ${drawerWidth}px)`,
+                marginTop: "17px",
+              }}
+            >
+              <When condition={isMediumScreen}>
+                <Box
+                  sx={{
+                    width: "2rem",
+                    height: "3rem",
+                    background: Palette.primary.main,
+                    position: "fixed",
+                    marginTop: uiState.toggleDrawerMarginTop,
+                    borderRadius: "0px 4px 4px 0px",
+                    boxShadow: "0px 5px 9px rgba(0, 0, 0, 0.25)",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    alignContent: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconButton
+                    sx={{
+                      color: "white",
+                    }}
+                    onClick={() => dispatch(toggleDrawer())}
+                  >
+                    <If condition={uiState.isDrawerExpanded}>
+                      <Then>
+                        <ArrowBackIosIcon />
+                      </Then>
+                      <Else>
+                        <ArrowForwardIosIcon />
+                      </Else>
+                    </If>
+                  </IconButton>
+                </Box>
+              </When>
+              <AuthenticatedRoutes />
+            </Box>
+          </Box>
+        </Router>
+      )}
+    </>
   );
 }

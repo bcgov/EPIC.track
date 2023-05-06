@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 export const EpicTrackPageGridContainer = styled(Grid)(() => ({
-  padding: "6em 1em 1em 1em",
+  padding: "6em 2em 1em 2em",
 }));
 
 export const EpicTrackH1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
@@ -24,7 +24,7 @@ export const EpicTrackH1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     <Typography
       sx={{
         ...sx,
-        fontSize: "2.3rem",
+        fontSize: "1.9375em",
         fontWeight: bold ? "bold" : MET_Header_Font_Weight,
         fontFamily: MET_Header_Font_Family,
       }}
@@ -107,7 +107,7 @@ export const EpicTrackH5 = ({
         fontWeight: bold ? "bold" : MET_Header_Font_Weight,
         fontFamily: MET_Header_Font_Family,
       }}
-      variant="h4"
+      variant="h5"
       {...rest}
     >
       {children}
