@@ -9,7 +9,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Palette } from "./styles/theme";
 import { toggleDrawer } from "./styles/uiStateSlice";
-import { Else, If, Then, Unless, When } from "react-if";
+import { Else, If, Then } from "react-if";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -38,7 +38,7 @@ export default function App() {
                 marginTop: "17px",
               }}
             >
-              <When condition={isMediumScreen}>
+              <If condition={isMediumScreen}>
                 <Box
                   sx={{
                     width: "2rem",
@@ -71,7 +71,7 @@ export default function App() {
                     </If>
                   </IconButton>
                 </Box>
-              </When>
+              </If>
               <AuthenticatedRoutes />
             </Box>
           </Box>
