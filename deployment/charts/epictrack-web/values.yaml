@@ -14,7 +14,7 @@ image:
   tag: latest
   repository: image-registry.openshift-image-registry.svc:5000/dc383e-tools/
 keycloak:
-  url: https://keycloak-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+  url: "https://keycloak-{{ tpl .Release.Namespace .}}.apps.silver.devops.gov.bc.ca"
   realm: forms-flow-ai
   client: forms-flow-web
 service:

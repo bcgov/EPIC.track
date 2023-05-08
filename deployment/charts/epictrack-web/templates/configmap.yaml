@@ -8,7 +8,7 @@ data:
   config.js: |-
     // runtime-config.js vars
       window["_env_"] =  {
-        "ENV": "dev"
+        "ENV": "dev",
         "NODE_ENV": "production",
         "REACT_APP_API_URL": "{{ .Values.app.api}}",
         "REACT_APP_KEYCLOAK_URL": "{{ .Values.keycloak.url }}",
