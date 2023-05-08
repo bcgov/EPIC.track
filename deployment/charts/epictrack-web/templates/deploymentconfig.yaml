@@ -1,0 +1,53 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  annotations: null
+  creationTimestamp: null
+  labels:
+    app: {{ .Values.app.name }}
+  name: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicas.count}}
+  selector:
+    app: {{ .Values.app.name }}
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources:
+      limits:
+        cpu: {{ .Values.resources.cpu.limit }}
+        memory: {{ .Values.resources.memory.limit }}
+      requests:
+        cpu: {{ .Values.resources.cpu.request}}
+        memory: {{ .Values.resources.memory.request }}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: {{ .Values.app.name }}
+    spec:
+      containers:
+      - env: null
+        image: "{{ .Values.image.repository}}{{ tpl .Values.image.name . }}:{{ .Values.image.tag }}"
+        imagePullPolicy: Always
+        name: {{ .Chart.Name }}
+        ports:
+        - containerPort: 8080
+        resources: {}
+        tty: true
+        volumeMounts:
+        - mountPath: {{ .Values.mount_path }}
+          name: {{ .Chart.Name }}
+          readOnly: true
+      restartPolicy: Always
+      volumes:
+      - configMap:
+          defaultMode: 420
+          name: {{ .Chart.Name }}
+        name: {{ .Chart.Name }}

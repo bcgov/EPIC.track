@@ -1,0 +1,25 @@
+app:
+  name: epictrack
+  url: web-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+  api: https://eao-reports-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+resources:
+  cpu:
+    limit: 300m
+    request: 250m
+  memory:
+    limit: 200Mi
+    request: 100Mi
+image:
+  name: epictrack-web
+  tag: latest
+  repository: image-registry.openshift-image-registry.svc:5000/dc383e-tools/
+keycloak:
+  url: https://keycloak-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+  realm: forms-flow-ai
+  client: forms-flow-web
+service:
+  port: 8080
+replicas:
+  count: 1
+mount_path: /usr/share/nginx/html/config/
+
