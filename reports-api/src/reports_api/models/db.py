@@ -16,8 +16,10 @@
 These will get initialized by the application using the models
 """
 from flask_sqlalchemy import SQLAlchemy
+from flask_marshmallow import Marshmallow
 
 
 # by convention in the Flask community these are lower case,
 # whereas pylint wants them upper case
 db = SQLAlchemy()  # pylint: disable=invalid-name
+ma = Marshmallow()

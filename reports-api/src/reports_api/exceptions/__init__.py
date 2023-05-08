@@ -29,3 +29,12 @@ class BusinessError(Exception):
         super().__init__(*args, **kwargs)
         self.error = error
         self.status_code = status_code
+
+
+class ResourceExistsError(Exception):
+    """Exception raised when a duplicate resource exists."""
+
+    def __init__(self, message, *args, **kwargs):
+        """Return a valid ResourceExistsError."""
+        super().__init__(*args, **kwargs)
+        self.message = message
