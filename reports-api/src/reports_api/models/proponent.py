@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Proponent."""
 
-from sqlalchemy import BOOLEAN, Boolean, Column, ForeignKey, Integer
+from sqlalchemy import BOOLEAN, Boolean, Column, ForeignKey, Integer, func
 from sqlalchemy.orm import relationship
 
 from .code_table import CodeTable
@@ -23,10 +23,12 @@ from .db import db
 class Proponent(db.Model, CodeTable):
     """Model class for Proponent."""
 
-    __tablename__ = 'proponents'
+    __tablename__ = "proponents"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    is_active = Column(BOOLEAN(), default=False, nullable=False)
+    id = Column(
+        Integer, primary_key=True, autoincrement=True
+    )  # TODO check how it can be inherited from parent
+    is_active = Column(BOOLEAN(), default=True, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
 
     relationship_holder_id = Column(
@@ -39,7 +41,22 @@ class Proponent(db.Model, CodeTable):
     def as_dict(self):
         """Return JSON Representation."""
         result = CodeTable.as_dict(self)
-        result['is_active'] = self.is_active
-        result['relationship_holder_id'] = self.relationship_holder_id
-        result['relationship_holder'] = self.relationship_holder.as_dict() if self.relationship_holder else None
+        result["is_active"] = self.is_active
+        result["relationship_holder_id"] = self.relationship_holder_id
+        result["relationship_holder"] = (
+            self.relationship_holder.as_dict() if self.relationship_holder else None
+        )
         return result
+
+    @classmethod
+    def check_existence(cls, name, instance_id):
+        """Checks if a proponent exists with given name"""
+        query = Proponent.query.filter(
+            func.lower(Proponent.name) == func.lower(name),
+            Proponent.is_deleted.is_(False),
+        )
+        if instance_id:
+            query = query.filter(Proponent.id != instance_id)
+        if query.count() > 0:
+            return True
+        return False
