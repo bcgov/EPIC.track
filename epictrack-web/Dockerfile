@@ -30,20 +30,20 @@ RUN mkdir /app
 # RUN  touch /var/run/nginx.pid && \
 #     chown -R nginx:nginx /var/cache/nginx /var/run/nginx.pid
 
-ARG user=nginx
-RUN usermod -a -G root $user
+# ARG user=nginx
+# RUN usermod -a -G root $user
 
 COPY --from=build-stage /app/build /usr/share/nginx/html
-COPY /nginx/*.conf /etc/nginx/
-COPY /nginx/docker-entrypoint.sh /
+COPY /nginx/nginx.conf /etc/nginx/
 
 # Set ownership and permissions
 # Set scripts as executable (make files and python files do not have to be marked)
 # Make /etc/passwd writable for the root group so an entry can be created for an OpenShift assigned user account.
-RUN chown -R $user:root /etc/nginx/ \
-    && chmod -R ug+rw /etc/nginx/ \
-    && chmod ug+x docker-entrypoint.sh \
-    && chmod g+rw /etc/passwd
+# RUN chown -R $user:root /etc/nginx/ \
+#     && chmod -R ug+rw /etc/nginx/ \
+#     && chmod ug+x docker-entrypoint.sh \
+#     && chmod g+rw /etc/passwd
 
-USER $user
-ENTRYPOINT ["sh", "/docker-entrypoint.sh"]
+# USER $user
+EXPOSE 8080:8080
+CMD ["nginx", "-g", "daemon off;"]

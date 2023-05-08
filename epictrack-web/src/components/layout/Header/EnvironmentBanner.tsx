@@ -8,10 +8,10 @@ const EnvironmentBanner = () => {
   const dispatch = useAppDispatch();
   const host = window.location.hostname;
   const isTestEnvironment =
-    host.startsWith("met-web-dev") ||
-    host.startsWith("met-web-test") ||
-    host.startsWith("met-web-demo") ||
-    host.startsWith("localhost");
+    host.indexOf("dev") !== -1 ||
+    host.indexOf("test") !== -1 ||
+    host.indexOf("demo") !== -1 ||
+    host.indexOf("localhost") !== -1;
   dispatch(envBanner(isTestEnvironment));
   if (!isTestEnvironment) {
     return (
