@@ -12,40 +12,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Proponent."""
-from sqlalchemy import func
 from flask import jsonify
+from reports_api.exceptions import ResourceExistsError
+
 from reports_api.models import Proponent
+from reports_api.schemas import ProponentSchema
 
 
-class ProponentService:  # pylint: disable=too-few-public-methods
+class ProponentService:
     """Service to manage proponent related operations."""
 
     @classmethod
-    def check_existence(cls, name, instance_id):
+    def check_existence(cls, name, instance_id=None):
         """Checks if an proponent exists with given name"""
-        query = Proponent.query.filter(
-                    func.lower(Proponent.name) == func.lower(name), Proponent.is_deleted.is_(False)
-        )
-        if instance_id:
-            query = query.filter(Proponent.id != instance_id)
-        if query.count() > 0:
-            return {"exists": True}
-        return {"exists": False}
+        return Proponent.check_existence(name, instance_id)
 
     @classmethod
     def find_all_proponents(cls):
         """Find all active proponent"""
         proponents = Proponent.find_all(default_filters=False)
-        return jsonify({"proponents": [item.as_dict() for item in proponents]})
+        proponents_schema = ProponentSchema(many=True)
+        return jsonify({"proponents": proponents_schema.dump(proponents)})
 
     @classmethod
-    def find(cls, proponent_id):
+    def find_by_id(cls, proponent_id):
         """Find by indigenous nation id."""
-        return {"proponent": Proponent.find_by_id(proponent_id).as_dict()}
+        proponent_schema = ProponentSchema()
+        response = None
+        proponent = Proponent.find_by_id(proponent_id)
+        if proponent:
+            response = {"proponent": proponent_schema.dump(proponent)}
+        return response
 
     @classmethod
     def create_proponent(cls, payload: dict):
         """Create a new proponent."""
+        exists = cls.check_existence(payload["name"])
+        if exists:
+            raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent(**payload)
         proponent.save()
         return proponent
@@ -53,8 +57,10 @@ class ProponentService:  # pylint: disable=too-few-public-methods
     @classmethod
     def update_proponent(cls, proponent_id: int, payload: dict):
         """Update existing proponent."""
+        exists = cls.check_existence(payload["name"], proponent_id)
+        if exists:
+            raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent.find_by_id(proponent_id)
-        del payload["relationship_holder"]
         proponent = proponent.update(payload)
         return proponent
 

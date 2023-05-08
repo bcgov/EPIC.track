@@ -298,25 +298,31 @@ import {
   FormControlLabel,
   FormGroup,
   FormHelperText,
-  FormLabel, Select, TextField, Tooltip
-} from '@mui/material';
+  FormLabel,
+  Select,
+  TextField,
+  Tooltip,
+} from "@mui/material";
 
 export default function ProjectForm() {
-
   const IconWithTooltip = () => (
-    <Tooltip title="You should be getting a certificate number 
-    if the assessment of the project has completed." placement='right-end'>
-      <HelpIcon fontSize='small' color='primary' />
+    <Tooltip
+      title="You should be getting a certificate number 
+    if the assessment of the project has completed."
+      placement="right-end"
+    >
+      <HelpIcon fontSize="small" color="primary" />
     </Tooltip>
   );
-
 
   return (
     <>
       <DialogContent>
         <Grid container spacing={2}>
           <Grid item xs={6}>
-            <FormLabel required color='error'>Project Name </FormLabel>
+            <FormLabel required color="error">
+              Project Name{" "}
+            </FormLabel>
             <TextField fullWidth />
           </Grid>
           <Grid item xs={6}>
@@ -333,8 +339,7 @@ export default function ProjectForm() {
           </Grid>
           <Grid item xs={12}>
             <FormLabel>Project Description</FormLabel>
-            <TextField fullWidth multiline
-              rows={4} />
+            <TextField fullWidth multiline rows={4} />
           </Grid>
           <Grid item xs={12}>
             <FormLabel>Location Description</FormLabel>
@@ -365,26 +370,37 @@ export default function ProjectForm() {
             <TextField fullWidth />
           </Grid>
           <Grid item xs={6}>
-            <FormLabel>Certificate Number<IconWithTooltip /></FormLabel>
+            <FormLabel>
+              Certificate Number
+              <IconWithTooltip />
+            </FormLabel>
             <TextField fullWidth />
-            <FormHelperText>Provide the certificate number if available</FormHelperText>
+            <FormHelperText>
+              Provide the certificate number if available
+            </FormHelperText>
           </Grid>
           <Grid item xs={6}>
             <FormLabel>Abbreviation</FormLabel>
-            <TextField fullWidth /> <FormHelperText>
-              Abbreviation of the project name to be displayed in reports and graphs
+            <TextField fullWidth />{" "}
+            <FormHelperText>
+              Abbreviation of the project name to be displayed in reports and
+              graphs
             </FormHelperText>
           </Grid>
           <Grid item xs={3}>
             <FormGroup>
               <FormControlLabel
-                control={<Checkbox defaultChecked />} label="Is the Project Closed?" />
+                control={<Checkbox defaultChecked />}
+                label="Is the Project Closed?"
+              />
             </FormGroup>
           </Grid>
           <Grid item xs={3}>
             <FormGroup>
               <FormControlLabel
-                control={<Checkbox defaultChecked />} label="Is Active" />
+                control={<Checkbox defaultChecked />}
+                label="Is Active"
+              />
             </FormGroup>
           </Grid>
           <Grid item xs={8}>

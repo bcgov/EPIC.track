@@ -1,125 +1,125 @@
-import { createTheme } from '@mui/material';
+import { createTheme } from "@mui/material";
 export const Palette = {
-    primary: {
-        main: '#003366',
-        light: '#385989',
-        dark: '#000C3B',
+  primary: {
+    main: "#003366",
+    light: "#385989",
+    dark: "#000C3B",
+  },
+  secondary: {
+    main: "#FFC107",
+    dark: "#FFAB00",
+    light: "#FFE082",
+  },
+  hover: {
+    light: "#4C81AF",
+  },
+  text: {
+    primary: "#494949",
+  },
+  action: {
+    active: "#1A5A96",
+  },
+  info: {
+    main: "#707070",
+  },
+  dashboard: {
+    upcoming: {
+      bg: "#FCB92F26",
+      border: "#FCB92F",
     },
-    secondary: {
-        main: '#FFC107',
-        dark: '#FFAB00',
-        light: '#FFE082',
+    open: {
+      bg: "#C8DF8C4D",
+      border: "#839537",
     },
-    hover: {
-        light: '#4C81AF',
+    closed: {
+      bg: "#F15A2C1A",
+      border: "#F15A2C",
     },
-    text: {
-        primary: '#494949',
-    },
-    action: {
-        active: '#1A5A96',
-    },
-    info: {
-        main: '#707070',
-    },
-    dashboard: {
-        upcoming: {
-            bg: '#FCB92F26',
-            border: '#FCB92F',
-        },
-        open: {
-            bg: '#C8DF8C4D',
-            border: '#839537',
-        },
-        closed: {
-            bg: '#F15A2C1A',
-            border: '#F15A2C',
-        },
-    },
+  },
 };
 
 export const BaseTheme = createTheme({
-    palette: {
-        primary: {
-            main: Palette.primary.main,
-            light: Palette.primary.light,
-            dark: Palette.primary.dark,
-        },
-        secondary: {
-            main: Palette.secondary.main,
-            dark: Palette.secondary.dark,
-            light: Palette.secondary.light,
-        },
-        text: {
-            primary: Palette.text.primary,
-        },
-        action: {
-            active: Palette.action.active,
-        },
-        info: {
-            main: Palette.info.main,
-        },
+  palette: {
+    primary: {
+      main: Palette.primary.main,
+      light: Palette.primary.light,
+      dark: Palette.primary.dark,
     },
-    components: {
-        MuiButton: {
-            styleOverrides: {
-                root: {
-                    height: '40px',
-                },
-            },
-            defaultProps: {
-                disableRipple: true,
-            },
-        },
-        MuiTextField: {
-            defaultProps: {
-                size: 'small',
-            },
-        },
-        MuiLink: {
-            defaultProps: {
-                color: Palette.action.active,
-            },
-        },
-        MuiFormLabel: {
-            defaultProps: {
-                focused: false,
-            },
-        },
+    secondary: {
+      main: Palette.secondary.main,
+      dark: Palette.secondary.dark,
+      light: Palette.secondary.light,
     },
-    typography: {
-        fontFamily: "'BCSans', 'Noto Sans', Verdana, Arial, sans-serif",
-        fontSize: 16,
-        h1: {
-            fontWeight: 500,
-        },
-        h2: {
-            fontWeight: 500,
-        },
-        h3: {
-            fontWeight: 500,
-        },
-        h4: {
-            fontWeight: 500,
-        },
-        h5: {
-            fontWeight: 500,
-        },
-        h6: {
-            fontWeight: 500,
-        },
-        subtitle2: {
-            fontWeight: 500,
-            fontSize: '1.15rem',
-        },
-        body1: {
-            fontWeight: 500,
-            fontSize: '16px',
-        },
-        button: {
-            fontWeight: 700,
-            fontSize: '1.125rem',
-            textTransform: 'none',
-        },
+    text: {
+      primary: Palette.text.primary,
     },
+    action: {
+      active: Palette.action.active,
+    },
+    info: {
+      main: Palette.info.main,
+    },
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          height: "40px",
+        },
+      },
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
+    MuiTextField: {
+      defaultProps: {
+        size: "small",
+      },
+    },
+    MuiLink: {
+      defaultProps: {
+        color: Palette.action.active,
+      },
+    },
+    MuiFormLabel: {
+      defaultProps: {
+        focused: false,
+      },
+    },
+  },
+  typography: {
+    fontFamily: '"BCSans",·"Noto·Sans",·Verdana,·Arial,·sans-serif',
+    fontSize: 16,
+    h1: {
+      fontWeight: 500,
+    },
+    h2: {
+      fontWeight: 500,
+    },
+    h3: {
+      fontWeight: 500,
+    },
+    h4: {
+      fontWeight: 500,
+    },
+    h5: {
+      fontWeight: 500,
+    },
+    h6: {
+      fontWeight: 500,
+    },
+    subtitle2: {
+      fontWeight: 500,
+      fontSize: "1.15rem",
+    },
+    body1: {
+      fontWeight: 500,
+      fontSize: "16px",
+    },
+    button: {
+      fontWeight: 700,
+      fontSize: "1.125rem",
+      textTransform: "none",
+    },
+  },
 });
