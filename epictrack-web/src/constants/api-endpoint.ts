@@ -1,22 +1,22 @@
 const Endpoints = {
   Reports: {
-    GET_REPORT: 'reports',
-    GET_PDF_REPORT: 'reports/file'
+    GET_REPORT: "reports",
+    GET_PDF_REPORT: "reports/file",
   },
   Staffs: {
-    STAFF: 'staffs'
+    STAFF: "staffs",
   },
   Projects: {
-    GET_PROJECTS: 'projects'
+    GET_PROJECTS: "projects",
   },
   Codes: {
-    GET_CODES: 'codes'
+    GET_CODES: "codes",
   },
   IndigenousNations: {
-    GET_INDIGENOUS_NATIONS: 'indigenous-nations'
+    GET_INDIGENOUS_NATIONS: "indigenous-nations",
   },
   Proponents: {
-    GET_PROPONENTS: 'proponents'
-  }
-}
+    GET_PROPONENTS: "proponents",
+  },
+};
 export default Endpoints;

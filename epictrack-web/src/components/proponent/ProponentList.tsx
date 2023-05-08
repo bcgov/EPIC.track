@@ -1,12 +1,9 @@
 import React from "react";
-import {
-  Edit as EditIcon,
-  Delete as DeleteIcon
-} from '@mui/icons-material';
+import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { RESULT_STATUS } from '../../constants/application-constant';
+import { RESULT_STATUS } from "../../constants/application-constant";
 import ProponentService from "../../services/proponentService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { EpicTrackPageGridContainer } from "../shared";
@@ -18,74 +15,78 @@ import { Proponent } from "../../models/proponent";
 
 export default function ProponentList() {
   const [resultStatus, setResultStatus] = useState<string>();
-  const [proponents, setProponents] = useState<Proponent[]>([])
-  const [proponentID, setProponentID] = useState<number>()
+  const [proponents, setProponents] = useState<Proponent[]>([]);
+  const [proponentID, setProponentID] = useState<number>();
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] = React.useState<boolean>(false);
-  const titleSuffix = 'Proponent Details';
+  const [showDeleteDialog, setShowDeleteDialog] =
+    React.useState<boolean>(false);
+  const titleSuffix = "Proponent Details";
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
-
 
   const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
     () => [
       {
-        accessorKey: 'name',
-        header: 'Name',
+        accessorKey: "name",
+        header: "Name",
       },
       {
-        accessorKey: 'relationship_holder.full_name',
-        header: 'Relationship Holder',
-        filterSelectOptions: staffs.map(s => s.full_name)
+        accessorKey: "relationship_holder.full_name",
+        header: "Relationship Holder",
+        filterSelectOptions: staffs.map((s) => s.full_name),
       },
       {
-        accessorKey: 'is_active',
-        header: 'Active',
-        filterVariant: 'checkbox',
+        accessorKey: "is_active",
+        header: "Active",
+        filterVariant: "checkbox",
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && <Chip label='Active' color='primary' />}
-            {!cell.getValue<boolean>() && <Chip label='Inactive' color='error' />}
+            {cell.getValue<boolean>() && (
+              <Chip label="Active" color="primary" />
+            )}
+            {!cell.getValue<boolean>() && (
+              <Chip label="Inactive" color="error" />
+            )}
           </span>
         ),
-      }
-    ], [staffs]
+      },
+    ],
+    [staffs]
   );
 
   const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == 'backdropClick')
-      return;
+    if (reason && reason == "backdropClick") return;
     setProponentID(undefined);
     setShowDialog(false);
-  }
+  };
   const onEdit = (id: number) => {
     setProponentID(id);
     setShowDialog(true);
-  }
+  };
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
     setProponentID(id);
-  }
+  };
 
   const getStaffs = async () => {
     const staffsResult = await StaffService.getStaffs();
     if (staffsResult.status === 200) {
-      setStaffs((staffsResult.data as never)['staffs']);
+      setStaffs((staffsResult.data as never)["staffs"]);
     }
-  }
+  };
   useEffect(() => {
     getStaffs();
   }, []);
 
   const getProponents = useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING)
+    setResultStatus(RESULT_STATUS.LOADING);
     try {
       const proponentsResult = await ProponentService.getProponents();
       if (proponentsResult.status === 200) {
-        setProponents((proponentsResult.data as never)['proponents']);
+        setProponents((proponentsResult.data as never)["proponents"]);
       }
     } catch (error) {
-      console.error('Proponent List: ', error);
+      console.error("Proponent List: ", error);
     } finally {
       setResultStatus(RESULT_STATUS.LOADED);
     }
@@ -98,7 +99,7 @@ export default function ProponentList() {
       setShowDeleteDialog(false);
       getProponents();
     }
-  }
+  };
 
   useEffect(() => {
     getProponents();
@@ -120,7 +121,7 @@ export default function ProponentList() {
             data={proponents}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
-              showGlobalFilter: true
+              showGlobalFilter: true,
             }}
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
@@ -134,11 +135,13 @@ export default function ProponentList() {
               </Box>
             )}
             renderTopToolbarCustomActions={() => (
-              <Box sx={{
-                width: '100%',
-                display: 'flex',
-                justifyContent: 'right'
-              }}>
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "right",
+                }}
+              >
                 <Button
                   onClick={() => {
                     setShowDialog(true);
@@ -154,11 +157,11 @@ export default function ProponentList() {
       </EpicTrackPageGridContainer>
       <TrackDialog
         open={showDialog}
-        dialogTitle={(proponentID ? 'Update ' : 'Create ') + titleSuffix}
+        dialogTitle={(proponentID ? "Update " : "Create ") + titleSuffix}
         onClose={(event, reason) => onDialogClose(event, reason)}
         disableEscapeKeyDown
         fullWidth
-        maxWidth='md'
+        maxWidth="md"
       >
         <ProponentForm
           onCancel={onDialogClose}
@@ -168,10 +171,10 @@ export default function ProponentList() {
       </TrackDialog>
       <TrackDialog
         open={showDeleteDialog}
-        dialogTitle='Delete'
-        dialogContentText='Are you sure you want to delete?'
-        okButtonText='Yes'
-        cancelButtonText='No'
+        dialogTitle="Delete"
+        dialogContentText="Are you sure you want to delete?"
+        okButtonText="Yes"
+        cancelButtonText="No"
         isActionsRequired
         onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
         onOk={() => deleteProponent(proponentID)}

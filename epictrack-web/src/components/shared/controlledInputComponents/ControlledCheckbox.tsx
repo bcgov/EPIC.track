@@ -1,12 +1,15 @@
-import React, { FC } from 'react';
-import { Checkbox, CheckboxProps } from '@mui/material';
-import { Controller, useFormContext } from 'react-hook-form';
+import React, { FC } from "react";
+import { Checkbox, CheckboxProps } from "@mui/material";
+import { Controller, useFormContext } from "react-hook-form";
 
 type IFormCheckboxProps = {
   name: string;
 } & CheckboxProps;
 
-const ControlledCheckbox: FC<IFormCheckboxProps> = ({ name, ...otherProps }) => {
+const ControlledCheckbox: FC<IFormCheckboxProps> = ({
+  name,
+  ...otherProps
+}) => {
   const {
     control,
     formState: { defaultValues },
@@ -16,13 +19,9 @@ const ControlledCheckbox: FC<IFormCheckboxProps> = ({ name, ...otherProps }) => 
     <Controller
       control={control}
       name={name}
-      defaultValue={defaultValues?.[name] || ''}
+      defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
-        <Checkbox
-          {...otherProps}
-          {...field}
-          checked={field.value}
-        />
+        <Checkbox {...otherProps} {...field} checked={field.value} />
       )}
     />
   );
