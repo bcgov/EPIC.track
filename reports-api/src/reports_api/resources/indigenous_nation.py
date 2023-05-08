@@ -16,6 +16,7 @@ from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors, reqparse
 from marshmallow import ValidationError
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.schemas import IndigenousNationSchema
 from reports_api.services import IndigenousNationService
@@ -94,16 +95,13 @@ class IndigenousNation(Resource):
         indigenous_nation_schema = IndigenousNationSchema()
         try:
             request_json = indigenous_nation_schema.load(API.payload)
+            indigenous_nation = IndigenousNationService.update_indigenous_nation(
+                indigenous_nation_id, request_json
+            )
         except ValidationError as err:
             return err.messages, HTTPStatus.BAD_REQUEST
-        exists = IndigenousNationService.check_existence(
-            request_json.get("name"), indigenous_nation_id
-        )
-        if exists:
-            return "Indigenous nation with same name exists", HTTPStatus.CONFLICT
-        indigenous_nation = IndigenousNationService.update_indigenous_nation(
-            indigenous_nation_id, request_json
-        )
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
 
         return indigenous_nation_schema.dump(indigenous_nation), HTTPStatus.OK
 
@@ -140,12 +138,11 @@ class IndigenousNations(Resource):
         indigenous_nation_schema = IndigenousNationSchema()
         try:
             request_json = indigenous_nation_schema.load(API.payload)
+            indigenous_nation = IndigenousNationService.create_indigenous_nation(
+                request_json
+            )
         except ValidationError as err:
             return err.messages, HTTPStatus.BAD_REQUEST
-        exists = IndigenousNationService.check_existence(request_json.get("name"))
-        if exists:
-            return "Indigenous nation with same name exists", HTTPStatus.CONFLICT
-        indigenous_nation = IndigenousNationService.create_indigenous_nation(
-            request_json
-        )
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
         return indigenous_nation_schema.dump(indigenous_nation), HTTPStatus.CREATED

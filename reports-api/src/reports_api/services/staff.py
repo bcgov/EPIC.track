@@ -14,6 +14,7 @@
 """Service to manage Staffs."""
 
 from flask import current_app
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.models import Staff
 from reports_api.schemas import StaffSchema
@@ -59,6 +60,9 @@ class StaffService:
     @classmethod
     def create_staff(cls, payload: dict):
         """Create a new staff."""
+        exists = cls.check_existence(payload["email"])
+        if exists:
+            raise ResourceExistsError("Staff with same email already exists")
         staff = Staff(**payload)
         current_app.logger.info(f"Staff obj {dir(staff)}")
         staff.save()
@@ -67,6 +71,9 @@ class StaffService:
     @classmethod
     def update_staff(cls, staff_id: int, payload: dict):
         """Update existing staff."""
+        exists = cls.check_existence(payload["email"], staff_id)
+        if exists:
+            raise ResourceExistsError("Staff with same email already exists")
         staff = Staff.find_by_id(staff_id)
         staff = staff.update(payload)
         return staff
@@ -90,6 +97,6 @@ class StaffService:
         return response
 
     @classmethod
-    def check_existence(cls, first_name, last_name, instance_id=None):
+    def check_existence(cls, email, instance_id=None):
         """Checks if a staff exists with given first name and last name"""
-        return Staff.check_existence(first_name, last_name, instance_id)
+        return Staff.check_existence(email, instance_id)

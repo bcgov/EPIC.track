@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage Proponent."""
 from flask import jsonify
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.models import Proponent
 from reports_api.schemas import ProponentSchema
@@ -46,6 +47,9 @@ class ProponentService:
     @classmethod
     def create_proponent(cls, payload: dict):
         """Create a new proponent."""
+        exists = cls.check_existence(payload["name"])
+        if exists:
+            raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent(**payload)
         proponent.save()
         return proponent
@@ -53,6 +57,9 @@ class ProponentService:
     @classmethod
     def update_proponent(cls, proponent_id: int, payload: dict):
         """Update existing proponent."""
+        exists = cls.check_existence(payload["name"], proponent_id)
+        if exists:
+            raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent.find_by_id(proponent_id)
         proponent = proponent.update(payload)
         return proponent

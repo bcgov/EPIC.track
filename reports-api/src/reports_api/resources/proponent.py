@@ -16,6 +16,7 @@ from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors, reqparse
 from marshmallow import ValidationError
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.schemas import ProponentSchema
 from reports_api.services import ProponentService
@@ -86,14 +87,11 @@ class Proponent(Resource):
         proponent_schema = ProponentSchema()
         try:
             request_json = proponent_schema.load(API.payload)
+            proponent = ProponentService.update_proponent(proponent_id, request_json)
         except ValidationError as err:
             return err.messages, HTTPStatus.BAD_REQUEST
-        exists = ProponentService.check_existence(
-            request_json.get("name"), proponent_id
-        )
-        if exists:
-            return "A proponent with same name exists", HTTPStatus.CONFLICT
-        proponent = ProponentService.update_proponent(proponent_id, request_json)
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
         return proponent_schema.dump(proponent), HTTPStatus.OK
 
     @staticmethod
@@ -129,10 +127,9 @@ class Proponents(Resource):
         proponent_schema = ProponentSchema()
         try:
             request_json = proponent_schema.load(API.payload)
+            proponent = ProponentService.create_proponent(request_json)
         except ValidationError as err:
             return err.messages, HTTPStatus.BAD_REQUEST
-        exists = ProponentService.check_existence(request_json.get("name"))
-        if exists:
-            return "A proponent with same name exists", HTTPStatus.CONFLICT
-        proponent = ProponentService.create_proponent(request_json)
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
         return proponent.as_dict(), HTTPStatus.CREATED

@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask import current_app
 from flask_restx import Namespace, Resource, cors, reqparse
 from marshmallow import ValidationError
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.schemas import StaffSchema
 from reports_api.services import StaffService
@@ -32,19 +33,11 @@ parser.add_argument("position", type=int, location="args")
 
 validation_parser = reqparse.RequestParser(bundle_errors=True)
 validation_parser.add_argument(
-    "first_name",
+    "email",
     type=str,
     required=True,
     location="args",
-    help="first name to be checked.",
-    trim=True,
-)
-validation_parser.add_argument(
-    "last_name",
-    type=str,
-    required=True,
-    location="args",
-    help="last name to be checked.",
+    help="email to be checked.",
     trim=True,
 )
 validation_parser.add_argument(
@@ -84,14 +77,11 @@ class Staffs(Resource):
         staff_schema = StaffSchema()
         try:
             request_json = staff_schema.load(API.payload)
+            staff = StaffService.create_staff(request_json)
         except ValidationError as err:
             return err.messages, HTTPStatus.BAD_REQUEST
-        exists = StaffService.check_existence(
-            request_json.get("first_name"), request_json.get("last_name")
-        )
-        if exists:
-            return "A staff with given name already exists.", HTTPStatus.CONFLICT
-        staff = StaffService.create_staff(request_json)
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
         return staff_schema.dump(staff), HTTPStatus.CREATED
 
 
@@ -120,14 +110,11 @@ class Staff(Resource):
         staff_schema = StaffSchema()
         try:
             request_json = staff_schema.load(API.payload)
+            staff = StaffService.update_staff(staff_id, request_json)
         except ValidationError as err:
             return err.messages, HTTPStatus.BAD_REQUEST
-        exists = StaffService.check_existence(
-            request_json.get("first_name"), request_json.get("last_name"), staff_id
-        )
-        if exists:
-            return "A staff with given name already exists.", HTTPStatus.CONFLICT
-        staff = StaffService.update_staff(staff_id, request_json)
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
         return staff_schema.dump(staff), HTTPStatus.OK
 
     @staticmethod
@@ -167,12 +154,9 @@ class ValidateStaff(Resource):
     def get():
         """Checks for existing staffs."""
         args = validation_parser.parse_args()
-        first_name = args["first_name"]
-        last_name = args["last_name"]
+        email = args["email"]
         instance_id = args["id"]
-        exists = StaffService.check_existence(
-            first_name=first_name, last_name=last_name, instance_id=instance_id
-        )
+        exists = StaffService.check_existence(email=email, instance_id=instance_id)
         return (
             {"exists": exists},
             HTTPStatus.OK,

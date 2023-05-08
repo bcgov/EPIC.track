@@ -14,6 +14,7 @@
 """Service to manage IndigenousNation."""
 from flask import jsonify
 from sqlalchemy import func
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.models import IndigenousNation
 from reports_api.schemas import IndigenousNationSchema
@@ -56,6 +57,9 @@ class IndigenousNationService:
     @classmethod
     def create_indigenous_nation(cls, payload: dict):
         """Create a new indigenous_nation."""
+        exists = cls.check_existence(payload["name"])
+        if exists:
+            raise ResourceExistsError("Indigenous nation with same name exists")
         indigenous_nation = IndigenousNation(**payload)
         indigenous_nation.save()
         return indigenous_nation
@@ -63,8 +67,10 @@ class IndigenousNationService:
     @classmethod
     def update_indigenous_nation(cls, indigenous_nation_id: int, payload: dict):
         """Update existing indigenous_nation."""
+        exists = cls.check_existence(payload["name"], indigenous_nation_id)
+        if exists:
+            raise ResourceExistsError("Indigenous nation with same name exists")
         indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
-        # del payload["responsible_epd"]
         indigenous_nation = indigenous_nation.update(payload)
         return indigenous_nation
 
