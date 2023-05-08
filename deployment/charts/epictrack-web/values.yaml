@@ -1,6 +1,6 @@
 app:
   name: epictrack
-  url: web-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+  url: epictrack-web-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
   api: https://eao-reports-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
 resources:
   cpu:
