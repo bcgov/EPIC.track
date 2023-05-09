@@ -171,7 +171,7 @@ export default function IndigenousNationList() {
         <IndigenousNationForm
           onCancel={onDialogClose}
           indigenousNationID={indigenousNationID}
-          onSubmitSucces={getIndigenousNations}
+          onSubmitSuccess={getIndigenousNations}
         />
       </TrackDialog>
       <TrackDialog

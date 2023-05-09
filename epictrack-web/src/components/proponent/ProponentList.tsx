@@ -166,7 +166,7 @@ export default function ProponentList() {
         <ProponentForm
           onCancel={onDialogClose}
           proponentID={proponentID}
-          onSubmitSucces={getProponents}
+          onSubmitSuccess={getProponents}
         />
       </TrackDialog>
       <TrackDialog

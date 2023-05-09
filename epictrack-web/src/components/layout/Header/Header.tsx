@@ -8,11 +8,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
 import EnvironmentBanner from "./EnvironmentBanner";
 import SideNav from "../SideNav/SideNav";
-import { ReactComponent as BCLogo } from "../../../assets/images/bcgovlogo.svg";
 import { EpicTrackH1 } from "../../shared";
 import UserService from "../../../services/userService";
 import { UIState } from "../../../styles/type";
 import { useAppSelector } from "../../../hooks";
+import logoPath from "../../../assets/images/bcgovlogo.png";
 
 const Header = () => {
   const [open, setOpen] = React.useState(false);
@@ -46,12 +46,13 @@ const Header = () => {
             />
           </When>
           <Box
-            component={BCLogo}
+            component="img"
             sx={{
               height: "5em",
-              width: { xs: "7em", md: "15em" },
+              width: { xs: "7em" },
               marginRight: { xs: "1em", md: "3em" },
             }}
+            src={logoPath}
             alt="British Columbia Logo"
           />
           {isMediumScreen ? (
