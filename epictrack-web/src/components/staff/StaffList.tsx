@@ -172,7 +172,7 @@ const StaffList = () => {
         <StaffForm
           onCancel={onDialogClose}
           staff_id={staffId}
-          onSubmitSucces={getStaff}
+          onSubmitSuccess={getStaff}
         />
       </TrackDialog>
       <TrackDialog

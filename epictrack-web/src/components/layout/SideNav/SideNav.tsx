@@ -19,7 +19,7 @@ import { EpicTrackH4, EpicTrackH5 } from "../../shared";
 
 const DrawerBox = () => {
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState<{ [x: string]: boolean }>({});
   const location = useLocation();
 
   const getCurrentBaseRoute = () => {
@@ -29,7 +29,10 @@ const DrawerBox = () => {
   };
   const handleClick = (route: any) => {
     if (route.routes && route.routes.length > 0) {
-      setOpen(!open);
+      setOpen((prevState: any) => ({
+        ...open,
+        [route.name]: !prevState[route.name],
+      }));
     } else {
       navigate(route.path);
     }
@@ -73,7 +76,7 @@ const DrawerBox = () => {
               </ListItemButton>
             </ListItem>
             <When condition={route.routes && route.routes?.length > 0}>
-              <Collapse in={open} timeout="auto" unmountOnExit>
+              <Collapse in={!!open[route.name]} timeout="auto" unmountOnExit>
                 <List disablePadding>
                   {route.routes?.map((subRoute) => (
                     <ListItem key={subRoute.name}>

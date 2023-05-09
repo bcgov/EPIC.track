@@ -10,6 +10,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { Palette } from "./styles/theme";
 import { toggleDrawer } from "./styles/uiStateSlice";
 import { Else, If, Then } from "react-if";
+import "./App.scss";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -63,7 +64,11 @@ export default function App() {
                   >
                     <If condition={uiState.isDrawerExpanded}>
                       <Then>
-                        <ArrowBackIosIcon />
+                        <ArrowBackIosIcon
+                          sx={{
+                            fontSize: "1.5rem",
+                          }}
+                        />
                       </Then>
                       <Else>
                         <ArrowForwardIosIcon />

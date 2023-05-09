@@ -81,7 +81,7 @@ export default function StaffForm({ ...props }) {
       if (result.status === 200) {
         setAlertContentText("Staff details updated");
         setOpenAlertDialog(true);
-        props.onSubmitSucces();
+        props.onSubmitSuccess();
         setLoading(false);
       }
     } else {
