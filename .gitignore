@@ -34,3 +34,4 @@ postgres
 node_modules
 wc-lib
 data
+/epictrack-web/.env
