@@ -57,7 +57,6 @@ export default function IndigenousNationList() {
 
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
-    setIndigenousNationID(undefined);
     setShowDialog(false);
   };
   const onEdit = (id: number) => {
@@ -148,6 +147,7 @@ export default function IndigenousNationList() {
                 <Button
                   onClick={() => {
                     setShowDialog(true);
+                    setIndigenousNationID(undefined);
                   }}
                   variant="contained"
                 >

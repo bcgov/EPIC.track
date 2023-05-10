@@ -27,7 +27,7 @@ const TrackDialog = ({ open, dialogTitle, ...props }: TrackDialogProps) => {
   useEffect(() => {
     setOpenDialog(open);
   }, [open]);
-  console.log(openDialog);
+
   if (!props.onOk) {
     props.onOk = () => setOpenDialog(false);
   }
