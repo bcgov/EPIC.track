@@ -16,6 +16,7 @@ import { Palette } from "../../../styles/theme";
 import { SideNavProps } from "./types";
 import { When, Unless } from "react-if";
 import { EpicTrackH4, EpicTrackH5 } from "../../shared";
+import { useAppSelector } from "../../../hooks";
 
 const DrawerBox = () => {
   const navigate = useNavigate();
@@ -49,11 +50,10 @@ const DrawerBox = () => {
       }}
     >
       <List sx={{ paddingTop: "2.5em" }}>
-        {Routes.map((route) => (
+        {Routes.map((route, i) => (
           <>
-            <ListItem key={route.name}>
+            <ListItem key={i}>
               <ListItemButton
-                key={`btn-${route.name}`}
                 data-testid={`SideNav/${route.name}-button`}
                 onClick={() => handleClick(route)}
                 sx={{
@@ -71,19 +71,16 @@ const DrawerBox = () => {
                   <EpicTrackH4 color={"white"}>{route.name}</EpicTrackH4>
                 </Unless>
                 <When condition={route.routes && route.routes?.length > 0}>
-                  {open ? <ExpandLess /> : <ExpandMore />}
+                  {!!open[route.name] ? <ExpandLess /> : <ExpandMore />}
                 </When>
               </ListItemButton>
             </ListItem>
             <When condition={route.routes && route.routes?.length > 0}>
               <Collapse in={!!open[route.name]} timeout="auto" unmountOnExit>
-                <List disablePadding>
+                <List disablePadding key={`list-${route.name}`}>
                   {route.routes?.map((subRoute) => (
-                    <ListItem key={subRoute.name}>
-                      <ListItemButton
-                        key={`btn=${subRoute.name}`}
-                        onClick={() => handleClick(subRoute)}
-                      >
+                    <ListItem key={`sub-list-${subRoute.name}`}>
+                      <ListItemButton onClick={() => handleClick(subRoute)}>
                         <When condition={location.pathname === subRoute.base}>
                           <EpicTrackH5
                             color={Palette.secondary.main}
@@ -123,6 +120,7 @@ const SideNav = ({
   isMediumScreen,
   drawerWidth,
 }: SideNavProps) => {
+  const uiState = useAppSelector((state) => state.uiState);
   return (
     <>
       {isMediumScreen ? (
@@ -130,7 +128,6 @@ const SideNav = ({
           variant="permanent"
           anchor="left"
           sx={{
-            transition: "all 0.25s",
             width: drawerWidth,
             flexShrink: 0,
             [`& .MuiDrawer-paper`]: {
