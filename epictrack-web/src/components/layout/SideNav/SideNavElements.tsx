@@ -44,9 +44,9 @@ export const Routes = [
         base: "/reporting/resource-forecast",
       },
       {
-        name: "Thirty Sixty Ninety",
-        path: "/reporting/thirty-sixty-ninety",
-        base: "/reporting/thirty-sixty-ninety",
+        name: "30-60-90",
+        path: "/reporting/30-60-90",
+        base: "/reporting/30-60-90",
       },
     ],
   },

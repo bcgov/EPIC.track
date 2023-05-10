@@ -24,8 +24,8 @@ const StaffList = () => {
   const titleSuffix = "Staff Details";
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
-    setStaffId(undefined);
     setShowDialog(false);
+    setStaffId(undefined);
   };
   const onEdit = (id: number) => {
     setStaffId(id);
@@ -115,8 +115,6 @@ const StaffList = () => {
     <>
       <EpicTrackPageGridContainer
         direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
         container
         columnSpacing={2}
         rowSpacing={3}
@@ -171,7 +169,7 @@ const StaffList = () => {
       >
         <StaffForm
           onCancel={onDialogClose}
-          staff_id={staffId}
+          staffId={staffId}
           onSubmitSuccess={getStaff}
         />
       </TrackDialog>

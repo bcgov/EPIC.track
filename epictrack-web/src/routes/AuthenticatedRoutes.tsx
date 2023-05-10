@@ -21,10 +21,7 @@ const AuthenticatedRoutes = () => {
         path="/reporting/resource-forecast"
         element={<ResourceForecast />}
       />
-      <Route
-        path="/reporting/thirty-sixty-ninety"
-        element={<ThirtySixtyNinety />}
-      />
+      <Route path="/reporting/30-60-90" element={<ThirtySixtyNinety />} />
       {/* <Route path="/surveys" element={<SurveyListing />} />
             <Route path="/surveys/create" element={<CreateSurvey />} />
             <Route path="/surveys/:surveyId/build" element={<SurveyFormBuilder />} />
