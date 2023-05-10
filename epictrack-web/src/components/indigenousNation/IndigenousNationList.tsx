@@ -32,8 +32,8 @@ export default function IndigenousNationList() {
         header: "Name",
       },
       {
-        accessorKey: "responsible_epd.full_name",
-        header: "Responsible EPD",
+        accessorKey: "relationship_holder.full_name",
+        header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
       },
       {
@@ -114,8 +114,6 @@ export default function IndigenousNationList() {
     <>
       <EpicTrackPageGridContainer
         direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
         container
         columnSpacing={2}
         rowSpacing={3}

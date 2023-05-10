@@ -29,18 +29,22 @@ class IndigenousNation(db.Model, CodeTable):
     name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
 
-    responsible_epd_id = Column(ForeignKey('staffs.id'), nullable=True, default=None)
-    responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')
+    relationship_holder_id = Column(
+        ForeignKey("staffs.id"), nullable=True, default=None
+    )
+    relationship_holder = relationship(
+        "Staff", foreign_keys=[relationship_holder_id], lazy="select"
+    )
 
     def as_dict(self):
-        """Return Json representation."""
-        return {
-            'id': self.id,
-            'name': self.name,
-            'is_active': self.is_active,
-            'responsible_epd_id': self.responsible_epd_id,
-            "responsible_epd": self.responsible_epd.as_dict() if self.responsible_epd else None,
-        }
+        """Return JSON Representation."""
+        result = CodeTable.as_dict(self)
+        result["is_active"] = self.is_active
+        result["relationship_holder_id"] = self.relationship_holder_id
+        result["relationship_holder"] = (
+            self.relationship_holder.as_dict() if self.relationship_holder else None
+        )
+        return result
 
     @classmethod
     def find_all_active_groups(cls):

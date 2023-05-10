@@ -38,7 +38,7 @@ export default function StaffForm({ ...props }) {
   const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
-  const staffId = props.staff_id;
+  const staffId = props.staffId;
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: staff,
