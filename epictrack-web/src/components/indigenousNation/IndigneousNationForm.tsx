@@ -21,7 +21,6 @@ import StaffService from "../../services/staffService";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
-  //   responsible_epd_id: yup.string().required('Select position')
 });
 
 export default function StaffForm({ ...props }) {
@@ -74,7 +73,7 @@ export default function StaffForm({ ...props }) {
       if (result.status === 200) {
         setAlertContentText("Staff details updated");
         setOpenAlertDialog(true);
-        props.onSubmitSucces();
+        props.onSubmitSuccess();
         setLoading(false);
       }
     } else {
@@ -108,11 +107,11 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Responsible EPD</TrackLabel>
+            <TrackLabel>Relationship Holder</TrackLabel>
             <ControlledSelect
-              defaultValue={indigenousNation?.responsible_epd_id}
+              defaultValue={indigenousNation?.relationship_holder_id}
               fullWidth
-              {...register("responsible_epd_id")}
+              {...register("relationship_holder_id")}
             >
               {staffs?.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>

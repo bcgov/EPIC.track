@@ -1,4 +1,4 @@
-export interface Position {
+export interface ListType {
     name: string;
     id: number;
 }

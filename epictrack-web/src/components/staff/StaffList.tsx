@@ -4,11 +4,10 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import StaffForm from "./StaffForm";
-import { Position, Staff } from "../../models/staff";
+import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import TrackDialog from "../shared/TrackDialog";
-import codeService from "../../services/codeService";
 import { EpicTrackPageGridContainer } from "../shared";
 
 const StaffList = () => {
@@ -19,12 +18,11 @@ const StaffList = () => {
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
-  const [positions, setPositions] = React.useState<Position[]>([]);
+  const [positions, setPositions] = React.useState<string[]>([]);
 
   const titleSuffix = "Staff Details";
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
-    setStaffId(undefined);
     setShowDialog(false);
   };
   const onEdit = (id: number) => {
@@ -48,16 +46,12 @@ const StaffList = () => {
   React.useEffect(() => {
     getStaff();
   }, [getStaff]);
-
-  const getPositions = async () => {
-    const positionResult = await codeService.getCodes("positions");
-    if (positionResult.status === 200) {
-      setPositions((positionResult.data as never)["codes"]);
-    }
-  };
   React.useEffect(() => {
-    getPositions();
-  }, []);
+    const positions = staffs
+      .map((p) => p.position?.name)
+      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    setPositions(positions);
+  }, [staffs]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
@@ -91,7 +85,7 @@ const StaffList = () => {
         accessorKey: "position.name",
         header: "Position",
         filterVariant: "multi-select",
-        filterSelectOptions: positions.map((p) => p.name),
+        filterSelectOptions: positions,
       },
       {
         accessorKey: "is_active",
@@ -115,8 +109,6 @@ const StaffList = () => {
     <>
       <EpicTrackPageGridContainer
         direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
         container
         columnSpacing={2}
         rowSpacing={3}
@@ -151,6 +143,7 @@ const StaffList = () => {
                 <Button
                   onClick={() => {
                     setShowDialog(true);
+                    setStaffId(undefined);
                   }}
                   variant="contained"
                 >
@@ -171,8 +164,8 @@ const StaffList = () => {
       >
         <StaffForm
           onCancel={onDialogClose}
-          staff_id={staffId}
-          onSubmitSucces={getStaff}
+          staffId={staffId}
+          onSubmitSuccess={getStaff}
         />
       </TrackDialog>
       <TrackDialog

@@ -55,7 +55,6 @@ export default function ProponentList() {
 
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
-    setProponentID(undefined);
     setShowDialog(false);
   };
   const onEdit = (id: number) => {
@@ -109,8 +108,6 @@ export default function ProponentList() {
     <>
       <EpicTrackPageGridContainer
         direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
         container
         columnSpacing={2}
         rowSpacing={3}
@@ -145,6 +142,7 @@ export default function ProponentList() {
                 <Button
                   onClick={() => {
                     setShowDialog(true);
+                    setProponentID(undefined);
                   }}
                   variant="contained"
                 >
@@ -166,7 +164,7 @@ export default function ProponentList() {
         <ProponentForm
           onCancel={onDialogClose}
           proponentID={proponentID}
-          onSubmitSucces={getProponents}
+          onSubmitSuccess={getProponents}
         />
       </TrackDialog>
       <TrackDialog

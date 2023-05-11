@@ -32,8 +32,8 @@ export default function IndigenousNationList() {
         header: "Name",
       },
       {
-        accessorKey: "responsible_epd.full_name",
-        header: "Responsible EPD",
+        accessorKey: "relationship_holder.full_name",
+        header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
       },
       {
@@ -57,7 +57,6 @@ export default function IndigenousNationList() {
 
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
-    setIndigenousNationID(undefined);
     setShowDialog(false);
   };
   const onEdit = (id: number) => {
@@ -114,8 +113,6 @@ export default function IndigenousNationList() {
     <>
       <EpicTrackPageGridContainer
         direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
         container
         columnSpacing={2}
         rowSpacing={3}
@@ -150,6 +147,7 @@ export default function IndigenousNationList() {
                 <Button
                   onClick={() => {
                     setShowDialog(true);
+                    setIndigenousNationID(undefined);
                   }}
                   variant="contained"
                 >
@@ -171,7 +169,7 @@ export default function IndigenousNationList() {
         <IndigenousNationForm
           onCancel={onDialogClose}
           indigenousNationID={indigenousNationID}
-          onSubmitSucces={getIndigenousNations}
+          onSubmitSuccess={getIndigenousNations}
         />
       </TrackDialog>
       <TrackDialog

@@ -17,6 +17,8 @@ interface HeaderProps {
 
 export const EpicTrackPageGridContainer = styled(Grid)(() => ({
   padding: "6em 2em 1em 2em",
+  justifyContent: "flex-start",
+  alignItems: "flex-start",
 }));
 
 export const EpicTrackH1 = ({ bold, children, sx, ...rest }: HeaderProps) => {

@@ -73,7 +73,7 @@ export default function StaffForm({ ...props }) {
       if (result.status === 200) {
         setAlertContentText("Staff details updated");
         setOpenAlertDialog(true);
-        props.onSubmitSucces();
+        props.onSubmitSuccess();
         setLoading(false);
       }
     } else {
@@ -107,7 +107,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Responsible EPD</TrackLabel>
+            <TrackLabel>Relationship Holder</TrackLabel>
             <ControlledSelect
               defaultValue={proponent?.relationship_holder_id}
               fullWidth
