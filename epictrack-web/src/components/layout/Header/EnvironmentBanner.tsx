@@ -12,7 +12,9 @@ const EnvironmentBanner = () => {
     host.indexOf("test") !== -1 ||
     host.indexOf("demo") !== -1 ||
     host.indexOf("localhost") !== -1;
-  dispatch(envBanner(isTestEnvironment));
+  React.useEffect(() => {
+    dispatch(envBanner(isTestEnvironment));
+  }, []);
   if (!isTestEnvironment) {
     return (
       <Box

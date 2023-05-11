@@ -8,9 +8,7 @@ import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import TrackDialog from "../shared/TrackDialog";
-import codeService, { Code } from "../../services/codeService";
 import { EpicTrackPageGridContainer } from "../shared";
-import { ListType } from "../../models/code";
 
 const StaffList = () => {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
@@ -20,13 +18,12 @@ const StaffList = () => {
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
-  const [positions, setPositions] = React.useState<ListType[]>([]);
+  const [positions, setPositions] = React.useState<string[]>([]);
 
   const titleSuffix = "Staff Details";
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
     setShowDialog(false);
-    setStaffId(undefined);
   };
   const onEdit = (id: number) => {
     setStaffId(id);
@@ -49,16 +46,12 @@ const StaffList = () => {
   React.useEffect(() => {
     getStaff();
   }, [getStaff]);
-
-  const getPositions = async () => {
-    const positionResult = await codeService.getCodes("positions");
-    if (positionResult.status === 200) {
-      setPositions((positionResult.data as never)["codes"]);
-    }
-  };
   React.useEffect(() => {
-    getPositions();
-  }, []);
+    const positions = staffs
+      .map((p) => p.position?.name)
+      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    setPositions(positions);
+  }, [staffs]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
@@ -92,7 +85,7 @@ const StaffList = () => {
         accessorKey: "position.name",
         header: "Position",
         filterVariant: "multi-select",
-        filterSelectOptions: positions.map((p) => p.name),
+        filterSelectOptions: positions,
       },
       {
         accessorKey: "is_active",
@@ -150,6 +143,7 @@ const StaffList = () => {
                 <Button
                   onClick={() => {
                     setShowDialog(true);
+                    setStaffId(undefined);
                   }}
                   variant="contained"
                 >

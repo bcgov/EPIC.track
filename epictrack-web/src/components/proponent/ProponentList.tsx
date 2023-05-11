@@ -55,7 +55,6 @@ export default function ProponentList() {
 
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
-    setProponentID(undefined);
     setShowDialog(false);
   };
   const onEdit = (id: number) => {
@@ -143,6 +142,7 @@ export default function ProponentList() {
                 <Button
                   onClick={() => {
                     setShowDialog(true);
+                    setProponentID(undefined);
                   }}
                   variant="contained"
                 >
