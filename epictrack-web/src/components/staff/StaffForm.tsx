@@ -12,11 +12,12 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import codeService from "../../services/codeService";
-import { Position, Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
 import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
+import { Staff } from "../../models/staff";
+import { ListType } from "../../models/code";
 
 const schema = yup.object().shape({
   email: yup.string().email().required("Email is required"),
@@ -33,7 +34,7 @@ const schema = yup.object().shape({
 });
 
 export default function StaffForm({ ...props }) {
-  const [positions, setPositions] = React.useState<Position[]>([]);
+  const [positions, setPositions] = React.useState<ListType[]>([]);
   const [staff, setStaff] = React.useState<Staff>();
   const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
   const [alertContentText, setAlertContentText] = React.useState<string>();

@@ -7,6 +7,7 @@ import ResourceForecast from "../components/reports/resourceForecast/ResourceFor
 import ThirtySixtyNinety from "../components/reports/30-60-90Report/ThirtySixtyNinety";
 import IndigenousNationList from "../components/indigenousNation/IndigenousNationList";
 import ProponentList from "../components/proponent/ProponentList";
+import WorkTombstoneForm from "../components/work/tombstone/WorkTombstoneForm";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -22,18 +23,12 @@ const AuthenticatedRoutes = () => {
         element={<ResourceForecast />}
       />
       <Route path="/reporting/30-60-90" element={<ThirtySixtyNinety />} />
-      {/* <Route path="/surveys" element={<SurveyListing />} />
-            <Route path="/surveys/create" element={<CreateSurvey />} />
-            <Route path="/surveys/:surveyId/build" element={<SurveyFormBuilder />} />
-            <Route path="/surveys/:surveyId/submit" element={<SurveySubmit />} />
-            <Route path="/surveys/:surveyId/comments" element={<CommentReviewListing />} />
-            <Route path="/surveys/:surveyId/comments/all" element={<CommentTextListing />} />
-            <Route path="/surveys/:surveyId/submissions/:submissionId/review" element={<CommentReview />} /> */}
       <Route
         path="/data-management/indigenous-nations"
         element={<IndigenousNationList />}
       />
       <Route path="/data-management/proponents" element={<ProponentList />} />
+      <Route path="/works" element={<WorkTombstoneForm />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -4,12 +4,13 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import StaffForm from "./StaffForm";
-import { Position, Staff } from "../../models/staff";
+import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import TrackDialog from "../shared/TrackDialog";
-import codeService from "../../services/codeService";
+import codeService, { Code } from "../../services/codeService";
 import { EpicTrackPageGridContainer } from "../shared";
+import { ListType } from "../../models/code";
 
 const StaffList = () => {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
@@ -19,7 +20,7 @@ const StaffList = () => {
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
-  const [positions, setPositions] = React.useState<Position[]>([]);
+  const [positions, setPositions] = React.useState<ListType[]>([]);
 
   const titleSuffix = "Staff Details";
   const onDialogClose = (event: any, reason: any) => {
