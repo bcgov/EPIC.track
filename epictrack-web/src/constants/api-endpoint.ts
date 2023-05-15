@@ -18,5 +18,8 @@ const Endpoints = {
   Proponents: {
     GET_PROPONENTS: "proponents",
   },
+  Works: {
+    GET_WORKS: "works",
+  },
 };
 export default Endpoints;

@@ -14,33 +14,34 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-// import { TrackLabel } from "../shared/index";
 import codeService from "../../../services/codeService";
-// import { Position, Staff } from "../../models/staff";
-// import StaffService from "../../services/staffService";
-// import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
-// import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
-// import TrackDialog from "../shared/TrackDialog";
 import { WorkTombstone } from "../../../models/work";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
 import { Code } from "../../../services/codeService";
-import { EpicTrackPageGridContainer, TrackLabel } from "../../shared";
+import { TrackLabel } from "../../shared";
 import ControlledSelect from "../../shared/controlledInputComponents/ControlledSelect";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DATE_FORMAT } from "../../../constants/application-constant";
-import { dateUtils } from "../../../utils";
+import WorkService from "../../../services/workService";
+import ControlledCheckbox from "../../shared/controlledInputComponents/ControlledCheckbox";
+import { Staff } from "../../../models/staff";
+import StaffService from "../../../services/staffService";
+import TrackDialog from "../../shared/TrackDialog";
 
 const schema = yup.object<WorkTombstone>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
   work_type_id: yup.number().required("Work type is required"),
-  start_date: yup.string().required("Start date is required"),
+  start_date: yup.date().required("Start date is required"),
   project_id: yup.number().required("Project is required"),
   ministry_id: yup.number().required("Responsible ministry is required"),
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),
   title: yup.string().required("Title is required"),
+  substitution_act_id: yup.number(),
+  short_description: yup.string(),
+  long_description: yup.string(),
 });
 
 export default function WorkTombstoneForm({ ...props }) {
@@ -53,8 +54,9 @@ export default function WorkTombstoneForm({ ...props }) {
   >([]);
   const [substitutionActs, setSubtitutionActs] = React.useState<ListType[]>([]);
   const [teams, setTeams] = React.useState<ListType[]>([]);
-  // const [epds, setEPDs] = React.useState<Staff[]>();
-  // const [leads, setLeads] = React.useState<Staff[]>();
+  const [epds, setEPDs] = React.useState<Staff[]>([]);
+  const [leads, setLeads] = React.useState<Staff[]>([]);
+  const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
 
   // const [positions, setPositions] = React.useState<Position[]>([]);
   const [work, setWork] = React.useState<WorkTombstone>();
@@ -84,32 +86,30 @@ export default function WorkTombstoneForm({ ...props }) {
     substitution_acts: setSubtitutionActs,
     eao_teams: setTeams,
   };
-  //#region listings
-  // const findMethod = (code: Code) => {
-  //   switch(code){
-  //     case "ea_acts": return setEAActs;
-  //     case "work_types": return setWorkTypes;
-  //     case "projects": return setProjects;
-  //     case "ministries": return setMinistries;
-  //     case "federal_involvements": return setFederalInvolvements;
-  //     case "substitution_acts": return setSubtitutionActs;
-  //     case "eao_teams": return setTeams;
-  //     case "ea_acts": return setEAActs;
-  //   }
-  //   return setEAActs;
-  // }
+
+  const staffByRoles: { [x: string]: any } = {
+    "4": setLeads,
+    "3": setEPDs,
+    "1,2,8": setDecisionMakers,
+  };
   const getCodes = async (code: Code) => {
     const codeResult = await codeService.getCodes(code);
     if (codeResult.status === 200) {
       codeTypes[code]((codeResult.data as never)["codes"]);
     }
   };
-  //#endregion
   const getWorkTombstone = async (id: number) => {
-    const result = { status: 200, data: {} }; //await StaffService.getStaff(id);
+    const result = await WorkService.getWork(id);
     if (result.status === 200) {
-      setWork(result.data as WorkTombstone);
-      //reset((result.data as never)["staff"]);
+      setWork((result.data as never)["work"]);
+      reset((result.data as never)["work"]);
+    }
+  };
+
+  const getStaffByPosition = async (position: string) => {
+    const staffResult = await StaffService.getStaffByPosition(position);
+    if (staffResult.status === 200) {
+      staffByRoles[position]((staffResult.data as never)["staffs"]);
     }
   };
 
@@ -124,46 +124,40 @@ export default function WorkTombstoneForm({ ...props }) {
     Object.keys(codeTypes).forEach(async (key) => {
       promises.push(getCodes(key as Code));
     });
+    Object.keys(staffByRoles).forEach(async (key) => {
+      promises.push(getStaffByPosition(key));
+    });
     Promise.all(promises);
   }, []);
 
-  // const getPositions = async () => {
-  //   const positionResult = await codeService.getCodes("positions");
-  //   if (positionResult.status === 200) {
-  //     setPositions((positionResult.data as never)["codes"]);
-  //   }
-  // };
-  // React.useEffect(() => {
-  //   getPositions();
-  // }, []);
   const onSubmitHandler = async (data: any) => {
-    console.log(data);
+    console.log(data, "data");
     setLoading(true);
-    // if (staffId) {
-    //   const result = await StaffService.updateStaff(data);
-    //   if (result.status === 200) {
-    //     setAlertContentText("Staff details updated");
-    //     setOpenAlertDialog(true);
-    //     props.onSubmitSuccess();
-    //     setLoading(false);
-    //   }
-    // } else {
-    //   const result = await StaffService.createStaff(data);
-    //   if (result.status === 201) {
-    //     setAlertContentText("Staff details inserted");
-    //     setOpenAlertDialog(true);
-    //     props.onSubmitSuccess();
-    //     setLoading(false);
-    //   }
-    // }
-    // reset();
+    if (workId) {
+      const result = await WorkService.updateWork(data);
+      if (result.status === 200) {
+        setAlertContentText("Work details updated");
+        setOpenAlertDialog(true);
+        props.onSubmitSuccess();
+        setLoading(false);
+      }
+    } else {
+      const result = await WorkService.createWork(data);
+      if (result.status === 201) {
+        setAlertContentText("Work details inserted");
+        setOpenAlertDialog(true);
+        props.onSubmitSuccess();
+        setLoading(false);
+      }
+    }
+    reset();
   };
   return (
-    <EpicTrackPageGridContainer>
+    <>
       <FormProvider {...methods}>
         <Grid
           component={"form"}
-          id="staff-form"
+          id="work-form"
           container
           spacing={2}
           onSubmit={handleSubmit(onSubmitHandler)}
@@ -220,6 +214,7 @@ export default function WorkTombstoneForm({ ...props }) {
                       e: SyntheticEvent<Element, Event>,
                       value: ListType | null
                     ) => onChange(value ? value.id : null)}
+                    ref={ref}
                     renderInput={(params) => (
                       <TextField
                         error={!!errors?.work_type_id?.message}
@@ -248,24 +243,43 @@ export default function WorkTombstoneForm({ ...props }) {
             </ControlledSelect> */}
           </Grid>
           <Grid item xs={4}>
-            <TrackLabel>Start date</TrackLabel>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                format={DATE_FORMAT}
-                // onChange={(dateVal: any) =>
-                //   props.setReportDate(dateUtils.formatDate(dateVal.$d))
-                // }
-                slotProps={{
-                  textField: {
-                    id: "start_date",
-                  },
-                  ...register("start_date"),
-                }}
-              />
-            </LocalizationProvider>
+            <TrackLabel className="start-date-label">Start date</TrackLabel>
+            <Controller
+              name="start_date"
+              control={control}
+              defaultValue={work?.start_date}
+              render={({
+                field: { onChange, value },
+                fieldState: { error },
+              }) => (
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    format={DATE_FORMAT}
+                    // onChange={(dateVal: any) =>
+                    //   props.setReportDate(dateUtils.formatDate(dateVal.$d))
+                    // }
+                    slotProps={{
+                      textField: {
+                        id: "start_date",
+                        fullWidth: true,
+                        error: error ? true : false,
+                        helperText: error?.message,
+                      },
+                      ...register("start_date"),
+                    }}
+                    value={value}
+                    onChange={(event) => {
+                      onChange(event);
+                    }}
+                    defaultValue={work?.start_date ? work.start_date : ""}
+                    sx={{ display: "block" }}
+                  />
+                </LocalizationProvider>
+              )}
+            />
           </Grid>
-          <Divider />
-          <Grid item xs={4}>
+          <Divider style={{ width: "100%", marginTop: "10px" }} />
+          <Grid item xs={6}>
             <TrackLabel>Project</TrackLabel>
             <ControlledSelect
               error={!!errors?.project_id?.message}
@@ -281,7 +295,7 @@ export default function WorkTombstoneForm({ ...props }) {
               ))}
             </ControlledSelect>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <TrackLabel>Responsible Ministry</TrackLabel>
             <ControlledSelect
               error={!!errors?.ministry_id?.message}
@@ -297,7 +311,7 @@ export default function WorkTombstoneForm({ ...props }) {
               ))}
             </ControlledSelect>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <TrackLabel>Federal Involvement</TrackLabel>
             <ControlledSelect
               error={!!errors?.federal_involvement_id?.message}
@@ -309,6 +323,151 @@ export default function WorkTombstoneForm({ ...props }) {
               {federalInvolvements.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
                   {e.name}
+                </MenuItem>
+              ))}
+            </ControlledSelect>
+          </Grid>
+
+          <Grid item xs={6}>
+            <TrackLabel>Federal Act</TrackLabel>
+            <ControlledSelect
+              error={!!errors?.substitution_act_id?.message}
+              helperText={errors?.substitution_act_id?.message?.toString()}
+              defaultValue={work?.substitution_act_id}
+              fullWidth
+              {...register("substitution_act_id")}
+            >
+              {substitutionActs.map((e, index) => (
+                <MenuItem key={index + 1} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
+            </ControlledSelect>
+          </Grid>
+          <Grid item xs={12}>
+            <TrackLabel>Title</TrackLabel>
+            <TextField
+              fullWidth
+              error={!!errors?.title?.message}
+              helperText={errors?.title?.message?.toString()}
+              {...register("title")}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TrackLabel>Short Description</TrackLabel>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              error={!!errors?.short_description?.message}
+              helperText={errors?.short_description?.message?.toString()}
+              {...register("short_description")}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TrackLabel>Long Description</TrackLabel>
+            <TextField
+              fullWidth
+              multiline
+              rows={4}
+              error={!!errors?.long_description?.message}
+              helperText={errors?.long_description?.message?.toString()}
+              {...register("long_description")}
+            />
+          </Grid>
+          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+            <ControlledCheckbox
+              defaultChecked={work?.is_pcp_required}
+              {...register("is_pcp_required")}
+            />
+            <TrackLabel id="is_pcp_required">PCP Required</TrackLabel>
+          </Grid>
+          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+            <ControlledCheckbox
+              defaultChecked={work?.is_cac_required}
+              {...register("is_cac_required")}
+            />
+            <TrackLabel id="is_cac_required">CAC Required</TrackLabel>
+          </Grid>
+          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+            <ControlledCheckbox
+              defaultChecked={work?.is_watched}
+              {...register("is_watched")}
+            />
+            <TrackLabel id="is_watched">Watched</TrackLabel>
+          </Grid>
+          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+            <ControlledCheckbox
+              defaultChecked={work?.is_active}
+              {...register("is_active")}
+            />
+            <TrackLabel id="is_active">Active</TrackLabel>
+          </Grid>
+
+          <Divider style={{ width: "100%", marginTop: "10px" }} />
+
+          <Grid item xs={6}>
+            <TrackLabel>EAO Team</TrackLabel>
+            <ControlledSelect
+              error={!!errors?.eao_team_id?.message}
+              helperText={errors?.eao_team_id?.message?.toString()}
+              defaultValue={work?.eao_team_id}
+              fullWidth
+              {...register("eao_team_id")}
+            >
+              {teams.map((e, index) => (
+                <MenuItem key={index + 1} value={e.id}>
+                  {e.name}
+                </MenuItem>
+              ))}
+            </ControlledSelect>
+          </Grid>
+
+          <Grid item xs={6}>
+            <TrackLabel>Responsible EPD</TrackLabel>
+            <ControlledSelect
+              error={!!errors?.responsible_epd_id?.message}
+              helperText={errors?.responsible_epd_id?.message?.toString()}
+              defaultValue={work?.responsible_epd_id}
+              fullWidth
+              {...register("responsible_epd_id")}
+            >
+              {epds.map((e, index) => (
+                <MenuItem key={index + 1} value={e.id}>
+                  {e.full_name}
+                </MenuItem>
+              ))}
+            </ControlledSelect>
+          </Grid>
+          <Grid item xs={6}>
+            <TrackLabel>Work Lead</TrackLabel>
+            <ControlledSelect
+              error={!!errors?.work_lead_id?.message}
+              helperText={errors?.work_lead_id?.message?.toString()}
+              defaultValue={work?.work_lead_id}
+              fullWidth
+              {...register("work_lead_id")}
+            >
+              {leads.map((e, index) => (
+                <MenuItem key={index + 1} value={e.id}>
+                  {e.full_name}
+                </MenuItem>
+              ))}
+            </ControlledSelect>
+          </Grid>
+          <Grid item xs={6}>
+            {/* TODO: Make the label dynamic */}
+            <TrackLabel>Decision Maker</TrackLabel>
+            <ControlledSelect
+              error={!!errors?.decision_by_id?.message}
+              helperText={errors?.decision_by_id?.message?.toString()}
+              defaultValue={work?.decision_by_id}
+              fullWidth
+              {...register("decision_by_id")}
+            >
+              {decisionMakers.map((e, index) => (
+                <MenuItem key={index + 1} value={e.id}>
+                  {e.full_name}
                 </MenuItem>
               ))}
             </ControlledSelect>
@@ -327,7 +486,7 @@ export default function WorkTombstoneForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      {/* <TrackDialog
+      <TrackDialog
         open={openAlertDialog}
         dialogTitle={"Success"}
         dialogContentText={alertContentText}
@@ -343,7 +502,7 @@ export default function WorkTombstoneForm({ ...props }) {
         open={loading}
       >
         <CircularProgress color="inherit" />
-      </Backdrop> */}
-    </EpicTrackPageGridContainer>
+      </Backdrop>
+    </>
   );
 }

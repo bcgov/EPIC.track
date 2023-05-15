@@ -14,37 +14,51 @@
 """Service to manage Milestone."""
 from flask import current_app, jsonify
 from reports_api.models import Milestone, PhaseCode, db
+from reports_api.schemas.milestone import MilestoneSchema
 
 
-class MilestoneService():  # pylint:disable=too-few-public-methods
+class MilestoneService:  # pylint:disable=too-few-public-methods
     """Service to manage milestones related operations"""
 
     @classmethod
     def find_non_decision_by_phase_id(cls, phase_id: int):
         """Find milestones by phase_id which are neither start event not end event"""
-        current_app.logger.debug(f'find non decision making milestones by phase id {phase_id}')
+        current_app.logger.debug(
+            f"find non decision making milestones by phase id {phase_id}"
+        )
         milestones = Milestone.find_non_decision_by_phase_id(phase_id)
         return jsonify([item.as_dict() for item in milestones])
 
     @classmethod
     def find_milestone_by_id(cls, milestone_id: int):
         """Find milestone by id"""
-        current_app.logger.debug(f'find milestone by id {milestone_id}')
+        current_app.logger.debug(f"find milestone by id {milestone_id}")
         milestone = Milestone.find_by_id(milestone_id)
         return jsonify(milestone.as_dict())
 
     @classmethod
     def find_all_active_milestones(cls):
         """Find all active milestones"""
-        current_app.logger.debug('Find all active milestones')
+        current_app.logger.debug("Find all active milestones")
         milestones = Milestone.find_all()
         return jsonify([item.as_dict() for item in milestones])
 
     @classmethod
     def find_milestones_per_work_type(cls, work_type_id: int):
         """Find all active milestones"""
-        current_app.logger.debug('Find all active milestones')
-        milestones = db.session.query(Milestone).filter(Milestone.phase_id.in_(
-            db.session.query(PhaseCode.id)
-            .filter(PhaseCode.work_type_id == work_type_id)))
+        current_app.logger.debug("Find all active milestones")
+        milestones = db.session.query(Milestone).filter(
+            Milestone.phase_id.in_(
+                db.session.query(PhaseCode.id).filter(
+                    PhaseCode.work_type_id == work_type_id
+                )
+            )
+        )
         return jsonify([item.as_dict() for item in milestones])
+
+    @classmethod
+    def find_auto_milestones_per_phase(cls, phase_id):
+        """Find start and end EVENTS for given phase id"""
+        milestones = Milestone.find_auto_by_phase_id(phase_id)
+        milestones_schema = MilestoneSchema(many=True)
+        return milestones_schema.dump(milestones)

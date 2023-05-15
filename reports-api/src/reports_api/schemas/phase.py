@@ -1,0 +1,27 @@
+"""Ministry model schema"""
+from marshmallow import EXCLUDE, fields
+
+from reports_api.models import PhaseCode
+from reports_api.models.db import ma
+from reports_api.schemas.ea_act import EAActSchema
+from reports_api.schemas.milestone import MilestoneSchema
+
+
+from reports_api.schemas.work_type import WorkTypeSchema
+
+
+class PhaseSchema(
+    ma.SQLAlchemyAutoSchema
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """PhaseCode model schema class"""
+
+    class Meta:
+        """Meta information"""
+
+        model = PhaseCode
+        include_fk = True
+        unknown = EXCLUDE
+
+    ea_act = fields.Nested(EAActSchema, dump_only=True)
+    work_type = fields.Nested(WorkTypeSchema, dump_only=True)
+    milestones = fields.Nested(MilestoneSchema(many=True), dump_only=True)

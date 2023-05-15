@@ -15,26 +15,27 @@
 from flask import current_app, jsonify
 
 from reports_api.models.phase_code import PhaseCode
+from reports_api.schemas.phase import PhaseSchema
 
 
-class PhaseService():  # pylint:disable=too-few-public-methods
+class PhaseService:  # pylint:disable=too-few-public-methods
     """Service to manage phases related operations"""
 
     @classmethod
     def find_phase_codes_by_ea_act_and_work_type(
-            cls,
-            _ea_act_id: str,
-            _work_type_id: str
+        cls, _ea_act_id: str, _work_type_id: str
     ):
         """Find phase codes by ea_act and work_type"""
-        current_app.logger.debug(f'<find_phase_codes_by_ea_act_and_work_type : {_ea_act_id} - {_work_type_id}')
-        code_table = PhaseCode.find_by_ea_act_and_work_type(_ea_act_id, _work_type_id)
-        return jsonify([item.as_dict() for item in code_table])
+        current_app.logger.debug(
+            f"<find_phase_codes_by_ea_act_and_work_type : {_ea_act_id} - {_work_type_id}"
+        )
+        phases = PhaseCode.find_by_ea_act_and_work_type(_ea_act_id, _work_type_id)
+        phases_schema = PhaseSchema(many=True)
+        return jsonify(phases_schema.dump(phases))
 
     @classmethod
-    def find_all_phases(
-        cls
-    ):
+    def find_all_phases(cls):
         """Find all phases"""
         phases = PhaseCode.find_all()
-        return jsonify([item.as_dict() for item in phases])
+        phases_schema = PhaseSchema(many=True)
+        return jsonify(phases_schema.dump(phases))
