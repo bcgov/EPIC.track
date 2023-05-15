@@ -7,7 +7,7 @@ import ResourceForecast from "../components/reports/resourceForecast/ResourceFor
 import ThirtySixtyNinety from "../components/reports/30-60-90Report/ThirtySixtyNinety";
 import IndigenousNationList from "../components/indigenousNation/IndigenousNationList";
 import ProponentList from "../components/proponent/ProponentList";
-import WorkTombstoneForm from "../components/work/tombstone/WorkTombstoneForm";
+import WorkList from "../components/work/WorkList";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -28,7 +28,7 @@ const AuthenticatedRoutes = () => {
         element={<IndigenousNationList />}
       />
       <Route path="/data-management/proponents" element={<ProponentList />} />
-      <Route path="/works" element={<WorkTombstoneForm />} />
+      <Route path="/works" element={<WorkList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

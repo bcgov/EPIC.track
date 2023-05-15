@@ -33,11 +33,24 @@ const deleteStaff = async (id?: number) => {
     AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/${id}`
   );
 };
+
+const getStaffByPosition = async (position: string) => {
+  let query_param = "position";
+  if (position.includes(",")) {
+    query_param += "s";
+  }
+
+  return await http.GetRequest(
+    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `?${query_param}=${position}`
+  );
+};
+
 const StaffService = {
   getStaffs,
   createStaff,
   getStaff,
   updateStaff,
   deleteStaff,
+  getStaffByPosition,
 };
 export default StaffService;
