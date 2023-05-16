@@ -8,6 +8,7 @@ import ThirtySixtyNinety from "../components/reports/30-60-90Report/ThirtySixtyN
 import IndigenousNationList from "../components/indigenousNation/IndigenousNationList";
 import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
+import ProjectList from "../components/project/ProjectList";
 
 const AuthenticatedRoutes = () => {
   return (

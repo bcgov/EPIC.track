@@ -1,3 +1,5 @@
+import { Proponent } from "./proponent";
+
 export interface Project {
     id: number;
     project_name: string;
@@ -7,7 +9,7 @@ export interface Project {
     description:string;
     region_env:string;
     region_flnro:string;
-    proponent:string;
+    proponent:Proponent;
     ea_certificate:string;
     abbreviation:string;
     epic_guid:string;

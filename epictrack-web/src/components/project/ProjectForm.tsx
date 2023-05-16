@@ -14,6 +14,7 @@ import { TrackLabel } from "../shared/index";
 import codeService from "../../services/codeService";
 import ProjectService from "../../services/projectService";
 import { Project } from "../../models/project";
+import { Proponent } from "../../models/proponent";
 import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
@@ -31,14 +32,15 @@ const schema = yup.object().shape({
 });
 
 export default function ProjectForm({ ...props }) {
-  const [projects, setProject] = React.useState<Project>();
+  const [project, setProject] = React.useState<Project>();
+  const [proponent, setProponent] = React.useState<Proponent>();
   const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const projectId = props.project_id;
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: projects,
+    defaultValues: project,
   });
 
   const {
@@ -51,8 +53,8 @@ export default function ProjectForm({ ...props }) {
   const getProjects = async (id: number) => {
     const result = await ProjectService.getProjects(id);
     if (result.status === 200) {
-      setProject((result.data as never)["projects"]);
-      reset((result.data as never)["projects"]);
+      setProject((result.data as never)["project"]);
+      reset((result.data as never)["project"]);
     }
   };
 
@@ -105,23 +107,23 @@ export default function ProjectForm({ ...props }) {
               {...register("project_name")}
             />
           </Grid>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <TrackLabel>Proponent</TrackLabel>
             <ControlledSelect
               error={!!errors?.proponent?.message}
               helperText={errors?.proponent?.message?.toString()}
-              defaultValue={projects?.proponent}
+              defaultValue={project?.proponent}
               fullWidth
               {...register("proponent")}
             >
-              {projects.map((e, index) => (
+              {proponent.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
-                  {e.proponent}
+                  {e.name}
                 </MenuItem>
               ))}
-            </ControlledSelect>
+            </ControlledSelect> */}
           </Grid>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <TrackLabel>Type</TrackLabel>
             <ControlledSelect
               error={!!errors?.type?.message}
@@ -132,12 +134,12 @@ export default function ProjectForm({ ...props }) {
             >
               {project.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
+                  {e.type}
                 </MenuItem>
               ))}
             </ControlledSelect>
-          </Grid>
-          <Grid item xs={6}>
+          </Grid> */}
+          {/* <Grid item xs={6}>
             <TrackLabel>SubType</TrackLabel>
             <ControlledSelect
               error={!!errors?.subtype?.message}
@@ -148,11 +150,11 @@ export default function ProjectForm({ ...props }) {
             >
               {project.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
+                  {e.subtype}
                 </MenuItem>
               ))}
             </ControlledSelect>
-          </Grid>
+          </Grid> */}
           <Grid item xs={6}>
             <TrackLabel>Project Description</TrackLabel>
             <TextField
@@ -190,7 +192,7 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.longitude?.message?.toString()}
             />
           </Grid>
-          <Grid item xs={6}>
+          {/* <Grid item xs={6}>
             <TrackLabel>ENV Region</TrackLabel>
             <ControlledSelect
               error={!!errors?.env_region?.message}
@@ -201,12 +203,12 @@ export default function ProjectForm({ ...props }) {
             >
               {project.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
+                  {e.region_env}
                 </MenuItem>
               ))}
             </ControlledSelect>
-          </Grid>
-          <Grid item xs={6}>
+          </Grid> */}
+          {/* <Grid item xs={6}>
             <TrackLabel>NRS Region</TrackLabel>
             <ControlledSelect
               error={!!errors?.nrs_region?.message}
@@ -217,11 +219,11 @@ export default function ProjectForm({ ...props }) {
             >
               {project.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
+                  {e.region_flnro}
                 </MenuItem>
               ))}
             </ControlledSelect>
-          </Grid>
+          </Grid> */}
           <Grid item xs={6}>
             <TrackLabel>Capital Investment</TrackLabel>
             <TextField

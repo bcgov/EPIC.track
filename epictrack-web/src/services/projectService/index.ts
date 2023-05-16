@@ -1,26 +1,35 @@
 import Endpoints from "../../constants/api-endpoint";
-import http from "../../apiManager/http-request-handler"
+import http from "../../apiManager/http-request-handler";
 import { AppConfig } from "../../config";
 const getProjects = async (apiUrl?: string) => {
-  return await http.GetRequest((AppConfig.apiUrl || apiUrl) + Endpoints.Projects.GET_PROJECTS)
-}
+  return await http.GetRequest(
+    (AppConfig.apiUrl || apiUrl) + Endpoints.Projects.GET_PROJECTS
+  );
+};
 
 const createProjects = async (projectID: any, projectParams: any) => {
-  return await http.DeleteRequest(AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS, projectParams)
-}
+  return await http.DeleteRequest(
+    AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS,
+    projectParams
+  );
+};
 
 const updateProjects = async (projectID: any, projectParams: any) => {
-  return await http.DeleteRequest(AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS
-    + `/${projectID}`, projectParams)
-}
+  return await http.DeleteRequest(
+    AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${projectID}`,
+    projectParams
+  );
+};
 const deleteProjects = async (projectID: any) => {
-  return await http.DeleteRequest(AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${projectID}`)
-}
+  return await http.DeleteRequest(
+    AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${projectID}`
+  );
+};
 const ProjectService = {
   getProjects,
   createProjects,
   updateProjects,
-  deleteProjects
-}
+  deleteProjects,
+};
 
 export default ProjectService;
