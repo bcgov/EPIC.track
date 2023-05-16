@@ -14,6 +14,7 @@ const AuthenticatedRoutes = () => {
     <Routes>
       {/* <Route path="/" element={<Dashboard />} /> */}
       <Route path="/data-management/staffs" element={<StaffList />} />
+      <Route path="/data-management/projects" element={<ProjectList />} />
       <Route
         path="/reporting/referral-schedule"
         element={<AnticipatedEAOSchedule />}
