@@ -19,9 +19,11 @@ const MasterTrackTable = <T extends Record<string, any>>({
         enableDensityToggle={false}
         enableColumnFilters={true}
         enableFullScreenToggle={false}
+        enablePinning
         positionActionsColumn={"last"}
         initialState={{
           density: "compact",
+          columnPinning: { right: ["mrt-row-actions"] },
         }}
         positionGlobalFilter="left"
         muiSearchTextFieldProps={{
@@ -31,6 +33,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
         }}
         state={{
           showGlobalFilter: true,
+          columnPinning: { right: ["mrt-row-actions"] },
           ...rest.state,
         }}
         renderToolbarInternalActions={({ table }) => (
