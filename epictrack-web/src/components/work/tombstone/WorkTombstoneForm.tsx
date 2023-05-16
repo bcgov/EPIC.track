@@ -28,6 +28,7 @@ import ControlledCheckbox from "../../shared/controlledInputComponents/Controlle
 import { Staff } from "../../../models/staff";
 import StaffService from "../../../services/staffService";
 import TrackDialog from "../../shared/TrackDialog";
+import dayjs from "dayjs";
 
 const schema = yup.object<WorkTombstone>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -101,8 +102,10 @@ export default function WorkTombstoneForm({ ...props }) {
   const getWorkTombstone = async (id: number) => {
     const result = await WorkService.getWork(id);
     if (result.status === 200) {
-      setWork((result.data as never)["work"]);
-      reset((result.data as never)["work"]);
+      const work = (result.data as any)["work"];
+      work.start_date = dayjs(work.start_date);
+      setWork(work);
+      reset(work);
     }
   };
 
