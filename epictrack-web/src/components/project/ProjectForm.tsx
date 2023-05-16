@@ -121,8 +121,8 @@ export default function ProjectForm({ ...props }) {
                   {e.name}
                 </MenuItem>
               ))}
-            </ControlledSelect> */}
-          </Grid>
+            </ControlledSelect> 
+          </Grid>  */}
           {/* <Grid item xs={6}>
             <TrackLabel>Type</TrackLabel>
             <ControlledSelect
