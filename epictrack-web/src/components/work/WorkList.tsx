@@ -9,10 +9,6 @@ import WorkService from "../../services/workService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import TrackDialog from "../shared/TrackDialog";
 import { EpicTrackPageGridContainer } from "../shared";
-import { ListType } from "../../models/code";
-import { Ministry } from "../../models/ministry";
-import codeService, { Code } from "../../services/codeService";
-
 const WorkList = () => {
   const [works, setWorks] = React.useState<WorkTombstone[]>([]);
   const [resultStatus, setResultStatus] = React.useState<string>();
@@ -21,12 +17,12 @@ const WorkList = () => {
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
-  const [phases, setPhases] = React.useState<ListType[]>([]);
-  const [eaActs, setEAActs] = React.useState<ListType[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
-  const [projects, setProjects] = React.useState<ListType[]>([]);
-  const [ministries, setMinistries] = React.useState<Ministry[]>([]);
-  const [teams, setTeams] = React.useState<ListType[]>([]);
+  const [phases, setPhases] = React.useState<string[]>([]);
+  const [eaActs, setEAActs] = React.useState<string[]>([]);
+  const [workTypes, setWorkTypes] = React.useState<string[]>([]);
+  const [projects, setProjects] = React.useState<string[]>([]);
+  const [ministries, setMinistries] = React.useState<string[]>([]);
+  const [teams, setTeams] = React.useState<string[]>([]);
   const titleSuffix = "Work Details";
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
@@ -38,28 +34,52 @@ const WorkList = () => {
   };
 
   const codeTypes: { [x: string]: any } = {
-    phases: setPhases,
-    ea_acts: setEAActs,
-    work_types: setWorkTypes,
-    projects: setProjects,
-    ministries: setMinistries,
-    eao_teams: setTeams,
-  };
-
-  const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
-    }
+    ea_act: setEAActs,
+    work_type: setWorkTypes,
+    project: setProjects,
+    ministry: setMinistries,
+    eao_team: setTeams,
+    current_phase: setPhases,
   };
 
   React.useEffect(() => {
-    const promises: any[] = [];
-    Object.keys(codeTypes).forEach(async (key) => {
-      promises.push(getCodes(key as Code));
+    Object.keys(codeTypes).forEach((key: string) => {
+      const codes = works
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        .map((w) => w[key]?.name)
+        .filter(
+          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
+        );
+      codeTypes[key](codes);
     });
-    Promise.all(promises);
-  }, []);
+
+    // const phases = works
+    //   .map((p) => p.current_phase?.name)
+    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    // setPhases(phases);
+    // const eaActs = works
+    //   .map((p) => p.ea_act?.name)
+    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    // setEAActs(eaActs);
+    // const workTypes = works
+    //   .map((p) => p.work_type?.name)
+    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    // setWorkTypes(workTypes);
+    // const projects = works
+    //   .map((p) => p.project?.name)
+    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    // setProjects(projects);
+    // const ministries = works
+    //   .map((p) => p.ministry?.name)
+    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    // setMinistries(ministries);
+    // const teams = works
+    //   .map((p) => p.eao_team?.name)
+    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    // setTeams(teams);
+  }, [works]);
+
   const getWorks = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -102,37 +122,37 @@ const WorkList = () => {
         accessorKey: "project.name",
         header: "Project",
         filterVariant: "multi-select",
-        filterSelectOptions: projects.map((p) => p.name),
+        filterSelectOptions: projects,
       },
       {
         accessorKey: "ea_act.name",
         header: "EA Act",
         filterVariant: "multi-select",
-        filterSelectOptions: eaActs.map((e) => e.name),
+        filterSelectOptions: eaActs,
       },
       {
         accessorKey: "work_type.name",
         header: "Work type",
         filterVariant: "multi-select",
-        filterSelectOptions: workTypes.map((w) => w.name),
+        filterSelectOptions: workTypes,
       },
       {
         accessorKey: "ministry.abbreviation",
         header: "Ministry",
         filterVariant: "multi-select",
-        filterSelectOptions: ministries.map((m) => m.abbreviation),
+        filterSelectOptions: ministries,
       },
       {
         accessorKey: "eao_team.name",
         header: "Team",
         filterVariant: "multi-select",
-        filterSelectOptions: teams.map((t) => t.name),
+        filterSelectOptions: teams,
       },
       {
         accessorKey: "current_phase.name",
         header: "Current Phase",
         filterVariant: "multi-select",
-        filterSelectOptions: phases.map((p) => p.name),
+        filterSelectOptions: phases,
       },
       {
         accessorKey: "is_active",
@@ -171,9 +191,9 @@ const WorkList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                {/* <IconButton onClick={() => onEdit(row.original.id)}>
+                <IconButton onClick={() => onEdit(row.original.id)}>
                   <EditIcon />
-                </IconButton> */}
+                </IconButton>
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>
@@ -198,6 +218,7 @@ const WorkList = () => {
                 </Button>
               </Box>
             )}
+            // state={{ columnPinning: { right: ["mrt-row-actions"] } }}
           />
         </Grid>
       </EpicTrackPageGridContainer>
