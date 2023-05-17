@@ -20,36 +20,44 @@ indigenous_categories = table(
     "indigenous_categories",
     column("id", sa.Integer),
     column("name", sa.String),
-    column("sort_order", sa.Integer)
+    column("sort_order", sa.Integer),
+    column("is_active", sa.Boolean)
 )
 data = [
     {
         "name": "PIN",
-        "sort_order": 1
+        "sort_order": 1,
+        "is_active": True
     },
     {
         "name": "TAC Member",
-        "sort_order": 2
+        "sort_order": 2,
+        "is_active": True
     },
         {
         "name": "Notification",
-        "sort_order": 3
+        "sort_order": 3,
+        "is_active": True
     },
         {
         "name": "Working Group",
-        "sort_order": 4
+        "sort_order": 4,
+        "is_active": True
     },
         {
         "name": "Collaboration",
-        "sort_order": 5
+        "sort_order": 5,
+        "is_active": True
     },
         {
         "name": "Consultation Agreement",
-        "sort_order": 6
+        "sort_order": 6,
+        "is_active": True
     },
         {
         "name": "Consent Required",
-        "sort_order": 7
+        "sort_order": 7,
+        "is_active": True
     }
     ]
 
