@@ -19,7 +19,7 @@ jobs:
   setup-job:
     runs-on: ubuntu-20.04
 
-    if: github.repository == 'bcgov/EPIC.track'
+    if: github.repository == 'bcgov/EPIC-FLOW'
 
     steps:
       - uses: actions/checkout@v2
