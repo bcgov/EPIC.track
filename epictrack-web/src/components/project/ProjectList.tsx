@@ -12,6 +12,8 @@ import { EpicTrackPageGridContainer } from "../shared";
 
 const ProjectList = () => {
   const [projects, setProjects] = React.useState<Project[]>([]);
+  const [regions, setRegions] = React.useState<string[]>([]);
+  const [types, setTypes] = React.useState<string[]>([]);
   const [resultStatus, setResultStatus] = React.useState<string>();
   const [projectId, setProjectId] = React.useState<number>();
   const [deleteProjectId, setDeleteProjectId] = React.useState<number>();
@@ -28,6 +30,24 @@ const ProjectList = () => {
     setProjectId(id);
     setShowDialog(true);
   };
+
+  const codeTypes: { [x: string]: any } = {
+    projects: setProjects,
+    regions: setRegions,
+    types: setTypes,
+  };
+
+  // React.useEffect(() => {
+  //   Object.keys(codeTypes).forEach((key: string) => {
+  //     const codes = projects
+  //       .map((w) => w[key]?.name)
+  //       .filter(
+  //         (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
+  //       );
+  //     codeTypes[key](codes);
+  //   });
+  // }, [projects]);
+
   const getProject = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -45,6 +65,20 @@ const ProjectList = () => {
   React.useEffect(() => {
     getProject();
   }, [getProject]);
+
+  // React.useEffect(() => {
+  //   const regions = staffs
+  //     .map((p) => p.position?.name)
+  //     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+  //   setPositions(positions);
+  // }, [staffs]);
+
+  // React.useEffect(() => {
+  //   const types = staffs
+  //     .map((p) => p.position?.name)
+  //     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+  //   setPositions(positions);
+  // }, [staffs]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
@@ -69,14 +103,20 @@ const ProjectList = () => {
       {
         accessorKey: "sub_type.type.name",
         header: "Type",
+        filterVariant: "multi-select",
+        // filterSelectOptions: types,
       },
       {
         accessorKey: "sub_type.name",
         header: "Sub Type",
+        filterVariant: "multi-select",
+        // filterSelectOptions: types,
       },
       {
         accessorKey: "region_env.name",
         header: "ENV Region",
+        filterVariant: "multi-select",
+        // filterSelectOptions: regions,
       },
       {
         accessorKey: "is_project_closed",
@@ -94,14 +134,12 @@ const ProjectList = () => {
         ),
       },
     ],
-    [projects]
+    [projects, types, regions]
   );
   return (
     <>
       <EpicTrackPageGridContainer
         direction="row"
-        justifyContent="flex-start"
-        alignItems="flex-start"
         container
         columnSpacing={2}
         rowSpacing={3}
