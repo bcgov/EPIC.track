@@ -5,8 +5,10 @@ import {
   AccordionDetails,
   AccordionSummary,
   Alert,
+  Autocomplete,
   Box,
   Chip,
+  FormLabel,
   Grid,
   Skeleton,
   Tab,
@@ -15,6 +17,7 @@ import {
   TableCell,
   TableRow,
   Tabs,
+  TextField,
   Typography,
 } from "@mui/material";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
@@ -36,6 +39,8 @@ export default function AnticipatedEAOSchedule() {
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [reportDate, setReportDate] = React.useState<string>();
   const [resultStatus, setResultStatus] = React.useState<string>();
+  const [typeFilter, setTypeFilter] = React.useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = React.useState<string[]>([]);
 
   const FILENAME_PREFIX = "Anticipated_EA_Referral_Schedule";
   React.useEffect(() => {
@@ -46,6 +51,14 @@ export default function AnticipatedEAOSchedule() {
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
+
+  React.useEffect(() => {
+    const filterTypes = Object.keys(reports).filter(
+      (ele, index, arr) => arr.findIndex((t) => t === ele) === index
+    );
+    setTypeFilter(filterTypes);
+  }, [reports]);
+  console.log("TYPES", typeFilter);
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -163,174 +176,208 @@ export default function AnticipatedEAOSchedule() {
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>
+      {Object.keys(reports).length > 0 && (
+        <>
+          <Grid item sm={2}>
+            <FormLabel>Select Type to Hide</FormLabel>
+          </Grid>
+          <Grid item sm={2}>
+            <Autocomplete
+              sx={{
+                [`& .MuiInputBase-root`]: {
+                  padding: "5px",
+                  border: "1px solid",
+                  borderColor: "black",
+                  borderRadius: "4px",
+                },
+              }}
+              autoFocus
+              multiple
+              value={selectedTypes}
+              onChange={(e, value) => setSelectedTypes(value)}
+              options={typeFilter}
+              renderInput={(params) => (
+                <TextField {...params} variant="standard" />
+              )}
+            />
+          </Grid>
+        </>
+      )}
       <Grid item sm={12}>
         {resultStatus === RESULT_STATUS.LOADED &&
-          Object.keys(reports).map((key) => {
-            console.log(key);
-            return (
-              <>
-                <Accordion
-                  sx={{ mt: "15px", bgcolor: "rgba(0, 0, 0, .03)" }}
-                  square
-                  disableGutters
-                  elevation={0}
-                >
-                  <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
-                    <Typography>{key}</Typography>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    {((reports as any)[key] as []).map((item, itemIndex) => {
-                      return (
-                        <Accordion key={itemIndex} elevation={0}>
-                          <AccordionSummary
-                            expandIcon={<ArrowForwardIosSharpIcon />}
-                          >
-                            <Typography>
-                              <Chip
-                                style={{
-                                  marginRight: "0.5rem",
-                                  borderRadius: "4px",
-                                  fontSize: "12px",
-                                  ...staleLevel(item["date_updated"]),
-                                }}
-                                label={
-                                  <>
-                                    <b>
-                                      {dateUtils.formatDate(
-                                        item["date_updated"],
-                                        DISPLAY_DATE_FORMAT
-                                      )}
-                                    </b>
-                                  </>
-                                }
-                              />
-                              {item["project_name"]}
-                            </Typography>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <Tabs
-                              id={itemIndex.toString()}
-                              onChange={handleTabChange}
-                              value={selectedTab}
+          Object.keys(reports)
+            .filter((key) => !selectedTypes.includes(key))
+            .map((key) => {
+              return (
+                <>
+                  <Accordion
+                    sx={{ mt: "15px", bgcolor: "rgba(0, 0, 0, .03)" }}
+                    square
+                    disableGutters
+                    elevation={0}
+                  >
+                    <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
+                      <Typography>{key}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      {((reports as any)[key] as []).map((item, itemIndex) => {
+                        return (
+                          <Accordion key={itemIndex} elevation={0}>
+                            <AccordionSummary
+                              expandIcon={<ArrowForwardIosSharpIcon />}
                             >
-                              <Tab label="Basic" />
-                              <Tab label="Project Description" />
-                              <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
-                            </Tabs>
-                            <TabPanel value={selectedTab} index={0}>
-                              <Table>
-                                <TableBody>
-                                  {item["proponent"] && (
+                              <Typography>
+                                <Chip
+                                  style={{
+                                    marginRight: "0.5rem",
+                                    borderRadius: "4px",
+                                    fontSize: "12px",
+                                    ...staleLevel(item["date_updated"]),
+                                  }}
+                                  label={
+                                    <>
+                                      <b>
+                                        {dateUtils.formatDate(
+                                          item["date_updated"],
+                                          DISPLAY_DATE_FORMAT
+                                        )}
+                                      </b>
+                                    </>
+                                  }
+                                />
+                                {item["project_name"]}
+                              </Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                              <Tabs
+                                id={itemIndex.toString()}
+                                onChange={handleTabChange}
+                                value={selectedTab}
+                              >
+                                <Tab label="Basic" />
+                                <Tab label="Project Description" />
+                                <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
+                              </Tabs>
+                              <TabPanel value={selectedTab} index={0}>
+                                <Table>
+                                  <TableBody>
+                                    {item["proponent"] && (
+                                      <TableRow>
+                                        <TableCell>Proponent</TableCell>
+                                        <TableCell>
+                                          {item["proponent"]}
+                                        </TableCell>
+                                      </TableRow>
+                                    )}
                                     <TableRow>
-                                      <TableCell>Proponent</TableCell>
-                                      <TableCell>{item["proponent"]}</TableCell>
+                                      <TableCell>Region</TableCell>
+                                      <TableCell>{item["region"]}</TableCell>
                                     </TableRow>
-                                  )}
-                                  <TableRow>
-                                    <TableCell>Region</TableCell>
-                                    <TableCell>{item["region"]}</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell>Location</TableCell>
-                                    <TableCell>{item["location"]}</TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell>EA Type</TableCell>
-                                    <TableCell>
-                                      {item["ea_act"]}
-                                      {item["substitution_act"]
-                                        ? ", " + item["substitution_act"]
-                                        : ""}
-                                    </TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell>Responsible Minister</TableCell>
-                                    <TableCell>
-                                      {item["ministry_name"]}
-                                    </TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell>
-                                      Decision to be made by
-                                    </TableCell>
-                                    <TableCell>{item["decision_by"]}</TableCell>
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
-                            </TabPanel>
-                            <TabPanel value={selectedTab} index={1}>
-                              {item["project_description"]}
-                            </TabPanel>
-                            <TabPanel value={selectedTab} index={2}>
-                              <Table>
-                                <TableBody>
-                                  <TableRow>
-                                    <TableCell>
-                                      {item["milestone_type"] === 4
-                                        ? "Referral Date"
-                                        : "Decision Date"}
-                                    </TableCell>
-                                    <TableCell>
-                                      {dateUtils.formatDate(
-                                        item["referral_date"],
-                                        DISPLAY_DATE_FORMAT
-                                      )}
-                                    </TableCell>
-                                  </TableRow>
-                                  <TableRow>
-                                    <TableCell>Updated Date</TableCell>
-                                    <TableCell>
-                                      {dateUtils.formatDate(
-                                        item["date_updated"],
-                                        DISPLAY_DATE_FORMAT
-                                      )}
-                                    </TableCell>
-                                  </TableRow>
-                                  {item["next_pecp_date"] && (
                                     <TableRow>
-                                      <TableCell>Next PECP Date</TableCell>
+                                      <TableCell>Location</TableCell>
+                                      <TableCell>{item["location"]}</TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell>EA Type</TableCell>
+                                      <TableCell>
+                                        {item["ea_act"]}
+                                        {item["substitution_act"]
+                                          ? ", " + item["substitution_act"]
+                                          : ""}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell>
+                                        Responsible Minister
+                                      </TableCell>
+                                      <TableCell>
+                                        {item["ministry_name"]}
+                                      </TableCell>
+                                    </TableRow>
+                                    <TableRow>
+                                      <TableCell>
+                                        Decision to be made by
+                                      </TableCell>
+                                      <TableCell>
+                                        {item["decision_by"]}
+                                      </TableCell>
+                                    </TableRow>
+                                  </TableBody>
+                                </Table>
+                              </TabPanel>
+                              <TabPanel value={selectedTab} index={1}>
+                                {item["project_description"]}
+                              </TabPanel>
+                              <TabPanel value={selectedTab} index={2}>
+                                <Table>
+                                  <TableBody>
+                                    <TableRow>
+                                      <TableCell>
+                                        {item["milestone_type"] === 4
+                                          ? "Referral Date"
+                                          : "Decision Date"}
+                                      </TableCell>
                                       <TableCell>
                                         {dateUtils.formatDate(
-                                          item["next_pecp_date"]
+                                          item["referral_date"],
+                                          DISPLAY_DATE_FORMAT
                                         )}
                                       </TableCell>
                                     </TableRow>
-                                  )}
-                                  {item["next_pecp_title"] && (
                                     <TableRow>
-                                      <TableCell>PECP Title</TableCell>
+                                      <TableCell>Updated Date</TableCell>
                                       <TableCell>
-                                        {item["next_pecp_title"]}
+                                        {dateUtils.formatDate(
+                                          item["date_updated"],
+                                          DISPLAY_DATE_FORMAT
+                                        )}
                                       </TableCell>
                                     </TableRow>
-                                  )}
-                                  {item["next_pecp_short_description"] !==
-                                    null && (
+                                    {item["next_pecp_date"] && (
+                                      <TableRow>
+                                        <TableCell>Next PECP Date</TableCell>
+                                        <TableCell>
+                                          {dateUtils.formatDate(
+                                            item["next_pecp_date"]
+                                          )}
+                                        </TableCell>
+                                      </TableRow>
+                                    )}
+                                    {item["next_pecp_title"] && (
+                                      <TableRow>
+                                        <TableCell>PECP Title</TableCell>
+                                        <TableCell>
+                                          {item["next_pecp_title"]}
+                                        </TableCell>
+                                      </TableRow>
+                                    )}
+                                    {item["next_pecp_short_description"] !==
+                                      null && (
+                                      <TableRow>
+                                        <TableCell>PECP Description</TableCell>
+                                        <TableCell>
+                                          {item["next_pecp_short_description"]}
+                                        </TableCell>
+                                      </TableRow>
+                                    )}
                                     <TableRow>
-                                      <TableCell>PECP Description</TableCell>
+                                      <TableCell>Additional Info</TableCell>
                                       <TableCell>
-                                        {item["next_pecp_short_description"]}
+                                        {item["additional_info"]}
                                       </TableCell>
                                     </TableRow>
-                                  )}
-                                  <TableRow>
-                                    <TableCell>Additional Info</TableCell>
-                                    <TableCell>
-                                      {item["additional_info"]}
-                                    </TableCell>
-                                  </TableRow>
-                                </TableBody>
-                              </Table>
-                            </TabPanel>
-                          </AccordionDetails>
-                        </Accordion>
-                      );
-                    })}
-                  </AccordionDetails>
-                </Accordion>
-              </>
-            );
-          })}
+                                  </TableBody>
+                                </Table>
+                              </TabPanel>
+                            </AccordionDetails>
+                          </Accordion>
+                        );
+                      })}
+                    </AccordionDetails>
+                  </Accordion>
+                </>
+              );
+            })}
 
         {resultStatus === RESULT_STATUS.NO_RECORD && (
           <Container>
