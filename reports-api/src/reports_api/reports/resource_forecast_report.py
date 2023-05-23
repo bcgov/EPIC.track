@@ -268,7 +268,7 @@ class EAResourceForeCastReport(ReportFactory):
             Project.query.filter(
                 Project.is_project_closed.is_(False),
                 Project.is_deleted.is_(False),
-                Project.is_active.is_(True),
+                Project.is_active.is_(True)
             )
             .join(Work)
             .join(WorkType)
@@ -371,9 +371,25 @@ class EAResourceForeCastReport(ReportFactory):
             results[work_id] = work_data
         return results
 
+    def _filter_data(self, data_items):
+        filter_search = self.filters['filter_search']
+        global_search = self.filters['global_search'] if 'global_search' in self.filters else None
+        return [item for item in data_items
+                if all(item[0][key] in filter_search[key]
+                       for key in list(filter_search)
+                       if key != 'project_name' and len(filter_search.keys()) > 0) and
+                ('project_name' not in filter_search or ('project_name' in filter_search and
+                                                         item[0]['project_name'] not in
+                                                         filter_search['project_name'])) and
+                (not global_search or any(global_search.lower() in
+                                          str(item[0][key]).lower()
+                                          for key in item[0].keys()))]
+
     def _format_data(self, data):  # pylint: disable=too-many-locals
         response = []
-        for _, values in data.items():
+        data = [item for _, item in data.items()]
+        data = self._filter_data(data)
+        for values in data:
             staffs = []
             work_data = values[0]
             work_data["cairt_lead"] = ""

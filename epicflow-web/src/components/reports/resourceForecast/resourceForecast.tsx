@@ -72,7 +72,16 @@ export default function ResourceForecast() {
       const state = {
         ...prev,
         exclude: Object.keys(columnVisibility).filter(p => !!p),
-        filter_search: columnFilters.map(p => { return { [p.id]: p.value } }),
+        filter_search: ()=>{
+          let result = {};
+          columnFilters.forEach(filter=>{
+            result = {
+              ...result,
+              filter
+            }
+          });
+          return result;
+        },//    columnFilters.map(p => { return { ...columnFilters, [p.id]: p.value } }),
         global_search: globalFilter
       };
       return state;
