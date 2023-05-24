@@ -14,6 +14,7 @@
 """Service to manage Project."""
 from flask import current_app
 from sqlalchemy import func
+from reports_api.exceptions import ResourceExistsError
 
 from reports_api.models import Project
 from reports_api.schemas.project import ProjectSchema
@@ -37,6 +38,9 @@ class ProjectService:
     @classmethod
     def create_project(cls, payload: dict):
         """Create a new project."""
+        exists = cls.check_existence(payload["name"])
+        if exists:
+            raise ResourceExistsError("Indigenous nation with same name exists")
         project = Project(**payload)
         current_app.logger.info(f"Project obj {dir(project)}")
         project.save()
@@ -45,6 +49,9 @@ class ProjectService:
     @classmethod
     def update_project(cls, project_id: int, payload: dict):
         """Update existing project."""
+        exists = cls.check_existence(payload["name"], project_id)
+        if exists:
+            raise ResourceExistsError("Indigenous nation with same name exists")
         project = Project.find_by_id(project_id)
         project = project.update(payload)
         return project
@@ -58,7 +65,7 @@ class ProjectService:
         return True
 
     @classmethod
-    def check_existence(cls, name, instance_id):
+    def check_existence(cls, name, instance_id=None):
         """Checks if a project exists with given name"""
         query = Project.query.filter(
             func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
@@ -66,5 +73,5 @@ class ProjectService:
         if instance_id:
             query = query.filter(Project.id != instance_id)
         if query.count() > 0:
-            return {"exists": True}
-        return {"exists": False}
+            return True
+        return False
