@@ -16,29 +16,37 @@ from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors, reqparse
 from marshmallow import ValidationError
+
 from reports_api.exceptions import ResourceExistsError
 from reports_api.schemas.project import ProjectSchema
-
 from reports_api.services import ProjectService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace('projects', description='Projects')
+API = Namespace("projects", description="Projects")
 
 parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument('name', type=str, required=True,
-                    help='Name of the project to be checked.', location='args', trim=True)
-parser.add_argument('id', type=int, help='ID of the project in case of updates.', location='args')
+parser.add_argument(
+    "name",
+    type=str,
+    required=True,
+    help="Name of the project to be checked.",
+    location="args",
+    trim=True,
+)
+parser.add_argument(
+    "id", type=int, help="ID of the project in case of updates.", location="args"
+)
 
 
-@cors_preflight('GET, DELETE, POST')
-@API.route('', methods=['GET', 'POST', 'OPTIONS'])
+@cors_preflight("GET, DELETE, POST")
+@API.route("", methods=["GET", "POST", "OPTIONS"])
 class Projects(Resource):
     """Endpoint resource to manage projects."""
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def get():
@@ -46,7 +54,7 @@ class Projects(Resource):
         return ProjectService.find_all(), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def post():
@@ -62,13 +70,13 @@ class Projects(Resource):
         return project_schema.dump(project), HTTPStatus.CREATED
 
 
-@cors_preflight('GET, DELETE, PUT')
-@API.route('/<int:project_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
+@cors_preflight("GET, DELETE, PUT")
+@API.route("/<int:project_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
 class Project(Resource):
     """Endpoint resource to manage a project."""
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def get(project_id):
@@ -76,7 +84,7 @@ class Project(Resource):
         return ProjectService.find(project_id), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def put(project_id):
@@ -92,9 +100,8 @@ class Project(Resource):
 
         return project_schema.dump(project), HTTPStatus.OK
 
-
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def delete(project_id):
@@ -103,20 +110,20 @@ class Project(Resource):
         return {"message": "Project successfully deleted"}, HTTPStatus.OK
 
 
-@cors_preflight('GET')
-@API.route('/exists', methods=['GET', 'OPTIONS'])
+@cors_preflight("GET")
+@API.route("/exists", methods=["GET", "OPTIONS"])
 class ValidateProject(Resource):
     """Endpoint resource to check for existing project."""
 
     @staticmethod
-    @cors.crossdomain(origin='*')
+    @cors.crossdomain(origin="*")
     @auth.require
     @API.expect(parser)
     @profiletime
     def get():
         """Checks for existing projects."""
         args = parser.parse_args()
-        name = args['name']
-        instance_id = args['id']
+        name = args["name"]
+        instance_id = args["id"]
         exists = ProjectService.check_existence(name=name, instance_id=instance_id)
         return {"exists": exists}, HTTPStatus.OK
