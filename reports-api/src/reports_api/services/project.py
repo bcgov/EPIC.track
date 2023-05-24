@@ -16,6 +16,7 @@ from flask import current_app
 from sqlalchemy import func
 
 from reports_api.models import Project
+from reports_api.schemas.project import ProjectSchema
 
 
 class ProjectService:
@@ -29,16 +30,15 @@ class ProjectService:
     @classmethod
     def find_all(cls):
         """Find all projects"""
-        response = {'projects': []}
-        for row in Project.find_all():
-            response['projects'].append(row.as_dict())
+        projects_schema = ProjectSchema(many=True)
+        response = {"projects": projects_schema.dump(Project.find_all())}
         return response
 
     @classmethod
     def create_project(cls, payload: dict):
         """Create a new project."""
         project = Project(**payload)
-        current_app.logger.info(f'Project obj {dir(project)}')
+        current_app.logger.info(f"Project obj {dir(project)}")
         project.save()
         return project
 
@@ -61,7 +61,7 @@ class ProjectService:
     def check_existence(cls, name, instance_id):
         """Checks if a project exists with given name"""
         query = Project.query.filter(
-                    func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
+            func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
         )
         if instance_id:
             query = query.filter(Project.id != instance_id)
