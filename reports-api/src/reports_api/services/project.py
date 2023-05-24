@@ -65,7 +65,7 @@ class ProjectService:
         return True
 
     @classmethod
-    def check_existence(cls, name, instance_id):
+    def check_existence(cls, name, instance_id=None):
         """Checks if a project exists with given name"""
         query = Project.query.filter(
             func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
