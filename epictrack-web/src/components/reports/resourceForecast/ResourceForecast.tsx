@@ -209,6 +209,7 @@ export default function ResourceForecast() {
       {
         accessorKey: "ea_type",
         header: "EA Type",
+        enableHiding: false,
         filterVariant: "select",
         filterSelectOptions: eaTypeFilter,
       },
