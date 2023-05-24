@@ -15,6 +15,9 @@
 from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors, reqparse
+from marshmallow import ValidationError
+from reports_api.exceptions import ResourceExistsError
+from reports_api.schemas.project import ProjectSchema
 
 from reports_api.services import ProjectService
 from reports_api.utils import auth, profiletime
@@ -48,8 +51,15 @@ class Projects(Resource):
     @profiletime
     def post():
         """Create new project"""
-        project = ProjectService.create_project(API.payload)
-        return project.as_dict(), HTTPStatus.CREATED
+        project_schema = ProjectSchema()
+        try:
+            request_json = project_schema.load(API.payload)
+            project = ProjectService.create_project(request_json)
+        except ValidationError as err:
+            return err.messages, HTTPStatus.BAD_REQUEST
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
+        return project_schema.dump(project), HTTPStatus.CREATED
 
 
 @cors_preflight('GET, DELETE, PUT')
@@ -71,8 +81,17 @@ class Project(Resource):
     @profiletime
     def put(project_id):
         """Update and return a project."""
-        project = ProjectService.update_project(project_id, API.payload)
-        return project.as_dict(), HTTPStatus.OK
+        project_schema = ProjectSchema()
+        try:
+            request_json = project_schema.load(API.payload)
+            project = ProjectService.update_project(project_id, request_json)
+        except ValidationError as err:
+            return err.messages, HTTPStatus.BAD_REQUEST
+        except ResourceExistsError as err:
+            return err.message, HTTPStatus.CONFLICT
+
+        return project_schema.dump(project), HTTPStatus.OK
+
 
     @staticmethod
     @cors.crossdomain(origin='*')
@@ -99,4 +118,5 @@ class ValidateProject(Resource):
         args = parser.parse_args()
         name = args['name']
         instance_id = args['id']
-        return ProjectService.check_existence(name=name, instance_id=instance_id), HTTPStatus.OK
+        exists = ProjectService.check_existence(name=name, instance_id=instance_id)
+        return {"exists": exists}, HTTPStatus.OK
