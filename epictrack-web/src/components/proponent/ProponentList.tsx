@@ -12,6 +12,7 @@ import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
 import { Proponent } from "../../models/proponent";
+import { sort } from "../../utils";
 
 export default function ProponentList() {
   const [resultStatus, setResultStatus] = useState<string>();
@@ -82,7 +83,9 @@ export default function ProponentList() {
     try {
       const proponentsResult = await ProponentService.getProponents();
       if (proponentsResult.status === 200) {
-        setProponents((proponentsResult.data as never)["proponents"]);
+        setProponents(
+          sort((proponentsResult.data as never)["proponents"], "name")
+        );
       }
     } catch (error) {
       console.error("Proponent List: ", error);

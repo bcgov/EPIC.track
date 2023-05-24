@@ -25,6 +25,17 @@ const MasterTrackTable = <T extends Record<string, any>>({
           density: "compact",
           columnPinning: { right: ["mrt-row-actions"] },
         }}
+        sortingFns={{
+          sortFn: (rowA: any, rowB: any, columnId: string) => {
+            return rowA
+              .getValue(columnId)
+              .value.localeCompare(rowB.getValue(columnId).value, "en", {
+                numeric: true,
+                ignorePunctuation: true,
+                sensitivity: "base",
+              });
+          },
+        }}
         positionGlobalFilter="left"
         muiSearchTextFieldProps={{
           placeholder: "Search",

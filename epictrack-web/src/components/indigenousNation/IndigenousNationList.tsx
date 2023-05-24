@@ -1,7 +1,7 @@
 import React from "react";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
-import { MRT_ColumnDef } from "material-react-table";
+import { MRT_ColumnDef, MRT_Row } from "material-react-table";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import IndigenousNationService from "../../services/indigenousNationService";
@@ -12,6 +12,7 @@ import TrackDialog from "../shared/TrackDialog";
 import IndigenousNationForm from "./IndigneousNationForm";
 import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
+import { sort } from "../../utils";
 
 export default function IndigenousNationList() {
   const [resultStatus, setResultStatus] = useState<string>();
@@ -86,7 +87,10 @@ export default function IndigenousNationList() {
         await IndigenousNationService.getIndigenousNations();
       if (indigenousNationsResult.status === 200) {
         setIndigenousNations(
-          (indigenousNationsResult.data as never)["indigenous_nations"]
+          sort(
+            (indigenousNationsResult.data as never)["indigenous_nations"],
+            "name"
+          )
         );
       }
     } catch (error) {
