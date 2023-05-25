@@ -15,19 +15,20 @@ import { TrackLabel } from "../shared/index";
 import codeService from "../../services/codeService";
 import ProjectService from "../../services/projectService";
 import { Project } from "../../models/project";
-import { ListType } from "../../../models/code";
+import { Code } from "../../../services/codeService";
 import { Proponent } from "../../models/proponent";
+import { subtype } from "../../models/subtype";
 import ProponentService from "../../services/proponentService";
 import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
 
 const schema = yup.object<Project>().shape({
-  project_name: yup.string().required("Project Name is required"),
+  name: yup.string().required("Project Name is required"),
   proponent: yup.string().required("Proponent is required"),
   type: yup.string().required("Type is required"),
-  subtype: yup.string().required("SubType is required"),
-  project_description: yup.string().required("Project Description is required"),
+  sub_type_id: yup.string().required("SubType is required"),
+  description: yup.string().required("Project Description is required"),
   latitude: yup.string().required("Invalid latitude value"),
   longitude: yup.string().required("Invalid longitude value"),
   region_id_env: yup.number().required("ENV Region is required"),
@@ -37,8 +38,9 @@ const schema = yup.object<Project>().shape({
 export default function ProjectForm({ ...props }) {
   const [projects, setProjects] = React.useState<Project>();
   const [regions, setRegions] = React.useState<string[]>([]);
+  const [subtypes, setsubTypes] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
-  const [proponent, setProponents] = React.useState<Proponent>();
+  const [proponents, setProponents] = React.useState<Proponent>();
   const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -55,11 +57,15 @@ export default function ProjectForm({ ...props }) {
     reset,
   } = methods;
 
+  // const halflocation = Math.ceil(location.length / 2);
+  // const latitude = location.slice(0, halflocation);
+  // const Longitude = location.slice(halflocation);
+
   const codeTypes: { [x: string]: any } = {
-    projects: setProjects,
     regions: setRegions,
     types: setTypes,
-    proponent: setProponents,
+    subtypes: setsubTypes,
+    proponents: setProponents,
   };
 
   const getCodes = async (code: Code) => {
@@ -69,14 +75,14 @@ export default function ProjectForm({ ...props }) {
     }
   };
   const getProject = async (id: number) => {
-    const result = await ProjectService.getProjects(id);
+    const result = await ProjectService.getProject(id);
+    console.log(result);
     if (result.status === 200) {
-      const projects = (result.data as any)["projects"];
-      setWork(projects);
-      reset(projects);
+      const project = result.data as any;
+      setProjects(project);
+      reset(project);
     }
   };
-
   React.useEffect(() => {
     if (projectId) {
       getProject(projectId);
@@ -126,21 +132,21 @@ export default function ProjectForm({ ...props }) {
             <TrackLabel>Project Name</TrackLabel>
             <TextField
               fullWidth
-              error={!!errors?.project_name?.message}
-              helperText={errors?.project_name?.message?.toString()}
-              {...register("project_name")}
+              error={!!errors?.name?.message}
+              helperText={errors?.name?.message?.toString()}
+              {...register("name")}
             />
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Proponent</TrackLabel>
             <ControlledSelect
-              error={!!errors?.proponent?.message}
-              helperText={errors?.proponent?.message?.toString()}
-              defaultValue={projects?.proponent}
+              error={!!errors?.proponent_id?.message}
+              helperText={errors?.proponent_id?.message?.toString()}
+              defaultValue={projects?.proponent_id}
               fullWidth
-              {...register("proponent")}
+              {...register("proponent_id")}
             >
-              {projects?.map((e, index) => (
+              {proponents?.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
                   {e.name}
                 </MenuItem>
@@ -154,7 +160,7 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.type?.message?.toString()}
               defaultValue={projects?.type}
               fullWidth
-              {...register("type")}
+              {...register("sub_type.type.name")}
             >
               {types?.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
@@ -166,17 +172,17 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>SubType</TrackLabel>
             <ControlledSelect
-              error={!!errors?.subtype?.message}
-              helperText={errors?.subtype?.message?.toString()}
-              defaultValue={projects?.subtype}
+              error={!!errors?.sub_type_id?.message}
+              helperText={errors?.sub_type_id?.message?.toString()}
+              defaultValue={projects?.sub_type_id}
               fullWidth
-              {...register("subtype")}
+              {...register("sub_type_id")}
             >
-              {types?.map((e, index) => (
+              {/* {subtypes?.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
-                  {e.type}
+                  {e}
                 </MenuItem>
-              ))}
+              ))} */}
             </ControlledSelect>
           </Grid>
           <Grid item xs={12}>
@@ -185,9 +191,9 @@ export default function ProjectForm({ ...props }) {
               fullWidth
               multiline
               rows={4}
-              {...register("project_description")}
-              error={!!errors?.project_description?.message}
-              helperText={errors?.project_description?.message?.toString()}
+              {...register("description")}
+              error={!!errors?.description?.message}
+              helperText={errors?.description?.message?.toString()}
             />
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
@@ -195,27 +201,27 @@ export default function ProjectForm({ ...props }) {
             <TrackLabel>Location Description</TrackLabel>
             <TextField
               fullWidth
-              {...register("location_description")}
-              error={!!errors?.location_description?.message}
-              helperText={errors?.location_description?.message?.toString()}
+              {...register("address")}
+              error={!!errors?.address?.message}
+              helperText={errors?.address?.message?.toString()}
             />
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Latitude</TrackLabel>
             <TextField
               fullWidth
-              {...register("latitude")}
-              error={!!errors?.latitude?.message}
-              helperText={errors?.latitude?.message?.toString()}
+              {...register("location")}
+              error={!!errors?.location?.message}
+              helperText={errors?.location?.message?.toString()}
             />
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Longitude</TrackLabel>
             <TextField
               fullWidth
-              {...register("longitude")}
-              error={!!errors?.longitude?.message}
-              helperText={errors?.longitude?.message?.toString()}
+              {...register("location")}
+              error={!!errors?.location?.message}
+              helperText={errors?.location?.message?.toString()}
             />
           </Grid>
           <Grid item xs={6}>
@@ -273,12 +279,12 @@ export default function ProjectForm({ ...props }) {
               Certificate Number
               {/* <IconWithTooltip /> */}
             </TrackLabel>
-            <TextField helperText fullWidth />
+            <TextField helperText fullWidth {...register("ea_certificate")} />
             Provide the certificate number if available
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Abbreviation</TrackLabel>
-            <TextField helperText fullWidth />
+            <TextField helperText fullWidth {...register("abbreviation")} />
             Abbreviation of the project name to be displayed in reports and
             graphs
           </Grid>

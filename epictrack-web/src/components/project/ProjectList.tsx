@@ -12,7 +12,8 @@ import { EpicTrackPageGridContainer } from "../shared";
 
 const ProjectList = () => {
   const [projects, setProjects] = React.useState<Project[]>([]);
-  const [regions, setRegions] = React.useState<string[]>([]);
+  const [envregions, setenvRegions] = React.useState<string[]>([]);
+  const [subtypes, setsubTypes] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
   const [resultStatus, setResultStatus] = React.useState<string>();
   const [projectId, setProjectId] = React.useState<number>();
@@ -32,21 +33,27 @@ const ProjectList = () => {
   };
 
   const codeTypes: { [x: string]: any } = {
-    projects: setProjects,
-    regions: setRegions,
-    types: setTypes,
+    region_env: setenvRegions,
+    sub_type: setsubTypes,
   };
 
-  // React.useEffect(() => {
-  //   Object.keys(codeTypes).forEach((key: string) => {
-  //     const codes = projects
-  //       .map((w) => w[key]?.name)
-  //       .filter(
-  //         (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
-  //       );
-  //     codeTypes[key](codes);
-  //   });
-  // }, [projects]);
+  React.useEffect(() => {
+    Object.keys(codeTypes).forEach((key: string) => {
+      const codes = projects
+        .map((w) => w[key]?.name)
+        .filter(
+          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
+        );
+      codeTypes[key](codes);
+    });
+  }, [projects]);
+  console.log(projects);
+  React.useEffect(() => {
+    const types = projects
+      .map((p) => p.sub_type.type.name)
+      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    setTypes(types);
+  }, [projects]);
 
   const getProject = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
@@ -65,20 +72,6 @@ const ProjectList = () => {
   React.useEffect(() => {
     getProject();
   }, [getProject]);
-
-  // React.useEffect(() => {
-  //   const regions = staffs
-  //     .map((p) => p.position?.name)
-  //     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  //   setPositions(positions);
-  // }, [staffs]);
-
-  // React.useEffect(() => {
-  //   const types = staffs
-  //     .map((p) => p.position?.name)
-  //     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  //   setPositions(positions);
-  // }, [staffs]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
@@ -104,19 +97,19 @@ const ProjectList = () => {
         accessorKey: "sub_type.type.name",
         header: "Type",
         filterVariant: "multi-select",
-        // filterSelectOptions: types,
+        filterSelectOptions: types,
       },
       {
         accessorKey: "sub_type.name",
         header: "Sub Type",
         filterVariant: "multi-select",
-        // filterSelectOptions: types,
+        filterSelectOptions: subtypes,
       },
       {
         accessorKey: "region_env.name",
         header: "ENV Region",
         filterVariant: "multi-select",
-        // filterSelectOptions: regions,
+        filterSelectOptions: envregions,
       },
       {
         accessorKey: "is_project_closed",
@@ -134,7 +127,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    [projects, types, regions]
+    [projects, types, envregions, subtypes]
   );
   return (
     <>
@@ -195,7 +188,7 @@ const ProjectList = () => {
       >
         <ProjectForm
           onCancel={onDialogClose}
-          project_id={projectId}
+          projectId={projectId}
           onSubmitSucces={getProject}
         />
       </TrackDialog>

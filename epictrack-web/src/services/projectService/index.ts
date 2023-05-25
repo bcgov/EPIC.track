@@ -7,6 +7,12 @@ const getProjects = async (apiUrl?: string) => {
   );
 };
 
+const getProject = async (id: number) => {
+  return await http.GetRequest(
+    AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${id}`
+  );
+};
+
 const createProjects = async (projectID: any, projectParams: any) => {
   return await http.DeleteRequest(
     AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS,
@@ -26,6 +32,7 @@ const deleteProjects = async (projectID: any) => {
   );
 };
 const ProjectService = {
+  getProject,
   getProjects,
   createProjects,
   updateProjects,
