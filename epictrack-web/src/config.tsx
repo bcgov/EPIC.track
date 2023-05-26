@@ -24,7 +24,7 @@ const KC_REALM =
   process.env.REACT_APP_KEYCLOAK_REALM;
 
 export const AppConfig = {
-  apiUrl: API_URL,
+  apiUrl: `${API_URL}/api/v1/`,
   keycloak: {
     url: KC_URL || "",
     clientId: KC_CLIENT || "",

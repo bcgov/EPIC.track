@@ -5,7 +5,7 @@ import { userToken, userAuthentication } from "./userSlice";
 const KeycloakData: Keycloak = new Keycloak({
   clientId: AppConfig.keycloak.clientId,
   realm: AppConfig.keycloak.realm,
-  url: AppConfig.keycloak.url,
+  url: `${AppConfig.keycloak.url}/auth`,
 });
 const doLogout = KeycloakData.logout;
 let refreshInterval: NodeJS.Timer;

@@ -10,7 +10,9 @@ export type Code =
   | "ea_acts"
   | "work_types"
   | "eao_teams"
-  | "ministries"
+  | "regions"
+  | "types"
+  | "sub_types"
   | "federal_involvements"
   | "substitution_acts";
 

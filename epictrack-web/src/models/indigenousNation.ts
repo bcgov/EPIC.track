@@ -1,9 +1,8 @@
+import { ListType } from "./code";
 import { Staff } from "./staff";
 
-export interface IndigenousNation {
-    id: number,
+export interface IndigenousNation extends ListType {
     is_active: boolean,
-    name: string,
     relationship_holder_id?: number,
     relationship_holder?: Staff
 }

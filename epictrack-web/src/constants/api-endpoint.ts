@@ -21,5 +21,8 @@ const Endpoints = {
   Works: {
     GET_WORKS: "works",
   },
+  SubTypes: {
+    GET_SUB_TYPES: "sub-types",
+  },
 };
 export default Endpoints;
