@@ -27,21 +27,24 @@ class MilestoneService:  # pylint:disable=too-few-public-methods
             f"find non decision making milestones by phase id {phase_id}"
         )
         milestones = Milestone.find_non_decision_by_phase_id(phase_id)
-        return jsonify([item.as_dict() for item in milestones])
+        milestones_schema = MilestoneSchema(many=True)
+        return jsonify(milestones_schema.dump(milestones))
 
     @classmethod
     def find_milestone_by_id(cls, milestone_id: int):
         """Find milestone by id"""
         current_app.logger.debug(f"find milestone by id {milestone_id}")
         milestone = Milestone.find_by_id(milestone_id)
-        return jsonify(milestone.as_dict())
+        milestone_schema = MilestoneSchema()
+        return jsonify(milestone_schema.dump(milestone))
 
     @classmethod
     def find_all_active_milestones(cls):
         """Find all active milestones"""
         current_app.logger.debug("Find all active milestones")
         milestones = Milestone.find_all()
-        return jsonify([item.as_dict() for item in milestones])
+        milestones_schema = MilestoneSchema(many=True)
+        return jsonify(milestones_schema.dump(milestones))
 
     @classmethod
     def find_milestones_per_work_type(cls, work_type_id: int):
@@ -54,7 +57,8 @@ class MilestoneService:  # pylint:disable=too-few-public-methods
                 )
             )
         )
-        return jsonify([item.as_dict() for item in milestones])
+        milestones_schema = MilestoneSchema(many=True)
+        return jsonify(milestones_schema.dump(milestones))
 
     @classmethod
     def find_auto_milestones_per_phase(cls, phase_id):

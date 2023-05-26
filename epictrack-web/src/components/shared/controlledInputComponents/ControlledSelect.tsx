@@ -24,8 +24,8 @@ const ControlledSelect: FC<IFormInputProps> = ({
       render={({ field }) => (
         <TextField
           select
-          {...otherProps}
           {...field}
+          {...otherProps}
           error={!!errors[name]}
           helperText={String(errors[name]?.message || "")}
         >

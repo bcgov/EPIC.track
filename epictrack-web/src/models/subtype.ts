@@ -1,7 +1,6 @@
-import { type } from "./type";
+import { ListType } from "./code";
+import { Type } from "./type";
 
-export interface subtype {
-    id: number;
-    type: type;
-    name: string;
+export interface SubType extends ListType{
+    type: Type;
 }

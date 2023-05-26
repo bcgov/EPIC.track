@@ -101,10 +101,19 @@ export default function ResourceForecast() {
     setFilters((prev) => {
       const state = {
         ...prev,
-        exclude: Object.keys(columnVisibility).filter((p) => !!p),
-        filter_search: columnFilters.map((p) => {
-          return { [p.id]: p.value };
-        }),
+        exclude: Object.keys(columnVisibility).filter(
+          (p) => !columnVisibility[p]
+        ),
+        filter_search: (() => {
+          let result = {};
+          columnFilters.forEach((filter) => {
+            result = {
+              ...result,
+              [filter["id"]]: filter["value"],
+            };
+          });
+          return result;
+        })(),
         global_search: globalFilter,
       };
       return state;
@@ -200,6 +209,7 @@ export default function ResourceForecast() {
       {
         accessorKey: "ea_type",
         header: "EA Type",
+        enableHiding: false,
         filterVariant: "select",
         filterSelectOptions: eaTypeFilter,
       },
@@ -303,7 +313,13 @@ export default function ResourceForecast() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setRFData((reportData.data as never)["data"]);
+        const data = (reportData.data as never)["data"] as any[];
+        data.forEach((element) => {
+          Object.keys(element).forEach(
+            (key) => (element[key] = element[key] ?? "")
+          );
+        });
+        setRFData(data);
       }
       if (reportData.status === 204) {
         setResultStatus(RESULT_STATUS.NO_RECORD);

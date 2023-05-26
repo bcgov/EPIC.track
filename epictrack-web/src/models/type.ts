@@ -1,4 +1,4 @@
-export interface type {
-    id: number;
-    name: string;
+import { ListType } from "./code";
+
+export interface Type extends ListType {
 }
