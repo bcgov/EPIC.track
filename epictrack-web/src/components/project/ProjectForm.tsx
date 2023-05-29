@@ -16,7 +16,6 @@ import codeService, { Code } from "../../services/codeService";
 import ProjectService from "../../services/projectService";
 import { Project } from "../../models/project";
 import { Proponent } from "../../models/proponent";
-import ProponentService from "../../services/proponentService";
 import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
@@ -27,14 +26,14 @@ import subTypeService from "../../services/subTypeService";
 
 const schema = yup.object<Project>().shape({
   name: yup.string().required("Project Name is required"),
-  proponent: yup.string().required("Proponent is required"),
   type_id: yup.string().required("Type is required"),
+  proponent_id: yup.string().required("Proponent is required"),
   sub_type_id: yup.string().required("SubType is required"),
   description: yup.string().required("Project Description is required"),
   latitude: yup.string().required("Invalid latitude value"),
   longitude: yup.string().required("Invalid longitude value"),
-  region_id_env: yup.number().required("ENV Region is required"),
-  region_id_flnro: yup.number().required("NRS Region is required"),
+  region_id_env: yup.string().required("ENV Region is required"),
+  region_id_flnro: yup.string().required("NRS Region is required"),
 });
 
 export default function ProjectForm({ ...props }) {
@@ -47,7 +46,6 @@ export default function ProjectForm({ ...props }) {
   const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [selectedType, setSelectedType] = React.useState<number>(0);
   const projectId = props.projectId;
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -60,14 +58,13 @@ export default function ProjectForm({ ...props }) {
     formState: { errors },
     reset,
   } = methods;
-
   const setRegions = (regions: Region[]) => {
     const envRegions = regions.filter((p) => p.entity === "ENV");
     const nrsRegions = regions.filter((p) => p.entity === "FLNR");
     setEnvRegions(envRegions);
     setNRSRegions(nrsRegions);
   };
-
+  console.log(projectId);
   const codeTypes: { [x: string]: any } = {
     regions: setRegions,
     types: setTypes,
@@ -80,26 +77,32 @@ export default function ProjectForm({ ...props }) {
       codeTypes[code]((codeResult.data as never)["codes"]);
     }
   };
-  const getProject = async (id: number) => {
-    const result = await ProjectService.getProject(id);
-    if (result.status === 200) {
-      const project = result.data as Project;
-      setProject(project);
-      reset(project);
-      setSelectedType(project.type_id);
-    }
-  };
+  const getProject = React.useCallback(
+    async (id: number) => {
+      const result = await ProjectService.getProject(id);
+      if (result.status === 200) {
+        const project = result.data as Project;
+        setProject(project);
+        reset(project);
+      }
+    },
+    [project]
+  );
 
   const getSubTypesByType = async () => {
-    const subTypeResult = await subTypeService.getSubTypeByType(selectedType);
+    const subTypeResult = await subTypeService.getSubTypeByType(
+      project?.type_id
+    );
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
     }
   };
 
   React.useEffect(() => {
-    getSubTypesByType();
-  }, [selectedType]);
+    if (project?.type_id) {
+      getSubTypesByType();
+    }
+  }, [project?.type_id]);
 
   React.useEffect(() => {
     if (projectId) {
@@ -116,14 +119,13 @@ export default function ProjectForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
-    console.log("DATA ", data);
     setLoading(true);
     if (projectId) {
       const result = await ProjectService.updateProjects(projectId, data);
       if (result.status === 200) {
         setAlertContentText("Project details updated");
         setOpenAlertDialog(true);
-        props.onSubmitSucces();
+        props.onSubmitSuccess();
         setLoading(false);
       }
     } else {
@@ -135,7 +137,7 @@ export default function ProjectForm({ ...props }) {
         setLoading(false);
       }
     }
-    // reset();
+    reset();
   };
   return (
     <>
@@ -177,11 +179,9 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelect
               error={!!errors?.type_id?.message}
               helperText={errors?.type_id?.message?.toString()}
-              defaultValue={selectedType}
+              defaultValue={project?.type_id}
               fullWidth
               {...register("type_id")}
-              onChange={(e) => setSelectedType(parseInt(e.target.value))}
-              value={selectedType}
             >
               {types?.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
@@ -218,10 +218,12 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <TrackLabel>Location Description</TrackLabel>
             <TextField
               fullWidth
+              multiline
+              rows={3}
               {...register("address")}
               error={!!errors?.address?.message}
               helperText={errors?.address?.message?.toString()}
