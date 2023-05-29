@@ -63,7 +63,7 @@ const ProjectList = () => {
 
   React.useEffect(() => {
     getProject();
-  }, []);
+  }, [setProjects]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
@@ -180,7 +180,7 @@ const ProjectList = () => {
         <ProjectForm
           onCancel={onDialogClose}
           projectId={projectId}
-          onSubmitSucces={getProject}
+          onSubmitSuccess={getProject}
         />
       </TrackDialog>
       <TrackDialog
