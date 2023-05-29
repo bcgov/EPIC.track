@@ -190,6 +190,7 @@ def new_project():
             "description": "Testing the create project endpoint",
             "latitude": "54.2681",
             "longitude": "-130.3828",
+            "type_id": 1,
             "sub_type_id": 1,
             "proponent_id": 1,
             "region_id_env": 1,

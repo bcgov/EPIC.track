@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { FC, useEffect } from "react";
 import {
   Button,
   Dialog,
@@ -17,40 +17,52 @@ type TrackDialogProps = {
   okButtonText?: string;
   dialogTitle: string;
   dialogContentText?: string;
-  isActionsRequired: boolean;
-  isOkRequired: boolean;
-  isCancelRequired: boolean;
+  isActionsRequired?: boolean;
+  isOkRequired?: boolean;
+  isCancelRequired?: boolean;
 } & DialogProps;
 
-const TrackDialog = ({ open, dialogTitle, ...props }: TrackDialogProps) => {
+const TrackDialog: FC<TrackDialogProps> = ({
+  onCancel,
+  onOk,
+  cancelButtonText,
+  okButtonText,
+  isActionsRequired,
+  isOkRequired = true,
+  isCancelRequired = true,
+  open,
+  dialogTitle,
+  dialogContentText,
+  ...props
+}) => {
   const [openDialog, setOpenDialog] = React.useState(false);
   useEffect(() => {
     setOpenDialog(open);
   }, [open]);
 
-  if (!props.onOk) {
-    props.onOk = () => setOpenDialog(false);
+  if (!onOk) {
+    onOk = () => setOpenDialog(false);
   }
-  if (!props.onCancel) {
-    props.onCancel = () => setOpenDialog(false);
+  if (!onCancel) {
+    onCancel = () => setOpenDialog(false);
   }
   return (
     <Dialog open={openDialog} {...props}>
       <DialogTitle>{dialogTitle}</DialogTitle>
       <DialogContent>
-        {props.dialogContentText && (
-          <DialogContentText>{props.dialogContentText}</DialogContentText>
+        {dialogContentText && (
+          <DialogContentText>{dialogContentText}</DialogContentText>
         )}
         {props.children}
       </DialogContent>
-      {props.isActionsRequired && (
+      {isActionsRequired && (
         <DialogActions>
-          {props.isCancelRequired && (
-            <Button onClick={props.onCancel}>{props.cancelButtonText}</Button>
+          {isCancelRequired && (
+            <Button onClick={onCancel}>{cancelButtonText || "Cancel"}</Button>
           )}
-          {props.isOkRequired && (
-            <Button onClick={props.onOk} autoFocus>
-              {props.okButtonText}
+          {isOkRequired && (
+            <Button onClick={onOk} autoFocus>
+              {okButtonText || "Ok"}
             </Button>
           )}
         </DialogActions>
@@ -59,24 +71,24 @@ const TrackDialog = ({ open, dialogTitle, ...props }: TrackDialogProps) => {
   );
 };
 
-TrackDialog.propTypes = {
-  onOk: PropTypes.func,
-  onCancel: PropTypes.func,
-  okButtonText: PropTypes.string,
-  cancelButtonText: PropTypes.string,
-  dialogTitle: PropTypes.string.isRequired,
-  dialogContentText: PropTypes.string,
-  isActionsRequried: PropTypes.bool,
-  isOkRequired: PropTypes.bool,
-  isCancelRequired: PropTypes.bool,
-};
+// TrackDialog.propTypes = {
+//   onOk: PropTypes.func,
+//   onCancel: PropTypes.func,
+//   okButtonText: PropTypes.string,
+//   cancelButtonText: PropTypes.string,
+//   dialogTitle: PropTypes.string.isRequired,
+//   dialogContentText: PropTypes.string,
+//   isActionsRequried: PropTypes.bool,
+//   isOkRequired: PropTypes.bool,
+//   isCancelRequired: PropTypes.bool,
+// };
 
-TrackDialog.defaultProps = {
-  okButtonText: "Ok",
-  cancelButtonText: "Cancel",
-  isActionsRequired: false,
-  isOkRequired: true,
-  isCancelRequired: true,
-};
+// TrackDialog.defaultProps = {
+//   // okButtonText: "Ok",
+//   // cancelButtonText: "Cancel",
+//   isActionsRequired: false,
+//   isOkRequired: true,
+//   isCancelRequired: true,
+// };
 
 export default TrackDialog;

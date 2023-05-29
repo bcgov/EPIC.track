@@ -109,7 +109,7 @@ export default function StaffForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>Relationship Holder</TrackLabel>
             <ControlledSelect
-              defaultValue={indigenousNation?.relationship_holder_id}
+              defaultValue={indigenousNation?.relationship_holder_id || ""}
               fullWidth
               {...register("relationship_holder_id")}
             >

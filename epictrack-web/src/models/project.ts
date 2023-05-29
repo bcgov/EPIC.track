@@ -10,6 +10,7 @@ export interface Project {
     sub_type:SubType;
     sub_type_id:number;
     type_id: number;
+    type: Type;
     is_active: boolean;
     description:string;
     region_id_env:number;

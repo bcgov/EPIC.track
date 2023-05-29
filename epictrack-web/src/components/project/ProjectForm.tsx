@@ -27,14 +27,14 @@ import subTypeService from "../../services/subTypeService";
 
 const schema = yup.object<Project>().shape({
   name: yup.string().required("Project Name is required"),
-  proponent: yup.string().required("Proponent is required"),
-  type_id: yup.string().required("Type is required"),
-  sub_type_id: yup.string().required("SubType is required"),
-  description: yup.string().required("Project Description is required"),
-  latitude: yup.string().required("Invalid latitude value"),
-  longitude: yup.string().required("Invalid longitude value"),
-  region_id_env: yup.number().required("ENV Region is required"),
-  region_id_flnro: yup.number().required("NRS Region is required"),
+  // proponent: yup.string().required("Proponent is required"),
+  // type_id: yup.string().required("Type is required"),
+  // sub_type_id: yup.string().required("SubType is required"),
+  // description: yup.string().required("Project Description is required"),
+  // latitude: yup.string().required("Invalid latitude value"),
+  // longitude: yup.string().required("Invalid longitude value"),
+  // region_id_env: yup.number().required("ENV Region is required"),
+  // region_id_flnro: yup.number().required("NRS Region is required"),
 });
 
 export default function ProjectForm({ ...props }) {
@@ -84,10 +84,9 @@ export default function ProjectForm({ ...props }) {
     const result = await ProjectService.getProject(id);
     if (result.status === 200) {
       const project = result.data as Project;
-      project.type_id = project.sub_type.type.id;
       setProject(project);
       reset(project);
-      setSelectedType(project.sub_type.type.id);
+      setSelectedType(project.type_id);
     }
   };
 
@@ -117,6 +116,7 @@ export default function ProjectForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
+    console.log("DATA ", data);
     setLoading(true);
     if (projectId) {
       const result = await ProjectService.updateProjects(projectId, data);
@@ -135,7 +135,7 @@ export default function ProjectForm({ ...props }) {
         setLoading(false);
       }
     }
-    reset();
+    // reset();
   };
   return (
     <>
@@ -177,10 +177,11 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelect
               error={!!errors?.type_id?.message}
               helperText={errors?.type_id?.message?.toString()}
-              defaultValue={project?.type_id}
+              defaultValue={selectedType}
               fullWidth
               {...register("type_id")}
               onChange={(e) => setSelectedType(parseInt(e.target.value))}
+              value={selectedType}
             >
               {types?.map((e, index) => (
                 <MenuItem key={index + 1} value={e.id}>
@@ -342,6 +343,7 @@ export default function ProjectForm({ ...props }) {
         dialogContentText={alertContentText}
         isActionsRequired
         isCancelRequired={false}
+        isOkRequired
         onOk={() => {
           setOpenAlertDialog(false);
           props.onCancel();
