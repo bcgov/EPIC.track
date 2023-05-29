@@ -77,7 +77,9 @@ export default function App() {
                   </IconButton>
                 </Box>
               </If>
-              <AuthenticatedRoutes />
+              <React.StrictMode>
+                <AuthenticatedRoutes />
+              </React.StrictMode>
             </Box>
           </Box>
         </Router>

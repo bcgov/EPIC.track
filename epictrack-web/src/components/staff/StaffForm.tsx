@@ -185,6 +185,7 @@ export default function StaffForm({ ...props }) {
         dialogContentText={alertContentText}
         isActionsRequired
         isCancelRequired={false}
+        isOkRequired
         onOk={() => {
           setOpenAlertDialog(false);
           props.onCancel();
