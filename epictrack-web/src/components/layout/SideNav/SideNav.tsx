@@ -51,7 +51,7 @@ const DrawerBox = () => {
     >
       <List sx={{ paddingTop: "2.5em" }}>
         {Routes.map((route, i) => (
-          <>
+          <React.Fragment key={i}>
             <ListItem key={i}>
               <ListItemButton
                 data-testid={`SideNav/${route.name}-button`}
@@ -70,7 +70,7 @@ const DrawerBox = () => {
                 <Unless condition={currentBaseRoute === route.base}>
                   <EpicTrackH4 color={"white"}>{route.name}</EpicTrackH4>
                 </Unless>
-                <When condition={route.routes && route.routes?.length > 0}>
+                <When condition={route?.routes && route?.routes?.length > 0}>
                   {!!open[route.name] ? <ExpandLess /> : <ExpandMore />}
                 </When>
               </ListItemButton>
@@ -78,10 +78,13 @@ const DrawerBox = () => {
             <When condition={route.routes && route.routes?.length > 0}>
               <Collapse in={!!open[route.name]} timeout="auto" unmountOnExit>
                 <List disablePadding key={`list-${route.name}`}>
-                  {route.routes?.map((subRoute) => (
-                    <ListItem key={`sub-list-${subRoute.name}`}>
+                  {route.routes?.map((subRoute, i) => (
+                    <ListItem key={`sub-list-${subRoute?.name}`}>
                       <ListItemButton onClick={() => handleClick(subRoute)}>
-                        <When condition={location.pathname === subRoute.base}>
+                        <When
+                          key={i}
+                          condition={location.pathname === subRoute.base}
+                        >
                           <EpicTrackH5
                             color={Palette.secondary.main}
                             sx={{
@@ -107,7 +110,7 @@ const DrawerBox = () => {
                 </List>
               </Collapse>
             </When>
-          </>
+          </React.Fragment>
         ))}
       </List>
     </Box>

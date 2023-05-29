@@ -6,11 +6,10 @@ type IFormInputProps = {
   name: string;
 } & TextFieldProps;
 
-const ControlledSelect: FC<IFormInputProps> = ({
-  name,
-  children,
-  ...otherProps
-}) => {
+const ControlledSelect: React.ForwardRefRenderFunction<
+  HTMLDivElement,
+  IFormInputProps
+> = ({ name, children, ...otherProps }, ref) => {
   const {
     control,
     formState: { errors, defaultValues },
@@ -25,6 +24,7 @@ const ControlledSelect: FC<IFormInputProps> = ({
         <TextField
           select
           {...field}
+          ref={ref}
           {...otherProps}
           error={!!errors[name]}
           helperText={String(errors[name]?.message || "")}
@@ -36,4 +36,4 @@ const ControlledSelect: FC<IFormInputProps> = ({
   );
 };
 
-export default ControlledSelect;
+export default React.forwardRef(ControlledSelect);

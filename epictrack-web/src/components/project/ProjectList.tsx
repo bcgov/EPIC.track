@@ -34,7 +34,7 @@ const ProjectList = () => {
 
   React.useEffect(() => {
     const types = projects
-      .map((p) => p.sub_type.type.name)
+      .map((p) => p.type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const subTypes = projects
       .map((p) => p.sub_type.name)
@@ -85,7 +85,7 @@ const ProjectList = () => {
         header: "Project Name",
       },
       {
-        accessorKey: "sub_type.type.name",
+        accessorKey: "type.name",
         header: "Type",
         filterVariant: "multi-select",
         filterSelectOptions: types,
@@ -103,7 +103,7 @@ const ProjectList = () => {
         filterSelectOptions: envRegions,
       },
       {
-        accessorKey: "is_project_closed",
+        accessorKey: "is_active",
         header: "Active",
         filterVariant: "checkbox",
         Cell: ({ cell }) => (

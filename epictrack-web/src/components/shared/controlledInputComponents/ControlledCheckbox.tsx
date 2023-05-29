@@ -6,10 +6,10 @@ type IFormCheckboxProps = {
   name: string;
 } & CheckboxProps;
 
-const ControlledCheckbox: FC<IFormCheckboxProps> = ({
-  name,
-  ...otherProps
-}) => {
+const ControlledCheckbox: React.ForwardRefRenderFunction<
+  HTMLButtonElement,
+  IFormCheckboxProps
+> = ({ name, ...otherProps }, ref) => {
   const {
     control,
     formState: { defaultValues },
@@ -21,10 +21,15 @@ const ControlledCheckbox: FC<IFormCheckboxProps> = ({
       name={name}
       defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
-        <Checkbox {...otherProps} {...field} checked={field.value} />
+        <Checkbox
+          {...otherProps}
+          {...field}
+          ref={ref}
+          checked={!!field.value}
+        />
       )}
     />
   );
 };
 
-export default ControlledCheckbox;
+export default React.forwardRef(ControlledCheckbox);
