@@ -27,14 +27,14 @@ import subTypeService from "../../services/subTypeService";
 
 const schema = yup.object<Project>().shape({
   name: yup.string().required("Project Name is required"),
-  // proponent: yup.string().required("Proponent is required"),
-  // type_id: yup.string().required("Type is required"),
-  // sub_type_id: yup.string().required("SubType is required"),
-  // description: yup.string().required("Project Description is required"),
-  // latitude: yup.string().required("Invalid latitude value"),
-  // longitude: yup.string().required("Invalid longitude value"),
-  // region_id_env: yup.number().required("ENV Region is required"),
-  // region_id_flnro: yup.number().required("NRS Region is required"),
+  proponent: yup.string().required("Proponent is required"),
+  type_id: yup.string().required("Type is required"),
+  sub_type_id: yup.string().required("SubType is required"),
+  description: yup.string().required("Project Description is required"),
+  latitude: yup.string().required("Invalid latitude value"),
+  longitude: yup.string().required("Invalid longitude value"),
+  region_id_env: yup.number().required("ENV Region is required"),
+  region_id_flnro: yup.number().required("NRS Region is required"),
 });
 
 export default function ProjectForm({ ...props }) {
