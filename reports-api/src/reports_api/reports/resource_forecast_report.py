@@ -1,13 +1,11 @@
 """Classes for specific report types."""
-import time
 from calendar import monthrange
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime
 from functools import partial
 from io import BytesIO
 
 from dateutil import rrule
-from flask import current_app
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A3, landscape
 from reportlab.lib.styles import getSampleStyleSheet
@@ -52,6 +50,7 @@ class EAResourceForeCastReport(ReportFactory):
             "role_id",
             "work_id",
             "ea_type_label",
+            "sector(sub)"
         ]
         group_by = "work_id"
         super().__init__(data_keys, group_by, None, filters)
@@ -67,6 +66,7 @@ class EAResourceForeCastReport(ReportFactory):
             .all()
         )
         self.start_event_milestones = [x.milestone_id for x in start_event_milestones]
+        self.months = []
         self.month_labels = []
         self.report_cells = {
             "[PROJECT BACKGROUND]": [
@@ -154,8 +154,8 @@ class EAResourceForeCastReport(ReportFactory):
                 filtered_cells = [
                     x for x in cells if x["data_key"] not in self.excluded_items
                 ]
-                section_headings.append(section_heading)
                 if len(filtered_cells) > 1:
+                    section_headings.append(section_heading)
                     section_headings += [""] * (len(filtered_cells) - 1)  # for colspan
                     styles.append(
                         (
@@ -192,14 +192,17 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _fetch_data(self, report_date: datetime):  # pylint: disable=too-many-locals
         """Fetches the relevant data for EA Resource Forecast Report"""
-        report_start_date = report_date.date()
-        report_start_date = report_start_date.replace(month=report_start_date.month + 1)
+        report_start_date = report_date.date().replace(day=1)
         year = report_start_date.year
-        year_offset, end_month = divmod(report_start_date.month + 5, 13)
+        year_offset, first_month = divmod(report_start_date.month + 1, 13)
+        first_month = report_start_date.replace(
+            year=year + year_offset,
+            month=first_month or 1,
+        )
+        year_offset, end_month = divmod(first_month.month + 5, 13)
         if year_offset > 0:
             end_month += 1
-        start_date = report_start_date.replace(day=1)
-        self.end_date = report_start_date.replace(
+        self.end_date = first_month.replace(
             year=year + year_offset,
             month=end_month,
             day=monthrange(year + year_offset, end_month)[1],
@@ -216,59 +219,60 @@ class EAResourceForeCastReport(ReportFactory):
                 func.max(Event.start_date).label("max_start_date"),
             )
             .filter(
-                Event.start_date <= start_date,
+                Event.start_date <= first_month,
                 Event.milestone_id.in_(self.start_event_milestones),
             )
             .group_by(Event.work_id)
             .subquery()
         )
 
-        year_offset, second_month = divmod(start_date.month + 1, 13)
-        second_month = start_date.replace(
+        year_offset, second_month = divmod(first_month.month + 1, 13)
+        second_month = first_month.replace(
             year=year + year_offset,
             month=second_month or 1,
             day=monthrange(year + year_offset, second_month)[1],
         )
 
-        year_offset, third_month = divmod(start_date.month + 2, 13)
-        third_month = start_date.replace(
+        year_offset, third_month = divmod(first_month.month + 2, 13)
+        third_month = first_month.replace(
             year=year + year_offset,
             month=third_month or 1,
             day=monthrange(year + year_offset, third_month or 1)[1],
         )
 
-        year_offset, remaining_start = divmod(start_date.month + 3, 13)
-        remaining_start_month = start_date.replace(
+        year_offset, remaining_start = divmod(first_month.month + 3, 13)
+        remaining_start_month = first_month.replace(
             year=year + year_offset,
             month=remaining_start or 1,
             day=1,
         )
-        months = [
-            start_date.replace(
+        self.months = [
+            report_start_date.replace(
                 day=monthrange(report_start_date.year, report_start_date.month)[1]
             ),
+            first_month.replace(day=monthrange(first_month.year, first_month.month)[1]),
             second_month,
             third_month,
             self.end_date,
         ]
-        self.month_labels = list(map(lambda x: f"{x:%B}", months[:-1]))
-        month_labels = []
+        self.month_labels = list(map(lambda x: f"{x:%B}", self.months[1:-1]))
+        q2_month_labels = []
         for month in rrule.rrule(
             rrule.MONTHLY, dtstart=remaining_start_month, until=self.end_date
         ):
             month_label = f"{month:%b}"
             if month.month == 12:
                 month_label += f"{month:%Y}"
-            month_labels.append(month_label)
-        if self.end_date.year > start_date.year:
-            month_labels[-1] += f"{self.end_date:%Y}"
-        self.month_labels.append(", ".join(month_labels))
+            q2_month_labels.append(month_label)
+        if self.end_date.year > first_month.year:
+            q2_month_labels[-1] += f"{self.end_date:%Y}"
+        self.month_labels.append(", ".join(q2_month_labels))
 
         works = (
             Project.query.filter(
                 Project.is_project_closed.is_(False),
                 Project.is_deleted.is_(False),
-                Project.is_active.is_(True)
+                Project.is_active.is_(True),
             )
             .join(Work)
             .join(WorkType)
@@ -308,7 +312,7 @@ class EAResourceForeCastReport(ReportFactory):
                         Work.anticipated_decision_date.cast(Date),
                     ),
                     "[)",
-                ).overlaps(daterange(start_date, self.end_date, "[)"))
+                ).overlaps(daterange(report_start_date, self.end_date, "[)"))
             )
             .add_columns(
                 Project.name.label("project_name"),
@@ -330,6 +334,7 @@ class EAResourceForeCastReport(ReportFactory):
                 Staff.last_name.label("staff_last_name"),
                 StaffWorkRole.role_id.label("role_id"),
                 Work.id.label("work_id"),
+                func.concat(SubType.short_name, ' (', Type.short_name, ')').label("sector(sub)")
             )
             .all()
         )
@@ -339,8 +344,7 @@ class EAResourceForeCastReport(ReportFactory):
             Event.query.filter(
                 Event.work_id.in_(work_ids),
                 Event.milestone_id.in_(self.start_event_milestones),
-                func.coalesce(Event.start_date, Event.anticipated_start_date) <=
-                self.end_date,
+                func.coalesce(Event.start_date, Event.anticipated_start_date) <= self.end_date,
             )
             .join(Milestone)
             .join(PhaseCode)
@@ -359,8 +363,12 @@ class EAResourceForeCastReport(ReportFactory):
         results = defaultdict(list)
         for work_id, work_data in works.items():
             work = work_data[0]
-            for index, month in enumerate(months):
-                latest_event = events[work_id][-1]
+            for index, month in enumerate(self.months[1:]):
+                month_events = list(
+                    filter(lambda x: x.start_date.date() <= month, events[work_id])  # pylint:disable=cell-var-from-loop
+                )
+                month_events = sorted(month_events, key=lambda x: x.start_date)
+                latest_event = month_events[-1]
                 work.update(
                     {
                         self.month_labels[index]: latest_event.event_phase,
@@ -372,22 +380,50 @@ class EAResourceForeCastReport(ReportFactory):
         return results
 
     def _filter_data(self, data_items):
-        filter_search = self.filters['filter_search'] if self.filters and self.filters['filter_search'] else []
-        global_search = self.filters['global_search'] if self.filters and 'global_search' in self.filters else None
-        return [item for item in data_items
-                if all(item[0][key] in filter_search[key]
-                       for key in list(filter_search)
-                       if key != 'project_name' and len(filter_search.keys()) > 0) and
-                ('project_name' not in filter_search or ('project_name' in filter_search and
-                                                         item[0]['project_name'] not in
-                                                         filter_search['project_name'])) and
-                (not global_search or any(global_search.lower() in
-                                          str(item[0][key]).lower()
-                                          for key in item[0].keys()))]
+        if self.filters:
+            filter_search = self.filters["filter_search"] if self.filters and self.filters['filter_search'] else {}
+            global_search = self.filters.get("global_search", None)
+            project_name = filter_search.pop("project_name", None)
+            filtered_result = []
+            for item in data_items:
+                if project_name and item[0]["project_name"] in project_name:
+                    continue
+                if any(item[0][key] not in filter_search[key] for key in list(filter_search)):
+                    continue
+                if global_search and all(global_search.lower() not in str(item[0][key]).lower()
+                                         for key in item[0].keys()):
+                    continue
+                filtered_result.append(item)
+            if filter_search or global_search or project_name:
+                return filtered_result
+        return data_items
+        # return [
+        #     item
+        #     for item in data_items
+        #     if all(
+        #         item[0][key] in filter_search[key]
+        #         for key in list(filter_search)
+        #         if key != "project_name" and len(filter_search.keys()) > 0
+        #     )
+        #     and (
+        #         "project_name" not in filter_search
+        #         or (
+        #             "project_name" in filter_search
+        #             and item[0]["project_name"] not in filter_search["project_name"]
+        #         )
+        #     )
+        #     and (
+        #         not global_search
+        #         or any(
+        #             global_search.lower() in str(item[0][key]).lower()
+        #             for key in item[0].keys()
+        #         )
+        #     )
+        # ]
 
     def _format_data(self, data):  # pylint: disable=too-many-locals
         response = []
-        data = [item for _, item in data.items()]
+        data = data.values()
         data = self._filter_data(data)
         for values in data:
             staffs = []
@@ -408,15 +444,6 @@ class EAResourceForeCastReport(ReportFactory):
                 work_data[
                     "capital_investment"
                 ] = f"{work_data['capital_investment']:,.0f}"
-            months = []
-            for month in self.month_labels:
-                month_data = work_data.pop(month)
-                color = work_data.pop(f"{month}_color")
-                months.append({"label": month, "phase": month_data, "color": color})
-            work_data["months"] = months
-            work_data[
-                "sector(sub)"
-            ] = f"{work_data.get('type', '')} ({work_data.get('sub_type', '')})"
             referral_timing_query = (
                 db.session.query(PhaseCode)
                 .join(
@@ -432,7 +459,6 @@ class EAResourceForeCastReport(ReportFactory):
                 .filter(
                     and_(
                         WorkType.id == PhaseCode.work_type_id,
-                        WorkType.name == work_data["ea_type"],
                         Event.work_id == work_data["work_id"],
                     )
                 )
@@ -449,12 +475,41 @@ class EAResourceForeCastReport(ReportFactory):
                 if obj.name not in {"Other", "None"} and obj.auto
             )
 
-            referral_timing = Event.query.filter(
-                Event.milestone_id == referral_timing_milestone.id
-            ).first()
+            referral_timing = (
+                Event.query.filter(Event.milestone_id == referral_timing_milestone.id)
+                .add_column(
+                    func.coalesce(Event.start_date, Event.anticipated_start_date).label(
+                        "event_start_date"
+                    )
+                )
+                .first()
+            )
             work_data[
                 "referral_timing"
-            ] = f"{referral_timing.anticipated_start_date:%B %d, %Y}"
+            ] = f"{referral_timing.event_start_date:%B %d, %Y}"
+            months = []
+            referral_month_index = len(self.month_labels)
+            # TODO:  Check if this can be done w/o setting self.months
+            referral_month = next(
+                (
+                    x
+                    for x in self.months
+                    if referral_timing.event_start_date.date() <= x
+                ),
+                None,
+            )
+            if referral_month:
+                referral_month_index = self.months.index(referral_month)
+                for month in self.month_labels[referral_month_index:]:
+                    month_data = work_data.pop(month)
+                    color = work_data.pop(f"{month}_color")
+                    months.append({"label": month, "phase": "Referred", "color": color})
+            for month in self.month_labels[:referral_month_index]:
+                month_data = work_data.pop(month)
+                color = work_data.pop(f"{month}_color")
+                months.append({"label": month, "phase": month_data, "color": color})
+
+            work_data["months"] = months
             response.append(work_data)
 
         return response
@@ -463,21 +518,12 @@ class EAResourceForeCastReport(ReportFactory):
         self, report_date, return_type
     ):  # pylint: disable=too-many-locals,too-many-statements
         """Generates a report and returns it"""
-        start_time = time.process_time()
         data = self._fetch_data(report_date)
-        end = time.process_time()
-        current_app.logger.info(f"Db query took {timedelta(seconds=end - start_time)}")
-        start_time = end
         data = self._format_data(data)
-        end = time.process_time()
-        current_app.logger.info(
-            f"Formatting took {timedelta(seconds=end - start_time)}"
-        )
         if return_type == "json" and data:
             return {"data": data}, None
         if not data:
             return {}, None
-        start_time = end
         formatted_data = defaultdict(list)
         for item in data:
             formatted_data[item["ea_type_label"]].append(item)
@@ -503,8 +549,7 @@ class EAResourceForeCastReport(ReportFactory):
                     Paragraph(
                         f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style
                     )
-                ] +
-                [""] * (len(table_headers[1]) - 1)
+                ] + [""] * (len(table_headers[1]) - 1)
             )
             normal_style.textColor = colors.black
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
@@ -525,7 +570,7 @@ class EAResourceForeCastReport(ReportFactory):
                     row.append(Paragraph(month_data["phase"], normal_style))
                     cell_index = month_cell_start + month_index
                     color = month_data["color"][1:]
-                    bg_color = [int(color[i: i + 2], 16) / 255 for i in (0, 2, 4)]
+                    bg_color = [int(color[i:i + 2], 16) / 255 for i in (0, 2, 4)]
                     styles.append(
                         (
                             "BACKGROUND",
@@ -549,8 +594,7 @@ class EAResourceForeCastReport(ReportFactory):
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ] +
-                styles
+                ] + styles
             )
         )
 
@@ -583,8 +627,4 @@ class EAResourceForeCastReport(ReportFactory):
             canv.showPage()
         canv.save()
         pdf_stream.seek(0)
-        end = time.process_time()
-        current_app.logger.info(
-            f"PDF creation took {timedelta(seconds=end - start_time)}"
-        )
         return pdf_stream.getvalue(), f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
