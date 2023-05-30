@@ -50,7 +50,7 @@ class EAResourceForeCastReport(ReportFactory):
             "role_id",
             "work_id",
             "ea_type_label",
-            "sector(sub)"
+            "sector(sub)",
         ]
         group_by = "work_id"
         super().__init__(data_keys, group_by, None, filters)
@@ -334,7 +334,9 @@ class EAResourceForeCastReport(ReportFactory):
                 Staff.last_name.label("staff_last_name"),
                 StaffWorkRole.role_id.label("role_id"),
                 Work.id.label("work_id"),
-                func.concat(SubType.short_name, ' (', Type.short_name, ')').label("sector(sub)")
+                func.concat(SubType.short_name, " (", Type.short_name, ")").label(
+                    "sector(sub)"
+                ),
             )
             .all()
         )
@@ -365,7 +367,8 @@ class EAResourceForeCastReport(ReportFactory):
             work = work_data[0]
             for index, month in enumerate(self.months[1:]):
                 month_events = list(
-                    filter(lambda x: x.start_date.date() <= month, events[work_id])  # pylint:disable=cell-var-from-loop
+                    filter(
+                        lambda x: x.start_date.date() <= month, events[work_id])  # pylint:disable=cell-var-from-loop
                 )
                 month_events = sorted(month_events, key=lambda x: x.start_date)
                 latest_event = month_events[-1]
@@ -381,45 +384,31 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _filter_data(self, data_items):
         if self.filters:
-            filter_search = self.filters["filter_search"] if self.filters and self.filters['filter_search'] else {}
+            filter_search = (
+                self.filters["filter_search"]
+                if self.filters and self.filters["filter_search"]
+                else {}
+            )
             global_search = self.filters.get("global_search", None)
             project_name = filter_search.pop("project_name", None)
             filtered_result = []
             for item in data_items:
                 if project_name and item[0]["project_name"] in project_name:
                     continue
-                if any(item[0][key] not in filter_search[key] for key in list(filter_search)):
+                if any(
+                    item[0][key] not in filter_search[key]
+                    for key in list(filter_search)
+                ):
                     continue
-                if global_search and all(global_search.lower() not in str(item[0][key]).lower()
-                                         for key in item[0].keys()):
+                if global_search and all(
+                    global_search.lower() not in str(item[0][key]).lower()
+                    for key in item[0].keys()
+                ):
                     continue
                 filtered_result.append(item)
             if filter_search or global_search or project_name:
                 return filtered_result
         return data_items
-        # return [
-        #     item
-        #     for item in data_items
-        #     if all(
-        #         item[0][key] in filter_search[key]
-        #         for key in list(filter_search)
-        #         if key != "project_name" and len(filter_search.keys()) > 0
-        #     )
-        #     and (
-        #         "project_name" not in filter_search
-        #         or (
-        #             "project_name" in filter_search
-        #             and item[0]["project_name"] not in filter_search["project_name"]
-        #         )
-        #     )
-        #     and (
-        #         not global_search
-        #         or any(
-        #             global_search.lower() in str(item[0][key]).lower()
-        #             for key in item[0].keys()
-        #         )
-        #     )
-        # ]
 
     def _format_data(self, data):  # pylint: disable=too-many-locals
         response = []
@@ -489,7 +478,6 @@ class EAResourceForeCastReport(ReportFactory):
             ] = f"{referral_timing.event_start_date:%B %d, %Y}"
             months = []
             referral_month_index = len(self.month_labels)
-            # TODO:  Check if this can be done w/o setting self.months
             referral_month = next(
                 (
                     x
@@ -498,6 +486,7 @@ class EAResourceForeCastReport(ReportFactory):
                 ),
                 None,
             )
+
             if referral_month:
                 referral_month_index = self.months.index(referral_month)
                 for month in self.month_labels[referral_month_index:]:
@@ -558,11 +547,15 @@ class EAResourceForeCastReport(ReportFactory):
             row_index += 1
             for project in projects:
                 row = []
-                for cell in table_cells[:-1]:
+                # Referral timing is manually added at the end since it is
+                # always the last cell
+                if "referral_timing" in table_cells:
+                    table_cells.remove("referral_timing")
+                for cell in table_cells:
                     row.append(
                         Paragraph(project[cell] if project[cell] else "", normal_style)
                     )
-                month_cell_start = len(table_cells) - 1
+                month_cell_start = len(table_cells)
                 for month_index, month in enumerate(self.month_labels):
                     month_data = next(
                         x for x in project["months"] if x["label"] == month
@@ -579,7 +572,8 @@ class EAResourceForeCastReport(ReportFactory):
                             bg_color,
                         )
                     )
-                row.append(Paragraph(project[table_cells[-1]], normal_style))
+                if "referral_timing" not in self.excluded_items:
+                    row.append(Paragraph(project["referral_timing"], normal_style))
                 table_data.append(row)
                 row_index += 1
         table = Table(table_headers + table_data, repeatRows=3, colWidths=cell_widths)
