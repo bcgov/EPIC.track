@@ -14,6 +14,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
       <MaterialReactTable
         columns={columns}
         data={data}
+        globalFilterFn="contains"
         enableHiding={false}
         enableStickyHeader={true}
         enableDensityToggle={false}
