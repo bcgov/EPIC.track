@@ -16,7 +16,7 @@ from datetime import datetime
 from http import HTTPStatus
 from io import BytesIO
 
-from flask import send_file, jsonify
+from flask import jsonify, send_file
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import ReportService
