@@ -16,7 +16,7 @@ from datetime import datetime
 from http import HTTPStatus
 from io import BytesIO
 
-from flask import send_file
+from flask import send_file, jsonify
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import ReportService
@@ -42,7 +42,7 @@ class Report(Resource):
         filters = API.payload.get('filters', None)
         report = ReportService.generate_report(report_type, report_date, 'json', filters=filters)
         if report:
-            return report, HTTPStatus.OK
+            return jsonify(report), HTTPStatus.OK
         return report, HTTPStatus.NO_CONTENT
 
 

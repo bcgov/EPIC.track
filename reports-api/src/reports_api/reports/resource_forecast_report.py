@@ -51,6 +51,7 @@ class EAResourceForeCastReport(ReportFactory):
             "work_id",
             "ea_type_label",
             "sector(sub)",
+            "ea_type_sort_order"
         ]
         group_by = "work_id"
         super().__init__(data_keys, group_by, None, filters)
@@ -319,6 +320,7 @@ class EAResourceForeCastReport(ReportFactory):
                 Project.capital_investment.label("capital_investment"),
                 WorkType.name.label("ea_type"),
                 WorkType.report_title.label("ea_type_label"),
+                WorkType.sort_order.label("ea_type_sort_order"),
                 project_phase.name.label("project_phase"),
                 EAAct.name.label("ea_act"),
                 FederalInvolvement.name.label("iaac"),
@@ -509,10 +511,11 @@ class EAResourceForeCastReport(ReportFactory):
         """Generates a report and returns it"""
         data = self._fetch_data(report_date)
         data = self._format_data(data)
-        if return_type == "json" and data:
-            return {"data": data}, None
         if not data:
             return {}, None
+        data = sorted(data, key=lambda k: (k['ea_type_sort_order'], k['project_name']))
+        if return_type == "json" and data:
+            return data, None
         formatted_data = defaultdict(list)
         for item in data:
             formatted_data[item["ea_type_label"]].append(item)
