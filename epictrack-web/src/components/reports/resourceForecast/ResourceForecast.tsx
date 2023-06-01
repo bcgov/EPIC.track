@@ -313,7 +313,7 @@ export default function ResourceForecast() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        const data = (reportData.data as never)["data"] as any[];
+        const data = reportData.data as never[];
         data.forEach((element) => {
           Object.keys(element).forEach(
             (key) => (element[key] = element[key] ?? "")
