@@ -1,4 +1,4 @@
-export const Routes = [
+export const Routes: RouteType[] = [
   { name: "Home", path: "/", base: "/" },
   {
     name: "Data Management",
@@ -51,3 +51,10 @@ export const Routes = [
     ],
   },
 ];
+
+export interface RouteType {
+  name: string;
+  path: string;
+  base: string;
+  routes?: RouteType[];
+}

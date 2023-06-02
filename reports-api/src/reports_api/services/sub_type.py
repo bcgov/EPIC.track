@@ -15,6 +15,7 @@
 from flask import current_app, jsonify
 
 from reports_api.models import SubType
+from reports_api.schemas.types import SubTypeSchema
 
 
 class SubTypeService:  # pylint:disable=too-few-public-methods
@@ -25,4 +26,5 @@ class SubTypeService:  # pylint:disable=too-few-public-methods
         """Find sub types by type_id"""
         current_app.logger.debug(f"find sub types by type_id {type_id}")
         sub_types = SubType.find_by_type_id(type_id)
-        return jsonify([item.as_dict() for item in sub_types])
+        sub_types_schema = SubTypeSchema(many=True)
+        return jsonify(sub_types_schema.dump(sub_types))

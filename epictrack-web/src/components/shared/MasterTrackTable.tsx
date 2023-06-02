@@ -20,6 +20,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
         enableColumnFilters={true}
         enableFullScreenToggle={false}
         enablePinning
+        enablePagination={false}
         positionActionsColumn={"last"}
         initialState={{
           density: "compact",

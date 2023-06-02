@@ -188,7 +188,9 @@ def new_project():
         **{
             "name": "New Project",
             "description": "Testing the create project endpoint",
-            "location": "Victoria, BC",
+            "latitude": "54.2681",
+            "longitude": "-130.3828",
+            "type_id": 1,
             "sub_type_id": 1,
             "proponent_id": 1,
             "region_id_env": 1,

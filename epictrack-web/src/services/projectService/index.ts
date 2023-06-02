@@ -7,15 +7,21 @@ const getProjects = async (apiUrl?: string) => {
   );
 };
 
-const createProjects = async (projectID: any, projectParams: any) => {
-  return await http.DeleteRequest(
+const getProject = async (id: number) => {
+  return await http.GetRequest(
+    AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${id}`
+  );
+};
+
+const createProjects = async (projectParams: any) => {
+  return await http.PostRequest(
     AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS,
     projectParams
   );
 };
 
 const updateProjects = async (projectID: any, projectParams: any) => {
-  return await http.DeleteRequest(
+  return await http.PutRequest(
     AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${projectID}`,
     projectParams
   );
@@ -26,6 +32,7 @@ const deleteProjects = async (projectID: any) => {
   );
 };
 const ProjectService = {
+  getProject,
   getProjects,
   createProjects,
   updateProjects,

@@ -1,9 +1,8 @@
+import { ListType } from "./code";
 import { Staff } from "./staff";
 
-export interface Ministry {
-    id: number;
+export interface Ministry extends ListType {
     abbreviation: string;
     combined: string;
-    name: string;
     minister: Staff;
 }

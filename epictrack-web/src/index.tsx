@@ -10,7 +10,6 @@ import { BaseTheme } from "./styles/theme";
 // eslint-disable-next-line
 const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
-  // <React.StrictMode>
   <Provider store={store}>
     <ThemeProvider theme={BaseTheme}>
       <StyledEngineProvider injectFirst>
@@ -18,7 +17,6 @@ root.render(
       </StyledEngineProvider>
     </ThemeProvider>
   </Provider>
-  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

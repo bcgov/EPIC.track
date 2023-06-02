@@ -25,7 +25,9 @@ def test_create_project(client):
     payload = {
         "name": "New Project",
         "description": "Testing the create project endpoint",
-        "location": "Victoria, BC",
+        "latitude": "54.2681",
+        "longitude": "-130.3828",
+        "type_id": 1,
         "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
@@ -50,7 +52,9 @@ def test_update_project(client):
     payload = {
         "name": "New Project",
         "description": "Testing the create project endpoint",
-        "location": "Victoria, BC",
+        "latitude": "54.2681",
+        "longitude": "-130.3828",
+        "type_id": 1,
         "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
@@ -73,7 +77,9 @@ def test_delete_project(client):
     payload = {
         "name": "New Project",
         "description": "Testing the create project endpoint",
-        "location": "Victoria, BC",
+        "latitude": "54.2681",
+        "longitude": "-130.3828",
+        "type_id": 1,
         "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
@@ -95,7 +101,9 @@ def test_project_detail(client):
     payload = {
         "name": "New Project",
         "description": "Testing the create project endpoint",
-        "location": "Victoria, BC",
+        "latitude": "54.2681",
+        "longitude": "-130.3828",
+        "type_id": 1,
         "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
