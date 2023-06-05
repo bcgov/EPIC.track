@@ -83,6 +83,7 @@ const ProjectList = () => {
       {
         accessorKey: "name",
         header: "Project Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "type.name",
@@ -132,6 +133,14 @@ const ProjectList = () => {
           <MasterTrackTable
             columns={columns}
             data={projects}
+            initialState={{
+              sorting: [
+                {
+                  id: "name",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,

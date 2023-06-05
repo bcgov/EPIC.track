@@ -29,6 +29,7 @@ export default function ProponentList() {
       {
         accessorKey: "name",
         header: "Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "relationship_holder.full_name",
@@ -119,6 +120,14 @@ export default function ProponentList() {
           <MasterTrackTable
             columns={columns}
             data={proponents}
+            initialState={{
+              sorting: [
+                {
+                  id: "name",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,

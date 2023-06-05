@@ -12,7 +12,6 @@ import TrackDialog from "../shared/TrackDialog";
 import IndigenousNationForm from "./IndigneousNationForm";
 import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
-import { sort } from "../../utils";
 
 export default function IndigenousNationList() {
   const [resultStatus, setResultStatus] = useState<string>();
@@ -25,12 +24,13 @@ export default function IndigenousNationList() {
     React.useState<boolean>(false);
   const titleSuffix = "Indigeneous Nation Details";
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
-
+  console.log(indigenousNations);
   const columns = useMemo<MRT_ColumnDef<IndigenousNation>[]>(
     () => [
       {
         accessorKey: "name",
         header: "Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "relationship_holder.full_name",
@@ -87,10 +87,7 @@ export default function IndigenousNationList() {
         await IndigenousNationService.getIndigenousNations();
       if (indigenousNationsResult.status === 200) {
         setIndigenousNations(
-          sort(
-            (indigenousNationsResult.data as never)["indigenous_nations"],
-            "name"
-          )
+          (indigenousNationsResult.data as never)["indigenous_nations"]
         );
       }
     } catch (error) {
@@ -125,6 +122,14 @@ export default function IndigenousNationList() {
           <MasterTrackTable
             columns={columns}
             data={indigenousNations}
+            initialState={{
+              sorting: [
+                {
+                  id: "name",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,
