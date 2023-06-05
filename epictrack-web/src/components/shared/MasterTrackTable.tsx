@@ -20,12 +20,25 @@ const MasterTrackTable = <T extends Record<string, any>>({
         enableDensityToggle={false}
         enableColumnFilters={true}
         enableFullScreenToggle={false}
+        enableSorting={true}
         enablePinning
         enablePagination={false}
         positionActionsColumn={"last"}
-        initialState={{
-          density: "compact",
-          columnPinning: { right: ["mrt-row-actions"] },
+        muiTableContainerProps={(table) => ({
+          sx: {
+            maxHeight: "100%",
+          },
+        })}
+        sortingFns={{
+          sortFn: (rowA: any, rowB: any, columnId: string) => {
+            return rowA
+              .getValue(columnId)
+              .localeCompare(rowB.getValue(columnId), "en", {
+                numeric: true,
+                ignorePunctuation: false,
+                sensitivity: "base",
+              });
+          },
         }}
         positionGlobalFilter="left"
         muiSearchTextFieldProps={{
@@ -33,17 +46,22 @@ const MasterTrackTable = <T extends Record<string, any>>({
           sx: { minWidth: "300px" },
           variant: "outlined",
         }}
-        state={{
-          showGlobalFilter: true,
-          columnPinning: { right: ["mrt-row-actions"] },
-          ...rest.state,
-        }}
         renderToolbarInternalActions={({ table }) => (
           <>
             <MRT_ToggleFiltersButton table={table} />
           </>
         )}
         {...rest}
+        initialState={{
+          density: "compact",
+          columnPinning: { right: ["mrt-row-actions"] },
+          ...rest.initialState,
+        }}
+        state={{
+          showGlobalFilter: true,
+          columnPinning: { right: ["mrt-row-actions"] },
+          ...rest.state,
+        }}
       />
     </>
   );

@@ -53,31 +53,6 @@ const WorkList = () => {
         );
       codeTypes[key](codes);
     });
-
-    // const phases = works
-    //   .map((p) => p.current_phase?.name)
-    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    // setPhases(phases);
-    // const eaActs = works
-    //   .map((p) => p.ea_act?.name)
-    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    // setEAActs(eaActs);
-    // const workTypes = works
-    //   .map((p) => p.work_type?.name)
-    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    // setWorkTypes(workTypes);
-    // const projects = works
-    //   .map((p) => p.project?.name)
-    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    // setProjects(projects);
-    // const ministries = works
-    //   .map((p) => p.ministry?.name)
-    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    // setMinistries(ministries);
-    // const teams = works
-    //   .map((p) => p.eao_team?.name)
-    //   .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    // setTeams(teams);
   }, [works]);
 
   const getWorks = React.useCallback(async () => {
@@ -117,6 +92,7 @@ const WorkList = () => {
       {
         accessorKey: "title",
         header: "Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "project.name",
@@ -184,6 +160,14 @@ const WorkList = () => {
           <MasterTrackTable
             columns={columns}
             data={works}
+            initialState={{
+              sorting: [
+                {
+                  id: "title",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,
