@@ -34,12 +34,21 @@ const getProponent = async (id: number) => {
   );
 };
 
+const checkProponentExists = async (name: string, id: number) => {
+  return await http.GetRequest(
+    AppConfig.apiUrl +
+      Endpoints.Proponents.GET_PROPONENTS +
+      `/exists?name=${name}${id ? "&id=" + id : ""}`
+  );
+};
+
 const ProponentService = {
   getProponents,
   createProponent,
   updateProponent,
   deleteProponent,
   getProponent,
+  checkProponentExists,
 };
 
 export default ProponentService;
