@@ -19,11 +19,6 @@ import ProponentService from "../../services/proponentService";
 import { Proponent } from "../../models/proponent";
 import StaffService from "../../services/staffService";
 
-const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  //   responsible_epd_id: yup.string().required('Select position')
-});
-
 export default function StaffForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const [proponent, setProponent] = React.useState<Proponent>();
@@ -31,11 +26,25 @@ export default function StaffForm({ ...props }) {
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const proponentID = props.proponentID;
+  const schema = yup.object().shape({
+    name: yup
+      .string()
+      .required("Name is required")
+      .test(
+        "validate-proponent",
+        "Proponent/Certificate Holder with the given name already exists",
+        async (value) => {
+          const validateProponentResult =
+            await ProponentService.checkProponentExists(value, proponentID);
+          return !(validateProponentResult.data as any)["exists"] as boolean;
+        }
+      ),
+    //   responsible_epd_id: yup.string().required('Select position')
+  });
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: proponent,
   });
-
   const {
     register,
     handleSubmit,
