@@ -9,12 +9,11 @@ import ProjectService from "../../services/projectService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import TrackDialog from "../shared/TrackDialog";
 import { EpicTrackPageGridContainer } from "../shared";
-import { Staff } from "../../models/staff";
 
 const ProjectList = () => {
   const [projects, setProjects] = React.useState<Project[]>([]);
-  const [envRegions, setEnvRegions] = React.useState<string[]>([]);
-  const [subTypes, setSubTypes] = React.useState<string[]>([]);
+  const [envregions, setenvRegions] = React.useState<string[]>([]);
+  const [subtypes, setsubTypes] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
   const [resultStatus, setResultStatus] = React.useState<string>();
   const [projectId, setProjectId] = React.useState<number>();
@@ -22,6 +21,7 @@ const ProjectList = () => {
   const [showDialog, setShowDialog] = React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
+
   const titleSuffix = "Project Details";
   const onDialogClose = (event: any, reason: any) => {
     if (reason && reason == "backdropClick") return;
@@ -32,19 +32,27 @@ const ProjectList = () => {
     setShowDialog(true);
   };
 
+  const codeTypes: { [x: string]: any } = {
+    region_env: setenvRegions,
+    sub_type: setsubTypes,
+  };
+
+  React.useEffect(() => {
+    Object.keys(codeTypes).forEach((key: string) => {
+      const codes = projects
+        .map((w) => w[key]?.name)
+        .filter(
+          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
+        );
+      codeTypes[key](codes);
+    });
+  }, [projects]);
+  console.log(projects);
   React.useEffect(() => {
     const types = projects
-      .map((p) => p.type.name)
-      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    const subTypes = projects
-      .map((p) => p.sub_type.name)
-      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    const envRegions = projects
-      .map((p) => p.region_env.name)
+      .map((p) => p.sub_type.type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setTypes(types);
-    setSubTypes(subTypes);
-    setEnvRegions(envRegions);
   }, [projects]);
 
   const getProject = React.useCallback(async () => {
@@ -63,7 +71,7 @@ const ProjectList = () => {
 
   React.useEffect(() => {
     getProject();
-  }, [setProjects]);
+  }, [getProject]);
 
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
@@ -78,15 +86,15 @@ const ProjectList = () => {
       getProject();
     }
   };
+
   const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
         accessorKey: "name",
         header: "Project Name",
-        sortingFn: "sortFn",
       },
       {
-        accessorKey: "type.name",
+        accessorKey: "sub_type.type.name",
         header: "Type",
         filterVariant: "multi-select",
         filterSelectOptions: types,
@@ -95,16 +103,16 @@ const ProjectList = () => {
         accessorKey: "sub_type.name",
         header: "Sub Type",
         filterVariant: "multi-select",
-        filterSelectOptions: subTypes,
+        filterSelectOptions: subtypes,
       },
       {
         accessorKey: "region_env.name",
         header: "ENV Region",
         filterVariant: "multi-select",
-        filterSelectOptions: envRegions,
+        filterSelectOptions: envregions,
       },
       {
-        accessorKey: "is_active",
+        accessorKey: "is_project_closed",
         header: "Active",
         filterVariant: "checkbox",
         Cell: ({ cell }) => (
@@ -119,7 +127,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    []
+    [projects, types, envregions, subtypes]
   );
   return (
     <>
@@ -133,14 +141,6 @@ const ProjectList = () => {
           <MasterTrackTable
             columns={columns}
             data={projects}
-            initialState={{
-              sorting: [
-                {
-                  id: "name",
-                  desc: false,
-                },
-              ],
-            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,
@@ -189,7 +189,7 @@ const ProjectList = () => {
         <ProjectForm
           onCancel={onDialogClose}
           projectId={projectId}
-          onSubmitSuccess={getProject}
+          onSubmitSucces={getProject}
         />
       </TrackDialog>
       <TrackDialog
@@ -205,4 +205,5 @@ const ProjectList = () => {
     </>
   );
 };
+
 export default ProjectList;

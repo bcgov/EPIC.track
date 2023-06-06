@@ -13,15 +13,15 @@ const getProject = async (id: number) => {
   );
 };
 
-const createProjects = async (projectParams: any) => {
-  return await http.PostRequest(
+const createProjects = async (projectID: any, projectParams: any) => {
+  return await http.DeleteRequest(
     AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS,
     projectParams
   );
 };
 
 const updateProjects = async (projectID: any, projectParams: any) => {
-  return await http.PutRequest(
+  return await http.DeleteRequest(
     AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${projectID}`,
     projectParams
   );

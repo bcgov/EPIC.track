@@ -9,12 +9,12 @@ export type Code =
   | "proponents"
   | "ea_acts"
   | "work_types"
-  | "eao_teams"
-  | "regions"
-  | "types"
-  | "sub_types"
-  | "federal_involvements"
-  | "substitution_acts";
+  | "eao_teams";
+("regions");
+("types");
+("subtypes");
+("federal_involvements");
+("substitution_acts");
 
 const getCodes = async (codeType: Code, apiUrl?: string) => {
   return await http.GetRequest(

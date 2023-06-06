@@ -1,4 +1,4 @@
-import { ListType } from "./code";
-
-export interface Type extends ListType {
+export interface type {
+    id: number;
+    name: string;
 }

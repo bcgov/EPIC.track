@@ -1,29 +1,26 @@
 import { Proponent } from "./proponent";
 import { ListType } from "./code";
-import { Type } from "./type";
-import { SubType } from "./subtype";
-import { Region } from "./region";
+import { type } from "./type";
+import { subtype } from "./subtype";
 
 export interface Project {
     id: number;
     name: string;
-    sub_type:SubType;
+    sub_type:subtype;
     sub_type_id:number;
-    type_id: number;
-    type: Type;
+    type: type;
     is_active: boolean;
     description:string;
     region_id_env:number;
     region_id_flnro:number;
-    proponent_id:number;
+    proponent_id:Proponent;
     ea_certificate:string;
     abbreviation:string;
     epic_guid:string;
-    latitude: string;
-    longitude: string;
-    capital_investment: number;
-    address:string;
+    location:string;
+    capital_investment: Float;
+    address:Text;
     is_project_closed:boolean;
-    region_env:Region;
-    region_flnro:Region;
+    region_env:ListType;
+    region_flnro:ListType;
 }
