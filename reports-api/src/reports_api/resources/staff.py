@@ -45,7 +45,7 @@ validation_parser.add_argument(
 )
 
 
-@cors_preflight("GET")
+@cors_preflight("GET,POST")
 @API.route("", methods=["GET", "POST", "OPTIONS"])
 class Staffs(Resource):
     """Endpoint resource to return staffs."""

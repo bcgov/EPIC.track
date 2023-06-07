@@ -2,16 +2,16 @@
 from marshmallow import EXCLUDE, ValidationError, fields, validate, validates
 
 from reports_api.models import Staff
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.position import PositionSchema
 
 
 class StaffSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Staff model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = Staff

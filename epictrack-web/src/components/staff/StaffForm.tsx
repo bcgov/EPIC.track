@@ -3,7 +3,6 @@ import {
   TextField,
   Grid,
   Button,
-  MenuItem,
   Backdrop,
   CircularProgress,
 } from "@mui/material";
@@ -13,14 +12,26 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import codeService from "../../services/codeService";
 import StaffService from "../../services/staffService";
-import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
 import { Staff } from "../../models/staff";
 import { ListType } from "../../models/code";
+import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 
 const schema = yup.object().shape({
-  email: yup.string().email().required("Email is required"),
+  email: yup
+    .string()
+    .email()
+    .required("Email is required")
+    .test({
+      name: "checkDuplicateEmail",
+      exclusive: true,
+      message: "User with same email exists",
+      test: async (value, { parent }) => {
+        const result = await StaffService.validateEmail(value, parent["id"]);
+        return !(result.data as never)["exists"];
+      },
+    }),
   phone: yup
     .string()
     .matches(
@@ -43,6 +54,7 @@ export default function StaffForm({ ...props }) {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: staff,
+    mode: "onBlur",
   });
 
   const {
@@ -144,19 +156,14 @@ export default function StaffForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Position</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.position_id?.message}
+            <ControlledSelectV2
               helperText={errors?.position_id?.message?.toString()}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
               defaultValue={staff?.position_id}
-              fullWidth
+              options={positions}
               {...register("position_id")}
-            >
-              {positions.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            />
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
