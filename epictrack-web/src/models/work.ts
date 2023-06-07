@@ -7,8 +7,8 @@ export interface WorkTombstone {
   title: string;
   short_description: string;
   long_description: string;
-  is_pcp_required: boolean;
-  is_cac_required: boolean;
+  is_pecp_required: boolean;
+  is_cac_recommended: boolean;
   is_active: boolean;
   is_complete: boolean;
   is_watched: boolean;

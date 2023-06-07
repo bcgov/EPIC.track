@@ -1,7 +1,7 @@
 import React from "react";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
-import { MRT_ColumnDef } from "material-react-table";
+import { MRT_ColumnDef, MRT_Row } from "material-react-table";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import IndigenousNationService from "../../services/indigenousNationService";
@@ -24,12 +24,13 @@ export default function IndigenousNationList() {
     React.useState<boolean>(false);
   const titleSuffix = "Indigeneous Nation Details";
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
-
+  console.log(indigenousNations);
   const columns = useMemo<MRT_ColumnDef<IndigenousNation>[]>(
     () => [
       {
         accessorKey: "name",
         header: "Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "relationship_holder.full_name",
@@ -121,6 +122,14 @@ export default function IndigenousNationList() {
           <MasterTrackTable
             columns={columns}
             data={indigenousNations}
+            initialState={{
+              sorting: [
+                {
+                  id: "name",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,

@@ -1,14 +1,11 @@
-import React, { SyntheticEvent } from "react";
+import React from "react";
 import {
   TextField,
   Grid,
   Button,
-  MenuItem,
   Backdrop,
   CircularProgress,
   Divider,
-  Autocomplete,
-  AutocompleteProps,
 } from "@mui/material";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -20,7 +17,6 @@ import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
 import { Code } from "../../../services/codeService";
 import { TrackLabel } from "../../shared";
-import ControlledSelect from "../../shared/controlledInputComponents/ControlledSelect";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DATE_FORMAT } from "../../../constants/application-constant";
 import WorkService from "../../../services/workService";
@@ -29,6 +25,7 @@ import { Staff } from "../../../models/staff";
 import StaffService from "../../../services/staffService";
 import TrackDialog from "../../shared/TrackDialog";
 import dayjs from "dayjs";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 
 const schema = yup.object<WorkTombstone>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -167,23 +164,26 @@ export default function WorkTombstoneForm({ ...props }) {
         >
           <Grid item xs={4}>
             <TrackLabel>EA Act</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.ea_act_id?.message}
+            <ControlledSelectV2
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={work?.ea_act_id}
-              fullWidth
+              options={eaActs || []}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
               {...register("ea_act_id")}
-            >
-              {eaActs.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={4}>
             <TrackLabel>Worktype</TrackLabel>
-            <Controller
+            <ControlledSelectV2
+              helperText={errors?.ea_act_id?.message?.toString()}
+              defaultValue={work?.ea_act_id}
+              options={workTypes || []}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
+              {...register("work_type_id")}
+            ></ControlledSelectV2>
+            {/* <Controller
               name="work_type_id"
               control={control}
               render={({ field }) => {
@@ -229,21 +229,7 @@ export default function WorkTombstoneForm({ ...props }) {
                   />
                 );
               }}
-            />
-
-            {/* <ControlledSelect
-              error={!!errors?.work_type_id?.message}
-              helperText={errors?.work_type_id?.message?.toString()}
-              defaultValue={work?.work_type_id}
-              fullWidth
-              {...register("work_type_id")}
-            >
-              {workTypes.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect> */}
+            /> */}
           </Grid>
           <Grid item xs={4}>
             <TrackLabel className="start-date-label">Start date</TrackLabel>
@@ -284,68 +270,48 @@ export default function WorkTombstoneForm({ ...props }) {
           <Divider style={{ width: "100%", marginTop: "10px" }} />
           <Grid item xs={6}>
             <TrackLabel>Project</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.project_id?.message}
+            <ControlledSelectV2
               helperText={errors?.project_id?.message?.toString()}
               defaultValue={work?.project_id}
-              fullWidth
+              options={projects || []}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
               {...register("project_id")}
-            >
-              {projects.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Responsible Ministry</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.ministry_id?.message}
+            <ControlledSelectV2
               helperText={errors?.ministry_id?.message?.toString()}
               defaultValue={work?.ministry_id}
-              fullWidth
+              options={ministries || []}
+              getOptionValue={(o: Ministry) => o.id.toString()}
+              getOptionLabel={(o: Ministry) => o.name}
               {...register("ministry_id")}
-            >
-              {ministries.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Federal Involvement</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.federal_involvement_id?.message}
+            <ControlledSelectV2
               helperText={errors?.federal_involvement_id?.message?.toString()}
               defaultValue={work?.federal_involvement_id}
-              fullWidth
+              options={federalInvolvements || []}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
               {...register("federal_involvement_id")}
-            >
-              {federalInvolvements.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
 
           <Grid item xs={6}>
             <TrackLabel>Federal Act</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.substitution_act_id?.message}
+            <ControlledSelectV2
               helperText={errors?.substitution_act_id?.message?.toString()}
               defaultValue={work?.substitution_act_id}
-              fullWidth
+              options={substitutionActs || []}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
               {...register("substitution_act_id")}
-            >
-              {substitutionActs.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
             <TrackLabel>Title</TrackLabel>
@@ -380,17 +346,17 @@ export default function WorkTombstoneForm({ ...props }) {
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={work?.is_pcp_required}
-              {...register("is_pcp_required")}
+              defaultChecked={work?.is_pecp_required}
+              {...register("is_pecp_required")}
             />
             <TrackLabel id="is_pcp_required">PCP Required</TrackLabel>
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={work?.is_cac_required}
-              {...register("is_cac_required")}
+              defaultChecked={work?.is_cac_recommended}
+              {...register("is_cac_recommended")}
             />
-            <TrackLabel id="is_cac_required">CAC Required</TrackLabel>
+            <TrackLabel id="is_cac_recommended">CAC Required</TrackLabel>
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
@@ -411,69 +377,49 @@ export default function WorkTombstoneForm({ ...props }) {
 
           <Grid item xs={6}>
             <TrackLabel>EAO Team</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.eao_team_id?.message}
+            <ControlledSelectV2
               helperText={errors?.eao_team_id?.message?.toString()}
               defaultValue={work?.eao_team_id}
-              fullWidth
+              options={teams || []}
+              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionLabel={(o: ListType) => o.name}
               {...register("eao_team_id")}
-            >
-              {teams.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
 
           <Grid item xs={6}>
             <TrackLabel>Responsible EPD</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.responsible_epd_id?.message}
+            <ControlledSelectV2
               helperText={errors?.responsible_epd_id?.message?.toString()}
               defaultValue={work?.responsible_epd_id}
-              fullWidth
+              options={epds || []}
+              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionLabel={(o: Staff) => o.full_name}
               {...register("responsible_epd_id")}
-            >
-              {epds.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.full_name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Work Lead</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.work_lead_id?.message}
+            <ControlledSelectV2
               helperText={errors?.work_lead_id?.message?.toString()}
               defaultValue={work?.work_lead_id}
-              fullWidth
+              options={leads || []}
+              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionLabel={(o: Staff) => o.full_name}
               {...register("work_lead_id")}
-            >
-              {leads.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.full_name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             {/* TODO: Make the label dynamic */}
             <TrackLabel>Decision Maker</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.decision_by_id?.message}
+            <ControlledSelectV2
               helperText={errors?.decision_by_id?.message?.toString()}
               defaultValue={work?.decision_by_id}
-              fullWidth
+              options={decisionMakers || []}
+              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionLabel={(o: Staff) => o.full_name}
               {...register("decision_by_id")}
-            >
-              {decisionMakers.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.full_name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid
             item

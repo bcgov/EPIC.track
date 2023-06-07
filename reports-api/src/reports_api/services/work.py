@@ -69,7 +69,7 @@ class WorkService:  # pylint: disable=too-few-public-methods
                     "work_id": work.id,
                     "phase_id": phase["id"],
                     "start_date": f"{start_date}",
-                    "anticipated_decision_date": f"{end_date}",
+                    "anticipated_end_date": f"{end_date}",
                 }
             )
             phase_events = MilestoneService.find_auto_milestones_per_phase(phase["id"])

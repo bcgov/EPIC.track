@@ -3,7 +3,6 @@ import {
   TextField,
   Grid,
   Button,
-  MenuItem,
   Backdrop,
   CircularProgress,
 } from "@mui/material";
@@ -12,17 +11,12 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
 import ProponentService from "../../services/proponentService";
 import { Proponent } from "../../models/proponent";
 import StaffService from "../../services/staffService";
-
-const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  //   responsible_epd_id: yup.string().required('Select position')
-});
+import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 
 export default function StaffForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
@@ -31,11 +25,25 @@ export default function StaffForm({ ...props }) {
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const proponentID = props.proponentID;
+  const schema = yup.object().shape({
+    name: yup
+      .string()
+      .required("Name is required")
+      .test(
+        "validate-proponent",
+        "Proponent/Certificate Holder with the given name already exists",
+        async (value) => {
+          const validateProponentResult =
+            await ProponentService.checkProponentExists(value, proponentID);
+          return !(validateProponentResult.data as any)["exists"] as boolean;
+        }
+      ),
+    //   responsible_epd_id: yup.string().required('Select position')
+  });
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: proponent,
   });
-
   const {
     register,
     handleSubmit,
@@ -108,17 +116,13 @@ export default function StaffForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Relationship Holder</TrackLabel>
-            <ControlledSelect
+            <ControlledSelectV2
               defaultValue={proponent?.relationship_holder_id}
-              fullWidth
+              options={staffs || []}
+              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionLabel={(o: Staff) => o.full_name}
               {...register("relationship_holder_id")}
-            >
-              {staffs?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.full_name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox

@@ -2,15 +2,15 @@
 from marshmallow import EXCLUDE
 
 from reports_api.models import EAAct
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 
 
 class EAActSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """EAAct model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = EAAct

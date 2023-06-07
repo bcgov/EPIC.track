@@ -380,6 +380,7 @@ export default function ResourceForecast() {
               density: "compact",
             }}
             columns={columns}
+            globalFilterFn="contains"
             enableDensityToggle={false}
             enableStickyHeader={true}
             state={{

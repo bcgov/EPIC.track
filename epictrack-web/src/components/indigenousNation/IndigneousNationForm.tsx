@@ -12,18 +12,18 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
 import IndigenousNationService from "../../services/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
 import StaffService from "../../services/staffService";
+import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
 });
 
-export default function StaffForm({ ...props }) {
+export default function IndigenousNationForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const [indigenousNation, setIndigenousNation] =
     React.useState<IndigenousNation>();
@@ -71,7 +71,7 @@ export default function StaffForm({ ...props }) {
     if (indigenousNationID) {
       const result = await IndigenousNationService.updateIndigenousNation(data);
       if (result.status === 200) {
-        setAlertContentText("Staff details updated");
+        setAlertContentText("Indigenous nation details updated");
         setOpenAlertDialog(true);
         props.onSubmitSuccess();
         setLoading(false);
@@ -79,7 +79,7 @@ export default function StaffForm({ ...props }) {
     } else {
       const result = await IndigenousNationService.createIndigenousNation(data);
       if (result.status === 201) {
-        setAlertContentText("Staff details inserted");
+        setAlertContentText("Indigenous nation details inserted");
         setOpenAlertDialog(true);
         props.onSubmitSuccess();
         setLoading(false);
@@ -108,17 +108,13 @@ export default function StaffForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Relationship Holder</TrackLabel>
-            <ControlledSelect
+            <ControlledSelectV2
               defaultValue={indigenousNation?.relationship_holder_id || ""}
-              fullWidth
+              getOptionLabel={(o: Staff) => o.full_name}
+              getOptionValue={(o: Staff) => o.id.toString()}
+              options={staffs}
               {...register("relationship_holder_id")}
-            >
-              {staffs?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.full_name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox

@@ -12,6 +12,7 @@ import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
 import StaffService from "../../services/staffService";
 import { Proponent } from "../../models/proponent";
+import { sort } from "../../utils";
 
 export default function ProponentList() {
   const [resultStatus, setResultStatus] = useState<string>();
@@ -28,6 +29,7 @@ export default function ProponentList() {
       {
         accessorKey: "name",
         header: "Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "relationship_holder.full_name",
@@ -82,7 +84,9 @@ export default function ProponentList() {
     try {
       const proponentsResult = await ProponentService.getProponents();
       if (proponentsResult.status === 200) {
-        setProponents((proponentsResult.data as never)["proponents"]);
+        setProponents(
+          sort((proponentsResult.data as never)["proponents"], "name")
+        );
       }
     } catch (error) {
       console.error("Proponent List: ", error);
@@ -116,6 +120,14 @@ export default function ProponentList() {
           <MasterTrackTable
             columns={columns}
             data={proponents}
+            initialState={{
+              sorting: [
+                {
+                  id: "name",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,

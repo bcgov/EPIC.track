@@ -72,6 +72,7 @@ const StaffList = () => {
       {
         accessorKey: "full_name",
         header: "Name",
+        sortingFn: "sortFn",
       },
       {
         accessorKey: "phone",
@@ -117,6 +118,14 @@ const StaffList = () => {
           <MasterTrackTable
             columns={columns}
             data={staffs}
+            initialState={{
+              sorting: [
+                {
+                  id: "full_name",
+                  desc: false,
+                },
+              ],
+            }}
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,

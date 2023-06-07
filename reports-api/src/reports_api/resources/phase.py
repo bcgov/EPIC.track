@@ -16,6 +16,7 @@
 from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors
+from flask import jsonify
 
 from reports_api.services.phaseservice import PhaseService
 from reports_api.utils import auth, constants, profiletime
@@ -38,7 +39,8 @@ class PhasesByEaActWorkType(Resource):
     @profiletime
     def get(ea_act_id, work_type_id):
         """Return all phase codes based on ea_act_id and work_type_id."""
-        return PhaseService.find_phase_codes_by_ea_act_and_work_type(ea_act_id, work_type_id), HTTPStatus.OK
+        phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(ea_act_id, work_type_id)
+        return jsonify(phases), HTTPStatus.OK
 
 
 @cors_preflight('GET')
@@ -53,4 +55,5 @@ class Phases(Resource):
     @profiletime
     def get():
         """Returns all the phase codes regardless of act or work type"""
-        return PhaseService.find_all_phases(), HTTPStatus.OK
+        phases = PhaseService.find_all_phases()
+        return jsonify(phases), HTTPStatus.OK

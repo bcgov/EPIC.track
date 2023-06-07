@@ -2,6 +2,11 @@
 from dataclasses import dataclass, fields
 from datetime import datetime
 
+from marshmallow import fields as ma_fields
+from marshmallow import pre_load
+
+from reports_api.models.db import ma
+
 
 @dataclass
 class BaseSchema(object):  # pylint: disable=useless-object-inheritance
@@ -14,5 +19,27 @@ class BaseSchema(object):  # pylint: disable=useless-object-inheritance
             value = kwargs.get(field.name, None)
             if value is not None:
                 if field.type == datetime and not isinstance(value, datetime):
-                    value = datetime.strptime(value, self.dateformat)  # pylint: disable=no-member
+                    value = datetime.strptime(
+                        value, self.dateformat  # pylint: disable=no-member
+                    )
                 setattr(self, field.name, value)
+
+
+class AutoSchemaBase(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ancestors
+    """Representation of a base SQL alchemy auto schema with basic functions"""
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta information applicable to all schemas"""
+
+        exclude = ("created_at", "created_by", "updated_at", "updated_by", "is_deleted")
+        # abstract=True
+
+    @pre_load
+    def parse_empty_string(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Parse the input and convert empty strings to None"""
+        for field in data:
+            if (
+                isinstance(self.load_fields[field], ma_fields.Integer) and data[field] == ""
+            ):
+                data[field] = None
+        return data
