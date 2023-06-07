@@ -19,10 +19,6 @@ import IndigenousNationService from "../../services/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
 import StaffService from "../../services/staffService";
 
-const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-});
-
 export default function StaffForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const [indigenousNation, setIndigenousNation] =
@@ -31,6 +27,23 @@ export default function StaffForm({ ...props }) {
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const indigenousNationID = props.indigenousNationID;
+  const schema = yup.object().shape({
+    name: yup
+      .string()
+      .required("Name is required")
+      .test(
+        "validate-IndigenousNations",
+        "Indigenous Nation with the given name already exists",
+        async (value) => {
+          const validateINationsResult =
+            await IndigenousNationService.checkIndigenousNationExists(
+              value,
+              indigenousNationID
+            );
+          return !(validateINationsResult.data as any)["exists"] as boolean;
+        }
+      ),
+  });
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: indigenousNation,
