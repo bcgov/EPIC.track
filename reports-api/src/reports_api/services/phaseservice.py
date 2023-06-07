@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Phase."""
-from flask import current_app, jsonify
+from flask import current_app
 
 from reports_api.models.phase_code import PhaseCode
 from reports_api.schemas.phase import PhaseSchema
@@ -31,11 +31,11 @@ class PhaseService:  # pylint:disable=too-few-public-methods
         )
         phases = PhaseCode.find_by_ea_act_and_work_type(_ea_act_id, _work_type_id)
         phases_schema = PhaseSchema(many=True)
-        return jsonify(phases_schema.dump(phases))
+        return phases_schema.dump(phases)
 
     @classmethod
     def find_all_phases(cls):
         """Find all phases"""
         phases = PhaseCode.find_all()
         phases_schema = PhaseSchema(many=True)
-        return jsonify(phases_schema.dump(phases))
+        return phases_schema.dump(phases)

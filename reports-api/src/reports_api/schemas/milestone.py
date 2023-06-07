@@ -2,15 +2,15 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import Milestone, MilestoneType, Outcome
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 
 
 class MilestoneTypeSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Milestone type model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = MilestoneType
@@ -18,11 +18,11 @@ class MilestoneTypeSchema(
 
 
 class OutcomeSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Indigenous nation schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = Outcome
@@ -33,11 +33,11 @@ class OutcomeSchema(
 
 
 class MilestoneSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Milestone model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = Milestone

@@ -2,7 +2,7 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import Work, WorkPhase
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.ea_act import EAActSchema
 from reports_api.schemas.eao_team import EAOTeamSchema
 from reports_api.schemas.federal_involvement import FederalInvolvementSchema
@@ -15,11 +15,11 @@ from reports_api.schemas.work_type import WorkTypeSchema
 
 
 class WorkSchemaV2(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Work model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = Work
@@ -46,11 +46,11 @@ class WorkSchemaV2(
 
 
 class WorkPhaseSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Work phase model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = WorkPhase

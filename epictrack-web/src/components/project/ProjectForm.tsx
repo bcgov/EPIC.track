@@ -3,7 +3,6 @@ import {
   TextField,
   Grid,
   Button,
-  MenuItem,
   Divider,
   Backdrop,
   CircularProgress,
@@ -16,13 +15,13 @@ import codeService, { Code } from "../../services/codeService";
 import ProjectService from "../../services/projectService";
 import { Project } from "../../models/project";
 import { Proponent } from "../../models/proponent";
-import ControlledSelect from "../shared/controlledInputComponents/ControlledSelect";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import TrackDialog from "../shared/TrackDialog";
 import { Region } from "../../models/region";
 import { Type } from "../../models/type";
 import { SubType } from "../../models/subtype";
 import subTypeService from "../../services/subTypeService";
+import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 
 const schema = yup.object<Project>().shape({
   name: yup.string().required("Project Name is required"),
@@ -160,51 +159,36 @@ export default function ProjectForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Proponent</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.proponent_id?.message}
+            <ControlledSelectV2
               helperText={errors?.proponent_id?.message?.toString()}
               defaultValue={project?.proponent_id}
-              fullWidth
+              options={proponents || []}
+              getOptionValue={(o: Proponent) => o.id.toString()}
+              getOptionLabel={(o: Proponent) => o.name}
               {...register("proponent_id")}
-            >
-              {proponents?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Type</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.type_id?.message}
+            <ControlledSelectV2
               helperText={errors?.type_id?.message?.toString()}
               defaultValue={project?.type_id}
-              fullWidth
+              options={types || []}
+              getOptionValue={(o: Type) => o.id.toString()}
+              getOptionLabel={(o: Type) => o.name}
               {...register("type_id")}
-            >
-              {types?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>SubType</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.sub_type_id?.message}
+            <ControlledSelectV2
               helperText={errors?.sub_type_id?.message?.toString()}
               defaultValue={project?.sub_type_id}
-              fullWidth
+              options={subTypes || []}
+              getOptionValue={(o: SubType) => o.id.toString()}
+              getOptionLabel={(o: SubType) => o.name}
               {...register("sub_type_id")}
-            >
-              {subTypes?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
             <TrackLabel>Project Description</TrackLabel>
@@ -249,35 +233,25 @@ export default function ProjectForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>ENV Region</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.region_id_env?.message}
+            <ControlledSelectV2
               helperText={errors?.region_id_env?.message?.toString()}
               defaultValue={project?.region_id_env}
-              fullWidth
+              options={envRegions || []}
+              getOptionValue={(o: Region) => o.id.toString()}
+              getOptionLabel={(o: Region) => o.name}
               {...register("region_id_env")}
-            >
-              {envRegions?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>NRS Region</TrackLabel>
-            <ControlledSelect
-              error={!!errors?.region_id_flnro?.message}
+            <ControlledSelectV2
               helperText={errors?.region_id_flnro?.message?.toString()}
               defaultValue={project?.region_id_flnro}
-              fullWidth
+              options={nrsRegions || []}
+              getOptionValue={(o: Region) => o.id.toString()}
+              getOptionLabel={(o: Region) => o.name}
               {...register("region_id_flnro")}
-            >
-              {nrsRegions?.map((e, index) => (
-                <MenuItem key={index + 1} value={e.id}>
-                  {e.name}
-                </MenuItem>
-              ))}
-            </ControlledSelect>
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <TrackLabel>Capital Investment</TrackLabel>

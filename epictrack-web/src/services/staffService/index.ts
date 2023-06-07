@@ -45,6 +45,17 @@ const getStaffByPosition = async (position: string) => {
   );
 };
 
+const validateEmail = async (
+  email: string,
+  staffID: number | undefined = undefined
+) => {
+  let params = `email=${email}`;
+  if (staffID !== undefined) params += `&id=${staffID}`;
+  return await http.GetRequest(
+    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/exists?${params}`
+  );
+};
+
 const StaffService = {
   getStaffs,
   createStaff,
@@ -52,5 +63,6 @@ const StaffService = {
   updateStaff,
   deleteStaff,
   getStaffByPosition,
+  validateEmail,
 };
 export default StaffService;

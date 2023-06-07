@@ -2,16 +2,16 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import Ministry
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.staff import StaffSchema
 
 
 class MinistrySchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Ministry model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = Ministry

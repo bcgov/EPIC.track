@@ -2,28 +2,27 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import SubType, Type
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 
 
 class TypeSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Type model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = Type
-        include_fk = True
         unknown = EXCLUDE
 
 
 class SubTypeSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Type model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = SubType

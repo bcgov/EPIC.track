@@ -2,20 +2,18 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import PhaseCode
-from reports_api.models.db import ma
+from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.ea_act import EAActSchema
 from reports_api.schemas.milestone import MilestoneSchema
-
-
 from reports_api.schemas.work_type import WorkTypeSchema
 
 
 class PhaseSchema(
-    ma.SQLAlchemyAutoSchema
+    AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """PhaseCode model schema class"""
 
-    class Meta:
+    class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 
         model = PhaseCode
