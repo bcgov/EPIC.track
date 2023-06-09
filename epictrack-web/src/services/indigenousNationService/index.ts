@@ -41,8 +41,17 @@ const getIndigenousNation = async (id: number) => {
   );
 };
 
+const checkIndigenousNationExists = async (name: string, id: number) => {
+  return await http.GetRequest(
+    AppConfig.apiUrl +
+      Endpoints.IndigenousNations.GET_INDIGENOUS_NATIONS +
+      `/exists?name=${name}${id ? "&id=" + id : ""}`
+  );
+};
+
 const IndigenousNationService = {
   getIndigenousNations,
+  checkIndigenousNationExists,
   createIndigenousNation,
   updateIndigenousNation,
   deleteIndigenousNation,

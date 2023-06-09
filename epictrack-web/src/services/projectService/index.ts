@@ -31,12 +31,22 @@ const deleteProjects = async (projectID: any) => {
     AppConfig.apiUrl + Endpoints.Projects.GET_PROJECTS + `/${projectID}`
   );
 };
+
+const checkProjectExists = async (name: string, id: number) => {
+  return await http.GetRequest(
+    AppConfig.apiUrl +
+      Endpoints.Projects.GET_PROJECTS +
+      `/exists?name=${name}${id ? "&id=" + id : ""}`
+  );
+};
+
 const ProjectService = {
   getProject,
   getProjects,
   createProjects,
   updateProjects,
   deleteProjects,
+  checkProjectExists,
 };
 
 export default ProjectService;
