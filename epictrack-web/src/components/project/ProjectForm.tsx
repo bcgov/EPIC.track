@@ -23,18 +23,6 @@ import { SubType } from "../../models/subtype";
 import subTypeService from "../../services/subTypeService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 
-const schema = yup.object<Project>().shape({
-  name: yup.string().required("Project Name is required"),
-  type_id: yup.string().required("Type is required"),
-  proponent_id: yup.string().required("Proponent is required"),
-  sub_type_id: yup.string().required("SubType is required"),
-  description: yup.string().required("Project Description is required"),
-  latitude: yup.string().required("Invalid latitude value"),
-  longitude: yup.string().required("Invalid longitude value"),
-  region_id_env: yup.string().required("ENV Region is required"),
-  region_id_flnro: yup.string().required("NRS Region is required"),
-});
-
 export default function ProjectForm({ ...props }) {
   const [project, setProject] = React.useState<Project>();
   const [envRegions, setEnvRegions] = React.useState<Region[]>();
@@ -46,6 +34,31 @@ export default function ProjectForm({ ...props }) {
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const projectId = props.projectId;
+  const schema = yup.object<Project>().shape({
+    name: yup
+      .string()
+      .email()
+      .required("Project Name is required")
+      .test(
+        "validate-Project",
+        "Project with the given name already exists",
+        async (value) => {
+          const validateProjectResult = await ProjectService.checkProjectExists(
+            value,
+            projectId
+          );
+          return !(validateProjectResult.data as any)["exists"] as boolean;
+        }
+      ),
+    type_id: yup.string().required("Type is required"),
+    proponent_id: yup.string().required("Proponent is required"),
+    sub_type_id: yup.string().required("SubType is required"),
+    description: yup.string().required("Project Description is required"),
+    latitude: yup.string().required("Invalid latitude value"),
+    longitude: yup.string().required("Invalid longitude value"),
+    region_id_env: yup.string().required("ENV Region is required"),
+    region_id_flnro: yup.string().required("NRS Region is required"),
+  });
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: project,
