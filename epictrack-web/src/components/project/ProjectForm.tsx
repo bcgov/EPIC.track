@@ -63,7 +63,7 @@ export default function ProjectForm({ ...props }) {
     resolver: yupResolver(schema),
     defaultValues: project,
   });
-
+  console.log(project);
   const {
     register,
     handleSubmit,
