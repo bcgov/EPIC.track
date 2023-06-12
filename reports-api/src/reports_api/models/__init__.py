@@ -54,3 +54,14 @@ from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
 from .reminder_configuration import ReminderConfiguration
+from .calendar_event import CalendarEvent
+from .event_category import EventCategory
+from .event_field_value import EventFieldValue
+from .event_field import EventField
+from .event_template import EventTemplate
+from .event_type import EventType
+from .task_event_assignee import TaskEventAssignee
+from .task_event import TaskEvent
+from .task_template import TaskTemplate
+from .task import Task
+from .work_calendar_event import WorkCalendarEvent
