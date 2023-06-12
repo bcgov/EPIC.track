@@ -27,21 +27,6 @@ import TrackDialog from "../../shared/TrackDialog";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 
-const schema = yup.object<WorkTombstone>().shape({
-  ea_act_id: yup.number().required("EA Act is required"),
-  work_type_id: yup.number().required("Work type is required"),
-  start_date: yup.date().required("Start date is required"),
-  project_id: yup.number().required("Project is required"),
-  ministry_id: yup.number().required("Responsible ministry is required"),
-  federal_involvement_id: yup
-    .number()
-    .required("Federal Involvement is required"),
-  title: yup.string().required("Title is required"),
-  substitution_act_id: yup.number(),
-  short_description: yup.string(),
-  long_description: yup.string(),
-});
-
 export default function WorkTombstoneForm({ ...props }) {
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
@@ -62,6 +47,33 @@ export default function WorkTombstoneForm({ ...props }) {
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const workId = props.workId;
+  const schema = yup.object<WorkTombstone>().shape({
+    ea_act_id: yup.number().required("EA Act is required"),
+    work_type_id: yup.number().required("Work type is required"),
+    start_date: yup.date().required("Start date is required"),
+    project_id: yup.number().required("Project is required"),
+    ministry_id: yup.number().required("Responsible ministry is required"),
+    federal_involvement_id: yup
+      .number()
+      .required("Federal Involvement is required"),
+    title: yup
+      .string()
+      .required("Title is required")
+      .test(
+        "validate-Work",
+        "Work with same title already exists",
+        async (value) => {
+          const validateWorkResult = await WorkService.checkWorkExists(
+            value,
+            workId
+          );
+          return !(validateWorkResult.data as any)["exists"] as boolean;
+        }
+      ),
+    substitution_act_id: yup.number(),
+    short_description: yup.string(),
+    long_description: yup.string(),
+  });
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: work,
