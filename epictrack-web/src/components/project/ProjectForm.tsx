@@ -7,7 +7,7 @@ import {
   Backdrop,
   CircularProgress,
 } from "@mui/material";
-import { FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
@@ -34,10 +34,10 @@ export default function ProjectForm({ ...props }) {
   const [alertContentText, setAlertContentText] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
   const projectId = props.projectId;
+
   const schema = yup.object<Project>().shape({
     name: yup
       .string()
-      .email()
       .required("Project Name is required")
       .test(
         "validate-Project",
@@ -63,20 +63,22 @@ export default function ProjectForm({ ...props }) {
     resolver: yupResolver(schema),
     defaultValues: project,
   });
-
+  console.log(project);
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
     reset,
   } = methods;
+  const formValues = useWatch({ control });
+
   const setRegions = (regions: Region[]) => {
     const envRegions = regions.filter((p) => p.entity === "ENV");
     const nrsRegions = regions.filter((p) => p.entity === "FLNR");
     setEnvRegions(envRegions);
     setNRSRegions(nrsRegions);
   };
-  console.log(projectId);
   const codeTypes: { [x: string]: any } = {
     regions: setRegions,
     types: setTypes,
@@ -103,18 +105,22 @@ export default function ProjectForm({ ...props }) {
 
   const getSubTypesByType = async () => {
     const subTypeResult = await subTypeService.getSubTypeByType(
-      project?.type_id
+      formValues.type_id
     );
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
+      reset({
+        ...formValues,
+        sub_type_id: undefined,
+      });
     }
   };
 
   React.useEffect(() => {
-    if (project?.type_id) {
+    if (formValues.type_id) {
       getSubTypesByType();
     }
-  }, [project?.type_id]);
+  }, [formValues.type_id]);
 
   React.useEffect(() => {
     if (projectId) {
@@ -173,10 +179,11 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>Proponent</TrackLabel>
             <ControlledSelectV2
+              key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
               defaultValue={project?.proponent_id}
               options={proponents || []}
-              getOptionValue={(o: Proponent) => o.id.toString()}
+              getOptionValue={(o: Proponent) => o?.id?.toString()}
               getOptionLabel={(o: Proponent) => o.name}
               {...register("proponent_id")}
             ></ControlledSelectV2>
@@ -184,10 +191,11 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>Type</TrackLabel>
             <ControlledSelectV2
+              key={`type_select_${formValues.type_id}`}
               helperText={errors?.type_id?.message?.toString()}
               defaultValue={project?.type_id}
               options={types || []}
-              getOptionValue={(o: Type) => o.id.toString()}
+              getOptionValue={(o: Type) => o?.id?.toString()}
               getOptionLabel={(o: Type) => o.name}
               {...register("type_id")}
             ></ControlledSelectV2>
@@ -195,6 +203,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>SubType</TrackLabel>
             <ControlledSelectV2
+              key={`subtype_select_${formValues.sub_type_id}`}
               helperText={errors?.sub_type_id?.message?.toString()}
               defaultValue={project?.sub_type_id}
               options={subTypes || []}
@@ -247,6 +256,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>ENV Region</TrackLabel>
             <ControlledSelectV2
+              key={`env_select_${formValues.region_id_env}`}
               helperText={errors?.region_id_env?.message?.toString()}
               defaultValue={project?.region_id_env}
               options={envRegions || []}
@@ -258,6 +268,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>NRS Region</TrackLabel>
             <ControlledSelectV2
+              key={`nrs_select_${formValues.region_id_flnro}`}
               helperText={errors?.region_id_flnro?.message?.toString()}
               defaultValue={project?.region_id_flnro}
               options={nrsRegions || []}
@@ -285,10 +296,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>
-              Certificate Number
-              {/* <IconWithTooltip /> */}
-            </TrackLabel>
+            <TrackLabel>Certificate Number</TrackLabel>
             <TextField helperText fullWidth {...register("ea_certificate")} />
             Provide the certificate number if available
           </Grid>

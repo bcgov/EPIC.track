@@ -49,9 +49,13 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               getOptionValue={getOptionValue}
               getOptionLabel={getOptionLabel}
               isSearchable={true}
-              value={options.find((c) => getOptionValue(c) === value)}
+              isClearable={true}
+              value={options.find(
+                (c) => getOptionValue(c) === value?.toString()
+              )}
               isMulti={isMulti}
               onChange={(val: any) => {
+                console.log("Option value ", val);
                 let v;
                 if (isMulti)
                   v = val.map((v: any) => getOptionValue(v)).join(",");
