@@ -8,8 +8,8 @@ export interface Project {
     id: number;
     name: string;
     sub_type:SubType;
-    sub_type_id:number;
-    type_id: number;
+    sub_type_id?:number;
+    type_id?: number;
     type: Type;
     is_active: boolean;
     description:string;

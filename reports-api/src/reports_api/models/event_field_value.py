@@ -13,23 +13,21 @@
 # limitations under the License.
 """Model to handle all operations related to Event Field Values."""
 
-from sqlalchemy import Column, Integer, ForeignKey, String
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
-
 from .base_model import BaseModel
-from .db import db
 
 
-class Event_Field_Value(BaseModel):
+class EventFieldValue(BaseModel):
     """Model class for Event Field Values."""
 
     __tablename__ = 'event_field_values'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    name = Column(String)
-    field_id = Column(ForeignKey('event_fields.id'), nullable=False)
-    event_id = Column(ForeignKey('events.id'), nullable=False)
-    value = Column(String)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    name = sa.Column(sa.String, nullable=False)
+    field_id = sa.Column(sa.ForeignKey('event_fields.id'), nullable=False)
+    event_id = sa.Column(sa.ForeignKey('events.id'), nullable=False)
+    value = sa.Column(sa.String)
 
-    field = relationship('EventFieldValue', foreign_keys=[field_id], lazy='select')
+    field = relationship('EventField', foreign_keys=[field_id], lazy='select')
     event = relationship('Event', foreign_keys=[event_id], lazy='select')

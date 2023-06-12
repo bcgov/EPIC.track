@@ -13,11 +13,10 @@
 # limitations under the License.
 """Model to handle all operations related to Tasks."""
 
-from sqlalchemy import Column, Integer, ForeignKey, String
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .db import db
 
 
 class Task(BaseModel):
@@ -25,10 +24,11 @@ class Task(BaseModel):
 
     __tablename__ = 'tasks'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    name = Column(String)
-    start_at = Column(Integer, default=0, nullable=False)
-    duration = Column(Integer, default=1, nullable=False)
-    template_id = Column(ForeignKey('task_templates.id'), nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    name = sa.Column(sa.String)
+    start_at = sa.Column(sa.Integer, default=0, nullable=False)
+    number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
+    template_id = sa.Column(sa.ForeignKey('task_templates.id'), nullable=False)
+    tips = sa.Column(sa.String)
 
     template = relationship('TaskTemplate', foreign_keys=[template_id], lazy='select')

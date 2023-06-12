@@ -13,20 +13,20 @@
 # limitations under the License.
 """Model to handle all operations related to Event Types."""
 
-from sqlalchemy import Column, Integer, ForeignKey
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from .code_table import CodeTable
-from .db import db
+from .base_model import BaseModel
 
 
-class Event_Type(db.Model, CodeTable):
+class EventType(BaseModel):
     """Model class for Event Types."""
 
     __tablename__ = 'event_types'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    event_category_id = Column(ForeignKey('event_categories.id'), nullable=False)
-    sort_order = Column(Integer, nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    name = sa.Column(sa.String)
+    event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
+    sort_order = sa.Column(sa.Integer, nullable=False)
 
     event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')

@@ -13,16 +13,15 @@
 # limitations under the License.
 """Model to handle all operations related to Event Categories."""
 
-from sqlalchemy import Column, Integer
-
-from .code_table import CodeTable
-from .db import db
+import sqlalchemy as sa
+from .base_model import BaseModel
 
 
-class Event_Category(db.Model, CodeTable):
+class EventCategory(BaseModel):
     """Model class for Event Categories."""
 
     __tablename__ = 'event_categories'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    sort_order = Column(Integer, nullable=False)
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    name = sa.Column(sa.String, nullable=False)
+    sort_order = sa.Column(sa.Integer, nullable=False)

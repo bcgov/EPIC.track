@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model to handle all operations related to Event Fields."""
+"""Model to handle all operations related to Work Calendar Events."""
 
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
@@ -19,19 +19,16 @@ from sqlalchemy.orm import relationship
 from .base_model import BaseModel
 
 
-class EventField(BaseModel):
-    """Model class for Event Fields."""
+class WorkCalendarEvent(BaseModel):
+    """Model class for Work Calendar Events."""
 
-    __tablename__ = 'event_fields'
+    __tablename__ = 'work_calendar_events'
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    name = sa.Column(sa.String)
-    event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
-    event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
-    field_type = sa.Column(sa.String)
-    reference = sa.Column(sa.String)
-    control_label = sa.Column(sa.String)
-    validations = sa.Column(sa.String)
+    work_id = sa.Column(sa.ForeignKey('works.id'), nullable=False)
+    phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
+    calendar_event_id = sa.Column(sa.ForeignKey('calendar_events.id'), nullable=False)
 
-    event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')
-    event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
+    work = relationship('Work', foreign_keys=[work_id], lazy='select')
+    phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
+    calendar_event = relationship('CalendarEvent', foreign_keys=[calendar_event_id], lazy='select')

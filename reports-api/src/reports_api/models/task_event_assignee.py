@@ -11,24 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model to handle all operations related to Task Templates."""
+"""Model to handle all operations related to Task Event Assignees."""
 
-from sqlalchemy import Column, Integer, ForeignKey, String
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
-from .db import db
 
 
-class Task_Template(BaseModel):
-    """Model class for Tasks."""
+class TaskEventAssignee(BaseModel):
+    """Model class for Task Event Assignees."""
 
-    __tablename__ = 'task_templates'
+    __tablename__ = 'task_event_assignees'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    name = Column(String)
-    phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
-    work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
-    phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    task_event_id = sa.Column(sa.ForeignKey('task_events.id'), nullable=False)
+    assignee_id = sa.Column(sa.ForeignKey('staffs.id'), nullable=False)
 
-    work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
+    task_event = relationship('TaskEvent', foreign_keys=[task_event_id], lazy='select')
+    assignee = relationship('Staff', foreign_keys=[assignee_id], lazy='select')
