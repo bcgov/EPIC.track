@@ -33,8 +33,17 @@ const deleteWork = async (id?: number) => {
     AppConfig.apiUrl + Endpoints.Works.GET_WORKS + `/${id}`
   );
 };
+const checkWorkExists = async (title: string, id?: number) => {
+  return await http.GetRequest(
+    AppConfig.apiUrl +
+      Endpoints.Works.GET_WORKS +
+      `/exists?title=${title}${id ? "&id=" + id : ""}`
+  );
+};
+
 const WorkService = {
   getWorks,
+  checkWorkExists,
   createWork,
   getWork,
   updateWork,
