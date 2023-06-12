@@ -109,10 +109,13 @@ export default function ProjectForm({ ...props }) {
     );
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
-      reset({
-        ...formValues,
-        sub_type_id: undefined,
-      });
+      // The subtype select box wasn't resetting when type changes
+      if (formValues.sub_type_id !== project?.sub_type_id) {
+        reset({
+          ...formValues,
+          sub_type_id: undefined,
+        });
+      }
     }
   };
 
