@@ -32,9 +32,9 @@ class Issue(BaseModel):
     is_sensitive = Column(Boolean(), default=False, nullable=False)
     is_active = Column(Boolean(), default=True, nullable=False)
     is_resolved = Column(Boolean(), default=False, nullable=False)
-    start_date = Column(DateTime, nullable=False)
-    anticipated_resolution_date = Column(DateTime, nullable=True)
-    resolution_date = Column(DateTime, nullable=True)
+    start_date = Column(DateTime(timezone=True), nullable=False)
+    anticipated_resolution_date = Column(DateTime(timezone=True), nullable=True)
+    resolution_date = Column(DateTime(timezone=True), nullable=True)
     is_deleted = Column(Boolean(), default=False, nullable=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)

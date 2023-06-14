@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Base class for code model."""
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, func
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.ext.declarative import declared_attr
+
+from reports_api.utils.utcnow import utcnow
 
 from .db import db
 
@@ -25,9 +27,9 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     name = Column(String(250))
 
     created_by = Column(String(255), default=None, nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=utcnow())
     updated_by = Column(String(255), default=None, nullable=True)
-    updated_at = Column(DateTime, onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=utcnow())
     is_active = Column(Boolean, default=True, server_default='t', nullable=False)
     is_deleted = Column(Boolean, default=False, server_default='f', nullable=False)
 

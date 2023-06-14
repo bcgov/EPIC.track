@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Super class to handle all operations related to base model."""
-from sqlalchemy import Boolean, Column, DateTime, String, func
+from sqlalchemy import Boolean, Column, DateTime, String
+
+from reports_api.utils.utcnow import utcnow
+
 from .db import db
 
 
@@ -22,9 +25,9 @@ class BaseModel(db.Model):
     __abstract__ = True
 
     created_by = Column(String(255), default=None, nullable=True)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=utcnow())
     updated_by = Column(String(255), default=None, nullable=True)
-    updated_at = Column(DateTime, onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=utcnow())
     is_active = Column(Boolean, default=True, server_default='t', nullable=False)
     is_deleted = Column(Boolean, default=False, server_default='f', nullable=False)
 
