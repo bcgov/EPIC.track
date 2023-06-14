@@ -24,7 +24,7 @@ class CalendarEvent(BaseModel):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String)
-    anticipated_date = sa.Column(sa.DateTime, nullable=False)
-    actual_date = sa.Column(sa.DateTime)
+    anticipated_date = sa.Column(sa.DateTime(timezone=True), nullable=False)
+    actual_date = sa.Column(sa.DateTime(timezone=True))
     number_of_days = sa.Column(sa.Integer)
     link = sa.Column(sa.String)

@@ -38,9 +38,9 @@ class Work(BaseModel):
     project_tracking_number = Column(String(255), nullable=True, default=None)
     work_tracking_number = Column(String(255), nullable=True, default=None)
 
-    start_date = Column(DateTime)
-    anticipated_decision_date = Column(DateTime)
-    decision_date = Column(DateTime)
+    start_date = Column(DateTime(timezone=True))
+    anticipated_decision_date = Column(DateTime(timezone=True))
+    decision_date = Column(DateTime(timezone=True))
 
     project_id = Column(ForeignKey('projects.id'), nullable=False)
     ministry_id = Column(ForeignKey('ministries.id'), nullable=False)
