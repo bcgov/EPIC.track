@@ -38,3 +38,11 @@ class ResourceExistsError(Exception):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
         self.message = message
+
+class BadRequestError(Exception):
+    """Exception raised when there are issues with the api input"""
+
+    def __init__(self, message, *args, **kwargs):
+        """Return a valid BadRequestError."""
+        super().__init__(*args, **kwargs)
+        self.message = message

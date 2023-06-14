@@ -14,10 +14,16 @@
 """Model to handle all operations related to Task Events."""
 
 import sqlalchemy as sa
+import enum
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 
+class ResponsibleEntityEnum(enum.Enum):
+    Proponent = 1
+    PIN = 2
+    EAO = 3
+    FederalAgencies = 3
 
 class TaskEvent(BaseModel):
     """Model class for Tasks."""
@@ -34,7 +40,7 @@ class TaskEvent(BaseModel):
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
     tips = sa.Column(sa.String)
     notes = sa.Column(sa.String)
-    responsible_entity = sa.Column(sa.Enum('Proponent', 'PIN', 'EAO', 'Federal Agencies'))
+    responsible_entity = sa.Column(sa.Enum(ResponsibleEntityEnum))
     is_completed = sa.Column(sa.Boolean, default=False)
 
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')

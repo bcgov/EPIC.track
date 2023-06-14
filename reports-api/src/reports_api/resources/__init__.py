@@ -42,6 +42,7 @@ from .work import API as WORK_API
 from .indigenous_nation import API as INDIGENOUS_NATION_API
 from .proponent import API as PROPONENT_API
 from .reminder_configuration import API as REMINDER_CONFIGURATION_API
+from .configuration import API as CONFIGURATION_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -89,3 +90,4 @@ API.add_namespace(REPORTS_API, path="/reports")
 API.add_namespace(INDIGENOUS_NATION_API, path="/indigenous-nations")
 API.add_namespace(PROPONENT_API, path="/proponents")
 API.add_namespace(REMINDER_CONFIGURATION_API, path="/reminder-configurations")
+API.add_namespace(CONFIGURATION_API, path="/configurations")

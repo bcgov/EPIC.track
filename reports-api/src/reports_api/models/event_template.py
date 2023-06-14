@@ -28,9 +28,11 @@ class EventTemplate(BaseModel):
     name = sa.Column(sa.String)
     phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
+    event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
     start_at = sa.Column(sa.Integer, nullable=False)
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
     mandatory = sa.Column(sa.Boolean, default=False)
 
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
+    event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')
