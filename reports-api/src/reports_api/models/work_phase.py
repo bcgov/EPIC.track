@@ -25,8 +25,8 @@ class WorkPhase(BaseModel):
     __tablename__ = 'work_phases'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    start_date = Column(DateTime)
-    anticipated_end_date = Column(DateTime)
+    start_date = Column(DateTime(timezone=True))
+    anticipated_end_date = Column(DateTime(timezone=True))
     is_deleted = Column(Boolean(), default=False, nullable=False)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)

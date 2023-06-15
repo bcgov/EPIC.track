@@ -26,8 +26,8 @@ class Engagement(BaseModel):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), nullable=False)
-    start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime, nullable=False)
+    start_date = Column(DateTime(timezone=True), nullable=False)
+    end_date = Column(DateTime(timezone=True), nullable=False)
     correlation_id = Column(String(255), nullable=True, default=None)
     met_link = Column(String(255), nullable=True, default=None)
     status = Column(String(32), nullable=False, default='planned')

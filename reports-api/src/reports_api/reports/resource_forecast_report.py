@@ -234,16 +234,16 @@ class EAResourceForeCastReport(ReportFactory):
             day=monthrange(first_month.year + year_offset, second_month or 1)[1],
         )
 
-        year_offset, third_month = divmod(first_month.month + 2, 13)
+        year_offset, third_month = divmod(second_month.month + 1, 13)
         third_month = first_month.replace(
-            year=year + year_offset,
+            year=second_month.year + year_offset,
             month=third_month or 1,
             day=monthrange(second_month.year + year_offset, third_month or 1)[1],
         )
 
-        year_offset, remaining_start = divmod(first_month.month + 3, 13)
+        year_offset, remaining_start = divmod(third_month.month + 1, 13)
         remaining_start_month = first_month.replace(
-            year=year + year_offset,
+            year=third_month.year + year_offset,
             month=remaining_start or 1,
             day=1,
         )
