@@ -231,14 +231,14 @@ class EAResourceForeCastReport(ReportFactory):
         second_month = first_month.replace(
             year=year + year_offset,
             month=second_month or 1,
-            day=monthrange(year + year_offset, second_month)[1],
+            day=monthrange(first_month.year + year_offset, second_month or 1)[1],
         )
 
         year_offset, third_month = divmod(first_month.month + 2, 13)
         third_month = first_month.replace(
             year=year + year_offset,
             month=third_month or 1,
-            day=monthrange(year + year_offset, third_month or 1)[1],
+            day=monthrange(second_month.year + year_offset, third_month or 1)[1],
         )
 
         year_offset, remaining_start = divmod(first_month.month + 3, 13)
