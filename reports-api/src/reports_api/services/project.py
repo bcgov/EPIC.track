@@ -26,7 +26,8 @@ class ProjectService:
     @classmethod
     def find(cls, project_id):
         """Find by project id."""
-        return Project.find_by_id(project_id).as_dict()
+        project = Project.find_by_id(project_id)
+        return ProjectSchema().dump(project)
 
     @classmethod
     def find_all(cls):
