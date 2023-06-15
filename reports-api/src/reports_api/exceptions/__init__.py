@@ -39,6 +39,7 @@ class ResourceExistsError(Exception):
         super().__init__(*args, **kwargs)
         self.message = message
 
+
 class BadRequestError(Exception):
     """Exception raised when there are issues with the api input"""
 

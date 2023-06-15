@@ -16,11 +16,10 @@
 from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 from flask import jsonify, request
-import pandas as pd
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 from reports_api.services.configuration import ConfigurationService
-from reports_api.exceptions import BusinessError, BadRequestError
+from reports_api.exceptions import BadRequestError
 
 API = Namespace("configurations", description="Application Configurations")
 
@@ -39,10 +38,7 @@ class EventConfigurationsImport(Resource):
         event_configurations = request.files['event_configurations']
         try:
 
-            ConfigurationService.import_events_configurations(event_configurations)
+            result = ConfigurationService.import_events_configurations(event_configurations)
         except BadRequestError as err:
             return err.message, HTTPStatus.BAD_REQUEST
-        except Exception as err:
-            return str(err), HTTPStatus.INTERNAL_SERVER_ERROR
-        response = jsonify({'message' : 'File imported successfully'})
-        return response, HTTPStatus.CREATED
+        return jsonify(result), HTTPStatus.CREATED

@@ -13,17 +13,23 @@
 # limitations under the License.
 """Model to handle all operations related to Task Events."""
 
-import sqlalchemy as sa
 import enum
+import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
 
+
 class ResponsibleEntityEnum(enum.Enum):
+    """Enum for responsible entity"""
+
+    # pylint: disable=C0103
     Proponent = 1
     PIN = 2
     EAO = 3
+    # pylint: disable=C0103
     FederalAgencies = 3
+
 
 class TaskEvent(BaseModel):
     """Model class for Tasks."""

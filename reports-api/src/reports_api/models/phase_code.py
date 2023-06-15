@@ -26,7 +26,7 @@ class PhaseCode(db.Model, CodeTable):
     __tablename__ = 'phase_codes'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-
+    name = Column(String(250))
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
     ea_act_id = Column(ForeignKey('ea_acts.id'), nullable=False)
     duration = Column(Integer())
