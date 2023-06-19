@@ -76,14 +76,14 @@ class Staff(BaseModel):
         return cls.query.filter_by(is_deleted=False)
 
     @classmethod
-    def check_existence(cls, email, instance_id):
-        """Checks if a staff exists with given first name and last name"""
+    def check_existence(cls, email, staff_id):
+        """Checks if a staff exists with given email address"""
         query = cls.query.filter(
             func.lower(Staff.email) == func.lower(email),
             Staff.is_deleted.is_(False),
         )
-        if instance_id:
-            query = query.filter(Staff.id != instance_id)
+        if staff_id:
+            query = query.filter(Staff.id != staff_id)
         if query.count() > 0:
             return True
         return False

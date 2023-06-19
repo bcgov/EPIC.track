@@ -38,3 +38,12 @@ class ResourceExistsError(Exception):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
         self.message = message
+
+
+class ResourceNotFoundError(Exception):
+    """Exception raised when resource not found"""
+
+    def __init__(self, message, *args, **kwargs):
+        """Return a valid ResourceExistsError."""
+        super().__init__(*args, **kwargs)
+        self.message = message

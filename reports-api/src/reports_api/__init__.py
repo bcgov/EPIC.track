@@ -19,7 +19,9 @@ This module is the API for the EAO Reports system.
 import logging
 import os
 
+from http import HTTPStatus
 from flask import Flask
+from marshmallow import ValidationError
 
 from reports_api import config
 from reports_api.config import _Config
@@ -29,6 +31,7 @@ from reports_api.utils.json_encoder import CustomJSONEncoder
 from reports_api.utils.logging import setup_logging
 from reports_api.utils.run_version import get_run_version
 from reports_api.utils.caching import AppCache
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))
@@ -59,6 +62,16 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             version = get_run_version()
             response.headers['API'] = f'eao_reports_api/{version}'
             return response
+
+        @app.errorhandler(Exception)
+        def handle_error(err):
+            if isinstance(err, ValidationError):
+                return err.messages, HTTPStatus.BAD_REQUEST
+            if isinstance(err, ResourceExistsError):
+                return err.message, HTTPStatus.CONFLICT
+            if isinstance(err, ResourceNotFoundError):
+                return err.message, HTTPStatus.NOT_FOUND
+            return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)
 
