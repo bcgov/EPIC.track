@@ -194,20 +194,8 @@ class EAResourceForeCastReport(ReportFactory):
     def _fetch_data(self, report_date: datetime):  # pylint: disable=too-many-locals
         """Fetches the relevant data for EA Resource Forecast Report"""
         report_start_date = report_date.date().replace(day=1)
-        year = report_start_date.year
-        year_offset, first_month = divmod(report_start_date.month + 1, 13)
-        first_month = report_start_date.replace(
-            year=year + year_offset,
-            month=first_month or 1,
-        )
-        year_offset, end_month = divmod(first_month.month + 5, 13)
-        if year_offset > 0:
-            end_month += 1
-        self.end_date = first_month.replace(
-            year=year + year_offset,
-            month=end_month,
-            day=monthrange(year + year_offset, end_month)[1],
-        )
+        first_month = self._add_months(report_start_date, 1, False)
+        self.end_date = self._add_months(first_month, 5)
         env_region = aliased(Region)
         nrs_region = aliased(Region)
         responsible_epd = aliased(Staff)
@@ -227,26 +215,9 @@ class EAResourceForeCastReport(ReportFactory):
             .subquery()
         )
 
-        year_offset, second_month = divmod(first_month.month + 1, 13)
-        second_month = first_month.replace(
-            year=year + year_offset,
-            month=second_month or 1,
-            day=monthrange(first_month.year + year_offset, second_month or 1)[1],
-        )
-
-        year_offset, third_month = divmod(second_month.month + 1, 13)
-        third_month = first_month.replace(
-            year=second_month.year + year_offset,
-            month=third_month or 1,
-            day=monthrange(second_month.year + year_offset, third_month or 1)[1],
-        )
-
-        year_offset, remaining_start = divmod(third_month.month + 1, 13)
-        remaining_start_month = first_month.replace(
-            year=third_month.year + year_offset,
-            month=remaining_start or 1,
-            day=1,
-        )
+        second_month = self._add_months(first_month, 1)
+        third_month = self._add_months(second_month, 1)
+        remaining_start_month = self._add_months(third_month, 1, False)
         self.months = [
             report_start_date.replace(
                 day=monthrange(report_start_date.year, report_start_date.month)[1]
@@ -625,3 +596,17 @@ class EAResourceForeCastReport(ReportFactory):
         canv.save()
         pdf_stream.seek(0)
         return pdf_stream.getvalue(), f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
+
+    def _add_months(self, start: datetime, months: int, set_to_last: bool = True) -> datetime:
+        """Adds x months to given date"""
+        year_offset, month = divmod(start.month + months, 13)
+        if year_offset > 0:
+            month += 1
+        result = start.replace(
+            year=start.year + year_offset,
+            month=month,
+            day=1
+        )
+        if set_to_last:
+            result = result.replace(day=monthrange(start.year + year_offset, month)[1])
+        return result
