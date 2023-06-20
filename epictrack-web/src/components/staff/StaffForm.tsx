@@ -67,8 +67,8 @@ export default function StaffForm({ ...props }) {
   const getStaff = async (id: number) => {
     const result = await StaffService.getStaff(id);
     if (result.status === 200) {
-      setStaff((result.data as never)["staff"]);
-      reset((result.data as never)["staff"]);
+      setStaff(result.data as Staff);
+      reset(result.data as Staff);
     }
   };
 

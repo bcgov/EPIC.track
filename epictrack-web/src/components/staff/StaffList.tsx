@@ -34,7 +34,7 @@ const StaffList = () => {
     try {
       const staffResult = await StaffService.getStaffs();
       if (staffResult.status === 200) {
-        setStaffs((staffResult.data as never)["staffs"]);
+        setStaffs(staffResult.data as never);
       }
     } catch (error) {
       console.error("Staff List: ", error);
@@ -45,7 +45,7 @@ const StaffList = () => {
 
   React.useEffect(() => {
     getStaff();
-  }, [getStaff]);
+  }, []);
   React.useEffect(() => {
     const positions = staffs
       .map((p) => p.position?.name)

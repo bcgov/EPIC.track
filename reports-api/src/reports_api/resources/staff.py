@@ -14,35 +14,16 @@
 """Resource for staff endpoints."""
 from http import HTTPStatus
 
-from flask import current_app
-from flask_restx import Namespace, Resource, cors, reqparse
-from marshmallow import ValidationError
-from reports_api.exceptions import ResourceExistsError
-
-from reports_api.schemas import StaffSchema
+from flask import current_app, request, jsonify
+from flask_restx import Namespace, Resource, cors
+from reports_api.exceptions import ResourceNotFoundError
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
 from reports_api.services import StaffService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
-
 API = Namespace("staffs", description="Staffs")
-
-parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument("positions", type=int, action="split", location="args")
-parser.add_argument("position", type=int, location="args")
-
-validation_parser = reqparse.RequestParser(bundle_errors=True)
-validation_parser.add_argument(
-    "email",
-    type=str,
-    required=True,
-    location="args",
-    help="email to be checked.",
-    trim=True,
-)
-validation_parser.add_argument(
-    "id", type=int, help="ID of the staff in case of updates.", location="args"
-)
 
 
 @cors_preflight("GET,POST")
@@ -51,22 +32,20 @@ class Staffs(Resource):
     """Endpoint resource to return staffs."""
 
     @staticmethod
-    @cors.crossdomain(origin="*")
     @auth.require
+    @cors.crossdomain(origin="*")
     @profiletime
-    @API.expect(parser)
     def get():
         """Return all active staffs."""
         current_app.logger.info("Getting staffs")
-        position_id = parser.parse_args()["position"]
-        current_app.logger.info(f"Position id is {position_id}")
-        if position_id:
-            return StaffService.find_by_position_id(position_id), HTTPStatus.OK
-        positions = parser.parse_args()["positions"]
-        current_app.logger.info(f"Position ids are {positions}")
+        args = req.StaffByPositionsQueryParamSchema().load(request.args)
+        positions = args.get('positions')
+        if not positions:
+            staffs = StaffService.find_all_non_deleted_staff()
         if positions:
-            return StaffService.find_by_position_ids(positions), HTTPStatus.OK
-        return StaffService.find_all_non_deleted_staff(), HTTPStatus.OK
+            current_app.logger.info(f"Position ids are {positions}")
+            staffs = StaffService.find_by_position_ids(positions)
+        return jsonify(res.StaffResponseSchema(many=True).dump(staffs)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -74,15 +53,9 @@ class Staffs(Resource):
     @profiletime
     def post():
         """Create new staff"""
-        staff_schema = StaffSchema()
-        try:
-            request_json = staff_schema.load(API.payload)
-            staff = StaffService.create_staff(request_json)
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return staff_schema.dump(staff), HTTPStatus.CREATED
+        request_json = req.StaffBodyParameterSchema().load(API.payload)
+        staff = StaffService.create_staff(request_json)
+        return res.StaffResponseSchema().dump(staff), HTTPStatus.CREATED
 
 
 @cors_preflight("GET, DELETE, PUT")
@@ -96,10 +69,11 @@ class Staff(Resource):
     @profiletime
     def get(staff_id):
         """Return a staff detail based on id."""
+        req.StaffIdPathParameterSchema().load(request.view_args)
         staff = StaffService.find_by_id(staff_id)
         if staff:
-            return staff, HTTPStatus.OK
-        return f"Staff with id '{staff_id}' not found", HTTPStatus.NOT_FOUND
+            return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
+        raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -107,15 +81,10 @@ class Staff(Resource):
     @profiletime
     def put(staff_id):
         """Update and return a staff."""
-        staff_schema = StaffSchema()
-        try:
-            request_json = staff_schema.load(API.payload)
-            staff = StaffService.update_staff(staff_id, request_json)
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return staff_schema.dump(staff), HTTPStatus.OK
+        req.StaffIdPathParameterSchema().load(request.view_args)
+        request_json = req.StaffBodyParameterSchema().load(API.payload)
+        staff = StaffService.update_staff(staff_id, request_json)
+        return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -123,22 +92,9 @@ class Staff(Resource):
     @profiletime
     def delete(staff_id):
         """Delete a staff"""
+        req.StaffIdPathParameterSchema().load(request.view_args)
         StaffService.delete_staff(staff_id)
-        return {"message": "Staff successfully deleted"}, HTTPStatus.OK
-
-
-@cors_preflight("GET")
-@API.route("/positions/<int:position_id>", methods=["GET", "OPTIONS"])
-class StaffPosition(Resource):
-    """Endpoint resource to return staffs based on position_id."""
-
-    @staticmethod
-    @cors.crossdomain(origin="*")
-    @auth.require
-    @profiletime
-    def get(position_id):
-        """Return a staff detail based on id."""
-        return StaffService.find_by_position_id(position_id), HTTPStatus.OK
+        return "Staff successfully deleted", HTTPStatus.OK
 
 
 @cors_preflight("GET")
@@ -149,14 +105,13 @@ class ValidateStaff(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
-    @API.expect(validation_parser)
     @profiletime
     def get():
         """Checks for existing staffs."""
-        args = validation_parser.parse_args()
+        args = req.StaffExistanceQueryParamSchema().load(request.args)
         email = args["email"]
-        instance_id = args["id"]
-        exists = StaffService.check_existence(email=email, instance_id=instance_id)
+        staff_id = args["staff_id"]
+        exists = StaffService.check_existence(email=email, staff_id=staff_id)
         return (
             {"exists": exists},
             HTTPStatus.OK,
