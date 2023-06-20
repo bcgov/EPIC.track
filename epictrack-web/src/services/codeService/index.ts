@@ -12,6 +12,7 @@ export type Code =
   | "eao_teams"
   | "regions"
   | "types"
+  | "phases"
   | "sub_types"
   | "federal_involvements"
   | "substitution_acts";
