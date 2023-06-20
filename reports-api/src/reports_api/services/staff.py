@@ -14,10 +14,10 @@
 """Service to manage Staffs."""
 
 from flask import current_app
-from reports_api.exceptions import ResourceExistsError
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
 
 from reports_api.models import Staff
-from reports_api.schemas import StaffSchema
+from reports_api.schemas.response import StaffResponseSchema
 
 
 class StaffService:
@@ -27,7 +27,7 @@ class StaffService:
     def find_by_position_id(cls, position_id):
         """Find staff by position."""
         current_app.logger.debug(f"Find staff by position : {position_id}")
-        staffs_schema = StaffSchema(many=True)
+        staffs_schema = StaffResponseSchema(many=True)
         staffs = Staff.find_active_staff_by_position(position_id)
         response = {"staffs": staffs_schema.dump(staffs)}
         return response
@@ -36,15 +36,13 @@ class StaffService:
     def find_by_position_ids(cls, position_ids):
         """Find staffs by position ids."""
         current_app.logger.debug(f"Find staff by positions : {position_ids}")
-        staffs_schema = StaffSchema(many=True)
         staffs = Staff.find_active_staff_by_positions(position_ids)
-        response = {"staffs": staffs_schema.dump(staffs)}
-        return response
+        return staffs
 
     @classmethod
     def find_all_active_staff(cls):
         """Find all staffs."""
-        staffs_schema = StaffSchema(many=True)
+        staffs_schema = StaffResponseSchema(many=True)
         staffs = Staff.find_all_active_staff()
         response = {"staffs": staffs_schema.dump(staffs)}
         return response
@@ -52,10 +50,8 @@ class StaffService:
     @classmethod
     def find_all_non_deleted_staff(cls):
         """Find all non-deleted staff"""
-        staffs_schema = StaffSchema(many=True)
         staffs = Staff.find_all_non_deleted_staff()
-        response = {"staffs": staffs_schema.dump(staffs)}
-        return response
+        return staffs
 
     @classmethod
     def create_staff(cls, payload: dict):
@@ -75,6 +71,8 @@ class StaffService:
         if exists:
             raise ResourceExistsError("Staff with same email already exists")
         staff = Staff.find_by_id(staff_id)
+        if not staff:
+            raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
         staff = staff.update(payload)
         return staff
 
@@ -89,14 +87,10 @@ class StaffService:
     @classmethod
     def find_by_id(cls, _id):
         """Find staff by id."""
-        staff_schema = StaffSchema()
         staff = Staff.find_by_id(_id)
-        response = None
-        if staff:
-            response = {"staff": staff_schema.dump(staff)}
-        return response
+        return staff
 
     @classmethod
-    def check_existence(cls, email, instance_id=None):
+    def check_existence(cls, email, staff_id=None):
         """Checks if a staff exists with given first name and last name"""
-        return Staff.check_existence(email, instance_id)
+        return Staff.check_existence(email, staff_id)

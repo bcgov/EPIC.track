@@ -50,7 +50,7 @@ const validateEmail = async (
   staffID: number | undefined = undefined
 ) => {
   let params = `email=${email}`;
-  if (staffID !== undefined) params += `&id=${staffID}`;
+  if (staffID !== undefined) params += `&staff_id=${staffID}`;
   return await http.GetRequest(
     AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/exists?${params}`
   );
