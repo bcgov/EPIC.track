@@ -20,4 +20,4 @@ from reports_api import create_app
 application = create_app()  # pylint: disable=invalid-name
 
 if __name__ == "__main__":
-    application.run()
+    application.run(port=3200)

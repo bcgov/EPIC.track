@@ -27,3 +27,4 @@ from .indigenous_nation import IndigenousNationService
 from .proponent import ProponentService
 from .reminder_configuration import ReminderConfigurationService
 from .configuration import ConfigurationService
+from .user import UserService

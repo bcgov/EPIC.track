@@ -11,6 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all the response validation schemas"""
-from .staff_response import StaffResponseSchema
-from .user_group_response import UserGroupResponseSchema
+""""User service"""
+from .keycloak import KeycloakService
+
+class UserService:
+    """User Service"""
+
+    @staticmethod
+    def get_all_users():
+        """Get all users"""
+        return KeycloakService.get_groups(briefRepresentation=False)
+    
+
+    def get_groups():
+        """Get all groups"""
+        groups = KeycloakService.get_groups(briefRepresentation=False)
+        filtered_groups = list(filter((lambda g: 'level' in g['attributes']), groups))
+        return filtered_groups

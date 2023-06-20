@@ -11,6 +11,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all the response validation schemas"""
-from .staff_response import StaffResponseSchema
-from .user_group_response import UserGroupResponseSchema
+"""User group response schema"""
+from marshmallow import Schema, fields
+
+class UserGroupResponseSchema(Schema):
+    """User group response schema"""
+
+    id = fields.Str(
+        description='Id of the group'
+    )
+    name = fields.Str(
+        description='Name of the group'
+    )
+
+    level = fields.Method("get_level")
+
+    def get_level(self, instance):
+        """Get the full name"""
+        return int(instance["attributes"]["level"][0])
