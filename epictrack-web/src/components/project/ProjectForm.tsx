@@ -95,7 +95,7 @@ export default function ProjectForm({ ...props }) {
     async (id: number) => {
       const result = await ProjectService.getProject(id);
       if (result.status === 200) {
-        const project = result.data as Project;
+        const project: Project = result.data as Project;
         setProject(project);
         reset(project);
       }
