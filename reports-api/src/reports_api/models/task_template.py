@@ -25,8 +25,10 @@ class TaskTemplate(BaseModel):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String)
+    ea_act_id = sa.Column(sa.ForeignKey('ea_acts.id'), nullable=False)
     phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     work_type_id = sa.Column(sa.ForeignKey('work_types.id'), nullable=False)
 
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
+    ea_act = relationship('EAAct', foreign_keys=[ea_act_id], lazy='select')
