@@ -24,5 +24,11 @@ const Endpoints = {
   SubTypes: {
     GET_SUB_TYPES: "sub-types",
   },
+  Templates: {
+    GET_TEMPLATES: "templates",
+  },
+  Phases: {
+    GET_PHASES: "phases",
+  },
 };
 export default Endpoints;
