@@ -32,3 +32,9 @@ class TaskTemplate(BaseModel):
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
     ea_act = relationship('EAAct', foreign_keys=[ea_act_id], lazy='select')
+
+    tasks = relationship(
+        "Task",
+        primaryjoin="TaskTemplate.id==Task.template_id",
+        back_populates="template",
+    )

@@ -1,4 +1,4 @@
-"""Ministry model schema"""
+"""SubstitutionAct model schema"""
 from marshmallow import EXCLUDE
 
 from reports_api.models import SubstitutionAct
