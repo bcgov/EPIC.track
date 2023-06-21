@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """User response schema"""
-from marshmallow import fields, Schema
+from marshmallow import Schema, fields
+
 from .user_group_response import UserGroupResponseSchema
 
 
@@ -37,4 +38,4 @@ class UserResponseSchema(Schema):
         description='Email of the user',
     )
 
-    group=fields.Nested(UserGroupResponseSchema)
+    group = fields.Nested(UserGroupResponseSchema)

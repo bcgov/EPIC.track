@@ -11,8 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""""User service"""
+"""User service"""
+from reports_api.exceptions import BusinessError
 from .keycloak import KeycloakService
+
 
 class UserService:
     """User Service"""
@@ -22,26 +24,30 @@ class UserService:
         """Get all users"""
         users = KeycloakService.get_users()
         for user in users:
-            user['group']=None
+            user['group'] = None
         groups = UserService.get_groups()
         for group in groups:
-            memebers = KeycloakService.get_group_members(group['id'])
-            member_ids = [member['id'] for member in memebers]
-            filtered_users = list(filter(lambda x: x['id'] in member_ids, users))
+            members = KeycloakService.get_group_members(group['id'])
+            member_ids = [member['id'] for member in members]
+            filtered_users = list(filter(lambda x, _member_ids=member_ids: x['id'] in _member_ids, users))
             for user in filtered_users:
-                user['group']=group
+                user['group'] = group
         return users
-    
 
+    @staticmethod
     def get_groups():
         """Get groups that has level set up"""
         groups = KeycloakService.get_groups()
         filtered_groups = list(filter((lambda g: 'level' in g['attributes']), groups))
         return filtered_groups
-    
 
+    @staticmethod
     def update_user_group(user_id, user_group_request):
         """Update the group of a user"""
-        KeycloakService.delete_user_group(user_id, user_group_request.get('existing_group_id'))
-        result=KeycloakService.update_user_group(user_id, user_group_request['group_id_to_update'])
+        existing_group_id = user_group_request['existing_group_id']
+        if existing_group_id:
+            result = KeycloakService.delete_user_group(user_id, user_group_request.get('existing_group_id'))
+            if result.status_code != 204:
+                raise BusinessError('Error removing group', 500)
+        result = KeycloakService.update_user_group(user_id, user_group_request['group_id_to_update'])
         return result

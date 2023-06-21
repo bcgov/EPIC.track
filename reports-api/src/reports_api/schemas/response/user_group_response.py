@@ -14,6 +14,7 @@
 """User group response schema"""
 from marshmallow import Schema, fields
 
+
 class UserGroupResponseSchema(Schema):
     """User group response schema"""
 

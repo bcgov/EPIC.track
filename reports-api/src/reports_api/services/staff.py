@@ -92,5 +92,5 @@ class StaffService:
 
     @classmethod
     def check_existence(cls, email, staff_id=None):
-        """Checks if a staff exists with given first name and last name"""
+        """Checks if a staff exists with given email address"""
         return Staff.check_existence(email, staff_id)

@@ -14,39 +14,42 @@
 """Keycloak admin functions"""
 import requests
 from flask import current_app
+from reports_api.utils.enums import HttpMethod
+
 
 class KeycloakService:
     """Keycloak services"""
 
     @staticmethod
-    def get_groups(briefRepresentation:bool=False):
+    def get_groups(brief_representation: bool = False):
         """Get all the groups"""
-        return KeycloakService._request_keycloak('groups?briefRepresentation={briefRepresentation}')
-
+        response = KeycloakService._request_keycloak(f'groups?briefRepresentation={brief_representation}')
+        return response.json()
 
     @staticmethod
     def get_users():
         """Get users"""
-        return KeycloakService._request_keycloak('users')
-    
+        response = KeycloakService._request_keycloak('users')
+        return response.json()
+
     @staticmethod
     def get_group_members(group_id):
         """Get the members of a group"""
-        return KeycloakService._request_keycloak(f'groups/{group_id}/members')
-    
+        response = KeycloakService._request_keycloak(f'groups/{group_id}/members')
+        return response.json()
+
     @staticmethod
     def update_user_group(user_id, group_id):
-        """"Update the group of user"""
-        return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}')
-    
+        """Update the group of user"""
+        return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}', HttpMethod.PUT)
 
     @staticmethod
     def delete_user_group(user_id, group_id):
         """Delete user-group mapping"""
-        return KeycloakService._request_keycloak(f'/users/{user_id}/groups/{group_id}')
-    
+        return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}', HttpMethod.DELETE)
+
     @staticmethod
-    def _request_keycloak(relative_url):
+    def _request_keycloak(relative_url, http_method: HttpMethod = HttpMethod.GET, data=None):
         """Common method to request keycloak"""
         base_url = current_app.config.get('KEYCLOAK_BASE_URL')
         realm = current_app.config.get('KEYCLOAK_REALM_NAME')
@@ -57,10 +60,15 @@ class KeycloakService:
             'Authorization': f'Bearer {admin_token}'
         }
 
-        query_user_url = f'{base_url}/auth/admin/realms/{realm}/{relative_url}'
-        response = requests.get(query_user_url, headers=headers, timeout=timeout)
+        url = f'{base_url}/auth/admin/realms/{realm}/{relative_url}'
+        if http_method == HttpMethod.GET:
+            response = requests.get(url, headers=headers, timeout=timeout)
+        if http_method == HttpMethod.PUT:
+            response = requests.put(url, headers=headers, data=data, timeout=timeout)
+        if http_method == HttpMethod.DELETE:
+            response = requests.delete(url, headers=headers, timeout=timeout)
         response.raise_for_status()
-        return response.json()
+        return response
 
     @staticmethod
     def _get_admin_token():

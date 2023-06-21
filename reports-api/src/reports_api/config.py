@@ -102,7 +102,6 @@ class _Config():  # pylint: disable=too-few-public-methods
     KEYCLOAK_ADMIN_SECRET = _get_config('KEYCLOAK_ADMIN_SECRET')
     CONNECT_TIMEOUT = _get_config('CONNECT_TIMEOUT', default=60)
 
-
     TESTING = False
     DEBUG = True
 

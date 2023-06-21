@@ -25,15 +25,14 @@ class UserGroupBodyParamSchema(RequestBodyParameterSchema):
     )
 
     existing_group_id = fields.Str(
-        description='Existing group id of the user',
-        required=True
+        description='Existing group id of the user'
     )
 
 
 class UserGroupPathParamSchema(RequestPathParameterSchema):
     """User group path parameter schema"""
 
-    user_id=fields.UUID(
+    user_id = fields.UUID(
         description='Id of the user',
         required=True
     )

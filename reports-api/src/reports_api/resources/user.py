@@ -13,13 +13,15 @@
 # limitations under the License.
 """User resource"""
 from http import HTTPStatus
-from flask import jsonify, request
-from flask_restx import Resource, Namespace, cors
-from reports_api.utils import auth, constants, profiletime
-from reports_api.utils.util import cors_preflight
-from reports_api.services import UserService
-from reports_api.schemas import response as res, request as req
 
+from flask import jsonify, request
+from flask_restx import Namespace, Resource, cors
+from reports_api.exceptions import BusinessError
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
+from reports_api.services import UserService
+from reports_api.utils import auth, profiletime
+from reports_api.utils.util import cors_preflight
 
 API = Namespace("users", description="Users")
 
@@ -40,7 +42,7 @@ class Users(Resource):
 
 
 @cors_preflight("GET")
-@API.route("/groups", methods=["GET", "PUT", "OPTIONS"])    
+@API.route("/groups", methods=["GET", "OPTIONS"])
 class Groups(Resource):
     """Group resource"""
 
@@ -54,14 +56,20 @@ class Groups(Resource):
         return jsonify(reponse_schema.dump(UserService.get_groups())), HTTPStatus.OK
 
 
-@cors_preflight("GET")
-@API.route("/<user_id>/groups", methods=["PUT", "OPTIONS"]) 
+@cors_preflight("PUT")
+@API.route("/<uuid:user_id>/groups", methods=["PUT", "OPTIONS"])
 class UserGroups(Resource):
     """UserGroup resource"""
 
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
     def put(user_id):
         """Update the group of the user"""
         req.UserGroupPathParamSchema().load(request.view_args)
         user_group_request = req.UserGroupBodyParamSchema().load(API.payload)
         response = UserService.update_user_group(user_id, user_group_request)
-        return response
+        if response.status_code == 204:
+            return '', HTTPStatus.NO_CONTENT
+        raise BusinessError('Update failed', 500)

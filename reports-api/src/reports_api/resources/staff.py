@@ -14,8 +14,9 @@
 """Resource for staff endpoints."""
 from http import HTTPStatus
 
-from flask import current_app, request, jsonify
+from flask import current_app, jsonify, request
 from flask_restx import Namespace, Resource, cors
+
 from reports_api.exceptions import ResourceNotFoundError
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
@@ -23,7 +24,8 @@ from reports_api.services import StaffService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
-API = Namespace('staffs', description='Staffs')
+
+API = Namespace("staffs", description="Staffs")
 
 
 @cors_preflight('GET,POST')
