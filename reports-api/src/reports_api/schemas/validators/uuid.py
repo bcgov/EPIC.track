@@ -11,13 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Phone validator"""
+"""UUID Validator"""
 import re
 from typing import Union
 from marshmallow import ValidationError, validate
 
 
-class Phone(validate.Validator):  # pylint: disable=too-few-public-methods
+class UUID(validate.Validator):  # pylint: disable=too-few-public-methods
     """Phone number validation"""
 
     PHONE_REGEX = re.compile(

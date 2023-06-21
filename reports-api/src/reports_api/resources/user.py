@@ -13,12 +13,12 @@
 # limitations under the License.
 """User resource"""
 from http import HTTPStatus
-from flask import jsonify
+from flask import jsonify, request
 from flask_restx import Resource, Namespace, cors
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.util import cors_preflight
 from reports_api.services import UserService
-from reports_api.schemas import response as res
+from reports_api.schemas import response as res, request as req
 
 
 API = Namespace("users", description="Users")
@@ -35,13 +35,14 @@ class Users(Resource):
     @profiletime
     def get():
         """Get all users"""
-        return jsonify(UserService.get_groups()), HTTPStatus.OK
+        user_schema = res.UserResponseSchema(many=True)
+        return jsonify(user_schema.dump(UserService.get_all_users())), HTTPStatus.OK
 
 
 @cors_preflight("GET")
-@API.route("/groups", methods=["GET", "OPTIONS"])    
-class UserGroups(Resource):
-    """User groups"""
+@API.route("/groups", methods=["GET", "PUT", "OPTIONS"])    
+class Groups(Resource):
+    """Group resource"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -51,5 +52,16 @@ class UserGroups(Resource):
         """Get all groups"""
         reponse_schema = res.UserGroupResponseSchema(many=True)
         return jsonify(reponse_schema.dump(UserService.get_groups())), HTTPStatus.OK
-        
 
+
+@cors_preflight("GET")
+@API.route("/<user_id>/groups", methods=["PUT", "OPTIONS"]) 
+class UserGroups(Resource):
+    """UserGroup resource"""
+
+    def put(user_id):
+        """Update the group of the user"""
+        req.UserGroupPathParamSchema().load(request.view_args)
+        user_group_request = req.UserGroupBodyParamSchema().load(API.payload)
+        response = UserService.update_user_group(user_id, user_group_request)
+        return response

@@ -19,9 +19,35 @@ class KeycloakService:
     """Keycloak services"""
 
     @staticmethod
-    def get_groups(briefRepresentation:bool=True):
+    def get_groups(briefRepresentation:bool=False):
         """Get all the groups"""
-        """Get user group from Keycloak by userid."""
+        return KeycloakService._request_keycloak('groups?briefRepresentation={briefRepresentation}')
+
+
+    @staticmethod
+    def get_users():
+        """Get users"""
+        return KeycloakService._request_keycloak('users')
+    
+    @staticmethod
+    def get_group_members(group_id):
+        """Get the members of a group"""
+        return KeycloakService._request_keycloak(f'groups/{group_id}/members')
+    
+    @staticmethod
+    def update_user_group(user_id, group_id):
+        """"Update the group of user"""
+        return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}')
+    
+
+    @staticmethod
+    def delete_user_group(user_id, group_id):
+        """Delete user-group mapping"""
+        return KeycloakService._request_keycloak(f'/users/{user_id}/groups/{group_id}')
+    
+    @staticmethod
+    def _request_keycloak(relative_url):
+        """Common method to request keycloak"""
         base_url = current_app.config.get('KEYCLOAK_BASE_URL')
         realm = current_app.config.get('KEYCLOAK_REALM_NAME')
         timeout = int(current_app.config.get('CONNECT_TIMEOUT', 60))
@@ -31,12 +57,10 @@ class KeycloakService:
             'Authorization': f'Bearer {admin_token}'
         }
 
-        # Get the user and return
-        query_user_url = f'{base_url}/auth/admin/realms/{realm}/groups?briefRepresentation={briefRepresentation}'
+        query_user_url = f'{base_url}/auth/admin/realms/{realm}/{relative_url}'
         response = requests.get(query_user_url, headers=headers, timeout=timeout)
         response.raise_for_status()
         return response.json()
-    
 
     @staticmethod
     def _get_admin_token():

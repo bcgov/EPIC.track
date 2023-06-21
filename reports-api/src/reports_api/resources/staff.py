@@ -23,32 +23,32 @@ from reports_api.services import StaffService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
-API = Namespace("staffs", description="Staffs")
+API = Namespace('staffs', description='Staffs')
 
 
-@cors_preflight("GET,POST")
-@API.route("", methods=["GET", "POST", "OPTIONS"])
+@cors_preflight('GET,POST')
+@API.route('', methods=['GET', 'POST', 'OPTIONS'])
 class Staffs(Resource):
     """Endpoint resource to return staffs."""
 
     @staticmethod
     @auth.require
-    @cors.crossdomain(origin="*")
+    @cors.crossdomain(origin='*')
     @profiletime
     def get():
         """Return all active staffs."""
-        current_app.logger.info("Getting staffs")
+        current_app.logger.info('Getting staffs')
         args = req.StaffByPositionsQueryParamSchema().load(request.args)
         positions = args.get('positions')
         if not positions:
             staffs = StaffService.find_all_non_deleted_staff()
         if positions:
-            current_app.logger.info(f"Position ids are {positions}")
+            current_app.logger.info(f'Position ids are {positions}')
             staffs = StaffService.find_by_position_ids(positions)
         return jsonify(res.StaffResponseSchema(many=True).dump(staffs)), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin="*")
+    @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
     def post():
@@ -58,13 +58,13 @@ class Staffs(Resource):
         return res.StaffResponseSchema().dump(staff), HTTPStatus.CREATED
 
 
-@cors_preflight("GET, DELETE, PUT")
-@API.route("/<int:staff_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
+@cors_preflight('GET, DELETE, PUT')
+@API.route('/<int:staff_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class Staff(Resource):
     """Endpoint resource to return staff details."""
 
     @staticmethod
-    @cors.crossdomain(origin="*")
+    @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
     def get(staff_id):
@@ -73,10 +73,10 @@ class Staff(Resource):
         staff = StaffService.find_by_id(staff_id)
         if staff:
             return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
-        raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
+        raise ResourceNotFoundError(f'Staff with id "{staff_id}" not found')
 
     @staticmethod
-    @cors.crossdomain(origin="*")
+    @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
     def put(staff_id):
@@ -87,32 +87,32 @@ class Staff(Resource):
         return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
 
     @staticmethod
-    @cors.crossdomain(origin="*")
+    @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
     def delete(staff_id):
         """Delete a staff"""
         req.StaffIdPathParameterSchema().load(request.view_args)
         StaffService.delete_staff(staff_id)
-        return "Staff successfully deleted", HTTPStatus.OK
+        return 'Staff successfully deleted', HTTPStatus.OK
 
 
-@cors_preflight("GET")
-@API.route("/exists", methods=["GET", "OPTIONS"])
+@cors_preflight('GET')
+@API.route('/exists', methods=['GET', 'OPTIONS'])
 class ValidateStaff(Resource):
     """Endpoint resource to check for existing staff."""
 
     @staticmethod
-    @cors.crossdomain(origin="*")
+    @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
     def get():
         """Checks for existing staffs."""
         args = req.StaffExistanceQueryParamSchema().load(request.args)
-        email = args["email"]
-        staff_id = args["staff_id"]
+        email = args.get('email')
+        staff_id = args.get('staff_id')
         exists = StaffService.check_existence(email=email, staff_id=staff_id)
         return (
-            {"exists": exists},
+            {'exists': exists},
             HTTPStatus.OK,
         )

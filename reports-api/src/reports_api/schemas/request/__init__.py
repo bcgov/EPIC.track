@@ -16,3 +16,4 @@ from .staff_request import (StaffBodyParameterSchema,
                             StaffByPositionsQueryParamSchema,
                             StaffExistanceQueryParamSchema,
                             StaffIdPathParameterSchema)
+from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema

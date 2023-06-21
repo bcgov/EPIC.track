@@ -20,11 +20,28 @@ class UserService:
     @staticmethod
     def get_all_users():
         """Get all users"""
-        return KeycloakService.get_groups(briefRepresentation=False)
+        users = KeycloakService.get_users()
+        for user in users:
+            user['group']=None
+        groups = UserService.get_groups()
+        for group in groups:
+            memebers = KeycloakService.get_group_members(group['id'])
+            member_ids = [member['id'] for member in memebers]
+            filtered_users = list(filter(lambda x: x['id'] in member_ids, users))
+            for user in filtered_users:
+                user['group']=group
+        return users
     
 
     def get_groups():
-        """Get all groups"""
-        groups = KeycloakService.get_groups(briefRepresentation=False)
+        """Get groups that has level set up"""
+        groups = KeycloakService.get_groups()
         filtered_groups = list(filter((lambda g: 'level' in g['attributes']), groups))
         return filtered_groups
+    
+
+    def update_user_group(user_id, user_group_request):
+        """Update the group of a user"""
+        KeycloakService.delete_user_group(user_id, user_group_request.get('existing_group_id'))
+        result=KeycloakService.update_user_group(user_id, user_group_request['group_id_to_update'])
+        return result

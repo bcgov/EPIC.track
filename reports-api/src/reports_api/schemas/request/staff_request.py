@@ -41,8 +41,7 @@ class StaffExistanceQueryParamSchema(RequestQueryParameterSchema):
 
     staff_id = fields.Int(
         description='The id of the staff',
-        validate=validate.Range(min=1),
-        required=True
+        validate=validate.Range(min=1)
     )
 
 
