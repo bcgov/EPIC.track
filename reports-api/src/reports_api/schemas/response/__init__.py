@@ -13,3 +13,4 @@
 # limitations under the License.
 """Exposes all the response validation schemas"""
 from .staff_response import StaffResponseSchema
+from .task_response import TaskResponseSchema, TaskTemplateResponseSchema
