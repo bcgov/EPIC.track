@@ -96,6 +96,12 @@ class _Config():  # pylint: disable=too-few-public-methods
     JWT_OIDC_CACHING_ENABLED = _get_config('JWT_OIDC_CACHING_ENABLED', default=False)
     JWT_OIDC_JWKS_CACHE_TIMEOUT = int(_get_config('JWT_OIDC_JWKS_CACHE_TIMEOUT', default=300))
 
+    KEYCLOAK_BASE_URL = _get_config('KEYCLOAK_BASE_URL')
+    KEYCLOAK_REALM_NAME = _get_config('KEYCLOAK_REALM_NAME')
+    KEYCLOAK_ADMIN_CLIENT = _get_config('KEYCLOAK_ADMIN_CLIENT')
+    KEYCLOAK_ADMIN_SECRET = _get_config('KEYCLOAK_ADMIN_SECRET')
+    CONNECT_TIMEOUT = _get_config('CONNECT_TIMEOUT', default=60)
+
     TESTING = False
     DEBUG = True
 
