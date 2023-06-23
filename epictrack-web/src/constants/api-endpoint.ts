@@ -4,7 +4,7 @@ const Endpoints = {
     GET_PDF_REPORT: "reports/file",
   },
   Staffs: {
-    STAFF: "staffs",
+    GET_STAFFS: "staffs",
   },
   Projects: {
     GET_PROJECTS: "projects",
@@ -29,6 +29,10 @@ const Endpoints = {
   },
   Phases: {
     GET_PHASES: "phases",
+  },
+  Users: {
+    GET_USERS: "users",
+    GET_USER_GROUPS: "users/groups",
   },
 };
 export default Endpoints;

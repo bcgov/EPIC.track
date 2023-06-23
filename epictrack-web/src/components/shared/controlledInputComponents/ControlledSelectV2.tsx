@@ -1,7 +1,7 @@
 import React from "react";
 import { FormHelperText } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import Select from "react-select";
+import Select, { Props } from "react-select";
 
 type IFormInputProps = {
   name: string;
@@ -11,6 +11,7 @@ type IFormInputProps = {
   getOptionLabel: (option: any) => string;
   getOptionValue: (option: any) => string;
   helperText?: string | undefined;
+  // menuPortalTarget: HTMLElement | undefined;
 };
 
 const ControlledSelectV2: React.ForwardRefRenderFunction<
@@ -24,6 +25,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
     getOptionValue,
     isMulti,
     helperText,
+    // menuPortalTarget,
     ...otherProps
   },
   ref
@@ -55,13 +57,13 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               )}
               isMulti={isMulti}
               onChange={(val: any) => {
-                console.log("Option value ", val);
                 let v;
                 if (isMulti)
                   v = val.map((v: any) => getOptionValue(v)).join(",");
                 else v = getOptionValue(val);
                 return onChange(v);
               }}
+              menuPortalTarget={document.body}
               styles={{
                 control: (baseStyles, state) => {
                   return {
@@ -69,6 +71,10 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                     borderColor: !!errors[name] ? "#d32f2f" : undefined,
                   };
                 },
+                menuPortal: (base: any) => ({
+                  ...base,
+                  zIndex: 99999,
+                }),
               }}
             ></Select>
             {helperText && (

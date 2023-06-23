@@ -29,6 +29,7 @@ export const Routes: RouteType[] = [
   },
   { name: "Templates", path: "/templates", base: "/templates" },
   { name: "Works", path: "/works", base: "/works" },
+  { name: "Users", path: "/users", base: "/users" },
   {
     name: "Reporting",
     path: "/reporting",

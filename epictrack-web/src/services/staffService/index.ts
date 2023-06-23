@@ -4,33 +4,33 @@ import { AppConfig } from "../../config";
 import { Staff } from "../../models/staff";
 const getStaffs = async (apiUrl?: string) => {
   return await http.GetRequest(
-    (AppConfig.apiUrl || apiUrl) + Endpoints.Staffs.STAFF
+    (AppConfig.apiUrl || apiUrl) + Endpoints.Staffs.GET_STAFFS
   );
 };
 
 const createStaff = async (staff: Staff) => {
   return await http.PostRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF,
+    AppConfig.apiUrl + Endpoints.Staffs.GET_STAFFS,
     JSON.stringify(staff)
   );
 };
 
 const updateStaff = async (staff: Staff) => {
   return await http.PutRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/${staff.id}`,
+    AppConfig.apiUrl + Endpoints.Staffs.GET_STAFFS + `/${staff.id}`,
     JSON.stringify(staff)
   );
 };
 
 const getStaff = async (id: number) => {
   return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/${id}`
+    AppConfig.apiUrl + Endpoints.Staffs.GET_STAFFS + `/${id}`
   );
 };
 
 const deleteStaff = async (id?: number) => {
   return await http.DeleteRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/${id}`
+    AppConfig.apiUrl + Endpoints.Staffs.GET_STAFFS + `/${id}`
   );
 };
 
@@ -41,7 +41,9 @@ const getStaffByPosition = async (position: string) => {
   }
 
   return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `?${query_param}=${position}`
+    AppConfig.apiUrl +
+      Endpoints.Staffs.GET_STAFFS +
+      `?${query_param}=${position}`
   );
 };
 
@@ -52,7 +54,7 @@ const validateEmail = async (
   let params = `email=${email}`;
   if (staffID !== undefined) params += `&staff_id=${staffID}`;
   return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `/exists?${params}`
+    AppConfig.apiUrl + Endpoints.Staffs.GET_STAFFS + `/exists?${params}`
   );
 };
 

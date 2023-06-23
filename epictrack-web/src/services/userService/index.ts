@@ -1,7 +1,10 @@
-import { AppConfig } from "../../config";
 import Keycloak from "keycloak-js";
 import { Action, AnyAction, Dispatch } from "redux";
 import { userToken, userAuthentication } from "./userSlice";
+import { AppConfig } from "../../config";
+import http from "../../apiManager/http-request-handler";
+import Endpoints from "../../constants/api-endpoint";
+
 const KeycloakData: Keycloak = new Keycloak({
   clientId: AppConfig.keycloak.clientId,
   realm: AppConfig.keycloak.realm,
@@ -63,12 +66,25 @@ const getToken = () =>
   KeycloakData.token || window.localStorage.getItem("authToken");
 const doLogin = () => KeycloakData.login;
 
+// User management service methods
+const getUsers = async () => {
+  return await http.GetRequest(AppConfig.apiUrl + Endpoints.Users.GET_USERS);
+};
+
+const getGroups = async () => {
+  return await http.GetRequest(
+    AppConfig.apiUrl + Endpoints.Users.GET_USER_GROUPS
+  );
+};
+
 const UserService = {
   keycloakData: KeycloakData,
   initKeycloak,
   getToken,
   doLogin,
   doLogout,
+  getUsers,
+  getGroups,
 };
 
 export default UserService;
