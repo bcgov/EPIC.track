@@ -11,9 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all the request validation schemas"""
-from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
-from .staff_request import (
-    StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffExistanceQueryParamSchema,
-    StaffIdPathParameterSchema)
-from .task_request import TaskBodyParameterSchema, TaskTemplateBodyParameterSchema
+"""Enum definitions."""
+from enum import Enum
+
+
+class HttpMethod(Enum):
+    """Http methods"""
+
+    GET = 'GET'
+    PUT = 'PUT'
+    POST = 'POST'
+    PATCH = 'PATCH'
+    DELETE = 'DELETE'

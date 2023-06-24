@@ -11,8 +11,31 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Exposes all the response validation schemas"""
-from .staff_response import StaffResponseSchema
+"""User response schema"""
+from marshmallow import Schema, fields
+
 from .user_group_response import UserGroupResponseSchema
-from .user_response import UserResponseSchema
-from .task_response import TaskResponseSchema, TaskTemplateResponseSchema
+
+
+class UserResponseSchema(Schema):
+    """User response schema"""
+
+    id = fields.Str(
+        description='Id of the user'
+    )
+
+    first_name = fields.Str(
+        description='First name of the user',
+        attribute='firstName'
+    )
+
+    last_name = fields.Str(
+        description='Last name of the user',
+        attribute='lastName'
+    )
+
+    email = fields.Str(
+        description='Email of the user',
+    )
+
+    group = fields.Nested(UserGroupResponseSchema)
