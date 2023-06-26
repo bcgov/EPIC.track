@@ -22,7 +22,7 @@ from reports_api.services.phaseservice import PhaseService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
-
+from reports_api.schemas import response as res
 
 API = Namespace('phases', description='Phases')
 
@@ -40,7 +40,7 @@ class PhasesByEaActWorkType(Resource):
     def get(ea_act_id, work_type_id):
         """Return all phase codes based on ea_act_id and work_type_id."""
         phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(ea_act_id, work_type_id)
-        return jsonify(phases), HTTPStatus.OK
+        return jsonify(res.PhaseResponseSchema(many=True).dump(phases)), HTTPStatus.OK
 
 
 @cors_preflight('GET')
@@ -56,4 +56,4 @@ class Phases(Resource):
     def get():
         """Returns all the phase codes regardless of act or work type"""
         phases = PhaseService.find_all_phases()
-        return jsonify(phases), HTTPStatus.OK
+        return jsonify(res.PhaseResponseSchema(many=True).dump(phases)), HTTPStatus.OK

@@ -8,7 +8,7 @@ from reports_api.schemas.milestone import MilestoneSchema
 from reports_api.schemas.work_type import WorkTypeSchema
 
 
-class PhaseSchema(
+class PhaseResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """PhaseCode model schema class"""

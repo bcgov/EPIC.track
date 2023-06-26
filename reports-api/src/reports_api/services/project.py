@@ -13,11 +13,9 @@
 # limitations under the License.
 """Service to manage Project."""
 from flask import current_app
-from sqlalchemy import func
-from reports_api.exceptions import ResourceExistsError
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
 
 from reports_api.models import Project
-from reports_api.schemas.project import ProjectSchema
 
 
 class ProjectService:
@@ -27,21 +25,19 @@ class ProjectService:
     def find(cls, project_id):
         """Find by project id."""
         project = Project.find_by_id(project_id)
-        return ProjectSchema().dump(project)
+        return project
 
     @classmethod
     def find_all(cls):
         """Find all projects"""
-        projects_schema = ProjectSchema(many=True)
-        response = {"projects": projects_schema.dump(Project.find_all())}
-        return response
+        return Project.find_all()
 
     @classmethod
     def create_project(cls, payload: dict):
         """Create a new project."""
         exists = cls.check_existence(payload["name"])
         if exists:
-            raise ResourceExistsError("Indigenous nation with same name exists")
+            raise ResourceExistsError("Project with same name exists")
         project = Project(**payload)
         current_app.logger.info(f"Project obj {dir(project)}")
         project.save()
@@ -52,8 +48,10 @@ class ProjectService:
         """Update existing project."""
         exists = cls.check_existence(payload["name"], project_id)
         if exists:
-            raise ResourceExistsError("Indigenous nation with same name exists")
+            raise ResourceExistsError("Project with same name exists")
         project = Project.find_by_id(project_id)
+        if not project:
+            raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
         project = project.update(payload)
         return project
 
@@ -66,13 +64,6 @@ class ProjectService:
         return True
 
     @classmethod
-    def check_existence(cls, name, instance_id=None):
+    def check_existence(cls, name, project_id=None):
         """Checks if a project exists with given name"""
-        query = Project.query.filter(
-            func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
-        )
-        if instance_id:
-            query = query.filter(Project.id != instance_id)
-        if query.count() > 0:
-            return True
-        return False
+        return Project.check_existence(name, project_id)

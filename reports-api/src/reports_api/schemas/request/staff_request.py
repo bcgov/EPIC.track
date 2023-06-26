@@ -24,9 +24,7 @@ class StaffIdPathParameterSchema(RequestPathParameterSchema):
     """Staff id path parameter schema"""
 
     staff_id = fields.Int(
-        description='The id of the staff',
-        validate=validate.Range(min=1),
-        required=True
+        description="The id of the staff", validate=validate.Range(min=1), required=True
     )
 
 
@@ -34,54 +32,49 @@ class StaffExistanceQueryParamSchema(RequestQueryParameterSchema):
     """Staff existance check query parameters"""
 
     email = fields.Str(
-        description='Email address of the staff',
+        description="Email address of the staff",
         validate=validate.Email(),
-        required=True
+        required=True,
     )
 
     staff_id = fields.Int(
-        description='The id of the staff',
-        validate=validate.Range(min=1)
+        description="The id of the staff", validate=validate.Range(min=1), missing=None
     )
 
 
 class StaffByPositionsQueryParamSchema(RequestQueryParameterSchema):
     """Staff by positions query parameter"""
 
-    positions = IntegerList(
-        description='comma separated position ids'
-    )
+    positions = IntegerList(description="comma separated position ids")
 
 
 class StaffBodyParameterSchema(RequestBodyParameterSchema):
     """Staff request body schema"""
 
     first_name = fields.Str(
-        description='First name of staff',
+        description="First name of staff",
         validate=validate.Length(max=150),
-        required=True
+        required=True,
     )
 
     last_name = fields.Str(
-        description='Last name of staff',
+        description="Last name of staff",
         validate=validate.Length(max=150),
-        required=True
+        required=True,
     )
 
     email = fields.Str(
-        description='Email address of the staff',
+        description="Email address of the staff",
         validate=validate.Email(),
-        required=True
+        required=True,
     )
 
     phone = fields.Str(
-        description='Phone number of staff',
-        validate=Phone(),
-        required=True
+        description="Phone number of staff", validate=Phone(), required=True
     )
 
     position_id = fields.Int(
-        description='Position id of the staff',
+        description="Position id of the staff",
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )

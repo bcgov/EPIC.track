@@ -11,16 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Service to manage Reminder configuration."""
-from reports_api.models import ReminderConfiguration
+"""Type resource's input validations"""
+from marshmallow import fields, validate
+
+from .base import RequestPathParameterSchema
 
 
-class ReminderConfigurationService:  # pylint: disable=too-few-public-methods
-    """Service to manage reminder configuration related operations."""
+class TypeIdPathParameterSchema(RequestPathParameterSchema):
+    """Type id path parameter schema"""
 
-    @classmethod
-    def check_existence(cls, reminder_type, position_id, reminder_configuration_id):
-        """Checks if a reminder configuration exists for given reminder type and position"""
-        return ReminderConfiguration.check_existence(
-            reminder_type, position_id, reminder_configuration_id
-        )
+    type_id = fields.Int(
+        description="The id of the type", validate=validate.Range(min=1), required=True
+    )

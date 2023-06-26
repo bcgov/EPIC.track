@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Work."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -72,3 +72,15 @@ class Work(BaseModel):
         """Return JSON Representation."""
         result = super().as_dict(recursive=recursive)
         return result
+
+    @classmethod
+    def check_existence(cls, title, work_id=None):
+        """Checks if a work exists for a given title"""
+        query = Work.query.filter(
+            func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
+        )
+        if work_id:
+            query = query.filter(Work.id != work_id)
+        if query.count() > 0:
+            return True
+        return False
