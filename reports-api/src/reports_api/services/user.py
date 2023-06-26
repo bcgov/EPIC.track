@@ -44,7 +44,7 @@ class UserService:
     @staticmethod
     def update_user_group(user_id, user_group_request):
         """Update the group of a user"""
-        existing_group_id = user_group_request['existing_group_id']
+        existing_group_id = user_group_request.get('existing_group_id')
         if existing_group_id:
             result = KeycloakService.delete_user_group(user_id, user_group_request.get('existing_group_id'))
             if result.status_code != 204:

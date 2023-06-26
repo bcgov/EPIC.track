@@ -8,7 +8,7 @@ const getPhaseByWorkTypeEAact = async (
 ) => {
   return await http.GetRequest(
     AppConfig.apiUrl +
-      Endpoints.Phases.GET_PHASES +
+      Endpoints.Phases.PHASES +
       `/ea_acts/${eaactid}/work_types/${worktypeId}  `
   );
 };

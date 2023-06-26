@@ -1,27 +1,32 @@
 import React, { useEffect } from "react";
 import {
-  MRT_Cell,
-  MRT_ColumnDef,
-  MaterialReactTableProps,
+  MaterialReactTable,
+  type MaterialReactTableProps,
+  type MRT_ColumnDef,
+  type MRT_Row,
 } from "material-react-table";
+import {
+  Box,
+  Button,
+  IconButton,
+  FormHelperText,
+  Grid,
+  Tooltip,
+} from "@mui/material";
+import { Edit } from "@mui/icons-material";
 import { Group, User } from "../../models/user";
-import { EpicTrackPageGridContainer } from "../shared";
-import { Button, Grid } from "@mui/material";
-import MasterTrackTable from "../shared/MasterTrackTable";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import UserService from "../../services/userService";
+import { EpicTrackPageGridContainer } from "../shared";
 import Select from "react-select";
-import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
+import MasterTrackTable from "../shared/MasterTrackTable";
+import { UserGroupUpdate } from "../../services/userService/type";
 
 const UserList = () => {
-  const [users, setUsers] = React.useState<User[]>([]);
-  const [groups, setGroups] = React.useState<Group[]>([]);
-  const [test, setTest] = React.useState<string>();
-  const [selectedGroup, setSelectedGroup] = React.useState<
-    Group | undefined | null
-  >();
-  const [resultStatus, setResultStatus] = React.useState<string>();
-
+  const [isValidGroup, setIsValidGroup] = React.useState<boolean>(true);
+  const [updatedOn, setUpdatedOn] = React.useState<number>(
+    new Date().getMilliseconds()
+  );
   const getUsers = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -35,7 +40,7 @@ const UserList = () => {
       setResultStatus(RESULT_STATUS.LOADED);
     }
   }, []);
-
+  console.log(isValidGroup);
   const getGroups = React.useCallback(async () => {
     try {
       const groupResult = await UserService.getGroups();
@@ -49,16 +54,17 @@ const UserList = () => {
 
   React.useEffect(() => {
     getUsers();
-    setTest("dinesh");
-  }, []);
+  }, [updatedOn]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     getGroups();
   }, []);
-
-  const callMe = () => {
-    console.log("selelcted group", selectedGroup);
-  };
+  const [groups, setGroups] = React.useState<Group[]>([]);
+  const [users, setUsers] = React.useState<User[]>([]);
+  const [resultStatus, setResultStatus] = React.useState<string>();
+  const [selectedGroup, setSelectedGroup] = React.useState<
+    Group | undefined | null
+  >();
   const columns = React.useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -68,52 +74,72 @@ const UserList = () => {
         sortingFn: "sortFn",
         enableEditing: false,
       },
-      {
-        accessorKey: "email",
-        header: "Email",
-        enableEditing: false,
-      },
+      // {
+      //   accessorKey: "email",
+      //   header: "Email",
+      //   enableEditing: false,
+      // },
       {
         accessorKey: "group.name",
         header: "Group",
         enableEditing: true,
-        Edit: ({ cell, column, table }) => (
-          <Select
-            getOptionValue={(opt) => opt.id}
-            getOptionLabel={(opt) => opt.name}
-            options={groups}
-            required={true}
-            // menuPortalTarget={document.body}
-            onChange={(newVal) => setSelectedGroup(newVal)}
-            // defaultValue={cell.row.original.group?.id}
-            value={selectedGroup}
-            // styles={{
-            //   menuPortal: (base: any) => ({
-            //     ...base,
-            //     zIndex: 99999,
-            //   }),
-            // }}
-          />
+        Edit: ({ cell }) => (
+          <>
+            <Select
+              getOptionValue={(opt) => opt.id}
+              getOptionLabel={(opt) => opt.name}
+              options={groups}
+              required={true}
+              // menuPortalTarget={document.body}
+              onChange={(newVal) => setSelectedGroup(newVal)}
+              defaultValue={groups.find(
+                (p) => p.id === cell.row.original.group?.id
+              )}
+              value={selectedGroup}
+            />
+            {!isValidGroup && (
+              <FormHelperText
+                error={true}
+                className="MuiFormHelperText-sizeSmall"
+                style={{ marginInline: "14px" }}
+              >
+                Please select the group
+              </FormHelperText>
+            )}
+          </>
         ),
       },
     ],
-    [groups, selectedGroup]
+    [groups, isValidGroup]
   );
 
-  const handleSaveRow: MaterialReactTableProps<User>["onEditingRowSave"] =
-    React.useCallback(
-      ({ exitEditingMode, row, values }: any) => {
-        // //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
-        // tableData[row.index] = values;
-        // //send/receive api updates here
-        // setTableData([...tableData]);
-        console.log(groups);
-        console.log(row.original.group);
-        console.log(selectedGroup);
-        // exitEditingMode();
-      },
-      [selectedGroup]
-    );
+  const handleCancelRowEdits = () => {
+    setSelectedGroup(null);
+  };
+
+  const handleSaveRowEdits: MaterialReactTableProps<User>["onEditingRowSave"] =
+    async ({ exitEditingMode, row, values }) => {
+      const group = selectedGroup ? selectedGroup : row.original.group;
+      setSelectedGroup(group);
+      setIsValidGroup(!!group);
+      if (!!group) {
+        const updateGroup: UserGroupUpdate = {
+          existing_group_id: row.original.group?.id,
+          group_id_to_update: group.id,
+        };
+        setResultStatus(RESULT_STATUS.LOADING);
+        try {
+          await UserService.updateUserGroup(row.original.id, updateGroup);
+          setUpdatedOn(new Date().getMilliseconds());
+          setResultStatus(RESULT_STATUS.LOADED);
+        } catch (e) {
+          setResultStatus(RESULT_STATUS.ERROR);
+        }
+        setSelectedGroup(null);
+        exitEditingMode(); //required to exit editing mode and close modal
+      }
+    };
+
   return (
     <>
       <EpicTrackPageGridContainer
@@ -126,6 +152,9 @@ const UserList = () => {
           <MasterTrackTable
             columns={columns}
             data={users}
+            editingMode="modal"
+            enableColumnOrdering
+            enableEditing
             initialState={{
               sorting: [
                 {
@@ -138,18 +167,26 @@ const UserList = () => {
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,
             }}
-            enableEditing
-            editingMode="modal"
-            onEditingRowSave={async (params: any) => {
-              // //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
-              // tableData[row.index] = values;
-              // //send/receive api updates here
-              // setTableData([...tableData]);
-              console.log(groups);
-              console.log(params.row.original.group);
-              console.log(selectedGroup);
-              setTest("Harish");
-            }}
+            onEditingRowSave={handleSaveRowEdits}
+            onEditingRowCancel={handleCancelRowEdits}
+            // displayColumnDefOptions={{
+            //   "mrt-row-actions": {
+            //     header: "Update Group", //change "Actions" to "Edit"
+            //     //use a text button instead of a icon button
+            //     Cell: ({ row, table }) => (
+            //       <Button onClick={() => table.setEditingRow(row)}>Edit</Button>
+            //     ),
+            //   },
+            // }}
+            renderRowActions={({ row, table }) => (
+              <Box sx={{ display: "flex", gap: "1rem" }}>
+                <Tooltip arrow placement="left" title="Edit">
+                  <IconButton onClick={() => table.setEditingRow(row)}>
+                    <Edit />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
           />
         </Grid>
       </EpicTrackPageGridContainer>
@@ -158,89 +195,3 @@ const UserList = () => {
 };
 
 export default UserList;
-// import React, { useMemo, useState, useEffect } from "react";
-// import MaterialReactTable, {
-//   type MaterialReactTableProps,
-//   type MRT_ColumnDef,
-// } from "material-react-table";
-// import MasterTrackTable from "../shared/MasterTrackTable";
-
-// type Person = {
-//   firstName: string;
-//   lastName: string;
-//   address: string;
-//   city: string;
-//   state: string;
-// };
-
-// const UserList = () => {
-//   const columns = useMemo<MRT_ColumnDef<Person>[]>(
-//     () => [
-//       //column definitions...
-//       {
-//         accessorKey: "firstName",
-//         header: "First Name",
-//       },
-//       {
-//         accessorKey: "lastName",
-//         header: "Last Name",
-//       },
-
-//       {
-//         accessorKey: "address",
-//         header: "Address",
-//       },
-//       {
-//         accessorKey: "city",
-//         header: "City",
-//       },
-
-//       {
-//         accessorKey: "state",
-//         header: "State",
-//       }, //end
-//     ],
-//     []
-//   );
-
-//   const [tableData, setTableData] = useState<Person[]>([]);
-//   useEffect(() => {
-//     setTableData([
-//       {
-//         firstName: "Dylan",
-//         lastName: "Murray",
-//         address: "261 Erdman Ford",
-//         city: "East Daphne",
-//         state: "Kentucky",
-//       },
-//       {
-//         firstName: "Raquel",
-//         lastName: "Kohler",
-//         address: "769 Dominic Grove",
-//         city: "Columbus",
-//         state: "Ohio",
-//       },
-//     ]);
-//   }, []);
-
-//   const handleSaveRow: MaterialReactTableProps<Person>["onEditingRowSave"] =
-//     async ({ exitEditingMode, row, values }) => {
-//       //if using flat data and simple accessorKeys/ids, you can just do a simple assignment here.
-//       console.log("Table data ", tableData);
-//       tableData[row.index] = values;
-//       //send/receive api updates here
-//       setTableData([...tableData]);
-//       exitEditingMode(); //required to exit editing mode
-//     };
-
-//   return (
-//     <MasterTrackTable
-//       columns={columns}
-//       data={tableData}
-//       editingMode="modal" //default
-//       enableEditing
-//       onEditingRowSave={handleSaveRow}
-//     />
-//   );
-// };
-// export default UserList;

@@ -10,6 +10,7 @@ import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
 import ProjectList from "../components/project/ProjectList";
 import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
+import Example from "../components/user/UserList";
 import UserList from "../components/user/UserList";
 
 const AuthenticatedRoutes = () => {
