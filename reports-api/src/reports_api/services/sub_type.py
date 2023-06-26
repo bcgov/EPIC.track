@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage SubTypes."""
-from flask import current_app, jsonify
+from flask import current_app
 
 from reports_api.models import SubType
-from reports_api.schemas.types import SubTypeSchema
 
 
 class SubTypeService:  # pylint:disable=too-few-public-methods
@@ -26,5 +25,4 @@ class SubTypeService:  # pylint:disable=too-few-public-methods
         """Find sub types by type_id"""
         current_app.logger.debug(f"find sub types by type_id {type_id}")
         sub_types = SubType.find_by_type_id(type_id)
-        sub_types_schema = SubTypeSchema(many=True)
-        return jsonify(sub_types_schema.dump(sub_types))
+        return sub_types

@@ -14,30 +14,17 @@
 """Resource for proponent endpoints."""
 from http import HTTPStatus
 
-from flask_restx import Namespace, Resource, cors, reqparse
-from marshmallow import ValidationError
-from reports_api.exceptions import ResourceExistsError
+from flask import jsonify, request
+from flask_restx import Namespace, Resource, cors
 
-from reports_api.schemas import ProponentSchema
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
 from reports_api.services import ProponentService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
 API = Namespace("proponents", description="Proponent")
-
-parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument(
-    "name",
-    type=str,
-    required=True,
-    help="Name of the proponent to be checked.",
-    location="args",
-    trim=True,
-)
-parser.add_argument(
-    "id", type=int, help="ID of the proponent in case of updates.", location="args"
-)
 
 
 @cors_preflight("GET")
@@ -48,14 +35,13 @@ class ValidateProponent(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
-    @API.expect(parser)
     @profiletime
     def get():
         """Check for existing proponent."""
-        args = parser.parse_args()
+        args = req.ProponentExistenceQueryParamSchema().load(request.args)
         name = args["name"]
-        instance_id = args["id"]
-        exists = ProponentService.check_existence(name=name, instance_id=instance_id)
+        proponent_id = args["proponent_id"]
+        exists = ProponentService.check_existence(name=name, proponent_id=proponent_id)
         return (
             {"exists": exists},
             HTTPStatus.OK,
@@ -73,10 +59,9 @@ class Proponent(Resource):
     @profiletime
     def get(proponent_id):
         """Return details of a proponent."""
+        req.ProponentIdPathParameterSchema().load(request.view_args)
         proponent = ProponentService.find_by_id(proponent_id)
-        if proponent:
-            return proponent, HTTPStatus.OK
-        return f"Proponent with id '{proponent_id}' not found", HTTPStatus.NOT_FOUND
+        return res.ProponentResponseSchema().dump(proponent), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -84,15 +69,10 @@ class Proponent(Resource):
     @profiletime
     def put(proponent_id):
         """Update and return a proponent."""
-        proponent_schema = ProponentSchema()
-        try:
-            request_json = proponent_schema.load(API.payload)
-            proponent = ProponentService.update_proponent(proponent_id, request_json)
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return proponent_schema.dump(proponent), HTTPStatus.OK
+        req.ProponentIdPathParameterSchema().load(request.view_args)
+        request_json = req.ProponentBodyParameterSchema().load(API.payload)
+        proponent = ProponentService.update_proponent(proponent_id, request_json)
+        return res.ProponentResponseSchema().dump(proponent), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -100,8 +80,9 @@ class Proponent(Resource):
     @profiletime
     def delete(proponent_id):
         """Delete a proponent"""
+        req.ProponentIdPathParameterSchema().load(request.view_args)
         ProponentService.delete_proponent(proponent_id)
-        return {"message": "proponent successfully deleted"}, HTTPStatus.OK
+        return "Proponent successfully deleted", HTTPStatus.OK
 
 
 @cors_preflight("GET,POST")
@@ -113,10 +94,10 @@ class Proponents(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @API.expect(parser)
     def get():
         """Return all proponents."""
-        return ProponentService.find_all_proponents(), HTTPStatus.OK
+        proponents = ProponentService.find_all_proponents()
+        return jsonify(res.ProponentResponseSchema(many=True).dump(proponents)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -124,12 +105,6 @@ class Proponents(Resource):
     @profiletime
     def post():
         """Create new staff"""
-        proponent_schema = ProponentSchema()
-        try:
-            request_json = proponent_schema.load(API.payload)
-            proponent = ProponentService.create_proponent(request_json)
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return proponent.as_dict(), HTTPStatus.CREATED
+        request_json = req.ProponentBodyParameterSchema().load(API.payload)
+        proponent = ProponentService.create_proponent(request_json)
+        return res.ProponentResponseSchema().dump(proponent), HTTPStatus.CREATED

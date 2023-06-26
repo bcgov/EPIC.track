@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Milestone."""
-from flask import current_app, jsonify
+from flask import current_app
+
+from reports_api.exceptions import ResourceNotFoundError
 from reports_api.models import Milestone, PhaseCode, db
-from reports_api.schemas.milestone import MilestoneSchema
 
 
-class MilestoneService:  # pylint:disable=too-few-public-methods
+class MilestoneService:
     """Service to manage milestones related operations"""
 
     @classmethod
@@ -27,24 +28,23 @@ class MilestoneService:  # pylint:disable=too-few-public-methods
             f"find non decision making milestones by phase id {phase_id}"
         )
         milestones = Milestone.find_non_decision_by_phase_id(phase_id)
-        milestones_schema = MilestoneSchema(many=True)
-        return jsonify(milestones_schema.dump(milestones))
+        return milestones
 
     @classmethod
     def find_milestone_by_id(cls, milestone_id: int):
         """Find milestone by id"""
         current_app.logger.debug(f"find milestone by id {milestone_id}")
         milestone = Milestone.find_by_id(milestone_id)
-        milestone_schema = MilestoneSchema()
-        return jsonify(milestone_schema.dump(milestone))
+        if not milestone:
+            raise ResourceNotFoundError(f"Milestone with id '{milestone_id}' not found.")
+        return milestone
 
     @classmethod
     def find_all_active_milestones(cls):
         """Find all active milestones"""
         current_app.logger.debug("Find all active milestones")
         milestones = Milestone.find_all()
-        milestones_schema = MilestoneSchema(many=True)
-        return jsonify(milestones_schema.dump(milestones))
+        return milestones
 
     @classmethod
     def find_milestones_per_work_type(cls, work_type_id: int):
@@ -57,12 +57,10 @@ class MilestoneService:  # pylint:disable=too-few-public-methods
                 )
             )
         )
-        milestones_schema = MilestoneSchema(many=True)
-        return jsonify(milestones_schema.dump(milestones))
+        return milestones
 
     @classmethod
     def find_auto_milestones_per_phase(cls, phase_id):
         """Find start and end EVENTS for given phase id"""
         milestones = Milestone.find_auto_by_phase_id(phase_id)
-        milestones_schema = MilestoneSchema(many=True)
-        return milestones_schema.dump(milestones)
+        return milestones

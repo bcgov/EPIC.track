@@ -54,8 +54,8 @@ export default function StaffForm({ ...props }) {
   const getProponent = async (id: number) => {
     const result = await ProponentService.getProponent(id);
     if (result.status === 200) {
-      setProponent((result.data as never)["proponent"]);
-      reset((result.data as never)["proponent"]);
+      setProponent(result.data as never);
+      reset(result.data as never);
     }
   };
 
@@ -68,7 +68,7 @@ export default function StaffForm({ ...props }) {
   const getStaffs = async () => {
     const staffsResult = await StaffService.getStaffs();
     if (staffsResult.status === 200) {
-      setStaffs((staffsResult.data as never)["staffs"]);
+      setStaffs(staffsResult.data as never);
     }
   };
   React.useEffect(() => {
@@ -79,7 +79,7 @@ export default function StaffForm({ ...props }) {
     if (proponentID) {
       const result = await ProponentService.updateProponent(data);
       if (result.status === 200) {
-        setAlertContentText("Staff details updated");
+        setAlertContentText("Proponent details updated");
         setOpenAlertDialog(true);
         props.onSubmitSuccess();
         setLoading(false);
@@ -87,7 +87,7 @@ export default function StaffForm({ ...props }) {
     } else {
       const result = await ProponentService.createProponent(data);
       if (result.status === 201) {
-        setAlertContentText("Staff details inserted");
+        setAlertContentText("Proponent details inserted");
         setOpenAlertDialog(true);
         props.onSubmitSuccess();
         setLoading(false);

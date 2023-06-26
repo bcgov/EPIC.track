@@ -61,8 +61,8 @@ export default function IndigenousNationForm({ ...props }) {
   const getIndigenousNation = async (id: number) => {
     const result = await IndigenousNationService.getIndigenousNation(id);
     if (result.status === 200) {
-      setIndigenousNation((result.data as never)["indigenous_nation"]);
-      reset((result.data as never)["indigenous_nation"]);
+      setIndigenousNation(result.data as IndigenousNation);
+      reset(result.data as IndigenousNation);
     }
   };
 
@@ -75,7 +75,7 @@ export default function IndigenousNationForm({ ...props }) {
   const getStaffs = async () => {
     const staffsResult = await StaffService.getStaffs();
     if (staffsResult.status === 200) {
-      setStaffs((staffsResult.data as never)["staffs"]);
+      setStaffs(staffsResult.data as never);
     }
   };
   React.useEffect(() => {
@@ -125,8 +125,8 @@ export default function IndigenousNationForm({ ...props }) {
             <TrackLabel>Relationship Holder</TrackLabel>
             <ControlledSelectV2
               defaultValue={indigenousNation?.relationship_holder_id || ""}
-              getOptionLabel={(o: Staff) => o.full_name}
-              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionLabel={(o: Staff) => (o ? o.full_name : "")}
+              getOptionValue={(o: Staff) => (o ? o.id.toString() : "")}
               options={staffs}
               {...register("relationship_holder_id")}
             ></ControlledSelectV2>

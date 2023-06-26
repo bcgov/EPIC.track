@@ -13,34 +13,17 @@
 # limitations under the License.
 """Resource for indigenous nation endpoints."""
 from http import HTTPStatus
+from flask import jsonify, request
+from flask_restx import Namespace, Resource, cors
 
-from flask_restx import Namespace, Resource, cors, reqparse
-from marshmallow import ValidationError
-from reports_api.exceptions import ResourceExistsError
-
-from reports_api.schemas import IndigenousNationSchema
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
 from reports_api.services import IndigenousNationService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
 API = Namespace("indigenous_nations", description="Indigenous Nations")
-
-parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument(
-    "name",
-    type=str,
-    required=True,
-    help="Name of indigenous nation to be checked.",
-    location="args",
-    trim=True,
-)
-parser.add_argument(
-    "id",
-    type=int,
-    help="ID of the indigenous nation in case of updates.",
-    location="args",
-)
 
 
 @cors_preflight("GET")
@@ -51,15 +34,14 @@ class ValidateIndigenousNation(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
-    @API.expect(parser)
     @profiletime
     def get():
         """Check for existing indigenous nations."""
-        args = parser.parse_args()
+        args = req.IndigenousNationExistenceQueryParamSchema().load(request.args)
         name = args["name"]
-        instance_id = args["id"]
+        indigenous_nation_id = args["indigenous_nation_id"]
         exists = IndigenousNationService.check_existence(
-            name=name, instance_id=instance_id
+            name=name, indigenous_nation_id=indigenous_nation_id
         )
         return (
             {"exists": exists},
@@ -78,13 +60,9 @@ class IndigenousNation(Resource):
     @profiletime
     def get(indigenous_nation_id):
         """Return details of an indigenous nation."""
+        req.IndigenousNationIdPathParameterSchema().load(request.view_args)
         indigenous_nation = IndigenousNationService.find(indigenous_nation_id)
-        if indigenous_nation:
-            return indigenous_nation, HTTPStatus.OK
-        return (
-            f"Indigenous nation with id '{indigenous_nation_id}' not found.",
-            HTTPStatus.NOT_FOUND,
-        )
+        return res.IndigenousResponseNationSchema().dump(indigenous_nation), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -92,18 +70,12 @@ class IndigenousNation(Resource):
     @profiletime
     def put(indigenous_nation_id):
         """Update and return an indigenous nation."""
-        indigenous_nation_schema = IndigenousNationSchema()
-        try:
-            request_json = indigenous_nation_schema.load(API.payload)
-            indigenous_nation = IndigenousNationService.update_indigenous_nation(
-                indigenous_nation_id, request_json
-            )
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-
-        return indigenous_nation_schema.dump(indigenous_nation), HTTPStatus.OK
+        req.IndigenousNationIdPathParameterSchema().load(request.view_args)
+        request_json = req.IndigenousNationBodyParameterSchema().load(API.payload)
+        indigenous_nation = IndigenousNationService.update_indigenous_nation(
+            indigenous_nation_id, request_json
+        )
+        return res.IndigenousResponseNationSchema().dump(indigenous_nation), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -111,8 +83,9 @@ class IndigenousNation(Resource):
     @profiletime
     def delete(indigenous_nation_id):
         """Delete an indigenous nation"""
+        req.IndigenousNationIdPathParameterSchema().load(request.view_args)
         IndigenousNationService.delete_indigenous_nation(indigenous_nation_id)
-        return {"message": "Indigenous nation successfully deleted"}, HTTPStatus.OK
+        return "Indigenous nation successfully deleted", HTTPStatus.OK
 
 
 @cors_preflight("GET,POST")
@@ -124,10 +97,10 @@ class IndigenousNations(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @API.expect(parser)
     def get():
         """Return all indigenous nations."""
-        return IndigenousNationService.find_all_indigenous_nations(), HTTPStatus.OK
+        indigenous_nations = IndigenousNationService.find_all_indigenous_nations()
+        return jsonify(res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -135,14 +108,8 @@ class IndigenousNations(Resource):
     @profiletime
     def post():
         """Create new staff"""
-        indigenous_nation_schema = IndigenousNationSchema()
-        try:
-            request_json = indigenous_nation_schema.load(API.payload)
-            indigenous_nation = IndigenousNationService.create_indigenous_nation(
-                request_json
-            )
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return indigenous_nation_schema.dump(indigenous_nation), HTTPStatus.CREATED
+        request_json = req.IndigenousNationBodyParameterSchema().load(API.payload)
+        indigenous_nation = IndigenousNationService.create_indigenous_nation(
+            request_json
+        )
+        return res.IndigenousResponseNationSchema().dump(indigenous_nation), HTTPStatus.CREATED

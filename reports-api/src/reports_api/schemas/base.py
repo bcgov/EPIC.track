@@ -2,9 +2,6 @@
 from dataclasses import dataclass, fields
 from datetime import datetime
 
-from marshmallow import fields as ma_fields
-from marshmallow import pre_load
-
 from reports_api.models.db import ma
 
 
@@ -33,13 +30,3 @@ class AutoSchemaBase(ma.SQLAlchemyAutoSchema):  # pylint: disable=too-many-ances
 
         exclude = ("created_at", "created_by", "updated_at", "updated_by", "is_deleted")
         # abstract=True
-
-    @pre_load
-    def parse_empty_string(self, data, **kwargs):  # pylint: disable=unused-argument
-        """Parse the input and convert empty strings to None"""
-        for field in data:
-            if (
-                isinstance(self.load_fields[field], ma_fields.Integer) and data[field] == ""
-            ):
-                data[field] = None
-        return data

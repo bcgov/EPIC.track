@@ -12,31 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Outcome."""
-from flask import current_app, jsonify
+from flask import current_app
 
 from reports_api.models import Outcome
-from reports_api.schemas.milestone import OutcomeSchema
 
 
-class OutcomeService:  # pylint:disable=too-few-public-methods
+class OutcomeService:
     """Service to manage outcome related operations"""
 
     @classmethod
     def find_by_milestone_id(cls, milestone_id: int):
         """Find outcomes by milestone_id"""
         current_app.logger.debug(f"Find outcomes by milestone_id {milestone_id}")
-        outcomes_schema = OutcomeSchema(
-            many=True, only=("id", "name", "milestone_id", "terminates_work")
-        )
         outcomes = Outcome.find_by_milestone_id(milestone_id)
-        return jsonify(outcomes_schema.dump(outcomes))
+        return outcomes
 
     @classmethod
     def find_all_active_milestones(cls):
         """Find all active outcomes"""
         current_app.logger.debug("Find all active outcomes")
-        outcomes_schema = OutcomeSchema(
-            many=True, only=("id", "name", "milestone_id", "terminates_work")
-        )
         outcomes = Outcome.find_all()
-        return jsonify(outcomes_schema.dump(outcomes))
+        return outcomes

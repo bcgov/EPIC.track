@@ -52,7 +52,7 @@ const ProjectList = () => {
     try {
       const projectResult = await ProjectService.getProjects();
       if (projectResult.status === 200) {
-        setProjects((projectResult.data as never)["projects"]);
+        setProjects(projectResult.data as never);
       }
     } catch (error) {
       console.error("Project List: ", error);
