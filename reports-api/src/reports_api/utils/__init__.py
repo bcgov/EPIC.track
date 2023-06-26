@@ -15,3 +15,4 @@
 
 from .auth import auth
 from .profiler import profiletime
+from .enums import HttpMethod
