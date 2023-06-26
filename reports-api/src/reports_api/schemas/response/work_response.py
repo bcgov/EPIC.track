@@ -14,12 +14,10 @@ from reports_api.schemas.substitution_act import SubstitutionActSchema
 from reports_api.schemas.work_type import WorkTypeSchema
 
 
-class WorkSchemaV2(
+class WorkResponseSchema(
     AutoSchemaBase
-):  # pylint: disable=too-many-ancestors,too-few-public-methods, duplicate-code
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Work model schema class"""
-
-    # TODO: DEPRECATED. TO BE REMOVED
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""
@@ -47,7 +45,7 @@ class WorkSchemaV2(
     decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
 
 
-class WorkPhaseSchema(
+class WorkPhaseResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Work phase model schema class"""

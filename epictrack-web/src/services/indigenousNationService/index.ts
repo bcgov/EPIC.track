@@ -41,7 +41,7 @@ const checkIndigenousNationExists = async (name: string, id: number) => {
   return await http.GetRequest(
     AppConfig.apiUrl +
       Endpoints.IndigenousNations.INDIGENOUS_NATIONS +
-      `/exists?name=${name}${id ? "&id=" + id : ""}`
+      `/exists?name=${name}${id ? "&indigenous_nation_id=" + id : ""}`
   );
 };
 

@@ -35,7 +35,7 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/data-management/proponents" element={<ProponentList />} />
       <Route path="/works" element={<WorkList />} />
-      <Route path="/users" element={<UserList />} />
+      <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

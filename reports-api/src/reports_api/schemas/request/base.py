@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Base schema for path parameter validation"""
-from marshmallow import EXCLUDE, Schema
+from marshmallow import EXCLUDE, Schema, fields, pre_load
 
 
 class RequestPathParameterSchema(Schema):
@@ -26,6 +26,16 @@ class RequestBodyParameterSchema(Schema):  # pylint: disable=too-few-public-meth
         """Meta"""
 
         unknown = EXCLUDE
+
+    @pre_load
+    def parse_empty_string(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Parse the input and convert empty strings to None for integer fields"""
+        for field in data:
+            if (
+                data[field] == "" and isinstance(self.load_fields[field], fields.Integer)
+            ):
+                data[field] = None
+        return data
 
 
 class RequestQueryParameterSchema(Schema):

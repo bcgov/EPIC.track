@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Indigenous Group."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
 
 from .code_table import CodeTable
@@ -50,3 +50,16 @@ class IndigenousNation(db.Model, CodeTable):
     def find_all_active_groups(cls):
         """Find all active groups."""
         return cls.query.filter_by(is_active=True).all()
+
+    @classmethod
+    def check_existence(cls, name, indigenous_nation_id=None):
+        """Checks if an indigenous nation exists with given name"""
+        query = IndigenousNation.query.filter(
+            func.lower(IndigenousNation.name) == func.lower(name),
+            IndigenousNation.is_deleted.is_(False),
+        )
+        if indigenous_nation_id:
+            query = query.filter(IndigenousNation.id != indigenous_nation_id)
+        if query.count() > 0:
+            return True
+        return False

@@ -13,6 +13,7 @@
 # limitations under the License.
 """Resource for milestone endpoints."""
 from http import HTTPStatus
+from flask import jsonify
 
 from flask_restx import Namespace, Resource, cors
 
@@ -20,6 +21,7 @@ from reports_api.services import MilestoneService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
+from reports_api.schemas import response as res
 
 
 API = Namespace('milestones', description='MileStones')
@@ -37,7 +39,8 @@ class Milestones(Resource):
     @profiletime
     def get(phase_id):
         """Return all milestones based on phase_id."""
-        return MilestoneService.find_non_decision_by_phase_id(phase_id), HTTPStatus.OK
+        milestones = MilestoneService.find_non_decision_by_phase_id(phase_id)
+        return jsonify(res.MilestoneResponseSchema(many=True).dump(milestones)), HTTPStatus.OK
 
 
 @cors_preflight('GET')
@@ -52,7 +55,8 @@ class Milestone(Resource):
     @profiletime
     def get(milestone_id):
         """Return single milestone based on the milestone id given"""
-        return MilestoneService.find_milestone_by_id(milestone_id), HTTPStatus.OK
+        milestone = MilestoneService.find_milestone_by_id(milestone_id)
+        return res.MilestoneResponseSchema().dump(milestone), HTTPStatus.OK
 
 
 @cors_preflight('GET')
@@ -67,7 +71,8 @@ class ActiveMilestones(Resource):
     @profiletime
     def get():
         """Return single milestone based on the milestone id given"""
-        return MilestoneService.find_all_active_milestones(), HTTPStatus.OK
+        milestones = MilestoneService.find_all_active_milestones()
+        return jsonify(res.MilestoneResponseSchema(many=True).dump(milestones)), HTTPStatus.OK
 
 
 @cors_preflight('GET')
@@ -82,4 +87,5 @@ class MileStonesPerWorkType(Resource):
     @profiletime
     def get(work_type_id):
         """Return single milestone based on the milestone id given"""
-        return MilestoneService.find_milestones_per_work_type(work_type_id), HTTPStatus.OK
+        milestones = MilestoneService.find_milestones_per_work_type(work_type_id)
+        return jsonify(res.MilestoneResponseSchema(many=True).dump(milestones)), HTTPStatus.OK

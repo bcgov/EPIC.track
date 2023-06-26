@@ -73,7 +73,7 @@ export default function IndigenousNationList() {
   const getStaffs = async () => {
     const staffsResult = await StaffService.getStaffs();
     if (staffsResult.status === 200) {
-      setStaffs((staffsResult.data as never)["staffs"]);
+      setStaffs(staffsResult.data as never);
     }
   };
   useEffect(() => {
@@ -86,9 +86,7 @@ export default function IndigenousNationList() {
       const indigenousNationsResult =
         await IndigenousNationService.getIndigenousNations();
       if (indigenousNationsResult.status === 200) {
-        setIndigenousNations(
-          (indigenousNationsResult.data as never)["indigenous_nations"]
-        );
+        setIndigenousNations(indigenousNationsResult.data as never);
       }
     } catch (error) {
       console.error("Staff List: ", error);

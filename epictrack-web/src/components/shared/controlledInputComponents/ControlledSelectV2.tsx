@@ -48,6 +48,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               ref={ref}
               {...otherProps}
               options={options}
+              menuPosition="fixed"
               getOptionValue={getOptionValue}
               getOptionLabel={getOptionLabel}
               isSearchable={true}

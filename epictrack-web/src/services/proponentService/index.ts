@@ -38,7 +38,7 @@ const checkProponentExists = async (name: string, id: number) => {
   return await http.GetRequest(
     AppConfig.apiUrl +
       Endpoints.Proponents.PROPONENTS +
-      `/exists?name=${name}${id ? "&id=" + id : ""}`
+      `/exists?name=${name}${id ? "&proponent_id=" + id : ""}`
   );
 };
 

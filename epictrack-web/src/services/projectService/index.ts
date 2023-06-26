@@ -36,7 +36,7 @@ const checkProjectExists = async (name: string, id: number) => {
   return await http.GetRequest(
     AppConfig.apiUrl +
       Endpoints.Projects.PROJECTS +
-      `/exists?name=${name}${id ? "&id=" + id : ""}`
+      `/exists?name=${name}${id ? "&project_id=" + id : ""}`
   );
 };
 

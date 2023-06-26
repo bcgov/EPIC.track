@@ -9,10 +9,10 @@ const initialState: UserState = {
   },
   isAuthorized: false,
   userDetail: {
-    sub: '',
-    email_verified: false,
-    preferred_username: '',
-},
+    sub: "",
+    groups: [],
+    preferred_username: "",
+  },
 };
 
 export const userSlice = createSlice({

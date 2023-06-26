@@ -54,7 +54,12 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       return;
     }
 
-    const userDetail: UserDetail = await KeycloakData.loadUserInfo();
+    const userInfo: any = await KeycloakData.loadUserInfo();
+    const userDetail = new UserDetail(
+      userInfo["sub"],
+      userInfo["preferred_username"],
+      userInfo["groups"]
+    );
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));
     dispatch(userAuthentication(KeycloakData.authenticated ? true : false));

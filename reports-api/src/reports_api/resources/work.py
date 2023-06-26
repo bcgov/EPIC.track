@@ -14,30 +14,17 @@
 """Resource for work endpoints."""
 from http import HTTPStatus
 
-from flask_restx import Namespace, Resource, cors, reqparse
-from marshmallow import ValidationError
-from reports_api.exceptions import ResourceExistsError
-from reports_api.schemas.work_v2 import WorkSchemaV2
+from flask import jsonify, request
+from flask_restx import Namespace, Resource, cors
 
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
 from reports_api.services import WorkService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
 API = Namespace("works", description="Works")
-
-parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument(
-    "title",
-    type=str,
-    required=True,
-    help="Title of the work to be checked.",
-    location="args",
-    trim=True,
-)
-parser.add_argument(
-    "id", type=int, help="ID of the work in case of updates.", location="args"
-)
 
 
 @cors_preflight("GET")
@@ -48,14 +35,13 @@ class ValidateWork(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
-    @API.expect(parser)
     @profiletime
     def get():
         """Check for existing works."""
-        args = parser.parse_args()
+        args = req.WorkExistenceQueryParamSchema().load(request.args)
         title = args["title"]
-        instance_id = args["id"]
-        exists = WorkService.check_existence(title=title, instance_id=instance_id)
+        work_id = args["work_id"]
+        exists = WorkService.check_existence(title=title, work_id=work_id)
         return (
             {"exists": exists},
             HTTPStatus.OK,
@@ -71,10 +57,10 @@ class Works(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @API.expect(parser)
     def get():
         """Return all active works."""
-        return WorkService.find_all_works(), HTTPStatus.OK
+        works = WorkService.find_all_works()
+        return jsonify(res.WorkResponseSchema(many=True).dump(works)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -82,15 +68,9 @@ class Works(Resource):
     @profiletime
     def post():
         """Create new work"""
-        work_schema = WorkSchemaV2()
-        try:
-            request_json = work_schema.load(API.payload, partial=True)
-            work = WorkService.create_work(request_json)
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return work_schema.dump(work), HTTPStatus.CREATED
+        request_json = req.WorkBodyParameterSchema().load(API.payload)
+        work = WorkService.create_work(request_json)
+        return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
 
 @cors_preflight("GET, DELETE, PUT")
@@ -104,10 +84,9 @@ class Work(Resource):
     @profiletime
     def get(work_id):
         """Return a work detail based on id."""
+        req.WorkIdPathParameterSchema().load(request.view_args)
         work = WorkService.find_by_id(work_id)
-        if work:
-            return work, HTTPStatus.OK
-        return f"Work with id '{work_id}' not found", HTTPStatus.NOT_FOUND
+        return res.WorkResponseSchema().dump(work), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -115,15 +94,10 @@ class Work(Resource):
     @profiletime
     def put(work_id):
         """Update and return a work."""
-        work_schema = WorkSchemaV2()
-        try:
-            request_json = work_schema.load(API.payload)
-            work = WorkService.update_work(work_id, request_json)
-        except ValidationError as err:
-            return err.messages, HTTPStatus.BAD_REQUEST
-        except ResourceExistsError as err:
-            return err.message, HTTPStatus.CONFLICT
-        return work_schema.dump(work), HTTPStatus.OK
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        request_json = req.WorkBodyParameterSchema().load(API.payload)
+        work = WorkService.update_work(work_id, request_json)
+        return res.WorkResponseSchema().dump(work), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -131,5 +105,6 @@ class Work(Resource):
     @profiletime
     def delete(work_id):
         """Delete a work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
         WorkService.delete_work(work_id)
-        return {"message": "Work successfully deleted"}, HTTPStatus.OK
+        return "Work successfully deleted", HTTPStatus.OK

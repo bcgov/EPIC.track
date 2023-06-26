@@ -49,14 +49,14 @@ class Proponent(db.Model, CodeTable):
         return result
 
     @classmethod
-    def check_existence(cls, name, instance_id):
+    def check_existence(cls, name, proponent_id):
         """Checks if a proponent exists with given name"""
         query = Proponent.query.filter(
             func.lower(Proponent.name) == func.lower(name),
             Proponent.is_deleted.is_(False),
         )
-        if instance_id:
-            query = query.filter(Proponent.id != instance_id)
+        if proponent_id:
+            query = query.filter(Proponent.id != proponent_id)
         if query.count() > 0:
             return True
         return False

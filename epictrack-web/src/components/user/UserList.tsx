@@ -21,12 +21,14 @@ import { EpicTrackPageGridContainer } from "../shared";
 import Select from "react-select";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { UserGroupUpdate } from "../../services/userService/type";
+import { useAppSelector } from "../../hooks";
 
 const UserList = () => {
   const [isValidGroup, setIsValidGroup] = React.useState<boolean>(true);
   const [updatedOn, setUpdatedOn] = React.useState<number>(
     new Date().getMilliseconds()
   );
+  const userDetails = useAppSelector((state) => state.user.userDetail);
   const getUsers = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -65,6 +67,13 @@ const UserList = () => {
   const [selectedGroup, setSelectedGroup] = React.useState<
     Group | undefined | null
   >();
+
+  const currentUserGroup = React.useMemo<Group>(() => {
+    return groups
+      .filter((p) => userDetails.groups.includes(p.name))
+      .sort((a, b) => b.level - a.level)[0];
+  }, [userDetails, groups]);
+  console.log("Current user group", currentUserGroup);
   const columns = React.useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
@@ -86,9 +95,10 @@ const UserList = () => {
         Edit: ({ cell }) => (
           <>
             <Select
+              menuPosition="fixed"
               getOptionValue={(opt) => opt.id}
               getOptionLabel={(opt) => opt.name}
-              options={groups}
+              options={groups.filter((p) => currentUserGroup.level >= p.level)}
               required={true}
               // menuPortalTarget={document.body}
               onChange={(newVal) => setSelectedGroup(newVal)}
@@ -169,24 +179,22 @@ const UserList = () => {
             }}
             onEditingRowSave={handleSaveRowEdits}
             onEditingRowCancel={handleCancelRowEdits}
-            // displayColumnDefOptions={{
-            //   "mrt-row-actions": {
-            //     header: "Update Group", //change "Actions" to "Edit"
-            //     //use a text button instead of a icon button
-            //     Cell: ({ row, table }) => (
-            //       <Button onClick={() => table.setEditingRow(row)}>Edit</Button>
-            //     ),
-            //   },
-            // }}
-            renderRowActions={({ row, table }) => (
-              <Box sx={{ display: "flex", gap: "1rem" }}>
-                <Tooltip arrow placement="left" title="Edit">
-                  <IconButton onClick={() => table.setEditingRow(row)}>
-                    <Edit />
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            )}
+            renderRowActions={({ row, table }) => {
+              const level = row.original.group?.level || 0;
+              return (
+                <>
+                  {currentUserGroup && currentUserGroup.level >= level && (
+                    <Box sx={{ display: "flex", gap: "1rem" }}>
+                      <Tooltip arrow placement="left" title="Edit">
+                        <IconButton onClick={() => table.setEditingRow(row)}>
+                          <Edit />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </>
+              );
+            }}
           />
         </Grid>
       </EpicTrackPageGridContainer>

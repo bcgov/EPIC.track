@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """User service"""
-from reports_api.exceptions import BusinessError
+from reports_api.exceptions import BusinessError, PermissionDeniedError
+from reports_api.utils import TokenInfo
+
 from .keycloak import KeycloakService
 
 
@@ -44,6 +46,15 @@ class UserService:
     @staticmethod
     def update_user_group(user_id, user_group_request):
         """Update the group of a user"""
+        token_groups = TokenInfo.get_user_data()['groups']
+        groups = UserService.get_groups()
+        requested_group = next((group for group in groups if group['name'] in token_groups), None)
+        updating_group = next((group for group in groups
+                               if group['id'] == user_group_request.get('group_id_to_update')), None)
+        if (not requested_group and not updating_group and
+           int(requested_group['attributes']['level'][0]) < int(updating_group['attributes']['level'][0])):
+            raise PermissionDeniedError('Permission denied')
+
         existing_group_id = user_group_request.get('existing_group_id')
         if existing_group_id:
             result = KeycloakService.delete_user_group(user_id, user_group_request.get('existing_group_id'))

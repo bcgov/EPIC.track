@@ -44,7 +44,6 @@ def test_get_projects(client):
     url = urljoin(API_BASE_URL, "projects")
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
-    assert "projects" in response.json
 
 
 def test_update_project(client):
@@ -89,11 +88,11 @@ def test_delete_project(client):
     projects_url = urljoin(API_BASE_URL, "projects")
     project = client.post(projects_url, json=payload)
     response = client.get(projects_url)
-    assert len(response.json["projects"]) == 1
+    assert len(response.json) == 1
     url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
     client.delete(url)
     response = client.get(projects_url)
-    assert len(response.json["projects"]) == 0
+    assert len(response.json) == 0
 
 
 def test_project_detail(client):

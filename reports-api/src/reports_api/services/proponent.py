@@ -12,37 +12,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Proponent."""
-from flask import jsonify
-from reports_api.exceptions import ResourceExistsError
-
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
 from reports_api.models import Proponent
-from reports_api.schemas import ProponentSchema
 
 
 class ProponentService:
     """Service to manage proponent related operations."""
 
     @classmethod
-    def check_existence(cls, name, instance_id=None):
+    def check_existence(cls, name, proponent_id=None):
         """Checks if an proponent exists with given name"""
-        return Proponent.check_existence(name, instance_id)
+        return Proponent.check_existence(name, proponent_id)
 
     @classmethod
     def find_all_proponents(cls):
         """Find all active proponent"""
         proponents = Proponent.find_all(default_filters=False)
-        proponents_schema = ProponentSchema(many=True)
-        return jsonify({"proponents": proponents_schema.dump(proponents)})
+        return proponents
 
     @classmethod
     def find_by_id(cls, proponent_id):
         """Find by indigenous nation id."""
-        proponent_schema = ProponentSchema()
-        response = None
         proponent = Proponent.find_by_id(proponent_id)
         if proponent:
-            response = {"proponent": proponent_schema.dump(proponent)}
-        return response
+            return proponent
+        raise ResourceNotFoundError(f"Proponent with id '{proponent_id}' not found.")
 
     @classmethod
     def create_proponent(cls, payload: dict):
@@ -61,6 +55,8 @@ class ProponentService:
         if exists:
             raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent.find_by_id(proponent_id)
+        if not proponent:
+            raise ResourceNotFoundError(f"Proponent with id '{proponent_id}' not found.")
         proponent = proponent.update(payload)
         return proponent
 

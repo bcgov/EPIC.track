@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Reminder Configuration."""
 
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, func
 
 from .base_model import BaseModel
 
@@ -21,7 +21,7 @@ from .base_model import BaseModel
 class ReminderConfiguration(BaseModel):
     """Model class for Engagement."""
 
-    __tablename__ = 'reminder_configurations'
+    __tablename__ = "reminder_configurations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     reminder_type = Column(String(255), nullable=False)
@@ -33,3 +33,17 @@ class ReminderConfiguration(BaseModel):
     def as_dict(self, recursive=False):
         """Return a JSON representation"""
         return super().as_dict(recursive=recursive)
+
+    @classmethod
+    def check_existence(cls, reminder_type, position_id, reminder_configuration_id):
+        """Checks if a reminder configuration exists for given reminder type and position"""
+        query = ReminderConfiguration.query.filter(
+            func.lower(ReminderConfiguration.reminder_type) == func.lower(reminder_type),
+            ReminderConfiguration.position_id == position_id,
+            ReminderConfiguration.is_deleted.is_(False),
+        )
+        if reminder_configuration_id:
+            query = query.filter(ReminderConfiguration.id != reminder_configuration_id)
+        if query.count() > 0:
+            return True
+        return False

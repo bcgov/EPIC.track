@@ -13,13 +13,14 @@
 # limitations under the License.
 """Resource for outcome endpoints."""
 from http import HTTPStatus
-
+from flask import jsonify
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.services import OutcomeService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
+from reports_api.schemas import response as res
 
 
 API = Namespace('outcomes', description='Outcomes')
@@ -37,7 +38,9 @@ class Outcomes(Resource):
     @profiletime
     def get(milestone_id):
         """Return all outcomes based on milestone_id."""
-        return OutcomeService.find_by_milestone_id(milestone_id), HTTPStatus.OK
+        outcomes = OutcomeService.find_by_milestone_id(milestone_id)
+        outcomes_schema = res.OutcomeResponseSchema(many=True, only=("id", "name", "milestone_id", "terminates_work"))
+        return jsonify(outcomes_schema.dump(outcomes)), HTTPStatus.OK
 
 
 @cors_preflight('GET')
@@ -52,4 +55,6 @@ class ActiveOutcomes(Resource):
     @profiletime
     def get():
         """Return single milestone based on the milestone id given"""
-        return OutcomeService.find_all_active_milestones(), HTTPStatus.OK
+        outcomes = OutcomeService.find_all_active_milestones()
+        outcomes_schema = res.OutcomeResponseSchema(many=True, only=("id", "name", "milestone_id", "terminates_work"))
+        return outcomes_schema.dump(outcomes), HTTPStatus.OK
