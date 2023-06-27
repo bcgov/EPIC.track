@@ -14,34 +14,16 @@
 """Resource for reminder configuration endpoints."""
 from http import HTTPStatus
 
-from flask_restx import Namespace, Resource, cors, reqparse
+from flask import request
+from flask_restx import Namespace, Resource, cors
 
+from reports_api.schemas import request as req
 from reports_api.services import ReminderConfigurationService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
 API = Namespace("reminder-configurations", description="Reminder configurations")
-
-parser = reqparse.RequestParser(bundle_errors=True)
-parser.add_argument(
-    "reminder_type",
-    type=str,
-    required=True,
-    help="Reminder type to be checked.",
-    location="args",
-    trim=True
-)
-parser.add_argument(
-    "position_id",
-    type=int,
-    required=True,
-    help="Postion id to be checked.",
-    location="args",
-)
-parser.add_argument(
-    "id", type=int, help="ID of the work in case of updates.", location="args"
-)
 
 
 @cors_preflight("GET")
@@ -52,17 +34,19 @@ class ValidateReminderConfiguration(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
-    @API.expect(parser)
     @profiletime
     def get():
         """Check for existing works."""
-        args = parser.parse_args()
+        args = req.ReminderConfigurationExistenceQueryParamSchema().load(request.args)
         reminder_type = args["reminder_type"]
         position_id = args["position_id"]
-        instance_id = args["id"]
+        reminder_configuration_id = args["reminder_configuration_id"]
+        exists = ReminderConfigurationService.check_existence(
+            reminder_type=reminder_type,
+            position_id=position_id,
+            reminder_configuration_id=reminder_configuration_id,
+        )
         return (
-            ReminderConfigurationService.check_existence(
-                reminder_type=reminder_type, position_id=position_id, instance_id=instance_id
-            ),
+            {"exists": exists},
             HTTPStatus.OK,
         )

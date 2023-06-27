@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to manage Project."""
 
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
@@ -47,3 +47,15 @@ class Project(BaseModel):
     proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")
     region_env = relationship("Region", foreign_keys=[region_id_env], lazy="select")
     region_flnro = relationship("Region", foreign_keys=[region_id_flnro], lazy="select")
+
+    @classmethod
+    def check_existence(cls, name, project_id=None):
+        """Checks if a project exists with given name"""
+        query = Project.query.filter(
+            func.lower(Project.name) == func.lower(name), Project.is_deleted.is_(False)
+        )
+        if project_id:
+            query = query.filter(Project.id != project_id)
+        if query.count() > 0:
+            return True
+        return False

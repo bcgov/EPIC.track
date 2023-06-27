@@ -14,38 +14,27 @@
 """Service to manage Works."""
 from datetime import timedelta
 
-from sqlalchemy import func
-
-from reports_api.exceptions import ResourceExistsError
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
 from reports_api.models import Work
-from reports_api.schemas.work_v2 import WorkSchemaV2
 from reports_api.services.event import EventService
 from reports_api.services.milestone import MilestoneService
 from reports_api.services.phaseservice import PhaseService
 from reports_api.services.work_phase import WorkPhaseService
 
 
-class WorkService:  # pylint: disable=too-few-public-methods
+class WorkService:
     """Service to manage work related operations."""
 
     @classmethod
-    def check_existence(cls, title, instance_id=None):
+    def check_existence(cls, title, work_id=None):
         """Checks if a work exists for a given title"""
-        query = Work.query.filter(
-            func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
-        )
-        if instance_id:
-            query = query.filter(Work.id != instance_id)
-        if query.count() > 0:
-            return True
-        return False
+        return Work.check_existence(title=title, work_id=work_id)
 
     @classmethod
     def find_all_works(cls):
         """Find all non-deleted works"""
         works = Work.find_all(default_filters=False)
-        works_schema = WorkSchemaV2(many=True)
-        return {"works": works_schema.dump(works)}
+        return works
 
     @classmethod
     def create_work(cls, payload):
@@ -58,38 +47,38 @@ class WorkService:  # pylint: disable=too-few-public-methods
         phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
             work.ea_act_id, work.work_type_id
         )
-        work.current_phase_id = phases[0]["id"]
+        work.current_phase_id = phases[0].id
         work_phases = []
         work_events = []
         start_date = work.start_date
         for phase in phases:
-            end_date = start_date + timedelta(days=phase["duration"])
+            end_date = start_date + timedelta(days=phase.duration)
             work_phases.append(
                 {
                     "work_id": work.id,
-                    "phase_id": phase["id"],
+                    "phase_id": phase.id,
                     "start_date": f"{start_date}",
                     "anticipated_end_date": f"{end_date}",
                 }
             )
-            phase_events = MilestoneService.find_auto_milestones_per_phase(phase["id"])
+            phase_events = MilestoneService.find_auto_milestones_per_phase(phase.id)
             work_events.append(
                 {
-                    "title": phase_events[0]["name"],
+                    "title": phase_events[0].name,
                     "anticipated_start_date": f"{start_date}",
                     "anticipated_end_date": f"{start_date}",
                     "work_id": work.id,
-                    "milestone_id": phase_events[0]["id"],
+                    "milestone_id": phase_events[0].id,
                 }
             )
             for phase_event in phase_events[1:]:
                 work_events.append(
                     {
-                        "title": phase_event["name"],
+                        "title": phase_event.name,
                         "anticipated_start_date": f"{end_date}",
                         "anticipated_end_date": f"{end_date}",
                         "work_id": work.id,
-                        "milestone_id": phase_event["id"],
+                        "milestone_id": phase_event.id,
                     }
                 )
             start_date = end_date + timedelta(days=1)
@@ -99,14 +88,12 @@ class WorkService:  # pylint: disable=too-few-public-methods
         return work
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, work_id):
         """Find work by id."""
-        work_schema = WorkSchemaV2()
-        work = Work.find_by_id(_id)
-        response = None
-        if work:
-            response = {"work": work_schema.dump(work)}
-        return response
+        work = Work.find_by_id(work_id)
+        if not work:
+            raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
+        return work
 
     @classmethod
     def update_work(cls, work_id: int, payload: dict):
@@ -115,6 +102,8 @@ class WorkService:  # pylint: disable=too-few-public-methods
         if exists:
             raise ResourceExistsError("Work with same title already exists")
         work = Work.find_by_id(work_id)
+        if not work:
+            raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
         work = work.update(payload)
         return work
 

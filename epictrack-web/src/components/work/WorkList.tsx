@@ -60,7 +60,7 @@ const WorkList = () => {
     try {
       const workResult = await WorkService.getWorks();
       if (workResult.status === 200) {
-        setWorks((workResult.data as never)["works"]);
+        setWorks(workResult.data as never);
       }
     } catch (error) {
       console.error("Work List: ", error);

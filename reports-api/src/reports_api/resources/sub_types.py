@@ -22,6 +22,8 @@ from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
 
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
 
 API = Namespace("sub-types", description="SubTypes")
 
@@ -38,10 +40,7 @@ class SubTypes(Resource):
     @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all sub_types based on type_id."""
+        req.TypeIdPathParameterSchema().load(request.args)
         type_id = request.args.get("type_id", None)
-        if type_id is None:
-            return (
-                jsonify({"message": "Type ID is missing in URL parameters"}),
-                HTTPStatus.BAD_REQUEST,
-            )
-        return SubTypeService.find_by_type_id(type_id), HTTPStatus.OK
+        sub_types = SubTypeService.find_by_type_id(type_id)
+        return jsonify(res.SubTypeResponseSchema(many=True).dump(sub_types)), HTTPStatus.OK

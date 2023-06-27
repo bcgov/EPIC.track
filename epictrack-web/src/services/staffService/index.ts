@@ -35,13 +35,8 @@ const deleteStaff = async (id?: number) => {
 };
 
 const getStaffByPosition = async (position: string) => {
-  let query_param = "position";
-  if (position.includes(",")) {
-    query_param += "s";
-  }
-
   return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `?${query_param}=${position}`
+    AppConfig.apiUrl + Endpoints.Staffs.STAFF + `?positions=${position}`
   );
 };
 

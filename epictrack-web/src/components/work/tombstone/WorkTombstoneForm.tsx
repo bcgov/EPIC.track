@@ -63,6 +63,7 @@ export default function WorkTombstoneForm({ ...props }) {
         "validate-Work",
         "Work with same title already exists",
         async (value) => {
+          if (!value) return true;
           const validateWorkResult = await WorkService.checkWorkExists(
             value,
             workId
@@ -121,7 +122,7 @@ export default function WorkTombstoneForm({ ...props }) {
   const getStaffByPosition = async (position: string) => {
     const staffResult = await StaffService.getStaffByPosition(position);
     if (staffResult.status === 200) {
-      staffByRoles[position]((staffResult.data as never)["staffs"]);
+      staffByRoles[position](staffResult.data as never);
     }
   };
 

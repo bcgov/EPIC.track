@@ -72,7 +72,7 @@ export default function ProponentList() {
   const getStaffs = async () => {
     const staffsResult = await StaffService.getStaffs();
     if (staffsResult.status === 200) {
-      setStaffs((staffsResult.data as never)["staffs"]);
+      setStaffs(staffsResult.data as never);
     }
   };
   useEffect(() => {
@@ -84,9 +84,7 @@ export default function ProponentList() {
     try {
       const proponentsResult = await ProponentService.getProponents();
       if (proponentsResult.status === 200) {
-        setProponents(
-          sort((proponentsResult.data as never)["proponents"], "name")
-        );
+        setProponents(sort(proponentsResult.data as never, "name"));
       }
     } catch (error) {
       console.error("Proponent List: ", error);
