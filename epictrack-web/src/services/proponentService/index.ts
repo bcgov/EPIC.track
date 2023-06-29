@@ -4,40 +4,40 @@ import { AppConfig } from "../../config";
 import { Proponent } from "../../models/proponent";
 const getProponents = async (apiUrl?: string) => {
   return await http.GetRequest(
-    (AppConfig.apiUrl || apiUrl) + Endpoints.Proponents.GET_PROPONENTS
+    (AppConfig.apiUrl || apiUrl) + Endpoints.Proponents.PROPONENTS
   );
 };
 
 const createProponent = async (proponent: Proponent) => {
   return await http.PostRequest(
-    AppConfig.apiUrl + Endpoints.Proponents.GET_PROPONENTS,
+    AppConfig.apiUrl + Endpoints.Proponents.PROPONENTS,
     JSON.stringify(proponent)
   );
 };
 
 const updateProponent = async (proponent: Proponent) => {
   return await http.PutRequest(
-    AppConfig.apiUrl + Endpoints.Proponents.GET_PROPONENTS + `/${proponent.id}`,
+    AppConfig.apiUrl + Endpoints.Proponents.PROPONENTS + `/${proponent.id}`,
     JSON.stringify(proponent)
   );
 };
 
 const deleteProponent = async (id: any) => {
   return await http.DeleteRequest(
-    AppConfig.apiUrl + Endpoints.Proponents.GET_PROPONENTS + `/${id}`
+    AppConfig.apiUrl + Endpoints.Proponents.PROPONENTS + `/${id}`
   );
 };
 
 const getProponent = async (id: number) => {
   return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.Proponents.GET_PROPONENTS + `/${id}`
+    AppConfig.apiUrl + Endpoints.Proponents.PROPONENTS + `/${id}`
   );
 };
 
 const checkProponentExists = async (name: string, id: number) => {
   return await http.GetRequest(
     AppConfig.apiUrl +
-      Endpoints.Proponents.GET_PROPONENTS +
+      Endpoints.Proponents.PROPONENTS +
       `/exists?name=${name}${id ? "&proponent_id=" + id : ""}`
   );
 };

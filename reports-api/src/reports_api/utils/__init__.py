@@ -16,3 +16,4 @@
 from .auth import auth
 from .profiler import profiletime
 from .enums import HttpMethod
+from .token_info import TokenInfo

@@ -56,3 +56,12 @@ class ResourceNotFoundError(Exception):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
         self.message = message
+
+
+class PermissionDeniedError(Exception):
+    """Exception raised when resource not found"""
+
+    def __init__(self, message, *args, **kwargs):
+        """Return a valid ResourceExistsError."""
+        super().__init__(*args, **kwargs)
+        self.message = message

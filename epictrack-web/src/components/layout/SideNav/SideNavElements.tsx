@@ -51,6 +51,18 @@ export const Routes: RouteType[] = [
       },
     ],
   },
+  {
+    name: "Admin",
+    path: "/admin",
+    base: "/admin",
+    routes: [
+      {
+        name: "Users",
+        path: "/admin/users",
+        base: "/admin/users",
+      },
+    ],
+  },
 ];
 
 export interface RouteType {
