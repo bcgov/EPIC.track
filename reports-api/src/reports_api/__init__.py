@@ -31,7 +31,7 @@ from reports_api.utils.json_encoder import CustomJSONEncoder
 from reports_api.utils.logging import setup_logging
 from reports_api.utils.run_version import get_run_version
 from reports_api.utils.caching import AppCache
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, PermissionDeniedError
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))
@@ -71,6 +71,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
                 return err.message, HTTPStatus.CONFLICT
             if isinstance(err, ResourceNotFoundError):
                 return err.message, HTTPStatus.NOT_FOUND
+            if isinstance(err, PermissionDeniedError):
+                return err.message, HTTPStatus.FORBIDDEN
             return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)

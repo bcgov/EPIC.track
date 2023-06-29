@@ -69,6 +69,7 @@ class UserGroups(Resource):
         """Update the group of the user"""
         req.UserGroupPathParamSchema().load(request.view_args)
         user_group_request = req.UserGroupBodyParamSchema().load(API.payload)
+
         response = UserService.update_user_group(user_id, user_group_request)
         if response.status_code == 204:
             return '', HTTPStatus.NO_CONTENT

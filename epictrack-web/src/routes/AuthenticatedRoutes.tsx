@@ -10,6 +10,8 @@ import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
 import ProjectList from "../components/project/ProjectList";
 import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
+import Example from "../components/user/UserList";
+import UserList from "../components/user/UserList";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -33,6 +35,7 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/data-management/proponents" element={<ProponentList />} />
       <Route path="/works" element={<WorkList />} />
+      <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

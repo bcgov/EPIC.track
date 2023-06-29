@@ -4,31 +4,36 @@ const Endpoints = {
     GET_PDF_REPORT: "reports/file",
   },
   Staffs: {
-    STAFF: "staffs",
+    STAFFS: "staffs",
   },
   Projects: {
-    GET_PROJECTS: "projects",
+    PROJECTS: "projects",
   },
   Codes: {
     GET_CODES: "codes",
   },
   IndigenousNations: {
-    GET_INDIGENOUS_NATIONS: "indigenous-nations",
+    INDIGENOUS_NATIONS: "indigenous-nations",
   },
   Proponents: {
-    GET_PROPONENTS: "proponents",
+    PROPONENTS: "proponents",
   },
   Works: {
-    GET_WORKS: "works",
+    WORKS: "works",
   },
   SubTypes: {
-    GET_SUB_TYPES: "sub-types",
+    SUB_TYPES: "sub-types",
   },
   Templates: {
-    GET_TEMPLATES: "templates",
+    TEMPLATES: "templates",
   },
   Phases: {
-    GET_PHASES: "phases",
+    PHASES: "phases",
+  },
+  Users: {
+    USERS: "users",
+    GET_USER_GROUPS: "users/groups",
+    UPDATE_USER_GROUPS: "users/:userId/groups",
   },
 };
 export default Endpoints;

@@ -1,7 +1,11 @@
-import { AppConfig } from "../../config";
 import Keycloak from "keycloak-js";
 import { Action, AnyAction, Dispatch } from "redux";
-import { userToken, userAuthentication } from "./userSlice";
+import { userToken, userAuthentication, userDetails } from "./userSlice";
+import { AppConfig } from "../../config";
+import http from "../../apiManager/http-request-handler";
+import Endpoints from "../../constants/api-endpoint";
+import { UserDetail, UserGroupUpdate } from "./type";
+
 const KeycloakData: Keycloak = new Keycloak({
   clientId: AppConfig.keycloak.clientId,
   realm: AppConfig.keycloak.realm,
@@ -50,6 +54,13 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       return;
     }
 
+    const userInfo: any = await KeycloakData.loadUserInfo();
+    const userDetail = new UserDetail(
+      userInfo["sub"],
+      userInfo["preferred_username"],
+      userInfo["groups"]
+    );
+    dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));
     dispatch(userAuthentication(KeycloakData.authenticated ? true : false));
     refreshToken(dispatch);
@@ -63,12 +74,36 @@ const getToken = () =>
   KeycloakData.token || window.localStorage.getItem("authToken");
 const doLogin = () => KeycloakData.login;
 
+// User management service methods
+const getUsers = async () => {
+  return await http.GetRequest(AppConfig.apiUrl + Endpoints.Users.USERS);
+};
+
+const getGroups = async () => {
+  return await http.GetRequest(
+    AppConfig.apiUrl + Endpoints.Users.GET_USER_GROUPS
+  );
+};
+
+const updateUserGroup = async (
+  userId: string,
+  updateUserGroup: UserGroupUpdate
+) => {
+  return await http.PutRequest(
+    AppConfig.apiUrl +
+      Endpoints.Users.UPDATE_USER_GROUPS.replace(":userId", userId),
+    JSON.stringify(updateUserGroup)
+  );
+};
 const UserService = {
   keycloakData: KeycloakData,
   initKeycloak,
   getToken,
   doLogin,
   doLogout,
+  getUsers,
+  getGroups,
+  updateUserGroup,
 };
 
 export default UserService;

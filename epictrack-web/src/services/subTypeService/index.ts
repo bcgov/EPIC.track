@@ -4,7 +4,7 @@ import { AppConfig } from "../../config";
 
 const getSubTypeByType = async (typeId?: number) => {
   return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.SubTypes.GET_SUB_TYPES + `?type_id=${typeId}`
+    AppConfig.apiUrl + Endpoints.SubTypes.SUB_TYPES + `?type_id=${typeId}`
   );
 };
 
