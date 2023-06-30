@@ -9,9 +9,10 @@ import IndigenousNationList from "../components/indigenousNation/IndigenousNatio
 import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
 import ProjectList from "../components/project/ProjectList";
-import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
 import Example from "../components/user/UserList";
 import UserList from "../components/user/UserList";
+import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
+import TemplateList from "../components/task/template/TemplateList";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -28,7 +29,7 @@ const AuthenticatedRoutes = () => {
         element={<ResourceForecast />}
       />
       <Route path="/reporting/30-60-90" element={<ThirtySixtyNinety />} />
-      <Route path="/templates" element={<CreateTemplateForm />} />
+      <Route path="/templates" element={<TemplateList />} />
       <Route
         path="/data-management/indigenous-nations"
         element={<IndigenousNationList />}

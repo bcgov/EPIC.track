@@ -6,7 +6,7 @@ import Select, { Props } from "react-select";
 type IFormInputProps = {
   name: string;
   options: Array<any>;
-  defaultValue: string | number | undefined;
+  defaultValue?: string | number | undefined;
   isMulti?: boolean;
   getOptionLabel: (option: any) => string;
   getOptionValue: (option: any) => string;
