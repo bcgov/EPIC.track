@@ -22,7 +22,7 @@ from .reminder_configuration_request import ReminderConfigurationExistenceQueryP
 from .staff_request import (
     StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffExistanceQueryParamSchema,
     StaffIdPathParameterSchema)
-from .task_request import TaskBodyParameterSchema, TaskTemplateBodyParameterSchema
+from .task_request import TaskBodyParameterSchema, TaskTemplateBodyParameterSchema, TaskTemplateIdPathParameterSchema
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema

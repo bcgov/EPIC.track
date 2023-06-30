@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Tasks."""
-from typing import IO
+from typing import IO, List
 
 import pandas as pd
 from flask import current_app
 
+from reports_api.exceptions import ResourceNotFoundError
 from reports_api.models import Task, TaskTemplate
 from reports_api.schemas import request as req
 
@@ -25,14 +26,14 @@ class TaskService:
     """Service to manage task related operations"""
 
     @classmethod
-    def find_all_task_templates(cls):
+    def find_all_task_templates(cls) -> List[TaskTemplate]:
         """Find all task templates"""
         current_app.logger.debug("find all task templates")
-        task_templates = TaskTemplate.find_all()
+        task_templates = TaskTemplate.find_all(default_filters=False)
         return task_templates
 
     @classmethod
-    def create_task_template(cls, data: dict, template_file: IO):
+    def create_task_template(cls, data: dict, template_file: IO) -> TaskTemplate:
         """Create a task template instance and related tasks"""
         task_template = TaskTemplate(**data)
         task_template.flush()
@@ -44,7 +45,7 @@ class TaskService:
         return task_template
 
     @classmethod
-    def _read_excel(cls, template_file: IO):
+    def _read_excel(cls, template_file: IO) -> pd.DataFrame:
         """Read the template excel file"""
         column_map = {
             "No": "template_id",
@@ -58,7 +59,7 @@ class TaskService:
         return data_frame
 
     @classmethod
-    def create_bulk_tasks(cls, tasks):
+    def create_bulk_tasks(cls, tasks) -> None:
         """Bulk create tasks from given list of dicts"""
         tasks_schema = req.TaskBodyParameterSchema(many=True)
         tasks = tasks_schema.load(tasks)
@@ -66,3 +67,46 @@ class TaskService:
             instance = Task(**task)
             instance.flush()
         Task.commit()
+
+    @classmethod
+    def find_tasks_by_template_id(cls, template_id: int) -> List[Task]:
+        """Find all tasks for a given template id"""
+        template = TaskTemplate.find_by_id(template_id)
+        if not template:
+            raise ResourceNotFoundError(
+                f"Task template with id '{template_id}' not found"
+            )
+        return template.tasks
+
+    @classmethod
+    def update_template(cls, template_id: int, payload: dict) -> TaskTemplate:
+        """Update a task template"""
+        template = TaskTemplate.find_by_id(template_id)
+        if not template:
+            raise ResourceNotFoundError(
+                f"Task template with id '{template_id}' not found"
+            )
+        template = template.update(payload)
+        return template
+
+    @classmethod
+    def delete_template(cls, template_id: int) -> bool:
+        """Mark a template as deleted"""
+        template = TaskTemplate.find_by_id(template_id)
+        if not template:
+            raise ResourceNotFoundError(
+                f"Task template with id '{template_id}' not found"
+            )
+        template.is_deleted = True
+        TaskTemplate.commit()
+        return True
+
+    @classmethod
+    def find_by_id(cls, template_id) -> TaskTemplate:
+        """Find template by id."""
+        template = TaskTemplate.find_by_id(template_id)
+        if not template:
+            raise ResourceNotFoundError(
+                f"Task template with id '{template_id}' not found"
+            )
+        return template

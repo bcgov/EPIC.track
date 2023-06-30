@@ -62,6 +62,24 @@ const DeleteRequest = <T>(url: string, params = {}) => {
   });
 };
 
+const MultipartFormPostRequest = <T>(
+  url: string,
+  data = {},
+  params = {},
+  config = {}
+) => {
+  return axios.post<T>(url, data, {
+    params,
+    headers: {
+      "Content-type": "multipart/form-data",
+      Authorization: `Bearer ${
+        UserService.getToken() || window.localStorage.getItem("authToken")
+      }`,
+    },
+    ...config,
+  });
+};
+
 interface OSSRequestOptions {
   amzDate: string;
   authHeader: string;
@@ -99,4 +117,5 @@ export default {
   DeleteRequest,
   OSSGetRequest,
   OSSPutRequest,
+  MultipartFormPostRequest,
 };
