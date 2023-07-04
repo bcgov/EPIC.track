@@ -80,6 +80,12 @@ class TaskBodyParameterSchema(RequestBodyParameterSchema):
         required=True,
     )
 
+    responsibility_id = fields.Int(
+        description="Responsibility id of the task",
+        validate=validate.Range(min=1),
+        required=True
+    )
+
     is_active = fields.Bool(description="Active state of the task")
 
 

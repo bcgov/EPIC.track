@@ -18,7 +18,7 @@ import pandas as pd
 from flask import current_app
 
 from reports_api.exceptions import ResourceNotFoundError
-from reports_api.models import Task, TaskTemplate
+from reports_api.models import Task, TaskTemplate, Responsibility
 from reports_api.schemas import request as req
 
 
@@ -39,6 +39,10 @@ class TaskService:
         task_template.flush()
         task_data = cls._read_excel(template_file)
         task_data.loc[0:, ["template_id", "is_active"]] = [task_template.id, False]
+        responsibilities = Responsibility.find_all()
+        for res in responsibilities:
+            task_data = task_data.replace({'responsibility_id': rf'^{res.name}$'},
+                                          {'responsibility_id': res.id}, regex=True)
         tasks = task_data.to_dict("records")
         cls.create_bulk_tasks(tasks)
         TaskTemplate.commit()
@@ -49,9 +53,10 @@ class TaskService:
         """Read the template excel file"""
         column_map = {
             "No": "template_id",
-            "Title": "name",
-            "NumberOfDays": "number_of_days",
-            "StartAt": "start_at",
+            "Task \"Title\"": "name",
+            "Length (Days)": "number_of_days",
+            "Start Plus": "start_at",
+            "Responsibility": "responsibility_id",
             "Tips": "tips",
         }
         data_frame = pd.read_excel(template_file)
