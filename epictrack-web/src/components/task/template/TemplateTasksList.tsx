@@ -82,7 +82,7 @@ const TemplateTaskList = ({ ...props }) => {
     });
     if (result.status === 200) {
       setAlertContentText(
-        `Template ${template?.is_active ? "Disabled" : "Approved"}`
+        `Template ${template?.is_active ? "Deactivated" : "Activated"}`
       );
       setOpenAlertDialog(true);
       props.onApproval();
@@ -136,7 +136,7 @@ const TemplateTaskList = ({ ...props }) => {
           onClick={handleApproval}
           color="primary"
         >
-          {template?.is_active ? "Disable" : "Approve"}
+          {template?.is_active ? "Deactivate" : "Activate"}
         </Button>
       </Grid>
       <TrackDialog

@@ -65,3 +65,4 @@ from .task_event import TaskEvent, ResponsibleEntityEnum
 from .task_template import TaskTemplate
 from .task import Task
 from .work_calendar_event import WorkCalendarEvent
+from .responsibility import Responsibility
