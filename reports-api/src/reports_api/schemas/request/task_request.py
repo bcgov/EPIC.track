@@ -14,7 +14,7 @@
 """Task resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import RequestBodyParameterSchema
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema
 
 
 class TaskTemplateBodyParameterSchema(RequestBodyParameterSchema):
@@ -43,6 +43,8 @@ class TaskTemplateBodyParameterSchema(RequestBodyParameterSchema):
         validate=validate.Range(min=1),
         required=True,
     )
+
+    is_active = fields.Bool(description="Active state of the task", default=False, missing=False)
 
 
 class TaskBodyParameterSchema(RequestBodyParameterSchema):
@@ -79,3 +81,11 @@ class TaskBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     is_active = fields.Bool(description="Active state of the task")
+
+
+class TaskTemplateIdPathParameterSchema(RequestPathParameterSchema):
+    """Staff id path parameter schema"""
+
+    template_id = fields.Int(
+        description="The id of the template", validate=validate.Range(min=1), required=True
+    )

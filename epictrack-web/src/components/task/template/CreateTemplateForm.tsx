@@ -3,39 +3,50 @@ import {
   TextField,
   Grid,
   Button,
+  FormHelperText,
   Backdrop,
   CircularProgress,
-  Divider,
 } from "@mui/material";
-import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
+import { UploadFile as UploadFileIcon } from "@mui/icons-material";
+import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import codeService from "../../../services/codeService";
 import phaseService from "../../../services/phaseService";
 import { Code } from "../../../services/codeService";
 import { Template } from "../../../models/template";
-import ControlledCheckbox from "../../shared/controlledInputComponents/ControlledCheckbox";
-import TrackDialog from "../../shared/TrackDialog";
-import { EpicTrackPageGridContainer } from "../../shared";
 import { TrackLabel } from "../../shared";
 import { ListType } from "../../../models/code";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import TaskService from "../../../services/taskService";
+import TrackDialog from "../../shared/TrackDialog";
+
 export default function CreateTemplateForm({ ...props }) {
-  const [template, setTemplate] = React.useState<Template>();
+  // const [template, setTemplate] = React.useState<Template>();
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
   const [phases, setPhases] = React.useState<ListType[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
+  const [alertContentText, setAlertContentText] = React.useState<string>();
   const templateId = props.templateId;
   const schema = yup.object<Template>().shape({
     ea_act_id: yup.number().required("EA Act is required"),
     work_type_id: yup.number().required("Work type is required"),
     phase_id: yup.number().required("Phase is required"),
-    // template_name: yup.string().required("Name is required"),
+    name: yup.string().required("Name is required"),
+    template_file: yup
+      .mixed()
+      .test("required", "Template file is required", (value: any) => {
+        if (value?.length > 0) {
+          return true;
+        }
+        return false;
+      }),
   });
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: template,
+    // defaultValues: {},
   });
 
   const {
@@ -65,23 +76,23 @@ export default function CreateTemplateForm({ ...props }) {
     //   reset(template);
     // }
   };
+
   const getPhaseByWorkTypeEAact = async () => {
     const phaseResult = await phaseService.getPhaseByWorkTypeEAact(
       formValues.ea_act_id,
       formValues.work_type_id
     );
     if (phaseResult.status === 200) {
-      console.log(phaseResult);
       setPhases(phaseResult.data as ListType[]);
-      if (
-        formValues.work_type_id !== template?.work_type_id ||
-        formValues.ea_act_id !== template?.ea_act_id
-      ) {
-        reset({
-          ...formValues,
-          phase_id: undefined,
-        });
-      }
+      // if (
+      //   formValues.work_type_id !== template?.work_type_id ||
+      //   formValues.ea_act_id !== template?.ea_act_id
+      // ) {
+      //   reset({
+      //     ...formValues,
+      //     phase_id: undefined,
+      //   });
+      // }
     }
   };
 
@@ -106,11 +117,15 @@ export default function CreateTemplateForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
-    console.log(data);
     setLoading(true);
-    // if (templateId) {
-    // props.onSubmitSuccess();
-    // }
+    data["template_file"] = data["template_file"][0];
+    const result = await TaskService.createTemplate(data);
+    if (result.status === 201) {
+      setAlertContentText("Template details inserted");
+      setOpenAlertDialog(true);
+      props.onSubmitSuccess();
+      setLoading(false);
+    }
     reset();
   };
   return (
@@ -128,9 +143,9 @@ export default function CreateTemplateForm({ ...props }) {
             <TextField
               inputProps={{ maxLength: 150 }}
               fullWidth
-              error={!!errors?.template_name?.message}
-              helperText={errors?.template_name?.message?.toString()}
-              {...register("template_name")}
+              error={!!errors?.name?.message}
+              helperText={errors?.name?.message?.toString()}
+              {...register("name")}
             />
           </Grid>
           <Grid item xs={12}>
@@ -138,7 +153,6 @@ export default function CreateTemplateForm({ ...props }) {
             <ControlledSelectV2
               key={`eaact_select_${formValues.ea_act_id}`}
               helperText={errors?.ea_act_id?.message?.toString()}
-              defaultValue={template?.ea_act_id}
               options={eaActs || []}
               getOptionValue={(o: ListType) => o.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
@@ -146,11 +160,10 @@ export default function CreateTemplateForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Worktype</TrackLabel>
+            <TrackLabel>Work Type</TrackLabel>
             <ControlledSelectV2
               key={`worktype_select_${formValues.work_type_id}`}
               helperText={errors?.work_type_id?.message?.toString()}
-              defaultValue={template?.work_type_id}
               options={workTypes || []}
               getOptionValue={(o: ListType) => o.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
@@ -162,25 +175,39 @@ export default function CreateTemplateForm({ ...props }) {
             <ControlledSelectV2
               key={`phase_select_${formValues.phase_id}`}
               helperText={errors?.phase_id?.message?.toString()}
-              defaultValue={template?.phase_id}
               options={phases || []}
               getOptionValue={(o: ListType) => o.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("phase_id")}
             ></ControlledSelectV2>
           </Grid>
-          <Grid
-            item
-            xs={12}
-            sx={{ display: "flex", gap: "0.5rem", justifyContent: "left" }}
-          >
-            <input
-              type="file"
-              id="file-upload"
-              {...register("template_file")}
-            />
-            {/* Attach Template */}
-            {/* </Button> */}
+          <Grid item xs={12}>
+            <TrackLabel style={{ display: "block" }}>Template File</TrackLabel>
+            <Button
+              variant="outlined"
+              component="label"
+              startIcon={<UploadFileIcon />}
+              color={errors?.template_file?.message ? "error" : "primary"}
+            >
+              {formValues.template_file?.length > 0
+                ? formValues.template_file[0].name
+                : "Upload Template File"}
+              <input
+                type="file"
+                hidden
+                {...register("template_file")}
+                accept=".xls, .xlsx"
+              />
+            </Button>
+            {errors?.template_file?.message && (
+              <FormHelperText
+                error={true}
+                className="MuiFormHelperText-sizeSmall"
+                style={{ marginInline: "14px" }}
+              >
+                {String(errors?.template_file?.message || "")}
+              </FormHelperText>
+            )}
           </Grid>
           <Grid
             item
@@ -196,6 +223,24 @@ export default function CreateTemplateForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
+      <TrackDialog
+        open={openAlertDialog}
+        dialogTitle={"Success"}
+        dialogContentText={alertContentText}
+        isActionsRequired
+        isCancelRequired={false}
+        isOkRequired
+        onOk={() => {
+          setOpenAlertDialog(false);
+          props.onCancel();
+        }}
+      />
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </>
   );
 }

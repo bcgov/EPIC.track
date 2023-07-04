@@ -24,9 +24,6 @@ const Endpoints = {
   SubTypes: {
     SUB_TYPES: "sub-types",
   },
-  Templates: {
-    TEMPLATES: "templates",
-  },
   Phases: {
     PHASES: "phases",
   },
@@ -34,6 +31,9 @@ const Endpoints = {
     USERS: "users",
     GET_USER_GROUPS: "users/groups",
     UPDATE_USER_GROUPS: "users/:userId/groups",
+  },
+  Templates: {
+    TEMPLATES: "task-templates",
   },
 };
 export default Endpoints;
