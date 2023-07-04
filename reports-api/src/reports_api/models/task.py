@@ -17,6 +17,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel
+from .task_event import ResponsibleEntityEnum
 
 
 class Task(BaseModel):
@@ -29,6 +30,7 @@ class Task(BaseModel):
     start_at = sa.Column(sa.Integer, default=0, nullable=False)
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
     template_id = sa.Column(sa.ForeignKey('task_templates.id'), nullable=False)
+    responsible_entity = sa.Column(sa.Enum(ResponsibleEntityEnum))
     tips = sa.Column(sa.String)
 
     template = relationship('TaskTemplate', foreign_keys=[template_id], lazy='select')
