@@ -73,6 +73,21 @@ class Works(Resource):
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
 
+@cors_preflight("GET")
+@API.route("/resources", methods=["GET", "OPTIONS"])
+class WorkResources(Resource):
+    """Endpoint resource to list all allocated staff resources"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return all resource and work details"""
+        works = WorkService.find_allocated_resources()
+        return jsonify(res.WorkResourceResponseSchema(many=True).dump(works)), HTTPStatus.OK
+
+
 @cors_preflight("GET, DELETE, PUT")
 @API.route("/<int:work_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
 class Work(Resource):
