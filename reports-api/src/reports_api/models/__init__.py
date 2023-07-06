@@ -61,7 +61,8 @@ from .event_field import EventField
 from .event_template import EventTemplate
 from .event_type import EventType
 from .task_event_assignee import TaskEventAssignee
-from .task_event import TaskEvent
+from .task_event import TaskEvent, ResponsibleEntityEnum
 from .task_template import TaskTemplate
 from .task import Task
 from .work_calendar_event import WorkCalendarEvent
+from .responsibility import Responsibility
