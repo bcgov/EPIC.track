@@ -4,3 +4,4 @@ from .position import PositionSchema
 from .proponent import ProponentSchema
 from .staff import StaffSchema
 from .event import EventSchema
+from .role import RoleSchema
