@@ -13,9 +13,11 @@
 # limitations under the License.
 """Service to manage Works."""
 from datetime import timedelta
+from sqlalchemy.orm import aliased
 
 from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
-from reports_api.models import Work
+from reports_api.models import (EAOTeam, Project, Role, Staff, StaffWorkRole,
+                                Work)
 from reports_api.services.event import EventService
 from reports_api.services.milestone import MilestoneService
 from reports_api.services.phaseservice import PhaseService
@@ -34,6 +36,50 @@ class WorkService:
     def find_all_works(cls):
         """Find all non-deleted works"""
         works = Work.find_all(default_filters=False)
+        return works
+
+    @classmethod
+    def find_allocated_resources(cls):
+        """Find all allocated resources"""
+        lead = aliased(Staff)
+        epd = aliased(Staff)
+        work_result = (
+            Work.query
+            .join(Project).filter(
+                Project.is_deleted.is_(False),
+                Project.is_project_closed.is_(False)
+            )
+            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
+            .outerjoin(lead, lead.id == Work.work_lead_id)
+            .outerjoin(epd, epd.id == Work.responsible_epd_id)
+            .all()
+        )
+        works = [
+            {
+                "id": work.id,
+                "title": work.title,
+                "project": work.project,
+                "eao_team": work.eao_team,
+                "responsible_epd": work.responsible_epd,
+                "work_lead": work.work_lead,
+            } for work in work_result
+        ]
+        work_ids = [work['id'] for work in works]
+        staff_result = (
+            Staff.query
+            .join(StaffWorkRole)
+            .filter(StaffWorkRole.work_id.in_(work_ids),
+                    StaffWorkRole.is_deleted.is_(False))
+            .join(Role, Role.id == StaffWorkRole.role_id)
+            .add_entity(Role)
+            .add_columns(
+                StaffWorkRole.work_id
+            )
+            .all()
+        )
+        for work in works:
+            staffs = list(filter(lambda x, _work_id=work['id']: x.work_id == _work_id, staff_result))
+            work['staff'] = staffs
         return works
 
     @classmethod

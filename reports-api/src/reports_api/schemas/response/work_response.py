@@ -1,7 +1,7 @@
 """Work model schema"""
-from marshmallow import EXCLUDE, fields
+from marshmallow import EXCLUDE, fields, pre_dump
 
-from reports_api.models import Work, WorkPhase
+from reports_api.models import Work, WorkPhase, Staff
 from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.ea_act import EAActSchema
 from reports_api.schemas.eao_team import EAOTeamSchema
@@ -12,6 +12,9 @@ from reports_api.schemas.project import ProjectSchema
 from reports_api.schemas.staff import StaffSchema
 from reports_api.schemas.substitution_act import SubstitutionActSchema
 from reports_api.schemas.work_type import WorkTypeSchema
+from reports_api.schemas.response.staff_response import StaffResponseSchema
+from reports_api.schemas import PositionSchema
+from reports_api.schemas import RoleSchema
 
 
 class WorkResponseSchema(
@@ -56,3 +59,49 @@ class WorkPhaseResponseSchema(
         model = WorkPhase
         include_fk = True
         unknown = EXCLUDE
+
+
+class WorkStaffRoleReponseSchema(AutoSchemaBase):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Schema for allocated staff for work"""
+
+    class Meta(AutoSchemaBase.Meta):  # pylint: disable=too-many-ancestors,too-few-public-methods
+        """Meta information"""
+
+        model = Staff
+        include_fk = True
+        unknown = EXCLUDE
+
+    full_name = fields.Method("get_full_name", dump_only=True)
+    position = fields.Nested(PositionSchema(), dump_only=True)
+
+    def get_full_name(self, instance):
+        """Get the full name"""
+        return f"{instance['last_name']}, {instance['first_name']}"
+    role = fields.Nested(RoleSchema)
+
+    @pre_dump()
+    def convert(self, instance, many):  # pylint: disable=unused-argument
+        """Convert the incoming object in to json"""
+        staff = StaffResponseSchema().dump(instance.Staff)
+        if staff:
+            staff["role"] = instance.Role
+        return staff
+
+
+class WorkResourceResponseSchema(AutoSchemaBase):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Schema for work"""
+
+    class Meta(AutoSchemaBase.Meta):  # pylint: disable=too-many-ancestors,too-few-public-methods
+        """Meta information"""
+
+        model = Work
+        include_fk = False
+        unknown = EXCLUDE
+
+    project = fields.Nested(
+        ProjectSchema(only=("id", "name"))
+    )
+    eao_team = fields.Nested(EAOTeamSchema, dump_only=True)
+    responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
+    work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
+    staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
