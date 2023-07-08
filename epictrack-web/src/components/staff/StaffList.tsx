@@ -2,69 +2,43 @@ import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
-import { RESULT_STATUS } from "../../constants/application-constant";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
-import StaffService from "../../services/staffService";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import TrackDialog from "../shared/TrackDialog";
 import { EpicTrackPageGridContainer } from "../shared";
+import { MasterContext } from "../shared/MasterContext";
+import staffService from "../../services/staffService/staffService";
 
 const StaffList = () => {
-  const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  const [resultStatus, setResultStatus] = React.useState<string>();
   const [staffId, setStaffId] = React.useState<number>();
-  const [deleteStaffId, setDeleteStaffId] = React.useState<number>();
-  const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] =
-    React.useState<boolean>(false);
   const [positions, setPositions] = React.useState<string[]>([]);
+  const ctx = React.useContext(MasterContext);
 
-  const titleSuffix = "Staff Details";
-  const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick") return;
-    setShowDialog(false);
-  };
+  React.useEffect(() => {
+    ctx.setForm(<StaffForm staffId={staffId} />);
+  }, [staffId]);
+
   const onEdit = (id: number) => {
     setStaffId(id);
-    setShowDialog(true);
+    ctx.setShowModalForm(true);
   };
-  const getStaff = React.useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING);
-    try {
-      const staffResult = await StaffService.getStaffs();
-      if (staffResult.status === 200) {
-        setStaffs(staffResult.data as never);
-      }
-    } catch (error) {
-      console.error("Staff List: ", error);
-    } finally {
-      setResultStatus(RESULT_STATUS.LOADED);
-    }
-  }, []);
 
   React.useEffect(() => {
-    getStaff();
+    ctx.setService(staffService);
   }, []);
+
+  const staff = React.useMemo(() => ctx.data as Staff[], [ctx.data]);
+
   React.useEffect(() => {
-    const positions = staffs
+    const positions = staff
       .map((p) => p.position?.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setPositions(positions);
-  }, [staffs]);
+  }, [staff]);
 
-  const handleDelete = (id: number) => {
-    setShowDeleteDialog(true);
-    setDeleteStaffId(id);
-  };
-
-  const deleteStaff = async (id?: number) => {
-    const result = await StaffService.deleteStaff(id);
-    if (result.status === 200) {
-      setDeleteStaffId(undefined);
-      setShowDeleteDialog(false);
-      getStaff();
-    }
+  const handleDelete = (id: string) => {
+    ctx.setShowDeleteDialog(true);
+    ctx.setId(id);
   };
 
   const columns = React.useMemo<MRT_ColumnDef<Staff>[]>(
@@ -117,7 +91,7 @@ const StaffList = () => {
         <Grid item xs={12}>
           <MasterTrackTable
             columns={columns}
-            data={staffs}
+            data={staff}
             initialState={{
               sorting: [
                 {
@@ -127,7 +101,7 @@ const StaffList = () => {
               ],
             }}
             state={{
-              isLoading: resultStatus === RESULT_STATUS.LOADING,
+              isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
             enableRowActions={true}
@@ -151,7 +125,7 @@ const StaffList = () => {
               >
                 <Button
                   onClick={() => {
-                    setShowDialog(true);
+                    ctx.setShowModalForm(true);
                     setStaffId(undefined);
                   }}
                   variant="contained"
@@ -163,30 +137,6 @@ const StaffList = () => {
           />
         </Grid>
       </EpicTrackPageGridContainer>
-      <TrackDialog
-        open={showDialog}
-        dialogTitle={(staffId ? "Update " : "Create ") + titleSuffix}
-        onClose={(event, reason) => onDialogClose(event, reason)}
-        disableEscapeKeyDown
-        fullWidth
-        maxWidth="md"
-      >
-        <StaffForm
-          onCancel={onDialogClose}
-          staffId={staffId}
-          onSubmitSuccess={getStaff}
-        />
-      </TrackDialog>
-      <TrackDialog
-        open={showDeleteDialog}
-        dialogTitle="Delete"
-        dialogContentText="Are you sure you want to delete?"
-        okButtonText="Yes"
-        cancelButtonText="No"
-        isActionsRequired
-        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
-        onOk={() => deleteStaff(deleteStaffId)}
-      />
     </>
   );
 };

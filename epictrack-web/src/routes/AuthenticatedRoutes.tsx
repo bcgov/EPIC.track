@@ -13,12 +13,20 @@ import Example from "../components/user/UserList";
 import UserList from "../components/user/UserList";
 import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
 import TemplateList from "../components/task/template/TemplateList";
+import { MasterProvider } from "../components/shared/MasterContext";
 
 const AuthenticatedRoutes = () => {
   return (
     <Routes>
       {/* <Route path="/" element={<Dashboard />} /> */}
-      <Route path="/data-management/staffs" element={<StaffList />} />
+      <Route
+        path="/data-management/staffs"
+        element={
+          <MasterProvider>
+            <StaffList />
+          </MasterProvider>
+        }
+      />
       <Route path="/data-management/projects" element={<ProjectList />} />
       <Route
         path="/reporting/referral-schedule"
@@ -32,7 +40,11 @@ const AuthenticatedRoutes = () => {
       <Route path="/templates" element={<TemplateList />} />
       <Route
         path="/data-management/indigenous-nations"
-        element={<IndigenousNationList />}
+        element={
+          <MasterProvider>
+            <IndigenousNationList />
+          </MasterProvider>
+        }
       />
       <Route path="/data-management/proponents" element={<ProponentList />} />
       <Route path="/works" element={<WorkList />} />

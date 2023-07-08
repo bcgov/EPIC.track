@@ -1,22 +1,16 @@
 import React from "react";
-import {
-  TextField,
-  Grid,
-  Button,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
+import { TextField, Grid, Button, FormHelperText } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import codeService from "../../services/codeService";
-import StaffService from "../../services/staffService";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
-import TrackDialog from "../shared/TrackDialog";
 import { Staff } from "../../models/staff";
 import { ListType } from "../../models/code";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
+import { MasterContext } from "../shared/MasterContext";
+import staffService from "../../services/staffService/staffService";
 
 const schema = yup.object().shape({
   email: yup
@@ -26,10 +20,13 @@ const schema = yup.object().shape({
     .test({
       name: "checkDuplicateEmail",
       exclusive: true,
-      message: "User with same email exists",
+      message: "Staff with same email already exists",
       test: async (value, { parent }) => {
-        const result = await StaffService.validateEmail(value, parent["id"]);
-        return !(result.data as never)["exists"];
+        if (value) {
+          const result = await staffService.validateEmail(value, parent["id"]);
+          return !(result.data as never)["exists"];
+        }
+        return true;
       },
     }),
   phone: yup
@@ -46,14 +43,18 @@ const schema = yup.object().shape({
 
 export default function StaffForm({ ...props }) {
   const [positions, setPositions] = React.useState<ListType[]>([]);
-  const [staff, setStaff] = React.useState<Staff>();
-  const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-  const [alertContentText, setAlertContentText] = React.useState<string>();
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const staffId = props.staffId;
+  const ctx = React.useContext(MasterContext);
+  React.useEffect(() => {
+    ctx.setTitle("Staff");
+  }, [ctx.title]);
+
+  React.useEffect(() => {
+    ctx.setId(props.staffId);
+  }, [ctx.id]);
+
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: staff,
+    defaultValues: ctx.item as Staff,
     mode: "onBlur",
   });
 
@@ -64,19 +65,9 @@ export default function StaffForm({ ...props }) {
     reset,
   } = methods;
 
-  const getStaff = async (id: number) => {
-    const result = await StaffService.getStaff(id);
-    if (result.status === 200) {
-      setStaff(result.data as Staff);
-      reset(result.data as Staff);
-    }
-  };
-
   React.useEffect(() => {
-    if (staffId) {
-      getStaff(staffId);
-    }
-  }, [staffId]);
+    reset(ctx.item);
+  }, [ctx.item]);
 
   const getPositions = async () => {
     const positionResult = await codeService.getCodes("positions");
@@ -88,25 +79,9 @@ export default function StaffForm({ ...props }) {
     getPositions();
   }, []);
   const onSubmitHandler = async (data: any) => {
-    setLoading(true);
-    if (staffId) {
-      const result = await StaffService.updateStaff(data);
-      if (result.status === 200) {
-        setAlertContentText("Staff details updated");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    } else {
-      const result = await StaffService.createStaff(data);
-      if (result.status === 201) {
-        setAlertContentText("Staff details inserted");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    }
-    reset();
+    ctx.onSave(data, () => {
+      reset();
+    });
   };
   return (
     <>
@@ -118,6 +93,16 @@ export default function StaffForm({ ...props }) {
           spacing={2}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
+          {ctx.error && (
+            <Grid item xs={12}>
+              <FormHelperText
+                error={true}
+                className="MuiFormHelperText-sizeSmall"
+              >
+                {ctx.error}
+              </FormHelperText>
+            </Grid>
+          )}
           <Grid item xs={6}>
             <TrackLabel>First Name</TrackLabel>
             <TextField
@@ -160,14 +145,14 @@ export default function StaffForm({ ...props }) {
               helperText={errors?.position_id?.message?.toString()}
               getOptionValue={(o: ListType) => o.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
-              defaultValue={staff?.position_id}
+              defaultValue={(ctx.item as Staff)?.position_id}
               options={positions}
               {...register("position_id")}
             />
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={staff?.is_active}
+              defaultChecked={(ctx.item as Staff)?.is_active}
               {...register("is_active")}
             />
             <TrackLabel id="active">Active</TrackLabel>
@@ -177,7 +162,13 @@ export default function StaffForm({ ...props }) {
             xs={12}
             sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
           >
-            <Button variant="outlined" type="reset" onClick={props.onCancel}>
+            <Button
+              variant="outlined"
+              type="reset"
+              onClick={(event) => {
+                ctx.onDialogClose(event, "");
+              }}
+            >
               Cancel
             </Button>
             <Button variant="outlined" type="submit">
@@ -186,24 +177,6 @@ export default function StaffForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      <TrackDialog
-        open={openAlertDialog}
-        dialogTitle={"Success"}
-        dialogContentText={alertContentText}
-        isActionsRequired
-        isCancelRequired={false}
-        isOkRequired
-        onOk={() => {
-          setOpenAlertDialog(false);
-          props.onCancel();
-        }}
-      />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
     </>
   );
 }

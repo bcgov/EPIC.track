@@ -1,31 +1,46 @@
 import React from "react";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
-import { MRT_ColumnDef, MRT_Row } from "material-react-table";
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { RESULT_STATUS } from "../../constants/application-constant";
-import IndigenousNationService from "../../services/indigenousNationService";
+import { MRT_ColumnDef } from "material-react-table";
+import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { EpicTrackPageGridContainer } from "../shared";
-import TrackDialog from "../shared/TrackDialog";
 import IndigenousNationForm from "./IndigneousNationForm";
 import { Staff } from "../../models/staff";
-import StaffService from "../../services/staffService";
+import staffService from "../../services/staffService/staffService";
+import { MasterContext } from "../shared/MasterContext";
 
 export default function IndigenousNationList() {
-  const [resultStatus, setResultStatus] = useState<string>();
-  const [indigenousNations, setIndigenousNations] = useState<
-    IndigenousNation[]
-  >([]);
-  const [indigenousNationID, setIndigenousNationID] = useState<number>();
-  const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] =
-    React.useState<boolean>(false);
-  const titleSuffix = "Indigeneous Nation Details";
+  const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  console.log(indigenousNations);
-  const columns = useMemo<MRT_ColumnDef<IndigenousNation>[]>(
+  const ctx = React.useContext(MasterContext);
+  React.useEffect(() => {
+    ctx.setForm(
+      <IndigenousNationForm indigenousNationID={indigenousNationID} />
+    );
+  }, [indigenousNationID]);
+
+  const onEdit = (id: number) => {
+    setIndigenousNationID(id);
+    ctx.setShowModalForm(true);
+  };
+
+  React.useEffect(() => {
+    ctx.setService(indigenousNationService);
+  }, []);
+
+  const indigenousNations = React.useMemo(
+    () => ctx.data as IndigenousNation[],
+    [ctx.data]
+  );
+
+  const handleDelete = (id: string) => {
+    ctx.setShowDeleteDialog(true);
+    ctx.setId(id);
+  };
+
+  const columns = React.useMemo<MRT_ColumnDef<IndigenousNation>[]>(
     () => [
       {
         accessorKey: "name",
@@ -56,57 +71,15 @@ export default function IndigenousNationList() {
     [staffs]
   );
 
-  const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick") return;
-    setShowDialog(false);
-  };
-  const onEdit = (id: number) => {
-    setIndigenousNationID(id);
-    setShowDialog(true);
-  };
-
-  const handleDelete = (id: number) => {
-    setShowDeleteDialog(true);
-    setIndigenousNationID(id);
-  };
-
   const getStaffs = async () => {
-    const staffsResult = await StaffService.getStaffs();
+    const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
       setStaffs(staffsResult.data as never);
     }
   };
-  useEffect(() => {
+  React.useEffect(() => {
     getStaffs();
   }, []);
-
-  const getIndigenousNations = useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING);
-    try {
-      const indigenousNationsResult =
-        await IndigenousNationService.getIndigenousNations();
-      if (indigenousNationsResult.status === 200) {
-        setIndigenousNations(indigenousNationsResult.data as never);
-      }
-    } catch (error) {
-      console.error("Staff List: ", error);
-    } finally {
-      setResultStatus(RESULT_STATUS.LOADED);
-    }
-  }, []);
-
-  const deleteIndigenousNation = async (id?: number) => {
-    const result = await IndigenousNationService.deleteIndigenousNation(id);
-    if (result.status === 200) {
-      setIndigenousNationID(undefined);
-      setShowDeleteDialog(false);
-      getIndigenousNations();
-    }
-  };
-
-  useEffect(() => {
-    getIndigenousNations();
-  }, [getIndigenousNations]);
 
   return (
     <>
@@ -129,7 +102,7 @@ export default function IndigenousNationList() {
               ],
             }}
             state={{
-              isLoading: resultStatus === RESULT_STATUS.LOADING,
+              isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
             enableRowActions={true}
@@ -153,7 +126,7 @@ export default function IndigenousNationList() {
               >
                 <Button
                   onClick={() => {
-                    setShowDialog(true);
+                    ctx.setShowModalForm(true);
                     setIndigenousNationID(undefined);
                   }}
                   variant="contained"
@@ -165,30 +138,6 @@ export default function IndigenousNationList() {
           />
         </Grid>
       </EpicTrackPageGridContainer>
-      <TrackDialog
-        open={showDialog}
-        dialogTitle={(indigenousNationID ? "Update " : "Create ") + titleSuffix}
-        onClose={(event, reason) => onDialogClose(event, reason)}
-        disableEscapeKeyDown
-        fullWidth
-        maxWidth="md"
-      >
-        <IndigenousNationForm
-          onCancel={onDialogClose}
-          indigenousNationID={indigenousNationID}
-          onSubmitSuccess={getIndigenousNations}
-        />
-      </TrackDialog>
-      <TrackDialog
-        open={showDeleteDialog}
-        dialogTitle="Delete"
-        dialogContentText="Are you sure you want to delete?"
-        okButtonText="Yes"
-        cancelButtonText="No"
-        isActionsRequired
-        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
-        onOk={() => deleteIndigenousNation(indigenousNationID)}
-      />
     </>
   );
 }

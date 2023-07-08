@@ -1,54 +1,54 @@
 import React from "react";
-import {
-  TextField,
-  Grid,
-  Button,
-  MenuItem,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
+import { TextField, Grid, Button } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
-import TrackDialog from "../shared/TrackDialog";
-import IndigenousNationService from "../../services/indigenousNationService";
+import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
-import StaffService from "../../services/staffService";
+import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
+import { MasterContext } from "../shared/MasterContext";
 
-export default function IndigenousNationForm({ ...props }) {
-  const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  const [indigenousNation, setIndigenousNation] =
-    React.useState<IndigenousNation>();
-  const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-  const [alertContentText, setAlertContentText] = React.useState<string>();
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const indigenousNationID = props.indigenousNationID;
-
-  const schema = yup.object().shape({
-    name: yup
-      .string()
-      .required("Name is required")
-      .test(
-        "validate-IndigenousNations",
-        "Indigenous Nation with the given name already exists",
-        async (value) => {
+const schema = yup.object().shape({
+  name: yup
+    .string()
+    .required("Name is required")
+    .test(
+      "validate-IndigenousNations",
+      "Indigenous Nation with the given name already exists",
+      async (value, { parent }) => {
+        if (value) {
           const validateINationsResult =
-            await IndigenousNationService.checkIndigenousNationExists(
+            await indigenousNationService.checkIndigenousNationExists(
               value,
-              indigenousNationID
+              parent["id"]
             );
           return !(validateINationsResult.data as any)["exists"] as boolean;
         }
-      ),
-  });
+        return true;
+      }
+    ),
+});
+
+export default function IndigenousNationForm({ ...props }) {
+  const [staffs, setStaffs] = React.useState<Staff[]>([]);
+  const ctx = React.useContext(MasterContext);
+
+  React.useEffect(() => {
+    ctx.setTitle("Indigenous Nation");
+  }, [ctx.title]);
+
+  React.useEffect(() => {
+    ctx.setId(props.indigenousNationID);
+  }, [ctx.id]);
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: indigenousNation,
+    defaultValues: ctx.item as IndigenousNation,
+    mode: "onBlur",
   });
 
   const {
@@ -58,22 +58,12 @@ export default function IndigenousNationForm({ ...props }) {
     reset,
   } = methods;
 
-  const getIndigenousNation = async (id: number) => {
-    const result = await IndigenousNationService.getIndigenousNation(id);
-    if (result.status === 200) {
-      setIndigenousNation(result.data as IndigenousNation);
-      reset(result.data as IndigenousNation);
-    }
-  };
-
   React.useEffect(() => {
-    if (indigenousNationID) {
-      getIndigenousNation(indigenousNationID);
-    }
-  }, [indigenousNationID]);
+    reset(ctx.item);
+  }, [ctx.item]);
 
   const getStaffs = async () => {
-    const staffsResult = await StaffService.getStaffs();
+    const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
       setStaffs(staffsResult.data as never);
     }
@@ -82,25 +72,9 @@ export default function IndigenousNationForm({ ...props }) {
     getStaffs();
   }, []);
   const onSubmitHandler = async (data: IndigenousNation) => {
-    setLoading(true);
-    if (indigenousNationID) {
-      const result = await IndigenousNationService.updateIndigenousNation(data);
-      if (result.status === 200) {
-        setAlertContentText("Indigenous nation details updated");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    } else {
-      const result = await IndigenousNationService.createIndigenousNation(data);
-      if (result.status === 201) {
-        setAlertContentText("Indigenous nation details inserted");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    }
-    reset();
+    ctx.onSave(data, () => {
+      reset();
+    });
   };
   return (
     <>
@@ -124,7 +98,9 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>Relationship Holder</TrackLabel>
             <ControlledSelectV2
-              defaultValue={indigenousNation?.relationship_holder_id || ""}
+              defaultValue={
+                (ctx.item as IndigenousNation)?.relationship_holder_id || ""
+              }
               getOptionLabel={(o: Staff) => (o ? o.full_name : "")}
               getOptionValue={(o: Staff) => (o ? o.id.toString() : "")}
               options={staffs}
@@ -133,7 +109,7 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={indigenousNation?.is_active}
+              defaultChecked={(ctx.item as IndigenousNation)?.is_active}
               {...register("is_active")}
             />
             <TrackLabel id="active">Active</TrackLabel>
@@ -143,7 +119,13 @@ export default function IndigenousNationForm({ ...props }) {
             xs={12}
             sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
           >
-            <Button variant="outlined" type="reset" onClick={props.onCancel}>
+            <Button
+              variant="outlined"
+              type="reset"
+              onClick={(event) => {
+                ctx.onDialogClose(event, "");
+              }}
+            >
               Cancel
             </Button>
             <Button variant="outlined" type="submit">
@@ -152,23 +134,6 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      <TrackDialog
-        open={openAlertDialog}
-        dialogTitle={"Success"}
-        dialogContentText={alertContentText}
-        isActionsRequired
-        isCancelRequired={false}
-        onOk={() => {
-          setOpenAlertDialog(false);
-          props.onCancel();
-        }}
-      />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
     </>
   );
 }

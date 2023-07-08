@@ -22,7 +22,7 @@ import { DATE_FORMAT } from "../../../constants/application-constant";
 import WorkService from "../../../services/workService";
 import ControlledCheckbox from "../../shared/controlledInputComponents/ControlledCheckbox";
 import { Staff } from "../../../models/staff";
-import StaffService from "../../../services/staffService";
+import staffService from "../../../services/staffService/staffService";
 import TrackDialog from "../../shared/TrackDialog";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
@@ -120,7 +120,7 @@ export default function WorkTombstoneForm({ ...props }) {
   };
 
   const getStaffByPosition = async (position: string) => {
-    const staffResult = await StaffService.getStaffByPosition(position);
+    const staffResult = await staffService.getStaffByPosition(position);
     if (staffResult.status === 200) {
       staffByRoles[position](staffResult.data as never);
     }
