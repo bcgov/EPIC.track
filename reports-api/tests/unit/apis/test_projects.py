@@ -49,7 +49,7 @@ def test_get_projects(client):
 def test_update_project(client):
     """Test update project."""
     payload = {
-        "name": "New Project",
+        "name": "New Project Created",
         "description": "Testing the create project endpoint",
         "latitude": "54.2681",
         "longitude": "-130.3828",
@@ -62,6 +62,7 @@ def test_update_project(client):
     # Create a project
     url = urljoin(API_BASE_URL, "projects")
     response = client.post(url, json=payload)
+
     # Update the project
     payload["name"] = "New Project Updated"
     url = urljoin(API_BASE_URL, f'projects/{response.json["id"]}')
@@ -74,7 +75,7 @@ def test_update_project(client):
 def test_delete_project(client):
     """Test delete project."""
     payload = {
-        "name": "New Project",
+        "name": "New Project for deletion",
         "description": "Testing the create project endpoint",
         "latitude": "54.2681",
         "longitude": "-130.3828",
@@ -88,17 +89,18 @@ def test_delete_project(client):
     projects_url = urljoin(API_BASE_URL, "projects")
     project = client.post(projects_url, json=payload)
     response = client.get(projects_url)
-    assert len(response.json) == 1
+    num_projects = len(response.json)
+    assert num_projects >= 1
     url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
     client.delete(url)
     response = client.get(projects_url)
-    assert len(response.json) == 0
+    assert len(response.json) == num_projects - 1
 
 
 def test_project_detail(client):
     """Test project details."""
     payload = {
-        "name": "New Project",
+        "name": "New Project for details",
         "description": "Testing the create project endpoint",
         "latitude": "54.2681",
         "longitude": "-130.3828",

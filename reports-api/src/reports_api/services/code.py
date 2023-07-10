@@ -41,7 +41,7 @@ class CodeService:
             filters['is_deleted'] = False
         if hasattr(model, 'sort_order'):
             order_by_fields.insert(0, "sort_order")
-        for row in model.query.filter_by(**filters).order_by(text(*order_by_fields)):
+        for row in model.query.filter_by(**filters).order_by(text(",".join(order_by_fields))):
             response['codes'].append(row.as_dict())
 
         current_app.logger.debug('>find_code_values_by_type')

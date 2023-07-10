@@ -33,8 +33,9 @@ from reports_api.models import db as _db
 def app():
     """Return a session-wide application configured in TEST mode."""
     _app = create_app("testing")
-
-    return _app
+    with _app.app_context():
+        yield _app  
+        _db.session.remove()
 
 
 @pytest.fixture(scope="function")
@@ -72,12 +73,12 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """
     with app.app_context():
         # Clear out any existing tables
-        metadata = MetaData(_db.engine)
-        metadata.reflect()
+        metadata = MetaData()
+        metadata.reflect(bind=_db.engine)
         for table in metadata.tables.values():
             for fk in table.foreign_keys:  # pylint: disable=invalid-name
-                _db.engine.execute(DropConstraint(fk.constraint))
-        metadata.drop_all()
+                _db.session.execute(DropConstraint(fk.constraint))
+        metadata.drop_all(_db.engine)
         _db.drop_all()
 
         sequence_sql = """SELECT sequence_name FROM information_schema.sequences
@@ -116,7 +117,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         txn = conn.begin()
 
         options = dict(bind=conn, binds={})
-        sess = db.create_scoped_session(options=options)
+        sess = db._make_scoped_session(options=options)
 
         # establish  a SAVEPOINT just before beginning the test
         # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)

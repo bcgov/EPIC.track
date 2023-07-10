@@ -88,7 +88,7 @@ def upgrade():
                 phase_obj = conn.execute(query, phase).fetchone()
                 if phase_obj is None:
                     phase_obj = conn.execute(
-                        phase_table.insert(phase).returning(
+                        phase_table.insert().values(**phase).returning(
                             (phase_table.c.id).label("id")
                         )
                     )
@@ -98,7 +98,7 @@ def upgrade():
                         .where(phase_table.c.id == phase_obj.id)
                         .values(**phase)
                     )
-                phase_id = phase_obj.id if hasattr(phase_obj,"id") else phase_obj.first()["id"]
+                phase_id = phase_obj.id if hasattr(phase_obj,"id") else phase_obj.mappings().first()["id"]
                 milestones = _filter_dataset(milestones_data, "phase_id", phase_ref)
                 milestone_sort_order = 0
                 for milestone in milestones:
@@ -114,7 +114,7 @@ def upgrade():
                     milestone_obj = conn.execute(query, milestone).fetchone()
                     if milestone_obj is None: 
                         milestone_obj = conn.execute(
-                            milestones_table.insert(milestone).returning(
+                            milestones_table.insert().values(**milestone).returning(
                                 (milestones_table.c.id).label("id")
                             )
                         )
@@ -124,7 +124,7 @@ def upgrade():
                             .where(milestones_table.c.id == milestone_obj.id)
                             .values(**milestone)
                         )
-                    milestone_id = milestone_obj.id if hasattr(milestone_obj,"id") else milestone_obj.first()["id"]
+                    milestone_id = milestone_obj.id if hasattr(milestone_obj,"id") else milestone_obj.mappings().first()["id"]
                     if milestone_ref:
                         outcomes = _filter_dataset(
                             outcomes_data, "milestone_id", milestone_ref
@@ -141,7 +141,7 @@ def upgrade():
                             outcome_obj = conn.execute(query, outcome).fetchone()
                             if outcome_obj is None:
                                 conn.execute(
-                                    outcomes_table.insert(outcome)
+                                    outcomes_table.insert().values(**outcome)
                                 )
                             else:
                                 conn.execute(

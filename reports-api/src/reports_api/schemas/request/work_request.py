@@ -21,105 +21,109 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
     """Work request body schema"""
 
     title = fields.Str(
-        description="Title of work",
+        metadata={"description": "Title of work"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     short_description = fields.Str(
-        description="Short description of work",
+        metadata={"description": "Short description of work"},
         validate=validate.Length(max=500),
         required=True,
     )
     long_description = fields.Str(
-        description="Long description of work",
+        metadata={"description": "Long description of work"},
         validate=validate.Length(max=2000),
         allow_none=True,
-        default=None,
+        load_default=None,
     )
     start_date = fields.DateTime(
-        description="Start date for the work",
+        metadata={"description": "Start date for the work"},
         required=True
     )
 
     ea_act_id = fields.Int(
-        description="EA Act id of the work",
+        metadata={"description": "EA Act id of the work"},
         validate=validate.Range(min=1),
         required=True
     )
 
     work_type_id = fields.Int(
-        description="WorkType id of the work",
+        metadata={"description": "WorkType id of the work"},
         validate=validate.Range(min=1),
         required=True
     )
 
     project_id = fields.Int(
-        description="Project id of the work",
+        metadata={"description": "Project id of the work"},
         validate=validate.Range(min=1),
         required=True
     )
 
     ministry_id = fields.Int(
-        description="Ministry id of the work",
+        metadata={"description": "Ministry id of the work"},
         validate=validate.Range(min=1),
         required=True
     )
     federal_involvement_id = fields.Int(
-        description="Federal involvement id of the work",
+        metadata={"description": "Federal involvement id of the work"},
         validate=validate.Range(min=1),
         required=True
     )
 
     substitution_act_id = fields.Int(
-        description="Substitution act id of the work",
+        metadata={"description": "Substitution act id of the work"},
         validate=validate.Range(min=1),
         allow_none=True
     )
 
     eao_team_id = fields.Int(
-        description="EAO Team id of the work",
+        metadata={"description": "EAO Team id of the work"},
         validate=validate.Range(min=1),
         allow_none=True
     )
 
     responsible_epd_id = fields.Int(
-        description="Responsible EPD id of the work",
+        metadata={"description": "Responsible EPD id of the work"},
         validate=validate.Range(min=1),
         allow_none=True
     )
 
     work_lead_id = fields.Int(
-        description="Work lead id of the work",
+        metadata={"description": "Work lead id of the work"},
         validate=validate.Range(min=1),
         allow_none=True
     )
 
     decision_by_id = fields.Int(
-        description="Decision maker id of the work",
+        metadata={"description": "Decision maker id of the work"},
         validate=validate.Range(min=1),
         allow_none=True
     )
 
-    is_active = fields.Bool(description="Active state of the work")
-    is_watched = fields.Bool(description="Watched state of the work", default=False)
-    is_cac_recommended = fields.Bool(description="Is CAC recommended for the work", default=False)
-    is_pecp_required = fields.Bool(description="Is PCP recommended for the work", default=False)
+    is_active = fields.Bool(
+        metadata={"description": "Active state of the work"})
+    is_watched = fields.Bool(
+        metadata={"description": "Watched state of the work"}, default=False)
+    is_cac_recommended = fields.Bool(
+        metadata={"description": "Is CAC recommended for the work"}, default=False)
+    is_pecp_required = fields.Bool(
+        metadata={"description": "Is PCP recommended for the work"}, default=False)
 
 
 class WorkExistenceQueryParamSchema(RequestQueryParameterSchema):
     """Work existence check query parameters"""
 
     title = fields.Str(
-        description='Title of the work',
+        metadata={"description": "Title of the work"},
         validate=validate.Length(max=150),
         required=True
     )
 
     work_id = fields.Int(
-        description='The id of the work',
+        metadata={"description": "The id of the work"},
         validate=validate.Range(min=1),
-        missing=None
+        load_default=None
     )
 
 
@@ -127,7 +131,7 @@ class WorkIdPathParameterSchema(RequestPathParameterSchema):
     """work id path parameter schema"""
 
     work_id = fields.Int(
-        description='The id of the work',
+        metadata={"description": "The id of the work"},
         validate=validate.Range(min=1),
         required=True
     )

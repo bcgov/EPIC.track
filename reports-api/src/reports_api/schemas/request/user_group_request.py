@@ -20,12 +20,12 @@ class UserGroupBodyParamSchema(RequestBodyParameterSchema):
     """User group body parameter schema"""
 
     group_id_to_update = fields.Str(
-        description='Group id to be updated',
+        metadata={"description": "Group id to be updated"},
         required=True
     )
 
     existing_group_id = fields.Str(
-        description='Existing group id of the user'
+        metadata={"description": "Existing group id of the user"},
     )
 
 
@@ -33,6 +33,6 @@ class UserGroupPathParamSchema(RequestPathParameterSchema):
     """User group path parameter schema"""
 
     user_id = fields.UUID(
-        description='Id of the user',
+        metadata={"description": "Id of the user"},
         required=True
     )

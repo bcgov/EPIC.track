@@ -13,14 +13,14 @@
 # limitations under the License.
 """Base class for code model."""
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from sqlalchemy.ext.declarative import declared_attr
+from reports_api.models.history import Versioned
 
 from reports_api.utils.utcnow import utcnow
 
 from .db import db
 
 
-class CodeTable():  # pylint: disable=too-few-public-methods
+class CodeTable(Versioned):  # pylint: disable=too-few-public-methods
     """This class provides base methods for Code Table."""
 
     id = Column(Integer(), primary_key=True, autoincrement=True)
@@ -33,15 +33,15 @@ class CodeTable():  # pylint: disable=too-few-public-methods
     is_active = Column(Boolean, default=True, server_default='t', nullable=False)
     is_deleted = Column(Boolean, default=False, server_default='f', nullable=False)
 
-    @declared_attr
-    def id(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code."""
-        return Column(Integer)
+    # @declared_attr
+    # def id(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code."""
+    #     return Column(Integer)
 
-    @declared_attr
-    def name(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
-        """Return code name."""
-        return Column(String)
+    # @declared_attr
+    # def name(cls):  # pylint:disable=no-self-argument,function-redefined # noqa: N805
+    #     """Return code name."""
+    #     return Column(String)
 
     @classmethod
     def find_by_id(cls, _id):

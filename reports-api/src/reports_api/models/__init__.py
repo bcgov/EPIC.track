@@ -19,12 +19,18 @@ from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 # Import signal for it to register itself
 from reports_api.signals import before_commit
 
+from .calendar_event import CalendarEvent
 from .code_table import CodeTable
 from .db import db  # noqa: I001
 from .ea_act import EAAct
 from .eao_team import EAOTeam
 from .engagement import Engagement, WorkEngagement
 from .event import Event
+from .event_category import EventCategory
+from .event_field import EventField
+from .event_field_value import EventFieldValue
+from .event_template import EventTemplate
+from .event_type import EventType
 from .federal_involvement import FederalInvolvement
 from .indigenous_category import IndigenousCategory
 from .indigenous_nation import IndigenousNation
@@ -43,26 +49,20 @@ from .position import Position
 from .project import Project
 from .proponent import Proponent
 from .region import Region
+from .reminder_configuration import ReminderConfiguration
+from .responsibility import Responsibility
 from .role import Role
 from .staff import Staff
 from .staff_work_role import StaffWorkRole
 from .sub_types import SubType
 from .substitution_acts import SubstitutionAct
+from .task import Task
+from .task_event import ResponsibleEntityEnum, TaskEvent
+from .task_event_assignee import TaskEventAssignee
+from .task_template import TaskTemplate
 from .types import Type
 from .work import Work
+from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
-from .reminder_configuration import ReminderConfiguration
-from .calendar_event import CalendarEvent
-from .event_category import EventCategory
-from .event_field_value import EventFieldValue
-from .event_field import EventField
-from .event_template import EventTemplate
-from .event_type import EventType
-from .task_event_assignee import TaskEventAssignee
-from .task_event import TaskEvent, ResponsibleEntityEnum
-from .task_template import TaskTemplate
-from .task import Task
-from .work_calendar_event import WorkCalendarEvent
-from .responsibility import Responsibility

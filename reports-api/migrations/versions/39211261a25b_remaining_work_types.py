@@ -73,11 +73,11 @@ def upgrade():
                 phase_obj = conn.execute(query, phase).fetchone()
                 if phase_obj is None:
                     phase_obj = conn.execute(
-                        phase_table.insert(phase).returning(
+                        phase_table.insert().values(**phase).returning(
                             (phase_table.c.id).label("id")
                         )
                     )
-                    phase_id = phase_obj.first()["id"]
+                    phase_id = phase_obj.mappings().first()["id"]
                 milestones = filter(
                     lambda x: x["phase_id"] == phase_ref, milestones_data
                 )
@@ -103,7 +103,7 @@ def upgrade():
 
                     if milestone_obj is None:
                         milestone_obj = conn.execute(
-                            milestones_table.insert(milestone).returning(
+                            milestones_table.insert().values(**milestone).returning(
                                 (milestones_table.c.id).label("milestone_id")
                             )
                         )

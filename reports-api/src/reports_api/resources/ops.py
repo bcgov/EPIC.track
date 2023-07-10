@@ -34,7 +34,7 @@ class Healthz(Resource):
     def get():
         """Return a JSON object stating the health of the Service and dependencies."""
         try:
-            db.engine.execute(SQL)
+            db.session.execute(SQL)
         except exc.SQLAlchemyError:
             return {'message': 'api is down'}, 500
 

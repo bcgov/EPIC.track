@@ -20,22 +20,18 @@ from .user_group_response import UserGroupResponseSchema
 class UserResponseSchema(Schema):
     """User response schema"""
 
-    id = fields.Str(
-        description='Id of the user'
-    )
+    id = fields.Str(metadata={"description": "Id of the user"})
 
     first_name = fields.Str(
-        description='First name of the user',
-        attribute='firstName'
+        metadata={"description": "First name of the user"}, attribute="firstName"
     )
 
     last_name = fields.Str(
-        description='Last name of the user',
-        attribute='lastName'
+        metadata={"description": "Last name of the user"}, attribute="lastName"
     )
 
     email = fields.Str(
-        description='Email of the user',
+        metadata={"description": "Email of the user"},
     )
 
     group = fields.Nested(UserGroupResponseSchema)

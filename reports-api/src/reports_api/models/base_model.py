@@ -13,13 +13,14 @@
 # limitations under the License.
 """Super class to handle all operations related to base model."""
 from sqlalchemy import Boolean, Column, DateTime, String
+from reports_api.models.history import Versioned
 
 from reports_api.utils.utcnow import utcnow
 
 from .db import db
 
 
-class BaseModel(db.Model):
+class BaseModel(Versioned, db.Model):
     """This class manages all of the base model functions."""
 
     __abstract__ = True
