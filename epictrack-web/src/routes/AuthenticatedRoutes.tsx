@@ -22,7 +22,7 @@ const AuthenticatedRoutes = () => {
       <Route
         path="/data-management/staffs"
         element={
-          <MasterProvider>
+          <MasterProvider key={"/data-management/staffs"}>
             <StaffList />
           </MasterProvider>
         }
@@ -41,7 +41,7 @@ const AuthenticatedRoutes = () => {
       <Route
         path="/data-management/indigenous-nations"
         element={
-          <MasterProvider>
+          <MasterProvider key={"/data-management/indigenous-nations"}>
             <IndigenousNationList />
           </MasterProvider>
         }
