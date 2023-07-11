@@ -68,7 +68,7 @@ export const MasterProvider = ({
     if (id && !showDeleteDialog) {
       getById(id);
     }
-  }, [id]);
+  }, [id, showDeleteDialog]);
 
   React.useEffect(() => {
     getData();
