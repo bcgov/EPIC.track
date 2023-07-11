@@ -34,7 +34,7 @@ def app():
     """Return a session-wide application configured in TEST mode."""
     _app = create_app("testing")
     with _app.app_context():
-        yield _app  
+        yield _app
         _db.session.remove()
 
 
