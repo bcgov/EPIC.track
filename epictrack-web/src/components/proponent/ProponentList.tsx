@@ -10,7 +10,7 @@ import { EpicTrackPageGridContainer } from "../shared";
 import TrackDialog from "../shared/TrackDialog";
 import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
-import StaffService from "../../services/staffService";
+import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
 import { sort } from "../../utils";
 
@@ -70,7 +70,7 @@ export default function ProponentList() {
   };
 
   const getStaffs = async () => {
-    const staffsResult = await StaffService.getStaffs();
+    const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
       setStaffs(staffsResult.data as never);
     }

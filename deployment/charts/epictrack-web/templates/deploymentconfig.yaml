@@ -53,7 +53,7 @@ spec:
         resources: {}
         tty: true
         volumeMounts:
-        - mountPath: {{ .Values.mount_path }}
+        - mountPath: {{ .Values.mountPath }}
           name: {{ .Chart.Name }}
           readOnly: true
       restartPolicy: Always
