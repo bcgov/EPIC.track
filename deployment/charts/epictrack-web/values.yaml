@@ -21,5 +21,5 @@ service:
   port: 8080
 replicas:
   count: 1
-mount_path: /usr/share/nginx/html/config/
+mountPath: /usr/share/nginx/html/config/
 
