@@ -1,0 +1,198 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: "{{ .Chart.Name }}"
+  name: "{{ .Chart.Name }}"
+spec:
+  replicas: {{ .Values.replicaCount}}
+  selector:
+    app: {{ .Chart.Name }}
+  strategy:
+    activeDeadlineSeconds: 21600
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+      pre:
+        failurePolicy: Abort
+        execNewPod:
+          command:
+            - /opt/app-root/pre-hook-update-db.sh
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secret }}
+                  key: database-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secret }}
+                  key: database-password
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secret }}
+                  key: database-name
+            - name: DATABASE_HOST
+              value: {{ .Values.database.service.name }}
+            - name: DATABASE_PORT
+              value: "{{ .Values.database.service.port }}"
+          containerName: {{ .Chart.Name }}
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+        - resources:
+            limits:
+              cpu: {{ .Values.resources.cpu.limit }}
+              memory: {{ .Values.resources.memory.limit }}
+            requests:
+              cpu: {{ .Values.resources.cpu.request }}
+              memory: {{ .Values.resources.memory.request }}
+          readinessProbe:
+            httpGet:
+              path: /ops/readyz
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          terminationMessagePath: /dev/termination-log
+          name: {{ .Chart.Name }}
+          livenessProbe:
+            httpGet:
+              path: /ops/healthz
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          env:
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secret }}
+                  key: database-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secret }}
+                  key: database-password
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secret }}
+                  key: database-name
+            - name: DATABASE_HOST
+              value: {{ .Values.database.service.name }}
+            - name: DATABASE_PORT
+              value: {{ .Values.database.service.name }}
+            - name: JWT_OIDC_ALGORITHMS
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: KEYCLOAK_JWT_OIDC_ALGORITHMS
+            - name: JWT_OIDC_AUDIENCE
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: JWT_OIDC_AUDIENCE
+            - name: JWT_OIDC_CACHING_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: KEYCLOAK_JWT_OIDC_CACHING_ENABLED
+            - name: JWT_OIDC_ISSUER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: JWT_OIDC_ISSUER
+            - name: JWT_OIDC_JWKS_CACHE_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: JWT_OIDC_JWKS_CACHE_TIMEOUT
+            - name: JWT_OIDC_WELL_KNOWN_CONFIG
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: JWT_OIDC_WELL_KNOWN_CONFIG
+            - name: PYTHONBUFFERED
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: PYTHONBUFFERED
+            - name: CDOGS_TOKEN_END_POINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: CDOGS_TOKEN_END_POINT
+            - name: CDOGS_API_ENDPOINT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: CDOGS_API_ENDPOINT
+            - name: CDOGS_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: CDOGS_CLIENT_ID
+            - name: CDOGS_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: CDOGS_CLIENT_SECRET
+            - name: KEYCLOAK_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: KEYCLOAK_BASE_URL
+            - name: KEYCLOAK_REALM_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: KEYCLOAK_REALM_NAME
+            - name: KEYCLOAK_ADMIN_CLIENT
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: KEYCLOAK_ADMIN_CLIENT
+            - name: KEYCLOAK_ADMIN_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: KEYCLOAK_ADMIN_SECRET
+            - name: CONNECT_TIMEOUT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Chart.Name }}
+                  key: CONNECT_TIMEOUT
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ tpl .Values.image.repository . }}:{{ .Values.image.tag }}"
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+triggers:
+  - type: ImageChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+        - {{ .Chart.Name }}
+      from:
+        kind: ImageStreamTag
+        namespace: dc383e-tools
+        name: "{{ tpl .Values.image.repository . }}:{{ .Values.image.tag }}"
