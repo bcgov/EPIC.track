@@ -1,0 +1,34 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  labels:
+    app: {{ .Chart.Name }}
+  name: {{ .Chart.Name }}
+spec:
+  output:
+    to:
+      kind: ImageStreamTag
+      name: "{{ .Chart.Name }}:{{ .Values.image.tag }}"
+  resources:
+    limits:
+      cpu: "{{ .Values.resources.cpu.limit }}"
+      memory: "{{ .Values.resources.memory.limit }}"
+    requests:
+      cpu: "{{ .Values.resources.cpu.request }}"
+      memory: "{{ .Values.resources.memory.request }}"
+  successfulBuildsHistoryLimit: 5
+  failedBuildsHistoryLimit: 5
+  runPolicy: Serial
+  source:
+    contextDir: {{ .Values.context.dir }}
+    git:
+      ref: {{ .Values.repository.ref }}
+      uri: {{ .Values.repository.url }}
+  strategy:
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+    type: Docker
+  triggers:
+  - imageChange: {}
+    type: ImageChange
+  - type: ConfigChange

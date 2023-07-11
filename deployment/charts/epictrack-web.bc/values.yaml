@@ -1,0 +1,15 @@
+image:
+  tag: latest
+resources:
+  cpu:
+    request: 500m
+    limit: 1500m
+  memory:
+    request: 2Gi
+    limit: 4Gi
+repository:
+  ref: develop
+  url: https://github.com/bcgov/EPIC-FLOW.git
+context:
+  dir: /epictrack-web
+
