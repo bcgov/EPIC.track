@@ -1,6 +1,7 @@
 import { ListType } from "./code";
+import { MasterBase } from "./type";
 
-export interface Staff {
+export interface Staff extends MasterBase{
     id: number;
     phone: string;
     email: string;

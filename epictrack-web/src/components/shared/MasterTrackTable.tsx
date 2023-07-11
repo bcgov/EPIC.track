@@ -33,7 +33,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
           sortFn: (rowA: any, rowB: any, columnId: string) => {
             return rowA
               ?.getValue(columnId)
-              .localeCompare(rowB?.getValue(columnId), "en", {
+              ?.localeCompare(rowB?.getValue(columnId), "en", {
                 numeric: true,
                 ignorePunctuation: false,
                 sensitivity: "base",

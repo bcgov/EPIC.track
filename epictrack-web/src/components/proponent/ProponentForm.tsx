@@ -15,7 +15,7 @@ import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCh
 import TrackDialog from "../shared/TrackDialog";
 import ProponentService from "../../services/proponentService";
 import { Proponent } from "../../models/proponent";
-import StaffService from "../../services/staffService";
+import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 
 export default function StaffForm({ ...props }) {
@@ -66,7 +66,7 @@ export default function StaffForm({ ...props }) {
   }, [proponentID]);
 
   const getStaffs = async () => {
-    const staffsResult = await StaffService.getStaffs();
+    const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
       setStaffs(staffsResult.data as never);
     }
