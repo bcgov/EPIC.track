@@ -20,7 +20,7 @@ from reports_api.utils.utcnow import utcnow
 from .db import db
 
 
-class CodeTable(Versioned):  # pylint: disable=too-few-public-methods
+class CodeTable():  # pylint: disable=too-few-public-methods
     """This class provides base methods for Code Table."""
 
     id = Column(Integer(), primary_key=True, autoincrement=True)
@@ -105,3 +105,7 @@ class CodeTable(Versioned):  # pylint: disable=too-few-public-methods
             'id': self.id,
             'name': self.name
         }
+
+
+class CodeTableVersioned(Versioned, CodeTable):
+    """This class creates history tables."""

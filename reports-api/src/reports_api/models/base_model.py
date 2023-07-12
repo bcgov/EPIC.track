@@ -20,7 +20,7 @@ from reports_api.utils.utcnow import utcnow
 from .db import db
 
 
-class BaseModel(Versioned, db.Model):
+class BaseModel(db.Model):
     """This class manages all of the base model functions."""
 
     __abstract__ = True
@@ -94,3 +94,9 @@ class BaseModel(Versioned, db.Model):
                 relational_data = getattr(self, relationship, None)
                 result[relationship] = relational_data.as_dict() if relational_data else None
         return result
+
+
+class BaseModelVersioned(Versioned, BaseModel):
+    """This class creates a history table to track changes."""
+
+    __abstract__ = True

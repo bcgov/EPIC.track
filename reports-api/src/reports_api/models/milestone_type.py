@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class MilestoneType(db.Model, CodeTable):
+class MilestoneType(db.Model, CodeTableVersioned):
     """Model class for Milestone Type."""
 
     __tablename__ = 'milestone_types'

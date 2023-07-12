@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class Type(db.Model, CodeTable):
+class Type(db.Model, CodeTableVersioned):
     """Model class for Types."""
 
     __tablename__ = 'types'
@@ -30,6 +30,6 @@ class Type(db.Model, CodeTable):
 
     def as_dict(self):
         """Return JSON Representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result['short_name'] = self.short_name
         return result

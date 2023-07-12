@@ -15,10 +15,10 @@
 
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class TaskTemplate(BaseModel):
+class TaskTemplate(BaseModelVersioned):
     """Model class for Tasks."""
 
     __tablename__ = 'task_templates'

@@ -18,10 +18,10 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.ext.mutable import MutableList
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class InspectionAttendee(BaseModel):
+class InspectionAttendee(BaseModelVersioned):
     """Model class for InspectionAttendee."""
 
     __tablename__ = 'inspection_attendees'

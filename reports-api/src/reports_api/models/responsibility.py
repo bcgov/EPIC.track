@@ -15,10 +15,10 @@
 
 import sqlalchemy as sa
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class Responsibility(BaseModel):
+class Responsibility(BaseModelVersioned):
     """Model class for responsibilities"""
 
     __tablename__ = 'responsibilities'

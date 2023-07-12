@@ -16,11 +16,11 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class PhaseCode(db.Model, CodeTable):
+class PhaseCode(db.Model, CodeTableVersioned):
     """Model class for Phase."""
 
     __tablename__ = 'phase_codes'

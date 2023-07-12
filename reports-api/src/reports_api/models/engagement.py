@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class Engagement(BaseModel):
+class Engagement(BaseModelVersioned):
     """Model class for Engagement."""
 
     __tablename__ = 'engagements'
@@ -44,7 +44,7 @@ class Engagement(BaseModel):
         return super().as_dict(recursive=recursive)
 
 
-class WorkEngagement(BaseModel):
+class WorkEngagement(BaseModelVersioned):
     """Model class for Work Engagements."""
 
     __tablename__ = 'work_engagements'

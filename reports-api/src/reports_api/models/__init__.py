@@ -20,7 +20,7 @@ from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 from reports_api.signals import before_commit
 
 from .calendar_event import CalendarEvent
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db  # noqa: I001
 from .ea_act import EAAct
 from .eao_team import EAOTeam

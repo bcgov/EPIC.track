@@ -17,7 +17,7 @@ import enum
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
 class ResponsibleEntityEnum(enum.Enum):
@@ -31,7 +31,7 @@ class ResponsibleEntityEnum(enum.Enum):
     FederalAgencies = 3
 
 
-class TaskEvent(BaseModel):
+class TaskEvent(BaseModelVersioned):
     """Model class for Tasks."""
 
     __tablename__ = 'task_events'
