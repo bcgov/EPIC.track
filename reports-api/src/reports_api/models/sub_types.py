@@ -16,11 +16,11 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class SubType(db.Model, CodeTable):
+class SubType(db.Model, CodeTableVersioned):
     """Model class for SubTypes."""
 
     __tablename__ = "sub_types"
@@ -33,7 +33,7 @@ class SubType(db.Model, CodeTable):
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return Json representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result["short_name"] = self.short_name
         result["type"] = self.type.as_dict()
         return result

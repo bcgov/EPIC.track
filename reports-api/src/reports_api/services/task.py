@@ -18,7 +18,7 @@ import pandas as pd
 from flask import current_app
 
 from reports_api.exceptions import ResourceNotFoundError
-from reports_api.models import Task, TaskTemplate, Responsibility
+from reports_api.models import Responsibility, Task, TaskTemplate
 from reports_api.schemas import request as req
 
 

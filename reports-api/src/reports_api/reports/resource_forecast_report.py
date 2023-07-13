@@ -23,6 +23,8 @@ from reports_api.models import (
 from .report_factory import ReportFactory
 
 
+# pylint:disable=not-callable
+
 daterange = partial(func.daterange, type_=DATERANGE)
 
 
@@ -246,10 +248,10 @@ class EAResourceForeCastReport(ReportFactory):
                 Project.is_deleted.is_(False),
                 Project.is_active.is_(True),
             )
-            .join(Work)
-            .join(WorkType)
-            .join(EAAct)
-            .outerjoin(EAOTeam)
+            .join(Work, Work.project_id == Project.id)
+            .join(WorkType, Work.work_type_id == WorkType.id)
+            .join(EAAct, Work.ea_act_id == EAAct.id)
+            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
             .join(FederalInvolvement)
             .join(project_phase_query, project_phase_query.c.work_id == Work.id)
             .join(
@@ -262,11 +264,11 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .join(Milestone, Event.milestone_id == Milestone.id)
             .join(project_phase, Milestone.phase_id == project_phase.id)
-            .join(SubType)
-            .join(Type)
+            .join(SubType, Project.sub_type_id == SubType.id)
+            .join(Type, Project.type_id == Type.id)
             .join(env_region, env_region.id == Project.region_id_env)
             .join(nrs_region, nrs_region.id == Project.region_id_flnro)
-            .outerjoin(StaffWorkRole)
+            .outerjoin(StaffWorkRole, Work.id == StaffWorkRole.work_id)
             .outerjoin(
                 Staff,
                 and_(
@@ -321,8 +323,8 @@ class EAResourceForeCastReport(ReportFactory):
                 Event.milestone_id.in_(self.start_event_milestones),
                 func.coalesce(Event.start_date, Event.anticipated_start_date) <= self.end_date,
             )
-            .join(Milestone)
-            .join(PhaseCode)
+            .join(Milestone, Event.milestone_id == Milestone.id)
+            .join(PhaseCode, Milestone.phase_id == PhaseCode.id)
             .order_by(func.coalesce(Event.start_date, Event.anticipated_start_date))
             .add_columns(
                 Event.work_id.label("work_id"),

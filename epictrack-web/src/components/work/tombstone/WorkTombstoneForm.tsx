@@ -112,7 +112,7 @@ export default function WorkTombstoneForm({ ...props }) {
   const getWorkTombstone = async (id: number) => {
     const result = await WorkService.getWork(id);
     if (result.status === 200) {
-      const work = (result.data as any)["work"];
+      const work = result.data as any;
       work.start_date = dayjs(work.start_date);
       setWork(work);
       reset(work);

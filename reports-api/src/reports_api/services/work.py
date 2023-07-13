@@ -13,11 +13,11 @@
 # limitations under the License.
 """Service to manage Works."""
 from datetime import timedelta
+
 from sqlalchemy.orm import aliased
 
 from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
-from reports_api.models import (EAOTeam, Project, Role, Staff, StaffWorkRole,
-                                Work)
+from reports_api.models import EAOTeam, Project, Role, Staff, StaffWorkRole, Work
 from reports_api.services.event import EventService
 from reports_api.services.milestone import MilestoneService
 from reports_api.services.phaseservice import PhaseService

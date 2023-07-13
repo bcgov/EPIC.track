@@ -16,10 +16,10 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class EventField(BaseModel):
+class EventField(BaseModelVersioned):
     """Model class for Event Fields."""
 
     __tablename__ = 'event_fields'

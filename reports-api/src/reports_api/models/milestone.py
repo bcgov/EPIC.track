@@ -18,7 +18,7 @@ from flask import current_app
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 from .db import db
 
 
@@ -29,7 +29,7 @@ class MilestoneKind(enum.Enum):
     ENGAGEMENT = "ENGAGEMENT"
 
 
-class Milestone(BaseModel):
+class Milestone(BaseModelVersioned):
     """Model class for Milestone."""
 
     __tablename__ = "milestones"

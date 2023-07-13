@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class InspectionDetail(BaseModel):
+class InspectionDetail(BaseModelVersioned):
     """Model class for Inspection Details."""
 
     __tablename__ = 'inspection_details'

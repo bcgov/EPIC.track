@@ -45,8 +45,8 @@ def upgrade():
     ]
     conn = op.get_bind()
     for table in tables_to_update:
-        entries = conn.execute(f"SELECT * FROM {table} WHERE name='None' ORDER BY id ")
-        entries = entries.fetchall()
+        entries = conn.execute(sa.text(f"SELECT * FROM {table} WHERE name='None' ORDER BY id "))
+        entries = entries.mappings().fetchall()
         data = [{'id': x['id'], 'sort_order': -1} for x in entries]
         op.execute(
             f"""

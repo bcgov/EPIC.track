@@ -21,19 +21,19 @@ class ReminderConfigurationExistenceQueryParamSchema(RequestQueryParameterSchema
     """ReminderConfiguration request body schema"""
 
     reminder_type = fields.Str(
-        description="Type of reminder configuration",
+        metadata={"description": "Type of reminder configuration"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     position_id = fields.Int(
-        description="Position id for the reminder configuration",
+        metadata={"description": "Position id for the reminder configuration"},
         validate=validate.Range(min=1),
         allow_none=True,
         missing=None
     )
     reminder_configuration_id = fields.Int(
-        description="ID of the reminder configuration",
+        metadata={"description": "ID of the reminder configuration"},
         validate=validate.Range(min=1),
         allow_none=True,
         missing=None

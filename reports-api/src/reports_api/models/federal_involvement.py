@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class FederalInvolvement(db.Model, CodeTable):
+class FederalInvolvement(db.Model, CodeTableVersioned):
     """Model class for FederalInvolvement."""
 
     __tablename__ = 'federal_involvements'

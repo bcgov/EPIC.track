@@ -21,5 +21,6 @@ class TypeIdPathParameterSchema(RequestPathParameterSchema):
     """Type id path parameter schema"""
 
     type_id = fields.Int(
-        description="The id of the type", validate=validate.Range(min=1), required=True
+        metadata={"description": "The id of the type"},
+        validate=validate.Range(min=1), required=True
     )

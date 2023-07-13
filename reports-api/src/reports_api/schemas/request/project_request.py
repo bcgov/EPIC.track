@@ -21,103 +21,103 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
     """Project request body schema"""
 
     name = fields.Str(
-        description="Name of project",
+        metadata={"description": "Name of project"},
         validate=validate.Length(max=150),
         required=True,
     )
     latitude = fields.Str(
-        description="Latitude of project location",
+        metadata={"description": "Latitude of project location"},
         validate=validate.Length(max=150),
         required=True,
     )
     longitude = fields.Str(
-        description="Longitude of project location",
+        metadata={"description": "Longitude of project location"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     capital_investment = fields.Int(
-        description="Capital investment of project",
+        metadata={"description": "Capital investment of project"},
         validate=validate.Range(min=0),
         allow_none=True,
-        default=None,
+        load_default=None,
     )
     epic_guid = fields.Str(
-        description="EPIC GUID of project",
+        metadata={"description": "EPIC GUID of project"},
         validate=validate.Length(max=150),
         allow_none=True,
-        default=None,
+        load_default=None,
     )
     ea_certificate = fields.Str(
-        description="EA Certificate # of project",
+        metadata={"description": "EA Certificate # of project"},
         validate=validate.Length(max=150),
         allow_none=True,
-        default=None,
+        load_default=None,
     )
     abbreviation = fields.Str(
-        description="Abbreviation of the project",
+        metadata={"description": "Abbreviation of the project"},
         validate=validate.Length(max=150),
         allow_none=True,
-        default=None,
+        load_default=None,
     )
     description = fields.Str(
-        description="Description of project",
+        metadata={"description": "Description of project"},
         validate=validate.Length(max=2000),
         required=True,
     )
     address = fields.Str(
-        description="Location description of project",
+        metadata={"description": "Location description of project"},
         validate=validate.Length(max=2000),
         allow_none=True,
-        default=None,
+        load_default=None,
     )
 
     proponent_id = fields.Int(
-        description="Proponent id of the project",
+        metadata={"description": "Proponent id of the project"},
         validate=validate.Range(min=1),
         required=True
     )
 
     type_id = fields.Int(
-        description="Type id of the project",
+        metadata={"description": "Type id of the project"},
         validate=validate.Range(min=1),
         required=True
     )
 
     sub_type_id = fields.Int(
-        description="SubType id of the project",
+        metadata={"description": "SubType id of the project"},
         validate=validate.Range(min=1),
         required=True
     )
 
     region_id_env = fields.Int(
-        description="ENV Region id of the project",
+        metadata={"description": "ENV Region id of the project"},
         validate=validate.Range(min=1),
         required=True
     )
     region_id_flnro = fields.Int(
-        description="NRS Region id of the project",
+        metadata={"description": "NRS Region id of the project"},
         validate=validate.Range(min=1),
         required=True
     )
 
-    is_active = fields.Bool(description="Active state of the project")
-    is_project_closed = fields.Bool(description="Closed state of the project", default=False)
+    is_active = fields.Bool(metadata={"description": "Active state of the project"})
+    is_project_closed = fields.Bool(metadata={"description": "Closed state of the project"}, default=False)
 
 
 class ProjectExistenceQueryParamSchema(RequestQueryParameterSchema):
     """Project existence check query parameters"""
 
     name = fields.Str(
-        description='Name of the project',
+        metadata={"description": "Name of the project"},
         validate=validate.Length(max=150),
         required=True
     )
 
     project_id = fields.Int(
-        description='The id of the project',
+        metadata={"description": "The id of the project"},
         validate=validate.Range(min=1),
-        missing=None
+        load_default=None
     )
 
 
@@ -125,7 +125,7 @@ class ProjectIdPathParameterSchema(RequestPathParameterSchema):
     """project id path parameter schema"""
 
     project_id = fields.Int(
-        description='The id of the project',
+        metadata={"description": "The id of the project"},
         validate=validate.Range(min=1),
         required=True
     )

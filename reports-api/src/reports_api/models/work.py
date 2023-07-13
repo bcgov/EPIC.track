@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class Work(BaseModel):
+class Work(BaseModelVersioned):
     """Model class for Work."""
 
     __tablename__ = 'works'

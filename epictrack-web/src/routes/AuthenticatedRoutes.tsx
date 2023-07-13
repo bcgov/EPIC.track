@@ -20,33 +20,30 @@ const AuthenticatedRoutes = () => {
     <Routes>
       {/* <Route path="/" element={<Dashboard />} /> */}
       <Route
-        path="/data-management/staffs"
+        path="/list-management/staffs"
         element={
-          <MasterProvider key={"/data-management/staffs"}>
+          <MasterProvider key={"/list-management/staffs"}>
             <StaffList />
           </MasterProvider>
         }
       />
-      <Route path="/data-management/projects" element={<ProjectList />} />
+      <Route path="/list-management/projects" element={<ProjectList />} />
       <Route
-        path="/reporting/referral-schedule"
+        path="/reports/referral-schedule"
         element={<AnticipatedEAOSchedule />}
       />
-      <Route
-        path="/reporting/resource-forecast"
-        element={<ResourceForecast />}
-      />
-      <Route path="/reporting/30-60-90" element={<ThirtySixtyNinety />} />
+      <Route path="/reports/resource-forecast" element={<ResourceForecast />} />
+      <Route path="/reports/30-60-90" element={<ThirtySixtyNinety />} />
       <Route path="/templates" element={<TemplateList />} />
       <Route
-        path="/data-management/indigenous-nations"
+        path="/list-management/indigenous-nations"
         element={
-          <MasterProvider key={"/data-management/indigenous-nations"}>
+          <MasterProvider key={"/list-management/indigenous-nations"}>
             <IndigenousNationList />
           </MasterProvider>
         }
       />
-      <Route path="/data-management/proponents" element={<ProponentList />} />
+      <Route path="/list-management/proponents" element={<ProponentList />} />
       <Route path="/works" element={<WorkList />} />
       <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
