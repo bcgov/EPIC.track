@@ -5,13 +5,7 @@ import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import {
-  ETHeading1,
-  ETHeading2,
-  ETHeading3,
-  ETHeading4,
-  EpicTrackPageGridContainer,
-} from "../shared";
+import { EpicTrackPageGridContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
 
@@ -95,10 +89,6 @@ const StaffList = () => {
         rowSpacing={3}
       >
         <Grid item xs={12}>
-          <ETHeading1 bold>Dinesh</ETHeading1>
-          <ETHeading2>Dinesh</ETHeading2>
-          <ETHeading3>Dinesh</ETHeading3>
-          <ETHeading4>Dinesh</ETHeading4>
           <MasterTrackTable
             columns={columns}
             data={staff}
