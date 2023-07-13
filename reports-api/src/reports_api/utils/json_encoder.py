@@ -1,9 +1,9 @@
 """Custom JSON Encoder to handle date conversion"""
 from datetime import date, datetime
+from json import JSONEncoder
 
-from flask.json import JSONEncoder
 
-
+# pylint:disable=too-few-public-methods,invalid-name
 class CustomJSONEncoder(JSONEncoder):
     """Custom JSON Encoder"""
 

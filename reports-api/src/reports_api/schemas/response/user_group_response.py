@@ -18,12 +18,8 @@ from marshmallow import Schema, fields
 class UserGroupResponseSchema(Schema):
     """User group response schema"""
 
-    id = fields.Str(
-        description='Id of the group'
-    )
-    name = fields.Str(
-        description='Name of the group'
-    )
+    id = fields.Str(metadata={"description": "Id of the group"})
+    name = fields.Str(metadata={"description": "Name of the group"})
 
     level = fields.Method("get_level")
 

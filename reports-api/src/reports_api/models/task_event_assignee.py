@@ -16,10 +16,10 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class TaskEventAssignee(BaseModel):
+class TaskEventAssignee(BaseModelVersioned):
     """Model class for Task Event Assignees."""
 
     __tablename__ = 'task_event_assignees'

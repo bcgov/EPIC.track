@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class WorkPhase(BaseModel):
+class WorkPhase(BaseModelVersioned):
     """Model class for WorkPhase."""
 
     __tablename__ = 'work_phases'

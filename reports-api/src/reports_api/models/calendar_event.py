@@ -14,10 +14,10 @@
 """Model to handle all operations related to Calendar Events."""
 
 import sqlalchemy as sa
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class CalendarEvent(BaseModel):
+class CalendarEvent(BaseModelVersioned):
     """Model class for Event Types."""
 
     __tablename__ = 'calendar_events'

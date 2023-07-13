@@ -15,10 +15,10 @@
 
 from sqlalchemy import Column, Integer, String, Text, func
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class ReminderConfiguration(BaseModel):
+class ReminderConfiguration(BaseModelVersioned):
     """Model class for Engagement."""
 
     __tablename__ = "reminder_configurations"

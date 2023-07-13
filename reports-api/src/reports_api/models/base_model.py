@@ -13,6 +13,7 @@
 # limitations under the License.
 """Super class to handle all operations related to base model."""
 from sqlalchemy import Boolean, Column, DateTime, String
+from reports_api.models.history import Versioned
 
 from reports_api.utils.utcnow import utcnow
 
@@ -93,3 +94,9 @@ class BaseModel(db.Model):
                 relational_data = getattr(self, relationship, None)
                 result[relationship] = relational_data.as_dict() if relational_data else None
         return result
+
+
+class BaseModelVersioned(Versioned, BaseModel):
+    """This class creates a history table to track changes."""
+
+    __abstract__ = True

@@ -16,11 +16,11 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class Ministry(db.Model, CodeTable):
+class Ministry(db.Model, CodeTableVersioned):
     """Model class for Ministry."""
 
     __tablename__ = 'ministries'
@@ -34,7 +34,7 @@ class Ministry(db.Model, CodeTable):
 
     def as_dict(self):
         """Return JSON representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result['abbreviation'] = self.abbreviation
         result['combined'] = "-".join([self.name, self.abbreviation])
         result['minister'] = self.minister.as_dict() if self.minister else None

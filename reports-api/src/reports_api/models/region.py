@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class Region(db.Model, CodeTable):
+class Region(db.Model, CodeTableVersioned):
     """Model class for Region."""
 
     __tablename__ = 'regions'
@@ -30,6 +30,6 @@ class Region(db.Model, CodeTable):
 
     def as_dict(self):
         """Return Json representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result['entity'] = self.entity
         return result

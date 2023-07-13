@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class EAOTeam(db.Model, CodeTable):
+class EAOTeam(db.Model, CodeTableVersioned):
     """Model class for EAOTeam."""
 
     __tablename__ = 'eao_teams'

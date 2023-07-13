@@ -14,10 +14,10 @@
 """Model to handle all operations related to Event Categories."""
 
 import sqlalchemy as sa
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class EventCategory(BaseModel):
+class EventCategory(BaseModelVersioned):
     """Model class for Event Categories."""
 
     __tablename__ = 'event_categories'

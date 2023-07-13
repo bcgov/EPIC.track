@@ -69,7 +69,7 @@ def upgrade():
         result = conn.execute(query).fetchone()
         if result is None:
             result = conn.execute(
-                indigenous_categories.insert(in_cat)
+                indigenous_categories.insert().values(**in_cat)
             )
         else:
             conn.execute(

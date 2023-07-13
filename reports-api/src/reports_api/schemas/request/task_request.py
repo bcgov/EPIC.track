@@ -21,77 +21,85 @@ class TaskTemplateBodyParameterSchema(RequestBodyParameterSchema):
     """TaskTemplate request body schema"""
 
     name = fields.Str(
-        description="Name of task template",
+        metadata={"description": "Name of task template"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     ea_act_id = fields.Int(
-        description="EAAct id of the task template",
+        metadata={"description": "EAAct id of the task template"},
         validate=validate.Range(min=1),
         required=True,
     )
 
     phase_id = fields.Int(
-        description="Phase id of the task template",
+        metadata={"description": "Phase id of the task template"},
         validate=validate.Range(min=1),
         required=True,
     )
 
     work_type_id = fields.Int(
-        description="WorkType id of the task template",
+        metadata={"description": "WorkType id of the task template"},
         validate=validate.Range(min=1),
         required=True,
     )
 
-    is_active = fields.Bool(description="Active state of the task", default=False, missing=False)
+    is_active = fields.Bool(
+        metadata={"description": "Active state of the task"},
+        default=False,
+        missing=False,
+    )
 
 
 class TaskBodyParameterSchema(RequestBodyParameterSchema):
     """TaskTemplate request body schema"""
 
     name = fields.Str(
-        description="Name of task",
+        metadata={"description": "Name of task"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     tips = fields.Str(
-        description="Practical info on why/how to do the task",
+        metadata={"description": "Practical info on why/how to do the task"},
         # validate=validate.Length(max=150),
         required=True,
     )
 
     number_of_days = fields.Int(
-        description="Number of days for the task to complete",
+        metadata={"description": "Number of days for the task to complete"},
         validate=validate.Range(min=0),
         required=True,
     )
 
     start_at = fields.Int(
-        description="Number of days from start of phase when task starts",
+        metadata={"description": "Number of days from start of phase when task starts"},
         validate=validate.Range(min=0),
         required=True,
     )
 
     template_id = fields.Int(
-        description="TaskTemplate id of the task",
+        metadata={"description": "TaskTemplate id of the task"},
         validate=validate.Range(min=1),
         required=True,
     )
 
     responsibility_id = fields.Int(
-        description="Responsibility id of the task",
+        metadata={"description": "Responsibility id of the task"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
 
-    is_active = fields.Bool(description="Active state of the task")
+    is_active = fields.Bool(
+        metadata={"description": "Active state of the task"},
+    )
 
 
 class TaskTemplateIdPathParameterSchema(RequestPathParameterSchema):
     """Staff id path parameter schema"""
 
     template_id = fields.Int(
-        description="The id of the template", validate=validate.Range(min=1), required=True
+        metadata={"description": "The id of the template"},
+        validate=validate.Range(min=1),
+        required=True,
     )

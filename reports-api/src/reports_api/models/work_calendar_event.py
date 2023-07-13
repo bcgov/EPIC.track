@@ -16,10 +16,10 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class WorkCalendarEvent(BaseModel):
+class WorkCalendarEvent(BaseModelVersioned):
     """Model class for Work Calendar Events."""
 
     __tablename__ = 'work_calendar_events'

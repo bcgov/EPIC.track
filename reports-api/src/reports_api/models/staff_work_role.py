@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class StaffWorkRole(BaseModel):
+class StaffWorkRole(BaseModelVersioned):
     """Model class for StaffWorkRole."""
 
     __tablename__ = 'staff_work_roles'

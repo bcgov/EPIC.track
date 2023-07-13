@@ -1,6 +1,7 @@
 """Classes for specific report types."""
-from datetime import timedelta
+from datetime import datetime, timedelta
 from io import BytesIO
+from pytz import utc
 
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -16,6 +17,8 @@ from reports_api.models import Event, Milestone, Project, Work, WorkStatus, Work
 
 from .report_factory import ReportFactory
 
+
+# pylint:disable=not-callable
 
 class ThirtySixtyNinetyReport(ReportFactory):
     """EA 30-60-90 Report Generator"""
@@ -209,10 +212,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
         return response
 
     def generate_report(
-        self, report_date, return_type
+        self, report_date: datetime, return_type
     ):  # pylint: disable=too-many-locals
         """Generates a report and returns it"""
-        self.report_date = report_date
+        self.report_date = report_date.astimezone(utc)
         data = self._fetch_data(report_date)
         data = self._format_data(data)
         if return_type == "json" and data:

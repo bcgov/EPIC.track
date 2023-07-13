@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class WorkType(db.Model, CodeTable):
+class WorkType(db.Model, CodeTableVersioned):
     """Model class for WorkType."""
 
     __tablename__ = 'work_types'
@@ -30,7 +30,7 @@ class WorkType(db.Model, CodeTable):
 
     def as_dict(self):
         """Return Json representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result['sort_order'] = self.sort_order
         result['report_title'] = self.report_title
         return result

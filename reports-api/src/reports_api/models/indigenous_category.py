@@ -15,11 +15,11 @@
 
 from sqlalchemy import Boolean, Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class IndigenousCategory(db.Model, CodeTable):
+class IndigenousCategory(db.Model, CodeTableVersioned):
     """Model class for IndigenousCategory."""
 
     __tablename__ = 'indigenous_categories'

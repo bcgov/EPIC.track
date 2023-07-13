@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class Outcome(BaseModel):
+class Outcome(BaseModelVersioned):
     """Model class for Outcome."""
 
     __tablename__ = 'outcomes'

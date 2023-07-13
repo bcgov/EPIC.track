@@ -21,34 +21,34 @@ class ProponentBodyParameterSchema(RequestBodyParameterSchema):
     """Proponent request body schema"""
 
     name = fields.Str(
-        description="Name of proponent",
+        metadata={"description": "Name of proponent"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     relationship_holder_id = fields.Int(
-        description="Relationship holder id of the proponent",
+        metadata={"description": "Relationship holder id of the proponent"},
         validate=validate.Range(min=1),
         allow_none=True,
-        missing=None
+        missing=None,
     )
 
-    is_active = fields.Bool(description="Active state of the proponent")
+    is_active = fields.Bool(metadata={"description": "Active state of the proponent"})
 
 
 class ProponentExistenceQueryParamSchema(RequestQueryParameterSchema):
     """Proponent existence check query parameters"""
 
     name = fields.Str(
-        description='Name of the proponent',
+        metadata={"description": "Name of the proponent"},
         validate=validate.Length(max=150),
-        required=True
+        required=True,
     )
 
     proponent_id = fields.Int(
-        description='The id of the proponent',
+        metadata={"description": "The id of the proponent"},
         validate=validate.Range(min=1),
-        missing=None
+        missing=None,
     )
 
 
@@ -56,7 +56,7 @@ class ProponentIdPathParameterSchema(RequestPathParameterSchema):
     """proponent id path parameter schema"""
 
     proponent_id = fields.Int(
-        description='The id of the proponent',
+        metadata={"description": "The id of the proponent"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
