@@ -18,10 +18,10 @@ from typing import List
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import column_property, relationship
 
-from reports_api.models.base_model import BaseModel
+from reports_api.models.base_model import BaseModelVersioned
 
 
-class Staff(BaseModel):
+class Staff(BaseModelVersioned):
     """Model class for Staff."""
 
     __tablename__ = "staffs"

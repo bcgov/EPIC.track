@@ -16,11 +16,11 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class IndigenousNation(db.Model, CodeTable):
+class IndigenousNation(db.Model, CodeTableVersioned):
     """Model class for IndigenousNation."""
 
     __tablename__ = 'indigenous_nations'
@@ -38,7 +38,7 @@ class IndigenousNation(db.Model, CodeTable):
 
     def as_dict(self):
         """Return JSON Representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result["is_active"] = self.is_active
         result["relationship_holder_id"] = self.relationship_holder_id
         result["relationship_holder"] = (

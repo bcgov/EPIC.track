@@ -18,8 +18,12 @@ These will get initialized by the application using the models
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
+from reports_api.models.history import versioned_session
+
 
 # by convention in the Flask community these are lower case,
 # whereas pylint wants them upper case
 db = SQLAlchemy()  # pylint: disable=invalid-name
 ma = Marshmallow()
+
+versioned_session(db.session)

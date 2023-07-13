@@ -16,11 +16,11 @@
 from sqlalchemy import BOOLEAN, Boolean, Column, ForeignKey, Integer, func
 from sqlalchemy.orm import relationship
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class Proponent(db.Model, CodeTable):
+class Proponent(db.Model, CodeTableVersioned):
     """Model class for Proponent."""
 
     __tablename__ = "proponents"
@@ -40,7 +40,7 @@ class Proponent(db.Model, CodeTable):
 
     def as_dict(self):
         """Return JSON Representation."""
-        result = CodeTable.as_dict(self)
+        result = CodeTableVersioned.as_dict(self)
         result["is_active"] = self.is_active
         result["relationship_holder_id"] = self.relationship_holder_id
         result["relationship_holder"] = (

@@ -8,9 +8,12 @@ from sqlalchemy.orm import aliased
 from reports_api.models import (
     EAAct, Engagement, Event, Milestone, Ministry, PhaseCode, Project, Proponent, Region, SubstitutionAct, Work,
     WorkEngagement, WorkStatus, db)
+from reports_api.models.staff import Staff
 
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
+
+# pylint:disable=not-callable
 
 
 class EAAnticipatedScheduleReport(ReportFactory):
@@ -47,8 +50,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
         start_date = report_date + timedelta(days=-7)
-        eac_decision_by = aliased(Work.eac_decision_by)
-        decision_by = aliased(Work.decision_by)
+        eac_decision_by = aliased(Staff)
+        decision_by = aliased(Staff)
         pecp_event = aliased(Event)
 
         pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()

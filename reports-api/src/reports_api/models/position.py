@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class Position(db.Model, CodeTable):
+class Position(db.Model, CodeTableVersioned):
     """Model class for Postion."""
 
     __tablename__ = 'positions'

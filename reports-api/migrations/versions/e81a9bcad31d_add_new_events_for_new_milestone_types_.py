@@ -61,7 +61,7 @@ def upgrade():
             .where(milestones_table.c.phase_id==8)\
             .order_by(sa.desc(milestones_table.c.id))
     ).fetchmany(2)
-    milestone_to_update = dict(milestones_for_update[0].items())
+    milestone_to_update = dict(milestones_for_update[0]._mapping)
     milestone_to_update['sort_order'] = milestones_for_update[1].sort_order + 1
     conn.execute(
         milestones_table.update()\
@@ -76,7 +76,7 @@ def upgrade():
         last_milestone = conn.execute(milestones_table.select()\
             .where(milestones_table.c.phase_id==phase[0])\
             .order_by(sa.desc(milestones_table.c.sort_order))).first()
-        last_milestone = dict(last_milestone.items())
+        last_milestone = dict(last_milestone._mapping)
         milestones += [{
             'name': milestone_type.name, 'phase_id': phase[0],
             'milestone_type_id': milestone_type[0], 'start_at': 0, 'duration': 0, 'auto': False,

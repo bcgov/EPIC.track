@@ -83,11 +83,11 @@ def upgrade():
                 phase["sort_order"] = phase_sort_order
                 phase["legislated"] = False
                 result = conn.execute(
-                    phase_table.insert(phase).returning(
+                    phase_table.insert().values(**phase).returning(
                         (phase_table.c.id).label("phase_id")
                     )
                 )
-                phase_id = result.first()["phase_id"]
+                phase_id = result.mappings().first()["phase_id"]
                 milestones = _filter_dataset(milestones_data, "phase_id", phase_ref)
                 milestone_sort_order = 0
                 for milestone in milestones:
@@ -97,11 +97,11 @@ def upgrade():
                     milestone["sort_order"] = milestone_sort_order
                     milestone["auto"] = milestone.get('auto', False)
                     result = conn.execute(
-                        milestones_table.insert(milestone).returning(
+                        milestones_table.insert().values(**milestone).returning(
                             (milestones_table.c.id).label("milestone_id")
                         )
                     )
-                    milestone_id = result.first()["milestone_id"]
+                    milestone_id = result.mappings().first()["milestone_id"]
 
                     if milestone_ref:
                         outcomes = _filter_dataset(
@@ -113,7 +113,7 @@ def upgrade():
                             outcome["sort_order"] = outcome_sort_order
                             outcome["milestone_id"] = milestone_id
                             conn.execute(
-                                outcomes_table.insert(outcome)
+                                outcomes_table.insert().values(**outcome)
                             )
 
 

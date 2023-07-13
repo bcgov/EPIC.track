@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class IndigenousWork(BaseModel):
+class IndigenousWork(BaseModelVersioned):
     """Model class for IndigenousWork."""
 
     __tablename__ = 'indigenous_works'

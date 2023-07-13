@@ -16,11 +16,11 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 from .db import db
 
 
-class EventTemplate(BaseModel):
+class EventTemplate(BaseModelVersioned):
     """Model class for Event Template."""
 
     __tablename__ = 'event_templates'

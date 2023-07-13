@@ -16,7 +16,7 @@
 from flask import current_app
 from sqlalchemy import text
 
-from reports_api.models import CodeTable
+from reports_api.models import CodeTableVersioned
 from reports_api.utils.helpers import find_model_from_table_name
 
 
@@ -31,7 +31,7 @@ class CodeService:
     ):  # pylint: disable=dangerous-default-value
         """Find code values by code type."""
         current_app.logger.debug(f'<find_code_values_by_type : {code_type}')
-        model: CodeTable = find_model_from_table_name(code_type)
+        model: CodeTableVersioned = find_model_from_table_name(code_type)
         response = {'codes': []}
         filters = {k: v for k, v in filters.items() if hasattr(model, k)}
         order_by_fields = ["id"]
@@ -41,7 +41,7 @@ class CodeService:
             filters['is_deleted'] = False
         if hasattr(model, 'sort_order'):
             order_by_fields.insert(0, "sort_order")
-        for row in model.query.filter_by(**filters).order_by(text(*order_by_fields)):
+        for row in model.query.filter_by(**filters).order_by(text(",".join(order_by_fields))):
             response['codes'].append(row.as_dict())
 
         current_app.logger.debug('>find_code_values_by_type')
@@ -55,6 +55,6 @@ class CodeService:
     ):
         """Find code values by code type and code."""
         current_app.logger.debug(f'<find_code_value_by_type_and_code : {code_type} - {code}')
-        model: CodeTable = find_model_from_table_name(code_type)
+        model: CodeTableVersioned = find_model_from_table_name(code_type)
         current_app.logger.debug('>find_code_value_by_type_and_code')
         return model.find_by_id(code).as_dict()

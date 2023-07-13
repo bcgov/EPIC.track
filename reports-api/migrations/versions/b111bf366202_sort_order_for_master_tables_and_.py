@@ -114,8 +114,8 @@ def upgrade():
     ]
     conn = op.get_bind()
     for table in tables_to_update:
-        entries = conn.execute(f"SELECT * FROM {table} ORDER BY id")
-        entries = entries.fetchall()
+        entries = conn.execute(sa.text(f"SELECT * FROM {table} ORDER BY id"))
+        entries = entries.mappings().fetchall()
         data = [{'id': x['id'], 'sort_order': i + 1 if x['name'] != 'Other' else 32767} for i, x in enumerate(entries)]
         op.execute(
             f"""

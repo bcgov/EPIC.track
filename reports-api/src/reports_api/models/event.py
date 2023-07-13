@@ -16,10 +16,10 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel
+from .base_model import BaseModelVersioned
 
 
-class Event(BaseModel):
+class Event(BaseModelVersioned):
     """Model class for Event."""
 
     __tablename__ = 'events'

@@ -61,5 +61,5 @@ class FileReport(Resource):
         filters = API.payload.get('filters', None)
         report, file_name = ReportService.generate_report(report_type, report_date, 'file', filters=filters)
         if report:
-            return send_file(BytesIO(report), as_attachment=True, attachment_filename=file_name)
+            return send_file(BytesIO(report), as_attachment=True, download_name=file_name)
         return report, HTTPStatus.NO_CONTENT

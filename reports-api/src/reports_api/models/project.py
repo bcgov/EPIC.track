@@ -15,11 +15,12 @@
 
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import TSTZRANGE
 
-from .base_model import BaseModel
+from .base_model import BaseModel, BaseModelVersioned
 
 
-class Project(BaseModel):
+class Project(BaseModelVersioned):
     """Model class for Project."""
 
     __tablename__ = "projects"
@@ -59,3 +60,17 @@ class Project(BaseModel):
         if query.count() > 0:
             return True
         return False
+
+
+class ProjectSpecialFields(BaseModel):
+    """Model class for tracking project special field values."""
+
+    __tablename__ = "project_special_fields"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    field_name = Column(String(100), nullable=False)
+    field_value = Column(String, nullable=False)
+    time_range = Column(TSTZRANGE, nullable=False)
+
+    project_id = Column(ForeignKey("projects.id"), nullable=False)
+    project = relationship("Project", foreign_keys=[project_id], lazy="select")

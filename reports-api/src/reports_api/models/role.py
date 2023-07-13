@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer, String
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class Role(db.Model, CodeTable):
+class Role(db.Model, CodeTableVersioned):
     """Model class for Role."""
 
     __tablename__ = 'roles'

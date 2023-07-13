@@ -21,32 +21,33 @@ class IndigenousNationBodyParameterSchema(RequestBodyParameterSchema):
     """IndigenousNation request body schema"""
 
     name = fields.Str(
-        description="Name of indigenous nation",
+        metadata={"description": "Name of indigenous nation"},
         validate=validate.Length(max=150),
         required=True,
     )
 
     relationship_holder_id = fields.Int(
-        description="Relationship holder id of the indigenous nation",
+        metadata={"description": "Relationship holder id of the indigenous nation"},
         validate=validate.Range(min=1),
         allow_none=True,
         missing=None
     )
 
-    is_active = fields.Bool(description="Active state of the indigenous nation")
+    is_active = fields.Bool(
+        metadata={"description": "Active state of the indigenous nation"})
 
 
 class IndigenousNationExistenceQueryParamSchema(RequestQueryParameterSchema):
     """IndigenousNation existance check query parameters"""
 
     name = fields.Str(
-        description='Name of the indigenous nation',
+        metadata={"description": "Name of the indigenous nation"},
         validate=validate.Length(max=150),
         required=True
     )
 
     indigenous_nation_id = fields.Int(
-        description='The id of the indigenous nation',
+        metadata={"description": "The id of the indigenous nation"},
         validate=validate.Range(min=1),
         missing=None
     )
@@ -56,7 +57,7 @@ class IndigenousNationIdPathParameterSchema(RequestPathParameterSchema):
     """Indigenous nation id path parameter schema"""
 
     indigenous_nation_id = fields.Int(
-        description='The id of the indigenous nation',
+        metadata={"description": "The id of the indigenous nation"},
         validate=validate.Range(min=1),
         required=True
     )

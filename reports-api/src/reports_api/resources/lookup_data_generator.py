@@ -92,4 +92,4 @@ class Inspections(Resource):
         lookup_data = LookupService.generate_excel(data)
 
         return send_file(lookup_data, as_attachment=True,
-                         attachment_filename=f'Lookups_{os.getenv("FLASK_ENV", "production")}.xlsx')
+                         download_name=f'Lookups_{os.getenv("FLASK_ENV", "production")}.xlsx')

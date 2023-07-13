@@ -15,11 +15,11 @@
 
 from sqlalchemy import Column, Integer
 
-from .code_table import CodeTable
+from .code_table import CodeTableVersioned
 from .db import db
 
 
-class EAAct(db.Model, CodeTable):
+class EAAct(db.Model, CodeTableVersioned):
     """Model class for EAAct."""
 
     __tablename__ = 'ea_acts'
