@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { EpicTrackH1, EpicTrackPageGridContainer } from "../components/shared";
+import { ETHeading1, EpicTrackPageGridContainer } from "../components/shared";
 import React from "react";
 import { IProps } from "./types";
 import ErrorIcon from "@mui/icons-material/ErrorOutlineOutlined";
@@ -19,11 +19,11 @@ const NotFound = React.memo(
         padding={"2em 2em 1em 2em"}
       >
         <Grid item xs={12} justifyContent="center">
-          <EpicTrackH1 align="center">
+          <ETHeading1 align="center">
             Oh no! Something went wrong.
             <br />
             {errorMessage} ({errorCode})
-          </EpicTrackH1>
+          </ETHeading1>
         </Grid>
         <Grid
           item

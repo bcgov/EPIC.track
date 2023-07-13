@@ -8,7 +8,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
 import EnvironmentBanner from "./EnvironmentBanner";
 import SideNav from "../SideNav/SideNav";
-import { EpicTrackH1 } from "../../shared";
+import { ETHeading1 } from "../../shared";
 import UserService from "../../../services/userService";
 import { UIState } from "../../../styles/type";
 import { useAppSelector } from "../../../hooks";
@@ -56,9 +56,9 @@ const Header = () => {
             alt="British Columbia Logo"
           />
           {isMediumScreen ? (
-            <EpicTrackH1 sx={{ flexGrow: 1 }}>EPIC Track</EpicTrackH1>
+            <ETHeading1 sx={{ flexGrow: 1 }}>EPIC Track</ETHeading1>
           ) : (
-            <EpicTrackH1 sx={{ flexGrow: 1 }}>EPIC Track</EpicTrackH1>
+            <ETHeading1 sx={{ flexGrow: 1 }}>EPIC Track</ETHeading1>
           )}
           <Button
             data-testid="button-header"

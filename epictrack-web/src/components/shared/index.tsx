@@ -4,7 +4,8 @@ import { Typography, FormLabel, Grid } from "@mui/material";
 import { SxProps, styled } from "@mui/system";
 import {
   MET_Header_Font_Family,
-  MET_Header_Font_Weight,
+  MET_Header_Font_Weight_Bold,
+  MET_Header_Font_Weight_Regular,
 } from "../../styles/constants";
 
 interface HeaderProps {
@@ -21,13 +22,35 @@ export const EpicTrackPageGridContainer = styled(Grid)(() => ({
   alignItems: "flex-start",
 }));
 
-export const EpicTrackH1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
+export const ETHeading1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       sx={{
         ...sx,
-        fontSize: "1.9375em",
-        fontWeight: bold ? "bold" : MET_Header_Font_Weight,
+        fontSize: "2em",
+        lineHeight: "1.5em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="h1"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+export const ETHeading2 = ({ bold, children, sx, ...rest }: HeaderProps) => {
+  return (
+    <Typography
+      sx={{
+        ...sx,
+        fontSize: "1.75em",
+        lineHeight: "1.4em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
         fontFamily: MET_Header_Font_Family,
       }}
       variant="h2"
@@ -37,29 +60,16 @@ export const EpicTrackH1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     </Typography>
   );
 };
-export const EpicTrackH2 = ({ bold, children, sx, ...rest }: HeaderProps) => {
+export const ETHeading3 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       sx={{
         ...sx,
-        fontSize: "1.9rem",
-        fontWeight: bold ? "bold" : MET_Header_Font_Weight,
-        fontFamily: MET_Header_Font_Family,
-      }}
-      variant="h2"
-      {...rest}
-    >
-      {children}
-    </Typography>
-  );
-};
-export const EpicTrackH3 = ({ bold, children, sx, ...rest }: HeaderProps) => {
-  return (
-    <Typography
-      sx={{
-        ...sx,
-        fontSize: "1.5rem",
-        fontWeight: bold ? "bold" : MET_Header_Font_Weight,
+        fontSize: "1.5em",
+        lineHeight: "1.3em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
         fontFamily: MET_Header_Font_Family,
       }}
       variant="h3"
@@ -69,7 +79,7 @@ export const EpicTrackH3 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     </Typography>
   );
 };
-export const EpicTrackH4 = ({
+export const ETHeading4 = ({
   bold,
   color,
   children,
@@ -81,8 +91,11 @@ export const EpicTrackH4 = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "1.3rem",
-        fontWeight: bold ? "bold" : MET_Header_Font_Weight,
+        fontSize: "1.25em",
+        lineHeight: "1.2em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
         fontFamily: MET_Header_Font_Family,
       }}
       variant="h4"
@@ -93,7 +106,7 @@ export const EpicTrackH4 = ({
   );
 };
 
-export const EpicTrackH5 = ({
+export const ETSubhead = ({
   bold,
   color,
   children,
@@ -105,11 +118,122 @@ export const EpicTrackH5 = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "1rem",
-        fontWeight: bold ? "bold" : MET_Header_Font_Weight,
+        fontSize: "1.125em",
+        lineHeight: "1.3em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
         fontFamily: MET_Header_Font_Family,
       }}
-      variant="h5"
+      variant="subtitle1"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
+export const ETParagraph = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        ...sx,
+        fontSize: "1em",
+        lineHeight: "1.5em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="inherit"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
+export const ETCaption1 = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        ...sx,
+        fontSize: "0.8125em",
+        lineHeight: "1.2em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="caption"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
+export const ETCaption2 = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        ...sx,
+        fontSize: "0.875em",
+        lineHeight: "1.2em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="caption"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
+export const ETCaption3 = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        ...sx,
+        fontSize: "0.75em",
+        lineHeight: "1.3em",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="caption"
       {...rest}
     >
       {children}

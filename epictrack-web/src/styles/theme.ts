@@ -2,14 +2,38 @@ import { createTheme } from "@mui/material";
 export const Palette = {
   primary: {
     main: "#003366",
-    light: "#385989",
-    dark: "#000C3B",
+    light: "#D6EBFF",
+    dark: "#38598A",
+    main100: "#85c2ff",
+    main200: "#3399ff",
+    main300: "#1A5A96",
   },
   secondary: {
-    main: "#FFC107",
-    dark: "#FFAB00",
-    light: "#FFE082",
+    main: "#FCBA19",
+    dark: "#fdc63f",
+    light: "#fff4d9",
+    main100: "#feeec5",
+    main200: "#fedd8c",
+    main300: "#fdd166",
   },
+  success: {
+    main: "#2E8540",
+    dark: "#236430",
+    light: "#d6f1dc",
+    main100: "#c2eaca",
+    main200: "#99dca6",
+    main300: "#70cd83",
+  },
+  error: {
+    main: "#df4d52",
+    dark: "#D8292F",
+    light: "#fcedee",
+    main100: "#f5cacb",
+    main200: "#eb9497",
+    main300: "#e57074",
+  },
+  white: "#FFFFFF",
+  black: "#000000",
   hover: {
     light: "#4C81AF",
   },
@@ -22,20 +46,6 @@ export const Palette = {
   info: {
     main: "#707070",
   },
-  dashboard: {
-    upcoming: {
-      bg: "#FCB92F26",
-      border: "#FCB92F",
-    },
-    open: {
-      bg: "#C8DF8C4D",
-      border: "#839537",
-    },
-    closed: {
-      bg: "#F15A2C1A",
-      border: "#F15A2C",
-    },
-  },
 };
 
 export const BaseTheme = createTheme({
@@ -44,11 +54,13 @@ export const BaseTheme = createTheme({
       main: Palette.primary.main,
       light: Palette.primary.light,
       dark: Palette.primary.dark,
+      contrastText: "#FFFFFF",
     },
     secondary: {
       main: Palette.secondary.main,
       dark: Palette.secondary.dark,
       light: Palette.secondary.light,
+      contrastText: "#000000",
     },
     text: {
       primary: Palette.text.primary,
@@ -89,7 +101,6 @@ export const BaseTheme = createTheme({
   },
   typography: {
     fontFamily: '"BCSans",·"Noto·Sans",·Verdana,·Arial,·sans-serif',
-    fontSize: 16,
     h1: {
       fontWeight: 500,
     },
