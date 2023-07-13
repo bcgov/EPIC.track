@@ -1,8 +1,9 @@
 import { ListType } from "./code";
 import { Ministry } from "./ministry";
 import { Staff } from "./staff";
+import { MasterBase } from "./type";
 
-export interface WorkTombstone {
+export interface Work extends MasterBase {
   id: number;
   title: string;
   short_description: string;

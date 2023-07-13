@@ -1,48 +1,53 @@
 import React from "react";
-import {
-  TextField,
-  Grid,
-  Button,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
+import { TextField, Grid, Button } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
-import TrackDialog from "../shared/TrackDialog";
-import ProponentService from "../../services/proponentService";
 import { Proponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
+import { MasterContext } from "../shared/MasterContext";
+import proponentService from "../../services/proponentService/proponentService";
+
+const schema = yup.object().shape({
+  name: yup
+    .string()
+    .required("Name is required")
+    .test({
+      name: "checkDuplicateProponent",
+      exclusive: true,
+      message:
+        "Proponent/Certificate holder with the given name already exists",
+      test: async (value, { parent }) => {
+        if (value) {
+          const validateProponentResult =
+            await proponentService.checkProponentExists(value, parent["id"]);
+          return !(validateProponentResult.data as any)["exists"] as boolean;
+        }
+        return true;
+      },
+    }),
+});
 
 export default function StaffForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  const [proponent, setProponent] = React.useState<Proponent>();
-  const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-  const [alertContentText, setAlertContentText] = React.useState<string>();
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const proponentID = props.proponentID;
-  const schema = yup.object().shape({
-    name: yup
-      .string()
-      .required("Name is required")
-      .test(
-        "validate-proponent",
-        "Proponent/Certificate Holder with the given name already exists",
-        async (value) => {
-          const validateProponentResult =
-            await ProponentService.checkProponentExists(value, proponentID);
-          return !(validateProponentResult.data as any)["exists"] as boolean;
-        }
-      ),
-    //   responsible_epd_id: yup.string().required('Select position')
-  });
+  const ctx = React.useContext(MasterContext);
+
+  React.useEffect(() => {
+    ctx.setTitle("Proponent/Certificate Holder");
+  }, [ctx.title]);
+
+  React.useEffect(() => {
+    ctx.setId(props.proponentId);
+  }, [ctx.id]);
+
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: proponent,
+    defaultValues: ctx.item as Proponent,
+    mode: "onBlur",
   });
   const {
     register,
@@ -51,19 +56,9 @@ export default function StaffForm({ ...props }) {
     reset,
   } = methods;
 
-  const getProponent = async (id: number) => {
-    const result = await ProponentService.getProponent(id);
-    if (result.status === 200) {
-      setProponent(result.data as never);
-      reset(result.data as never);
-    }
-  };
-
   React.useEffect(() => {
-    if (proponentID) {
-      getProponent(proponentID);
-    }
-  }, [proponentID]);
+    reset(ctx.item);
+  }, [ctx.item]);
 
   const getStaffs = async () => {
     const staffsResult = await staffService.getAll();
@@ -75,25 +70,9 @@ export default function StaffForm({ ...props }) {
     getStaffs();
   }, []);
   const onSubmitHandler = async (data: any) => {
-    setLoading(true);
-    if (proponentID) {
-      const result = await ProponentService.updateProponent(data);
-      if (result.status === 200) {
-        setAlertContentText("Proponent details updated");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    } else {
-      const result = await ProponentService.createProponent(data);
-      if (result.status === 201) {
-        setAlertContentText("Proponent details inserted");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    }
-    reset();
+    ctx.onSave(data, () => {
+      reset();
+    });
   };
   return (
     <>
@@ -117,7 +96,7 @@ export default function StaffForm({ ...props }) {
           <Grid item xs={6}>
             <TrackLabel>Relationship Holder</TrackLabel>
             <ControlledSelectV2
-              defaultValue={proponent?.relationship_holder_id}
+              defaultValue={(ctx.item as Proponent)?.relationship_holder_id}
               options={staffs || []}
               getOptionValue={(o: Staff) => o.id.toString()}
               getOptionLabel={(o: Staff) => o.full_name}
@@ -126,7 +105,7 @@ export default function StaffForm({ ...props }) {
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={proponent?.is_active}
+              defaultChecked={(ctx.item as Proponent)?.is_active}
               {...register("is_active")}
             />
             <TrackLabel id="active">Active</TrackLabel>
@@ -136,7 +115,13 @@ export default function StaffForm({ ...props }) {
             xs={12}
             sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
           >
-            <Button variant="outlined" type="reset" onClick={props.onCancel}>
+            <Button
+              variant="outlined"
+              type="reset"
+              onClick={(event) => {
+                ctx.onDialogClose(event, "");
+              }}
+            >
               Cancel
             </Button>
             <Button variant="outlined" type="submit">
@@ -145,23 +130,6 @@ export default function StaffForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      <TrackDialog
-        open={openAlertDialog}
-        dialogTitle={"Success"}
-        dialogContentText={alertContentText}
-        isActionsRequired
-        isCancelRequired={false}
-        onOk={() => {
-          setOpenAlertDialog(false);
-          props.onCancel();
-        }}
-      />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
     </>
   );
 }

@@ -2,29 +2,35 @@ import React from "react";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
-import { useState, useCallback, useMemo, useEffect } from "react";
-import { RESULT_STATUS } from "../../constants/application-constant";
-import ProponentService from "../../services/proponentService";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { EpicTrackPageGridContainer } from "../shared";
-import TrackDialog from "../shared/TrackDialog";
 import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
-import { sort } from "../../utils";
+import { MasterContext } from "../shared/MasterContext";
+import proponentService from "../../services/proponentService/proponentService";
 
 export default function ProponentList() {
-  const [resultStatus, setResultStatus] = useState<string>();
-  const [proponents, setProponents] = useState<Proponent[]>([]);
-  const [proponentID, setProponentID] = useState<number>();
-  const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] =
-    React.useState<boolean>(false);
-  const titleSuffix = "Proponent Details";
+  const [proponentId, setProponentId] = React.useState<number>();
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
+  const ctx = React.useContext(MasterContext);
 
-  const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
+  React.useEffect(() => {
+    ctx.setForm(<ProponentForm proponentId={proponentId} />);
+  }, [proponentId]);
+
+  const onEdit = (id: number) => {
+    setProponentId(id);
+    ctx.setShowModalForm(true);
+  };
+
+  React.useEffect(() => {
+    ctx.setService(proponentService);
+  }, []);
+
+  const proponents = React.useMemo(() => ctx.data as Proponent[], [ctx.data]);
+  const columns = React.useMemo<MRT_ColumnDef<Proponent>[]>(
     () => [
       {
         accessorKey: "name",
@@ -55,18 +61,9 @@ export default function ProponentList() {
     [staffs]
   );
 
-  const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick") return;
-    setShowDialog(false);
-  };
-  const onEdit = (id: number) => {
-    setProponentID(id);
-    setShowDialog(true);
-  };
-
-  const handleDelete = (id: number) => {
-    setShowDeleteDialog(true);
-    setProponentID(id);
+  const handleDelete = (id: string) => {
+    ctx.setShowDeleteDialog(true);
+    ctx.setId(id);
   };
 
   const getStaffs = async () => {
@@ -75,36 +72,9 @@ export default function ProponentList() {
       setStaffs(staffsResult.data as never);
     }
   };
-  useEffect(() => {
+  React.useEffect(() => {
     getStaffs();
   }, []);
-
-  const getProponents = useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING);
-    try {
-      const proponentsResult = await ProponentService.getProponents();
-      if (proponentsResult.status === 200) {
-        setProponents(sort(proponentsResult.data as never, "name"));
-      }
-    } catch (error) {
-      console.error("Proponent List: ", error);
-    } finally {
-      setResultStatus(RESULT_STATUS.LOADED);
-    }
-  }, []);
-
-  const deleteProponent = async (id?: number) => {
-    const result = await ProponentService.deleteProponent(id);
-    if (result.status === 200) {
-      setProponentID(undefined);
-      setShowDeleteDialog(false);
-      getProponents();
-    }
-  };
-
-  useEffect(() => {
-    getProponents();
-  }, [getProponents]);
 
   return (
     <>
@@ -127,7 +97,7 @@ export default function ProponentList() {
               ],
             }}
             state={{
-              isLoading: resultStatus === RESULT_STATUS.LOADING,
+              isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
             enableRowActions={true}
@@ -151,8 +121,8 @@ export default function ProponentList() {
               >
                 <Button
                   onClick={() => {
-                    setShowDialog(true);
-                    setProponentID(undefined);
+                    ctx.setShowModalForm(true);
+                    setProponentId(undefined);
                   }}
                   variant="contained"
                 >
@@ -163,30 +133,6 @@ export default function ProponentList() {
           />
         </Grid>
       </EpicTrackPageGridContainer>
-      <TrackDialog
-        open={showDialog}
-        dialogTitle={(proponentID ? "Update " : "Create ") + titleSuffix}
-        onClose={(event, reason) => onDialogClose(event, reason)}
-        disableEscapeKeyDown
-        fullWidth
-        maxWidth="md"
-      >
-        <ProponentForm
-          onCancel={onDialogClose}
-          proponentID={proponentID}
-          onSubmitSuccess={getProponents}
-        />
-      </TrackDialog>
-      <TrackDialog
-        open={showDeleteDialog}
-        dialogTitle="Delete"
-        dialogContentText="Are you sure you want to delete?"
-        okButtonText="Yes"
-        cancelButtonText="No"
-        isActionsRequired
-        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
-        onOk={() => deleteProponent(proponentID)}
-      />
     </>
   );
 }

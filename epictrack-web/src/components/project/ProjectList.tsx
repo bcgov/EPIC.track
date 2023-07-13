@@ -1,36 +1,35 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, IconButton, Tooltip } from "@mui/material";
-import { RESULT_STATUS } from "../../constants/application-constant";
+import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import ProjectForm from "./ProjectForm";
 import { Project } from "../../models/project";
-import ProjectService from "../../services/projectService";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import TrackDialog from "../shared/TrackDialog";
 import { EpicTrackPageGridContainer } from "../shared";
-import { Staff } from "../../models/staff";
+import { MasterContext } from "../shared/MasterContext";
+import projectService from "../../services/projectService/projectService";
 
 const ProjectList = () => {
-  const [projects, setProjects] = React.useState<Project[]>([]);
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
   const [subTypes, setSubTypes] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
-  const [resultStatus, setResultStatus] = React.useState<string>();
   const [projectId, setProjectId] = React.useState<number>();
-  const [deleteProjectId, setDeleteProjectId] = React.useState<number>();
-  const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] =
-    React.useState<boolean>(false);
-  const titleSuffix = "Project Details";
-  const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick") return;
-    setShowDialog(false);
-  };
+  const ctx = React.useContext(MasterContext);
+
+  React.useEffect(() => {
+    ctx.setForm(<ProjectForm projectId={projectId} />);
+  }, [projectId]);
+
   const onEdit = (id: number) => {
     setProjectId(id);
-    setShowDialog(true);
+    ctx.setShowModalForm(true);
   };
+
+  React.useEffect(() => {
+    ctx.setService(projectService);
+  }, []);
+
+  const projects = React.useMemo(() => ctx.data as Project[], [ctx.data]);
 
   React.useEffect(() => {
     const types = projects
@@ -47,36 +46,9 @@ const ProjectList = () => {
     setEnvRegions(envRegions);
   }, [projects]);
 
-  const getProject = React.useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING);
-    try {
-      const projectResult = await ProjectService.getProjects();
-      if (projectResult.status === 200) {
-        setProjects(projectResult.data as never);
-      }
-    } catch (error) {
-      console.error("Project List: ", error);
-    } finally {
-      setResultStatus(RESULT_STATUS.LOADED);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    getProject();
-  }, [setProjects]);
-
-  const handleDelete = (id: number) => {
-    setShowDeleteDialog(true);
-    setDeleteProjectId(id);
-  };
-
-  const deleteProject = async (id?: number) => {
-    const result = await ProjectService.deleteProjects(id);
-    if (result.status === 200) {
-      setDeleteProjectId(undefined);
-      setShowDeleteDialog(false);
-      getProject();
-    }
+  const handleDelete = (id: string) => {
+    ctx.setShowDeleteDialog(true);
+    ctx.setId(id);
   };
   const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
     () => [
@@ -142,7 +114,7 @@ const ProjectList = () => {
               ],
             }}
             state={{
-              isLoading: resultStatus === RESULT_STATUS.LOADING,
+              isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
             enableRowActions={true}
@@ -166,7 +138,7 @@ const ProjectList = () => {
               >
                 <Button
                   onClick={() => {
-                    setShowDialog(true);
+                    ctx.setShowModalForm(true);
                     setProjectId(undefined);
                   }}
                   variant="contained"
@@ -178,30 +150,6 @@ const ProjectList = () => {
           />
         </Grid>
       </EpicTrackPageGridContainer>
-      <TrackDialog
-        open={showDialog}
-        dialogTitle={(projectId ? "Update " : "Create ") + titleSuffix}
-        onClose={(event: any, reason: any) => onDialogClose(event, reason)}
-        disableEscapeKeyDown
-        fullWidth
-        maxWidth="md"
-      >
-        <ProjectForm
-          onCancel={onDialogClose}
-          projectId={projectId}
-          onSubmitSuccess={getProject}
-        />
-      </TrackDialog>
-      <TrackDialog
-        open={showDeleteDialog}
-        dialogTitle="Delete"
-        dialogContentText="Are you sure you want to delete?"
-        okButtonText="Yes"
-        cancelButtonText="No"
-        isActionsRequired
-        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
-        onOk={() => deleteProject(deleteProjectId)}
-      />
     </>
   );
 };

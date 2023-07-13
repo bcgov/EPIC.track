@@ -1,69 +1,72 @@
 import React from "react";
-import {
-  TextField,
-  Grid,
-  Button,
-  Divider,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
+import { TextField, Grid, Button, Divider } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { TrackLabel } from "../shared/index";
 import codeService, { Code } from "../../services/codeService";
-import ProjectService from "../../services/projectService";
 import { Project } from "../../models/project";
 import { Proponent } from "../../models/proponent";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
-import TrackDialog from "../shared/TrackDialog";
 import { Region } from "../../models/region";
 import { Type } from "../../models/type";
 import { SubType } from "../../models/subtype";
 import subTypeService from "../../services/subTypeService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
+import { MasterContext } from "../shared/MasterContext";
+import projectService from "../../services/projectService/projectService";
+
+const schema = yup.object<Project>().shape({
+  name: yup
+    .string()
+    .required("Project Name is required")
+    .test({
+      name: "checkDuplicateProjectName",
+      exclusive: true,
+      message: "Project with the given name already exists",
+      test: async (value, { parent }) => {
+        if (value) {
+          const validateProjectResult = await projectService.checkProjectExists(
+            value,
+            parent["id"]
+          );
+          return !(validateProjectResult.data as any)["exists"] as boolean;
+        }
+        return true;
+      },
+    }),
+  type_id: yup.string().required("Type is required"),
+  proponent_id: yup.string().required("Proponent is required"),
+  sub_type_id: yup.string().required("SubType is required"),
+  description: yup.string().required("Project Description is required"),
+  latitude: yup.string().required("Invalid latitude value"),
+  longitude: yup.string().required("Invalid longitude value"),
+  region_id_env: yup.string().required("ENV Region is required"),
+  region_id_flnro: yup.string().required("NRS Region is required"),
+});
 
 export default function ProjectForm({ ...props }) {
-  const [project, setProject] = React.useState<Project>();
   const [envRegions, setEnvRegions] = React.useState<Region[]>();
   const [nrsRegions, setNRSRegions] = React.useState<Region[]>();
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
-  const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-  const [alertContentText, setAlertContentText] = React.useState<string>();
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const projectId = props.projectId;
+  const ctx = React.useContext(MasterContext);
 
-  const schema = yup.object<Project>().shape({
-    name: yup
-      .string()
-      .required("Project Name is required")
-      .test(
-        "validate-Project",
-        "Project with the given name already exists",
-        async (value) => {
-          const validateProjectResult = await ProjectService.checkProjectExists(
-            value,
-            projectId
-          );
-          return !(validateProjectResult.data as any)["exists"] as boolean;
-        }
-      ),
-    type_id: yup.string().required("Type is required"),
-    proponent_id: yup.string().required("Proponent is required"),
-    sub_type_id: yup.string().required("SubType is required"),
-    description: yup.string().required("Project Description is required"),
-    latitude: yup.string().required("Invalid latitude value"),
-    longitude: yup.string().required("Invalid longitude value"),
-    region_id_env: yup.string().required("ENV Region is required"),
-    region_id_flnro: yup.string().required("NRS Region is required"),
-  });
+  React.useEffect(() => {
+    ctx.setTitle("Project");
+  }, [ctx.title]);
+
+  React.useEffect(() => {
+    ctx.setId(props.projectId);
+  }, [ctx.id]);
+
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: project,
+    defaultValues: ctx.item as Project,
+    mode: "onBlur",
   });
-  console.log(project);
+
   const {
     register,
     handleSubmit,
@@ -72,6 +75,10 @@ export default function ProjectForm({ ...props }) {
     reset,
   } = methods;
   const formValues = useWatch({ control });
+
+  React.useEffect(() => {
+    reset(ctx.item);
+  }, [ctx.item]);
 
   const setRegions = (regions: Region[]) => {
     const envRegions = regions.filter((p) => p.entity === "ENV");
@@ -91,17 +98,6 @@ export default function ProjectForm({ ...props }) {
       codeTypes[code]((codeResult.data as never)["codes"]);
     }
   };
-  const getProject = React.useCallback(
-    async (id: number) => {
-      const result = await ProjectService.getProject(id);
-      if (result.status === 200) {
-        const project: Project = result.data as Project;
-        setProject(project);
-        reset(project);
-      }
-    },
-    [project]
-  );
 
   const getSubTypesByType = async () => {
     const subTypeResult = await subTypeService.getSubTypeByType(
@@ -110,7 +106,7 @@ export default function ProjectForm({ ...props }) {
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
       // The subtype select box wasn't resetting when type changes
-      if (formValues.sub_type_id !== project?.sub_type_id) {
+      if (formValues.sub_type_id !== (ctx.item as Project)?.sub_type_id) {
         reset({
           ...formValues,
           sub_type_id: undefined,
@@ -123,13 +119,7 @@ export default function ProjectForm({ ...props }) {
     if (formValues.type_id) {
       getSubTypesByType();
     }
-  }, [formValues.type_id]);
-
-  React.useEffect(() => {
-    if (projectId) {
-      getProject(projectId);
-    }
-  }, [projectId]);
+  }, [formValues.type_id, ctx.item]);
 
   React.useEffect(() => {
     const promises: any[] = [];
@@ -140,25 +130,9 @@ export default function ProjectForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
-    setLoading(true);
-    if (projectId) {
-      const result = await ProjectService.updateProjects(projectId, data);
-      if (result.status === 200) {
-        setAlertContentText("Project details updated");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    } else {
-      const result = await ProjectService.createProjects(data);
-      if (result.status === 201) {
-        setAlertContentText("Project details inserted");
-        setOpenAlertDialog(true);
-        props.onSubmitSuccess();
-        setLoading(false);
-      }
-    }
-    reset();
+    ctx.onSave(data, () => {
+      reset();
+    });
   };
   return (
     <>
@@ -184,7 +158,7 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelectV2
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
-              defaultValue={project?.proponent_id}
+              defaultValue={(ctx.item as Project)?.proponent_id}
               options={proponents || []}
               getOptionValue={(o: Proponent) => o?.id?.toString()}
               getOptionLabel={(o: Proponent) => o.name}
@@ -196,7 +170,7 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelectV2
               key={`type_select_${formValues.type_id}`}
               helperText={errors?.type_id?.message?.toString()}
-              defaultValue={project?.type_id}
+              defaultValue={(ctx.item as Project)?.type_id}
               options={types || []}
               getOptionValue={(o: Type) => o?.id?.toString()}
               getOptionLabel={(o: Type) => o.name}
@@ -208,7 +182,7 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelectV2
               key={`subtype_select_${formValues.sub_type_id}`}
               helperText={errors?.sub_type_id?.message?.toString()}
-              defaultValue={project?.sub_type_id}
+              defaultValue={(ctx.item as Project)?.sub_type_id}
               options={subTypes || []}
               getOptionValue={(o: SubType) => o.id.toString()}
               getOptionLabel={(o: SubType) => o.name}
@@ -261,7 +235,7 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelectV2
               key={`env_select_${formValues.region_id_env}`}
               helperText={errors?.region_id_env?.message?.toString()}
-              defaultValue={project?.region_id_env}
+              defaultValue={(ctx.item as Project)?.region_id_env}
               options={envRegions || []}
               getOptionValue={(o: Region) => o.id.toString()}
               getOptionLabel={(o: Region) => o.name}
@@ -273,7 +247,7 @@ export default function ProjectForm({ ...props }) {
             <ControlledSelectV2
               key={`nrs_select_${formValues.region_id_flnro}`}
               helperText={errors?.region_id_flnro?.message?.toString()}
-              defaultValue={project?.region_id_flnro}
+              defaultValue={(ctx.item as Project)?.region_id_flnro}
               options={nrsRegions || []}
               getOptionValue={(o: Region) => o.id.toString()}
               getOptionLabel={(o: Region) => o.name}
@@ -311,14 +285,14 @@ export default function ProjectForm({ ...props }) {
           </Grid>
           <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={project?.is_project_closed}
+              defaultChecked={(ctx.item as Project)?.is_project_closed}
               {...register("is_project_closed")}
             />
             <TrackLabel id="active">Is the Project Closed?</TrackLabel>
           </Grid>
           <Grid item xs={2} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={project?.is_active}
+              defaultChecked={(ctx.item as Project)?.is_active}
               {...register("is_active")}
             />
             <TrackLabel id="active">Active</TrackLabel>
@@ -328,7 +302,13 @@ export default function ProjectForm({ ...props }) {
             xs={12}
             sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
           >
-            <Button variant="outlined" type="reset" onClick={props.onCancel}>
+            <Button
+              variant="outlined"
+              type="reset"
+              onClick={(event) => {
+                ctx.onDialogClose(event, "");
+              }}
+            >
               Cancel
             </Button>
             <Button variant="outlined" type="submit">
@@ -337,24 +317,6 @@ export default function ProjectForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      <TrackDialog
-        open={openAlertDialog}
-        dialogTitle={"Success"}
-        dialogContentText={alertContentText}
-        isActionsRequired
-        isCancelRequired={false}
-        isOkRequired
-        onOk={() => {
-          setOpenAlertDialog(false);
-          props.onCancel();
-        }}
-      />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
     </>
   );
 }

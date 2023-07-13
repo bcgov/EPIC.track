@@ -2,37 +2,40 @@ import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
-import { RESULT_STATUS } from "../../constants/application-constant";
-import WorkTombstoneForm from "./tombstone/WorkTombstoneForm";
-import { WorkTombstone } from "../../models/work";
-import WorkService from "../../services/workService";
+import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import TrackDialog from "../shared/TrackDialog";
 import { EpicTrackPageGridContainer } from "../shared";
+import { MasterContext } from "../shared/MasterContext";
+import WorkForm from "./WorkForm";
+import workService from "../../services/workService/workService";
+
 const WorkList = () => {
-  const [works, setWorks] = React.useState<WorkTombstone[]>([]);
-  const [resultStatus, setResultStatus] = React.useState<string>();
   const [workId, setWorkId] = React.useState<number>();
-  const [deleteWorkId, setDeleteWorkId] = React.useState<number>();
-  const [showDialog, setShowDialog] = React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] =
-    React.useState<boolean>(false);
   const [phases, setPhases] = React.useState<string[]>([]);
   const [eaActs, setEAActs] = React.useState<string[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [projects, setProjects] = React.useState<string[]>([]);
   const [ministries, setMinistries] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-  const titleSuffix = "Work Details";
-  const onDialogClose = (event: any, reason: any) => {
-    if (reason && reason == "backdropClick") return;
-    setShowDialog(false);
-  };
+  const ctx = React.useContext(MasterContext);
+  React.useEffect(() => {
+    ctx.setForm(<WorkForm workId={workId} />);
+  }, [workId]);
+
   const onEdit = (id: number) => {
     setWorkId(id);
-    setShowDialog(true);
+    ctx.setShowModalForm(true);
   };
 
+  const handleDelete = (id: string) => {
+    ctx.setShowDeleteDialog(true);
+    ctx.setId(id);
+  };
+
+  React.useEffect(() => {
+    ctx.setService(workService);
+  }, []);
+  const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
   const codeTypes: { [x: string]: any } = {
     ea_act: setEAActs,
     work_type: setWorkTypes,
@@ -55,39 +58,7 @@ const WorkList = () => {
     });
   }, [works]);
 
-  const getWorks = React.useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING);
-    try {
-      const workResult = await WorkService.getWorks();
-      if (workResult.status === 200) {
-        setWorks(workResult.data as never);
-      }
-    } catch (error) {
-      console.error("Work List: ", error);
-    } finally {
-      setResultStatus(RESULT_STATUS.LOADED);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    getWorks();
-  }, [getWorks]);
-
-  const handleDelete = (id: number) => {
-    setShowDeleteDialog(true);
-    setDeleteWorkId(id);
-  };
-
-  const deleteWork = async (id?: number) => {
-    const result = await WorkService.deleteWork(id);
-    if (result.status === 200) {
-      setDeleteWorkId(undefined);
-      setShowDeleteDialog(false);
-      getWorks();
-    }
-  };
-
-  const columns = React.useMemo<MRT_ColumnDef<WorkTombstone>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
@@ -169,7 +140,7 @@ const WorkList = () => {
               ],
             }}
             state={{
-              isLoading: resultStatus === RESULT_STATUS.LOADING,
+              isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
             enableRowActions={true}
@@ -193,7 +164,7 @@ const WorkList = () => {
               >
                 <Button
                   onClick={() => {
-                    setShowDialog(true);
+                    ctx.setShowModalForm(true);
                     setWorkId(undefined);
                   }}
                   variant="contained"
@@ -202,34 +173,9 @@ const WorkList = () => {
                 </Button>
               </Box>
             )}
-            // state={{ columnPinning: { right: ["mrt-row-actions"] } }}
           />
         </Grid>
       </EpicTrackPageGridContainer>
-      <TrackDialog
-        open={showDialog}
-        dialogTitle={(workId ? "Update " : "Create ") + titleSuffix}
-        onClose={(event, reason) => onDialogClose(event, reason)}
-        disableEscapeKeyDown
-        fullWidth
-        maxWidth="md"
-      >
-        <WorkTombstoneForm
-          onCancel={onDialogClose}
-          workId={workId}
-          onSubmitSuccess={getWorks}
-        />
-      </TrackDialog>
-      <TrackDialog
-        open={showDeleteDialog}
-        dialogTitle="Delete"
-        dialogContentText="Are you sure you want to delete?"
-        okButtonText="Yes"
-        cancelButtonText="No"
-        isActionsRequired
-        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
-        onOk={() => deleteWork(deleteWorkId)}
-      />
     </>
   );
 };
