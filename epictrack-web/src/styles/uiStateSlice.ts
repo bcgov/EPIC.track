@@ -3,7 +3,7 @@ import { UIState } from "./type";
 
 const initialState: UIState = {
   isDrawerExpanded: true,
-  drawerWidth: 259,
+  drawerWidth: 260,
   showEnvBanner: false,
   toggleDrawerMarginTop: "5rem",
 };

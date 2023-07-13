@@ -1,38 +1,21 @@
 export const Routes: RouteType[] = [
-  { name: "Home", path: "/", base: "/" },
   {
-    name: "Data Management",
-    path: "/engagements",
-    base: "/data-management",
-    routes: [
-      {
-        name: "Staff",
-        path: "/data-management/staffs",
-        base: "/data-management/staffs",
-      },
-      {
-        name: "Indigenous Nations",
-        path: "/data-management/indigenous-nations",
-        base: "/data-management/indigenous-nations",
-      },
-      {
-        name: "Proponents",
-        path: "/data-management/proponents",
-        base: "/data-management/proponents",
-      },
-      {
-        name: "Projects",
-        path: "/data-management/projects",
-        base: "/data-management/projects",
-      },
-    ],
+    name: "All Works",
+    icon: "ListIcon",
+    path: "/works",
+    base: "/works",
   },
-  { name: "Templates", path: "/templates", base: "/templates" },
-  { name: "Works", path: "/works", base: "/works" },
   {
-    name: "Reporting",
-    path: "/reporting",
-    base: "/reporting",
+    name: "My Workplans",
+    icon: "DashboardIcon",
+    path: "/",
+    base: "/",
+  },
+  {
+    name: "Reports",
+    icon: "ReportIcon",
+    path: "/reports",
+    base: "/reports",
     routes: [
       {
         name: "Referral Schedule",
@@ -52,6 +35,35 @@ export const Routes: RouteType[] = [
     ],
   },
   {
+    name: "List Management",
+    icon: "SettingsIcon",
+    path: "/list-management",
+    base: "/list-management",
+    routes: [
+      {
+        name: "Staff",
+        path: "/list-management/staffs",
+        base: "/list-management/staffs",
+      },
+      {
+        name: "Indigenous Nations",
+        path: "/list-management/indigenous-nations",
+        base: "/list-management/indigenous-nations",
+      },
+      {
+        name: "Proponents",
+        path: "/list-management/proponents",
+        base: "/list-management/proponents",
+      },
+      {
+        name: "Projects",
+        path: "/list-management/projects",
+        base: "/list-management/projects",
+      },
+    ],
+  },
+  { name: "Templates", path: "/templates", base: "/templates" },
+  {
     name: "Admin",
     path: "/admin",
     base: "/admin",
@@ -69,5 +81,6 @@ export interface RouteType {
   name: string;
   path: string;
   base: string;
+  icon?: string;
   routes?: RouteType[];
 }
