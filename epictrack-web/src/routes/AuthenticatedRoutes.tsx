@@ -9,9 +9,7 @@ import IndigenousNationList from "../components/indigenousNation/IndigenousNatio
 import ProponentList from "../components/proponent/ProponentList";
 import WorkList from "../components/work/WorkList";
 import ProjectList from "../components/project/ProjectList";
-import Example from "../components/user/UserList";
 import UserList from "../components/user/UserList";
-import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
 import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
 
@@ -27,7 +25,14 @@ const AuthenticatedRoutes = () => {
           </MasterProvider>
         }
       />
-      <Route path="/list-management/projects" element={<ProjectList />} />
+      <Route
+        path="/list-management/projects"
+        element={
+          <MasterProvider key={"/list-management/projects"}>
+            <ProjectList />
+          </MasterProvider>
+        }
+      />
       <Route
         path="/reports/referral-schedule"
         element={<AnticipatedEAOSchedule />}
@@ -43,8 +48,22 @@ const AuthenticatedRoutes = () => {
           </MasterProvider>
         }
       />
-      <Route path="/list-management/proponents" element={<ProponentList />} />
-      <Route path="/works" element={<WorkList />} />
+      <Route
+        path="/list-management/proponents"
+        element={
+          <MasterProvider key={"/list-management/proponents"}>
+            <ProponentList />
+          </MasterProvider>
+        }
+      />
+      <Route
+        path="/works"
+        element={
+          <MasterProvider key={"/works"}>
+            <WorkList />
+          </MasterProvider>
+        }
+      />
       <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
