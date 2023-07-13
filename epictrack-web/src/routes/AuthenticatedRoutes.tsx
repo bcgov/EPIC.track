@@ -14,6 +14,7 @@ import UserList from "../components/user/UserList";
 import CreateTemplateForm from "../components/task/template/CreateTemplateForm";
 import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
+import WorkStaffingList from "../components/workStaffing/WorkStaffingList";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -34,6 +35,7 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/reports/resource-forecast" element={<ResourceForecast />} />
       <Route path="/reports/30-60-90" element={<ThirtySixtyNinety />} />
+      <Route path="/WorkStaffing" element={<WorkStaffingList />} />
       <Route path="/templates" element={<TemplateList />} />
       <Route
         path="/list-management/indigenous-nations"

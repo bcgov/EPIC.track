@@ -35,5 +35,8 @@ const Endpoints = {
   Templates: {
     TEMPLATES: "task-templates",
   },
+  WorkStaffing: {
+    WORK_STAFFING: "work-staffing",
+  },
 };
 export default Endpoints;

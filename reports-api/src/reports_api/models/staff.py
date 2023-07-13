@@ -37,7 +37,7 @@ class Staff(BaseModelVersioned):
 
     position = relationship("Position", foreign_keys=[position_id], lazy="select")
 
-    full_name = column_property(last_name + ", " + first_name)
+    full_name = column_property(first_name + " " + last_name)
 
     def as_dict(self):  # pylint: disable=arguments-differ
         """Return Json representation."""

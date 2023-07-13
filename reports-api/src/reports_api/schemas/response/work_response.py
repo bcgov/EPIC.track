@@ -75,7 +75,7 @@ class WorkStaffRoleReponseSchema(AutoSchemaBase):  # pylint: disable=too-many-an
 
     def get_full_name(self, instance):
         """Get the full name"""
-        return f"{instance['last_name']}, {instance['first_name']}"
+        return f"{instance['first_name']}, {instance['last_name']}"
     role = fields.Nested(RoleSchema)
 
     @pre_dump()

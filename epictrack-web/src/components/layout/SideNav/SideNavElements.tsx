@@ -63,6 +63,7 @@ export const Routes: RouteType[] = [
     ],
   },
   { name: "Templates", path: "/templates", base: "/templates" },
+  { name: "Work Staffing", path: "/workstaffing", base: "/workstaffing" },
   {
     name: "Admin",
     path: "/admin",

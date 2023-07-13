@@ -1,3 +1,4 @@
+import { ByRoleMatcher } from "@testing-library/react";
 import { ListType } from "./code";
 import { MasterBase } from "./type";
 
@@ -11,4 +12,10 @@ export interface Staff extends MasterBase{
     last_name: string;
     full_name: string;
     position: ListType;
+    role:Role;
+}
+
+export interface Role {
+    id: string;
+    name: string;
 }
