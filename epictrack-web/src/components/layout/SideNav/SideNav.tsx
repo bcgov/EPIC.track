@@ -18,9 +18,9 @@ import Collapse from "@mui/material/Collapse";
 import { Routes } from "./SideNavElements";
 import { Palette } from "../../../styles/theme";
 import { SideNavProps } from "./types";
-import { When, Unless } from "react-if";
 import { useAppSelector } from "../../../hooks";
 import Icons from "../../icons";
+import { groupBy } from "../../../utils";
 
 const ListItemButtonStyled = styled(ListItemButton)({
   padding: "16px 24px 16px 24px",
@@ -50,12 +50,6 @@ const DrawerBox = () => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState<{ [x: string]: boolean }>({});
   const location = useLocation();
-  // console.log(Icons);
-  // const getCurrentBaseRoute = () => {
-  //   return Routes.map((route) => route.base)
-  //     .filter((route) => location.pathname.includes(route))
-  //     .reduce((prev, curr) => (prev.length > curr.length ? prev : curr));
-  // };
   const handleClick = (route: any) => {
     if (route.routes && route.routes.length > 0) {
       setOpen((prevState: any) => ({
@@ -65,6 +59,11 @@ const DrawerBox = () => {
       navigate(route.path);
     }
   };
+
+  const groupedRoutes = React.useMemo(
+    () => groupBy(Routes, (p) => p.group),
+    []
+  );
 
   return (
     <Box
@@ -76,76 +75,102 @@ const DrawerBox = () => {
       }}
     >
       <List sx={{ paddingTop: "2.5em" }}>
-        {Routes.map((route, i) => (
-          <React.Fragment key={i}>
-            <ListItem
-              key={i}
-              sx={{
-                paddingLeft: "0px",
-                paddingRight: "0px",
-              }}
-            >
-              <ListItemButtonStyled
-                data-testid={`SideNav/${route.name}-button`}
-                onClick={() => handleClick(route)}
-              >
-                {route.icon && (
-                  <ListItemIconStyled>{Icons[route.icon]}</ListItemIconStyled>
-                )}
-                <ListItemText
-                  primary={
-                    <Typography className="sidebar-item">
-                      {route.name}
-                    </Typography>
-                  }
-                />
-                {route?.routes &&
-                route?.routes?.length > 0 &&
-                !!open[route.name] ? (
-                  <ExpandLess className="sidebar-item" />
-                ) : (
-                  <ExpandMore className="sidebar-item" />
-                )}
-              </ListItemButtonStyled>
-            </ListItem>
-            {route.routes && route.routes?.length > 0 && (
-              <Collapse in={!!open[route.name]} timeout="auto" unmountOnExit>
-                <List disablePadding key={`list-${route.name}`}>
-                  {route.routes?.map((subRoute, i) => (
-                    <ListItem
-                      key={`sub-list-${subRoute?.name}`}
-                      sx={{
-                        paddingLeft: "0px",
-                        paddingRight: "0px",
-                      }}
-                    >
-                      <ListItemButtonStyled
-                        onClick={() => handleClick(subRoute)}
+        <>
+          {Object.keys(groupedRoutes).map((groupKey) => {
+            return (
+              <>
+                {groupedRoutes[groupKey].map((route, i) => {
+                  console.log(groupKey, route.path);
+                  return (
+                    <>
+                      <ListItem
+                        key={i}
+                        sx={{
+                          padding: "0px 0px 0px 0px",
+                        }}
                       >
-                        <ListItemText
-                          sx={{
-                            marginLeft: "40px",
-                          }}
-                          primary={
-                            <Typography
-                              className={`sidebar-item ${
-                                location.pathname === subRoute.base
-                                  ? "active"
-                                  : ""
-                              }`}
-                            >
-                              {subRoute.name}
-                            </Typography>
-                          }
-                        />
-                      </ListItemButtonStyled>
-                    </ListItem>
-                  ))}
-                </List>
-              </Collapse>
-            )}
-          </React.Fragment>
-        ))}
+                        <ListItemButtonStyled
+                          data-testid={`SideNav/${route.name}-button`}
+                          onClick={() => handleClick(route)}
+                        >
+                          {route.icon && (
+                            <ListItemIconStyled>
+                              {Icons[route.icon]}
+                            </ListItemIconStyled>
+                          )}
+                          <ListItemText
+                            primary={
+                              <Typography
+                                className={`sidebar-item ${
+                                  location.pathname === route.path
+                                    ? "active"
+                                    : ""
+                                }`}
+                              >
+                                {route.name}
+                              </Typography>
+                            }
+                          />
+                          {route?.routes &&
+                            (route?.routes?.length > 0 && !!open[route.name] ? (
+                              <ExpandLess className="sidebar-item" />
+                            ) : (
+                              <ExpandMore className="sidebar-item" />
+                            ))}
+                        </ListItemButtonStyled>
+                      </ListItem>
+                      {route.routes && route.routes?.length > 0 && (
+                        <Collapse
+                          in={!!open[route.name]}
+                          timeout="auto"
+                          unmountOnExit
+                        >
+                          <List disablePadding key={`list-${route.name}`}>
+                            {route.routes?.map((subRoute, i) => (
+                              <ListItem
+                                key={`sub-list-${subRoute?.name}`}
+                                sx={{
+                                  paddingLeft: "0px",
+                                  paddingRight: "0px",
+                                }}
+                              >
+                                <ListItemButtonStyled
+                                  onClick={() => handleClick(subRoute)}
+                                >
+                                  <ListItemText
+                                    sx={{
+                                      marginLeft: "40px",
+                                    }}
+                                    primary={
+                                      <Typography
+                                        className={`sidebar-item ${
+                                          location.pathname === subRoute.path
+                                            ? "active"
+                                            : ""
+                                        }`}
+                                      >
+                                        {subRoute.name}
+                                      </Typography>
+                                    }
+                                  />
+                                </ListItemButtonStyled>
+                              </ListItem>
+                            ))}
+                          </List>
+                        </Collapse>
+                      )}
+                    </>
+                  );
+                })}
+                <ListItem
+                  sx={{
+                    height: "1.5rem",
+                  }}
+                ></ListItem>
+              </>
+            );
+          })}
+        </>
       </List>
     </Box>
   );

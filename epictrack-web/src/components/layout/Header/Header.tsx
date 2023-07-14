@@ -3,7 +3,6 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import { useMediaQuery, Theme, IconButton, Button } from "@mui/material";
-import { When } from "react-if";
 import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
 import EnvironmentBanner from "./EnvironmentBanner";
@@ -33,7 +32,7 @@ const Header = () => {
       >
         <CssBaseline />
         <Toolbar>
-          <When condition={!isMediumScreen}>
+          {!isMediumScreen && (
             <IconButton
               component={MenuIcon}
               color="info"
@@ -44,7 +43,7 @@ const Header = () => {
               }}
               onClick={() => setOpen(!open)}
             />
-          </When>
+          )}
           <Box
             component="img"
             sx={{
