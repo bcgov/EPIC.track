@@ -84,3 +84,13 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
         validate=validate.Range(min=1),
         required=True,
     )
+
+
+class StaffEmailPathParameterSchema(RequestPathParameterSchema):
+    """Staff email path parameter schema"""
+
+    email = fields.Str(
+        metadata={"description": "The email of the staff"},
+        validate=validate.Email(),
+        required=True,
+    )

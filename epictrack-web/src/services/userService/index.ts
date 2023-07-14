@@ -5,6 +5,8 @@ import { AppConfig } from "../../config";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 import { UserDetail, UserGroupUpdate } from "./type";
+import staffService from "../staffService/staffService";
+import { Staff } from "../../models/staff";
 
 const KeycloakData: Keycloak = new Keycloak({
   clientId: AppConfig.keycloak.clientId,
@@ -55,10 +57,18 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     }
 
     const userInfo: any = await KeycloakData.loadUserInfo();
+    const staffProfile: Staff = (
+      await staffService.getByEmail(userInfo["email"])
+    ).data as Staff;
     const userDetail = new UserDetail(
       userInfo["sub"],
       userInfo["preferred_username"],
-      userInfo["groups"]
+      userInfo["groups"],
+      userInfo["given_name"],
+      userInfo["family_name"],
+      userInfo["email"],
+      staffProfile.phone,
+      staffProfile.position.name
     );
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));

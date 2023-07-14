@@ -7,11 +7,13 @@ import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
 import EnvironmentBanner from "./EnvironmentBanner";
 import SideNav from "../SideNav/SideNav";
-import { ETHeading1 } from "../../shared";
 import UserService from "../../../services/userService";
 import { UIState } from "../../../styles/type";
 import { useAppSelector } from "../../../hooks";
-import logoPath from "../../../assets/images/bcgovlogo.png";
+import BCGovLogo from "../../../assets/images/bcgovLogoWhite.svg";
+import EpicTrackLogo from "../../../assets/images/epicTrackLogo.svg";
+
+import ProfileMenu from "./ProfileMenu";
 
 const Header = () => {
   const [open, setOpen] = React.useState(false);
@@ -49,16 +51,25 @@ const Header = () => {
             sx={{
               height: "5em",
               width: { xs: "7em" },
-              marginRight: { xs: "1em", md: "3em" },
+              marginRight: { xs: "1em", md: "2em" },
+              marginLeft: { xs: "1em", md: "2em" },
             }}
-            src={logoPath}
-            alt="British Columbia Logo"
+            src={BCGovLogo}
+            alt="British Columbia"
           />
-          {isMediumScreen ? (
-            <ETHeading1 sx={{ flexGrow: 1 }}>EPIC Track</ETHeading1>
-          ) : (
-            <ETHeading1 sx={{ flexGrow: 1 }}>EPIC Track</ETHeading1>
-          )}
+          <Box sx={{ flexGrow: 1, display: "flex" }}>
+            <Box
+              component="img"
+              sx={{
+                height: "5em",
+                width: { xs: "7em" },
+                marginRight: { xs: "1em", md: "3em" },
+              }}
+              src={EpicTrackLogo}
+              alt="EPIC.track"
+            />
+          </Box>
+          <ProfileMenu />
           <Button
             data-testid="button-header"
             color="inherit"

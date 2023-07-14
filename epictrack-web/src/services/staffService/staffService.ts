@@ -47,6 +47,12 @@ class StaffService implements ServiceBase {
       AppConfig.apiUrl + Endpoints.Staffs.STAFFS + `/exists?${params}`
     );
   }
+
+  async getByEmail(email: string) {
+    return await http.GetRequest(
+      AppConfig.apiUrl + Endpoints.Staffs.STAFFS + `/${email}`
+    );
+  }
 }
 
 export default new StaffService();

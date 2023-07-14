@@ -87,3 +87,7 @@ class Staff(BaseModelVersioned):
         if query.count() > 0:
             return True
         return False
+
+    @classmethod
+    def find_by_email(cls, email):
+        return cls.query.filter(Staff.email==email).first()
