@@ -4,7 +4,7 @@ Flask-Caching
 Flask-Migrate
 Flask-Moment
 Flask-SQLAlchemy==3.0.5
-flask-restx
+flask-restx==1.1.0
 flask-jwt-oidc
 python-dotenv
 psycopg2-binary
