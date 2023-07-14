@@ -94,3 +94,8 @@ class StaffService:
     def check_existence(cls, email, staff_id=None):
         """Checks if a staff exists with given email address"""
         return Staff.check_existence(email, staff_id)
+
+    @classmethod
+    def find_by_email(cls, email):
+        """Find staff by email address"""
+        return Staff.find_by_email(email)

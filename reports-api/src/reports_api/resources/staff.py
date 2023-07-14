@@ -118,3 +118,21 @@ class ValidateStaff(Resource):
             {'exists': exists},
             HTTPStatus.OK,
         )
+
+
+@cors_preflight('GET')
+@API.route('/<string:email>', methods=['GET', 'OPTIONS'])
+class StaffByEmail(Resource):
+    """Endpoint resource to return staff details by email."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def get(email):
+        """Return a staff detail based on email."""
+        req.StaffEmailPathParameterSchema().load(request.view_args)
+        staff = StaffService.find_by_email(email)
+        if staff:
+            return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
+        raise ResourceNotFoundError(f'Staff with id "{email}" not found')

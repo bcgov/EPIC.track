@@ -12,6 +12,11 @@ const initialState: UserState = {
     sub: "",
     groups: [],
     preferred_username: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    position: "",
   },
 };
 

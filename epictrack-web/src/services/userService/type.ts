@@ -16,9 +16,28 @@ export class UserDetail {
   sub: string;
   preferred_username: string;
   groups: string[];
-  constructor(sub: string, preferred_username: string, groups: string[]) {
+  firstName: string;
+  lastName: string;
+  email: string;
+  position: string;
+  phone: string;
+  constructor(
+    sub: string,
+    preferred_username: string,
+    groups: string[],
+    firstName: string,
+    lastName: string,
+    email: string,
+    phone: string,
+    position: string
+  ) {
     this.sub = sub;
     this.preferred_username = preferred_username;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.phone = phone;
+    this.position = position;
     this.groups = groups.map((p) => p.substring(1, p.length));
   }
 }

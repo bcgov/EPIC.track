@@ -20,8 +20,8 @@ from .proponent_request import (
     ProponentBodyParameterSchema, ProponentExistenceQueryParamSchema, ProponentIdPathParameterSchema)
 from .reminder_configuration_request import ReminderConfigurationExistenceQueryParamSchema
 from .staff_request import (
-    StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffExistanceQueryParamSchema,
-    StaffIdPathParameterSchema)
+    StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffEmailPathParameterSchema,
+    StaffExistanceQueryParamSchema, StaffIdPathParameterSchema)
 from .task_request import TaskBodyParameterSchema, TaskTemplateBodyParameterSchema, TaskTemplateIdPathParameterSchema
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
