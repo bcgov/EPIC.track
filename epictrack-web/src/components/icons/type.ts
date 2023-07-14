@@ -6,3 +6,11 @@ export type Icon =
 | "GearIcon"
 | "PenIcon"
 | "GridIcon";
+
+export interface IconProps {
+    className?: string;
+    width?: string;
+    height?: string;
+    viewBox?: string;
+    fill?: string; 
+}
