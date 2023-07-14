@@ -1,77 +1,83 @@
+import { Icon } from "../../icons/type";
+
 export const Routes: RouteType[] = [
-  {
-    name: "All Works",
-    icon: "ListIcon",
-    path: "/works",
-    base: "/works",
-  },
   {
     name: "My Workplans",
     icon: "DashboardIcon",
     path: "/",
-    base: "/",
+    group: "Group1",
+  },
+  {
+    name: "All Works",
+    icon: "AllIcon",
+    path: "/works",
+    group: "Group1",
   },
   {
     name: "Reports",
     icon: "ReportIcon",
     path: "/reports",
-    base: "/reports",
+    group: "Group2",
     routes: [
       {
         name: "Referral Schedule",
         path: "/reporting/referral-schedule",
-        base: "/reporting/referral-schedule",
       },
       {
         name: "Resource Forecast",
         path: "/reporting/resource-forecast",
-        base: "/reporting/resource-forecast",
       },
       {
         name: "30-60-90",
         path: "/reporting/30-60-90",
-        base: "/reporting/30-60-90",
       },
     ],
   },
   {
+    name: "Insights",
+    icon: "InsightIcon",
+    path: "/insights",
+    group: "Group2",
+  },
+  {
+    name: "Templates",
+    path: "/templates",
+    group: "Group3",
+    icon: "PenIcon",
+  },
+  {
     name: "List Management",
-    icon: "SettingsIcon",
+    icon: "GridIcon",
     path: "/list-management",
-    base: "/list-management",
+    group: "Group3",
     routes: [
       {
         name: "Staff",
         path: "/list-management/staffs",
-        base: "/list-management/staffs",
       },
       {
         name: "Indigenous Nations",
         path: "/list-management/indigenous-nations",
-        base: "/list-management/indigenous-nations",
       },
       {
         name: "Proponents",
         path: "/list-management/proponents",
-        base: "/list-management/proponents",
       },
       {
         name: "Projects",
         path: "/list-management/projects",
-        base: "/list-management/projects",
       },
     ],
   },
-  { name: "Templates", path: "/templates", base: "/templates" },
   {
     name: "Admin",
     path: "/admin",
-    base: "/admin",
+    icon: "GearIcon",
+    group: "Group4",
     routes: [
       {
         name: "Users",
         path: "/admin/users",
-        base: "/admin/users",
       },
     ],
   },
@@ -80,7 +86,7 @@ export const Routes: RouteType[] = [
 export interface RouteType {
   name: string;
   path: string;
-  base: string;
-  icon?: string;
+  group?: string;
+  icon?: Icon;
   routes?: RouteType[];
 }

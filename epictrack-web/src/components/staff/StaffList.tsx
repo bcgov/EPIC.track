@@ -1,11 +1,11 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
+import { Box, Button, Chip, Grid, IconButton, Typography } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETHeading1, ETHeading2, EpicTrackPageGridContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
 

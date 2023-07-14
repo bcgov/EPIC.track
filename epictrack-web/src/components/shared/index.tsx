@@ -27,8 +27,6 @@ export const ETHeading1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     <Typography
       sx={{
         ...sx,
-        fontSize: "2em",
-        lineHeight: "1.5em",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
@@ -46,8 +44,6 @@ export const ETHeading2 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     <Typography
       sx={{
         ...sx,
-        fontSize: "1.75em",
-        lineHeight: "1.4em",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
@@ -65,8 +61,6 @@ export const ETHeading3 = ({ bold, children, sx, ...rest }: HeaderProps) => {
     <Typography
       sx={{
         ...sx,
-        fontSize: "1.5em",
-        lineHeight: "1.3em",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
@@ -91,8 +85,6 @@ export const ETHeading4 = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "1.25em",
-        lineHeight: "1.2em",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
@@ -118,8 +110,6 @@ export const ETSubhead = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "1.125em",
-        lineHeight: "1.3em",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
@@ -152,7 +142,7 @@ export const ETParagraph = ({
           : MET_Header_Font_Weight_Regular,
         fontFamily: MET_Header_Font_Family,
       }}
-      variant="inherit"
+      variant="body1"
       {...rest}
     >
       {children}
@@ -172,8 +162,6 @@ export const ETCaption1 = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "0.8125em",
-        lineHeight: "1.2em",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,

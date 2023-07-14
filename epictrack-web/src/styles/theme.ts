@@ -1,36 +1,57 @@
 import { createTheme } from "@mui/material";
+import { MET_Header_Font_Weight_Regular } from "./constants";
 export const Palette = {
   primary: {
-    main: "#003366",
-    light: "#D6EBFF",
-    dark: "#38598A",
-    main100: "#85c2ff",
-    main200: "#3399ff",
-    main300: "#1A5A96",
+    main: "#036",
+    light: "#38598A",
+    dark: "#00264D",
+    accent: {
+      main: "#1A5A96",
+      light: "#0070E0",
+    },
+    bg: {
+      main: "#D6EBFF",
+      light: "#F0F8FF",
+    },
   },
   secondary: {
     main: "#FCBA19",
-    dark: "#fdc63f",
-    light: "#fff4d9",
-    main100: "#feeec5",
-    main200: "#fedd8c",
-    main300: "#fdd166",
+    dark: "#e4a203",
+    light: "#fdc63f",
+    accent: {
+      main: "#fdd166",
+      light: "#FEDD8C",
+    },
+    bg: {
+      main: "#FEEEC5",
+      light: "#fff4d9",
+    },
   },
   success: {
     main: "#2E8540",
     dark: "#236430",
-    light: "#d6f1dc",
-    main100: "#c2eaca",
-    main200: "#99dca6",
-    main300: "#70cd83",
+    light: "#3cae54",
+    accent: {
+      main: "#70cd83",
+      light: "#99dca6",
+    },
+    bg: {
+      main: "#c2eaca",
+      light: "#d6f1dc",
+    },
   },
   error: {
-    main: "#df4d52",
-    dark: "#D8292F",
-    light: "#fcedee",
-    main100: "#f5cacb",
-    main200: "#eb9497",
-    main300: "#e57074",
+    main: "#D8292F",
+    dark: "#a31e22",
+    light: "#df4d52",
+    accent: {
+      main: "#e57074",
+      light: "#eb9497",
+    },
+    bg: {
+      main: "#f5cacb",
+      light: "#fcedee",
+    },
   },
   white: "#FFFFFF",
   black: "#000000",
@@ -65,6 +86,11 @@ export const BaseTheme = createTheme({
     text: {
       primary: Palette.text.primary,
     },
+    error: {
+      main: Palette.error.main,
+      dark: Palette.error.dark,
+      light: Palette.error.light,
+    },
     action: {
       active: Palette.action.active,
     },
@@ -98,34 +124,84 @@ export const BaseTheme = createTheme({
         focused: false,
       },
     },
+    MuiTableCell: {
+      styleOverrides: {
+        root: {
+          fontSize: "1rem",
+        },
+      },
+    },
+    MuiCssBaseline: {
+      styleOverrides: {
+        "*": {
+          scrollbarWidth: "thin",
+          scrollbarColor: "#B7B7B7 transparent",
+          "&::-webkit-scrollbar": {
+            width: 6,
+            height: 6,
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-track": {
+            backgroundColor: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            borderRadius: 6,
+            backgroundColor: "#B7B7B7",
+            minHeight: 24,
+            minWidth: 24,
+          },
+          "&::-webkit-scrollbar-thumb:focus": {
+            backgroundColor: "#adadad",
+          },
+          "&::-webkit-scrollbar-thumb:active": {
+            backgroundColor: "#adadad",
+          },
+          "&::-webkit-scrollbar-thumb:hover": {
+            backgroundColor: "#adadad",
+          },
+          "&::-webkit-scrollbar-corner": {
+            backgroundColor: "transparent",
+          },
+        },
+      },
+    },
   },
   typography: {
     fontFamily: '"BCSans",·"Noto·Sans",·Verdana,·Arial,·sans-serif',
     h1: {
-      fontWeight: 500,
+      fontWeight: MET_Header_Font_Weight_Regular,
+      fontSize: "2rem",
+      lineHeight: "1.5rem",
     },
     h2: {
-      fontWeight: 500,
+      fontWeight: MET_Header_Font_Weight_Regular,
+      fontSize: "1.75rem",
+      lineHeight: "1.4rem",
     },
     h3: {
-      fontWeight: 500,
+      fontSize: "1.5rem",
+      lineHeight: "1.3rem",
+      fontWeight: MET_Header_Font_Weight_Regular,
     },
     h4: {
-      fontWeight: 500,
+      fontSize: "1.25rem",
+      lineHeight: "1.6rem",
+      fontWeight: MET_Header_Font_Weight_Regular,
     },
-    h5: {
-      fontWeight: 500,
+    subtitle1: {
+      fontSize: "1.125rem",
+      lineHeight: "1.3rem",
+      fontWeight: MET_Header_Font_Weight_Regular,
     },
-    h6: {
-      fontWeight: 500,
-    },
-    subtitle2: {
-      fontWeight: 500,
-      fontSize: "1.15rem",
+    caption: {
+      fontWeight: MET_Header_Font_Weight_Regular,
+      fontSize: "0.8125em",
+      lineHeight: "1.2em",
     },
     body1: {
-      fontWeight: 500,
-      fontSize: "16px",
+      fontWeight: MET_Header_Font_Weight_Regular,
+      fontSize: "1rem",
+      lineHeight: "1.5rem",
     },
     button: {
       fontWeight: 700,
