@@ -57,9 +57,11 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     }
 
     const userInfo: any = await KeycloakData.loadUserInfo();
-    const staffProfile: Staff = (
-      await staffService.getByEmail(userInfo["email"])
-    ).data as Staff;
+    let staffProfile;
+    const staffResult = await staffService.getByEmail(userInfo["email"]);
+    if (staffResult.status == 200) {
+      staffProfile = staffResult.data as Staff;
+    }
     const userDetail = new UserDetail(
       userInfo["sub"],
       userInfo["preferred_username"],
@@ -67,8 +69,8 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       userInfo["given_name"],
       userInfo["family_name"],
       userInfo["email"],
-      staffProfile.phone,
-      staffProfile.position.name
+      staffProfile?.phone || "",
+      staffProfile?.position?.name || ""
     );
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));

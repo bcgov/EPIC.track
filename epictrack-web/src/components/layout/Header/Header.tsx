@@ -70,13 +70,6 @@ const Header = () => {
             />
           </Box>
           <ProfileMenu />
-          <Button
-            data-testid="button-header"
-            color="inherit"
-            onClick={() => UserService.doLogout()}
-          >
-            Logout
-          </Button>
         </Toolbar>
         <EnvironmentBanner />
       </AppBar>
