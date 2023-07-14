@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import {
   ListItemButton,
   List,
@@ -21,6 +21,12 @@ import { SideNavProps } from "./types";
 import { useAppSelector } from "../../../hooks";
 import Icons from "../../icons";
 import { groupBy } from "../../../utils";
+import { IconProps } from "../../icons/type";
+import { ETSubhead } from "../../shared";
+
+const ListItemStyled = styled(ListItem)({
+  padding: "0px 0px 0px 0px",
+});
 
 const ListItemButtonStyled = styled(ListItemButton)({
   padding: "16px 24px 16px 24px",
@@ -30,6 +36,7 @@ const ListItemButtonStyled = styled(ListItemButton)({
   },
   "& .active": {
     color: Palette.secondary.main,
+    fill: Palette.secondary.main,
   },
   "&:hover": {
     backgroundColor: Palette.secondary.main,
@@ -49,6 +56,7 @@ const ListItemIconStyled = styled(ListItemIcon)({
 const DrawerBox = () => {
   const navigate = useNavigate();
   const [open, setOpen] = React.useState<{ [x: string]: boolean }>({});
+  const uiState = useAppSelector((state) => state.uiState);
   const location = useLocation();
   const handleClick = (route: any) => {
     if (route.routes && route.routes.length > 0) {
@@ -59,6 +67,11 @@ const DrawerBox = () => {
       navigate(route.path);
     }
   };
+
+  const renderIcon = React.useCallback((iconTitle: string, active: boolean) => {
+    const Icon: React.FC<IconProps> = Icons[iconTitle];
+    return <Icon className={`sidebar-item ${active ? "active" : ""}`} />;
+  }, []);
 
   const groupedRoutes = React.useMemo(
     () => groupBy(Routes, (p) => p.group),
@@ -74,43 +87,37 @@ const DrawerBox = () => {
         padding: "16px 0px 57px 0px",
       }}
     >
-      <List sx={{ paddingTop: "2.5em" }}>
+      <List sx={{ paddingTop: uiState.toggleDrawerMarginTop }}>
         <>
           {Object.keys(groupedRoutes).map((groupKey) => {
             return (
               <>
                 {groupedRoutes[groupKey].map((route, i) => {
-                  console.log(groupKey, route.path);
                   return (
                     <>
-                      <ListItem
-                        key={i}
-                        sx={{
-                          padding: "0px 0px 0px 0px",
-                        }}
-                      >
+                      <ListItemStyled key={`${groupKey}${i}`}>
                         <ListItemButtonStyled
+                          key={`lstbutton-${groupKey}${i}`}
                           data-testid={`SideNav/${route.name}-button`}
                           onClick={() => handleClick(route)}
                         >
                           {route.icon && (
-                            <ListItemIconStyled>
-                              {Icons[route.icon]}
+                            <ListItemIconStyled key={`lsticon-${groupKey}${i}`}>
+                              {renderIcon(
+                                route.icon,
+                                location.pathname === route.path
+                              )}
                             </ListItemIconStyled>
                           )}
-                          <ListItemText
-                            primary={
-                              <Typography
-                                className={`sidebar-item ${
-                                  location.pathname === route.path
-                                    ? "active"
-                                    : ""
-                                }`}
-                              >
-                                {route.name}
-                              </Typography>
-                            }
-                          />
+                          <ListItemText key={`lsttext-${groupKey}${i}`}>
+                            <ETSubhead
+                              className={`sidebar-item ${
+                                location.pathname === route.path ? "active" : ""
+                              }`}
+                            >
+                              {route.name}
+                            </ETSubhead>
+                          </ListItemText>
                           {route?.routes &&
                             (route?.routes?.length > 0 && !!open[route.name] ? (
                               <ExpandLess className="sidebar-item" />
@@ -118,7 +125,7 @@ const DrawerBox = () => {
                               <ExpandMore className="sidebar-item" />
                             ))}
                         </ListItemButtonStyled>
-                      </ListItem>
+                      </ListItemStyled>
                       {route.routes && route.routes?.length > 0 && (
                         <Collapse
                           in={!!open[route.name]}
@@ -127,34 +134,31 @@ const DrawerBox = () => {
                         >
                           <List disablePadding key={`list-${route.name}`}>
                             {route.routes?.map((subRoute, i) => (
-                              <ListItem
+                              <ListItemStyled
                                 key={`sub-list-${subRoute?.name}`}
-                                sx={{
-                                  paddingLeft: "0px",
-                                  paddingRight: "0px",
-                                }}
                               >
                                 <ListItemButtonStyled
+                                  key={`sub-list-button-${subRoute?.name}`}
                                   onClick={() => handleClick(subRoute)}
                                 >
                                   <ListItemText
+                                    key={`sub-list-text-${subRoute?.name}`}
                                     sx={{
                                       marginLeft: "40px",
                                     }}
-                                    primary={
-                                      <Typography
-                                        className={`sidebar-item ${
-                                          location.pathname === subRoute.path
-                                            ? "active"
-                                            : ""
-                                        }`}
-                                      >
-                                        {subRoute.name}
-                                      </Typography>
-                                    }
-                                  />
+                                  >
+                                    <ETSubhead
+                                      className={`sidebar-item ${
+                                        location.pathname === subRoute.path
+                                          ? "active"
+                                          : ""
+                                      }`}
+                                    >
+                                      {subRoute.name}
+                                    </ETSubhead>
+                                  </ListItemText>
                                 </ListItemButtonStyled>
-                              </ListItem>
+                              </ListItemStyled>
                             ))}
                           </List>
                         </Collapse>
@@ -182,7 +186,6 @@ const SideNav = ({
   isMediumScreen,
   drawerWidth,
 }: SideNavProps) => {
-  const uiState = useAppSelector((state) => state.uiState);
   return (
     <>
       {isMediumScreen ? (
@@ -199,7 +202,11 @@ const SideNav = ({
             },
           }}
         >
-          <Toolbar />
+          <Toolbar
+            sx={{
+              minHeight: "100px !important",
+            }}
+          />
           <DrawerBox />
         </Drawer>
       ) : (

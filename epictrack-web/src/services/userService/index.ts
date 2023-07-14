@@ -58,9 +58,14 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
 
     const userInfo: any = await KeycloakData.loadUserInfo();
     let staffProfile;
-    const staffResult = await staffService.getByEmail(userInfo["email"]);
-    if (staffResult.status == 200) {
-      staffProfile = staffResult.data as Staff;
+    console.log("hi");
+    try {
+      const staffResult = await staffService.getByEmail(userInfo["email"]);
+      if (staffResult.status == 200) {
+        staffProfile = staffResult.data as Staff;
+      }
+    } catch (e) {
+      console.log(e);
     }
     const userDetail = new UserDetail(
       userInfo["sub"],
