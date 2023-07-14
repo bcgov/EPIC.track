@@ -91,4 +91,4 @@ class Staff(BaseModelVersioned):
     @classmethod
     def find_by_email(cls, email):
         """Returns a staff by email"""
-        return cls.query.filter(Staff.email==email).first()
+        return cls.query.filter(Staff.email == email).first()
