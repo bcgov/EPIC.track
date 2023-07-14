@@ -120,10 +120,10 @@ class ValidateStaff(Resource):
         )
 
 
-@cors_preflight('GET, DELETE, PUT')
-@API.route('/<string:email>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
-class Staff(Resource):
-    """Endpoint resource to return staff details."""
+@cors_preflight('GET')
+@API.route('/<string:email>', methods=['GET', 'OPTIONS'])
+class StaffByEmail(Resource):
+    """Endpoint resource to return staff details by email."""
 
     @staticmethod
     @cors.crossdomain(origin='*')
