@@ -3,7 +3,62 @@ import MaterialReactTable, {
   MRT_ToggleFiltersButton,
   MaterialReactTableProps,
 } from "material-react-table";
+import { Box, Container, Typography } from "@mui/material";
+import SearchIcon from "../../assets/images/search.svg";
+import { ETHeading2 } from ".";
 
+const NoDataComponent = ({ ...props }) => {
+  const { table } = props;
+  return (
+    <>
+      {table.options.data.length == 0 ? (
+        <Typography
+          sx={{
+            color: "text.secondary",
+            py: "2rem",
+            textAlign: "center",
+            width: "100%",
+          }}
+        >
+          No results found
+        </Typography>
+      ) : (
+        <Container
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            minHeight: "400px",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "2rem",
+              alignItems: "center",
+            }}
+          >
+            <Box component="img" src={SearchIcon} alt="Search" width="32px" />
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1rem",
+                alignItems: "center",
+              }}
+            >
+              <ETHeading2 bold>No results found</ETHeading2>
+              <Typography color="#6D7274">
+                Adjust your parameters and try again
+              </Typography>
+            </Box>
+          </Box>
+        </Container>
+      )}
+    </>
+  );
+};
 const MasterTrackTable = <T extends Record<string, any>>({
   columns,
   data,
@@ -62,6 +117,9 @@ const MasterTrackTable = <T extends Record<string, any>>({
           columnPinning: { right: ["mrt-row-actions"] },
           ...rest.state,
         }}
+        renderEmptyRowsFallback={({ table }) => (
+          <NoDataComponent table={table} />
+        )}
       />
     </>
   );

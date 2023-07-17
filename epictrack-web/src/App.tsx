@@ -5,6 +5,7 @@ import UserService from "./services/userService";
 import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
 import { useAppDispatch, useAppSelector } from "./hooks";
 import { Box, Theme, useMediaQuery } from "@mui/material";
+import AxiosErrorHandler from "./components/axiosErrorHandler/AxiosErrorHandler";
 import "./styles/App.scss";
 
 export default function App() {
@@ -22,25 +23,27 @@ export default function App() {
   }, [dispatch]);
   return (
     <>
-      {isLoggedIn && (
-        <Router>
-          <Box sx={{ display: "flex" }}>
-            <Header />
-            <Box
-              component="main"
-              sx={{
-                flexGrow: 1,
-                width: `calc(100% - ${drawerWidth}px)`,
-                marginTop: "17px",
-              }}
-            >
-              <React.StrictMode>
-                <AuthenticatedRoutes />
-              </React.StrictMode>
+      <AxiosErrorHandler>
+        {isLoggedIn && (
+          <Router>
+            <Box sx={{ display: "flex" }}>
+              <Header />
+              <Box
+                component="main"
+                sx={{
+                  flexGrow: 1,
+                  width: `calc(100% - ${drawerWidth}px)`,
+                  marginTop: "17px",
+                }}
+              >
+                <React.StrictMode>
+                  <AuthenticatedRoutes />
+                </React.StrictMode>
+              </Box>
             </Box>
-          </Box>
-        </Router>
-      )}
+          </Router>
+        )}
+      </AxiosErrorHandler>
     </>
   );
 }

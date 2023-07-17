@@ -61,6 +61,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         def add_version(response):  # pylint: disable=unused-variable
             version = get_run_version()
             response.headers['API'] = f'eao_reports_api/{version}'
+            # So that ERR responses don't raise CORS error in browser
+            response.headers['Access-Control-Allow-Origin'] = '*'
             return response
 
         @app.errorhandler(Exception)

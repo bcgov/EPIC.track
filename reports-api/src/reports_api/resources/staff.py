@@ -135,4 +135,4 @@ class StaffByEmail(Resource):
         staff = StaffService.find_by_email(email)
         if staff:
             return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
-        raise ResourceNotFoundError(f'Staff with id "{email}" not found')
+        raise ResourceNotFoundError(f'Staff with email "{email}" not found')
