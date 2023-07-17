@@ -8,12 +8,12 @@ import {
   ListItemAvatar,
   Avatar,
   ListItemText,
-  Typography,
   Button,
+  Tooltip,
 } from "@mui/material";
-import UserIcon from "../../../assets/images/userIcon.svg";
 import CopyOutlineIcon from "../../../assets/images/copyOutline.svg";
 import CopyFilledIcon from "../../../assets/images/copyFilled.svg";
+import { ETCaption1, ETSubhead } from "../../shared";
 
 const CopyButton = ({ ...props }) => {
   const copyHandler = (text: string) => {
@@ -57,22 +57,30 @@ const ProfileMenu = () => {
       sx={{
         flexGrow: 0,
         display: "flex",
+        alignItems: "baseline",
         marginRight: "40px",
         gap: "1rem",
       }}
       onMouseEnter={handleOpenProfileMenu}
       onMouseLeave={handleCloseProfileMenu}
     >
-      <Box component="img" src={UserIcon} alt="User" />
-      <Typography
-        sx={{ fontSize: "18px", fontWeight: 700, lineHeight: "26px" }}
-        component="span"
+      <ETSubhead>Hello, {user.firstName}</ETSubhead>
+      <Avatar
+        sx={{
+          bgcolor: Palette.white,
+          color: Palette.primary.main,
+          fontSize: "1rem",
+          lineHeight: "1.3rem",
+          fontWeight: 700,
+          width: "2rem",
+          height: "2rem",
+        }}
       >
-        Hello, {user.firstName}
-      </Typography>
+        {`${user.firstName[0]}${user.lastName[0]}`}
+      </Avatar>
       <Menu
         sx={{
-          mt: "45px",
+          mt: "2.5rem",
         }}
         id="menu-appbar"
         anchorEl={profileMenuAnchorEl}
@@ -95,8 +103,9 @@ const ProfileMenu = () => {
         <MenuItem
           key="userDetail"
           sx={{
-            bgcolor: "#F9F9FB",
+            bgcolor: Palette.nuetral.bg.light,
             borderBlockColor: "#DBDCDC",
+            gap: "8px",
             "&:hover": {
               bgcolor: "#F9F9FB",
             },
@@ -107,24 +116,28 @@ const ProfileMenu = () => {
             <Avatar
               sx={{
                 bgcolor: Palette.primary.main,
-                width: 40,
-                height: 40,
+                width: "2rem",
+                height: "2rem",
+                minWidth: "0",
+                fontSize: "1rem",
+                lineHeight: "1.3rem",
+                fontWeight: 700,
               }}
-            >{`${user.firstName[0]}${user.lastName[0]}`}</Avatar>
+            >
+              {`${user.firstName[0]}${user.lastName[0]}`}
+            </Avatar>
           </ListItemAvatar>
           <ListItemText
-            primary={`${user.firstName} ${user.lastName}`}
-            secondary={user.position}
+            primary={
+              <ETCaption1 bold>
+                {`${user.firstName} ${user.lastName}`}
+              </ETCaption1>
+            }
+            secondary={<ETCaption1>{user.position}</ETCaption1>}
             primaryTypographyProps={{
-              variant: "subtitle2",
-              sx: {
-                fontWeight: 700,
-                fontSize: "14px",
-                lineHeight: "1rem",
-              },
+              noWrap: true,
             }}
             secondaryTypographyProps={{
-              variant: "inherit",
               noWrap: true,
             }}
           />
@@ -138,12 +151,7 @@ const ProfileMenu = () => {
           key="contact"
         >
           <ListItemText
-            primary="Contact"
-            primaryTypographyProps={{
-              fontSize: 15,
-              fontWeight: "600",
-              lineHeight: "20px",
-            }}
+            primary={<ETCaption1 bold>Contact</ETCaption1>}
           ></ListItemText>
         </MenuItem>
         <MenuItem
@@ -154,15 +162,18 @@ const ProfileMenu = () => {
             },
           }}
         >
-          <Typography
-            textAlign="center"
-            sx={{
-              flexGrow: 1,
-              textAlign: "left",
+          <ListItemText
+            primary={
+              <Tooltip title={user.email} arrow>
+                <ETCaption1 color={Palette.primary.accent.main}>
+                  {user.email}
+                </ETCaption1>
+              </Tooltip>
+            }
+            primaryTypographyProps={{
+              noWrap: true,
             }}
-          >
-            {user.email}
-          </Typography>
+          ></ListItemText>
           <CopyButton copyText={user.email} />
         </MenuItem>
         {user.phone && (
@@ -174,15 +185,18 @@ const ProfileMenu = () => {
               },
             }}
           >
-            <Typography
-              textAlign="center"
-              sx={{
-                flexGrow: 1,
-                textAlign: "left",
+            <ListItemText
+              primary={
+                <Tooltip title={user.phone}>
+                  <ETCaption1 color={Palette.primary.accent.main}>
+                    {user.phone}
+                  </ETCaption1>
+                </Tooltip>
+              }
+              primaryTypographyProps={{
+                noWrap: true,
               }}
-            >
-              {user.phone}
-            </Typography>
+            ></ListItemText>
             <CopyButton copyText={user.phone} />
           </MenuItem>
         )}

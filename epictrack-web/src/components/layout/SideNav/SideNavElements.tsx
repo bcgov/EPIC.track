@@ -21,15 +21,15 @@ export const Routes: RouteType[] = [
     routes: [
       {
         name: "Referral Schedule",
-        path: "/reporting/referral-schedule",
+        path: "/reports/referral-schedule",
       },
       {
         name: "Resource Forecast",
-        path: "/reporting/resource-forecast",
+        path: "/reports/resource-forecast",
       },
       {
         name: "30-60-90",
-        path: "/reporting/30-60-90",
+        path: "/reports/30-60-90",
       },
     ],
   },
