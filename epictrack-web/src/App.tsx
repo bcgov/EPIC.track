@@ -6,6 +6,7 @@ import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
 import { useAppDispatch, useAppSelector } from "./hooks";
 import { Box, Theme, useMediaQuery } from "@mui/material";
 import "./styles/App.scss";
+import Notification from "./components/shared/notifications/Notification";
 
 export default function App() {
   const dispatch = useAppDispatch();
@@ -41,6 +42,7 @@ export default function App() {
           </Box>
         </Router>
       )}
+      <Notification />
     </>
   );
 }
