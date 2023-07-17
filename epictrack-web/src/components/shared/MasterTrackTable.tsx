@@ -11,51 +11,40 @@ const NoDataComponent = ({ ...props }) => {
   const { table } = props;
   return (
     <>
-      {table.options.data.length == 0 ? (
-        <Typography
-          sx={{
-            color: "text.secondary",
-            py: "2rem",
-            textAlign: "center",
-            width: "100%",
-          }}
-        >
-          No results found
-        </Typography>
-      ) : (
-        <Container
+      <Container
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "400px",
+        }}
+      >
+        <Box
           sx={{
             display: "flex",
+            flexDirection: "column",
+            gap: "2rem",
             alignItems: "center",
-            justifyContent: "center",
-            minHeight: "400px",
           }}
         >
+          <Box component="img" src={SearchIcon} alt="Search" width="32px" />
           <Box
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: "2rem",
+              gap: "1rem",
               alignItems: "center",
             }}
           >
-            <Box component="img" src={SearchIcon} alt="Search" width="32px" />
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-                alignItems: "center",
-              }}
-            >
-              <ETHeading2 bold>No results found</ETHeading2>
+            <ETHeading2 bold>No results found</ETHeading2>
+            {table.options.data.length > 0 && (
               <Typography color="#6D7274">
                 Adjust your parameters and try again
               </Typography>
-            </Box>
+            )}
           </Box>
-        </Container>
-      )}
+        </Box>
+      </Container>
     </>
   );
 };
