@@ -124,11 +124,11 @@ const StaffList = () => {
                 }}
               >
                 <Button
+                  variant="contained"
                   onClick={() => {
                     ctx.setShowModalForm(true);
                     setStaffId(undefined);
                   }}
-                  variant="contained"
                 >
                   Create Staff
                 </Button>
