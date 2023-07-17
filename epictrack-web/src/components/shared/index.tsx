@@ -150,13 +150,7 @@ export const ETParagraph = ({
   );
 };
 
-export const ETCaption1 = ({
-  bold,
-  color,
-  children,
-  sx,
-  ...rest
-}: HeaderProps) => {
+export const ETCaption1 = ({ bold, color, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       color={color}
