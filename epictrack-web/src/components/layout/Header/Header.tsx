@@ -33,7 +33,12 @@ const Header = () => {
         data-testid="appbar-header"
       >
         <CssBaseline />
-        <Toolbar>
+        <Toolbar
+          sx={{
+            height: "4.5rem",
+            padding: "1rem 1.5rem 1rem 1.5rem",
+          }}
+        >
           {!isMediumScreen && (
             <IconButton
               component={MenuIcon}

@@ -135,8 +135,8 @@ export const ETParagraph = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "1em",
-        lineHeight: "1.5em",
+        fontSize: "1rem",
+        lineHeight: "1.5rem",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
@@ -150,13 +150,7 @@ export const ETParagraph = ({
   );
 };
 
-export const ETCaption1 = ({
-  bold,
-  color,
-  children,
-  sx,
-  ...rest
-}: HeaderProps) => {
+export const ETCaption1 = ({ bold, color, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
       color={color}
