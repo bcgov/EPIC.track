@@ -162,14 +162,36 @@ export const BaseTheme = createTheme({
     MuiInputBase: {
       styleOverrides: {
         root: {
-          borderRadius: "4px",
-          border: `2px solid ${Palette.nuetral.accent.light}`,
-          "&.Mui-focused": {
-            border: `2px solid ${Palette.primary.accent.light}`,
+          "&.MuiOutlinedInput-root": {
+            "& fieldset": {
+              border: `2px solid ${Palette.nuetral.bg.dark}`,
+            },
+            "&:hover fieldset": {
+              borderColor: Palette.primary.accent.light,
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: Palette.primary.accent.light,
+            },
           },
         },
       },
     },
+    // MuiCheckbox: {
+    //   styleOverrides: {
+    //     root: {
+    //       "&.Mui-checked": {
+    //         "& svg": {
+    //           fontSize: "10rem",
+    //           "& path": {
+    //             fill: "#1A5A96",
+    //             fillRule: "evenodd",
+    //             clipRule: "evenodd",
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
     MuiTextField: {
       styleOverrides: {
         root: {
