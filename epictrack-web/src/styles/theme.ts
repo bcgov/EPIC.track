@@ -1,6 +1,22 @@
 import { createTheme } from "@mui/material";
-import { MET_Header_Font_Weight_Regular } from "./constants";
+import {
+  MET_Header_Font_Weight_Bold,
+  MET_Header_Font_Weight_Regular,
+} from "./constants";
 export const Palette = {
+  nuetral: {
+    main: "#6D7274",
+    dark: "#313132",
+    light: "#858A8C",
+    accent: {
+      light: "#C2C4C5",
+    },
+    bg: {
+      main: "#F2F2F2",
+      dark: "#DBDCDC",
+      light: "#F9F9FB",
+    },
+  },
   primary: {
     main: "#036",
     light: "#38598A",
@@ -11,46 +27,32 @@ export const Palette = {
     },
     bg: {
       main: "#D6EBFF",
+      dark: "#85C2FF",
       light: "#F0F8FF",
     },
   },
   secondary: {
     main: "#FCBA19",
-    dark: "#e4a203",
-    light: "#fdc63f",
-    accent: {
-      main: "#fdd166",
-      light: "#FEDD8C",
-    },
+    dark: "#674901",
+    light: "#FDD166",
     bg: {
-      main: "#FEEEC5",
-      light: "#fff4d9",
+      light: "#FEEEC5",
     },
   },
   success: {
     main: "#2E8540",
     dark: "#236430",
-    light: "#3cae54",
-    accent: {
-      main: "#70cd83",
-      light: "#99dca6",
-    },
+    light: "#70CD83",
     bg: {
-      main: "#c2eaca",
-      light: "#d6f1dc",
+      light: "#D6F1DC",
     },
   },
   error: {
     main: "#D8292F",
-    dark: "#a31e22",
-    light: "#df4d52",
-    accent: {
-      main: "#e57074",
-      light: "#eb9497",
-    },
+    dark: "#A31E22",
+    light: "#E57074",
     bg: {
-      main: "#f5cacb",
-      light: "#fcedee",
+      light: "#FCEDEE",
     },
   },
   white: "#FFFFFF",
@@ -61,27 +63,26 @@ export const Palette = {
   text: {
     primary: "#494949",
   },
-  action: {
-    active: "#1A5A96",
-  },
-  info: {
-    main: "#707070",
-  },
 };
 
 export const BaseTheme = createTheme({
   palette: {
+    neutral: {
+      main: Palette.nuetral.main,
+      dark: Palette.nuetral.dark,
+      light: Palette.nuetral.light,
+    },
     primary: {
       main: Palette.primary.main,
       light: Palette.primary.light,
       dark: Palette.primary.dark,
-      contrastText: "#FFFFFF",
+      contrastText: Palette.white,
     },
     secondary: {
       main: Palette.secondary.main,
       dark: Palette.secondary.dark,
       light: Palette.secondary.light,
-      contrastText: "#000000",
+      contrastText: Palette.black,
     },
     text: {
       primary: Palette.text.primary,
@@ -91,19 +92,68 @@ export const BaseTheme = createTheme({
       dark: Palette.error.dark,
       light: Palette.error.light,
     },
-    action: {
-      active: Palette.action.active,
-    },
-    info: {
-      main: Palette.info.main,
-    },
   },
   components: {
     MuiButton: {
       styleOverrides: {
-        root: {
-          height: "40px",
-        },
+        root: ({ ownerState, theme }) => ({
+          fontWeight: MET_Header_Font_Weight_Bold,
+          padding: "0.75rem 1rem",
+          ...(ownerState.size === "medium" && {
+            fontSize: "0.875rem",
+            lineHeight: "1rem",
+            height: "2.5rem",
+          }),
+          ...(ownerState.size === "large" && {
+            fontSize: "1rem",
+            lineHeight: "1.5rem",
+            height: "3rem",
+          }),
+          ...((ownerState.variant === "contained" &&
+            ownerState.color === "primary" && {
+              "&:hover": {
+                backgroundColor: Palette.primary.light,
+              },
+              "&:active": {
+                backgroundColor: Palette.primary.dark,
+              },
+              "&:disabled": {
+                backgroundColor: Palette.nuetral.light,
+                color: Palette.white,
+              },
+            }) ||
+            (ownerState.color === "secondary" && {
+              "&:hover": {
+                backgroundColor: Palette.secondary.light,
+              },
+              "&:active": {
+                backgroundColor: Palette.secondary.dark,
+                color: Palette.white,
+              },
+              "&:disabled": {
+                backgroundColor: Palette.nuetral.light,
+                color: Palette.white,
+              },
+            })),
+          ...(ownerState.variant === "outlined" &&
+            ownerState.color === "primary" && {
+              background: Palette.white,
+              border: `2px solid ${Palette.primary.main}`,
+              "&:hover": {
+                backgroundColor: Palette.primary.main,
+                color: Palette.white,
+              },
+              "&:active": {
+                backgroundColor: Palette.primary.dark,
+                color: Palette.white,
+              },
+              "&:disabled": {
+                border: `2px solid ${Palette.nuetral.light}`,
+                backgroundColor: Palette.white,
+                color: Palette.nuetral.light,
+              },
+            }),
+        }),
       },
       defaultProps: {
         disableRipple: true,
@@ -143,13 +193,18 @@ export const BaseTheme = createTheme({
     //   },
     // },
     MuiTextField: {
+      styleOverrides: {
+        root: {
+          border: 0,
+        },
+      },
       defaultProps: {
         size: "small",
       },
     },
     MuiLink: {
       defaultProps: {
-        color: Palette.action.active,
+        color: Palette.primary.accent.main,
       },
     },
     MuiFormLabel: {
