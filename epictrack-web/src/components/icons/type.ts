@@ -5,7 +5,8 @@ export type Icon =
 | "InsightIcon"
 | "GearIcon"
 | "PenIcon"
-| "GridIcon";
+| "GridIcon"
+| "UserIcon";
 
 export interface IconProps {
     className?: string;

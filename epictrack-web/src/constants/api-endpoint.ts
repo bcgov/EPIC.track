@@ -20,6 +20,7 @@ const Endpoints = {
   },
   Works: {
     WORKS: "works",
+    WORK_RESOURCES: "works/resources",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

@@ -12,6 +12,7 @@ import ProjectList from "../components/project/ProjectList";
 import UserList from "../components/user/UserList";
 import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
+import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -64,6 +65,7 @@ const AuthenticatedRoutes = () => {
           </MasterProvider>
         }
       />
+      <Route path="/work-staff" element={<WorkStaffList />} />
       <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

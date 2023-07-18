@@ -67,7 +67,7 @@ class WorkService:
         work_ids = [work['id'] for work in works]
         staff_result = (
             Staff.query
-            .join(StaffWorkRole)
+            .join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(StaffWorkRole.work_id.in_(work_ids),
                     StaffWorkRole.is_deleted.is_(False))
             .join(Role, Role.id == StaffWorkRole.role_id)

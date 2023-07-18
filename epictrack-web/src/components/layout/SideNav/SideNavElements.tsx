@@ -8,6 +8,12 @@ export const Routes: RouteType[] = [
     group: "Group1",
   },
   {
+    name: "Work Staff",
+    path: "/work-staff",
+    group: "Group1",
+    icon: "UserIcon",
+  },
+  {
     name: "All Works",
     icon: "AllIcon",
     path: "/works",
