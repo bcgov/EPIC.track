@@ -109,6 +109,39 @@ export const BaseTheme = createTheme({
         disableRipple: true,
       },
     },
+    MuiInputBase: {
+      styleOverrides: {
+        root: {
+          "&.MuiOutlinedInput-root": {
+            "& fieldset": {
+              border: `2px solid ${Palette.nuetral.bg.dark}`,
+            },
+            "&:hover fieldset": {
+              borderColor: Palette.primary.accent.light,
+            },
+            "&.Mui-focused fieldset": {
+              borderColor: Palette.primary.accent.light,
+            },
+          },
+        },
+      },
+    },
+    // MuiCheckbox: {
+    //   styleOverrides: {
+    //     root: {
+    //       "&.Mui-checked": {
+    //         "& svg": {
+    //           fontSize: "10rem",
+    //           "& path": {
+    //             fill: "#1A5A96",
+    //             fillRule: "evenodd",
+    //             clipRule: "evenodd",
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
     MuiTextField: {
       defaultProps: {
         size: "small",
