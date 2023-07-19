@@ -23,8 +23,6 @@ const ControlledCheckbox: React.ForwardRefRenderFunction<
       defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
         <Checkbox
-          icon={<CheckboxRegular />}
-          checkedIcon={<CheckboxChecked />}
           {...otherProps}
           {...field}
           ref={ref}
