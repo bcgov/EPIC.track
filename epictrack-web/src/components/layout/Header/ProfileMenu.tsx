@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import CopyOutlineIcon from "../../../assets/images/copyOutline.svg";
 import CopyFilledIcon from "../../../assets/images/copyFilled.svg";
-import { ETCaption1, ETSubhead } from "../../shared";
+import { ETCaption1, ETCaption2, ETSubhead } from "../../shared";
 
 const CopyButton = ({ ...props }) => {
   const copyHandler = (text: string) => {
@@ -58,7 +58,6 @@ const ProfileMenu = () => {
         flexGrow: 0,
         display: "flex",
         alignItems: "baseline",
-        marginRight: "40px",
         gap: "1rem",
       }}
       onMouseEnter={handleOpenProfileMenu}
@@ -76,7 +75,9 @@ const ProfileMenu = () => {
           height: "2rem",
         }}
       >
-        {`${user.firstName[0]}${user.lastName[0]}`}
+        <ETCaption2
+          bold
+        >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
       </Avatar>
       <Menu
         sx={{

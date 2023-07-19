@@ -42,5 +42,11 @@ class WorkService implements ServiceBase {
         `/exists?title=${title}${id ? "&work_id=" + id : ""}`
     );
   }
+
+  async getWorkStaffDetails() {
+    return await http.GetRequest(
+      AppConfig.apiUrl + Endpoints.Works.WORK_RESOURCES
+    );
+  }
 }
 export default new WorkService();

@@ -36,7 +36,6 @@ const Header = () => {
         <Toolbar
           sx={{
             height: "4.5rem",
-            padding: "1rem 1.5rem 1rem 1.5rem",
           }}
         >
           {!isMediumScreen && (
@@ -57,7 +56,6 @@ const Header = () => {
               height: "5em",
               width: { xs: "7em" },
               marginRight: { xs: "1em", md: "2em" },
-              marginLeft: { xs: "1em", md: "2em" },
             }}
             src={BCGovLogo}
             alt="British Columbia"

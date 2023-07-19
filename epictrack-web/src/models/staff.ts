@@ -1,4 +1,5 @@
 import { ListType } from "./code";
+import { Role } from "./role";
 import { MasterBase } from "./type";
 
 export interface Staff extends MasterBase{
@@ -11,4 +12,8 @@ export interface Staff extends MasterBase{
     last_name: string;
     full_name: string;
     position: ListType;
+}
+
+export interface StaffRole extends Staff {
+    role: Role;
 }
