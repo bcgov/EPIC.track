@@ -65,7 +65,7 @@ const AuthenticatedRoutes = () => {
           </MasterProvider>
         }
       />
-      <Route path="/work-staff" element={<WorkStaffList />} />
+      <Route path="/list-management/work-staff" element={<WorkStaffList />} />
       <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
