@@ -1,8 +1,11 @@
+import React from "react";
 import { createTheme } from "@mui/material";
 import {
   MET_Header_Font_Weight_Bold,
   MET_Header_Font_Weight_Regular,
 } from "./constants";
+import { CheckboxRegular, CheckboxChecked } from "../components/icons/checkbox";
+
 export const Palette = {
   nuetral: {
     main: "#6D7274",
@@ -176,22 +179,12 @@ export const BaseTheme = createTheme({
         },
       },
     },
-    // MuiCheckbox: {
-    //   styleOverrides: {
-    //     root: {
-    //       "&.Mui-checked": {
-    //         "& svg": {
-    //           fontSize: "10rem",
-    //           "& path": {
-    //             fill: "#1A5A96",
-    //             fillRule: "evenodd",
-    //             clipRule: "evenodd",
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
+    MuiCheckbox: {
+      defaultProps: {
+        icon: <CheckboxRegular />,
+        checkedIcon: <CheckboxChecked />,
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {
