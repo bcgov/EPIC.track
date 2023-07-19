@@ -55,7 +55,7 @@ const WorkStaffList = () => {
                 (p: { first_name: string; last_name: string }) =>
                   `${p.first_name} ${p.last_name}`
               )
-              .join(",")}`,
+              .join(", ")}`,
           enableHiding: false,
           enableColumnFilter: true,
         } as MRT_ColumnDef<WorkStaff>;
