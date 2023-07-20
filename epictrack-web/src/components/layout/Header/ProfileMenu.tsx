@@ -94,7 +94,6 @@ const ProfileMenu = () => {
         flexGrow: 0,
         display: "flex",
         alignItems: "baseline",
-        marginRight: "40px",
         gap: "1rem",
       }}
       onMouseEnter={handleOpenProfileMenu}
@@ -108,7 +107,9 @@ const ProfileMenu = () => {
         }}
         className={classes.avatar}
       >
-        {`${user.firstName[0]}${user.lastName[0]}`}
+        <ETCaption2
+          bold
+        >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
       </Avatar>
       <Menu
         sx={{
@@ -146,8 +147,8 @@ const ProfileMenu = () => {
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Box
             sx={{
-              bgcolor: Palette.nuetral.bg.light,
-              borderBottom: `1px solid ${Palette.nuetral.bg.dark}`,
+              bgcolor: Palette.neutral.bg.light,
+              borderBottom: `1px solid ${Palette.neutral.bg.dark}`,
               alignItems: "center",
             }}
             className={classes.menuItemWrapper}

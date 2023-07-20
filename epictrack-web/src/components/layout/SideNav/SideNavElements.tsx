@@ -67,6 +67,10 @@ export const Routes: RouteType[] = [
         name: "Projects",
         path: "/list-management/projects",
       },
+      {
+        name: "Work Staff",
+        path: "/list-management/work-staff",
+      },
     ],
   },
   {

@@ -137,6 +137,14 @@ const CopyFilledIcon = (props: IconProps) => {
   );
 };
 
+const UserIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props}>
+      <path d="M11 12C7.67188 12 5 9.32812 5 6C5 2.71875 7.67188 0 11 0C14.2812 0 17 2.71875 17 6C17 9.32812 14.2812 12 11 12ZM13.3438 14.25C17.8438 14.25 21.5 17.9062 21.5 22.4062C21.5 23.2969 20.75 24 19.8594 24H2.09375C1.20312 24 0.5 23.2969 0.5 22.4062C0.5 17.9062 4.10938 14.25 8.60938 14.25H13.3438Z" />
+    </svg>
+  );
+};
+
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   DashboardIcon,
@@ -152,6 +160,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   NotificationWarning,
   CopyOutlinedIcon,
   CopyFilledIcon,
+  UserIcon,
 };
 
 export default icons;

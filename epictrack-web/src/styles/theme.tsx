@@ -1,10 +1,13 @@
+import React from "react";
 import { createTheme } from "@mui/material";
 import {
   MET_Header_Font_Weight_Bold,
   MET_Header_Font_Weight_Regular,
 } from "./constants";
+import { CheckboxRegular, CheckboxChecked } from "../components/icons/checkbox";
+
 export const Palette = {
-  nuetral: {
+  neutral: {
     main: "#6D7274",
     dark: "#313132",
     light: "#858A8C",
@@ -68,9 +71,9 @@ export const Palette = {
 export const BaseTheme = createTheme({
   palette: {
     neutral: {
-      main: Palette.nuetral.main,
-      dark: Palette.nuetral.dark,
-      light: Palette.nuetral.light,
+      main: Palette.neutral.main,
+      dark: Palette.neutral.dark,
+      light: Palette.neutral.light,
     },
     primary: {
       main: Palette.primary.main,
@@ -118,7 +121,7 @@ export const BaseTheme = createTheme({
                 backgroundColor: Palette.primary.dark,
               },
               "&:disabled": {
-                backgroundColor: Palette.nuetral.light,
+                backgroundColor: Palette.neutral.light,
                 color: Palette.white,
               },
             }) ||
@@ -131,7 +134,7 @@ export const BaseTheme = createTheme({
                 color: Palette.white,
               },
               "&:disabled": {
-                backgroundColor: Palette.nuetral.light,
+                backgroundColor: Palette.neutral.light,
                 color: Palette.white,
               },
             })),
@@ -148,9 +151,9 @@ export const BaseTheme = createTheme({
                 color: Palette.white,
               },
               "&:disabled": {
-                border: `2px solid ${Palette.nuetral.light}`,
+                border: `2px solid ${Palette.neutral.light}`,
                 backgroundColor: Palette.white,
-                color: Palette.nuetral.light,
+                color: Palette.neutral.light,
               },
             }),
         }),
@@ -164,7 +167,7 @@ export const BaseTheme = createTheme({
         root: {
           "&.MuiOutlinedInput-root": {
             "& fieldset": {
-              border: `2px solid ${Palette.nuetral.bg.dark}`,
+              border: `2px solid ${Palette.neutral.bg.dark}`,
             },
             "&:hover fieldset": {
               borderColor: Palette.primary.accent.light,
@@ -176,22 +179,12 @@ export const BaseTheme = createTheme({
         },
       },
     },
-    // MuiCheckbox: {
-    //   styleOverrides: {
-    //     root: {
-    //       "&.Mui-checked": {
-    //         "& svg": {
-    //           fontSize: "10rem",
-    //           "& path": {
-    //             fill: "#1A5A96",
-    //             fillRule: "evenodd",
-    //             clipRule: "evenodd",
-    //           },
-    //         },
-    //       },
-    //     },
-    //   },
-    // },
+    MuiCheckbox: {
+      defaultProps: {
+        icon: <CheckboxRegular />,
+        checkedIcon: <CheckboxChecked />,
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {

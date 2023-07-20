@@ -152,7 +152,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
               options={eaActs || []}
-              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionValue={(o: ListType) => o?.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("ea_act_id")}
             ></ControlledSelectV2>
@@ -163,7 +163,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
               options={workTypes || []}
-              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionValue={(o: ListType) => o?.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("work_type_id")}
             ></ControlledSelectV2>
@@ -212,7 +212,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.project_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.project_id}
               options={projects || []}
-              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionValue={(o: ListType) => o?.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("project_id")}
             ></ControlledSelectV2>
@@ -223,7 +223,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.ministry_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ministry_id}
               options={ministries || []}
-              getOptionValue={(o: Ministry) => o.id.toString()}
+              getOptionValue={(o: Ministry) => o?.id.toString()}
               getOptionLabel={(o: Ministry) => o.name}
               {...register("ministry_id")}
             ></ControlledSelectV2>
@@ -234,7 +234,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.federal_involvement_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.federal_involvement_id}
               options={federalInvolvements || []}
-              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionValue={(o: ListType) => o?.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("federal_involvement_id")}
             ></ControlledSelectV2>
@@ -246,7 +246,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.substitution_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.substitution_act_id}
               options={substitutionActs || []}
-              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionValue={(o: ListType) => o?.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("substitution_act_id")}
             ></ControlledSelectV2>
@@ -319,7 +319,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.eao_team_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.eao_team_id}
               options={teams || []}
-              getOptionValue={(o: ListType) => o.id.toString()}
+              getOptionValue={(o: ListType) => o?.id.toString()}
               getOptionLabel={(o: ListType) => o.name}
               {...register("eao_team_id")}
             ></ControlledSelectV2>
@@ -331,7 +331,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.responsible_epd_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.responsible_epd_id}
               options={epds || []}
-              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionValue={(o: Staff) => o?.id.toString()}
               getOptionLabel={(o: Staff) => o.full_name}
               {...register("responsible_epd_id")}
             ></ControlledSelectV2>
@@ -342,7 +342,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.work_lead_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.work_lead_id}
               options={leads || []}
-              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionValue={(o: Staff) => o?.id.toString()}
               getOptionLabel={(o: Staff) => o.full_name}
               {...register("work_lead_id")}
             ></ControlledSelectV2>
@@ -354,7 +354,7 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.decision_by_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.decision_by_id}
               options={decisionMakers || []}
-              getOptionValue={(o: Staff) => o.id.toString()}
+              getOptionValue={(o: Staff) => o?.id.toString()}
               getOptionLabel={(o: Staff) => o.full_name}
               {...register("decision_by_id")}
             ></ControlledSelectV2>
