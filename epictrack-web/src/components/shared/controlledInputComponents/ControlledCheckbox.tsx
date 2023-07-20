@@ -1,6 +1,7 @@
 import React, { FC } from "react";
 import { Checkbox, CheckboxProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
+import { CheckboxChecked, CheckboxRegular } from "../../icons/checkbox";
 
 type IFormCheckboxProps = {
   name: string;
@@ -22,6 +23,8 @@ const ControlledCheckbox: React.ForwardRefRenderFunction<
       defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
         <Checkbox
+          icon={<CheckboxRegular />}
+          checkedIcon={<CheckboxChecked />}
           {...otherProps}
           {...field}
           ref={ref}

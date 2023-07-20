@@ -202,11 +202,7 @@ const SideNav = ({
             },
           }}
         >
-          <Toolbar
-            sx={{
-              minHeight: "100px !important",
-            }}
-          />
+          <Toolbar />
           <DrawerBox />
         </Drawer>
       ) : (

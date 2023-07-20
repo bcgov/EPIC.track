@@ -6,13 +6,13 @@ import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
 import { useAppDispatch, useAppSelector } from "./hooks";
 import { Box, Theme, useMediaQuery } from "@mui/material";
 import AxiosErrorHandler from "./components/axiosErrorHandler/AxiosErrorHandler";
+import ETNotificationProvider from "./components/shared/notificationProvider/ETNotificationProvider";
 import "./styles/App.scss";
-import Notification from "./components/shared/notifications/Notification";
 
-export default function App() {
+export function App() {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(
-    (state) => state.user.authentication.authenticated
+    (state) => state.user?.authentication.authenticated
   );
   const isMediumScreen: boolean = useMediaQuery((theme: Theme) =>
     theme.breakpoints.up("md")
@@ -37,14 +37,15 @@ export default function App() {
                   marginTop: "17px",
                 }}
               >
-                <React.StrictMode>
-                  <AuthenticatedRoutes />
-                </React.StrictMode>
+                <ETNotificationProvider preventDuplicate>
+                  <React.StrictMode>
+                    <AuthenticatedRoutes />
+                  </React.StrictMode>
+                </ETNotificationProvider>
               </Box>
             </Box>
           </Router>
         )}
-        <Notification />
       </AxiosErrorHandler>
     </>
   );

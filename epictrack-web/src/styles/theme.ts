@@ -283,8 +283,8 @@ export const BaseTheme = createTheme({
     },
     caption: {
       fontWeight: MET_Header_Font_Weight_Regular,
-      fontSize: "0.8125em",
-      lineHeight: "1.2em",
+      fontSize: "0.8125rem",
+      lineHeight: "1.2rem",
     },
     body1: {
       fontWeight: MET_Header_Font_Weight_Regular,

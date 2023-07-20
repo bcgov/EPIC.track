@@ -18,7 +18,7 @@ export const uiStateSlice = createSlice({
     },
     envBanner: (state, action: PayloadAction<boolean>) => {
       state.showEnvBanner = action.payload;
-      state.toggleDrawerMarginTop = state.showEnvBanner ? "2rem" : "0.5rem";
+      state.toggleDrawerMarginTop = state.showEnvBanner ? "3rem" : "1rem";
     },
   },
 });

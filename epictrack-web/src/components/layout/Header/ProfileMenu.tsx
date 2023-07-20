@@ -2,40 +2,74 @@ import React from "react";
 import Box from "@mui/material/Box";
 import { Palette } from "../../../styles/theme";
 import { useAppSelector } from "../../../hooks";
-import {
-  Menu,
-  MenuItem,
-  ListItemAvatar,
-  Avatar,
-  ListItemText,
-  Typography,
-  Button,
-} from "@mui/material";
-import UserIcon from "../../../assets/images/userIcon.svg";
-import CopyOutlineIcon from "../../../assets/images/copyOutline.svg";
-import CopyFilledIcon from "../../../assets/images/copyFilled.svg";
+import { makeStyles } from "@mui/styles";
+import { Menu, Avatar, Tooltip, IconButton } from "@mui/material";
+import { ETCaption1, ETCaption2, ETSubhead } from "../../shared";
+import { IconProps } from "../../icons/type";
+import Icons from "../../icons";
+import { showNotification } from "../../shared/notificationProvider";
+
+const CopyOutlinedIcon: React.FC<IconProps> = Icons["CopyOutlinedIcon"];
+const CopyFilledIcon: React.FC<IconProps> = Icons["CopyFilledIcon"];
+
+const useButtonStyles = makeStyles({
+  copyIcon: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "4px",
+    "& .profile-menu-icon ": {
+      color: Palette.white,
+      fill: Palette.primary.accent.main,
+    },
+  },
+});
+
+const useStyles = makeStyles({
+  menuItemWrapper: {
+    display: "flex",
+    gap: "8px",
+    padding: "1rem",
+  },
+  menuItem: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  contactInfo: {
+    display: "flex",
+    gap: "1.5rem",
+    alignItems: "center",
+  },
+  avatar: {
+    fontSize: "1rem",
+    lineHeight: "1.3rem",
+    fontWeight: 700,
+    width: "2rem",
+    height: "2rem",
+  },
+});
 
 const CopyButton = ({ ...props }) => {
+  const classes = useButtonStyles();
+
   const copyHandler = (text: string) => {
+    showNotification("Copied to clipboard", { type: "success" });
     navigator.clipboard.writeText(text);
   };
-  // TODO: Switch to using fill color from state instead of changing src
-  const [fillColor, setFillColor] = React.useState<string>("#FFFFFF");
+
+  const [hover, setHover] = React.useState<boolean>(false);
   return (
-    <Button
+    <IconButton
       onClick={() => copyHandler(props.copyText)}
-      size="small"
-      sx={{ width: 32 }}
+      className={classes.copyIcon}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
     >
-      <Box
-        component="img"
-        src={CopyOutlineIcon}
-        alt="Copy"
-        sx={{ fill: fillColor }}
-        onMouseEnter={(e) => (e.currentTarget.src = CopyFilledIcon)}
-        onMouseLeave={(e) => (e.currentTarget.src = CopyOutlineIcon)}
-      />
-    </Button>
+      {hover ? (
+        <CopyFilledIcon className="profile-menu-icon" />
+      ) : (
+        <CopyOutlinedIcon className="profile-menu-icon" />
+      )}
+    </IconButton>
   );
 };
 const ProfileMenu = () => {
@@ -52,27 +86,33 @@ const ProfileMenu = () => {
     setProfileMenuAnchorEl(null);
   };
 
+  const classes = useStyles();
+
   return (
     <Box
       sx={{
         flexGrow: 0,
         display: "flex",
+        alignItems: "baseline",
         marginRight: "40px",
         gap: "1rem",
       }}
       onMouseEnter={handleOpenProfileMenu}
       onMouseLeave={handleCloseProfileMenu}
     >
-      <Box component="img" src={UserIcon} alt="User" />
-      <Typography
-        sx={{ fontSize: "18px", fontWeight: 700, lineHeight: "26px" }}
-        component="span"
+      <ETSubhead>Hello, {user.firstName}</ETSubhead>
+      <Avatar
+        sx={{
+          bgcolor: Palette.white,
+          color: Palette.primary.main,
+        }}
+        className={classes.avatar}
       >
-        Hello, {user.firstName}
-      </Typography>
+        {`${user.firstName[0]}${user.lastName[0]}`}
+      </Avatar>
       <Menu
         sx={{
-          mt: "45px",
+          mt: "2.5rem",
         }}
         id="menu-appbar"
         anchorEl={profileMenuAnchorEl}
@@ -89,103 +129,78 @@ const ProfileMenu = () => {
         onClose={handleCloseProfileMenu}
         style={{ pointerEvents: "none" }}
         PaperProps={{
-          style: { pointerEvents: "auto", width: 320 },
+          style: {
+            pointerEvents: "auto",
+            width: 320,
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+          },
+        }}
+        MenuListProps={{
+          style: {
+            paddingTop: 0,
+            paddingBottom: 0,
+          },
         }}
       >
-        <MenuItem
-          key="userDetail"
-          sx={{
-            bgcolor: "#F9F9FB",
-            borderBlockColor: "#DBDCDC",
-            "&:hover": {
-              bgcolor: "#F9F9FB",
-            },
-          }}
-          divider
-        >
-          <ListItemAvatar>
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Box
+            sx={{
+              bgcolor: Palette.nuetral.bg.light,
+              borderBottom: `1px solid ${Palette.nuetral.bg.dark}`,
+              alignItems: "center",
+            }}
+            className={classes.menuItemWrapper}
+          >
             <Avatar
               sx={{
                 bgcolor: Palette.primary.main,
-                width: 40,
-                height: 40,
+                color: Palette.white,
               }}
-            >{`${user.firstName[0]}${user.lastName[0]}`}</Avatar>
-          </ListItemAvatar>
-          <ListItemText
-            primary={`${user.firstName} ${user.lastName}`}
-            secondary={user.position}
-            primaryTypographyProps={{
-              variant: "subtitle2",
-              sx: {
-                fontWeight: 700,
-                fontSize: "14px",
-                lineHeight: "1rem",
-              },
-            }}
-            secondaryTypographyProps={{
-              variant: "inherit",
-              noWrap: true,
-            }}
-          />
-        </MenuItem>
-        <MenuItem
-          sx={{
-            "&:hover": {
-              bgcolor: "transparent",
-            },
-          }}
-          key="contact"
-        >
-          <ListItemText
-            primary="Contact"
-            primaryTypographyProps={{
-              fontSize: 15,
-              fontWeight: "600",
-              lineHeight: "20px",
-            }}
-          ></ListItemText>
-        </MenuItem>
-        <MenuItem
-          key="email"
-          sx={{
-            "&:hover": {
-              bgcolor: "transparent",
-            },
-          }}
-        >
-          <Typography
-            textAlign="center"
-            sx={{
-              flexGrow: 1,
-              textAlign: "left",
-            }}
-          >
-            {user.email}
-          </Typography>
-          <CopyButton copyText={user.email} />
-        </MenuItem>
-        {user.phone && (
-          <MenuItem
-            key="phone"
-            sx={{
-              "&:hover": {
-                bgcolor: "transparent",
-              },
-            }}
-          >
-            <Typography
-              textAlign="center"
-              sx={{
-                flexGrow: 1,
-                textAlign: "left",
-              }}
+              className={classes.avatar}
             >
-              {user.phone}
-            </Typography>
-            <CopyButton copyText={user.phone} />
-          </MenuItem>
-        )}
+              {`${user.firstName[0]}${user.lastName[0]}`}
+            </Avatar>
+            <Box sx={{ gap: "8px" }} className={classes.menuItem}>
+              <ETCaption1 bold>
+                {`${user.firstName} ${user.lastName}`}
+              </ETCaption1>
+              <ETCaption1>{user.position}</ETCaption1>
+            </Box>
+          </Box>
+          <Box
+            sx={{ flexDirection: "column" }}
+            className={classes.menuItemWrapper}
+          >
+            <ETCaption2 bold>Contact</ETCaption2>
+            <Box className={classes.menuItem}>
+              <Box className={classes.contactInfo}>
+                <Tooltip title={user.email} arrow>
+                  <ETCaption2
+                    color={Palette.primary.accent.main}
+                    sx={{ flexGrow: 1 }}
+                    noWrap
+                  >
+                    {user.email}
+                  </ETCaption2>
+                </Tooltip>
+                <CopyButton copyText={user.email} />
+              </Box>
+              <Box className={classes.contactInfo}>
+                <Tooltip title={user.phone} arrow>
+                  <ETCaption2
+                    color={Palette.primary.accent.main}
+                    sx={{ flexGrow: 1 }}
+                    noWrap
+                  >
+                    {user.phone}
+                  </ETCaption2>
+                </Tooltip>
+                <CopyButton copyText={user.phone} />
+              </Box>
+            </Box>
+          </Box>
+        </Box>
       </Menu>
     </Box>
   );
