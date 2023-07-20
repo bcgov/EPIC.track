@@ -160,7 +160,9 @@ const ProfileMenu = () => {
               }}
               className={classes.avatar}
             >
-              {`${user.firstName[0]}${user.lastName[0]}`}
+              <ETCaption2
+                bold
+              >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
             </Avatar>
             <Box sx={{ gap: "8px" }} className={classes.menuItem}>
               <ETCaption1 bold>
