@@ -100,7 +100,7 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
           <Typography className={classes.message}>{message}</Typography>
           <IconButton
             onClick={handleDismiss}
-            sx={{ width: "24px", height: "24px" }}
+            sx={{ width: "2.5rem", height: "2.5rem", padding: "8px" }}
             disableRipple
           >
             <CloseIconComponent />

@@ -4,7 +4,7 @@ import { Palette } from "../../../styles/theme";
 import { useAppSelector } from "../../../hooks";
 import { makeStyles } from "@mui/styles";
 import { Menu, Avatar, Tooltip, IconButton } from "@mui/material";
-import { ETCaption1, ETCaption2, ETSubhead } from "../../shared";
+import { ETCaption2, ETSubhead } from "../../shared";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 import { showNotification } from "../../shared/notificationProvider";
@@ -165,10 +165,10 @@ const ProfileMenu = () => {
               >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
             </Avatar>
             <Box sx={{ gap: "8px" }} className={classes.menuItem}>
-              <ETCaption1 bold>
+              <ETCaption2 bold>
                 {`${user.firstName} ${user.lastName}`}
-              </ETCaption1>
-              <ETCaption1>{user.position}</ETCaption1>
+              </ETCaption2>
+              <ETCaption2>{user.position}</ETCaption2>
             </Box>
           </Box>
           <Box
@@ -189,18 +189,20 @@ const ProfileMenu = () => {
                 </Tooltip>
                 <CopyButton copyText={user.email} />
               </Box>
-              <Box className={classes.contactInfo}>
-                <Tooltip title={user.phone} arrow>
-                  <ETCaption2
-                    color={Palette.primary.accent.main}
-                    sx={{ flexGrow: 1 }}
-                    noWrap
-                  >
-                    {user.phone}
-                  </ETCaption2>
-                </Tooltip>
-                <CopyButton copyText={user.phone} />
-              </Box>
+              {user.phone && (
+                <Box className={classes.contactInfo}>
+                  <Tooltip title={user.phone} arrow>
+                    <ETCaption2
+                      color={Palette.primary.accent.main}
+                      sx={{ flexGrow: 1 }}
+                      noWrap
+                    >
+                      {user.phone}
+                    </ETCaption2>
+                  </Tooltip>
+                  <CopyButton copyText={user.phone} />
+                </Box>
+              )}
             </Box>
           </Box>
         </Box>
