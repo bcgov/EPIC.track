@@ -133,8 +133,7 @@ const ProfileMenu = () => {
           style: {
             pointerEvents: "auto",
             width: 320,
-            borderBottomLeftRadius: 0,
-            borderBottomRightRadius: 0,
+            boxShadow: "0px 12px 24px 0px rgba(0, 0, 0, 0.10)",
           },
         }}
         MenuListProps={{
