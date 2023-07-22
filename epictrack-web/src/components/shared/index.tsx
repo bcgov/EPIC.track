@@ -187,8 +187,8 @@ export const ETCaption2 = ({
       color={color}
       sx={{
         ...sx,
-        fontSize: "0.875em",
-        lineHeight: "1.2em",
+        fontSize: "0.875rem",
+        lineHeight: "1.2rem",
         fontWeight: bold
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
