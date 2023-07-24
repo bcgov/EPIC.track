@@ -30,7 +30,7 @@ import { ResourceForecastModel } from "./type";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { EpicTrackPageGridContainer } from "../../shared";
+import { ETPageContainer } from "../../shared";
 
 export default function ResourceForecast() {
   const [reportDate, setReportDate] = React.useState<string>("");
@@ -357,7 +357,7 @@ export default function ResourceForecast() {
     }
   }, [reportDate, filters, fetchReportData]);
   return (
-    <EpicTrackPageGridContainer
+    <ETPageContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -434,6 +434,6 @@ export default function ResourceForecast() {
           </Container>
         )}
       </Grid>
-    </EpicTrackPageGridContainer>
+    </ETPageContainer>
   );
 }

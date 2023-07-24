@@ -1,12 +1,15 @@
 import React from "react";
 
-import { Typography, FormLabel, Grid } from "@mui/material";
-import { SxProps, styled } from "@mui/system";
+import { Typography, FormLabel, Grid, SxProps } from "@mui/material";
 import {
   MET_Header_Font_Family,
   MET_Header_Font_Weight_Bold,
   MET_Header_Font_Weight_Regular,
 } from "../../styles/constants";
+import { useAppSelector } from "../../hooks";
+import { styled } from "@mui/system";
+import { Link, LinkProps } from "react-router-dom";
+import { Palette } from "../../styles/theme";
 
 interface HeaderProps {
   sx?: SxProps;
@@ -16,12 +19,28 @@ interface HeaderProps {
   [prop: string]: unknown;
 }
 
-export const EpicTrackPageGridContainer = styled(Grid)(() => ({
-  padding: "6em 2em 1em 2em",
-  justifyContent: "flex-start",
-  alignItems: "flex-start",
-}));
+interface PageContainerProps {
+  children?: React.ReactNode | string;
+  [prop: string]: unknown;
+  sx?: SxProps;
+}
 
+export const ETPageContainer = (props: PageContainerProps) => {
+  const state = useAppSelector((state) => state.uiState);
+  return (
+    <Grid
+      {...props}
+      sx={{
+        ...props.sx,
+        padding: `${state.showEnvBanner ? "9" : "7"}rem 2rem 1rem 2.5rem`,
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+      }}
+    >
+      {props.children}
+    </Grid>
+  );
+};
 export const ETHeading1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography
@@ -233,3 +252,12 @@ export const TrackLabel = styled(FormLabel)(() => ({
   fontSize: "16px",
   fontWeight: "bold",
 }));
+
+export const ETLink = (props: LinkProps) => (
+  <Link
+    style={{
+      color: Palette.primary.main,
+    }}
+    {...props}
+  />
+);

@@ -34,7 +34,7 @@ export function App() {
                 sx={{
                   flexGrow: 1,
                   width: `calc(100% - ${drawerWidth}px)`,
-                  marginTop: "17px",
+                  // marginTop: "17px",
                 }}
               >
                 <ETNotificationProvider preventDuplicate>

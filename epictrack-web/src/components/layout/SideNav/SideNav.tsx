@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import {
   ListItemButton,
   List,
@@ -8,7 +8,6 @@ import {
   Toolbar,
   ListItemIcon,
   ListItemText,
-  Typography,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { styled } from "@mui/system";

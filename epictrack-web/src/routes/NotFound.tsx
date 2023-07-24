@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { ETHeading1, EpicTrackPageGridContainer } from "../components/shared";
+import { ETHeading1, ETPageContainer } from "../components/shared";
 import React from "react";
 import { IProps } from "./types";
 import ErrorIcon from "@mui/icons-material/ErrorOutlineOutlined";
@@ -10,7 +10,7 @@ const NotFound = React.memo(
     errorCode = "404",
   }: IProps) => {
     return (
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         container
         direction="row"
         justifyContent="center"
@@ -35,7 +35,7 @@ const NotFound = React.memo(
         >
           <ErrorIcon sx={{ height: "10em", width: "10em" }} />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     );
   }
 );

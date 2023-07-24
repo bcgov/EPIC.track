@@ -16,7 +16,7 @@ import { Edit } from "@mui/icons-material";
 import { Group, User } from "../../models/user";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import UserService from "../../services/userService";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETPageContainer } from "../shared";
 import Select from "react-select";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { UserGroupUpdate } from "../../services/userService/type";
@@ -151,7 +151,7 @@ const UserList = () => {
 
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -196,7 +196,7 @@ const UserList = () => {
             }}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 };

@@ -5,7 +5,7 @@ import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETPageContainer } from "../shared";
 import IndigenousNationForm from "./IndigneousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
@@ -83,7 +83,7 @@ export default function IndigenousNationList() {
 
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -137,7 +137,7 @@ export default function IndigenousNationList() {
             )}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 }
