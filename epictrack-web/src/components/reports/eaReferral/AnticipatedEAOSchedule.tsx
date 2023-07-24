@@ -30,7 +30,7 @@ import {
 import { dateUtils } from "../../../utils";
 import moment from "moment";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { EpicTrackPageGridContainer } from "../../shared";
+import { ETPageContainer } from "../../shared";
 
 export default function AnticipatedEAOSchedule() {
   const [reports, setReports] = React.useState({});
@@ -159,7 +159,7 @@ export default function AnticipatedEAOSchedule() {
     );
   }
   return (
-    <EpicTrackPageGridContainer
+    <ETPageContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -399,6 +399,6 @@ export default function AnticipatedEAOSchedule() {
           </>
         )}
       </Grid>
-    </EpicTrackPageGridContainer>
+    </ETPageContainer>
   );
 }

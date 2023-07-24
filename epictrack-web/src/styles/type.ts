@@ -6,18 +6,6 @@ export interface UIState {
 }
 
 declare module '@mui/material/styles' {
-    // interface Theme {
-    //   status: {
-    //     danger: React.CSSProperties['color'];
-    //   };
-    // }
-  
-    // interface ThemeOptions {
-    //   status: {
-    //     danger: React.CSSProperties['color'];
-    //   };
-    // }
-  
     interface Palette {
       neutral: Palette['primary'];
     }
@@ -25,12 +13,4 @@ declare module '@mui/material/styles' {
     interface PaletteOptions {
       neutral: PaletteOptions['primary'];
     }
-  
-    // interface PaletteColor {
-    //   darker?: string;
-    // }
-  
-    // interface SimplePaletteColorOptions {
-    //   darker?: string;
-    // }
   }

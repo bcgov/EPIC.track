@@ -11,7 +11,7 @@ import { Template } from "../../../models/template";
 import TaskService from "../../../services/taskService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import TrackDialog from "../../shared/TrackDialog";
-import { EpicTrackPageGridContainer } from "../../shared";
+import { ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
 
 const TemplateList = () => {
@@ -132,7 +132,7 @@ const TemplateList = () => {
 
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -195,7 +195,7 @@ const TemplateList = () => {
             )}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
       <TrackDialog
         open={showCreateDialog}
         dialogTitle={(templateId ? "Update " : "Create ") + titleSuffix}

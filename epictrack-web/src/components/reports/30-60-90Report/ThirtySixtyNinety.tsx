@@ -25,7 +25,7 @@ import {
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { EpicTrackPageGridContainer } from "../../shared";
+import { ETPageContainer } from "../../shared";
 
 export default function ThirtySixtyNinety() {
   const [reports, setReports] = React.useState({});
@@ -124,7 +124,7 @@ export default function ThirtySixtyNinety() {
     );
   }
   return (
-    <EpicTrackPageGridContainer
+    <ETPageContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -245,6 +245,6 @@ export default function ThirtySixtyNinety() {
           </>
         )}
       </Grid>
-    </EpicTrackPageGridContainer>
+    </ETPageContainer>
   );
 }

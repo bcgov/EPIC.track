@@ -5,7 +5,7 @@ import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
 
@@ -82,7 +82,7 @@ const StaffList = () => {
   );
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -136,7 +136,7 @@ const StaffList = () => {
             )}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 };

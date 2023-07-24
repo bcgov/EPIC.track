@@ -5,7 +5,7 @@ import { RESULT_STATUS } from "../../../constants/application-constant";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
-import { EpicTrackPageGridContainer } from "../../shared";
+import { ETPageContainer } from "../../shared";
 import projectService from "../../../services/projectService/projectService";
 
 const WorkStaffList = () => {
@@ -163,7 +163,7 @@ const WorkStaffList = () => {
   );
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -196,7 +196,7 @@ const WorkStaffList = () => {
             )}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 };

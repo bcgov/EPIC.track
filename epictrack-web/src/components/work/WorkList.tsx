@@ -4,7 +4,7 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETLink, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
@@ -64,6 +64,11 @@ const WorkList = () => {
       {
         accessorKey: "title",
         header: "Name",
+        Cell: ({ row }) => (
+          <ETLink to={`/work-plan?work_id=${row.original.id}`}>
+            {row.original.title}
+          </ETLink>
+        ),
         sortingFn: "sortFn",
       },
       {
@@ -122,7 +127,7 @@ const WorkList = () => {
   );
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -181,7 +186,7 @@ const WorkList = () => {
             )}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 };

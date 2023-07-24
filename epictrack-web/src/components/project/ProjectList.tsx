@@ -5,7 +5,7 @@ import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import ProjectForm from "./ProjectForm";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
 
@@ -95,7 +95,7 @@ const ProjectList = () => {
   );
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         container
         columnSpacing={2}
@@ -149,7 +149,7 @@ const ProjectList = () => {
             )}
           />
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 };

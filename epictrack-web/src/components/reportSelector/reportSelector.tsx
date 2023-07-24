@@ -8,7 +8,7 @@ import Select from "@mui/material/Select";
 import AnticipatedEAOSchedule from "../reports/eaReferral/AnticipatedEAOSchedule";
 import ResourceForecast from "../reports/resourceForecast/ResourceForecast";
 import ThirtySixtyNinety from "../reports/30-60-90Report/ThirtySixtyNinety";
-import { EpicTrackPageGridContainer } from "../shared";
+import { ETPageContainer } from "../shared";
 
 export default function ReportSelector() {
   const [selectedReport, setSelectedReport] = useState<string>("none");
@@ -19,7 +19,7 @@ export default function ReportSelector() {
   ));
   return (
     <>
-      <EpicTrackPageGridContainer
+      <ETPageContainer
         direction="row"
         justifyContent="flex-start"
         alignItems="flex-start"
@@ -52,7 +52,7 @@ export default function ReportSelector() {
             <ThirtySixtyNinety />
           )}
         </Grid>
-      </EpicTrackPageGridContainer>
+      </ETPageContainer>
     </>
   );
 }
