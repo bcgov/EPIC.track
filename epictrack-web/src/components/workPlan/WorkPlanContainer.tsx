@@ -72,7 +72,7 @@ const WorkPlanContainer = () => {
               <ETTab label="Issues" />
               <ETTab label="About" />
               <ETTab label="Teams" identifier="4" />
-              <Tab label="First Nations" />
+              <ETTab label="First Nations" />
             </ETTabs>
           </Box>
         </ETPageContainer>
