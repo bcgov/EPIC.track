@@ -104,6 +104,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
               fontSize: "21px",
               lineHeight: "27px",
               letterSpacing: "-0.42px",
+              color: Palette.neutral.dark,
             }}
           >
             {dialogContentText}
