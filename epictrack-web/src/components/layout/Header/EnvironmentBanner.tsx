@@ -23,6 +23,7 @@ const EnvironmentBanner = () => {
         sx={{
           height: "0.5rem",
           background: Palette.secondary.main,
+          boxShadow: "0px 4px 8px 0px rgba(0, 0, 0, 0.10)",
         }}
       ></Box>
     );
@@ -37,6 +38,7 @@ const EnvironmentBanner = () => {
         gap: "8px",
         paddingBlock: "8px",
         height: "2.5rem",
+        boxShadow: "0px 4px 8px 0px rgba(0, 0, 0, 0.10)",
       }}
       textAlign="center"
     >
