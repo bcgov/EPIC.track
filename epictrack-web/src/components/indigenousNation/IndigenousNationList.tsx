@@ -21,6 +21,10 @@ export default function IndigenousNationList() {
     );
   }, [indigenousNationID]);
 
+  React.useEffect(() => {
+    ctx.setTitle("Indigenous Nation");
+  }, [ctx.title]);
+
   const onEdit = (id: number) => {
     setIndigenousNationID(id);
     ctx.setShowModalForm(true);

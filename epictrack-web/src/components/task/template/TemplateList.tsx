@@ -203,6 +203,10 @@ const TemplateList = () => {
         disableEscapeKeyDown
         fullWidth
         maxWidth="md"
+        formId="template-form"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
       >
         <TemplateForm
           onCancel={onDialogClose}

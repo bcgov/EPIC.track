@@ -22,6 +22,7 @@ interface MasterContextProps {
   setService: Dispatch<SetStateAction<ServiceBase | undefined>>;
   onSave(data: any, callback: () => any): any;
   setForm: Dispatch<SetStateAction<React.ReactElement>>;
+  setFormId: Dispatch<SetStateAction<string | undefined>>;
   onDialogClose(event: any, reason: any): any;
 }
 
@@ -41,6 +42,7 @@ export const MasterContext = createContext<MasterContextProps>({
   onSave: (data: any, callback: () => any) => ({}),
   getData: () => ({}),
   setForm: () => ({}),
+  setFormId: () => ({}),
   onDialogClose: (event: any, reason: any) => ({}),
 });
 
@@ -62,6 +64,7 @@ export const MasterProvider = ({
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
   const [form, setForm] = React.useState<React.ReactElement>(() => <></>);
+  const [formId, setFormId] = React.useState<string | undefined>();
   const [showModalForm, setShowModalForm] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -174,6 +177,7 @@ export const MasterProvider = ({
         onSave,
         getData,
         setForm,
+        setFormId,
         onDialogClose,
       }}
     >
@@ -198,10 +202,10 @@ export const MasterProvider = ({
       </Backdrop>
       <TrackDialog
         open={showDeleteDialog}
-        dialogTitle="Delete"
-        dialogContentText="Are you sure you want to delete?"
-        okButtonText="Yes"
-        cancelButtonText="No"
+        dialogTitle="Delete Confirmation"
+        dialogContentText={`Are you sure you want to delete this ${title}?`}
+        okButtonText="Delete"
+        cancelButtonText="Cancel"
         isActionsRequired
         onCancel={() => handleDelete()}
         onOk={() => deleteItem(id)}
@@ -213,6 +217,12 @@ export const MasterProvider = ({
         disableEscapeKeyDown
         fullWidth
         maxWidth="md"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        onCancel={() => onDialogClose()}
+        formId={formId}
+        // onOk={() => deleteItem(id)}
       >
         {form}
       </TrackDialog>

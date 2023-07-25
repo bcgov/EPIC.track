@@ -22,6 +22,10 @@ const WorkList = () => {
     ctx.setForm(<WorkForm workId={workId} />);
   }, [workId]);
 
+  React.useEffect(() => {
+    ctx.setTitle("Work");
+  }, [ctx.title]);
+
   const onEdit = (id: number) => {
     setWorkId(id);
     ctx.setShowModalForm(true);

@@ -209,18 +209,6 @@ export default function CreateTemplateForm({ ...props }) {
               </FormHelperText>
             )}
           </Grid>
-          <Grid
-            item
-            xs={12}
-            sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
-          >
-            <Button variant="outlined" type="reset" onClick={props.onCancel}>
-              Cancel
-            </Button>
-            <Button variant="outlined" type="submit">
-              Submit
-            </Button>
-          </Grid>
         </Grid>
       </FormProvider>
       <TrackDialog

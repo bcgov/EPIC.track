@@ -1,7 +1,6 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Grid, IconButton, Autocomplete, TextField } from "@mui/material";
-import { RESULT_STATUS } from "../../../constants/application-constant";
+import { Box, Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
@@ -10,7 +9,6 @@ import projectService from "../../../services/projectService/projectService";
 
 const WorkStaffList = () => {
   const [wsData, setwsData] = React.useState<WorkStaff[]>([]);
-  const [resultStatus, setResultStatus] = React.useState<string>();
   const [loading, setLoading] = React.useState<boolean>(false);
 
   const getWorkStaffAllocation = React.useCallback(async () => {
@@ -107,7 +105,7 @@ const WorkStaffList = () => {
     () =>
       wsData
         .filter((p) => p.responsible_epd)
-        .map((p) => `${p.work_lead.first_name} ${p.work_lead.last_name}`)
+        .map((p) => `${p.work_lead?.first_name} ${p.work_lead?.last_name}`)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
     [wsData]
   );
