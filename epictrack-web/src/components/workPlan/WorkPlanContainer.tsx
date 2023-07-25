@@ -46,7 +46,7 @@ const WorkPlanContainer = () => {
           }}
         >
           <Box>
-            <ETHeading2 bold color={Palette.primary.accent.main}>
+            <ETHeading2 bold color={Palette.primary.main}>
               {work?.title}
             </ETHeading2>
           </Box>
@@ -68,11 +68,11 @@ const WorkPlanContainer = () => {
                 }}
                 label="Workplan"
               />
-              <ETTab label="Status" />
+              <ETTab label="Status & Reports" />
               <ETTab label="Issues" />
-              <ETTab label="About Project" />
-              <ETTab label="Teams" identifier="4" data-title="dddd" value={4} />
-              <Tab label="Indigenous Nations" />
+              <ETTab label="About" />
+              <ETTab label="Teams" identifier="4" />
+              <Tab label="First Nations" />
             </ETTabs>
           </Box>
         </ETPageContainer>

@@ -25,25 +25,22 @@ const ETTabs = styled(Tabs)({
     fontWeight: MET_Header_Font_Weight_Bold,
     color: Palette.primary.main,
   },
-  "& :hover": {
-    fontWeight: MET_Header_Font_Weight_Regular,
-    color: Palette.primary.main,
-  },
 });
 
 const ETTab = ({ label, identifier, ...props }: ETTabProps) => {
   return (
     <>
-      {identifier && (
-        <Tab
-          sx={{
-            ...props.sx,
-            flexDirection: "row",
-            gap: "0.5rem",
-          }}
-          label={
-            <>
-              {label}
+      <Tab
+        disableRipple={true}
+        sx={{
+          ...props.sx,
+          flexDirection: "row",
+          gap: "0.5rem",
+        }}
+        label={
+          <>
+            {label}
+            {identifier && (
               <Chip
                 size="small"
                 label={identifier}
@@ -52,20 +49,11 @@ const ETTab = ({ label, identifier, ...props }: ETTabProps) => {
                   color: Palette.neutral.dark,
                 }}
               />
-            </>
-          }
-          {...props}
-        />
-      )}
-      {!identifier && (
-        <Tab
-          sx={{
-            ...props.sx,
-          }}
-          label={label}
-          {...props}
-        />
-      )}
+            )}
+          </>
+        }
+        {...props}
+      />
     </>
   );
 };

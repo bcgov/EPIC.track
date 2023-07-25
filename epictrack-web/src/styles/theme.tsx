@@ -97,6 +97,15 @@ export const BaseTheme = createTheme({
     },
   },
   components: {
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          "&>:not(:first-of-type)": {
+            marginLeft: "16px",
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: ({ ownerState, theme }) => ({
@@ -144,6 +153,7 @@ export const BaseTheme = createTheme({
               border: `2px solid ${Palette.primary.main}`,
               "&:hover": {
                 backgroundColor: Palette.primary.main,
+                border: `2px solid ${Palette.primary.main}`,
                 color: Palette.white,
               },
               "&:active": {
@@ -258,6 +268,7 @@ export const BaseTheme = createTheme({
       fontWeight: MET_Header_Font_Weight_Regular,
       fontSize: "1.75rem",
       lineHeight: "1.4rem",
+      letterSpacing: "-1.12px",
     },
     h3: {
       fontSize: "1.5rem",
