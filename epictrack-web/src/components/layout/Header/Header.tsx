@@ -27,6 +27,7 @@ const Header = () => {
       <AppBar
         position="fixed"
         sx={{
+          boxShadow: "none",
           zIndex: (theme: Theme) =>
             isMediumScreen ? theme.zIndex.drawer + 1 : theme.zIndex.drawer,
         }}
