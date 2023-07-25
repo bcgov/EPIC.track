@@ -8,7 +8,6 @@ import { ETLink, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
-import { Link } from "react-router-dom";
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -158,11 +157,6 @@ const WorkList = () => {
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>
-                <Link to={`/work-plan?work_id=${row.original.id}`}>
-                  <IconButton>
-                    <EditIcon />
-                  </IconButton>
-                </Link>
               </Box>
             )}
             renderTopToolbarCustomActions={() => (
