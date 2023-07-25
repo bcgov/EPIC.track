@@ -52,7 +52,7 @@ const CopyButton = ({ ...props }) => {
   const classes = useButtonStyles();
 
   const copyHandler = (text: string) => {
-    showNotification("Copied to clipboard" + new Date().getMilliseconds(), {
+    showNotification("Copied to clipboard", {
       type: "success",
     });
     navigator.clipboard.writeText(text);
