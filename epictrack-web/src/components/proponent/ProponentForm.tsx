@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Button } from "@mui/material";
+import { TextField, Grid } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -36,6 +36,9 @@ export default function StaffForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const ctx = React.useContext(MasterContext);
 
+  React.useEffect(() => {
+    ctx.setFormId("proponent-form");
+  }, []);
   React.useEffect(() => {
     ctx.setTitle("Proponent/Certificate Holder");
   }, [ctx.title]);
@@ -79,7 +82,7 @@ export default function StaffForm({ ...props }) {
       <FormProvider {...methods}>
         <Grid
           component={"form"}
-          id="indigenous-nation-form"
+          id="proponent-form"
           container
           spacing={2}
           onSubmit={handleSubmit(onSubmitHandler)}
@@ -109,24 +112,6 @@ export default function StaffForm({ ...props }) {
               {...register("is_active")}
             />
             <TrackLabel id="active">Active</TrackLabel>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
-          >
-            <Button
-              variant="outlined"
-              type="reset"
-              onClick={(event) => {
-                ctx.onDialogClose(event, "");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button variant="outlined" type="submit">
-              Submit
-            </Button>
           </Grid>
         </Grid>
       </FormProvider>

@@ -38,8 +38,8 @@ export default function IndigenousNationForm({ ...props }) {
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
-    ctx.setTitle("Indigenous Nation");
-  }, [ctx.title]);
+    ctx.setFormId("indigenous-nation-form");
+  }, []);
 
   React.useEffect(() => {
     ctx.setId(props.indigenousNationID);
@@ -113,24 +113,6 @@ export default function IndigenousNationForm({ ...props }) {
               {...register("is_active")}
             />
             <TrackLabel id="active">Active</TrackLabel>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
-          >
-            <Button
-              variant="outlined"
-              type="reset"
-              onClick={(event) => {
-                ctx.onDialogClose(event, "");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button variant="outlined" type="submit">
-              Submit
-            </Button>
           </Grid>
         </Grid>
       </FormProvider>

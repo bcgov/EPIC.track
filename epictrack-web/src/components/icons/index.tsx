@@ -1,6 +1,5 @@
 import React, { ReactNode } from "react";
 import { IconProps } from "./type";
-import { SvgIcon } from "@mui/material";
 
 const commonProps = {
   className: "sidebar-item",

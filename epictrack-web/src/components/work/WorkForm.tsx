@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Button, Divider } from "@mui/material";
+import { TextField, Grid, Divider } from "@mui/material";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import * as yup from "yup";
@@ -66,8 +66,8 @@ export default function WorkForm({ ...props }) {
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
-    ctx.setTitle("Work");
-  }, [ctx.title]);
+    ctx.setFormId("work-form");
+  }, []);
 
   React.useEffect(() => {
     ctx.setId(props.workId);
@@ -358,24 +358,6 @@ export default function WorkForm({ ...props }) {
               getOptionLabel={(o: Staff) => o.full_name}
               {...register("decision_by_id")}
             ></ControlledSelectV2>
-          </Grid>
-          <Grid
-            item
-            xs={12}
-            sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
-          >
-            <Button
-              variant="outlined"
-              type="reset"
-              onClick={(event) => {
-                ctx.onDialogClose(event, "");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button variant="outlined" type="submit">
-              Submit
-            </Button>
           </Grid>
         </Grid>
       </FormProvider>

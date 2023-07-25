@@ -29,6 +29,10 @@ const ProjectList = () => {
     ctx.setService(projectService);
   }, []);
 
+  React.useEffect(() => {
+    ctx.setTitle("Project");
+  }, [ctx.title]);
+
   const projects = React.useMemo(() => ctx.data as Project[], [ctx.data]);
 
   React.useEffect(() => {

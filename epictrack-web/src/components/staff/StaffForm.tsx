@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Button, FormHelperText } from "@mui/material";
+import { TextField, Grid, FormHelperText } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -47,6 +47,10 @@ export default function StaffForm({ ...props }) {
   React.useEffect(() => {
     ctx.setTitle("Staff");
   }, [ctx.title]);
+
+  React.useEffect(() => {
+    ctx.setFormId("staff-form");
+  }, []);
 
   React.useEffect(() => {
     ctx.setId(props.staffId);
@@ -157,7 +161,9 @@ export default function StaffForm({ ...props }) {
             />
             <TrackLabel id="active">Active</TrackLabel>
           </Grid>
-          <Grid
+
+          {/* TODO: Keeping for reference. Delete after new modal is merged and working in test. */}
+          {/* <Grid
             item
             xs={12}
             sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
@@ -174,7 +180,7 @@ export default function StaffForm({ ...props }) {
             <Button variant="outlined" type="submit">
               Submit
             </Button>
-          </Grid>
+          </Grid> */}
         </Grid>
       </FormProvider>
     </>
