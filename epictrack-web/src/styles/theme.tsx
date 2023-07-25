@@ -109,6 +109,7 @@ export const BaseTheme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: ({ ownerState, theme }) => ({
+          boxShadow: "none",
           fontWeight: MET_Header_Font_Weight_Bold,
           padding: "0.75rem 1rem",
           ...(ownerState.size === "medium" && {
@@ -125,6 +126,7 @@ export const BaseTheme = createTheme({
             ownerState.color === "primary" && {
               "&:hover": {
                 backgroundColor: Palette.primary.light,
+                boxShadow: "none",
               },
               "&:active": {
                 backgroundColor: Palette.primary.dark,
@@ -137,6 +139,7 @@ export const BaseTheme = createTheme({
             (ownerState.color === "secondary" && {
               "&:hover": {
                 backgroundColor: Palette.secondary.light,
+                boxShadow: "none",
               },
               "&:active": {
                 backgroundColor: Palette.secondary.dark,
@@ -155,6 +158,7 @@ export const BaseTheme = createTheme({
                 backgroundColor: Palette.primary.main,
                 border: `2px solid ${Palette.primary.main}`,
                 color: Palette.white,
+                boxShadow: "none",
               },
               "&:active": {
                 backgroundColor: Palette.primary.dark,
