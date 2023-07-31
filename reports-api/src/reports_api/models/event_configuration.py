@@ -20,13 +20,14 @@ from .base_model import BaseModelVersioned
 from .db import db
 
 
-class EventTemplate(BaseModelVersioned):
+class EventConfiguration(BaseModelVersioned):
     """Model class for Event Template."""
 
-    __tablename__ = 'event_templates'
+    __tablename__ = 'event_configurations'
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String)
+    work_id = sa.Column(sa.ForeignKey('works.id'), nullable=False)
     parent_id = sa.Column(sa.Integer, nullable=True)
     phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
@@ -36,6 +37,7 @@ class EventTemplate(BaseModelVersioned):
     mandatory = sa.Column(sa.Boolean, default=False)
     sort_order = sa.Column(sa.Integer, nullable=False)
 
+    work = relationship('Work', foreign_keys=[work_id], lazy='select')
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
     event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')
@@ -44,24 +46,11 @@ class EventTemplate(BaseModelVersioned):
     def find_by_phase_id(cls, _phase_id):
         """Returns the event configurations based on phase id"""
         events = db.session.query(
-            EventTemplate
+            EventConfiguration
         ).filter_by(
             phase_id=_phase_id,
             is_active=True
         ).order_by(
-            EventTemplate.sort_order.asc()
-        ).all()  # pylint: disable=no-member
-        return events
-
-    @classmethod
-    def find_by_phase_ids(cls, _phase_ids):
-        """Returns the event configurations based on phase ids"""
-        events = db.session.query(
-            EventTemplate
-        ).filter(
-            EventTemplate.phase_id.in_(_phase_ids),
-            EventTemplate.is_active.is_(True)
-        ).order_by(
-            EventTemplate.sort_order.asc()
+            EventConfiguration.sort_order.asc()
         ).all()  # pylint: disable=no-member
         return events

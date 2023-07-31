@@ -39,7 +39,7 @@ class Outcomes(Resource):
     def get(milestone_id):
         """Return all outcomes based on milestone_id."""
         outcomes = OutcomeService.find_by_milestone_id(milestone_id)
-        outcomes_schema = res.OutcomeResponseSchema(many=True, only=("id", "name", "milestone_id", "terminates_work"))
+        outcomes_schema = res.OutcomeResponseSchema(many=True, only=("id", "name", "terminates_work"))
         return jsonify(outcomes_schema.dump(outcomes)), HTTPStatus.OK
 
 

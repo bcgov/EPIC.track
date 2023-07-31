@@ -28,7 +28,6 @@ from .apihelper import Api
 from .code import API as CODES_API
 from .lookup_data_generator import API as LOOKUP_API
 from .meta import API as META_API
-from .milestone import API as MILESTONE_API
 from .ops import API as OPS_API
 from .outcome import API as OUTCOME_API
 from .phase import API as PHASE_API
@@ -42,9 +41,9 @@ from .work import API as WORK_API
 from .indigenous_nation import API as INDIGENOUS_NATION_API
 from .proponent import API as PROPONENT_API
 from .reminder_configuration import API as REMINDER_CONFIGURATION_API
-from .configuration import API as CONFIGURATION_API
 from .user import API as USER_API
 from .task import API as TASK_API
+from .event_template import API as EVENT_TEMPLATE_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -81,7 +80,6 @@ API.add_namespace(CODES_API, path="/codes")
 API.add_namespace(PROJECTS_API, path="/projects")
 API.add_namespace(SYNC_FORM_DATA_API, path="/sync-form-data")
 API.add_namespace(PHASE_API, path="/phases")
-API.add_namespace(MILESTONE_API, path="/milestones")
 API.add_namespace(STAFF_API, path="/staffs")
 API.add_namespace(OUTCOME_API, path="/outcomes")
 API.add_namespace(SUB_TYPES_API, path="/sub-types")
@@ -92,6 +90,6 @@ API.add_namespace(REPORTS_API, path="/reports")
 API.add_namespace(INDIGENOUS_NATION_API, path="/indigenous-nations")
 API.add_namespace(PROPONENT_API, path="/proponents")
 API.add_namespace(REMINDER_CONFIGURATION_API, path="/reminder-configurations")
-API.add_namespace(CONFIGURATION_API, path="/configurations")
 API.add_namespace(USER_API, path='/users')
 API.add_namespace(TASK_API, path="/task-templates")
+API.add_namespace(EVENT_TEMPLATE_API, path="/event-templates")

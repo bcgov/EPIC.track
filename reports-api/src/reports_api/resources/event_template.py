@@ -11,34 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Resource for configurations"""
-
+"""Resource for Event Template endpoints."""
 from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 from flask import jsonify, request
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
-from reports_api.services.configuration import ConfigurationService
-from reports_api.exceptions import BadRequestError
-
-API = Namespace("configurations", description="Application Configurations")
+from reports_api.services import EventTemplateService
 
 
-@cors_preflight("POST")
-@API.route("/events", methods=["POST", "OPTIONS"])
-class EventConfigurationsImport(Resource):
-    """Endpoints for import event configurations"""
+API = Namespace("tasks", description="Tasks")
+
+
+@cors_preflight("GET,POST")
+@API.route("", methods=["GET", "POST", "OPTIONS"])
+class EventTemplates(Resource):
+    """Endpoints for EventTemplates"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     def post():
-        """Import event configurations"""
-        event_configurations = request.files['event_configurations']
-        try:
-
-            result = ConfigurationService.import_events_configurations(event_configurations)
-        except BadRequestError as err:
-            return err.message, HTTPStatus.BAD_REQUEST
-        return jsonify(result), HTTPStatus.CREATED
+        """Create new task template"""
+        template_file = request.files["event_template"]
+        event_template = EventTemplateService.import_events_template(template_file)
+        return jsonify(event_template), HTTPStatus.CREATED

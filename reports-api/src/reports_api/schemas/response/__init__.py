@@ -13,7 +13,6 @@
 # limitations under the License.
 """Exposes all the response validation schemas"""
 from .indigenous_nation_response import IndigenousResponseNationSchema
-from .milestone_response import MilestoneResponseSchema, MilestoneTypeResponseSchema, OutcomeResponseSchema
 from .phase_response import PhaseResponseSchema
 from .project_response import ProjectResponseSchema
 from .proponent_response import ProponentResponseSchema
@@ -24,3 +23,6 @@ from .user_group_response import UserGroupResponseSchema
 from .user_response import UserResponseSchema
 from .work_response import (
     WorkPhaseResponseSchema, WorkResourceResponseSchema, WorkResponseSchema, WorkStaffRoleReponseSchema)
+from .event_template_response import EventTemplateResponseSchema
+from .event_configuration_response import EventConfigurationResponseSchema
+from .outcome_response import OutcomeResponseSchema

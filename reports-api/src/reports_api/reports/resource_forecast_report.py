@@ -17,7 +17,7 @@ from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
 from reports_api.models import (
-    EAAct, EAOTeam, Event, FederalInvolvement, Milestone, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType,
+    EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType,
     Type, Work, WorkPhase, WorkType, db)
 
 from .report_factory import ReportFactory
@@ -61,14 +61,14 @@ class EAResourceForeCastReport(ReportFactory):
         if self.filters and "exclude" in self.filters:
             self.excluded_items = self.filters["exclude"]
         self.report_title = "EAO Resource Forecast"
-        start_event_milestones = (
-            db.session.query(
-                func.min(Milestone.id).label("milestone_id"), Milestone.phase_id
-            )
-            .group_by(Milestone.phase_id)
-            .all()
-        )
-        self.start_event_milestones = [x.milestone_id for x in start_event_milestones]
+        # start_event_milestones = (
+        #     db.session.query(
+        #         func.min(Milestone.id).label("milestone_id"), Milestone.phase_id
+        #     )
+        #     .group_by(Milestone.phase_id)
+        #     .all()
+        # )
+        self.start_event_milestones = []  # [x.milestone_id for x in start_event_milestones]
         self.months = []
         self.month_labels = []
         self.report_cells = {
@@ -262,8 +262,8 @@ class EAResourceForeCastReport(ReportFactory):
                     Event.milestone_id.in_(self.start_event_milestones),
                 ),
             )
-            .join(Milestone, Event.milestone_id == Milestone.id)
-            .join(project_phase, Milestone.phase_id == project_phase.id)
+            # .join(Milestone, Event.milestone_id == Milestone.id)
+            # .join(project_phase, Milestone.phase_id == project_phase.id)
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
             .join(env_region, env_region.id == Project.region_id_env)
@@ -315,28 +315,28 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .all()
         )
-        work_ids = set((work.work_id for work in works))
+        # work_ids = set((work.work_id for work in works))
         works = super()._format_data(works)
-        events = (
-            Event.query.filter(
-                Event.work_id.in_(work_ids),
-                Event.milestone_id.in_(self.start_event_milestones),
-                func.coalesce(Event.start_date, Event.anticipated_start_date) <= self.end_date,
-            )
-            .join(Milestone, Event.milestone_id == Milestone.id)
-            .join(PhaseCode, Milestone.phase_id == PhaseCode.id)
-            .order_by(func.coalesce(Event.start_date, Event.anticipated_start_date))
-            .add_columns(
-                Event.work_id.label("work_id"),
-                func.coalesce(Event.start_date, Event.anticipated_start_date).label(
-                    "start_date"
-                ),
-                PhaseCode.name.label("event_phase"),
-                PhaseCode.color.label("phase_color"),
-            )
-            .all()
-        )
-        events = {y: self._filter_work_events(y, events) for y in work_ids}
+        # events = (
+        #     Event.query.filter(
+        #         Event.work_id.in_(work_ids),
+        #         Event.milestone_id.in_(self.start_event_milestones),
+        #         func.coalesce(Event.start_date, Event.anticipated_start_date) <= self.end_date,
+        #     )
+        #     .join(Milestone, Event.milestone_id == Milestone.id)
+        #     .join(PhaseCode, Milestone.phase_id == PhaseCode.id)
+        #     .order_by(func.coalesce(Event.start_date, Event.anticipated_start_date))
+        #     .add_columns(
+        #         Event.work_id.label("work_id"),
+        #         func.coalesce(Event.start_date, Event.anticipated_start_date).label(
+        #             "start_date"
+        #         ),
+        #         PhaseCode.name.label("event_phase"),
+        #         PhaseCode.color.label("phase_color"),
+        #     )
+        #     .all()
+        # )
+        events = {}  # {y: self._filter_work_events(y, events) for y in work_ids}
         results = defaultdict(list)
         for work_id, work_data in works.items():
             work = work_data[0]
@@ -418,7 +418,7 @@ class EAResourceForeCastReport(ReportFactory):
                     ),
                 )
                 .join(WorkType)
-                .join(Milestone)
+                # .join(Milestone)
                 .join(Event)
                 .filter(
                     and_(

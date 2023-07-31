@@ -25,10 +25,9 @@ class WorkCalendarEvent(BaseModelVersioned):
     __tablename__ = 'work_calendar_events'
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
-    work_id = sa.Column(sa.ForeignKey('works.id'), nullable=False)
-    phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     calendar_event_id = sa.Column(sa.ForeignKey('calendar_events.id'), nullable=False)
+    source_event_id = sa.Column(sa.Integer, nullable=True)
+    event_configuration_id = sa.Column(sa.ForeignKey('event_configurations.id'), nullable=False)
 
-    work = relationship('Work', foreign_keys=[work_id], lazy='select')
-    phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
+    event_configuration = relationship('EventConfiguration', foreign_keys=[event_configuration_id], lazy='select')
     calendar_event = relationship('CalendarEvent', foreign_keys=[calendar_event_id], lazy='select')
