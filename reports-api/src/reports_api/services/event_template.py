@@ -13,12 +13,15 @@
 # limitations under the License.
 """Service to manage Event Template."""
 from typing import IO, Dict
+
 import pandas as pd
-from reports_api.exceptions import BadRequestError
+
 from reports_api import models
-from reports_api.utils.str import escape_characters
+from reports_api.exceptions import BadRequestError
 from reports_api.models import EventTemplate
-from reports_api.schemas import request as req, response as res
+from reports_api.schemas import request as req
+from reports_api.schemas import response as res
+from reports_api.utils.str import escape_characters
 
 
 class EventTemplateService:

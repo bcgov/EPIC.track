@@ -13,7 +13,8 @@
 # limitations under the License.
 """Service to manage Event Configuration."""
 from typing import Iterable
-from reports_api.models import db, EventConfiguration
+
+from reports_api.models import EventConfiguration, db
 from reports_api.models.event_category import EventCategoryEnum
 
 

@@ -44,3 +44,12 @@ export interface Work extends MasterBase {
   eac_decision_by: Staff;
   decision_by: Staff;
 }
+
+export interface WorkPhaseSkeleton extends MasterBase {
+  phase_id: number;
+  end_date: string;
+  start_date: string;
+  phase: string;
+  milestone_progress: number;
+  next_milestone: string;
+}

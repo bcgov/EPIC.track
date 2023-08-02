@@ -7,6 +7,8 @@ import { Palette } from "../../styles/theme";
 import { Tab } from "@mui/material";
 import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
+import TabPanel from "../shared/tab/TabPanel";
+import PhaseContainer from "./components/PhaseContainer";
 
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -37,45 +39,58 @@ const WorkPlanContainer = () => {
   return (
     <>
       {!loading && (
-        <ETPageContainer
-          sx={{
-            borderBottom: "2px solid",
-            paddingBottom: "0rem !important",
-            borderColor: Palette.neutral.bg.dark,
-            backgroundColor: Palette.neutral.bg.light,
-          }}
-        >
-          <Box>
-            <ETHeading2 bold color={Palette.primary.main}>
-              {work?.title}
-            </ETHeading2>
-          </Box>
-          <Box
+        <>
+          <ETPageContainer
             sx={{
-              marginTop: "1rem",
+              borderBottom: "2px solid",
+              paddingBottom: "0rem !important",
+              borderColor: Palette.neutral.bg.dark,
+              backgroundColor: Palette.neutral.bg.light,
             }}
           >
-            <ETTabs
+            <Box>
+              <ETHeading2 bold color={Palette.primary.accent.main}>
+                {work?.title}
+              </ETHeading2>
+            </Box>
+            <Box
               sx={{
-                gap: "2rem",
+                marginTop: "1rem",
               }}
-              onChange={handleTabSelected}
-              value={selectedTabIndex}
             >
-              <ETTab
+              <ETTabs
                 sx={{
-                  paddingLeft: 0,
+                  gap: "2rem",
                 }}
-                label="Workplan"
-              />
-              <ETTab label="Status & Reports" />
-              <ETTab label="Issues" />
-              <ETTab label="About" />
-              <ETTab label="Teams" identifier="4" />
-              <ETTab label="First Nations" />
-            </ETTabs>
-          </Box>
-        </ETPageContainer>
+                onChange={handleTabSelected}
+                value={selectedTabIndex}
+              >
+                <ETTab
+                  sx={{
+                    paddingLeft: 0,
+                  }}
+                  label="Workplan"
+                />
+                <ETTab label="Status" />
+                <ETTab label="Issues" />
+                <ETTab label="About Project" />
+                <ETTab
+                  label="Teams"
+                  identifier="4"
+                  data-title="dddd"
+                  value={4}
+                />
+                <Tab label="Indigenous Nations" />
+              </ETTabs>
+            </Box>
+          </ETPageContainer>
+          <TabPanel index={0} value={selectedTabIndex}>
+            <PhaseContainer
+              workId={work_id}
+              currentPhase={work?.current_phase_id}
+            />
+          </TabPanel>
+        </>
       )}
     </>
   );

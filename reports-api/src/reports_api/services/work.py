@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Works."""
-from datetime import datetime, timedelta
+from datetime import timedelta
+
 from sqlalchemy import exc
 from sqlalchemy.orm import aliased
+
 from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
-from reports_api.models import (CalendarEvent, EAOTeam, Event,
-                                EventConfiguration, Project, Role, Staff,
-                                StaffWorkRole, Work, WorkCalendarEvent,
-                                WorkPhase, db)
+from reports_api.models import (
+    CalendarEvent, EAOTeam, Event, EventConfiguration, Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent,
+    WorkPhase, db)
 from reports_api.models.event_category import EventCategoryEnum
 from reports_api.schemas.response import EventTemplateResponseSchema
 from reports_api.services.event_configuration import EventConfigurationService
