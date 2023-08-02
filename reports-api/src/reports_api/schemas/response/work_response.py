@@ -40,7 +40,7 @@ class WorkResponseSchema(
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_type = fields.Nested(WorkTypeSchema, dump_only=True)
     current_phase = fields.Nested(
-        PhaseSchema, exclude=("milestones", "ea_act", "work_type"), dump_only=True
+        PhaseSchema, exclude=("ea_act", "work_type"), dump_only=True
     )
     substitution_act = fields.Nested(SubstitutionActSchema, dump_only=True)
     eac_decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)

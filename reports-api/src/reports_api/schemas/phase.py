@@ -4,7 +4,6 @@ from marshmallow import EXCLUDE, fields
 from reports_api.models import PhaseCode
 from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.ea_act import EAActSchema
-from reports_api.schemas.milestone import MilestoneSchema
 from reports_api.schemas.work_type import WorkTypeSchema
 
 
@@ -22,4 +21,3 @@ class PhaseSchema(
 
     ea_act = fields.Nested(EAActSchema, dump_only=True)
     work_type = fields.Nested(WorkTypeSchema, dump_only=True)
-    milestones = fields.Nested(MilestoneSchema(many=True), dump_only=True)

@@ -13,7 +13,7 @@ from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import aliased
 
-from reports_api.models import Event, Milestone, Project, Work, WorkStatus, WorkType, db
+from reports_api.models import Event, Project, Work, WorkStatus, WorkType, db
 
 from .report_factory import ReportFactory
 
@@ -43,9 +43,9 @@ class ThirtySixtyNinetyReport(ReportFactory):
         super().__init__(data_keys, filters=filters)
         self.report_date = None
         self.report_title = "30-60-90"
-        self.decision_miletones = Milestone.query.filter(Milestone.outcomes.any())
-        self.decision_miletones = [x.id for x in self.decision_miletones]
-        self.pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
+        self.decision_miletones = {}  # Milestone.query.filter(Milestone.outcomes.any())
+        # self.decision_miletones = [x.id for x in self.decision_miletones]
+        # self.pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
         self.pecps = [x.id for x in self.pecps]
 
     def _fetch_data(self, report_date):
@@ -102,7 +102,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ),
                 ),
             )
-            .join(Milestone)
+            # .join(Milestone)
             .outerjoin(
                 next_pecp_query,
                 and_(
@@ -141,7 +141,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 func.coalesce(
                             Event.start_date, Event.anticipated_start_date
                         ).label("event_date"),
-                Milestone.id.label("milestone_id"),
+                # Milestone.id.label("milestone_id"),
             )
         )
 
@@ -150,9 +150,9 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _format_data(self, data):
         data = super()._format_data(data)
-        major_decision_miletones = Milestone.query.filter(
-            Milestone.milestone_type_id.in_((1, 4))
-        ).all()
+        major_decision_miletones = []  # Milestone.query.filter(
+        #     Milestone.milestone_type_id.in_((1, 4))
+        # ).all()
         major_decision_miletones = [x.id for x in major_decision_miletones]
         response = {
             "30": [],

@@ -13,8 +13,22 @@
 # limitations under the License.
 """Model to handle all operations related to Event Categories."""
 
+import enum
 import sqlalchemy as sa
 from .base_model import BaseModelVersioned
+
+
+class EventCategoryEnum(enum.Enum):
+    """Enum for EventCategory"""
+
+    # pylint: disable=C0103
+    MILESTONE = 1
+    EXTENSION = 2
+    SUSPENSION = 3
+    DECISION = 4
+    PCP = 5
+    CALENDAR = 6
+    FINANCE = 7
 
 
 class EventCategory(BaseModelVersioned):

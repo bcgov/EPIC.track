@@ -29,7 +29,7 @@ class PhaseCode(db.Model, CodeTableVersioned):
     name = Column(String(250))
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
     ea_act_id = Column(ForeignKey('ea_acts.id'), nullable=False)
-    duration = Column(Integer())
+    number_of_days = Column(Integer(), default=0)
     legislated = Column(Boolean())
     sort_order = Column(Integer())
     color = Column(String(15))
@@ -37,22 +37,16 @@ class PhaseCode(db.Model, CodeTableVersioned):
     work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
     ea_act = relationship('EAAct', foreign_keys=[ea_act_id], lazy='select')
 
-    milestones = relationship("Milestone",
-                              primaryjoin="PhaseCode.id==Milestone.phase_id",
-                              back_populates="phase",
-                              order_by="Milestone.sort_order.asc(), Milestone.id.asc()")
-
     def as_dict(self):
         """Return Json representation."""
         return {
             'id': self.id,
             'name': self.name,
             'sort_order': self.sort_order,
-            'duration': self.duration,
+            'number_of_days': self.number_of_days,
             'legislated': self.legislated,
             'work_type': self.work_type.as_dict(),
             'ea_act': self.ea_act.as_dict(),
-            'milestones': [milestone.as_dict() for milestone in self.milestones],
             'color': self.color
         }
 
@@ -62,7 +56,8 @@ class PhaseCode(db.Model, CodeTableVersioned):
         code_table = db.session.query(
             PhaseCode
         ).filter_by(
-            work_type_id=_work_type_id, ea_act_id=_ea_act_id
+            work_type_id=_work_type_id, ea_act_id=_ea_act_id,
+            is_active=True
         ).order_by(
             PhaseCode.sort_order.asc()
         ).all()  # pylint: disable=no-member
