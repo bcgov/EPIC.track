@@ -20,6 +20,7 @@ from flask_restx import Namespace, Resource, cors
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services import WorkService
+from reports_api.services.work_phase import WorkPhaseService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
@@ -123,3 +124,19 @@ class Work(Resource):
         req.WorkIdPathParameterSchema().load(request.view_args)
         WorkService.delete_work(work_id)
         return "Work successfully deleted", HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:work_id>/phases", methods=["GET", "OPTIONS"])
+class WorkPhases(Resource):
+    """Endpoint resource to return phases details for given work id."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id):
+        """Return a phase details based on id."""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        work_phases = WorkPhaseService.find_by_work_id(work_id)
+        return res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases), HTTPStatus.OK

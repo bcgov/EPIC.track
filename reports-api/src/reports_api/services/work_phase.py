@@ -28,3 +28,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             instance = WorkPhase(**work_phase)
             instance.flush()
         WorkPhase.commit()
+
+    @classmethod
+    def find_by_work_id(cls, work_id: int):
+        """Find work phases by work id"""
+        work_phases = WorkPhase.find_by_work_id(work_id)
+        return work_phases

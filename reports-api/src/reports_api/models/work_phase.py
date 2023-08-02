@@ -40,7 +40,7 @@ class WorkPhase(BaseModelVersioned):
         return {
             'id': self.id,
             'start_date': str(self.start_date),
-            'anticipated_end_date': str(self.anticipated_end_date),
+            'end_date': str(self.end_date),
             'work_id': self.work_id,
             'phase': self.phase.as_dict()
         }
@@ -48,4 +48,4 @@ class WorkPhase(BaseModelVersioned):
     @classmethod
     def find_by_work_id(cls, work_id: int):
         """Find by work id."""
-        return cls.query.filter_by(work_id=work_id)
+        return cls.query.filter_by(work_id=work_id).all()
