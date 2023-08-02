@@ -12,16 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Works."""
-from datetime import timedelta
-
+from datetime import datetime, timedelta
+from sqlalchemy import exc
 from sqlalchemy.orm import aliased
-
 from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
-from reports_api.models import EAOTeam, Project, Role, Staff, StaffWorkRole, Work
-from reports_api.services.event import EventService
-from reports_api.services.milestone import MilestoneService
+from reports_api.models import (CalendarEvent, EAOTeam, Event,
+                                EventConfiguration, Project, Role, Staff,
+                                StaffWorkRole, Work, WorkCalendarEvent,
+                                WorkPhase, db)
+from reports_api.models.event_category import EventCategoryEnum
+from reports_api.schemas.response import EventTemplateResponseSchema
+from reports_api.services.event_configuration import EventConfigurationService
+from reports_api.services.event_template import EventTemplateService
 from reports_api.services.phaseservice import PhaseService
-from reports_api.services.work_phase import WorkPhaseService
 
 
 class WorkService:
@@ -84,54 +87,113 @@ class WorkService:
 
     @classmethod
     def create_work(cls, payload):
+        # pylint: disable=too-many-locals
         """Create a new work"""
-        exists = cls.check_existence(payload["title"])
-        if exists:
-            raise ResourceExistsError("Work with same title already exists")
-        work = Work(**payload)
-        work.flush()
-        phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
-            work.ea_act_id, work.work_type_id
-        )
-        work.current_phase_id = phases[0].id
-        work_phases = []
-        work_events = []
-        start_date = work.start_date
-        for phase in phases:
-            end_date = start_date + timedelta(days=phase.duration)
-            work_phases.append(
-                {
-                    "work_id": work.id,
-                    "phase_id": phase.id,
-                    "start_date": f"{start_date}",
-                    "anticipated_end_date": f"{end_date}",
-                }
+        try:
+            if cls.check_existence(payload["title"]):
+                raise ResourceExistsError("Work with same title already exists")
+            work = Work(**payload)
+            work.flush()
+            phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
+                work.ea_act_id, work.work_type_id
             )
-            phase_events = MilestoneService.find_auto_milestones_per_phase(phase.id)
-            work_events.append(
-                {
-                    "title": phase_events[0].name,
-                    "anticipated_start_date": f"{start_date}",
-                    "anticipated_end_date": f"{start_date}",
-                    "work_id": work.id,
-                    "milestone_id": phase_events[0].id,
-                }
-            )
-            for phase_event in phase_events[1:]:
-                work_events.append(
-                    {
-                        "title": phase_event.name,
-                        "anticipated_start_date": f"{end_date}",
-                        "anticipated_end_date": f"{end_date}",
+            phase_ids = list(map(lambda x: x.id, phases))
+            event_templates = EventTemplateService.find_by_phase_ids(phase_ids)
+            event_template_json = EventTemplateResponseSchema(many=True).dump(event_templates)
+            for parent_config in list(filter(lambda x: not x['parent_id'], event_template_json)):
+                parent_config['work_id'] = work.id
+                p_result = EventConfiguration(**cls._prepare_configuration(parent_config))
+                p_result.flush()
+                for child in list(filter(lambda x, _parent_config_id=parent_config['id']:
+                                         x['parent_id'] == _parent_config_id, event_template_json)):
+                    child['work_id'] = work.id
+                    child['parent_id'] = p_result.id
+                    EventConfiguration.flush(EventConfiguration(**cls._prepare_configuration(child)))
+
+            work.current_phase_id = phases[0].id
+            phase_start_date = work.start_date
+            for phase in phases:
+                end_date = phase_start_date + timedelta(days=phase.number_of_days)
+                WorkPhase.flush(WorkPhase(** {
                         "work_id": work.id,
-                        "milestone_id": phase_event.id,
-                    }
-                )
-            start_date = end_date + timedelta(days=1)
-        WorkPhaseService.create_bulk_work_phases(work_phases)
-        EventService.bulk_create_events(work_events)
-        work.save()
+                        "phase_id": phase.id,
+                        "start_date": f"{phase_start_date}",
+                        "end_date": f"{end_date}",
+                }))
+                event_configs = EventConfigurationService.find_mandatory_configurations(phase.id)
+                parent_event_configs = list(filter(lambda x: not x.parent_id, event_configs))
+                for p_event_conf in parent_event_configs:
+                    p_event_start_date = phase_start_date +\
+                        timedelta(days=cls._find_start_at_value(p_event_conf.start_at, 0))
+                    p_event = Event.flush(Event(**cls._prepare_regular_event(p_event_conf.name,
+                                                                             str(p_event_start_date),
+                                                                             p_event_conf.number_of_days,
+                                                                             p_event_conf.id)))
+                    c_events = list(filter(lambda x, _parent_id=p_event_conf.id: x.parent_id == _parent_id,
+                                           event_configs))
+                    for c_event_conf in c_events:
+                        c_event_start_date = p_event_start_date +\
+                            timedelta(days=cls._find_start_at_value(c_event_conf.start_at,
+                                                                    p_event_conf.number_of_days))
+                        if c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value:
+                            cal_event = CalendarEvent.flush(CalendarEvent(**{
+                                "name": c_event_conf.name,
+                                "anticipated_date": c_event_start_date,
+                                "number_of_days": c_event_conf.number_of_days
+                            }))
+                            WorkCalendarEvent.flush(WorkCalendarEvent(**{
+                                "calendar_event_id": cal_event.id,
+                                "source_event_id": p_event.id,
+                                "event_configuration_id": c_event_conf.id
+                            }))
+                        else:
+                            Event.flush(Event(**cls._prepare_regular_event(c_event_conf.name,
+                                                                           str(c_event_start_date),
+                                                                           c_event_conf.number_of_days,
+                                                                           c_event_conf.id, p_event.id)))
+                phase_start_date = end_date + timedelta(days=1)
+            db.session.commit()
+        except exc.IntegrityError as exception:
+            db.session.rollback()
+            raise exception
         return work
+
+    @classmethod
+    def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
+        """Calculate the start at value"""
+        # pylint: disable=eval-used
+        start_at_value = eval(start_at.replace('number_of_days',
+                                               str(number_of_days))) if 'number_of_days' in start_at else int(start_at)
+        return start_at_value + number_of_days
+
+    @classmethod
+    def _prepare_regular_event(cls, name: str, start_date: str, number_of_days: int,
+                               ev_config_id: int, source_e_id: int = None) -> dict:
+        # pylint: disable=too-many-arguments
+        """Prepare the event object"""
+        return {
+                "name": name,
+                "anticipated_date": f"{start_date}",
+                "number_of_days": number_of_days,
+                "event_configuration_id": ev_config_id,
+                "source_event_id": source_e_id
+        }
+
+    @classmethod
+    def _prepare_configuration(cls, data) -> dict:
+        """Prepare the configuration object"""
+        return {
+                'name': data['name'],
+                'work_id': data['work_id'],
+                'phase_id': data['phase_id'],
+                'parent_id': data['parent_id'],
+                'event_type_id': data['event_type_id'],
+                'event_category_id': data['event_category_id'],
+                'start_at': data['start_at'],
+                'number_of_days': data['number_of_days'],
+                'mandatory': data['mandatory'],
+                'sort_order': data['sort_order']
+        }
 
     @classmethod
     def find_by_id(cls, work_id):

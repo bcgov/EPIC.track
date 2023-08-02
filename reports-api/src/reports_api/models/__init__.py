@@ -24,7 +24,6 @@ from .code_table import CodeTableVersioned
 from .db import db  # noqa: I001
 from .ea_act import EAAct
 from .eao_team import EAOTeam
-from .engagement import Engagement, WorkEngagement
 from .event import Event
 from .event_category import EventCategory
 from .event_field import EventField
@@ -40,7 +39,6 @@ from .inspection_attachment import InspectionAttachment
 from .inspection_attendee import InspectionAttendee
 from .inspection_detail import InspectionDetail
 from .issue import Issue
-from .milestone import Milestone
 from .milestone_type import MilestoneType
 from .ministry import Ministry
 from .outcome import Outcome
@@ -66,3 +64,4 @@ from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
+from .event_configuration import EventConfiguration
