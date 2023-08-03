@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Resource for Task endpoints."""
+"""Resource for Event endpoints."""
 from http import HTTPStatus
 
 from flask import jsonify, request
@@ -19,19 +19,19 @@ from flask_restx import Namespace, Resource, cors
 
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
-from reports_api.services import TaskService
+from reports_api.services.event import EventService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace("tasks", description="Tasks")
+API = Namespace("events", description="Events")
 
 
 @cors_preflight("GET")
-@API.route("/<int:work_id>/events", methods=["GET", "OPTIONS"])
+@API.route("/<int:work_id>/milestones", methods=["GET", "OPTIONS"])
 class Templates(Resource):
-    """Endpoint resource to return all task events for given work id"""
+    """Endpoint resource to return all milestone events for given work id"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -41,8 +41,8 @@ class Templates(Resource):
     def get(work_id):
         """Return all task templates."""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        task_events = TaskService.find_tasks_by_work_id(work_id)
+        task_events = EventService.find_milestone_events_by_work_id(work_id)
         return (
-            jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
+            jsonify(res.EventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,
         )
