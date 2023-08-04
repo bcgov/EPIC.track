@@ -29,19 +29,21 @@ API = Namespace("tasks", description="Tasks")
 
 
 @cors_preflight("GET")
-@API.route("/<int:work_id>/events", methods=["GET", "OPTIONS"])
+@API.route("/events", methods=["GET", "OPTIONS"])
 class Templates(Resource):
-    """Endpoint resource to return all task events for given work id"""
+    """Endpoint resource to return all task events for given work id and phase id"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
     @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
-    def get(work_id):
+    def get():
         """Return all task templates."""
-        req.WorkIdPathParameterSchema().load(request.view_args)
-        task_events = TaskService.find_tasks_by_work_id(work_id)
+        args = req.TaskEventQueryParamSchema().load(request.args)
+        work_id = args.get("work_id")
+        phase_id = args.get("phase_id")
+        task_events = TaskService.find_tasks_by_work_id(work_id, phase_id)
         return (
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,

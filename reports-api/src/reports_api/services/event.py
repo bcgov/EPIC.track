@@ -68,6 +68,6 @@ class EventService:  # pylint: disable=too-few-public-methods
         return (events_completed / events_total) * 100
 
     @classmethod
-    def find_milestone_events_by_work_id(cls, work_id: int):
-        """Find all milestone events by work id"""
-        return Event.find_milestones_by_work_id(work_id)
+    def find_milestone_events_by_work_phase(cls, work_id: int, phase_id: int):
+        """Find all milestone events by work id and phase id"""
+        return Event.find_milestones_by_work_phase(work_id, phase_id)

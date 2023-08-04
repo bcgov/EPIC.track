@@ -29,7 +29,7 @@ API = Namespace("events", description="Events")
 
 
 @cors_preflight("GET")
-@API.route("/<int:work_id>/milestones", methods=["GET", "OPTIONS"])
+@API.route("/milestones", methods=["GET", "OPTIONS"])
 class Templates(Resource):
     """Endpoint resource to return all milestone events for given work id"""
 
@@ -38,10 +38,14 @@ class Templates(Resource):
     @auth.require
     @profiletime
     @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
-    def get(work_id):
+    def get():
         """Return all task templates."""
-        req.WorkIdPathParameterSchema().load(request.view_args)
-        task_events = EventService.find_milestone_events_by_work_id(work_id)
+        args = req.MilestoneEventQueryParamSchema().load(request.args)
+        work_id = args.get("work_id")
+        phase_id = args.get("phase_id")
+        task_events = EventService.find_milestone_events_by_work_phase(
+            work_id, phase_id
+        )
         return (
             jsonify(res.EventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,

@@ -118,6 +118,6 @@ class TaskService:
         return template
 
     @classmethod
-    def find_tasks_by_work_id(cls, work_id: int) -> List[Task]:
-        """Find all tasks for a given work id"""
-        return TaskEvent.find_by_work_id(work_id)
+    def find_tasks_by_work_id(cls, work_id: int, phase_id: int) -> List[Task]:
+        """Find all tasks for a given work id and phase id"""
+        return TaskEvent.find_by_work_phase(work_id, phase_id)
