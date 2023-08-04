@@ -2,6 +2,7 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import Task, TaskTemplate
+from reports_api.models.task_event import TaskEvent
 from reports_api.schemas.base import AutoSchemaBase
 
 from .ea_act_response import EAActResponseSchema
@@ -41,3 +42,16 @@ class TaskTemplateResponseSchema(
         dump_only=True,
         exclude=("ea_act", "work_type", "milestones"),
     )
+
+
+class TaskEventResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """TaskEvent model schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = TaskEvent
+        include_fk = True
+        unknown = EXCLUDE

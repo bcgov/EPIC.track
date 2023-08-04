@@ -14,7 +14,7 @@
 """Task resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import RequestBodyParameterSchema, RequestPathParameterSchema
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
 class TaskTemplateBodyParameterSchema(RequestBodyParameterSchema):
@@ -100,6 +100,22 @@ class TaskTemplateIdPathParameterSchema(RequestPathParameterSchema):
 
     template_id = fields.Int(
         metadata={"description": "The id of the template"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+
+class TaskEventQueryParamSchema(RequestQueryParameterSchema):
+    """Task events per work/phase query parameters"""
+
+    work_id = fields.Int(
+        metadata={"description": "Work ID for the events"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    phase_id = fields.Int(
+        metadata={"description": "Phase ID for the events"},
         validate=validate.Range(min=1),
         required=True,
     )

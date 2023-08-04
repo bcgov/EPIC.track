@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Resource for Task endpoints."""
+"""Resource for Event endpoints."""
 from http import HTTPStatus
 
 from flask import jsonify, request
@@ -19,19 +19,19 @@ from flask_restx import Namespace, Resource, cors
 
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
-from reports_api.services import TaskService
+from reports_api.services.event import EventService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace("tasks", description="Tasks")
+API = Namespace("events", description="Events")
 
 
 @cors_preflight("GET")
-@API.route("/events", methods=["GET", "OPTIONS"])
+@API.route("/milestones", methods=["GET", "OPTIONS"])
 class Templates(Resource):
-    """Endpoint resource to return all task events for given work id and phase id"""
+    """Endpoint resource to return all milestone events for given work id"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -40,11 +40,13 @@ class Templates(Resource):
     @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all task templates."""
-        args = req.TaskEventQueryParamSchema().load(request.args)
+        args = req.MilestoneEventQueryParamSchema().load(request.args)
         work_id = args.get("work_id")
         phase_id = args.get("phase_id")
-        task_events = TaskService.find_tasks_by_work_id(work_id, phase_id)
+        task_events = EventService.find_milestone_events_by_work_phase(
+            work_id, phase_id
+        )
         return (
-            jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
+            jsonify(res.EventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,
         )
