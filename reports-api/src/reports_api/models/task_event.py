@@ -52,3 +52,8 @@ class TaskEvent(BaseModelVersioned):
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     responsibility = relationship('Responsibility', foreign_keys=[responsibility_id], lazy='select')
+
+    @classmethod
+    def find_by_work_phase(cls, work_id: int, phase_id:int):
+        """Find task events by work id and phase id"""
+        return cls.query.filter_by(work_id=work_id, phase_id=phase_id).all()

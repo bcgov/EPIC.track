@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all the response validation schemas"""
+from .event import EventResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_template_response import EventTemplateResponseSchema
 from .indigenous_nation_response import IndigenousResponseNationSchema
@@ -20,7 +21,7 @@ from .phase_response import PhaseResponseSchema
 from .project_response import ProjectResponseSchema
 from .proponent_response import ProponentResponseSchema
 from .staff_response import StaffResponseSchema
-from .task_response import TaskResponseSchema, TaskTemplateResponseSchema
+from .task_response import TaskEventResponseSchema, TaskResponseSchema, TaskTemplateResponseSchema
 from .types_response import SubTypeResponseSchema, TypeResponseSchema
 from .user_group_response import UserGroupResponseSchema
 from .user_response import UserResponseSchema

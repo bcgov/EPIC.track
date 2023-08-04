@@ -26,24 +26,26 @@ from flask import Blueprint
 
 from .apihelper import Api
 from .code import API as CODES_API
+from .event import API as EVENT_API
+from .event_template import API as EVENT_TEMPLATE_API
+from .indigenous_nation import API as INDIGENOUS_NATION_API
+from .inspection import API as INSPECTION_API
 from .lookup_data_generator import API as LOOKUP_API
 from .meta import API as META_API
 from .ops import API as OPS_API
 from .outcome import API as OUTCOME_API
 from .phase import API as PHASE_API
 from .project import API as PROJECTS_API
-from .reports import API as REPORTS_API
-from .staff import API as STAFF_API
-from .sync_form_data import API as SYNC_FORM_DATA_API
-from .sub_types import API as SUB_TYPES_API
-from .inspection import API as INSPECTION_API
-from .work import API as WORK_API
-from .indigenous_nation import API as INDIGENOUS_NATION_API
 from .proponent import API as PROPONENT_API
 from .reminder_configuration import API as REMINDER_CONFIGURATION_API
-from .user import API as USER_API
+from .reports import API as REPORTS_API
+from .staff import API as STAFF_API
+from .sub_types import API as SUB_TYPES_API
+from .sync_form_data import API as SYNC_FORM_DATA_API
 from .task import API as TASK_API
-from .event_template import API as EVENT_TEMPLATE_API
+from .task_template import API as TASK_TEMPLATE_API
+from .user import API as USER_API
+from .work import API as WORK_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -91,5 +93,7 @@ API.add_namespace(INDIGENOUS_NATION_API, path="/indigenous-nations")
 API.add_namespace(PROPONENT_API, path="/proponents")
 API.add_namespace(REMINDER_CONFIGURATION_API, path="/reminder-configurations")
 API.add_namespace(USER_API, path='/users')
-API.add_namespace(TASK_API, path="/task-templates")
+API.add_namespace(TASK_TEMPLATE_API, path="/task-templates")
 API.add_namespace(EVENT_TEMPLATE_API, path="/event-templates")
+API.add_namespace(TASK_API, path="/tasks")
+API.add_namespace(EVENT_API, path="/events")
