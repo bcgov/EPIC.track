@@ -8,7 +8,7 @@ import { Tab } from "@mui/material";
 import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
 import TabPanel from "../shared/tab/TabPanel";
-import PhaseContainer from "./components/PhaseContainer";
+import PhaseContainer from "./phase/PhaseContainer";
 
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;

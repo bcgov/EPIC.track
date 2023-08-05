@@ -97,6 +97,13 @@ export const BaseTheme = createTheme({
     },
   },
   components: {
+    MuiAccordion: {
+      styleOverrides: {
+        root: {
+          boxShadow: "none",
+        },
+      },
+    },
     MuiDialogActions: {
       styleOverrides: {
         root: {

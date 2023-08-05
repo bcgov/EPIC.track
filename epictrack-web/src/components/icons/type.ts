@@ -1,3 +1,5 @@
+import { SxProps } from "@mui/material";
+
 export type Icon = 
 | "AllIcon"
 | "DashboardIcon"
@@ -13,5 +15,6 @@ export interface IconProps {
     width?: string;
     height?: string;
     viewBox?: string;
-    fill?: string; 
+    fill?: string;
+    sx?: SxProps; 
 }

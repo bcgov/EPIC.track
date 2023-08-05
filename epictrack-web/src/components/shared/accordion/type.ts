@@ -1,10 +1,15 @@
+import { AccordionDetailsProps } from "@mui/material";
 import { AccordionProps as MuiAccordionProps } from "@mui/material/Accordion";
+import { MUIStyledCommonProps } from "@mui/system";
 
 export type AccordionProps = {
-  activePane: string | number;
-  loading: boolean;
-  phaseId: number;
-  handleExpand: (
-    phaseId: number
-  ) => (event: React.SyntheticEvent, isExpanded: boolean) => void;
+  expanded?: boolean;
 } & MuiAccordionProps;
+
+export type AccordionStyledProps = {
+  expanded?: boolean;
+} & MUIStyledCommonProps;
+
+export type ETAccordionDetailProps = {
+  expanded?: boolean;
+} & AccordionDetailsProps;

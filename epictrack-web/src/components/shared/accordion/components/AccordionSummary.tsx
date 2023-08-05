@@ -1,8 +1,14 @@
-import { AccordionSummary } from "@mui/material";
-import { styled } from "@mui/system";
+import { AccordionSummary, styled } from "@mui/material";
+import { AccordionStyledProps } from "../type";
+import { Palette } from "../../../../styles/theme";
 
-const ETAccordionSummary = styled(AccordionSummary)({
-  border: "1px solid #043673",
-});
+const ETAccordionSummary = styled(AccordionSummary)(
+  (props: AccordionStyledProps) => ({
+    border: `1px solid ${Palette.primary.main}`,
+    "& .MuiAccordionSummary-content": {
+      margin: 0,
+    },
+  })
+);
 
 export default ETAccordionSummary;
