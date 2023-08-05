@@ -1,15 +1,15 @@
-import { Box, LinearProgress, Skeleton } from "@mui/material";
+import { Box, LinearProgress } from "@mui/material";
 import React from "react";
 import Moment from "moment";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ETAccordion from "../../shared/accordion/Accordion";
-import { PhaseAccordionProps } from "../type";
+import { PhaseAccordionProps } from "./type";
 import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
 import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import PhaseSummaryItem from "./PhaseSummaryItem";
-import PhaseAccordionDetails from "./PhaseAccordionDetails";
-import { makeStyles } from "@mui/styles";
+import PhaseSummaryItem from "../components/PhaseSummaryItem";
+import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
+import PhaseAccordionActions from "../components/PhaseAccordionActions";
 
 const PhaseAccordion = ({
   phase,
@@ -96,7 +96,9 @@ const PhaseAccordion = ({
               </PhaseSummaryItem>
             </Box>
           </ETAccordionSummary>
-          <PhaseAccordionDetails expanded={expanded} ></PhaseAccordionDetails>
+          <ETAccordionDetails expanded={expanded}>
+            <PhaseAccordionActions></PhaseAccordionActions>
+          </ETAccordionDetails>
         </ETAccordion>
       </Box>
     </>

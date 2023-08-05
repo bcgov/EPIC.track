@@ -1,11 +1,23 @@
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, Tooltip } from "@mui/material";
 import React from "react";
+import { styled } from "@mui/system";
 
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
+import { Palette } from "../../../styles/theme";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+
+const IButton = styled(IconButton)({
+  "& .icon": {
+    fill: Palette.primary.main,
+  },
+  "&:hover": {
+    backgroundColor: Palette.neutral.bg.main,
+    borderRadius: "4px",
+  },
+});
 
 const PhaseAccordionActions = () => {
   return (
@@ -42,12 +54,16 @@ const PhaseAccordionActions = () => {
             alignItems: "center",
           }}
         >
-          <IconButton>
-            <ImportFileIcon />
-          </IconButton>
-          <IconButton>
-            <DownloadIcon />
-          </IconButton>
+          <Tooltip title="Import tasks from template">
+            <IButton>
+              <ImportFileIcon className="icon" />
+            </IButton>
+          </Tooltip>
+          <Tooltip title="Export workplan to excel">
+            <IButton>
+              <DownloadIcon className="icon" />
+            </IButton>
+          </Tooltip>
         </Box>
         {/* TODO: Add pagination details */}
       </Box>

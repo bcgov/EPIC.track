@@ -1,4 +1,4 @@
-import { WorkPhaseSkeleton } from "../../models/work";
+import { WorkPhaseSkeleton } from "../../../models/work";
 
 export interface PhaseAccordionProps {
   phase: WorkPhaseSkeleton;

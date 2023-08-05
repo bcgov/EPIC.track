@@ -1,6 +1,7 @@
 import React from "react";
 import { Accordion } from "@mui/material";
 import { AccordionProps as MuiAccordionProps } from "@mui/material/Accordion";
+import { Palette } from "../../../styles/theme";
 
 const ETAccordion = (props: MuiAccordionProps) => {
   return (
@@ -8,10 +9,13 @@ const ETAccordion = (props: MuiAccordionProps) => {
       expanded={props.expanded}
       onChange={props.onChange}
       sx={{
+        borderLeft: `${props.expanded ? "4px" : "1px"} solid ${
+          Palette.primary.main
+        }`,
+        borderRadius: `${props.expanded ? "8px" : "5px"} !important`,
         ".MuiAccordionSummary-root": {
           flexDirection: "row-reverse",
           borderRadius: props.expanded ? "4px 4px 0px 0px" : "4px",
-          borderLeft: "4px solid",
         },
         ".Mui-expanded": {
           margin: "0px !important",

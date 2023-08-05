@@ -2,14 +2,10 @@ import React from "react";
 import PhaseAccordion from "./PhaseAccordion";
 import { WorkPhaseSkeleton } from "../../../models/work";
 import workService from "../../../services/workService/workService";
-import { PhaseAccordionProps, PhaseContainerProps } from "../type";
+import { PhaseAccordionProps, PhaseContainerProps } from "./type";
 import { Box, Skeleton } from "@mui/material";
 
-const PhaseContainer = ({
-  workId,
-  currentPhase,
-  ...props
-}: PhaseContainerProps) => {
+const PhaseContainer = ({ workId, currentPhase }: PhaseContainerProps) => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [phases, setPhases] = React.useState<WorkPhaseSkeleton[]>([]);
 
