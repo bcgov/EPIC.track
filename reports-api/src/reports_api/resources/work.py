@@ -13,8 +13,9 @@
 # limitations under the License.
 """Resource for work endpoints."""
 from http import HTTPStatus
+from io import BytesIO
 
-from flask import jsonify, request
+from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
 
 from reports_api.schemas import request as req
@@ -140,3 +141,21 @@ class WorkPhases(Resource):
         req.WorkIdPathParameterSchema().load(request.view_args)
         work_phases = WorkPhaseService.find_by_work_id(work_id)
         return res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases), HTTPStatus.OK
+
+
+@cors_preflight("GET,POST")
+@API.route("/workplan/download", methods=["GET", "POST", "OPTIONS"])
+class WorkPlan(Resource):
+    """Endpoint resource to download workplan."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return a phase details based on id."""
+        args = req.WorkPlanDownloadQueryParamSchema().load(request.args)
+        work_id = args.get("work_id")
+        phase_id = args.get("phase_id")
+        file = WorkService.generate_workplan(work_id, phase_id)
+        return send_file(BytesIO(file), as_attachment=True, download_name="work_plan.xlsx")

@@ -1,3 +1,4 @@
+"""Event resource's input validations"""
 from marshmallow import fields, validate
 
 from .base import RequestQueryParameterSchema
