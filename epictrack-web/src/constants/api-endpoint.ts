@@ -21,6 +21,7 @@ const Endpoints = {
   Works: {
     WORKS: "works",
     WORK_RESOURCES: "works/resources",
+    DOWNLOAD_WORK_PLAN: "works/workplan/download",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

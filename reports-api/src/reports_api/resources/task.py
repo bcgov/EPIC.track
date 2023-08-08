@@ -43,7 +43,7 @@ class Templates(Resource):
         args = req.TaskEventQueryParamSchema().load(request.args)
         work_id = args.get("work_id")
         phase_id = args.get("phase_id")
-        task_events = TaskService.find_tasks_by_work_id(work_id, phase_id)
+        task_events = TaskService.find_tasks_by_work_phase(work_id, phase_id)
         return (
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,

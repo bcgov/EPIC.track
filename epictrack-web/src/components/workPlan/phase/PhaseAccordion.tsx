@@ -102,7 +102,7 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
           <ETAccordionDetails expanded={expanded}>
             <Grid container xs={12}>
               <Grid item xs={12}>
-                <PhaseAccordionActions></PhaseAccordionActions>
+                <PhaseAccordionActions workId={workId}></PhaseAccordionActions>
               </Grid>
               <Grid
                 item

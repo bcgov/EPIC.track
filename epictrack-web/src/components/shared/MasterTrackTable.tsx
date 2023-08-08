@@ -124,9 +124,9 @@ const MasterTrackTable = <T extends Record<string, any>>({
           sx: { minWidth: "300px" },
           variant: "outlined",
         }}
-        // renderToolbarInternalActions={({ table }) => (
-        //   <>{/* <MRT_ToggleFiltersButton table={table} /> */}</>
-        // )}
+        renderToolbarInternalActions={({ table }) => (
+          <>{/* <MRT_ToggleFiltersButton table={table} /> */}</>
+        )}
         {...rest}
         initialState={{
           showColumnFilters: true,

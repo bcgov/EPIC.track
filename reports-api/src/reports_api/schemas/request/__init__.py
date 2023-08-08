@@ -30,4 +30,5 @@ from .task_request import (
     TaskTemplateIdPathParameterSchema)
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
-from .work_request import WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema
+from .work_request import (
+    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkPlanDownloadQueryParamSchema)
