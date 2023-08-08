@@ -54,5 +54,13 @@ class WorkService implements ServiceBase {
       AppConfig.apiUrl + Endpoints.Works.WORKS + `/${workId}/phases`
     );
   }
+
+  async downloadWorkplan(workId: number, phaseId: number) {
+    return await http.GetRequest(
+      AppConfig.apiUrl +
+        Endpoints.Works.DOWNLOAD_WORK_PLAN +
+        `?work_id=${workId}&phase_id=${phaseId}`
+    );
+  }
 }
 export default new WorkService();

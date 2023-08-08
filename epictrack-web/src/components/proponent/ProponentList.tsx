@@ -3,13 +3,14 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETPageContainer } from "../shared";
+import { ETGridTitle, ETPageContainer } from "../shared";
 import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
+import { ActiveChip, InactiveChip } from "../shared/chip/chip";
 
 export default function ProponentList() {
   const [proponentId, setProponentId] = React.useState<number>();
@@ -35,6 +36,11 @@ export default function ProponentList() {
       {
         accessorKey: "name",
         header: "Name",
+        Cell: ({ cell, row }) => (
+          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+            {cell.getValue<string>()}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
       },
       {
@@ -49,10 +55,10 @@ export default function ProponentList() {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
-              <Chip label="Active" color="primary" />
+              <ActiveChip label="Active" color="primary" />
             )}
             {!cell.getValue<boolean>() && (
-              <Chip label="Inactive" color="error" />
+              <InactiveChip label="Inactive" color="error" />
             )}
           </span>
         ),
@@ -103,9 +109,6 @@ export default function ProponentList() {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>

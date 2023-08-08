@@ -5,6 +5,9 @@ import { styled } from "@mui/system";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { Palette } from "../../../styles/theme";
+import { PhaseContainerProps } from "./type";
+import { WorkplanContext } from "../WorkPlanContext";
+import workService from "../../../services/workService/workService";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -19,7 +22,24 @@ const IButton = styled(IconButton)({
   },
 });
 
-const PhaseAccordionActions = () => {
+const PhaseAccordionActions = ({ workId }: PhaseContainerProps) => {
+  const ctx = React.useContext(WorkplanContext);
+  const downloadPDFReport = React.useCallback(async () => {
+    try {
+      const binaryReponse = await workService.downloadWorkplan(
+        workId,
+        Number(ctx.selectedPhaseId)
+      );
+      const url = window.URL.createObjectURL(
+        new Blob([(binaryReponse as any).data])
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `file.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+    } catch (error) {}
+  }, [workId, ctx.selectedPhaseId]);
   return (
     <Box
       sx={{
@@ -60,7 +80,7 @@ const PhaseAccordionActions = () => {
             </IButton>
           </Tooltip>
           <Tooltip title="Export workplan to excel">
-            <IButton>
+            <IButton onClick={downloadPDFReport}>
               <DownloadIcon className="icon" />
             </IButton>
           </Tooltip>

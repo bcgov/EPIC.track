@@ -8,7 +8,7 @@ import {
 } from "../../styles/constants";
 import { useAppSelector } from "../../hooks";
 import { styled } from "@mui/system";
-import { Link, LinkProps } from "react-router-dom";
+import { Link, LinkProps, Path } from "react-router-dom";
 import { Palette } from "../../styles/theme";
 
 interface HeaderProps {
@@ -17,6 +17,11 @@ interface HeaderProps {
   bold?: boolean;
   children?: React.ReactNode | string;
   [prop: string]: unknown;
+}
+
+interface LinkHeaderProps extends HeaderProps {
+  to: string | Partial<Path>;
+  onClick?: () => void;
 }
 
 interface PageContainerProps {
@@ -221,6 +226,22 @@ export const ETCaption2 = ({
   );
 };
 
+export const ETGridTitle = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: LinkHeaderProps) => {
+  return (
+    <ETLink to={rest.to} onClick={rest.onClick}>
+      <ETParagraph bold {...rest} color={Palette.primary.accent.main}>
+        {children}
+      </ETParagraph>
+    </ETLink>
+  );
+};
+
 export const ETCaption3 = ({
   bold,
   color,
@@ -256,7 +277,8 @@ export const TrackLabel = styled(FormLabel)(() => ({
 export const ETLink = (props: LinkProps) => (
   <Link
     style={{
-      color: Palette.primary.main,
+      color: Palette.primary.accent.main,
+      textDecoration: "none",
     }}
     {...props}
   />

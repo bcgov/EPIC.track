@@ -5,9 +5,10 @@ import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import ProjectForm from "./ProjectForm";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETPageContainer } from "../shared";
+import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
+import { ActiveChip, InactiveChip } from "../shared/chip/chip";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
@@ -59,6 +60,11 @@ const ProjectList = () => {
       {
         accessorKey: "name",
         header: "Project Name",
+        Cell: ({ cell, row }) => (
+          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+            {cell.getValue<string>()}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
       },
       {
@@ -86,10 +92,10 @@ const ProjectList = () => {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
-              <Chip label="Active" color="primary" />
+              <ActiveChip label="Active" color="primary" />
             )}
             {!cell.getValue<boolean>() && (
-              <Chip label="Inactive" color="error" />
+              <InactiveChip label="Inactive" color="error" />
             )}
           </span>
         ),
@@ -124,9 +130,6 @@ const ProjectList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>

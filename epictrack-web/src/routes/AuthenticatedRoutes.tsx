@@ -14,6 +14,7 @@ import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
 import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlanContainer from "../components/workPlan/WorkPlanContainer";
+import { WorkplanProvider } from "../components/workPlan/WorkPlanContext";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -67,7 +68,14 @@ const AuthenticatedRoutes = () => {
         }
       />
       <Route path="/list-management/work-staff" element={<WorkStaffList />} />
-      <Route path="/work-plan" element={<WorkPlanContainer />} />
+      <Route
+        path="/work-plan"
+        element={
+          <WorkplanProvider>
+            <WorkPlanContainer />
+          </WorkplanProvider>
+        }
+      />
       <Route path="/admin/users" element={<UserList />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

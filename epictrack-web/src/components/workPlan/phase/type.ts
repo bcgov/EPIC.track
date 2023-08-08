@@ -1,11 +1,10 @@
 import { WorkPhaseSkeleton } from "../../../models/work";
 
 export interface PhaseAccordionProps {
+  workId: number;
   phase: WorkPhaseSkeleton;
-  currentPhase: number | undefined;
 }
 
 export interface PhaseContainerProps {
-  workId?: string | null;
-  currentPhase: number | undefined;
+  workId: number;
 }

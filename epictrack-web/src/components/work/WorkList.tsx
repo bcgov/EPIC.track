@@ -4,10 +4,11 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETLink, ETPageContainer } from "../shared";
+import { ETGridTitle, ETLink, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
+import { ActiveChip, InactiveChip } from "../shared/chip/chip";
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -68,9 +69,9 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         Cell: ({ row }) => (
-          <ETLink to={`/work-plan?work_id=${row.original.id}`}>
+          <ETGridTitle to={`/work-plan?work_id=${row.original.id}`}>
             {row.original.title}
-          </ETLink>
+          </ETGridTitle>
         ),
         sortingFn: "sortFn",
       },
@@ -117,10 +118,10 @@ const WorkList = () => {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
-              <Chip label="Active" color="primary" />
+              <ActiveChip label="Active" color="primary" />
             )}
             {!cell.getValue<boolean>() && (
-              <Chip label="Inactive" color="error" />
+              <InactiveChip label="Inactive" color="error" />
             )}
           </span>
         ),
@@ -155,9 +156,6 @@ const WorkList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>

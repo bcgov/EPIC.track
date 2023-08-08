@@ -4,7 +4,7 @@ import { Box, Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
-import { ETPageContainer } from "../../shared";
+import { ETGridTitle, ETPageContainer } from "../../shared";
 import projectService from "../../../services/projectService/projectService";
 
 const WorkStaffList = () => {
@@ -117,6 +117,9 @@ const WorkStaffList = () => {
         header: "Project",
         enableHiding: false,
         filterVariant: "multi-select",
+        Cell: ({ cell }) => (
+          <ETGridTitle to={"#"}>{cell.getValue<string>()}</ETGridTitle>
+        ),
         filterSelectOptions: projectFilter,
       },
       {

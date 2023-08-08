@@ -6,6 +6,8 @@ import MaterialReactTable, {
 import { Box, Container, Typography } from "@mui/material";
 import SearchIcon from "../../assets/images/search.svg";
 import { ETHeading2 } from ".";
+import { Palette } from "../../styles/theme";
+import { MET_Header_Font_Weight_Bold } from "../../styles/constants";
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
@@ -60,14 +62,46 @@ const MasterTrackTable = <T extends Record<string, any>>({
         data={data}
         globalFilterFn="contains"
         enableHiding={false}
+        enableGlobalFilter={false}
         enableStickyHeader={true}
         enableDensityToggle={false}
         enableColumnFilters={true}
         enableFullScreenToggle={false}
         enableSorting={true}
+        enableFilters={true}
+        enableColumnActions={false}
         enablePinning
         enablePagination={false}
         positionActionsColumn={"last"}
+        muiTableHeadCellProps={{
+          sx: {
+            backgroundColor: Palette.neutral.bg.light,
+            padding: "1rem 0.1rem 0.5rem 1rem !important",
+            "& .Mui-TableHeadCell-Content-Labels": {
+              fontSize: "1rem",
+              fontWeight: MET_Header_Font_Weight_Bold,
+              color: Palette.neutral.dark,
+              paddingBottom: "0.5rem",
+            },
+          },
+        }}
+        muiTableBodyCellProps={{
+          sx: {
+            padding: "0.5rem 0.5rem 0.5rem 1rem",
+          },
+        }}
+        muiTableHeadCellFilterTextFieldProps={{
+          variant: "outlined",
+          sx: {
+            backgroundColor: "white",
+            "& .MuiInputAdornment-root": {
+              display: "none",
+            },
+            "& .MuiSelect-icon": {
+              mr: "0px !important",
+            },
+          },
+        }}
         muiTableContainerProps={(table) => ({
           sx: {
             maxHeight: "100%",
@@ -91,12 +125,11 @@ const MasterTrackTable = <T extends Record<string, any>>({
           variant: "outlined",
         }}
         renderToolbarInternalActions={({ table }) => (
-          <>
-            <MRT_ToggleFiltersButton table={table} />
-          </>
+          <>{/* <MRT_ToggleFiltersButton table={table} /> */}</>
         )}
         {...rest}
         initialState={{
+          showColumnFilters: true,
           density: "compact",
           columnPinning: { right: ["mrt-row-actions"] },
           ...rest.initialState,

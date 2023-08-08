@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import { ETHeading2, ETPageContainer } from "../shared";
 import workService from "../../services/workService/workService";
 import { Work } from "../../models/work";
@@ -9,6 +9,7 @@ import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
 import TabPanel from "../shared/tab/TabPanel";
 import PhaseContainer from "./phase/PhaseContainer";
+import { WorkplanContext } from "./WorkPlanContext";
 
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -18,11 +19,16 @@ const WorkPlanContainer = () => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
-
+  const ctx = useContext(WorkplanContext);
   const work_id = React.useMemo(() => query.get("work_id"), [query]);
+
   React.useEffect(() => {
     getWorkById();
   }, [work_id]);
+
+  React.useEffect(() => {
+    ctx.selectedPhaseId = work?.current_phase_id;
+  }, [work]);
 
   const getWorkById = React.useCallback(async () => {
     if (work_id) {
@@ -85,10 +91,7 @@ const WorkPlanContainer = () => {
             </Box>
           </ETPageContainer>
           <TabPanel index={0} value={selectedTabIndex}>
-            <PhaseContainer
-              workId={work_id}
-              currentPhase={work?.current_phase_id}
-            />
+            <PhaseContainer workId={Number(work_id)} />
           </TabPanel>
         </>
       )}

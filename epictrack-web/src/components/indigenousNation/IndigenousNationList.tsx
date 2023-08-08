@@ -5,11 +5,12 @@ import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { IndigenousNation } from "../../models/indigenousNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETPageContainer } from "../shared";
+import { ETGridTitle, ETPageContainer } from "../shared";
 import IndigenousNationForm from "./IndigneousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { MasterContext } from "../shared/MasterContext";
+import { ActiveChip, InactiveChip } from "../shared/chip/chip";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
@@ -49,6 +50,11 @@ export default function IndigenousNationList() {
       {
         accessorKey: "name",
         header: "Name",
+        Cell: ({ cell, row }) => (
+          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+            {cell.getValue<string>()}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
       },
       {
@@ -63,10 +69,10 @@ export default function IndigenousNationList() {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
-              <Chip label="Active" color="primary" />
+              <ActiveChip label="Active" color="primary" />
             )}
             {!cell.getValue<boolean>() && (
-              <Chip label="Inactive" color="error" />
+              <InactiveChip label="Inactive" color="error" />
             )}
           </span>
         ),
@@ -112,9 +118,6 @@ export default function IndigenousNationList() {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>
