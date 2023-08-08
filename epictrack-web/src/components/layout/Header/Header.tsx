@@ -2,18 +2,18 @@ import React from "react";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import { useMediaQuery, Theme, IconButton, Button } from "@mui/material";
+import { useMediaQuery, Theme, IconButton, Avatar } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
 import EnvironmentBanner from "./EnvironmentBanner";
 import SideNav from "../SideNav/SideNav";
-import UserService from "../../../services/userService";
 import { UIState } from "../../../styles/type";
 import { useAppSelector } from "../../../hooks";
 import BCGovLogo from "../../../assets/images/bcgovLogoWhite.svg";
 import EpicTrackLogo from "../../../assets/images/epicTrackLogo.svg";
-
-import ProfileMenu from "./ProfileMenu";
+import { ETCaption2, ETSubhead } from "../../shared";
+import { Palette } from "../../../styles/theme";
+import UserMenu from "../../shared/userMenu/UserMenu";
 
 const Header = () => {
   const [open, setOpen] = React.useState(false);
@@ -21,6 +21,18 @@ const Header = () => {
     theme.breakpoints.up("md")
   );
   const uiState: UIState = useAppSelector((state) => state.uiState);
+  const user = useAppSelector((state) => state.user.userDetail);
+
+  const [profileMenuAnchorEl, setProfileMenuAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+
+  const handleOpenProfileMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileMenuAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseProfileMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileMenuAnchorEl(null);
+  };
 
   return (
     <>
@@ -73,7 +85,43 @@ const Header = () => {
               alt="EPIC.track"
             />
           </Box>
-          <ProfileMenu />
+          {/* User menu */}
+          <Box
+            sx={{
+              flexGrow: 0,
+              display: "flex",
+              alignItems: "baseline",
+              gap: "1rem",
+            }}
+            onMouseEnter={handleOpenProfileMenu}
+            onMouseLeave={handleCloseProfileMenu}
+          >
+            <ETSubhead>Hello, {user.firstName}</ETSubhead>
+            <Avatar
+              sx={{
+                bgcolor: Palette.white,
+                color: Palette.primary.main,
+                fontSize: "1rem",
+                lineHeight: "1.3rem",
+                fontWeight: 700,
+                width: "2rem",
+                height: "2rem",
+              }}
+            >
+              <ETCaption2
+                bold
+              >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
+            </Avatar>
+            <UserMenu
+              anchorEl={profileMenuAnchorEl}
+              email={user.email}
+              phone={user.phone}
+              position={user.position}
+              firstName={user.firstName}
+              lastName={user.lastName}
+              onClose={handleCloseProfileMenu}
+            />
+          </Box>
         </Toolbar>
         <EnvironmentBanner />
       </AppBar>
