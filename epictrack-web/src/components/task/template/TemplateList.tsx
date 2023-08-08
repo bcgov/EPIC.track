@@ -11,8 +11,9 @@ import { Template } from "../../../models/template";
 import TaskService from "../../../services/taskService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import TrackDialog from "../../shared/TrackDialog";
-import { ETPageContainer } from "../../shared";
+import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
+import { ActiveChip, InactiveChip } from "../../shared/chip/chip";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -91,6 +92,11 @@ const TemplateList = () => {
       {
         accessorKey: "name",
         header: "Name",
+        Cell: ({ cell, row }) => (
+          <ETGridTitle to={"#"} onClick={() => onViewDetails(row.original.id)}>
+            {cell.getValue<string>()}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
       },
       {
@@ -118,10 +124,10 @@ const TemplateList = () => {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
-              <Chip label="Active" color="primary" />
+              <ActiveChip label="Active" color="primary" />
             )}
             {!cell.getValue<boolean>() && (
-              <Chip label="Inactive" color="error" />
+              <InactiveChip label="Inactive" color="error" />
             )}
           </span>
         ),
@@ -157,18 +163,6 @@ const TemplateList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton
-                  onClick={() => onViewDetails(row.original.id)}
-                  title="View Tasks"
-                >
-                  <VisibilityIcon />
-                </IconButton>
-                {/* <Switch
-                  color="success"
-                  defaultChecked={row.original.is_active}
-                  title="Approve/Disable"
-                  onChange={(e) => handleApproval(e, row.original.id)}
-                /> */}
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>

@@ -97,16 +97,6 @@ export default function StaffForm({ ...props }) {
           spacing={2}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
-          {ctx.error && (
-            <Grid item xs={12}>
-              <FormHelperText
-                error={true}
-                className="MuiFormHelperText-sizeSmall"
-              >
-                {ctx.error}
-              </FormHelperText>
-            </Grid>
-          )}
           <Grid item xs={6}>
             <TrackLabel>First Name</TrackLabel>
             <TextField

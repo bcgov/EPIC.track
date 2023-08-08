@@ -36,5 +36,8 @@ const Endpoints = {
   Templates: {
     TEMPLATES: "task-templates",
   },
+  Events: {
+    MILESTONE_EVENTS: "events/milestones",
+  },
 };
 export default Endpoints;

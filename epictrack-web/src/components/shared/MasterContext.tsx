@@ -3,10 +3,11 @@ import { MasterBase } from "../../models/type";
 import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog from "./TrackDialog";
 import { Backdrop, CircularProgress } from "@mui/material";
+import { showNotification } from "./notificationProvider";
 
 interface MasterContextProps {
   backdrop: boolean;
-  error: string | undefined;
+  // error: string | undefined;
   title: string;
   data: MasterBase[];
   item?: MasterBase;
@@ -28,7 +29,7 @@ interface MasterContextProps {
 
 export const MasterContext = createContext<MasterContextProps>({
   backdrop: false,
-  error: "",
+  // error: "",
   title: "Data",
   data: [],
   item: {},
@@ -51,7 +52,7 @@ export const MasterProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [error, setError] = React.useState<string | undefined>();
+  // const [error, setError] = React.useState<string | undefined>();
   const [title, setTitle] = React.useState("");
   const [data, setData] = React.useState<MasterBase[]>([]);
   const [item, setItem] = React.useState<MasterBase>();
@@ -87,7 +88,9 @@ export const MasterProvider = ({
       setLoading(false);
     } catch (e) {
       setLoading(false);
-      setError("Error loading data. Please try again after sometime");
+      showNotification("Error loading data. Please try again after sometime", {
+        type: "error",
+      });
     }
   }, [service]);
 
@@ -100,8 +103,11 @@ export const MasterProvider = ({
         setBackdrop(false);
       }
     } catch (e) {
-      setError(
-        "Error fetching the requested data. Please try again after some time"
+      showNotification(
+        "Error fetching the requested data. Please try again after some time",
+        {
+          type: "error",
+        }
       );
       setBackdrop(false);
     }
@@ -123,23 +129,27 @@ export const MasterProvider = ({
         if (id) {
           const result = await service?.update(data, id);
           if (result && result.status === 200) {
-            setAlertContentText(`${title} details updated`);
-            setOpenAlertDialog(true);
+            showNotification(`${title} details updated`, {
+              type: "success",
+            });
             setBackdrop(false);
             callback();
           }
         } else {
           const result = await service?.create(data);
           if (result && result.status === 201) {
-            setAlertContentText(`${title} details inserted`);
-            setOpenAlertDialog(true);
+            showNotification(`${title} details inserted`, {
+              type: "success",
+            });
             setBackdrop(false);
             callback();
           }
         }
         getData();
       } catch (e) {
-        setError("Error during processing. Please try again later");
+        showNotification("Error during processing. Please try again later", {
+          type: "error",
+        });
       }
     },
     [id, service, title]
@@ -156,14 +166,13 @@ export const MasterProvider = ({
     setShowModalForm(false);
     setId(undefined);
     setItem(undefined);
-    setError(undefined);
+    // setError(undefined);
   };
 
   return (
     <MasterContext.Provider
       value={{
         backdrop,
-        error,
         title,
         setTitle,
         data,

@@ -5,9 +5,12 @@ import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETPageContainer } from "../shared";
+import { ETGridTitle, ETPageContainer, ETParagraph } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
+import { ActiveChip, InactiveChip } from "../shared/chip/chip";
+import { Link } from "react-router-dom";
+import { Palette } from "../../styles/theme";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -46,6 +49,11 @@ const StaffList = () => {
       {
         accessorKey: "full_name",
         header: "Name",
+        Cell: ({ cell, row }) => (
+          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+            {cell.getValue<string>()}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
       },
       {
@@ -69,10 +77,10 @@ const StaffList = () => {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
-              <Chip label="Active" color="primary" />
+              <ActiveChip label="Active" color="primary" />
             )}
             {!cell.getValue<boolean>() && (
-              <Chip label="Inactive" color="error" />
+              <InactiveChip label="Inactive" color="error" />
             )}
           </span>
         ),

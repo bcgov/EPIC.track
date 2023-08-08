@@ -1,5 +1,5 @@
-import { Box, LinearProgress } from "@mui/material";
-import React from "react";
+import { Box, Grid, LinearProgress } from "@mui/material";
+import React, { useContext } from "react";
 import Moment from "moment";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ETAccordion from "../../shared/accordion/Accordion";
@@ -9,19 +9,22 @@ import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import PhaseSummaryItem from "../components/PhaseSummaryItem";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
-import PhaseAccordionActions from "../components/PhaseAccordionActions";
+import PhaseAccordionActions from "./PhaseAccordionActions";
+import EventGrid from "./EventGrid";
+import { WorkplanContext } from "../WorkPlanContext";
 
-const PhaseAccordion = ({
-  phase,
-  currentPhase,
-  ...rest
-}: PhaseAccordionProps) => {
+const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
-
+  const ctx = useContext(WorkplanContext);
   React.useEffect(
-    () => setExpanded(phase.phase_id === currentPhase),
-    [phase, currentPhase]
+    () => setExpanded(phase.phase_id === ctx.selectedPhaseId),
+    [phase, ctx.selectedPhaseId]
   );
+  React.useEffect(() => {
+    if (expanded) {
+      ctx.setSelectedPhaseId(phase.phase_id);
+    }
+  }, [expanded]);
   const fromDate = React.useMemo(
     () =>
       Moment(phase.start_date).isSameOrAfter(Moment())
@@ -97,7 +100,20 @@ const PhaseAccordion = ({
             </Box>
           </ETAccordionSummary>
           <ETAccordionDetails expanded={expanded}>
-            <PhaseAccordionActions></PhaseAccordionActions>
+            <Grid container xs={12}>
+              <Grid item xs={12}>
+                <PhaseAccordionActions></PhaseAccordionActions>
+              </Grid>
+              <Grid
+                item
+                xs={12}
+                sx={{
+                  mt: "0.5rem",
+                }}
+              >
+                <EventGrid workId={workId}></EventGrid>
+              </Grid>
+            </Grid>
           </ETAccordionDetails>
         </ETAccordion>
       </Box>
