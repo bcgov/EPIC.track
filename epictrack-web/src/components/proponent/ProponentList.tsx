@@ -10,7 +10,7 @@ import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
-import { ActiveChip, InactiveChip } from "../shared/chip/chip";
+import { ActiveChip, InactiveChip } from "../shared/chip/Chip";
 
 export default function ProponentList() {
   const [proponentId, setProponentId] = React.useState<number>();

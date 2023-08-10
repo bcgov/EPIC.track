@@ -90,6 +90,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       {
         accessorKey: "name",
         header: "Task / Milestone",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 300,
         Cell: ({ cell, row }) => (
           <ETGridTitle
@@ -106,6 +107,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       {
         accessorKey: "type",
         header: "Type",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         Cell: ({ cell, row }) => (
           <ETParagraph title={cell.getValue<string>()} bold>
             {cell.getValue<string>()}
@@ -115,6 +117,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       {
         accessorKey: "anticipated_date",
         header: "Start Date",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
           <ETParagraph bold className={classes.textEllipsis}>
@@ -126,29 +129,35 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
         accessorKey: "end_date",
         size: 140,
         header: "End Date",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
       },
       {
         accessorKey: "number_of_days",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 60,
         header: "Days",
       },
       {
         accessorKey: "assigned",
         header: "Assigned",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
       },
       {
         accessorKey: "responsibility",
         header: "Responsibility",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
       },
       {
         accessorKey: "notes",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         header: "Notes",
         size: 250,
       },
       {
         accessorKey: "progress",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         header: "Progress",
         size: 130,
         Cell: ({ cell, row }) => (
@@ -193,6 +202,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
         <MasterTrackTable
           enableRowSelection={(row) => row.original.type !== "Milestone"}
           enableSelectAll
+          enablePagination
           // onRowSelectionChange={setRowSelection}
           columns={columns}
           data={events}
