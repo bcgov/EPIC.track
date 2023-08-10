@@ -56,10 +56,15 @@ class WorkService implements ServiceBase {
   }
 
   async downloadWorkplan(workId: number, phaseId: number) {
-    return await http.GetRequest(
+    return await http.PostRequest(
       AppConfig.apiUrl +
         Endpoints.Works.DOWNLOAD_WORK_PLAN +
-        `?work_id=${workId}&phase_id=${phaseId}`
+        `?work_id=${workId}&phase_id=${phaseId}`,
+      {},
+      {},
+      {
+        responseType: "blob",
+      }
     );
   }
 }

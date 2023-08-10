@@ -1,6 +1,6 @@
 import React from "react";
 
-import { Typography, FormLabel, Grid, SxProps } from "@mui/material";
+import { Typography, FormLabel, Grid, SxProps, Tooltip } from "@mui/material";
 import {
   MET_Header_Font_Family,
   MET_Header_Font_Weight_Bold,
@@ -15,6 +15,7 @@ interface HeaderProps {
   sx?: SxProps;
   color?: string;
   bold?: boolean;
+  title?: string;
   children?: React.ReactNode | string;
   [prop: string]: unknown;
 }
@@ -155,22 +156,24 @@ export const ETParagraph = ({
   ...rest
 }: HeaderProps) => {
   return (
-    <Typography
-      color={color}
-      sx={{
-        ...sx,
-        fontSize: "1rem",
-        lineHeight: "1.5rem",
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
-      }}
-      variant="body1"
-      {...rest}
-    >
-      {children}
-    </Typography>
+    <Tooltip title={rest.title}>
+      <Typography
+        color={color}
+        sx={{
+          ...sx,
+          fontSize: "1rem",
+          lineHeight: "1.5rem",
+          fontWeight: bold
+            ? MET_Header_Font_Weight_Bold
+            : MET_Header_Font_Weight_Regular,
+          fontFamily: MET_Header_Font_Family,
+        }}
+        variant="body1"
+        {...rest}
+      >
+        {children}
+      </Typography>
+    </Tooltip>
   );
 };
 

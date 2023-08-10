@@ -7,7 +7,7 @@ import { PhaseAccordionProps } from "./type";
 import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
 import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import PhaseSummaryItem from "../components/PhaseSummaryItem";
+import PhaseSummaryItem from "./PhaseSummaryItem";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
 import PhaseAccordionActions from "./PhaseAccordionActions";
 import EventGrid from "./EventGrid";
@@ -51,69 +51,64 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
             expanded={expanded}
             expandIcon={<ExpandMoreIcon />}
           >
-            <Box
+            <Grid
+              container
+              columnSpacing={3}
               sx={{
-                display: "grid",
-                gap: "1.5rem",
-                alignItems: "center",
-                padding: "1rem",
-                width: "100%",
-                gridTemplateAreas:
-                  '"phase phase start end decision nextMilestone nextMilestone nextMilestone nextMilestone completed"',
+                pt: "1rem",
+                pb: "1rem",
               }}
             >
-              <PhaseSummaryItem sx={{ gridArea: "phase" }} label="phase">
-                <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
-                  {phase.phase}
-                </ETParagraph>
-              </PhaseSummaryItem>
-              <PhaseSummaryItem label="start date" sx={{ gridArea: "start" }}>
-                <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
-                  {Moment(phase.start_date).format("MMM. DD YYYY")}
-                </ETParagraph>
-              </PhaseSummaryItem>
-              <PhaseSummaryItem label="days left" sx={{ gridArea: "end" }}>
-                <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
-                  {Moment.duration(Moment(phase.end_date).diff(fromDate))
-                    .asDays()
-                    .toFixed(0)}
-                </ETParagraph>
-              </PhaseSummaryItem>
-              <PhaseSummaryItem
-                label="next milestone"
-                sx={{ gridArea: "nextMilestone" }}
-              >
-                <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
-                  {phase.next_milestone}
-                </ETParagraph>
-              </PhaseSummaryItem>
-              <PhaseSummaryItem
-                label="milestone progress"
-                sx={{ gridArea: "completed" }}
-              >
-                <LinearProgress
-                  variant="determinate"
-                  value={phase.milestone_progress}
-                  sx={{ marginTop: "10px" }}
-                />
-              </PhaseSummaryItem>
-            </Box>
-          </ETAccordionSummary>
-          <ETAccordionDetails expanded={expanded}>
-            <Grid container xs={12}>
-              <Grid item xs={12}>
-                <PhaseAccordionActions workId={workId}></PhaseAccordionActions>
+              <Grid item xl={3}>
+                <PhaseSummaryItem sx={{ gridArea: "phase" }} label="phase">
+                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                    {phase.phase}
+                  </ETParagraph>
+                </PhaseSummaryItem>
               </Grid>
-              <Grid
-                item
-                xs={12}
-                sx={{
-                  mt: "0.5rem",
-                }}
-              >
-                <EventGrid workId={workId}></EventGrid>
+              <Grid item xs={2}>
+                <PhaseSummaryItem label="start date" sx={{ gridArea: "start" }}>
+                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                    {Moment(phase.start_date).format("MMM. DD YYYY")}
+                  </ETParagraph>
+                </PhaseSummaryItem>
+              </Grid>
+              <Grid item xs={1}>
+                <PhaseSummaryItem label="days left" sx={{ gridArea: "end" }}>
+                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                    {Moment.duration(Moment(phase.end_date).diff(fromDate))
+                      .asDays()
+                      .toFixed(0)}
+                  </ETParagraph>
+                </PhaseSummaryItem>
+              </Grid>
+              <Grid item xs={2}></Grid>
+              <Grid item xs={2}>
+                <PhaseSummaryItem
+                  label="next milestone"
+                  sx={{ gridArea: "nextMilestone" }}
+                >
+                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                    {phase.next_milestone}
+                  </ETParagraph>
+                </PhaseSummaryItem>
+              </Grid>
+              <Grid item xs={2}>
+                <PhaseSummaryItem
+                  label="milestone progress"
+                  sx={{ gridArea: "completed" }}
+                >
+                  <LinearProgress
+                    variant="determinate"
+                    value={phase.milestone_progress}
+                    sx={{ marginTop: "10px" }}
+                  />
+                </PhaseSummaryItem>
               </Grid>
             </Grid>
+          </ETAccordionSummary>
+          <ETAccordionDetails expanded={expanded}>
+            <EventGrid workId={workId}></EventGrid>
           </ETAccordionDetails>
         </ETAccordion>
       </Box>
