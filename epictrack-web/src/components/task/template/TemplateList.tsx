@@ -13,7 +13,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import TrackDialog from "../../shared/TrackDialog";
 import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
-import { ActiveChip, InactiveChip } from "../../shared/chip/Chip";
+import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);

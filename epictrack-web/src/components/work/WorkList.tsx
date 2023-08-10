@@ -8,7 +8,7 @@ import { ETGridTitle, ETLink, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
-import { ActiveChip, InactiveChip } from "../shared/chip/Chip";
+import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();

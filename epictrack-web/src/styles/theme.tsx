@@ -195,7 +195,7 @@ export const BaseTheme = createTheme({
         root: {
           "&.MuiOutlinedInput-root": {
             "& fieldset": {
-              border: `2px solid ${Palette.neutral.bg.dark}`,
+              border: `2px solid ${Palette.neutral.accent.light}`,
             },
             "&:hover fieldset": {
               borderColor: Palette.primary.accent.light,

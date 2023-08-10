@@ -8,7 +8,7 @@ import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
-import { ActiveChip, InactiveChip } from "../shared/chip/Chip";
+import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
