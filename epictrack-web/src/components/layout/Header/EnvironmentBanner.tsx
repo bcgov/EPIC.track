@@ -35,6 +35,7 @@ const EnvironmentBanner = () => {
         color: Palette.text.primary,
         display: "flex",
         justifyContent: "center",
+        alignItems: "center",
         gap: "8px",
         paddingBlock: "8px",
         height: "2.5rem",

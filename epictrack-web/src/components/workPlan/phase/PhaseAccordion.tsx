@@ -16,6 +16,10 @@ import BorderLinearProgress from "../../shared/progress/Progress";
 const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
+  const isCurrentPhase = React.useMemo<boolean>(
+    () => phase.phase_id === ctx.selectedPhaseId,
+    [ctx.selectedPhaseId]
+  );
   React.useEffect(
     () => setExpanded(phase.phase_id === ctx.selectedPhaseId),
     [phase, ctx.selectedPhaseId]
@@ -61,21 +65,30 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
             >
               <Grid item xl={3}>
                 <PhaseSummaryItem sx={{ gridArea: "phase" }} label="phase">
-                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                  <ETParagraph
+                    bold={isCurrentPhase}
+                    sx={{ color: `${Palette.neutral.dark}` }}
+                  >
                     {phase.phase}
                   </ETParagraph>
                 </PhaseSummaryItem>
               </Grid>
               <Grid item xs={2}>
                 <PhaseSummaryItem label="start date" sx={{ gridArea: "start" }}>
-                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                  <ETParagraph
+                    bold={isCurrentPhase}
+                    sx={{ color: `${Palette.neutral.dark}` }}
+                  >
                     {Moment(phase.start_date).format("MMM. DD YYYY")}
                   </ETParagraph>
                 </PhaseSummaryItem>
               </Grid>
               <Grid item xs={1}>
                 <PhaseSummaryItem label="days left" sx={{ gridArea: "end" }}>
-                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                  <ETParagraph
+                    bold={isCurrentPhase}
+                    sx={{ color: `${Palette.neutral.dark}` }}
+                  >
                     {Moment.duration(Moment(phase.end_date).diff(fromDate))
                       .asDays()
                       .toFixed(0)}
@@ -88,7 +101,10 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
                   label="next milestone"
                   sx={{ gridArea: "nextMilestone" }}
                 >
-                  <ETParagraph bold sx={{ color: `${Palette.neutral.dark}` }}>
+                  <ETParagraph
+                    bold={isCurrentPhase}
+                    sx={{ color: `${Palette.neutral.dark}` }}
+                  >
                     {phase.next_milestone}
                   </ETParagraph>
                 </PhaseSummaryItem>
