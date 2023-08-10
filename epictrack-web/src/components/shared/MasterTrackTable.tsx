@@ -3,7 +3,13 @@ import MaterialReactTable, {
   MRT_ToggleFiltersButton,
   MaterialReactTableProps,
 } from "material-react-table";
-import { Box, Container, Typography } from "@mui/material";
+import {
+  Box,
+  Container,
+  TableBodyProps,
+  TableCellProps,
+  Typography,
+} from "@mui/material";
 import SearchIcon from "../../assets/images/search.svg";
 import { ETHeading2 } from ".";
 import { Palette } from "../../styles/theme";
@@ -83,13 +89,40 @@ const MasterTrackTable = <T extends Record<string, any>>({
               color: Palette.neutral.dark,
               paddingBottom: "0.5rem",
             },
+            "& .MuiTextField-root": {
+              minWidth: "0",
+            },
+            "& .MuiCheckbox-root": {
+              width: "2.75rem !important",
+              height: "2rem",
+              padding: "8px !important",
+              borderRadius: "4px",
+            },
           },
         }}
-        muiTableBodyCellProps={{
+        muiTableProps={{
+          sx: {
+            tableLayout: "fixed",
+          },
+        }}
+        muiTableBodyCellProps={({ row }) => ({
+          disabled: true,
+          disableRipple: true,
           sx: {
             padding: "0.5rem 0.5rem 0.5rem 1rem",
+            "& .MuiCheckbox-root": {
+              width: "2.75rem !important",
+              height: "2rem",
+              borderRadius: "4px",
+              padding: "8px !important",
+              "&.Mui-disabled": {
+                svg: {
+                  fill: Palette.neutral.accent.light,
+                },
+              },
+            },
           },
-        }}
+        })}
         muiTableHeadCellFilterTextFieldProps={{
           variant: "outlined",
           sx: {

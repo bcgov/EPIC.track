@@ -10,7 +10,7 @@ import IndigenousNationForm from "./IndigneousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { MasterContext } from "../shared/MasterContext";
-import { ActiveChip, InactiveChip } from "../shared/chip/chip";
+import { ActiveChip, InactiveChip } from "../shared/chip/Chip";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
