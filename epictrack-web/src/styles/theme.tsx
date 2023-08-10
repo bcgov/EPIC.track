@@ -202,6 +202,7 @@ export const BaseTheme = createTheme({
     },
     MuiCheckbox: {
       defaultProps: {
+        disableRipple: true,
         icon: <CheckboxRegular />,
         checkedIcon: <CheckboxChecked />,
       },

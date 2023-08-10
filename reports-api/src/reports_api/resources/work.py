@@ -152,7 +152,7 @@ class WorkPlan(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get():
+    def post():
         """Return a phase details based on id."""
         args = req.WorkPlanDownloadQueryParamSchema().load(request.args)
         work_id = args.get("work_id")
