@@ -79,6 +79,13 @@ const MasterTrackTable = <T extends Record<string, any>>({
         enablePinning
         enablePagination={false}
         positionActionsColumn={"last"}
+        muiTableHeadProps={{
+          sx: {
+            "& .MuiTableRow-root": {
+              boxShadow: "none",
+            },
+          },
+        }}
         muiTableHeadCellProps={{
           sx: {
             backgroundColor: Palette.neutral.bg.light,

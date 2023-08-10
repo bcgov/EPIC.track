@@ -107,6 +107,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       {
         accessorKey: "type",
         header: "Type",
+        size: 100,
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         Cell: ({ cell, row }) => (
           <ETParagraph title={cell.getValue<string>()} bold>
@@ -134,7 +135,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       {
         accessorKey: "number_of_days",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
-        size: 60,
+        size: 100,
         header: "Days",
       },
       {
@@ -175,7 +176,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
           <Button variant="contained">Add Task</Button>
         </Grid>
         <Grid item xs="auto">
-          <Button variant="contained">Add Milestone</Button>
+          <Button variant="outlined">Add Milestone</Button>
         </Grid>
         <Grid item xs={8}></Grid>
         <Grid
@@ -184,6 +185,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
           sx={{
             display: "flex",
             justifyContent: "right",
+            gap: "0.5rem",
           }}
         >
           <Tooltip title="Import tasks from template">
