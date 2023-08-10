@@ -9,9 +9,9 @@ import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import PhaseSummaryItem from "./PhaseSummaryItem";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
-import PhaseAccordionActions from "./PhaseAccordionActions";
 import EventGrid from "./EventGrid";
 import { WorkplanContext } from "../WorkPlanContext";
+import BorderLinearProgress from "../../shared/progress/Progress";
 
 const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
@@ -98,9 +98,9 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
                   label="milestone progress"
                   sx={{ gridArea: "completed" }}
                 >
-                  <LinearProgress
+                  <BorderLinearProgress
                     variant="determinate"
-                    value={phase.milestone_progress}
+                    value={50}
                     sx={{ marginTop: "10px" }}
                   />
                 </PhaseSummaryItem>
