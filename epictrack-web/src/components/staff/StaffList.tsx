@@ -8,7 +8,7 @@ import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer, ETParagraph } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
-import { ActiveChip, InactiveChip } from "../shared/chip/Chip";
+import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
 import { Palette } from "../../styles/theme";
 
