@@ -14,6 +14,7 @@
 """Task resource's input validations"""
 from marshmallow import fields, validate
 
+from reports_api.models.task_event import StatusEnum
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
@@ -118,4 +119,62 @@ class TaskEventQueryParamSchema(RequestQueryParameterSchema):
         metadata={"description": "Phase ID for the events"},
         validate=validate.Range(min=1),
         required=True,
+    )
+
+
+class TaskEventBodyParamSchema(RequestBodyParameterSchema):
+    """Task events body parameter"""
+
+    name = fields.Str(
+        metadata={"description": "Name of the task"},
+        required=True,
+    )
+
+    work_id = fields.Int(
+        metadata={"description": "Id of work"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    phase_id = fields.Int(
+        metadata={"description": "Id of the phase"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    responsibility_id = fields.Int(
+        metadata={"description": "Id of the responsible entity"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    anticipated_date = fields.DateTime(
+        metadata={"description": "Start date for the work"},
+        required=True
+    )
+
+    actual_date = fields.DateTime(
+        metadata={"description": "Start date for the work"},
+    )
+
+    number_of_days = fields.Int(
+        metadata={"description": "Number of days of the task"}
+    )
+
+    tips = fields.Str(
+        metadata={"description": "Tips for the task"}
+    )
+
+    notes = fields.Str(
+        metadata={"description": "Notes for the task"}
+    )
+
+    assignee_ids = fields.List(fields.Int(
+        metadata={"description": "List of assignees of the task"}
+    ))
+
+    status = fields.Str(
+        metadata={"description": "Status of the task"},
+        required=True,
+        validate=validate.OneOf([v.value for v in StatusEnum])
     )

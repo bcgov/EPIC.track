@@ -11,113 +11,98 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Service to manage Tasks."""
-from typing import IO, List
-
-import pandas as pd
-from flask import current_app
-
-from reports_api.exceptions import ResourceNotFoundError
-from reports_api.models import Responsibility, Task, TaskTemplate
-from reports_api.models.task_event import TaskEvent
-from reports_api.schemas import request as req
+"""Service to manage Tasks"""
+from reports_api.models import TaskEvent, TaskEventAssignee, StaffWorkRole, db
+from reports_api.exceptions import UnprocessableEntityError
 
 
 class TaskService:
     """Service to manage task related operations"""
 
     @classmethod
-    def find_all_task_templates(cls) -> List[TaskTemplate]:
-        """Find all task templates"""
-        current_app.logger.debug("find all task templates")
-        task_templates = TaskTemplate.find_all(default_filters=False)
-        return task_templates
+    def create_task_event(cls, data: dict) -> TaskEvent:
+        """Create task event"""
+        task_event = TaskEvent(**cls._prepare_task_event_object(data))
+        if cls._get_task_count(task_event.work_id, task_event.phase_id) > 0:
+            raise UnprocessableEntityError("Maxium task count per phase has reached")
+        if not cls._validate_assignees(data["assignee_ids"], data):
+            raise UnprocessableEntityError("Only team members can be assigned to a task")
+        task_event = task_event.flush()
+        if len(data["assignee_ids"]) > 0:
+            cls._handle_assignees(data["assignee_ids"], task_event)
+        db.session.commit()
+        return task_event
 
     @classmethod
-    def create_task_template(cls, data: dict, template_file: IO) -> TaskTemplate:
-        """Create a task template instance and related tasks"""
-        task_template = TaskTemplate(**data)
-        task_template.flush()
-        task_data = cls._read_excel(template_file)
-        task_data.loc[0:, ["template_id", "is_active"]] = [task_template.id, False]
-        responsibilities = Responsibility.find_all()
-        for res in responsibilities:
-            task_data = task_data.replace({'responsibility_id': rf'^{res.name}$'},
-                                          {'responsibility_id': res.id}, regex=True)
-        tasks = task_data.to_dict("records")
-        cls.create_bulk_tasks(tasks)
-        TaskTemplate.commit()
-        return task_template
+    def update_task_event(cls, data: dict, task_event_id) -> TaskEvent:
+        """Update task event"""
+        task_event = TaskEvent.find_by_id(task_event_id)
+        if not cls._validate_assignees(data["assignee_ids"], data):
+            raise UnprocessableEntityError("Only team members can be assigned to a task")
+        task_event.update(data, commit=False)
+        if len(data["assignee_ids"]) > 0:
+            cls._handle_assignees(data["assignee_ids"], task_event)
+        db.session.commit()
+        return task_event
 
     @classmethod
-    def _read_excel(cls, template_file: IO) -> pd.DataFrame:
-        """Read the template excel file"""
-        column_map = {
-            "No": "template_id",
-            "Task \"Title\"": "name",
-            "Length (Days)": "number_of_days",
-            "Start Plus": "start_at",
-            "Responsibility": "responsibility_id",
-            "Tips": "tips",
-        }
-        data_frame = pd.read_excel(template_file)
-        data_frame.rename(column_map, axis="columns", inplace=True)
-        return data_frame
+    def find_task_events(cls, work_id: int, phase_id: int) -> [TaskEvent]:
+        """Get all task events per workid, phaseid"""
+        return db.session.query(TaskEvent).filter(TaskEvent.is_active.is_(True),
+                                                  TaskEvent.is_deleted.is_(False),
+                                                  TaskEvent.work_id == work_id,
+                                                  TaskEvent.phase_id == phase_id).all()
 
     @classmethod
-    def create_bulk_tasks(cls, tasks) -> None:
-        """Bulk create tasks from given list of dicts"""
-        tasks_schema = req.TaskBodyParameterSchema(many=True)
-        tasks = tasks_schema.load(tasks)
-        for task in tasks:
-            instance = Task(**task)
-            instance.flush()
-        Task.commit()
+    def _prepare_task_event_object(cls, data: dict) -> dict:
+        """Prepare a task event object"""
+        exclude = ["assignee_ids"]
+        return {key: data[key] for key in data.keys() if key not in exclude}
 
     @classmethod
-    def find_tasks_by_template_id(cls, template_id: int) -> List[Task]:
-        """Find all tasks for a given template id"""
-        template = TaskTemplate.find_by_id(template_id)
-        if not template:
-            raise ResourceNotFoundError(
-                f"Task template with id '{template_id}' not found"
-            )
-        return template.tasks
+    def _handle_assignees(cls, assignees: list, task_event: TaskEvent) -> None:
+        """Handles the assignees for the task event"""
+        existing_assignees = db.session.query(TaskEventAssignee)\
+            .filter(TaskEventAssignee.is_active.is_(True),
+                    TaskEventAssignee.is_deleted.is_(False),
+                    TaskEventAssignee.task_event_id == task_event.id).all()
+        existing_set = set(list(map(lambda x: x.assignee_id, existing_assignees)))
+        incoming_set = set(assignees)
+        difference = list(existing_set.difference(incoming_set))
+
+        task_assignee = [TaskEventAssignee(**{
+                "task_event_id": task_event.id,
+                "assignee_id": assigne_id
+              }) for assigne_id in assignees]
+        # add or update the assignees
+        for new_assginee in task_assignee:
+            if new_assginee.assignee_id in existing_set:
+                new_assginee.update(new_assginee.as_dict(recursive=False), commit=False)
+            else:
+                new_assginee.flush()
+        to_be_inactive = db.session.query(TaskEventAssignee)\
+            .filter(TaskEventAssignee.is_active.is_(True),
+                    TaskEventAssignee.is_deleted.is_(False),
+                    TaskEventAssignee.task_event_id == task_event.id,
+                    TaskEventAssignee.assignee_id.in_(difference)).all()
+        for item in to_be_inactive:
+            item.is_active = False
+            item.update(item.as_dict(recursive=False), commit=False)
 
     @classmethod
-    def update_template(cls, template_id: int, payload: dict) -> TaskTemplate:
-        """Update a task template"""
-        template = TaskTemplate.find_by_id(template_id)
-        if not template:
-            raise ResourceNotFoundError(
-                f"Task template with id '{template_id}' not found"
-            )
-        template = template.update(payload)
-        return template
+    def _validate_assignees(cls, assignees: list, data: dict) -> bool:
+        """Database validation"""
+        work_staff = [r for (r,) in db.session.query(StaffWorkRole.staff_id)
+                      .filter(StaffWorkRole.work_id == data["work_id"],
+                              StaffWorkRole.is_deleted.is_(False),
+                              StaffWorkRole.is_active.is_(True))
+                      .all()]
+        return all(assigne in work_staff for assigne in assignees)
 
     @classmethod
-    def delete_template(cls, template_id: int) -> bool:
-        """Mark a template as deleted"""
-        template = TaskTemplate.find_by_id(template_id)
-        if not template:
-            raise ResourceNotFoundError(
-                f"Task template with id '{template_id}' not found"
-            )
-        template.is_deleted = True
-        TaskTemplate.commit()
-        return True
-
-    @classmethod
-    def find_by_id(cls, template_id) -> TaskTemplate:
-        """Find template by id."""
-        template = TaskTemplate.find_by_id(template_id)
-        if not template:
-            raise ResourceNotFoundError(
-                f"Task template with id '{template_id}' not found"
-            )
-        return template
-
-    @classmethod
-    def find_tasks_by_work_phase(cls, work_id: int, phase_id: int) -> List[Task]:
-        """Find all tasks for a given work id and phase id"""
-        return TaskEvent.find_by_work_phase(work_id, phase_id)
+    def _get_task_count(cls, work_id: int, phase_id: int):
+        """Task should be inserted only once."""
+        return db.session.query(TaskEvent.id).filter(TaskEvent.is_active.is_(True),
+                                                     TaskEvent.is_deleted.is_(False),
+                                                     TaskEvent.work_id == work_id,
+                                                     TaskEvent.phase_id == phase_id).count()
