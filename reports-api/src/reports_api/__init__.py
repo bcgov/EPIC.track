@@ -25,7 +25,8 @@ from marshmallow import ValidationError
 
 from reports_api import config
 from reports_api.config import _Config
-from reports_api.exceptions import PermissionDeniedError, ResourceExistsError, ResourceNotFoundError
+from reports_api.exceptions import (PermissionDeniedError, ResourceExistsError,
+                                    ResourceNotFoundError, UnprocessableEntityError)
 from reports_api.models import db
 from reports_api.utils.auth import jwt
 from reports_api.utils.caching import AppCache
@@ -75,6 +76,8 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
                 return err.message, HTTPStatus.NOT_FOUND
             if isinstance(err, PermissionDeniedError):
                 return err.message, HTTPStatus.FORBIDDEN
+            if isinstance(err, UnprocessableEntityError):
+                return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
             return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)

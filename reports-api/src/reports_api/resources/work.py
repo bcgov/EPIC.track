@@ -143,6 +143,22 @@ class WorkPhases(Resource):
         return res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases), HTTPStatus.OK
 
 
+@cors_preflight("GET")
+@API.route("/<int:work_id>/staff", methods=["GET", "OPTIONS"])
+class WorkStaff(Resource):
+    """Endpoints to handle work and staff"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id):
+        """Get all the active staff allocated to the work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        staff = WorkService.find_staff(work_id)
+        return res.StaffResponseSchema(many=True).dump(staff), HTTPStatus.OK
+
+
 @cors_preflight("GET,POST")
 @API.route("/workplan/download", methods=["GET", "POST", "OPTIONS"])
 class WorkPlan(Resource):

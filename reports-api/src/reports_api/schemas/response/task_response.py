@@ -49,6 +49,12 @@ class TaskEventResponseSchema(
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """TaskEvent model schema class"""
 
+    status = fields.Method("get_status_value")
+
+    def get_status_value(self, obj):
+        """Get status value"""
+        return obj.status.value
+
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""
 

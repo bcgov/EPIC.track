@@ -65,3 +65,12 @@ class PermissionDeniedError(Exception):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
         self.message = message
+
+
+class UnprocessableEntityError(Exception):
+    """Exception raised when resource is not processable"""
+
+    def __init__(self, message, *args, **kwargs):
+        """Return a valid UnprocessableEntityError."""
+        super().__init__(*args, **kwargs)
+        self.message = message

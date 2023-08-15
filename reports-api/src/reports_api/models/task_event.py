@@ -20,15 +20,22 @@ from sqlalchemy.orm import relationship
 from .base_model import BaseModelVersioned
 
 
-class ResponsibleEntityEnum(enum.Enum):
+# class ResponsibleEntityEnum(enum.Enum):
+#     """Enum for responsible entity"""
+
+#     # pylint: disable=C0103
+#     Proponent = 1
+#     PIN = 2
+#     EAO = 3
+#     # pylint: disable=C0103
+#     FederalAgencies = 3
+
+class StatusEnum(enum.Enum):
     """Enum for responsible entity"""
 
-    # pylint: disable=C0103
-    Proponent = 1
-    PIN = 2
-    EAO = 3
-    # pylint: disable=C0103
-    FederalAgencies = 3
+    NOT_STARTED = 'NOT_STARTED'
+    INPROGRESS = 'INPROGRESS'
+    COMPLETED = 'COMPLETED'
 
 
 class TaskEvent(BaseModelVersioned):
@@ -43,11 +50,10 @@ class TaskEvent(BaseModelVersioned):
     responsibility_id = sa.Column(sa.Integer, sa.ForeignKey('responsibilities.id'), nullable=False)
     anticipated_date = sa.Column(sa.DateTime(timezone=True), nullable=False)
     actual_date = sa.Column(sa.DateTime(timezone=True))
-    start_at = sa.Column(sa.Integer, default=0, nullable=False)
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
     tips = sa.Column(sa.String)
     notes = sa.Column(sa.String)
-    is_completed = sa.Column(sa.Boolean, default=False)
+    status = sa.Column(sa.Enum(StatusEnum), default=StatusEnum.NOT_STARTED)
 
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     work = relationship('Work', foreign_keys=[work_id], lazy='select')

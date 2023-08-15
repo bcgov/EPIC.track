@@ -19,7 +19,7 @@ from flask_restx import Namespace, Resource, cors
 
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
-from reports_api.services import TaskService
+from reports_api.services import TaskTemplateService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
@@ -40,7 +40,7 @@ class Templates(Resource):
     # @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all task templates."""
-        task_templates = TaskService.find_all_task_templates()
+        task_templates = TaskTemplateService.find_all_task_templates()
         return (
             jsonify(res.TaskTemplateResponseSchema(many=True).dump(task_templates)),
             HTTPStatus.OK,
@@ -54,7 +54,7 @@ class Templates(Resource):
         """Create new task template"""
         request_json = req.TaskTemplateBodyParameterSchema().load(request.form)
         template_file = request.files["template_file"]
-        task_template = TaskService.create_task_template(request_json, template_file)
+        task_template = TaskTemplateService.create_task_template(request_json, template_file)
         return res.TaskTemplateResponseSchema().dump(task_template), HTTPStatus.CREATED
 
 
@@ -71,7 +71,7 @@ class TemplateTasks(Resource):
     def get(template_id):
         """Return all tasks for the template."""
         req.TaskTemplateIdPathParameterSchema().load(request.view_args)
-        tasks = TaskService.find_tasks_by_template_id(template_id)
+        tasks = TaskTemplateService.find_tasks_by_template_id(template_id)
         return (
             jsonify(res.TaskResponseSchema(many=True).dump(tasks)),
             HTTPStatus.OK,
@@ -90,7 +90,7 @@ class Template(Resource):
     def get(template_id):
         """Get a task template details"""
         req.TaskTemplateIdPathParameterSchema().load(request.view_args)
-        template = TaskService.find_by_id(template_id=template_id)
+        template = TaskTemplateService.find_by_id(template_id=template_id)
         return res.TaskTemplateResponseSchema().dump(template), HTTPStatus.OK
 
     @staticmethod
@@ -103,7 +103,7 @@ class Template(Resource):
         request_json = req.TaskTemplateBodyParameterSchema().load(
             API.payload, partial=True
         )
-        template = TaskService.update_template(
+        template = TaskTemplateService.update_template(
             template_id=template_id, payload=request_json
         )
         return res.TaskTemplateResponseSchema().dump(template), HTTPStatus.OK
@@ -115,5 +115,5 @@ class Template(Resource):
     def delete(template_id):
         """Delete a task template"""
         req.TaskTemplateIdPathParameterSchema().load(request.view_args)
-        TaskService.delete_template(template_id)
+        TaskTemplateService.delete_template(template_id)
         return "Task template successfully deleted", HTTPStatus.OK

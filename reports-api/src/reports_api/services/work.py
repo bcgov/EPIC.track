@@ -215,6 +215,18 @@ class WorkService:
         return work
 
     @classmethod
+    def find_staff(cls, work_id: int) -> [Staff]:
+        """Active staff assigned on a work"""
+        query = db.session.query(Staff)\
+            .join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)\
+            .filter(StaffWorkRole.is_active.is_(True),
+                    StaffWorkRole.is_deleted.is_(False),
+                    StaffWorkRole.work_id == work_id,
+                    Staff.is_active.is_(True),
+                    Staff.is_deleted.is_(False))
+        return query.all()
+
+    @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
         """Calculate the start at value"""
         # pylint: disable=eval-used
@@ -226,7 +238,7 @@ class WorkService:
         return start_at_value + number_of_days
 
     @classmethod
-    def _prepare_regular_event(
+    def _prepare_regular_event(  # pylint: disable=too-many-arguments
         cls,
         name: str,
         start_date: str,
@@ -234,7 +246,6 @@ class WorkService:
         ev_config_id: int,
         source_e_id: int = None,
     ) -> dict:
-        # pylint: disable=too-many-arguments
         """Prepare the event object"""
         return {
             "name": name,
@@ -296,7 +307,7 @@ class WorkService:
         milestone_events = EventService.find_milestone_events_by_work_phase(
             work_id, phase_id
         )
-        task_events = TaskService.find_tasks_by_work_phase(work_id, phase_id)
+        task_events = TaskService.find_task_events(work_id, phase_id)
 
         work_plan_schema = WorkPlanSchema(many=True)
         work_plan_schema.context["type"] = "Milestone"
@@ -308,8 +319,10 @@ class WorkService:
         data["start_date"] = pd.to_datetime(data["start_date"])
         data = data.sort_values(by="start_date")
 
-        data["start_date"] = data["start_date"].dt.strftime("%b. %d %Y")
-        data["end_date"] = data["end_date"].dt.strftime("%b. %d %Y")
+        data["start_date"] = data["start_date"].dt.strftime("%b. %d %Y")  # pylint: disable=unsubscriptable-object,
+        # unsupported-assignment-operation
+        data["end_date"] = data["end_date"].dt.strftime("%b. %d %Y")  # pylint: disable=unsubscriptable-object,
+        # unsupported-assignment-operation
 
         file_buffer = BytesIO()
         columns = [

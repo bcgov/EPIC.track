@@ -26,8 +26,9 @@ from .indigenous_nation import IndigenousNationService
 from .proponent import ProponentService
 from .reminder_configuration import ReminderConfigurationService
 from .user import UserService
-from .task import TaskService
+from .task_template import TaskTemplateService
 from .event_configuration import EventConfigurationService
 from .phaseservice import PhaseService
 from .work_phase import WorkPhaseService
 from .event_template import EventTemplateService
+from .task import TaskService
