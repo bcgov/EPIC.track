@@ -3,7 +3,7 @@ import { TextField, Grid } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { TrackLabel } from "../shared/index";
+import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Proponent } from "../../models/proponent";
@@ -88,7 +88,7 @@ export default function StaffForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={6}>
-            <TrackLabel>Name</TrackLabel>
+            <ETFormLabel>Name</ETFormLabel>
             <TextField
               fullWidth
               error={!!errors?.name?.message}
@@ -97,7 +97,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Relationship Holder</TrackLabel>
+            <ETFormLabel>Relationship Holder</ETFormLabel>
             <ControlledSelectV2
               defaultValue={(ctx.item as Proponent)?.relationship_holder_id}
               options={staffs || []}
@@ -111,7 +111,7 @@ export default function StaffForm({ ...props }) {
               defaultChecked={(ctx.item as Proponent)?.is_active}
               {...register("is_active")}
             />
-            <TrackLabel id="active">Active</TrackLabel>
+            <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
         </Grid>
       </FormProvider>

@@ -8,3 +8,8 @@ export interface PhaseAccordionProps {
 export interface PhaseContainerProps {
   workId: number;
 }
+
+export enum EVENT_TYPE {
+  MILESTONE = "Milestone",
+  TASK = "Task",
+}

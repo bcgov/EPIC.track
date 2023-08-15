@@ -3,7 +3,7 @@ import { TextField, Grid, Button, Divider } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { TrackLabel } from "../shared/index";
+import { ETFormLabel } from "../shared/index";
 import codeService, { Code } from "../../services/codeService";
 import { Project } from "../../models/project";
 import { Proponent } from "../../models/proponent";
@@ -145,7 +145,7 @@ export default function ProjectForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={6}>
-            <TrackLabel>Project Name</TrackLabel>
+            <ETFormLabel>Project Name</ETFormLabel>
             <TextField
               fullWidth
               error={!!errors?.name?.message}
@@ -154,7 +154,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Proponent</TrackLabel>
+            <ETFormLabel>Proponent</ETFormLabel>
             <ControlledSelectV2
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
@@ -166,7 +166,7 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Type</TrackLabel>
+            <ETFormLabel>Type</ETFormLabel>
             <ControlledSelectV2
               key={`type_select_${formValues.type_id}`}
               helperText={errors?.type_id?.message?.toString()}
@@ -178,7 +178,7 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>SubType</TrackLabel>
+            <ETFormLabel>SubType</ETFormLabel>
             <ControlledSelectV2
               key={`subtype_select_${formValues.sub_type_id}`}
               helperText={errors?.sub_type_id?.message?.toString()}
@@ -190,7 +190,7 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Project Description</TrackLabel>
+            <ETFormLabel>Project Description</ETFormLabel>
             <TextField
               fullWidth
               multiline
@@ -202,7 +202,7 @@ export default function ProjectForm({ ...props }) {
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
           <Grid item xs={12}>
-            <TrackLabel>Location Description</TrackLabel>
+            <ETFormLabel>Location Description</ETFormLabel>
             <TextField
               fullWidth
               multiline
@@ -213,7 +213,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Latitude</TrackLabel>
+            <ETFormLabel>Latitude</ETFormLabel>
             <TextField
               fullWidth
               {...register("latitude")}
@@ -222,7 +222,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Longitude</TrackLabel>
+            <ETFormLabel>Longitude</ETFormLabel>
             <TextField
               fullWidth
               {...register("longitude")}
@@ -231,7 +231,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>ENV Region</TrackLabel>
+            <ETFormLabel>ENV Region</ETFormLabel>
             <ControlledSelectV2
               key={`env_select_${formValues.region_id_env}`}
               helperText={errors?.region_id_env?.message?.toString()}
@@ -243,7 +243,7 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>NRS Region</TrackLabel>
+            <ETFormLabel>NRS Region</ETFormLabel>
             <ControlledSelectV2
               key={`nrs_select_${formValues.region_id_flnro}`}
               helperText={errors?.region_id_flnro?.message?.toString()}
@@ -255,7 +255,7 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Capital Investment</TrackLabel>
+            <ETFormLabel>Capital Investment</ETFormLabel>
             <TextField
               fullWidth
               {...register("capital_investment")}
@@ -264,7 +264,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>EPIC GUID</TrackLabel>
+            <ETFormLabel>EPIC GUID</ETFormLabel>
             <TextField
               fullWidth
               {...register("epic_guid")}
@@ -273,12 +273,12 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Certificate Number</TrackLabel>
+            <ETFormLabel>Certificate Number</ETFormLabel>
             <TextField helperText fullWidth {...register("ea_certificate")} />
             Provide the certificate number if available
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Abbreviation</TrackLabel>
+            <ETFormLabel>Abbreviation</ETFormLabel>
             <TextField helperText fullWidth {...register("abbreviation")} />
             Abbreviation of the project name to be displayed in reports and
             graphs
@@ -288,14 +288,14 @@ export default function ProjectForm({ ...props }) {
               defaultChecked={(ctx.item as Project)?.is_project_closed}
               {...register("is_project_closed")}
             />
-            <TrackLabel id="active">Is the Project Closed?</TrackLabel>
+            <ETFormLabel id="active">Is the Project Closed?</ETFormLabel>
           </Grid>
           <Grid item xs={2} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
               defaultChecked={(ctx.item as Project)?.is_active}
               {...register("is_active")}
             />
-            <TrackLabel id="active">Active</TrackLabel>
+            <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
         </Grid>
       </FormProvider>

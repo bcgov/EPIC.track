@@ -11,40 +11,20 @@ import TabPanel from "../shared/tab/TabPanel";
 import PhaseContainer from "./phase/PhaseContainer";
 import { WorkplanContext } from "./WorkPlanContext";
 
-interface WorkPlanContainerRouteParams extends URLSearchParams {
-  work_id: string;
-}
 const WorkPlanContainer = () => {
-  const [work, setWork] = React.useState<Work>();
-  const [loading, setLoading] = React.useState<boolean>(true);
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
-  const query = useSearchParams<WorkPlanContainerRouteParams>();
   const ctx = useContext(WorkplanContext);
-  const work_id = React.useMemo(() => query.get("work_id"), [query]);
 
   React.useEffect(() => {
-    getWorkById();
-  }, [work_id]);
-
-  React.useEffect(() => {
-    ctx.selectedPhaseId = work?.current_phase_id;
-  }, [work]);
-
-  const getWorkById = React.useCallback(async () => {
-    if (work_id) {
-      const work = await workService.getById(String(work_id));
-      setWork(work.data as Work);
-      setLoading(false);
-    }
-  }, [work_id]);
+    ctx.selectedPhaseId = ctx.work?.current_phase_id;
+  }, [ctx.work]);
 
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
-  console.log("selected tab index", selectedTabIndex);
   return (
     <>
-      {!loading && (
+      {!ctx.loading && (
         <>
           <ETPageContainer
             sx={{
@@ -56,7 +36,7 @@ const WorkPlanContainer = () => {
           >
             <Box>
               <ETHeading2 bold color={Palette.primary.accent.main}>
-                {work?.title}
+                {ctx.work?.title}
               </ETHeading2>
             </Box>
             <Box
@@ -91,7 +71,7 @@ const WorkPlanContainer = () => {
             </Box>
           </ETPageContainer>
           <TabPanel index={0} value={selectedTabIndex}>
-            <PhaseContainer workId={Number(work_id)} />
+            <PhaseContainer workId={Number(ctx.work?.id)} />
           </TabPanel>
         </>
       )}

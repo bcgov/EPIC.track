@@ -1,10 +1,12 @@
+import { EVENT_TYPE } from "../components/workPlan/phase/type";
+
 export interface EventsGridModel {
   actual_date: string;
   anticipated_date: string;
   event_configuration_id: number;
   id: number;
   is_active: boolean;
-  type: string;
+  type: EVENT_TYPE;
   is_complete: boolean;
   long_description: string;
   name: string;

@@ -9,7 +9,7 @@ import { Work } from "../../models/work";
 import { ListType } from "../../models/code";
 import { Ministry } from "../../models/ministry";
 import { Code } from "../../services/codeService";
-import { TrackLabel } from "../shared";
+import { ETFormLabel } from "../shared";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DATE_FORMAT } from "../../constants/application-constant";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
@@ -147,7 +147,7 @@ export default function WorkForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={4}>
-            <TrackLabel>EA Act</TrackLabel>
+            <ETFormLabel>EA Act</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
@@ -158,7 +158,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={4}>
-            <TrackLabel>Worktype</TrackLabel>
+            <ETFormLabel>Worktype</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
@@ -169,7 +169,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={4}>
-            <TrackLabel className="start-date-label">Start date</TrackLabel>
+            <ETFormLabel className="start-date-label">Start date</ETFormLabel>
             <Controller
               name="start_date"
               control={control}
@@ -207,7 +207,7 @@ export default function WorkForm({ ...props }) {
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
           <Grid item xs={6}>
-            <TrackLabel>Project</TrackLabel>
+            <ETFormLabel>Project</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.project_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.project_id}
@@ -218,7 +218,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Responsible Ministry</TrackLabel>
+            <ETFormLabel>Responsible Ministry</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.ministry_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ministry_id}
@@ -229,7 +229,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Federal Involvement</TrackLabel>
+            <ETFormLabel>Federal Involvement</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.federal_involvement_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.federal_involvement_id}
@@ -241,7 +241,7 @@ export default function WorkForm({ ...props }) {
           </Grid>
 
           <Grid item xs={6}>
-            <TrackLabel>Federal Act</TrackLabel>
+            <ETFormLabel>Federal Act</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.substitution_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.substitution_act_id}
@@ -252,7 +252,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Title</TrackLabel>
+            <ETFormLabel>Title</ETFormLabel>
             <TextField
               fullWidth
               error={!!errors?.title?.message}
@@ -261,7 +261,7 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Short Description</TrackLabel>
+            <ETFormLabel>Short Description</ETFormLabel>
             <TextField
               fullWidth
               multiline
@@ -272,7 +272,7 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Long Description</TrackLabel>
+            <ETFormLabel>Long Description</ETFormLabel>
             <TextField
               fullWidth
               multiline
@@ -287,34 +287,34 @@ export default function WorkForm({ ...props }) {
               defaultChecked={(ctx.item as Work)?.is_pecp_required}
               {...register("is_pecp_required")}
             />
-            <TrackLabel id="is_pcp_required">PCP Required</TrackLabel>
+            <ETFormLabel id="is_pcp_required">PCP Required</ETFormLabel>
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
               defaultChecked={(ctx.item as Work)?.is_cac_recommended}
               {...register("is_cac_recommended")}
             />
-            <TrackLabel id="is_cac_recommended">CAC Required</TrackLabel>
+            <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
               defaultChecked={(ctx.item as Work)?.is_watched}
               {...register("is_watched")}
             />
-            <TrackLabel id="is_watched">Watched</TrackLabel>
+            <ETFormLabel id="is_watched">Watched</ETFormLabel>
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
               defaultChecked={(ctx.item as Work)?.is_active}
               {...register("is_active")}
             />
-            <TrackLabel id="is_active">Active</TrackLabel>
+            <ETFormLabel id="is_active">Active</ETFormLabel>
           </Grid>
 
           <Divider style={{ width: "100%", marginTop: "10px" }} />
 
           <Grid item xs={6}>
-            <TrackLabel>EAO Team</TrackLabel>
+            <ETFormLabel>EAO Team</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.eao_team_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.eao_team_id}
@@ -326,7 +326,7 @@ export default function WorkForm({ ...props }) {
           </Grid>
 
           <Grid item xs={6}>
-            <TrackLabel>Responsible EPD</TrackLabel>
+            <ETFormLabel>Responsible EPD</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.responsible_epd_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.responsible_epd_id}
@@ -337,7 +337,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Work Lead</TrackLabel>
+            <ETFormLabel>Work Lead</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.work_lead_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.work_lead_id}
@@ -349,7 +349,7 @@ export default function WorkForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             {/* TODO: Make the label dynamic */}
-            <TrackLabel>Decision Maker</TrackLabel>
+            <ETFormLabel>Decision Maker</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.decision_by_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.decision_by_id}
