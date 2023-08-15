@@ -28,9 +28,9 @@ from reports_api.utils.util import cors_preflight
 API = Namespace("tasks", description="Tasks")
 
 
-@cors_preflight("GET")
-@API.route("/events", methods=["GET", "OPTIONS"])
-class Templates(Resource):
+@cors_preflight("GET,POST")
+@API.route("/events", methods=["GET", "POST", "OPTIONS"])
+class Events(Resource):
     """Endpoint resource to return all task events for given work id and phase id"""
 
     @staticmethod
@@ -43,8 +43,34 @@ class Templates(Resource):
         args = req.TaskEventQueryParamSchema().load(request.args)
         work_id = args.get("work_id")
         phase_id = args.get("phase_id")
-        task_events = TaskService.find_tasks_by_work_phase(work_id, phase_id)
+        task_events = TaskService.find_task_events(work_id, phase_id)
         return (
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,
         )
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Create a new Task Event"""
+        request_json = req.TaskEventBodyParamSchema().load(API.payload)
+        task_response = TaskService.create_task_event(request_json)
+        return res.TaskEventResponseSchema().dump(task_response), HTTPStatus.CREATED
+
+
+@cors_preflight("GET,PUT")
+@API.route("/events/<int:event_id>", methods=["GET", "PUT", "OPTIONS"])
+class Event(Resource):
+    """Endpoint resource to handle single TaskEvent"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def put(event_id):
+        """Create a new Task Event"""
+        request_json = req.TaskEventBodyParamSchema().load(API.payload)
+        task_response = TaskService.update_task_event(request_json, event_id)
+        return res.TaskEventResponseSchema().dump(task_response), HTTPStatus.CREATED
