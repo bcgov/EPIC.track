@@ -1,10 +1,10 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
+import { Box, Button, Grid, IconButton } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETLink, ETPageContainer } from "../shared";
+import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
@@ -68,10 +68,8 @@ const WorkList = () => {
       {
         accessorKey: "title",
         header: "Name",
-        size: 300,
         Cell: ({ row }) => (
           <ETGridTitle
-            bold
             titleText={row.original.title}
             to={`/work-plan?work_id=${row.original.id}`}
           >
@@ -161,6 +159,9 @@ const WorkList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
+                <IconButton onClick={() => onEdit(row.original.id)}>
+                  <EditIcon />
+                </IconButton>
                 <IconButton onClick={() => handleDelete(row.original.id)}>
                   <DeleteIcon />
                 </IconButton>

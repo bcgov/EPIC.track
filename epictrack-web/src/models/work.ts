@@ -14,7 +14,7 @@ export interface Work extends MasterBase {
   is_complete: boolean;
   is_watched: boolean;
   is_deleted: boolean;
-  start_date: Date;
+  start_date: string;
   anticipated_decision_date: string;
   decision_date: string;
 

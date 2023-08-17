@@ -4,6 +4,7 @@ import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog from "./TrackDialog";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { showNotification } from "./notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "../../constants/application-constant";
 
 interface MasterContextProps {
   backdrop: boolean;
@@ -145,11 +146,13 @@ export const MasterProvider = ({
             callback();
           }
         }
+        setShowModalForm(false);
         getData();
       } catch (e) {
-        showNotification("Error during processing. Please try again later", {
+        showNotification(COMMON_ERROR_MESSAGE, {
           type: "error",
         });
+        setBackdrop(false);
       }
     },
     [id, service, title]

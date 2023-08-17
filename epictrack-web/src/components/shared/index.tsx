@@ -239,7 +239,7 @@ export const ETCaption2 = ({
 };
 
 export const ETGridTitle = ({
-  bold,
+  bold = true,
   color,
   children,
   sx,
