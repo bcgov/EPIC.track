@@ -11,6 +11,7 @@ import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
 import { Palette } from "../../styles/theme";
+import FilterSelect from "../shared/filterSelect/FilterSelect";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -68,6 +69,16 @@ const StaffList = () => {
         accessorKey: "position.name",
         header: "Position",
         filterVariant: "multi-select",
+        Filter: ({ header, column }) => {
+          return (
+            <FilterSelect
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+            />
+          );
+        },
         filterSelectOptions: positions,
       },
       {

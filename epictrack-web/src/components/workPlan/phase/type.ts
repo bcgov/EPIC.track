@@ -8,3 +8,8 @@ export enum EVENT_TYPE {
   MILESTONE = "Milestone",
   TASK = "Task",
 }
+
+export enum EVENT_TYPE {
+  MILESTONE = "Milestone",
+  TASK = "Task",
+}
