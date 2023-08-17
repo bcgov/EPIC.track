@@ -19,7 +19,7 @@ import pandas as pd
 from sqlalchemy import exc
 from sqlalchemy.orm import aliased
 
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
     CalendarEvent, EAOTeam, Event, EventConfiguration, Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent,
     WorkPhase, db)
@@ -102,6 +102,8 @@ class WorkService:
             phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
                 work.ea_act_id, work.work_type_id
             )
+            if not phases:
+                raise UnprocessableEntityError("No configuration found")
             phase_ids = list(map(lambda x: x.id, phases))
             event_templates = EventTemplateService.find_by_phase_ids(phase_ids)
             event_template_json = EventTemplateResponseSchema(many=True).dump(

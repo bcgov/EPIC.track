@@ -4,6 +4,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import Moment from "moment";
 import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
@@ -121,6 +122,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
     try {
       data.work_id = Number(ctx.work?.id);
       data.phase_id = Number(ctx.selectedPhaseId);
+      data.start_date = Moment(data.start_date).format();
       data.number_of_days =
         data.number_of_days.toString() === "" ? 0 : data.number_of_days;
       data.notes = notes;
@@ -210,7 +212,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
               <Controller
                 name="start_date"
                 control={control}
-                defaultValue={dayjs(taskEvent?.start_date).toISOString()}
+                defaultValue={Moment(taskEvent?.start_date).format()}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
