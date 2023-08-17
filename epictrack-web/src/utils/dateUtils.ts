@@ -15,7 +15,12 @@ const diff = (fromDate: string, toDate: string, unitOfTime: UnitOfTime) => {
   return moment(fromDate).diff(moment(toDate), unitOfTime);
 };
 
+const add = (date: string, unit: number, unitOfTime: UnitOfTime) => {
+  return moment(date).add(unit, unitOfTime);
+};
+
 export default {
   formatDate,
   diff,
+  add,
 };

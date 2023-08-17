@@ -1,9 +1,10 @@
 import React, { useContext } from "react";
-import { EVENT_TYPE, PhaseContainerProps } from "./type";
+import { EVENT_TYPE } from "./type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
 import { EventsGridModel } from "../../../models/events";
+import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import {
   MRT_ColumnDef,
@@ -20,6 +21,8 @@ import workService from "../../../services/workService/workService";
 import { makeStyles } from "@mui/styles";
 import TrackDialog from "../../shared/TrackDialog";
 import TaskForm from "../task/TaskForm";
+import { EVENT_STATUS, statusOptions } from "../../../models/task_event";
+import taskEventService from "../../../services/taskEventService/taskEventService";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -41,10 +44,11 @@ const IButton = styled(IconButton)({
   },
 });
 
-const EventGrid = ({ workId }: PhaseContainerProps) => {
+const EventGrid = () => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
+  const [eventId, setEventId] = React.useState<number | undefined>();
   const [showMilestoneForm, setShowMilestoneForm] =
     React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
@@ -52,35 +56,96 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
     {}
   );
   const classes = useStyle();
+  React.useEffect(() => setEvents([]), [ctx.selectedPhaseId]);
   React.useEffect(() => {
-    getMilestoneEvents(workId, Number(ctx.selectedPhaseId));
-  }, [workId, ctx.selectedPhaseId]);
-  const getMilestoneEvents = async (workId: number, currentPhase: number) => {
+    getCombinedEvents();
+  }, [ctx.work?.id, ctx.selectedPhaseId]);
+
+  const getCombinedEvents = () => {
+    let result: EventsGridModel[] = [];
+    setLoading(true);
+    Promise.all([
+      getMilestoneEvents(Number(ctx.work?.id), Number(ctx.selectedPhaseId)),
+      getTaskEvents(Number(ctx.work?.id), Number(ctx.selectedPhaseId)),
+    ]).then((data: Array<EventsGridModel[]>) => {
+      setLoading(false);
+      data.forEach((array: EventsGridModel[]) => {
+        console.log(array);
+        result = result.concat(array);
+      });
+      result = result.sort((a, b) =>
+        Moment(a.start_date).diff(b.start_date, "seconds")
+      );
+      setEvents(result);
+    });
+  };
+  const getTaskEvents = async (
+    workId: number,
+    currentPhase: number
+  ): Promise<EventsGridModel[]> => {
+    let result: EventsGridModel[] = [];
     try {
-      const result = await eventService.GetMilestoneEvents(
+      const taskResult = await taskEventService.getAllByWorkNdPhase(
         Number(workId),
         Number(currentPhase)
       );
-      if (result.status === 200) {
-        const data: EventsGridModel[] = (result.data as EventsGridModel[]).map(
-          (element) => {
-            element.type = EVENT_TYPE.MILESTONE;
-            element.progress = "Not Started";
-            return element;
-          }
-        );
-        setEvents(data);
-        setLoading(false);
+      if (taskResult.status === 200) {
+        result = (taskResult.data as EventsGridModel[]).map((element) => {
+          element.type = EVENT_TYPE.TASK;
+          element.end_date = dateUtils.formatDate(
+            dateUtils
+              .add(element.start_date, element.number_of_days, "days")
+              .toISOString()
+          );
+          return element;
+        });
       }
     } catch (e) {
       setLoading(false);
     }
+    return Promise.resolve(result);
+  };
+  const getMilestoneEvents = async (
+    workId: number,
+    currentPhase: number
+  ): Promise<EventsGridModel[]> => {
+    let result: EventsGridModel[] = [];
+    try {
+      const milestoneResult = await eventService.GetMilestoneEvents(
+        Number(workId),
+        Number(currentPhase)
+      );
+      if (milestoneResult.status === 200) {
+        result = (milestoneResult.data as any[]).map((element) => {
+          element.type = EVENT_TYPE.MILESTONE;
+          element.status = EVENT_STATUS.NOT_STARTED;
+          if (element.actual_date) {
+            element.end_date = dateUtils.formatDate(
+              dateUtils
+                .add(element.actual_date, element.number_of_days, "days")
+                .toISOString()
+            );
+          }
+          element.start_date = element.actual_date
+            ? element.actual_date
+            : element.anticipated_date;
+          return element;
+        });
+      }
+    } catch (e) {
+      setLoading(false);
+    }
+    return Promise.resolve(result);
   };
 
+  const onDialogClose = React.useCallback(() => {
+    setShowTaskForm(false);
+    getCombinedEvents();
+  }, []);
   const downloadPDFReport = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        workId,
+        Number(ctx.work?.id),
         Number(ctx.selectedPhaseId)
       );
       const url = window.URL.createObjectURL(
@@ -92,7 +157,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       document.body.appendChild(link);
       link.click();
     } catch (error) {}
-  }, [workId, ctx.selectedPhaseId]);
+  }, [ctx.work?.id, ctx.selectedPhaseId]);
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
     () => [
@@ -104,9 +169,10 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
         Cell: ({ cell, row }) => (
           <ETGridTitle
             to={"#"}
-            bold
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
             className={classes.textEllipsis}
-            title={cell.getValue<string>()}
+            onClick={() => onRowClick(row.original)}
+            titleText={cell.getValue<string>()}
           >
             {cell.getValue<string>()}
           </ETGridTitle>
@@ -119,65 +185,124 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
         size: 100,
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         Cell: ({ cell, row }) => (
-          <ETParagraph title={cell.getValue<string>()} bold>
+          <ETParagraph
+            title={cell.getValue<string>()}
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+          >
             {cell.getValue<string>()}
           </ETParagraph>
         ),
       },
       {
-        accessorKey: "anticipated_date",
+        accessorKey: "start_date",
         header: "Start Date",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph bold className={classes.textEllipsis}>
+          <ETParagraph
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+            className={classes.textEllipsis}
+          >
             {dateUtils.formatDate(cell.getValue<string>(), "MMM.DD YYYY")}
           </ETParagraph>
         ),
       },
       {
         accessorKey: "end_date",
+        accessorFn: (row: EventsGridModel) => {
+          if (row.end_date) {
+            return dateUtils.formatDate(row.end_date, "MMM.DD YYYY");
+          }
+          return "";
+        },
         size: 140,
         header: "End Date",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
+        Cell: ({ cell, row }) => (
+          <ETParagraph
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+            className={classes.textEllipsis}
+          >
+            {cell.getValue<string>()}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "number_of_days",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 100,
         header: "Days",
+        Cell: ({ cell, row }) => (
+          <ETParagraph
+            title={cell.getValue<string>()}
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+          >
+            {cell.getValue<string>()}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "assigned",
         header: "Assigned",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
+        Cell: ({ cell, row }) => (
+          <ETParagraph
+            title={cell.getValue<string>()}
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+          >
+            {cell.getValue<string>()}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "responsibility",
         header: "Responsibility",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
+        Cell: ({ cell, row }) => (
+          <ETParagraph
+            title={cell.getValue<string>()}
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+          >
+            {cell.getValue<string>()}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "notes",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         header: "Notes",
         size: 250,
+        Cell: ({ cell, row }) => (
+          <ETParagraph
+            title={cell.getValue<string>()}
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+          >
+            {cell.getValue<string>()}
+          </ETParagraph>
+        ),
       },
       {
-        accessorKey: "progress",
+        accessorKey: "status",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         header: "Progress",
         size: 130,
         Cell: ({ cell, row }) => (
-          <ETParagraph bold>{cell.getValue<string>()}</ETParagraph>
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
+            {
+              statusOptions.filter(
+                (p) => p.value == cell.getValue<EVENT_STATUS>()
+              )[0]?.label
+            }
+          </ETParagraph>
         ),
       },
     ],
     [events]
   );
   const onRowClick = (row: EventsGridModel) => {
+    setEventId(row.id);
     setShowTaskForm(row.type === EVENT_TYPE.TASK);
   };
   return (
@@ -247,12 +372,15 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
         okButtonText="Save"
         cancelButtonText="Cancel"
         isActionsRequired
-        //onCancel={() => onDialogClose()}
-        formId="formId"
-        // onOk={() => deleteItem(id)}
+        onCancel={() => setShowTaskForm(false)}
+        formId="task-form"
+        sx={{
+          "& .MuiDialogContent-root": {
+            padding: 0,
+          },
+        }}
       >
-        {/* <StaffForm /> */}
-        <TaskForm />
+        <TaskForm onSave={onDialogClose} eventId={eventId} />
       </TrackDialog>
     </Grid>
   );

@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Tasks"""
+from sqlalchemy import and_
+from sqlalchemy.orm import contains_eager
 from reports_api.models import TaskEvent, TaskEventAssignee, StaffWorkRole, db
 from reports_api.exceptions import UnprocessableEntityError
 
@@ -25,11 +27,11 @@ class TaskService:
         task_event = TaskEvent(**cls._prepare_task_event_object(data))
         if cls._get_task_count(task_event.work_id, task_event.phase_id) > 0:
             raise UnprocessableEntityError("Maxium task count per phase has reached")
-        if not cls._validate_assignees(data["assignee_ids"], data):
+        if data.get("assignee_ids") and not cls._validate_assignees(data.get("assignee_ids"), data):
             raise UnprocessableEntityError("Only team members can be assigned to a task")
         task_event = task_event.flush()
-        if len(data["assignee_ids"]) > 0:
-            cls._handle_assignees(data["assignee_ids"], task_event)
+        if data.get("assignee_ids"):
+            cls._handle_assignees(data.get("assignee_ids"), task_event)
         db.session.commit()
         return task_event
 
@@ -37,11 +39,11 @@ class TaskService:
     def update_task_event(cls, data: dict, task_event_id) -> TaskEvent:
         """Update task event"""
         task_event = TaskEvent.find_by_id(task_event_id)
-        if not cls._validate_assignees(data["assignee_ids"], data):
+        if data.get("assignee_ids") and not cls._validate_assignees(data.get("assignee_ids"), data):
             raise UnprocessableEntityError("Only team members can be assigned to a task")
         task_event.update(data, commit=False)
-        if len(data["assignee_ids"]) > 0:
-            cls._handle_assignees(data["assignee_ids"], task_event)
+        if data.get("assignee_ids"):
+            cls._handle_assignees(data.get("assignee_ids"), task_event)
         db.session.commit()
         return task_event
 
@@ -52,6 +54,15 @@ class TaskService:
                                                   TaskEvent.is_deleted.is_(False),
                                                   TaskEvent.work_id == work_id,
                                                   TaskEvent.phase_id == phase_id).all()
+
+    @classmethod
+    def find_task_event(cls, event_id: int) -> TaskEvent:
+        """Get the task event"""
+        return db.session.query(TaskEvent)\
+            .outerjoin(TaskEventAssignee, and_(TaskEventAssignee.task_event_id == TaskEvent.id,
+                                               TaskEventAssignee.is_active.is_(True)))\
+            .filter(TaskEvent.id == event_id)\
+            .options(contains_eager(TaskEvent.assignees)).scalar()
 
     @classmethod
     def _prepare_task_event_object(cls, data: dict) -> dict:

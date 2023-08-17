@@ -7,7 +7,7 @@ import { AccordionStyledProps } from "../type";
 const ETAccordionDetails = styled(AccordionDetails)(
   (props: AccordionStyledProps) => ({
     display: "inline-flex",
-    maxHeight: "540px",
+    maxHeight: "600px",
     flexDirection: "column",
     alignItems: "center",
     gap: "8px",

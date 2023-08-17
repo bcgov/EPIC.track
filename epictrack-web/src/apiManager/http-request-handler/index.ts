@@ -1,8 +1,12 @@
 import axios from "axios";
 import UserService from "../../services/userService";
+import { AppConfig } from "../../config";
 
+const instance = axios.create({
+  baseURL: AppConfig.apiUrl,
+});
 const GetRequest = <T>(url: string, params = {}, headers = {}) => {
-  return axios.get<T>(url, {
+  return instance.get<T>(url, {
     params: params,
     headers: {
       "Content-type": "application/json",
@@ -15,7 +19,7 @@ const GetRequest = <T>(url: string, params = {}, headers = {}) => {
 };
 
 const PostRequest = <T>(url: string, data = {}, params = {}, config = {}) => {
-  return axios.post<T>(url, data, {
+  return instance.post<T>(url, data, {
     params,
     headers: {
       "Content-type": "application/json",
@@ -28,7 +32,7 @@ const PostRequest = <T>(url: string, data = {}, params = {}, config = {}) => {
 };
 
 const PutRequest = <T>(url: string, data = {}, params = {}) => {
-  return axios.put<T>(url, data, {
+  return instance.put<T>(url, data, {
     params,
     headers: {
       "Content-type": "application/json",
@@ -40,7 +44,7 @@ const PutRequest = <T>(url: string, data = {}, params = {}) => {
 };
 
 const PatchRequest = <T>(url: string, data = {}) => {
-  return axios.patch<T>(url, data, {
+  return instance.patch<T>(url, data, {
     headers: {
       "Content-type": "application/json",
       Authorization: `Bearer ${
@@ -51,7 +55,7 @@ const PatchRequest = <T>(url: string, data = {}) => {
 };
 
 const DeleteRequest = <T>(url: string, params = {}) => {
-  return axios.delete<T>(url, {
+  return instance.delete<T>(url, {
     params: params,
     headers: {
       "Content-type": "application/json",
@@ -68,7 +72,7 @@ const MultipartFormPostRequest = <T>(
   params = {},
   config = {}
 ) => {
-  return axios.post<T>(url, data, {
+  return instance.post<T>(url, data, {
     params,
     headers: {
       "Content-type": "multipart/form-data",
@@ -88,7 +92,7 @@ export const OSSGetRequest = <T>(
   url: string,
   requestOptions: OSSRequestOptions
 ) => {
-  return axios.get<T>(url, {
+  return instance.get<T>(url, {
     headers: {
       "X-Amz-Date": requestOptions.amzDate,
       Authorization: requestOptions.authHeader,
@@ -102,13 +106,14 @@ export const OSSPutRequest = <T>(
   data: File,
   requestOptions: OSSRequestOptions
 ) => {
-  return axios.put<T>(url, data, {
+  return instance.put<T>(url, data, {
     headers: {
       "X-Amz-Date": requestOptions.amzDate,
       Authorization: requestOptions.authHeader,
     },
   });
 };
+
 export default {
   GetRequest,
   PostRequest,

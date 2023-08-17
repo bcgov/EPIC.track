@@ -16,14 +16,11 @@ from http import HTTPStatus
 
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
-
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services import TaskService
-from reports_api.utils import auth, constants, profiletime
-from reports_api.utils.caching import AppCache
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
-
 
 API = Namespace("tasks", description="Tasks")
 
@@ -37,7 +34,6 @@ class Events(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all task templates."""
         args = req.TaskEventQueryParamSchema().load(request.args)
@@ -73,4 +69,14 @@ class Event(Resource):
         """Create a new Task Event"""
         request_json = req.TaskEventBodyParamSchema().load(API.payload)
         task_response = TaskService.update_task_event(request_json, event_id)
-        return res.TaskEventResponseSchema().dump(task_response), HTTPStatus.CREATED
+        return res.TaskEventResponseSchema().dump(task_response), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(event_id):
+        """Gets the task event"""
+        req.TaskEventIdPathParameterSchema().load(request.view_args)
+        task_event = TaskService.find_task_event(event_id)
+        return res.TaskEventResponseSchema().dump(task_event), HTTPStatus.OK

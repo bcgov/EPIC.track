@@ -8,6 +8,7 @@ import {
   DialogContentText,
   DialogProps,
   IconButton,
+  SxProps,
 } from "@mui/material";
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
@@ -138,25 +139,5 @@ const TrackDialog: FC<TrackDialogProps> = ({
     </Dialog>
   );
 };
-
-// TrackDialog.propTypes = {
-//   onOk: PropTypes.func,
-//   onCancel: PropTypes.func,
-//   okButtonText: PropTypes.string,
-//   cancelButtonText: PropTypes.string,
-//   dialogTitle: PropTypes.string.isRequired,
-//   dialogContentText: PropTypes.string,
-//   isActionsRequried: PropTypes.bool,
-//   isOkRequired: PropTypes.bool,
-//   isCancelRequired: PropTypes.bool,
-// };
-
-// TrackDialog.defaultProps = {
-//   // okButtonText: "Ok",
-//   // cancelButtonText: "Cancel",
-//   isActionsRequired: false,
-//   isOkRequired: true,
-//   isCancelRequired: true,
-// };
 
 export default TrackDialog;

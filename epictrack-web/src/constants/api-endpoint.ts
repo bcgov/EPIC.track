@@ -22,6 +22,7 @@ const Endpoints = {
     WORKS: "works",
     WORK_RESOURCES: "works/resources",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
+    WORK_TEAM_MEMBERS: "works/:work_id/staff",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",
@@ -39,6 +40,9 @@ const Endpoints = {
   },
   Events: {
     MILESTONE_EVENTS: "events/milestones",
+  },
+  TaskEvents: {
+    EVENTS: "tasks/events",
   },
 };
 export default Endpoints;

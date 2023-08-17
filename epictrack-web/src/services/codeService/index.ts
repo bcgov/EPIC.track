@@ -1,6 +1,5 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
-import { AppConfig } from "../../config";
 
 export type Code =
   | "positions"
@@ -15,12 +14,11 @@ export type Code =
   | "phases"
   | "sub_types"
   | "federal_involvements"
+  | "responsibilities"
   | "substitution_acts";
 
 const getCodes = async (codeType: Code, apiUrl?: string) => {
-  return await http.GetRequest(
-    (AppConfig.apiUrl || apiUrl) + Endpoints.Codes.GET_CODES + `/${codeType}`
-  );
+  return await http.GetRequest(Endpoints.Codes.GET_CODES + `/${codeType}`);
 };
 
 const codeService = {

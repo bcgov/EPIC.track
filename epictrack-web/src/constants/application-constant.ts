@@ -29,3 +29,4 @@ export const PAGINATION_DEFAULT = {
   PAGE_SIZE: 10,
   PAGE_INDEX: 0,
 };
+export const COMMON_ERROR_MESSAGE = "Error during processing the request";

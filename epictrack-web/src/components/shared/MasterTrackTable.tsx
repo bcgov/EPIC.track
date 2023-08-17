@@ -114,7 +114,6 @@ const MasterTrackTable = <T extends Record<string, any>>({
         }}
         muiTableBodyCellProps={({ row }) => ({
           disabled: true,
-          disableRipple: true,
           sx: {
             padding: "0.5rem 0.5rem 0.5rem 1rem",
             "& .MuiCheckbox-root": {

@@ -2,27 +2,26 @@ import React, { useContext } from "react";
 import PhaseAccordion from "./PhaseAccordion";
 import { WorkPhaseSkeleton } from "../../../models/work";
 import workService from "../../../services/workService/workService";
-import { PhaseAccordionProps, PhaseContainerProps } from "./type";
 import { Box, Skeleton } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
 
-const PhaseContainer = ({ workId }: PhaseContainerProps) => {
+const PhaseContainer = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [phases, setPhases] = React.useState<WorkPhaseSkeleton[]>([]);
   const ctx = useContext(WorkplanContext);
 
   React.useEffect(() => {
     getWorkById();
-  }, [workId]);
+  }, [ctx.work?.id]);
 
   const getWorkById = React.useCallback(async () => {
-    if (workId) {
+    if (ctx.work?.id) {
       setLoading(true);
-      const work = await workService.getWorkPhases(String(workId));
+      const work = await workService.getWorkPhases(String(ctx.work?.id));
       setPhases(work.data as WorkPhaseSkeleton[]);
       setLoading(false);
     }
-  }, [workId]);
+  }, [ctx.work?.id]);
   return (
     <>
       {loading ? (
@@ -36,7 +35,6 @@ const PhaseContainer = ({ workId }: PhaseContainerProps) => {
           <PhaseAccordion
             key={`phase-accordion-${index}`}
             phase={phase}
-            workId={workId}
           ></PhaseAccordion>
         ))
       )}

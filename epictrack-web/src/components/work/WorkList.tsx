@@ -68,8 +68,13 @@ const WorkList = () => {
       {
         accessorKey: "title",
         header: "Name",
+        size: 300,
         Cell: ({ row }) => (
-          <ETGridTitle to={`/work-plan?work_id=${row.original.id}`}>
+          <ETGridTitle
+            bold
+            titleText={row.original.title}
+            to={`/work-plan?work_id=${row.original.id}`}
+          >
             {row.original.title}
           </ETGridTitle>
         ),
