@@ -4,6 +4,8 @@ import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog from "./TrackDialog";
 import { Backdrop, CircularProgress } from "@mui/material";
 import { showNotification } from "./notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "../../constants/application-constant";
+import { getAxiosError } from "../../utils/axiosUtils";
 
 interface MasterContextProps {
   backdrop: boolean;
@@ -145,11 +147,18 @@ export const MasterProvider = ({
             callback();
           }
         }
+        setShowModalForm(false);
         getData();
       } catch (e) {
-        showNotification("Error during processing. Please try again later", {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
           type: "error",
         });
+        setBackdrop(false);
       }
     },
     [id, service, title]

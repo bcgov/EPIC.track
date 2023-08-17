@@ -54,7 +54,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               isSearchable={true}
               isClearable={true}
               value={options.filter((c) => {
-                if (isMulti) {
+                if (isMulti && value) {
                   return (value as any[])
                     .map((p) => p.toString())
                     .includes(getOptionValue(c));

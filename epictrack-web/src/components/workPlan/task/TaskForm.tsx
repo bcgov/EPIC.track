@@ -4,17 +4,14 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import Moment from "moment";
 import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
 import { Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
-import {
-  EVENT_STATUS,
-  TaskEvent,
-  statusOptions,
-} from "../../../models/task_event";
+import { TaskEvent, statusOptions } from "../../../models/task_event";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
@@ -23,7 +20,6 @@ import { WorkplanContext } from "../WorkPlanContext";
 import workService from "../../../services/workService/workService";
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
-import { AxiosError } from "axios";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { ListType } from "../../../models/code";
 import codeService from "../../../services/codeService";
@@ -31,6 +27,8 @@ import RichTextEditor from "../../shared/richTextEditor";
 import { dateUtils } from "../../../utils";
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
+  start_date: yup.string().required("Please select start date"),
+  status: yup.string().required("Please select status"),
 });
 
 interface TaskFormProps {
@@ -66,7 +64,9 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
   }, []);
 
   React.useEffect(() => {
-    getTaskEvent();
+    if (eventId) {
+      getTaskEvent();
+    }
   }, [eventId]);
 
   React.useEffect(() => {
@@ -122,6 +122,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
     try {
       data.work_id = Number(ctx.work?.id);
       data.phase_id = Number(ctx.selectedPhaseId);
+      data.start_date = Moment(data.start_date).format();
       data.number_of_days =
         data.number_of_days.toString() === "" ? 0 : data.number_of_days;
       data.notes = notes;
@@ -211,7 +212,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
               <Controller
                 name="start_date"
                 control={control}
-                defaultValue={taskEvent?.start_date}
+                defaultValue={Moment(taskEvent?.start_date).format()}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },

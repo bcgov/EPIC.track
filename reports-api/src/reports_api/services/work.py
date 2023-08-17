@@ -19,7 +19,7 @@ import pandas as pd
 from sqlalchemy import exc
 from sqlalchemy.orm import aliased
 
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
     CalendarEvent, EAOTeam, Event, EventConfiguration, Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent,
     WorkPhase, db)
@@ -27,7 +27,6 @@ from reports_api.models.event_category import EventCategoryEnum
 from reports_api.schemas.response import EventTemplateResponseSchema
 from reports_api.schemas.work_plan import WorkPlanSchema
 from reports_api.services.event import EventService
-from reports_api.services.event_configuration import EventConfigurationService
 from reports_api.services.event_template import EventTemplateService
 from reports_api.services.phaseservice import PhaseService
 from reports_api.services.task import TaskService
@@ -103,11 +102,14 @@ class WorkService:
             phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
                 work.ea_act_id, work.work_type_id
             )
+            if not phases:
+                raise UnprocessableEntityError("No configuration found")
             phase_ids = list(map(lambda x: x.id, phases))
             event_templates = EventTemplateService.find_by_phase_ids(phase_ids)
             event_template_json = EventTemplateResponseSchema(many=True).dump(
                 event_templates
             )
+            event_configurations = []
             for parent_config in list(
                 filter(lambda x: not x["parent_id"], event_template_json)
             ):
@@ -116,6 +118,7 @@ class WorkService:
                     **cls._prepare_configuration(parent_config)
                 )
                 p_result.flush()
+                event_configurations.append(p_result)
                 for child in list(
                     filter(
                         lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] == _parent_config_id,
@@ -124,10 +127,10 @@ class WorkService:
                 ):
                     child["work_id"] = work.id
                     child["parent_id"] = p_result.id
-                    EventConfiguration.flush(
-                        EventConfiguration(**cls._prepare_configuration(child))
+                    c_result = EventConfiguration.flush(
+                                EventConfiguration(**cls._prepare_configuration(child))
                     )
-
+                    event_configurations.append(c_result)
             work.current_phase_id = phases[0].id
             phase_start_date = work.start_date
             for phase in phases:
@@ -142,11 +145,9 @@ class WorkService:
                         }
                     )
                 )
-                event_configs = EventConfigurationService.find_mandatory_configurations(
-                    phase.id
-                )
                 parent_event_configs = list(
-                    filter(lambda x: not x.parent_id, event_configs)
+                    filter(lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and
+                           x.phase_id == _phase_id, event_configurations)
                 )
                 for p_event_conf in parent_event_configs:
                     p_event_start_date = phase_start_date + timedelta(
@@ -164,8 +165,9 @@ class WorkService:
                     )
                     c_events = list(
                         filter(
-                            lambda x, _parent_id=p_event_conf.id: x.parent_id == _parent_id,
-                            event_configs,
+                            lambda x, _parent_id=p_event_conf.id, _phase_id=phase.id: x.parent_id == _parent_id and
+                            x.mandatory and x.phase_id == _phase_id,
+                            event_configurations,
                         )
                     )
                     for c_event_conf in c_events:
