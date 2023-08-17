@@ -305,6 +305,10 @@ const EventGrid = () => {
     setEventId(row.id);
     setShowTaskForm(row.type === EVENT_TYPE.TASK);
   };
+  const onCancelHandler = () => {
+    setShowTaskForm(false);
+    setEventId(undefined);
+  };
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
@@ -372,7 +376,7 @@ const EventGrid = () => {
         okButtonText="Save"
         cancelButtonText="Cancel"
         isActionsRequired
-        onCancel={() => setShowTaskForm(false)}
+        onCancel={() => onCancelHandler()}
         formId="task-form"
         sx={{
           "& .MuiDialogContent-root": {
