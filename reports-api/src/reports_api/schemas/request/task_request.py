@@ -144,17 +144,13 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
 
     responsibility_id = fields.Int(
         metadata={"description": "Id of the responsible entity"},
-        validate=validate.Range(min=1),
-        required=True,
+        allow_none=True,
+        validate=validate.Range(min=1)
     )
 
-    anticipated_date = fields.DateTime(
+    start_date = fields.DateTime(
         metadata={"description": "Start date for the work"},
         required=True
-    )
-
-    actual_date = fields.DateTime(
-        metadata={"description": "Start date for the work"},
     )
 
     number_of_days = fields.Int(
@@ -162,7 +158,8 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
     )
 
     tips = fields.Str(
-        metadata={"description": "Tips for the task"}
+        metadata={"description": "Tips for the task"},
+        allow_none=True,
     )
 
     notes = fields.Str(
@@ -177,4 +174,14 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         metadata={"description": "Status of the task"},
         required=True,
         validate=validate.OneOf([v.value for v in StatusEnum])
+    )
+
+
+class TaskEventIdPathParameterSchema(RequestPathParameterSchema):
+    """Staff id path parameter schema"""
+
+    event_id = fields.Int(
+        metadata={"description": "The id of the task event"},
+        validate=validate.Range(min=1),
+        required=True,
     )

@@ -3,6 +3,7 @@ from marshmallow import EXCLUDE, fields
 
 from reports_api.models import Task, TaskTemplate
 from reports_api.models.task_event import TaskEvent
+from reports_api.models.task_event_assignee import TaskEventAssignee
 from reports_api.schemas.base import AutoSchemaBase
 
 from .ea_act_response import EAActResponseSchema
@@ -44,12 +45,26 @@ class TaskTemplateResponseSchema(
     )
 
 
+class TaskEventAssigneeResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """TaskEventAssignee response schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = TaskEventAssignee
+        include_fk = True
+        unknown = EXCLUDE
+
+
 class TaskEventResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """TaskEvent model schema class"""
 
     status = fields.Method("get_status_value")
+    assignees = fields.Nested(TaskEventAssigneeResponseSchema(), many=True, dump_only=True)
 
     def get_status_value(self, obj):
         """Get status value"""

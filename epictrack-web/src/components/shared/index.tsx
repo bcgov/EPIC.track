@@ -24,7 +24,7 @@ interface HeaderProps {
   sx?: SxProps;
   color?: string;
   bold?: boolean;
-  title?: string;
+  titleText?: string;
   children?: React.ReactNode | string;
   [prop: string]: unknown;
 }
@@ -165,7 +165,7 @@ export const ETParagraph = ({
   ...rest
 }: HeaderProps) => {
   return (
-    <Tooltip title={rest.title}>
+    <Tooltip title={rest.titleText}>
       <Typography
         color={color}
         sx={{
@@ -247,7 +247,7 @@ export const ETGridTitle = ({
 }: LinkHeaderProps) => {
   return (
     <ETLink to={rest.to} onClick={rest.onClick}>
-      <ETParagraph bold {...rest} color={Palette.primary.accent.main}>
+      <ETParagraph bold={bold} {...rest} color={Palette.primary.accent.main}>
         {children}
       </ETParagraph>
     </ETLink>

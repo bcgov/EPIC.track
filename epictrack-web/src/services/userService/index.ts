@@ -92,13 +92,11 @@ const doLogin = () => KeycloakData.login;
 
 // User management service methods
 const getUsers = async () => {
-  return await http.GetRequest(AppConfig.apiUrl + Endpoints.Users.USERS);
+  return await http.GetRequest(Endpoints.Users.USERS);
 };
 
 const getGroups = async () => {
-  return await http.GetRequest(
-    AppConfig.apiUrl + Endpoints.Users.GET_USER_GROUPS
-  );
+  return await http.GetRequest(Endpoints.Users.GET_USER_GROUPS);
 };
 
 const updateUserGroup = async (
@@ -106,8 +104,7 @@ const updateUserGroup = async (
   updateUserGroup: UserGroupUpdate
 ) => {
   return await http.PutRequest(
-    AppConfig.apiUrl +
-      Endpoints.Users.UPDATE_USER_GROUPS.replace(":userId", userId),
+    Endpoints.Users.UPDATE_USER_GROUPS.replace(":userId", userId),
     JSON.stringify(updateUserGroup)
   );
 };

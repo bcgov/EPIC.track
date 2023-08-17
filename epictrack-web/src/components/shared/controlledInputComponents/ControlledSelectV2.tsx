@@ -6,7 +6,7 @@ import Select, { CSSObjectWithLabel, Props, ThemeConfig } from "react-select";
 type IFormInputProps = {
   name: string;
   options: Array<any>;
-  defaultValue?: string | number | undefined;
+  defaultValue?: string | number | undefined | number[];
   isMulti?: boolean;
   getOptionLabel: (option: any) => string;
   getOptionValue: (option: any) => string;
@@ -53,14 +53,18 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               getOptionLabel={getOptionLabel}
               isSearchable={true}
               isClearable={true}
-              value={options.find(
-                (c) => getOptionValue(c) === value?.toString()
-              )}
+              value={options.filter((c) => {
+                if (isMulti) {
+                  return (value as any[])
+                    .map((p) => p.toString())
+                    .includes(getOptionValue(c));
+                }
+                return getOptionValue(c) === value?.toString();
+              })}
               isMulti={isMulti}
               onChange={(val: any) => {
                 let v;
-                if (isMulti)
-                  v = val.map((v: any) => getOptionValue(v)).join(",");
+                if (isMulti) v = val.map((v: any) => getOptionValue(v));
                 else v = getOptionValue(val);
                 return onChange(v);
               }}

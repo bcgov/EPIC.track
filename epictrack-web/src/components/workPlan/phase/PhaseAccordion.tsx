@@ -56,7 +56,7 @@ const SummaryItem = (props: SummaryItemProps) => {
   );
 };
 
-const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
+const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
   const isCurrentPhase = React.useMemo<boolean>(
@@ -152,7 +152,7 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
             </Grid>
           </ETAccordionSummary>
           <ETAccordionDetails expanded={expanded}>
-            <EventGrid workId={workId}></EventGrid>
+            <EventGrid />
           </ETAccordionDetails>
         </ETAccordion>
       </Box>

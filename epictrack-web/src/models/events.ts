@@ -1,8 +1,8 @@
 import { EVENT_TYPE } from "../components/workPlan/phase/type";
+import { EVENT_STATUS } from "./task_event";
 
 export interface EventsGridModel {
-  actual_date: string;
-  anticipated_date: string;
+  start_date: string;
   event_configuration_id: number;
   id: number;
   is_active: boolean;
@@ -17,5 +17,5 @@ export interface EventsGridModel {
   assigned: string;
   responsibility: string;
   notes: string;
-  progress: string;
+  status: EVENT_STATUS;
 }

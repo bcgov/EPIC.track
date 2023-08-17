@@ -71,7 +71,7 @@ const WorkPlanContainer = () => {
             </Box>
           </ETPageContainer>
           <TabPanel index={0} value={selectedTabIndex}>
-            <PhaseContainer workId={Number(ctx.work?.id)} />
+            <PhaseContainer />
           </TabPanel>
         </>
       )}
