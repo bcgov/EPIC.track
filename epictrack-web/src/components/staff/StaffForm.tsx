@@ -3,7 +3,7 @@ import { TextField, Grid, FormHelperText } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { TrackLabel } from "../shared/index";
+import { ETFormLabel } from "../shared/index";
 import codeService from "../../services/codeService";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Staff } from "../../models/staff";
@@ -98,7 +98,7 @@ export default function StaffForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={6}>
-            <TrackLabel>First Name</TrackLabel>
+            <ETFormLabel>First Name</ETFormLabel>
             <TextField
               fullWidth
               error={!!errors?.first_name?.message}
@@ -107,7 +107,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Last Name</TrackLabel>
+            <ETFormLabel>Last Name</ETFormLabel>
             <TextField
               fullWidth
               {...register("last_name")}
@@ -116,7 +116,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Email</TrackLabel>
+            <ETFormLabel>Email</ETFormLabel>
             <TextField
               fullWidth
               {...register("email")}
@@ -125,7 +125,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Phone</TrackLabel>
+            <ETFormLabel>Phone</ETFormLabel>
             <TextField
               fullWidth
               {...register("phone")}
@@ -134,7 +134,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <TrackLabel>Position</TrackLabel>
+            <ETFormLabel>Position</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.position_id?.message?.toString()}
               getOptionValue={(o: ListType) => o.id.toString()}
@@ -149,28 +149,8 @@ export default function StaffForm({ ...props }) {
               defaultChecked={(ctx.item as Staff)?.is_active}
               {...register("is_active")}
             />
-            <TrackLabel id="active">Active</TrackLabel>
+            <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
-
-          {/* TODO: Keeping for reference. Delete after new modal is merged and working in test. */}
-          {/* <Grid
-            item
-            xs={12}
-            sx={{ display: "flex", gap: "0.5rem", justifyContent: "right" }}
-          >
-            <Button
-              variant="outlined"
-              type="reset"
-              onClick={(event) => {
-                ctx.onDialogClose(event, "");
-              }}
-            >
-              Cancel
-            </Button>
-            <Button variant="outlined" type="submit">
-              Submit
-            </Button>
-          </Grid> */}
         </Grid>
       </FormProvider>
     </>

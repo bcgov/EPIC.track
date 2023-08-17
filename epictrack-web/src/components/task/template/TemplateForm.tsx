@@ -15,13 +15,13 @@ import codeService from "../../../services/codeService";
 import phaseService from "../../../services/phaseService";
 import { Code } from "../../../services/codeService";
 import { Template } from "../../../models/template";
-import { TrackLabel } from "../../shared";
+import { ETFormLabel } from "../../shared";
 import { ListType } from "../../../models/code";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import TaskService from "../../../services/taskService";
 import TrackDialog from "../../shared/TrackDialog";
 
-export default function CreateTemplateForm({ ...props }) {
+export default function TemplateForm({ ...props }) {
   // const [template, setTemplate] = React.useState<Template>();
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
@@ -84,15 +84,6 @@ export default function CreateTemplateForm({ ...props }) {
     );
     if (phaseResult.status === 200) {
       setPhases(phaseResult.data as ListType[]);
-      // if (
-      //   formValues.work_type_id !== template?.work_type_id ||
-      //   formValues.ea_act_id !== template?.ea_act_id
-      // ) {
-      //   reset({
-      //     ...formValues,
-      //     phase_id: undefined,
-      //   });
-      // }
     }
   };
 
@@ -139,7 +130,7 @@ export default function CreateTemplateForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={12}>
-            <TrackLabel>Template Name</TrackLabel>
+            <ETFormLabel>Template Name</ETFormLabel>
             <TextField
               inputProps={{ maxLength: 150 }}
               fullWidth
@@ -149,7 +140,7 @@ export default function CreateTemplateForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>EA Act</TrackLabel>
+            <ETFormLabel>EA Act</ETFormLabel>
             <ControlledSelectV2
               key={`eaact_select_${formValues.ea_act_id}`}
               helperText={errors?.ea_act_id?.message?.toString()}
@@ -160,7 +151,7 @@ export default function CreateTemplateForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Work Type</TrackLabel>
+            <ETFormLabel>Work Type</ETFormLabel>
             <ControlledSelectV2
               key={`worktype_select_${formValues.work_type_id}`}
               helperText={errors?.work_type_id?.message?.toString()}
@@ -171,7 +162,7 @@ export default function CreateTemplateForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel>Phase</TrackLabel>
+            <ETFormLabel>Phase</ETFormLabel>
             <ControlledSelectV2
               key={`phase_select_${formValues.phase_id}`}
               helperText={errors?.phase_id?.message?.toString()}
@@ -182,7 +173,9 @@ export default function CreateTemplateForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <TrackLabel style={{ display: "block" }}>Template File</TrackLabel>
+            <ETFormLabel style={{ display: "block" }}>
+              Template File
+            </ETFormLabel>
             <Button
               variant="outlined"
               component="label"

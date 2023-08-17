@@ -1,4 +1,4 @@
-export const DATE_FORMAT = "YYYY-MM-DD";
+export const DATE_FORMAT = "MM-DD-YYYY";
 export const DISPLAY_DATE_FORMAT = "DD MMM YYYY";
 export const REPORT_TYPES = [
   {

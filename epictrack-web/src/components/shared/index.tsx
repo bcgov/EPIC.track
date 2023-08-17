@@ -1,6 +1,15 @@
 import React from "react";
 
-import { Typography, FormLabel, Grid, SxProps, Tooltip } from "@mui/material";
+import {
+  Typography,
+  FormLabel,
+  Grid,
+  SxProps,
+  Tooltip,
+  FormLabelTypeMap,
+  FormLabelOwnProps,
+  FormLabelBaseProps,
+} from "@mui/material";
 import {
   MET_Header_Font_Family,
   MET_Header_Font_Weight_Bold,
@@ -272,10 +281,24 @@ export const ETCaption3 = ({
   );
 };
 
-export const TrackLabel = styled(FormLabel)(() => ({
-  fontSize: "16px",
-  fontWeight: "bold",
-}));
+export const ETFormLabel = (props: FormLabelBaseProps & FormLabelOwnProps) => {
+  return (
+    <FormLabel
+      required={props.required}
+      sx={{
+        fontSize: "16px",
+        fontWeight: "bold",
+        lineHeight: "1.5rem",
+        color: Palette.neutral.dark,
+        "& .MuiFormLabel-asterisk": {
+          color: Palette.error.main,
+        },
+      }}
+    >
+      {props.children}
+    </FormLabel>
+  );
+};
 
 export const ETLink = (props: LinkProps) => (
   <Link

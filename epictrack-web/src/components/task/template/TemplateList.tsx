@@ -6,7 +6,7 @@ import {
 } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import { RESULT_STATUS } from "../../../constants/application-constant";
-import TemplateForm from "./CreateTemplateForm";
+import TemplateForm from "./TemplateForm";
 import { Template } from "../../../models/template";
 import TaskService from "../../../services/taskService";
 import MasterTrackTable from "../../shared/MasterTrackTable";

@@ -1,11 +1,15 @@
 import React, { useContext } from "react";
-import { PhaseContainerProps } from "./type";
+import { EVENT_TYPE, PhaseContainerProps } from "./type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
 import { EventsGridModel } from "../../../models/events";
 import { WorkplanContext } from "../WorkPlanContext";
-import { MRT_ColumnDef, MRT_RowSelectionState } from "material-react-table";
+import {
+  MRT_ColumnDef,
+  MRT_Row,
+  MRT_RowSelectionState,
+} from "material-react-table";
 import { ETGridTitle, ETParagraph } from "../../shared";
 import { dateUtils } from "../../../utils";
 import { Button, Grid, IconButton, Tooltip } from "@mui/material";
@@ -14,6 +18,8 @@ import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
 import workService from "../../../services/workService/workService";
 import { makeStyles } from "@mui/styles";
+import TrackDialog from "../../shared/TrackDialog";
+import TaskForm from "../task/TaskForm";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -38,6 +44,9 @@ const IButton = styled(IconButton)({
 const EventGrid = ({ workId }: PhaseContainerProps) => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
+  const [showMilestoneForm, setShowMilestoneForm] =
+    React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
     {}
@@ -55,7 +64,7 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
       if (result.status === 200) {
         const data: EventsGridModel[] = (result.data as EventsGridModel[]).map(
           (element) => {
-            element.type = "Milestone";
+            element.type = EVENT_TYPE.MILESTONE;
             element.progress = "Not Started";
             return element;
           }
@@ -168,12 +177,16 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
     ],
     [events]
   );
-
+  const onRowClick = (row: EventsGridModel) => {
+    setShowTaskForm(row.type === EVENT_TYPE.TASK);
+  };
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
         <Grid item xs="auto">
-          <Button variant="contained">Add Task</Button>
+          <Button variant="contained" onClick={() => setShowTaskForm(true)}>
+            Add Task
+          </Button>
         </Grid>
         <Grid item xs="auto">
           <Button variant="outlined">Add Milestone</Button>
@@ -224,6 +237,23 @@ const EventGrid = ({ workId }: PhaseContainerProps) => {
           }}
         />
       </Grid>
+      <TrackDialog
+        open={showTaskForm}
+        dialogTitle="Add Task"
+        //onClose={(event, reason) => onDialogClose(event, reason)}
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="md"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        //onCancel={() => onDialogClose()}
+        formId="formId"
+        // onOk={() => deleteItem(id)}
+      >
+        {/* <StaffForm /> */}
+        <TaskForm />
+      </TrackDialog>
     </Grid>
   );
 };

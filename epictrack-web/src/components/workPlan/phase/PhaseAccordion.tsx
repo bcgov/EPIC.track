@@ -5,13 +5,56 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ETAccordion from "../../shared/accordion/Accordion";
 import { PhaseAccordionProps } from "./type";
 import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
-import { ETParagraph } from "../../shared";
+import { ETCaption1, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import PhaseSummaryItem from "./PhaseSummaryItem";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
 import EventGrid from "./EventGrid";
 import { WorkplanContext } from "../WorkPlanContext";
 import BorderLinearProgress from "../../shared/progress/Progress";
+import { makeStyles } from "@mui/styles";
+import { type } from "os";
+
+const useStyles = makeStyles({
+  summaryBox: {
+    display: "flex",
+    gap: "0.5rem",
+    flexDirection: "column",
+    minHeight: "48px",
+  },
+  title: {
+    textTransform: "uppercase",
+    color: `${Palette.neutral.main}`,
+  },
+  content: {
+    minHeight: "1.5rem",
+    color: `${Palette.neutral.dark}`,
+  },
+});
+
+interface SummaryItemProps {
+  isTitleBold?: boolean;
+  title: string;
+  content?: string;
+  children?: React.ReactNode;
+}
+const SummaryItem = (props: SummaryItemProps) => {
+  const clasess = useStyles();
+  return (
+    <Box className={clasess.summaryBox}>
+      <ETCaption1 className={clasess.title}>{props.title}</ETCaption1>
+      {props.children && props.children}
+      {props.content && (
+        <ETParagraph
+          className={clasess.content}
+          bold={props.isTitleBold}
+          sx={{ color: `${Palette.neutral.dark}` }}
+        >
+          {props.content}
+        </ETParagraph>
+      )}
+    </Box>
+  );
+};
 
 const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
@@ -20,6 +63,7 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
     () => phase.phase_id === ctx.selectedPhaseId,
     [ctx.selectedPhaseId]
   );
+  const clasess = useStyles();
   React.useEffect(
     () => setExpanded(phase.phase_id === ctx.selectedPhaseId),
     [phase, ctx.selectedPhaseId]
@@ -64,62 +108,46 @@ const PhaseAccordion = ({ phase, workId, ...rest }: PhaseAccordionProps) => {
               }}
             >
               <Grid item xl={3}>
-                <PhaseSummaryItem sx={{ gridArea: "phase" }} label="phase">
-                  <ETParagraph
-                    bold={isCurrentPhase}
-                    sx={{ color: `${Palette.neutral.dark}` }}
-                  >
-                    {phase.phase}
-                  </ETParagraph>
-                </PhaseSummaryItem>
+                <SummaryItem
+                  title="Phase"
+                  content={phase.phase}
+                  isTitleBold={isCurrentPhase}
+                />
               </Grid>
               <Grid item xs={2}>
-                <PhaseSummaryItem label="start date" sx={{ gridArea: "start" }}>
-                  <ETParagraph
-                    bold={isCurrentPhase}
-                    sx={{ color: `${Palette.neutral.dark}` }}
-                  >
-                    {Moment(phase.start_date).format("MMM. DD YYYY")}
-                  </ETParagraph>
-                </PhaseSummaryItem>
+                <SummaryItem
+                  title="Start date"
+                  content={Moment(phase.start_date).format("MMM. DD YYYY")}
+                  isTitleBold={isCurrentPhase}
+                />
               </Grid>
               <Grid item xs={1}>
-                <PhaseSummaryItem label="days left" sx={{ gridArea: "end" }}>
-                  <ETParagraph
-                    bold={isCurrentPhase}
-                    sx={{ color: `${Palette.neutral.dark}` }}
-                  >
-                    {Moment.duration(Moment(phase.end_date).diff(fromDate))
-                      .asDays()
-                      .toFixed(0)}
-                  </ETParagraph>
-                </PhaseSummaryItem>
+                <SummaryItem
+                  title="Days left"
+                  content={Moment.duration(
+                    Moment(phase.end_date).diff(fromDate)
+                  )
+                    .asDays()
+                    .toFixed(0)}
+                  isTitleBold={isCurrentPhase}
+                />
               </Grid>
               <Grid item xs={2}></Grid>
               <Grid item xs={2}>
-                <PhaseSummaryItem
-                  label="next milestone"
-                  sx={{ gridArea: "nextMilestone" }}
-                >
-                  <ETParagraph
-                    bold={isCurrentPhase}
-                    sx={{ color: `${Palette.neutral.dark}` }}
-                  >
-                    {phase.next_milestone}
-                  </ETParagraph>
-                </PhaseSummaryItem>
+                <SummaryItem
+                  title="Next milestone"
+                  content={phase.next_milestone}
+                  isTitleBold={isCurrentPhase}
+                />
               </Grid>
               <Grid item xs={2}>
-                <PhaseSummaryItem
-                  label="milestone progress"
-                  sx={{ gridArea: "completed" }}
-                >
+                <SummaryItem title="Milestone progress">
                   <BorderLinearProgress
                     variant="determinate"
                     value={50}
                     sx={{ marginTop: "10px" }}
                   />
-                </PhaseSummaryItem>
+                </SummaryItem>
               </Grid>
             </Grid>
           </ETAccordionSummary>
