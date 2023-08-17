@@ -174,7 +174,7 @@ export default function WorkForm({ ...props }) {
             <Controller
               name="start_date"
               control={control}
-              defaultValue={(ctx.item as Work)?.start_date}
+              defaultValue={dayjs((ctx.item as Work)?.start_date).toISOString()}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
