@@ -6,7 +6,11 @@ import Icons from "../../icons";
 import { EventsGridModel } from "../../../models/events";
 import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
-import { MRT_ColumnDef, MRT_RowSelectionState } from "material-react-table";
+import {
+  MRT_ColumnDef,
+  MRT_Row,
+  MRT_RowSelectionState,
+} from "material-react-table";
 import { ETGridTitle, ETParagraph } from "../../shared";
 import { dateUtils } from "../../../utils";
 import { Button, Grid, IconButton, Tooltip } from "@mui/material";
