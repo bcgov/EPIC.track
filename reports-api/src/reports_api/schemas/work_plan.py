@@ -22,15 +22,15 @@ class WorkPlanSchema(Schema):
 
     def get_start_date(self, instance):
         """Return event start date"""
-        from_date = instance.anticipated_date
-        if instance.actual_date:
+        from_date = instance.start_date if hasattr(instance, "start_date") else instance.anticipated_date
+        if hasattr(instance, "actual_date") and instance.actual_date:
             from_date = instance.actual_date
         return from_date
 
     def get_end_date(self, instance):
         """Return event end date"""
-        from_date = instance.anticipated_date
-        if instance.actual_date:
+        from_date = instance.start_date if hasattr(instance, "start_date") else instance.anticipated_date
+        if hasattr(instance, "actual_date") and instance.actual_date:
             from_date = instance.actual_date
         end_date = from_date + timedelta(days=instance.number_of_days)
         return end_date
@@ -57,9 +57,17 @@ class WorkPlanSchema(Schema):
 
     def get_progress(self, instance):
         """Return the event progress"""
-        if instance.actual_date is None:
+        status_dict = {
+            "NOT_STARTED": "Not Started",
+            "INPROGRESS": "In Progress",
+            "COMPLETED": "Completed"
+        }
+        if hasattr(instance, "actual_date") and instance.actual_date is None:
             return "Not Started"
-        return "Completed" if instance.is_completed else "In Progress"
+        if hasattr(instance, "actual_date") and instance.actual_date:
+            return "Completed"
+        elif hasattr(instance, "status"):
+            return status_dict.get(instance.status.value)
 
     def get_notes(self, instance):
         """Return notes"""

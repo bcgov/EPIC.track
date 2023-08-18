@@ -15,10 +15,6 @@ const WorkPlanContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
   const ctx = useContext(WorkplanContext);
 
-  React.useEffect(() => {
-    ctx.selectedPhaseId = ctx.work?.current_phase_id;
-  }, [ctx.work]);
-
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };

@@ -23,6 +23,7 @@ import TrackDialog from "../../shared/TrackDialog";
 import TaskForm from "../task/TaskForm";
 import { EVENT_STATUS, statusOptions } from "../../../models/task_event";
 import taskEventService from "../../../services/taskEventService/taskEventService";
+import { showNotification } from "../../shared/notificationProvider";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -56,17 +57,20 @@ const EventGrid = () => {
     {}
   );
   const classes = useStyle();
-  React.useEffect(() => setEvents([]), [ctx.selectedPhaseId]);
+  React.useEffect(() => setEvents([]), [ctx.selectedPhase?.phase_id]);
   React.useEffect(() => {
     getCombinedEvents();
-  }, [ctx.work?.id, ctx.selectedPhaseId]);
+  }, [ctx.work?.id, ctx.selectedPhase?.phase_id]);
 
   const getCombinedEvents = () => {
     let result: EventsGridModel[] = [];
     setLoading(true);
     Promise.all([
-      getMilestoneEvents(Number(ctx.work?.id), Number(ctx.selectedPhaseId)),
-      getTaskEvents(Number(ctx.work?.id), Number(ctx.selectedPhaseId)),
+      getMilestoneEvents(
+        Number(ctx.work?.id),
+        Number(ctx.selectedPhase?.phase_id)
+      ),
+      getTaskEvents(Number(ctx.work?.id), Number(ctx.selectedPhase?.phase_id)),
     ]).then((data: Array<EventsGridModel[]>) => {
       setLoading(false);
       data.forEach((array: EventsGridModel[]) => {
@@ -146,18 +150,22 @@ const EventGrid = () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
         Number(ctx.work?.id),
-        Number(ctx.selectedPhaseId)
+        Number(ctx.selectedPhase?.phase_id)
       );
       const url = window.URL.createObjectURL(
         new Blob([(binaryReponse as any).data])
       );
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `file.xlsx`);
+      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_${ctx.selectedPhase?.phase}`;
+      link.setAttribute("download", `${fileName}.xlsx`);
       document.body.appendChild(link);
       link.click();
+      showNotification("File downloading completed", {
+        type: "success",
+      });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedPhaseId]);
+  }, [ctx.work?.id, ctx.selectedPhase?.phase_id]);
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
     () => [
