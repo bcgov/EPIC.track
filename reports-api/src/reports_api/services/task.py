@@ -25,8 +25,8 @@ class TaskService:
     def create_task_event(cls, data: dict) -> TaskEvent:
         """Create task event"""
         task_event = TaskEvent(**cls._prepare_task_event_object(data))
-        if cls._get_task_count(task_event.work_id, task_event.phase_id) > 0:
-            raise UnprocessableEntityError("Maxium task count per phase has reached")
+        # if cls._get_task_count(task_event.work_id, task_event.phase_id) > 0:
+        #     raise UnprocessableEntityError("Maxium task count per phase has reached")
         if data.get("assignee_ids") and not cls._validate_assignees(data.get("assignee_ids"), data):
             raise UnprocessableEntityError("Only team members can be assigned to a task")
         task_event = task_event.flush()
