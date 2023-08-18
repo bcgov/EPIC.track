@@ -1,11 +1,11 @@
 import React, { Dispatch, SetStateAction, createContext } from "react";
 import { useSearchParams } from "../../hooks/SearchParams";
 import workService from "../../services/workService/workService";
-import { Work } from "../../models/work";
+import { Work, WorkPhaseSkeleton } from "../../models/work";
 
 interface WorkplanContextProps {
-  selectedPhaseId?: number;
-  setSelectedPhaseId: Dispatch<SetStateAction<number | undefined>>;
+  selectedPhase?: WorkPhaseSkeleton;
+  setSelectedPhase: Dispatch<SetStateAction<WorkPhaseSkeleton | undefined>>;
   loading: boolean;
   work: Work | undefined;
 }
@@ -13,8 +13,8 @@ interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
 export const WorkplanContext = createContext<WorkplanContextProps>({
-  selectedPhaseId: undefined,
-  setSelectedPhaseId: () => ({}),
+  selectedPhase: undefined,
+  setSelectedPhase: () => ({}),
   loading: true,
   work: undefined,
 });
@@ -24,8 +24,8 @@ export const WorkplanProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [selectedPhaseId, setSelectedPhaseId] = React.useState<
-    number | undefined
+  const [selectedPhase, setSelectedPhase] = React.useState<
+    WorkPhaseSkeleton | undefined
   >();
   const [work, setWork] = React.useState<Work>();
   const [loading, setLoading] = React.useState<boolean>(true);
@@ -44,8 +44,8 @@ export const WorkplanProvider = ({
   return (
     <WorkplanContext.Provider
       value={{
-        selectedPhaseId,
-        setSelectedPhaseId,
+        selectedPhase,
+        setSelectedPhase,
         loading,
         work,
       }}
