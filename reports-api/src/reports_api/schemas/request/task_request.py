@@ -185,3 +185,19 @@ class TaskEventIdPathParameterSchema(RequestPathParameterSchema):
         validate=validate.Range(min=1),
         required=True,
     )
+
+
+class TaskTemplateImportEventsBodyParamSchema(RequestBodyParameterSchema):
+    """Task template import events schema"""
+
+    work_id = fields.Int(
+        metadata={"description": "Id of work"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    phase_id = fields.Int(
+        metadata={"description": "Id of the phase"},
+        validate=validate.Range(min=1),
+        required=True,
+    )

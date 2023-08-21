@@ -193,10 +193,7 @@ const EventGrid = () => {
         size: 100,
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            title={cell.getValue<string>()}
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -241,10 +238,7 @@ const EventGrid = () => {
         size: 100,
         header: "Days",
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            title={cell.getValue<string>()}
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -255,10 +249,7 @@ const EventGrid = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            title={cell.getValue<string>()}
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -269,10 +260,7 @@ const EventGrid = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            title={cell.getValue<string>()}
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -283,10 +271,7 @@ const EventGrid = () => {
         header: "Notes",
         size: 250,
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            title={cell.getValue<string>()}
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -359,14 +344,6 @@ const EventGrid = () => {
           columns={columns}
           data={events}
           enableTopToolbar={false}
-          initialState={{
-            sorting: [
-              {
-                id: "full_name",
-                desc: false,
-              },
-            ],
-          }}
           state={{
             // rowSelection,
             isLoading: loading,

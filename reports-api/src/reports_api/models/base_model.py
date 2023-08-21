@@ -73,7 +73,8 @@ class BaseModel(db.Model):
     def update(self, payload: dict, commit=True):
         """Update and commit."""
         for key, value in payload.items():
-            setattr(self, key, value)
+            if key != "id":
+                setattr(self, key, value)
         if commit:
             self.commit()
         return self

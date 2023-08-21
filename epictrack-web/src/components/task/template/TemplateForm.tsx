@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  TextField,
-  Grid,
-  Button,
-  FormHelperText,
-  Backdrop,
-  CircularProgress,
-} from "@mui/material";
+import { TextField, Grid, Button, FormHelperText } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -20,6 +13,9 @@ import { ListType } from "../../../models/code";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import TaskService from "../../../services/taskService";
 import TrackDialog from "../../shared/TrackDialog";
+import { showNotification } from "../../shared/notificationProvider";
+import { getAxiosError } from "../../../utils/axiosUtils";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 
 export default function TemplateForm({ ...props }) {
   // const [template, setTemplate] = React.useState<Template>();
@@ -27,8 +23,8 @@ export default function TemplateForm({ ...props }) {
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
   const [phases, setPhases] = React.useState<ListType[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-  const [alertContentText, setAlertContentText] = React.useState<string>();
+  // const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
+  // const [alertContentText, setAlertContentText] = React.useState<string>();
   const templateId = props.templateId;
   const schema = yup.object<Template>().shape({
     ea_act_id: yup.number().required("EA Act is required"),
@@ -68,14 +64,6 @@ export default function TemplateForm({ ...props }) {
       codeTypes[code]((codeResult.data as never)["codes"]);
     }
   };
-  const getTemplates = async (id: number) => {
-    // const result = await TemplateService.getTemplates(id);
-    // if (result.status === 200) {
-    //   const template = (result.data as any)["template"];
-    //   setTemplate(template);
-    //   reset(template);
-    // }
-  };
 
   const getPhaseByWorkTypeEAact = async () => {
     const phaseResult = await phaseService.getPhaseByWorkTypeEAact(
@@ -93,11 +81,11 @@ export default function TemplateForm({ ...props }) {
     }
   }, [formValues.ea_act_id, formValues.work_type_id]);
 
-  React.useEffect(() => {
-    if (templateId) {
-      getTemplates(templateId);
-    }
-  }, [templateId]);
+  // React.useEffect(() => {
+  //   if (templateId) {
+  //     getTemplates(templateId);
+  //   }
+  // }, [templateId]);
 
   React.useEffect(() => {
     const promises: any[] = [];
@@ -108,16 +96,28 @@ export default function TemplateForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
-    setLoading(true);
-    data["template_file"] = data["template_file"][0];
-    const result = await TaskService.createTemplate(data);
-    if (result.status === 201) {
-      setAlertContentText("Template details inserted");
-      setOpenAlertDialog(true);
-      props.onSubmitSuccess();
-      setLoading(false);
+    try {
+      setLoading(true);
+      data["template_file"] = data["template_file"][0];
+      const result = await TaskService.createTemplate(data);
+      if (result.status === 201) {
+        showNotification("Template details inserted", {
+          type: "success",
+        });
+        props.onSubmitSuccess();
+        setLoading(false);
+      }
+      reset();
+    } catch (e) {
+      const error = getAxiosError(e);
+      const message =
+        error?.response?.status === 422
+          ? error.response.data?.toString()
+          : COMMON_ERROR_MESSAGE;
+      showNotification(message, {
+        type: "error",
+      });
     }
-    reset();
   };
   return (
     <>
@@ -204,7 +204,7 @@ export default function TemplateForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      <TrackDialog
+      {/* <TrackDialog
         open={openAlertDialog}
         dialogTitle={"Success"}
         dialogContentText={alertContentText}
@@ -221,7 +221,7 @@ export default function TemplateForm({ ...props }) {
         open={loading}
       >
         <CircularProgress color="inherit" />
-      </Backdrop>
+      </Backdrop>*/}
     </>
   );
 }

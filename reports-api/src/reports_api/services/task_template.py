@@ -19,7 +19,6 @@ from flask import current_app
 
 from reports_api.exceptions import ResourceNotFoundError
 from reports_api.models import Responsibility, Task, TaskTemplate
-from reports_api.models.task_event import TaskEvent
 from reports_api.schemas import request as req
 
 
@@ -116,8 +115,3 @@ class TaskTemplateService:
                 f"Task template with id '{template_id}' not found"
             )
         return template
-
-    @classmethod
-    def find_tasks_by_work_phase(cls, work_id: int, phase_id: int) -> List[Task]:
-        """Find all tasks for a given work id and phase id"""
-        return TaskEvent.find_by_work_phase(work_id, phase_id)

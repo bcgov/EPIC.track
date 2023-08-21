@@ -12,17 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Tasks"""
+from datetime import timedelta
+from reports_api.exceptions import UnprocessableEntityError
+from reports_api.models import StaffWorkRole, TaskEvent, TaskEventAssignee, StatusEnum, db
 from sqlalchemy import and_
 from sqlalchemy.orm import contains_eager
-from reports_api.models import TaskEvent, TaskEventAssignee, StaffWorkRole, db
-from reports_api.exceptions import UnprocessableEntityError
+
+from .task_template import TaskTemplateService
+from .work_phase import WorkPhaseService
 
 
 class TaskService:
     """Service to manage task related operations"""
 
     @classmethod
-    def create_task_event(cls, data: dict) -> TaskEvent:
+    def create_task_event(cls, data: dict, commit: bool = True) -> TaskEvent:
         """Create task event"""
         task_event = TaskEvent(**cls._prepare_task_event_object(data))
         # if cls._get_task_count(task_event.work_id, task_event.phase_id) > 0:
@@ -32,7 +36,8 @@ class TaskService:
         task_event = task_event.flush()
         if data.get("assignee_ids"):
             cls._handle_assignees(data.get("assignee_ids"), task_event)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return task_event
 
     @classmethod
@@ -63,6 +68,31 @@ class TaskService:
                                                TaskEventAssignee.is_active.is_(True)))\
             .filter(TaskEvent.id == event_id)\
             .options(contains_eager(TaskEvent.assignees)).scalar()
+
+    @classmethod
+    def create_task_events_from_template(cls, params: dict, template_id: int) -> [TaskEvent]:
+        """Create a list of task events from the given task template"""
+        work_phase = WorkPhaseService.find_by_work_nd_phase(params.get("work_id"), params.get("phase_id"))
+        if not work_phase:
+            raise UnprocessableEntityError("No data found for the given work and phase")
+        tasks = TaskTemplateService.find_tasks_by_template_id(template_id)
+        if not tasks or len(tasks) == 0:
+            raise UnprocessableEntityError("No tasks found to import")
+        result_events = []
+        for task in tasks:
+            task_event_dic = {
+                "name": task.name,
+                "work_id": params.get("work_id"),
+                "phase_id": params.get("phase_id"),
+                "responsibility_id": task.responsibility_id,
+                "start_date": work_phase.start_date + timedelta(days=task.start_at + task.number_of_days),
+                "tips": task.tips,
+                "status": StatusEnum.NOT_STARTED
+            }
+            result_events.append(cls.create_task_event(task_event_dic, commit=False))
+        work_phase.template_uploaded = True
+        db.session.commit()
+        return result_events
 
     @classmethod
     def _prepare_task_event_object(cls, data: dict) -> dict:
