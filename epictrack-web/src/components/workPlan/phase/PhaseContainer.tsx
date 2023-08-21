@@ -14,6 +14,13 @@ const PhaseContainer = () => {
     getWorkById();
   }, [ctx.work?.id]);
 
+  React.useEffect(() => {
+    const phase = phases.filter(
+      (p) => p.phase_id === ctx.work?.current_phase_id
+    )[0];
+    ctx.setSelectedPhase(phase);
+  });
+
   const getWorkById = React.useCallback(async () => {
     if (ctx.work?.id) {
       setLoading(true);

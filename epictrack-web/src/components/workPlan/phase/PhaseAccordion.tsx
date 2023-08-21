@@ -60,17 +60,17 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
   const isCurrentPhase = React.useMemo<boolean>(
-    () => phase.phase_id === ctx.selectedPhaseId,
-    [ctx.selectedPhaseId]
+    () => phase.phase_id === ctx.selectedPhase?.phase_id,
+    [ctx.selectedPhase?.phase_id]
   );
   const clasess = useStyles();
   React.useEffect(
-    () => setExpanded(phase.phase_id === ctx.selectedPhaseId),
-    [phase, ctx.selectedPhaseId]
+    () => setExpanded(phase.phase_id === ctx.selectedPhase?.phase_id),
+    [phase, ctx.selectedPhase?.phase_id]
   );
   React.useEffect(() => {
     if (expanded) {
-      ctx.setSelectedPhaseId(phase.phase_id);
+      ctx.setSelectedPhase(phase);
     }
   }, [expanded]);
   const fromDate = React.useMemo(
