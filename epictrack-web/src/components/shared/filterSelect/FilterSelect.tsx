@@ -42,7 +42,9 @@ const FilterSelect = (props: SelectProps) => {
     } else {
       if (isOptionSelected(option)) {
         setSelectedOptions(
-          selectedOptions.filter((o: string) => o !== option.value)
+          selectedOptions.filter(
+            (o: string) => o !== option.value && o !== selectAllOption.value
+          )
         );
       } else {
         let value = [...selectedOptions, newValue.at(-1).value];
@@ -72,7 +74,6 @@ const FilterSelect = (props: SelectProps) => {
   const onCancel = () => {
     const currentValues = selectRef.current?.getValue() as any[];
     setSelectedOptions(currentValues || []);
-    // header.column.setFilterValue([]);
     setMenuIsOpen(false);
     selectRef.current?.blur();
   };
@@ -92,7 +93,7 @@ const FilterSelect = (props: SelectProps) => {
 
   return (
     <Select
-      value={header.column.getFilterValue() ?? undefined}
+      value={header.column.getFilterValue() ?? []}
       placeholder="Filter"
       name={name}
       options={options}
@@ -124,6 +125,13 @@ const FilterSelect = (props: SelectProps) => {
           overflow: "hidden",
           textOverflow: "ellipsis",
           padding: ".5rem .75rem .5rem 0px",
+          fontWeight: "normal",
+          fontSize: "1rem",
+          background: props.isFocused ? Palette.neutral.bg.main : "transparent",
+          color: props.isSelected
+            ? Palette.primary.accent.main
+            : Palette.text.primary,
+          cursor: props.isFocused ? "pointer" : "default",
         }),
         control: (base, props) => ({
           ...base,
@@ -132,11 +140,15 @@ const FilterSelect = (props: SelectProps) => {
         }),
         menu: (base, props) => ({
           ...base,
-          top: "2.35rem",
-          marginTop: "4px",
+          position: "relative",
+        }),
+        placeholder: (base, props) => ({
+          ...base,
+          fontWeight: "normal",
         }),
       }}
       isClearable={false}
+      menuPortalTarget={document.body}
     />
   );
 };
