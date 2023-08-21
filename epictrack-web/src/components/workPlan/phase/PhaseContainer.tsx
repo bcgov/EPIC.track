@@ -19,7 +19,7 @@ const PhaseContainer = () => {
       (p) => p.phase_id === ctx.work?.current_phase_id
     )[0];
     ctx.setSelectedPhase(phase);
-  }, []);
+  }, [phases]);
 
   const getWorkById = React.useCallback(async () => {
     if (ctx.work?.id) {

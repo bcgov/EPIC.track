@@ -67,11 +67,11 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
     () => setExpanded(phase.phase_id === ctx.selectedPhase?.phase_id),
     [phase, ctx.selectedPhase]
   );
-  // React.useEffect(() => {
-  //   if (expanded) {
-  //     ctx.setSelectedPhase(phase);
-  //   }
-  // }, [expanded]);
+  React.useEffect(() => {
+    if (expanded) {
+      ctx.setSelectedPhase(phase);
+    }
+  }, [expanded]);
   const onExpandHandler = (expand: boolean) => {
     setExpanded(expand);
     ctx.setSelectedPhase(phase);
