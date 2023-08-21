@@ -12,7 +12,6 @@ import EventGrid from "./EventGrid";
 import { WorkplanContext } from "../WorkPlanContext";
 import BorderLinearProgress from "../../shared/progress/Progress";
 import { makeStyles } from "@mui/styles";
-import { type } from "os";
 
 const useStyles = makeStyles({
   summaryBox: {
@@ -67,11 +66,11 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
     () => setExpanded(phase.phase_id === ctx.selectedPhase?.phase_id),
     [phase, ctx.selectedPhase]
   );
-  React.useEffect(() => {
-    if (expanded) {
-      ctx.setSelectedPhase(phase);
-    }
-  }, [expanded]);
+  // React.useEffect(() => {
+  //   if (expanded) {
+  //     ctx.setSelectedPhase(phase);
+  //   }
+  // }, [expanded]);
   const onExpandHandler = (expand: boolean) => {
     setExpanded(expand);
     ctx.setSelectedPhase(phase);

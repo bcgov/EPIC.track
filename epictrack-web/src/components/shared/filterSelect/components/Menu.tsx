@@ -51,12 +51,21 @@ const Menu = (props: MenuProps) => {
               padding: "1rem",
               alignItems: "flex-start",
               gap: "1rem",
+              justifyContent: "space-between",
             }}
           >
-            <Button variant="outlined" onClick={filterProps?.onCancel}>
+            <Button
+              variant="outlined"
+              onClick={filterProps?.onCancel}
+              fullWidth
+            >
               Cancel
             </Button>
-            <Button variant="contained" onClick={filterProps?.applyFilters}>
+            <Button
+              variant="contained"
+              onClick={filterProps?.applyFilters}
+              fullWidth
+            >
               Apply
             </Button>
           </Box>
