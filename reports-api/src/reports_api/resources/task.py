@@ -80,3 +80,22 @@ class Event(Resource):
         req.TaskEventIdPathParameterSchema().load(request.view_args)
         task_event = TaskService.find_task_event(event_id)
         return res.TaskEventResponseSchema().dump(task_event), HTTPStatus.OK
+
+
+@cors_preflight("POST")
+@API.route("/templates/<int:template_id>/events", methods=["POST", "OPTIONS"])
+class TemplateEvents(Resource):
+    """Endpoint resource to return all task events for given work id and phase id"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(template_id: int):
+        """Return all task templates."""
+        request_json = req.TaskTemplateImportEventsBodyParamSchema().load(API.payload)
+        task_events = TaskService.create_task_events_from_template(request_json, template_id)
+        return (
+            jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
+            HTTPStatus.OK,
+        )

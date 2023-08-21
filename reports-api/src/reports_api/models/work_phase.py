@@ -31,21 +31,7 @@ class WorkPhase(BaseModelVersioned):
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
+    template_uploaded = Column(Boolean, default=False,)
 
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
-
-    def as_dict(self):  # pylint:disable=arguments-differ
-        """Return JSON Representation."""
-        return {
-            'id': self.id,
-            'start_date': str(self.start_date),
-            'end_date': str(self.end_date),
-            'work_id': self.work_id,
-            'phase': self.phase.as_dict()
-        }
-
-    @classmethod
-    def find_by_work_id(cls, work_id: int):
-        """Find by work id."""
-        return cls.query.filter_by(work_id=work_id).all()

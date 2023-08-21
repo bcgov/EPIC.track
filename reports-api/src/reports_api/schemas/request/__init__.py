@@ -27,7 +27,8 @@ from .staff_request import (
     StaffExistanceQueryParamSchema, StaffIdPathParameterSchema)
 from .task_request import (
     TaskBodyParameterSchema, TaskEventQueryParamSchema, TaskTemplateBodyParameterSchema,
-    TaskTemplateIdPathParameterSchema, TaskEventBodyParamSchema, TaskEventIdPathParameterSchema)
+    TaskTemplateIdPathParameterSchema, TaskEventBodyParamSchema, TaskEventIdPathParameterSchema,
+    TaskTemplateImportEventsBodyParamSchema)
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (

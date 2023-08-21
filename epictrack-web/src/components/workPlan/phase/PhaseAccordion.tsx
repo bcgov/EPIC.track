@@ -59,20 +59,23 @@ const SummaryItem = (props: SummaryItemProps) => {
 const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
-  const isCurrentPhase = React.useMemo<boolean>(
+  const isSelectedPhase = React.useMemo<boolean>(
     () => phase.phase_id === ctx.selectedPhase?.phase_id,
-    [ctx.selectedPhase?.phase_id]
+    [ctx.selectedPhase]
   );
-  const clasess = useStyles();
   React.useEffect(
     () => setExpanded(phase.phase_id === ctx.selectedPhase?.phase_id),
-    [phase, ctx.selectedPhase?.phase_id]
+    [phase, ctx.selectedPhase]
   );
-  React.useEffect(() => {
-    if (expanded) {
-      ctx.setSelectedPhase(phase);
-    }
-  }, [expanded]);
+  // React.useEffect(() => {
+  //   if (expanded) {
+  //     ctx.setSelectedPhase(phase);
+  //   }
+  // }, [expanded]);
+  const onExpandHandler = (expand: boolean) => {
+    setExpanded(expand);
+    ctx.setSelectedPhase(phase);
+  };
   const fromDate = React.useMemo(
     () =>
       Moment(phase.start_date).isSameOrAfter(Moment())
@@ -93,7 +96,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
       >
         <ETAccordion
           expanded={expanded}
-          onChange={(e, expanded) => setExpanded(expanded)}
+          onChange={(e, expanded) => onExpandHandler(expanded)}
         >
           <ETAccordionSummary
             expanded={expanded}
@@ -111,14 +114,14 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                 <SummaryItem
                   title="Phase"
                   content={phase.phase}
-                  isTitleBold={isCurrentPhase}
+                  isTitleBold={isSelectedPhase}
                 />
               </Grid>
               <Grid item xs={2}>
                 <SummaryItem
                   title="Start date"
                   content={Moment(phase.start_date).format("MMM. DD YYYY")}
-                  isTitleBold={isCurrentPhase}
+                  isTitleBold={isSelectedPhase}
                 />
               </Grid>
               <Grid item xs={1}>
@@ -129,7 +132,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                   )
                     .asDays()
                     .toFixed(0)}
-                  isTitleBold={isCurrentPhase}
+                  isTitleBold={isSelectedPhase}
                 />
               </Grid>
               <Grid item xs={2}></Grid>
@@ -137,7 +140,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                 <SummaryItem
                   title="Next milestone"
                   content={phase.next_milestone}
-                  isTitleBold={isCurrentPhase}
+                  isTitleBold={isSelectedPhase}
                 />
               </Grid>
               <Grid item xs={2}>
