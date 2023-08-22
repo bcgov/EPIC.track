@@ -2,11 +2,11 @@ import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Button, Grid } from "@mui/material";
 import { RESULT_STATUS } from "../../../constants/application-constant";
-import TaskService from "../../../services/taskService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { Task } from "../../../models/task";
 import TrackDialog from "../../shared/TrackDialog";
 import { Template } from "../../../models/template";
+import templateService from "../../../services/taskService/templateService";
 
 const TemplateTaskList = ({ ...props }) => {
   const [tasks, setTasks] = React.useState<Task[]>([]);
@@ -21,7 +21,7 @@ const TemplateTaskList = ({ ...props }) => {
       setResultStatus(RESULT_STATUS.LOADING);
       try {
         if (templateId === undefined) return;
-        const taskResult = await TaskService.getTemplateTasks(templateId);
+        const taskResult = await templateService.getTemplateTasks(templateId);
         if (taskResult.status === 200) {
           setTasks(taskResult.data as never);
         }
@@ -37,7 +37,7 @@ const TemplateTaskList = ({ ...props }) => {
     async (templateId: number | undefined) => {
       try {
         if (templateId === undefined) return;
-        const templateResult = await TaskService.getTemplate(templateId);
+        const templateResult = await templateService.getTemplate(templateId);
         if (templateResult.status === 200) {
           setTemplate(templateResult.data as never);
         }
@@ -77,7 +77,7 @@ const TemplateTaskList = ({ ...props }) => {
   );
 
   const handleApproval = async (event: any) => {
-    const result = await TaskService.patchTemplate(templateId, {
+    const result = await templateService.patchTemplate(templateId, {
       is_active: !template?.is_active,
     });
     if (result.status === 200) {

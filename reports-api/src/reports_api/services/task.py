@@ -75,7 +75,12 @@ class TaskService:
         work_phase = WorkPhaseService.find_by_work_nd_phase(params.get("work_id"), params.get("phase_id"))
         if not work_phase:
             raise UnprocessableEntityError("No data found for the given work and phase")
-        tasks = TaskTemplateService.find_tasks_by_template_id(template_id)
+        if work_phase.template_uploaded:
+            raise UnprocessableEntityError("Template can be uploaded only once for a phase")
+        template = TaskTemplateService.find_by_id(template_id)
+        if not template.is_active:
+            raise UnprocessableEntityError("In-Active templates cannot be processed")
+        tasks = template.tasks
         if not tasks or len(tasks) == 0:
             raise UnprocessableEntityError("No tasks found to import")
         result_events = []

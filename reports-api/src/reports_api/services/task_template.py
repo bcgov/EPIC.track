@@ -26,10 +26,10 @@ class TaskTemplateService:
     """Service to manage task template related operations"""
 
     @classmethod
-    def find_all_task_templates(cls) -> List[TaskTemplate]:
+    def find_all_task_templates(cls, params: dict) -> List[TaskTemplate]:
         """Find all task templates"""
         current_app.logger.debug("find all task templates")
-        task_templates = TaskTemplate.find_all(default_filters=False)
+        task_templates = TaskTemplate.find_by_params(params, default_filters=False)
         return task_templates
 
     @classmethod

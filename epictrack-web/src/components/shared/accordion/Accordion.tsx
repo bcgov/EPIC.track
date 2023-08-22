@@ -9,6 +9,7 @@ const ETAccordion = (props: MuiAccordionProps) => {
       expanded={props.expanded}
       onChange={props.onChange}
       sx={{
+        border: `1px solid ${Palette.primary.main}`,
         borderLeft: `${props.expanded ? "4px" : "1px"} solid ${
           Palette.primary.main
         }`,

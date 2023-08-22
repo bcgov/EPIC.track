@@ -8,12 +8,12 @@ import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import { RESULT_STATUS } from "../../../constants/application-constant";
 import TemplateForm from "./TemplateForm";
 import { Template } from "../../../models/template";
-import TaskService from "../../../services/taskService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import TrackDialog from "../../shared/TrackDialog";
 import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
+import templateService from "../../../services/taskService/templateService";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -31,10 +31,11 @@ const TemplateList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
 
   const titleSuffix = "Task Template Details";
-  const onDialogClose = (event: any, reason: any) => {
+  const onDialogClose = (event: any = undefined, reason: any = undefined) => {
     if (reason && reason == "backdropClick") return;
     setShowCreateDialog(false);
     setShowDetailsDialog(false);
+    setTemplateId(undefined);
   };
   const onViewDetails = (id: number) => {
     setTemplateId(id);
@@ -43,7 +44,7 @@ const TemplateList = () => {
   const getTemplates = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
-      const templateResult = await TaskService.getTemplates();
+      const templateResult = await templateService.getTemplates();
       if (templateResult.status === 200) {
         setTemplates(templateResult.data as never);
       }
@@ -79,7 +80,7 @@ const TemplateList = () => {
   };
 
   const deleteTemplate = async (templateId?: number) => {
-    const result = await TaskService.deleteTemplate(templateId);
+    const result = await templateService.deleteTemplate(templateId);
     if (result.status === 200) {
       setDeleteTemplateId(undefined);
       setShowDeleteDialog(false);
@@ -200,13 +201,10 @@ const TemplateList = () => {
         formId="template-form"
         okButtonText="Save"
         cancelButtonText="Cancel"
+        onCancel={() => onDialogClose()}
         isActionsRequired
       >
-        <TemplateForm
-          onCancel={onDialogClose}
-          templateId={templateId}
-          onSubmitSuccess={getTemplates}
-        />
+        <TemplateForm templateId={templateId} onSubmitSuccess={onDialogClose} />
       </TrackDialog>
       <TrackDialog
         open={showDetailsDialog}

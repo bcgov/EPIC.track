@@ -37,10 +37,10 @@ class Templates(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    # @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all task templates."""
-        task_templates = TaskTemplateService.find_all_task_templates()
+        args = req.TaskTemplateQueryParamSchema().load(request.args)
+        task_templates = TaskTemplateService.find_all_task_templates(args)
         return (
             jsonify(res.TaskTemplateResponseSchema(many=True).dump(task_templates)),
             HTTPStatus.OK,

@@ -4,7 +4,9 @@ import { Palette } from "../../../../styles/theme";
 
 const ETAccordionSummary = styled(AccordionSummary)(
   (props: AccordionStyledProps) => ({
-    border: `1px solid ${Palette.primary.main}`,
+    borderBottom: `${props.expanded ? "1px" : "0px"} solid ${
+      Palette.primary.main
+    }`,
     "& .MuiAccordionSummary-content": {
       margin: 0,
     },

@@ -97,5 +97,5 @@ class TemplateEvents(Resource):
         task_events = TaskService.create_task_events_from_template(request_json, template_id)
         return (
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
-            HTTPStatus.OK,
+            HTTPStatus.CREATED,
         )

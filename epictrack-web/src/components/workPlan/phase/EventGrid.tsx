@@ -24,6 +24,9 @@ import TaskForm from "../task/TaskForm";
 import { EVENT_STATUS, statusOptions } from "../../../models/task_event";
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
+import ImportTaskEvent from "../task/ImportTaskEvent";
+import { getAxiosError } from "../../../utils/axiosUtils";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -50,7 +53,12 @@ const EventGrid = () => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
   const [eventId, setEventId] = React.useState<number | undefined>();
+  const [showTemplateConfirmation, setShowTemplateConfirmation] =
+    React.useState<boolean>(false);
+  const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
   const [showMilestoneForm, setShowMilestoneForm] =
+    React.useState<boolean>(false);
+  const [showTemplateForm, setShowTemplateForm] =
     React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
@@ -62,7 +70,7 @@ const EventGrid = () => {
     getCombinedEvents();
   }, [ctx.work?.id, ctx.selectedPhase?.phase_id]);
 
-  const getCombinedEvents = () => {
+  const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
     setLoading(true);
     Promise.all([
@@ -82,7 +90,7 @@ const EventGrid = () => {
       );
       setEvents(result);
     });
-  };
+  }, [ctx.work, ctx.selectedPhase]);
   const getTaskEvents = async (
     workId: number,
     currentPhase: number
@@ -144,8 +152,44 @@ const EventGrid = () => {
 
   const onDialogClose = React.useCallback(() => {
     setShowTaskForm(false);
+    setShowTemplateForm(false);
     getCombinedEvents();
   }, []);
+
+  const onTemplateFormSaveHandler = (templateId: number) => {
+    setShowTemplateForm(false);
+    setShowTemplateConfirmation(true);
+    setSelectedTemplateId(templateId);
+  };
+
+  const onTemplateConfirmationSaveHandler = async () => {
+    try {
+      const result = await taskEventService.importTasksFromTemplate(
+        {
+          work_id: ctx.work?.id,
+          phase_id: ctx.selectedPhase?.phase_id,
+        },
+        Number(selectedTemplateId)
+      );
+      if (result.status === 201) {
+        showNotification("Task events uploaded", {
+          type: "success",
+        });
+        setShowTemplateConfirmation(false);
+        getCombinedEvents();
+        setSelectedTemplateId(undefined);
+      }
+    } catch (e) {
+      const error = getAxiosError(e);
+      const message =
+        error?.response?.status === 422
+          ? error.response.data?.toString()
+          : COMMON_ERROR_MESSAGE;
+      showNotification(message, {
+        type: "error",
+      });
+    }
+  };
   const downloadPDFReport = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
@@ -300,8 +344,10 @@ const EventGrid = () => {
   };
   const onCancelHandler = () => {
     setShowTaskForm(false);
+    setShowTemplateForm(false);
     setEventId(undefined);
   };
+
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
@@ -324,7 +370,7 @@ const EventGrid = () => {
           }}
         >
           <Tooltip title="Import tasks from template">
-            <IButton>
+            <IButton onClick={() => setShowTemplateForm(true)}>
               <ImportFileIcon className="icon" />
             </IButton>
           </Tooltip>
@@ -371,6 +417,41 @@ const EventGrid = () => {
       >
         <TaskForm onSave={onDialogClose} eventId={eventId} />
       </TrackDialog>
+
+      <TrackDialog
+        open={showTemplateForm}
+        dialogTitle="Task Template"
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="md"
+        okButtonText="Get Template"
+        formId="import-tasks-form"
+        isCancelRequired={false}
+        onCancel={() => onCancelHandler()}
+        isActionsRequired
+        sx={{
+          "& .MuiDialogContent-root": {
+            padding: 0,
+          },
+        }}
+      >
+        <ImportTaskEvent onSave={onTemplateFormSaveHandler} />
+      </TrackDialog>
+      <TrackDialog
+        open={showTemplateConfirmation}
+        dialogTitle="Upload this Template?"
+        dialogContentText="Once the selected template is uploaded, all other templates will be locked for this phase?"
+        disableEscapeKeyDown
+        fullWidth
+        okButtonText="Upload"
+        onOk={onTemplateConfirmationSaveHandler}
+        onCancel={() => {
+          setShowTemplateForm(true);
+          setShowTemplateConfirmation(false);
+          setSelectedTemplateId(undefined);
+        }}
+        isActionsRequired
+      />
     </Grid>
   );
 };

@@ -12,7 +12,6 @@ import EventGrid from "./EventGrid";
 import { WorkplanContext } from "../WorkPlanContext";
 import BorderLinearProgress from "../../shared/progress/Progress";
 import { makeStyles } from "@mui/styles";
-import { type } from "os";
 
 const useStyles = makeStyles({
   summaryBox: {

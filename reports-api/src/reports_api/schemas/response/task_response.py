@@ -41,7 +41,7 @@ class TaskTemplateResponseSchema(
     phase = fields.Nested(
         PhaseResponseSchema,
         dump_only=True,
-        exclude=("ea_act", "work_type", "milestones"),
+        exclude=("ea_act", "work_type"),
     )
 
 

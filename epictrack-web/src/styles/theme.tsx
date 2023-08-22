@@ -190,6 +190,11 @@ export const BaseTheme = createTheme({
         disableRipple: true,
       },
     },
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: true,
+      },
+    },
     MuiInputBase: {
       styleOverrides: {
         root: {

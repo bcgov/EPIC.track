@@ -7,15 +7,15 @@ import { AccordionStyledProps } from "../type";
 const ETAccordionDetails = styled(AccordionDetails)(
   (props: AccordionStyledProps) => ({
     display: "inline-flex",
-    maxHeight: "600px",
     flexDirection: "column",
     alignItems: "center",
     gap: "8px",
     flexShrink: 0,
     padding: "1rem 1.5rem",
     width: "100%",
-    border: `1px solid ${Palette.primary.main}`,
-    borderTop: props.expanded ? "0px" : "1px",
+    // borderRadius: "4px",
+    // border: `1px solid ${Palette.primary.main}`,
+    // borderTop: props.expanded ? "0px" : "1px",
   })
 );
 
