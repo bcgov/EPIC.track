@@ -13,11 +13,11 @@ import {
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
-import { ETHeading3 } from ".";
+import { ETHeading3, ETSubhead } from ".";
 
 type TrackDialogProps = {
   onCancel?: () => void;
-  onOk?: () => void;
+  onOk?: (args: any) => void;
   cancelButtonText?: string;
   okButtonText?: string;
   dialogTitle: string;
@@ -102,13 +102,10 @@ const TrackDialog: FC<TrackDialogProps> = ({
         {dialogContentText && (
           <DialogContentText
             sx={{
-              fontSize: "21px",
-              lineHeight: "27px",
-              letterSpacing: "-0.42px",
               color: Palette.neutral.dark,
             }}
           >
-            {dialogContentText}
+            <ETSubhead>{dialogContentText}</ETSubhead>
           </DialogContentText>
         )}
         {props.children}

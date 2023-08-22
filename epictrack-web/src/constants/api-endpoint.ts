@@ -43,6 +43,7 @@ const Endpoints = {
   },
   TaskEvents: {
     EVENTS: "tasks/events",
+    TASKS: "tasks",
   },
 };
 export default Endpoints;

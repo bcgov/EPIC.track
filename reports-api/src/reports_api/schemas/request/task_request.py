@@ -52,6 +52,28 @@ class TaskTemplateBodyParameterSchema(RequestBodyParameterSchema):
     )
 
 
+class TaskTemplateQueryParamSchema(RequestQueryParameterSchema):
+    """Task template per phase, eaact and work type"""
+
+    phase_id = fields.Int(
+        metadata={"description": "Phase ID of the template"},
+        validate=validate.Range(min=1),
+        allow_none=True
+    )
+
+    ea_act_id = fields.Int(
+        metadata={"description": "EA Act ID of the template"},
+        validate=validate.Range(min=1),
+        allow_none=True
+    )
+
+    work_type_id = fields.Int(
+        metadata={"description": "Work Type ID of the template"},
+        validate=validate.Range(min=1),
+        allow_none=True
+    )
+
+
 class TaskBodyParameterSchema(RequestBodyParameterSchema):
     """TaskTemplate request body schema"""
 

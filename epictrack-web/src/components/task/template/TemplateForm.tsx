@@ -11,20 +11,17 @@ import { Template } from "../../../models/template";
 import { ETFormLabel } from "../../shared";
 import { ListType } from "../../../models/code";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import TaskService from "../../../services/taskService";
 import TrackDialog from "../../shared/TrackDialog";
 import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import templateService from "../../../services/taskService/templateService";
 
 export default function TemplateForm({ ...props }) {
-  // const [template, setTemplate] = React.useState<Template>();
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
   const [phases, setPhases] = React.useState<ListType[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
-  // const [openAlertDialog, setOpenAlertDialog] = React.useState(false);
-  // const [alertContentText, setAlertContentText] = React.useState<string>();
   const templateId = props.templateId;
   const schema = yup.object<Template>().shape({
     ea_act_id: yup.number().required("EA Act is required"),
@@ -81,12 +78,6 @@ export default function TemplateForm({ ...props }) {
     }
   }, [formValues.ea_act_id, formValues.work_type_id]);
 
-  // React.useEffect(() => {
-  //   if (templateId) {
-  //     getTemplates(templateId);
-  //   }
-  // }, [templateId]);
-
   React.useEffect(() => {
     const promises: any[] = [];
     Object.keys(codeTypes).forEach(async (key) => {
@@ -99,7 +90,7 @@ export default function TemplateForm({ ...props }) {
     try {
       setLoading(true);
       data["template_file"] = data["template_file"][0];
-      const result = await TaskService.createTemplate(data);
+      const result = await templateService.createTemplate(data);
       if (result.status === 201) {
         showNotification("Template details inserted", {
           type: "success",
@@ -204,24 +195,6 @@ export default function TemplateForm({ ...props }) {
           </Grid>
         </Grid>
       </FormProvider>
-      {/* <TrackDialog
-        open={openAlertDialog}
-        dialogTitle={"Success"}
-        dialogContentText={alertContentText}
-        isActionsRequired
-        isCancelRequired={false}
-        isOkRequired
-        onOk={() => {
-          setOpenAlertDialog(false);
-          props.onCancel();
-        }}
-      />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={loading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>*/}
     </>
   );
 }

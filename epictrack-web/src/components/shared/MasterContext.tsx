@@ -175,7 +175,6 @@ export const MasterProvider = ({
     setShowModalForm(false);
     setId(undefined);
     setItem(undefined);
-    // setError(undefined);
   };
 
   return (

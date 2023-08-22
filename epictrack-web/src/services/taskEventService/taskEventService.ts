@@ -25,6 +25,13 @@ class TaskEventService {
   async getById(eventId: number) {
     return await http.GetRequest(`${Endpoints.TaskEvents.EVENTS}/${eventId}`);
   }
+
+  async importTasksFromTemplate(payload: any, templateId: number) {
+    return await http.PostRequest(
+      `${Endpoints.TaskEvents.TASKS}/templates/${templateId}/events`,
+      JSON.stringify(payload)
+    );
+  }
 }
 
 export default new TaskEventService();
