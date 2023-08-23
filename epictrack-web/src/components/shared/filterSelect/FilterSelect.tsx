@@ -5,11 +5,13 @@ import Option from "./components/Option";
 import MultiValue from "./components/MultiValueContainer";
 import { OptionType, SelectProps } from "./type";
 import { Palette } from "../../../styles/theme";
+import SingleValue from "./components/SingleValueContainer";
 
 const FilterSelect = (props: SelectProps) => {
   const { name, isMulti, header, column } = props;
   const [options, setOptions] = React.useState<OptionType[]>([]);
-  const [selectedOptions, setSelectedOptions] = React.useState<any[]>([]);
+  const [selectedOptions, setSelectedOptions] = React.useState<any>();
+  const [selectValue, setSelectValue] = React.useState<any>();
   const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(false);
   const selectRef = React.useRef<SelectInstance | null>(null);
 
@@ -24,9 +26,29 @@ const FilterSelect = (props: SelectProps) => {
   const isSelectAllSelected = () =>
     selectedOptions.includes(selectAllOption.value);
 
-  const isOptionSelected = (o: OptionType) => selectedOptions.includes(o.value);
+  const isOptionSelected = (o: OptionType) =>
+    isMulti ? selectedOptions.includes(o.value) : selectedOptions === o.value;
+
+  React.useEffect(() => {
+    const currentValues = isMulti
+      ? selectValue.map((v: OptionType) => v.value)
+      : selectValue.value;
+    setSelectedOptions(currentValues);
+  }, [menuIsOpen]);
+
+  React.useEffect(() => {
+    setSelectValue(isMulti ? [] : "");
+  }, []);
 
   const handleChange = (newValue: any, actionMeta: any) => {
+    if (!isMulti) {
+      if (isOptionSelected(newValue)) {
+        setSelectedOptions("");
+      } else {
+        setSelectedOptions(newValue.value);
+      }
+      return;
+    }
     const { option } = actionMeta;
     if (option === undefined) return;
 
@@ -59,21 +81,35 @@ const FilterSelect = (props: SelectProps) => {
     if (selectedOptions.length === 0) {
       selectRef.current?.clearValue();
     }
+    if (isMulti) {
+      const value = options.filter((o: OptionType) =>
+        selectedOptions.includes(o.value)
+      );
+      setSelectValue(value);
+    } else {
+      const value = options.find(
+        (o: OptionType) => o.value === selectedOptions
+      );
+      setSelectValue(value);
+    }
     setMenuIsOpen(false);
     selectRef.current?.blur();
   };
 
   const clearFilters = () => {
     setSelectedOptions([]);
-    header.column.setFilterValue([]);
+    setSelectValue(isMulti ? [] : "");
+    header.column.setFilterValue(isMulti ? [] : "");
     selectRef.current?.clearValue();
     setMenuIsOpen(false);
     selectRef.current?.blur();
   };
 
   const onCancel = () => {
-    const currentValues = selectRef.current?.getValue() as any[];
-    setSelectedOptions(currentValues || []);
+    const currentValues = isMulti
+      ? selectValue.map((v: OptionType) => v.value)
+      : selectValue.value;
+    setSelectedOptions(currentValues || isMulti ? [] : "");
     setMenuIsOpen(false);
     selectRef.current?.blur();
   };
@@ -86,15 +122,15 @@ const FilterSelect = (props: SelectProps) => {
       value: option,
     }));
 
-    filterOptions = [selectAllOption, ...filterOptions];
+    if (isMulti) filterOptions = [selectAllOption, ...filterOptions];
 
     setOptions(filterOptions);
   }, [column]);
 
   return (
     <Select
-      value={header.column.getFilterValue() ?? []}
-      placeholder="Filter"
+      value={selectValue}
+      placeholder={props.placeholder || "Filter"}
       name={name}
       options={options}
       isMulti={isMulti}
@@ -103,6 +139,7 @@ const FilterSelect = (props: SelectProps) => {
         Option,
         Menu,
         MultiValue,
+        SingleValue,
         IndicatorSeparator: () => null,
       }}
       filterProps={{
@@ -136,15 +173,28 @@ const FilterSelect = (props: SelectProps) => {
         control: (base, props) => ({
           ...base,
           background: props.hasValue ? Palette.primary.bg.light : "initial",
+          borderWidth: "2px",
           borderStyle: props.hasValue ? "none" : "solid",
+          borderColor: props.isFocused
+            ? Palette.primary.accent.light
+            : Palette.neutral.accent.light,
+          boxShadow: "none",
         }),
         menu: (base, props) => ({
           ...base,
           position: "relative",
+          marginBlock: "0px",
+          border: `1px solid ${Palette.neutral.accent.light}`,
+          borderRadius: "4px",
         }),
         placeholder: (base, props) => ({
           ...base,
           fontWeight: "normal",
+        }),
+        menuPortal: (base, props) => ({
+          ...base,
+          zIndex: 2,
+          marginTop: "4px",
         }),
       }}
       isClearable={false}

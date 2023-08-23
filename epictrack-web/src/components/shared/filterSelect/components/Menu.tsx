@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button } from "@mui/material";
+import { Box, Button, RadioGroup } from "@mui/material";
 
 import { components, MenuProps } from "react-select";
 import { Palette } from "../../../../styles/theme";
@@ -15,13 +15,12 @@ const Menu = (props: MenuProps) => {
           flexDirection: "column",
           alignItems: "flex-start",
           borderRadius: "4px",
-          border: `1px solid ${Palette.neutral.accent.light}`,
           background: `${Palette.white}`,
-          boxShadow: "0px 4px 8px 0px rgba(0, 0, 0, 0.10)",
+          minWidth: "100%",
         }}
       >
         <components.Menu {...props}>
-          {props.options.length > 5 && (
+          {props.isMulti && props.options.length > 5 && (
             <Box
               sx={{
                 display: "flex",
@@ -30,6 +29,8 @@ const Menu = (props: MenuProps) => {
                 gap: "1rem",
                 justifyContent: "space-between",
                 background: Palette.neutral.bg.light,
+                borderTopLeftRadius: "4px",
+                borderTopRightRadius: "4px",
               }}
             >
               {filterProps?.selectedOptions && (
@@ -52,6 +53,8 @@ const Menu = (props: MenuProps) => {
               alignItems: "flex-start",
               gap: "1rem",
               justifyContent: "space-between",
+              borderBottomLeftRadius: "4px",
+              borderBottomRightRadius: "4px",
             }}
           >
             <Button

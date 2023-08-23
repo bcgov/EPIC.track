@@ -181,6 +181,9 @@ const MasterTrackTable = <T extends Record<string, any>>({
         renderEmptyRowsFallback={({ table }) => (
           <NoDataComponent table={table} />
         )}
+        icons={{
+          FilterAltIcon: () => null,
+        }}
       />
     </>
   );
