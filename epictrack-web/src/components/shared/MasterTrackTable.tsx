@@ -89,7 +89,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
         muiTableHeadCellProps={{
           sx: {
             backgroundColor: Palette.neutral.bg.light,
-            padding: "1rem 0.1rem 0.5rem 1rem !important",
+            padding: "1rem 0.5rem 0.5rem 1rem !important",
             "& .Mui-TableHeadCell-Content-Labels": {
               fontSize: "1rem",
               fontWeight: MET_Header_Font_Weight_Bold,
@@ -129,7 +129,8 @@ const MasterTrackTable = <T extends Record<string, any>>({
             },
           },
         })}
-        muiTableHeadCellFilterTextFieldProps={{
+        muiTableHeadCellFilterTextFieldProps={({ column }) => ({
+          placeholder: column.columnDef.header,
           variant: "outlined",
           sx: {
             backgroundColor: "white",
@@ -140,7 +141,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
               mr: "0px !important",
             },
           },
-        }}
+        })}
         muiTableContainerProps={(table) => ({
           sx: {
             maxHeight: "100%",
