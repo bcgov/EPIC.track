@@ -158,6 +158,22 @@ const DownloadIcon = (props: IconProps) => {
   );
 };
 
+const CollapseIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
+      <path d="M1.46875 9.46875L7.4375 3.75C7.625 3.59375 7.8125 3.5 8 3.5C8.1875 3.5 8.34375 3.5625 8.5 3.6875L14.4688 9.40625C14.7812 9.71875 14.7812 10.1875 14.5 10.4688C14.2188 10.7812 13.75 10.7812 13.4375 10.5L8 5.3125L2.5 10.5625C2.21875 10.8438 1.71875 10.8438 1.4375 10.5312C1.15625 10.2188 1.15625 9.75 1.46875 9.46875Z" />
+    </svg>
+  );
+};
+
+const ExpandIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
+      <path d="M14.5 6.5625L8.53125 12.2812C8.34375 12.4375 8.15625 12.5 8 12.5C7.8125 12.5 7.625 12.4375 7.46875 12.3125L1.46875 6.5625C1.15625 6.28125 1.15625 5.78125 1.4375 5.5C1.71875 5.1875 2.21875 5.1875 2.5 5.46875L8 10.7188L13.4688 5.46875C13.75 5.1875 14.25 5.1875 14.5312 5.5C14.8125 5.78125 14.8125 6.28125 14.5 6.5625Z" />
+    </svg>
+  );
+};
+
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   DashboardIcon,
@@ -176,6 +192,8 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   UserIcon,
   ImportFileIcon,
   DownloadIcon,
+  CollapseIcon,
+  ExpandIcon,
 };
 
 export default icons;

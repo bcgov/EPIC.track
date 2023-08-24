@@ -19,7 +19,8 @@ const ETAccordion = (props: MuiAccordionProps) => {
           borderRadius: props.expanded ? "4px 4px 0px 0px" : "4px",
         },
         ".Mui-expanded": {
-          margin: "0px !important",
+          mt: "0px !important",
+          mb: "0px !important",
         },
       }}
     >

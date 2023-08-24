@@ -1,4 +1,4 @@
-import { Box, Grid, LinearProgress } from "@mui/material";
+import { Box, Grid, LinearProgress, SxProps } from "@mui/material";
 import React, { useContext } from "react";
 import Moment from "moment";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -11,8 +11,11 @@ import ETAccordionDetails from "../../shared/accordion/components/AccordionDetai
 import EventGrid from "./EventGrid";
 import { WorkplanContext } from "../WorkPlanContext";
 import BorderLinearProgress from "../../shared/progress/Progress";
+import Icons from "../../icons/index";
 import { makeStyles } from "@mui/styles";
+import { IconProps } from "../../icons/type";
 
+const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const useStyles = makeStyles({
   summaryBox: {
     display: "flex",
@@ -23,10 +26,15 @@ const useStyles = makeStyles({
   title: {
     textTransform: "uppercase",
     color: `${Palette.neutral.main}`,
+    letterSpacing: "0.39px !important",
   },
   content: {
     minHeight: "1.5rem",
     color: `${Palette.neutral.dark}`,
+  },
+  accordionIcon: {
+    fill: Palette.primary.main,
+    cursor: "pointer",
   },
 });
 
@@ -35,11 +43,17 @@ interface SummaryItemProps {
   title: string;
   content?: string;
   children?: React.ReactNode;
+  sx?: SxProps;
 }
 const SummaryItem = (props: SummaryItemProps) => {
   const clasess = useStyles();
   return (
-    <Box className={clasess.summaryBox}>
+    <Box
+      className={clasess.summaryBox}
+      sx={{
+        ...props.sx,
+      }}
+    >
       <ETCaption1 className={clasess.title}>{props.title}</ETCaption1>
       {props.children && props.children}
       {props.content && (
@@ -58,6 +72,7 @@ const SummaryItem = (props: SummaryItemProps) => {
 const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
+  const classes = useStyles();
   const isSelectedPhase = React.useMemo<boolean>(
     () => phase.phase_id === ctx.selectedPhase?.phase_id,
     [ctx.selectedPhase]
@@ -66,11 +81,6 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
     () => setExpanded(phase.phase_id === ctx.selectedPhase?.phase_id),
     [phase, ctx.selectedPhase]
   );
-  // React.useEffect(() => {
-  //   if (expanded) {
-  //     ctx.setSelectedPhase(phase);
-  //   }
-  // }, [expanded]);
   const onExpandHandler = (expand: boolean) => {
     setExpanded(expand);
     ctx.setSelectedPhase(phase);
@@ -99,7 +109,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
         >
           <ETAccordionSummary
             expanded={expanded}
-            expandIcon={<ExpandMoreIcon />}
+            expandIcon={<ExpandIcon className={classes.accordionIcon} />}
           >
             <Grid
               container
@@ -109,17 +119,20 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                 pb: "1rem",
               }}
             >
-              <Grid item xl={3}>
+              <Grid item xs={3}>
                 <SummaryItem
                   title="Phase"
                   content={phase.phase}
                   isTitleBold={isSelectedPhase}
+                  sx={{
+                    ml: "12px",
+                  }}
                 />
               </Grid>
               <Grid item xs={2}>
                 <SummaryItem
                   title="Start date"
-                  content={Moment(phase.start_date).format("MMM. DD YYYY")}
+                  content={Moment(phase.start_date).format("MMM.DD YYYY")}
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
@@ -153,7 +166,12 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               </Grid>
             </Grid>
           </ETAccordionSummary>
-          <ETAccordionDetails expanded={expanded}>
+          <ETAccordionDetails
+            expanded={expanded}
+            sx={{
+              pt: "24px",
+            }}
+          >
             <EventGrid />
           </ETAccordionDetails>
         </ETAccordion>

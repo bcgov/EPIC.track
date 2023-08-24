@@ -31,7 +31,7 @@ const WorkPlanContainer = () => {
             }}
           >
             <Box>
-              <ETHeading2 bold color={Palette.primary.accent.main}>
+              <ETHeading2 bold color={Palette.primary.main}>
                 {ctx.work?.title}
               </ETHeading2>
             </Box>

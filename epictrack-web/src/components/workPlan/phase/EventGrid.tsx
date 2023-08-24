@@ -40,7 +40,7 @@ const useStyle = makeStyles({
 });
 const IButton = styled(IconButton)({
   "& .icon": {
-    fill: Palette.primary.main,
+    fill: Palette.primary.accent.main,
   },
   "&:hover": {
     backgroundColor: Palette.neutral.bg.main,
@@ -72,24 +72,29 @@ const EventGrid = () => {
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
-    setLoading(true);
-    Promise.all([
-      getMilestoneEvents(
-        Number(ctx.work?.id),
-        Number(ctx.selectedPhase?.phase_id)
-      ),
-      getTaskEvents(Number(ctx.work?.id), Number(ctx.selectedPhase?.phase_id)),
-    ]).then((data: Array<EventsGridModel[]>) => {
-      setLoading(false);
-      data.forEach((array: EventsGridModel[]) => {
-        console.log(array);
-        result = result.concat(array);
+    if (ctx.work?.id && ctx.selectedPhase?.phase_id) {
+      setLoading(true);
+      Promise.all([
+        getMilestoneEvents(
+          Number(ctx.work?.id),
+          Number(ctx.selectedPhase?.phase_id)
+        ),
+        getTaskEvents(
+          Number(ctx.work?.id),
+          Number(ctx.selectedPhase?.phase_id)
+        ),
+      ]).then((data: Array<EventsGridModel[]>) => {
+        setLoading(false);
+        data.forEach((array: EventsGridModel[]) => {
+          console.log(array);
+          result = result.concat(array);
+        });
+        result = result.sort((a, b) =>
+          Moment(a.start_date).diff(b.start_date, "seconds")
+        );
+        setEvents(result);
       });
-      result = result.sort((a, b) =>
-        Moment(a.start_date).diff(b.start_date, "seconds")
-      );
-      setEvents(result);
-    });
+    }
   }, [ctx.work, ctx.selectedPhase]);
   const getTaskEvents = async (
     workId: number,
