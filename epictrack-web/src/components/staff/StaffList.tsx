@@ -34,10 +34,12 @@ const StaffList = () => {
   const staff = React.useMemo(() => ctx.data as Staff[], [ctx.data]);
 
   React.useEffect(() => {
-    const positions = staff
-      .map((p) => p.position?.name)
-      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    setPositions(positions);
+    if (staff) {
+      const positions = staff
+        .map((p) => p.position?.name)
+        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+      setPositions(positions);
+    }
   }, [staff]);
 
   const handleDelete = (id: string) => {
@@ -73,6 +75,7 @@ const StaffList = () => {
           return (
             <FilterSelect
               isMulti
+              menuIsOpen={true}
               header={header}
               column={column}
               variant="inline"

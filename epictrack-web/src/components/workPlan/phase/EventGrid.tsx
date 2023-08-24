@@ -13,7 +13,7 @@ import {
 } from "material-react-table";
 import { ETGridTitle, ETParagraph } from "../../shared";
 import { dateUtils } from "../../../utils";
-import { Button, Grid, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
 import { styled } from "@mui/system";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
@@ -27,6 +27,11 @@ import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import {
+  CompletedIcon,
+  InProgressIcon,
+  NotStartedIcon,
+} from "../../icons/status";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -329,15 +334,32 @@ const EventGrid = () => {
         accessorKey: "status",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         header: "Progress",
-        size: 130,
+        size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
-            {
-              statusOptions.filter(
-                (p) => p.value == cell.getValue<EVENT_STATUS>()
-              )[0]?.label
-            }
-          </ETParagraph>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            {cell.getValue<EVENT_STATUS>() === EVENT_STATUS.NOT_STARTED && (
+              <NotStartedIcon fill={Palette.neutral.light} />
+            )}
+            {cell.getValue<EVENT_STATUS>() === EVENT_STATUS.INPROGRESS && (
+              <InProgressIcon fill={Palette.success.light} />
+            )}
+            {cell.getValue<EVENT_STATUS>() === EVENT_STATUS.COMPLETED && (
+              <CompletedIcon fill={Palette.neutral.accent.light} />
+            )}
+            <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
+              {
+                statusOptions.filter(
+                  (p) => p.value == cell.getValue<EVENT_STATUS>()
+                )[0]?.label
+              }
+            </ETParagraph>
+          </Box>
         ),
       },
     ],

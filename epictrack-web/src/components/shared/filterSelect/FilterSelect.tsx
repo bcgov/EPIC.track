@@ -11,8 +11,10 @@ const FilterSelect = (props: SelectProps) => {
   const { name, isMulti, header, column } = props;
   const [options, setOptions] = React.useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = React.useState<any>();
-  const [selectValue, setSelectValue] = React.useState<any>();
-  const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(false);
+  const [selectValue, setSelectValue] = React.useState<any>(isMulti ? [] : "");
+  const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(
+    !!props.menuIsOpen
+  );
   const selectRef = React.useRef<SelectInstance | null>(null);
 
   const selectAllOption = React.useMemo(
@@ -30,15 +32,14 @@ const FilterSelect = (props: SelectProps) => {
     isMulti ? selectedOptions.includes(o.value) : selectedOptions === o.value;
 
   React.useEffect(() => {
+    setSelectValue(isMulti ? [] : "");
+  }, []);
+  React.useEffect(() => {
     const currentValues = isMulti
       ? selectValue.map((v: OptionType) => v.value)
       : selectValue.value;
     setSelectedOptions(currentValues);
   }, [menuIsOpen]);
-
-  React.useEffect(() => {
-    setSelectValue(isMulti ? [] : "");
-  }, []);
 
   const handleChange = (newValue: any, actionMeta: any) => {
     if (!isMulti) {
@@ -161,6 +162,8 @@ const FilterSelect = (props: SelectProps) => {
           whiteSpace: "nowrap",
           overflow: "hidden",
           textOverflow: "ellipsis",
+          display: "flex",
+          alignItems: "center",
           padding: ".5rem .75rem .5rem 0px",
           fontWeight: "normal",
           fontSize: "1rem",
@@ -172,7 +175,7 @@ const FilterSelect = (props: SelectProps) => {
         }),
         control: (base, props) => ({
           ...base,
-          background: props.hasValue ? Palette.primary.bg.light : "initial",
+          background: props.hasValue ? Palette.primary.bg.light : Palette.white,
           borderWidth: "2px",
           borderStyle: props.hasValue ? "none" : "solid",
           borderColor: props.isFocused
