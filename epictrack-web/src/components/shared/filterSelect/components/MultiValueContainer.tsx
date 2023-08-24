@@ -6,31 +6,28 @@ import { ETCaption2 } from "../..";
 
 const MultiValue = (props: MultiValueProps) => {
   const { filterProps } = props.selectProps;
-
   return (
     <>
-      {props.index === 0 &&
-        filterProps?.selectedOptions &&
-        filterProps?.selectedOptions?.length > 0 && (
-          <Box
-            sx={{
-              display: "flex",
-              height: "2.25rem",
-              // padding: "0px 12px",
-              alignItems: "center",
-              alignSelf: "stretch",
-              borderRadius: "4px",
-              background: Palette.primary.bg.light,
-            }}
-            key={props.index}
-          >
-            <ETCaption2 bold color={Palette.primary.accent.light}>
-              {filterProps.variant === "inline"
-                ? "Filtered"
-                : `Filtered(${(props.selectProps.value as []).length})`}
-            </ETCaption2>
-          </Box>
-        )}
+      {props.index === 0 && props.selectProps.value && (
+        <Box
+          sx={{
+            display: "flex",
+            height: "2.25rem",
+            // padding: "0px 12px",
+            alignItems: "center",
+            alignSelf: "stretch",
+            borderRadius: "4px",
+            background: Palette.primary.bg.light,
+          }}
+          key={props.index}
+        >
+          <ETCaption2 bold color={Palette.primary.accent.light}>
+            {filterProps?.variant === "inline"
+              ? "Filtered"
+              : `Filtered(${(props.selectProps.value as []).length})`}
+          </ETCaption2>
+        </Box>
+      )}
       {props.index === 0 && !filterProps?.selectedOptions && (
         <ETCaption2 color={Palette.neutral.light}>
           {props.selectProps.placeholder}
