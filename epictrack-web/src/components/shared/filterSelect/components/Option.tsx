@@ -2,7 +2,7 @@ import React from "react";
 import { components, OptionProps } from "react-select";
 import Checkbox from "@mui/material/Checkbox";
 import { OptionType } from "../type";
-import { Box } from "@mui/material";
+import { Box, Radio } from "@mui/material";
 
 const Option = ({
   getStyles,
@@ -35,7 +35,31 @@ const Option = ({
         getStyles={getStyles}
         innerProps={innerProps}
       >
-        {isMulti && <Checkbox name={`${rest.label}`} checked={isSelected} />}
+        {isMulti && (
+          <Checkbox
+            name={`${rest.label}`}
+            checked={isSelected}
+            // indeterminate={
+            //   data.value === "<SELECT_ALL>" &&
+            //   !isSelected &&
+            //   filterProps?.selectedOptions &&
+            //   filterProps?.selectedOptions?.length > 0
+            // }
+          />
+        )}
+        {!isMulti && (
+          <Radio
+            name={rest.selectProps.name}
+            value={data.value}
+            checked={isSelected}
+            onChange={(
+              event: React.ChangeEvent<HTMLInputElement>,
+              checked: boolean
+            ) => {
+              rest.setValue(checked ? event.target.value : "", "select-option");
+            }}
+          />
+        )}
         {children}
       </components.Option>
     </Box>

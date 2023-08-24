@@ -76,6 +76,7 @@ const StaffList = () => {
               header={header}
               column={column}
               variant="inline"
+              name="positionsFilter"
             />
           );
         },
