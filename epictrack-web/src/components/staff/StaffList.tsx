@@ -70,6 +70,7 @@ const StaffList = () => {
       {
         accessorKey: "position.name",
         header: "Position",
+        filterFn: "equals",
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (

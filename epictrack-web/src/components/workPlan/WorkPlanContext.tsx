@@ -24,9 +24,7 @@ export const WorkplanProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [selectedPhase, setSelectedPhase] = React.useState<
-    WorkPhaseSkeleton | undefined
-  >();
+  const [selectedPhase, setSelectedPhase] = React.useState<WorkPhaseSkeleton>();
   const [work, setWork] = React.useState<Work>();
   const [loading, setLoading] = React.useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
@@ -41,6 +39,7 @@ export const WorkplanProvider = ({
       setLoading(false);
     }
   }, [work_id]);
+  console.log("SELECTED PHASE ", selectedPhase);
   return (
     <WorkplanContext.Provider
       value={{

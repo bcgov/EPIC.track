@@ -61,8 +61,6 @@ const EventGrid = () => {
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
     React.useState<boolean>(false);
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
-  const [showMilestoneForm, setShowMilestoneForm] =
-    React.useState<boolean>(false);
   const [showTemplateForm, setShowTemplateForm] =
     React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
@@ -164,7 +162,7 @@ const EventGrid = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     getCombinedEvents();
-  }, []);
+  }, [ctx.work, ctx.selectedPhase]);
 
   const onTemplateFormSaveHandler = (templateId: number) => {
     setShowTemplateForm(false);
@@ -230,10 +228,10 @@ const EventGrid = () => {
         size: 300,
         Cell: ({ cell, row }) => (
           <ETGridTitle
-            to={"#"}
+            to="#"
             bold={row.original.type === EVENT_TYPE.MILESTONE}
             className={classes.textEllipsis}
-            onClick={() => onRowClick(row.original)}
+            onClick={(event: any) => onRowClick(event, row.original)}
             titleText={cell.getValue<string>()}
           >
             {cell.getValue<string>()}
@@ -365,7 +363,8 @@ const EventGrid = () => {
     ],
     [events]
   );
-  const onRowClick = (row: EventsGridModel) => {
+  const onRowClick = (event: any, row: EventsGridModel) => {
+    event.preventDefault();
     setEventId(row.id);
     setShowTaskForm(row.type === EVENT_TYPE.TASK);
   };
@@ -374,7 +373,7 @@ const EventGrid = () => {
     setShowTemplateForm(false);
     setEventId(undefined);
   };
-
+  console.log("SELECTED PHASE Grid ", ctx.selectedPhase);
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
