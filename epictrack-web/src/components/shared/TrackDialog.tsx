@@ -96,7 +96,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
           gap: "1rem",
           alignItems: "flex-start",
           alignSelf: "stretch",
-          overflowY: "auto",
+          // overflowY: "auto",
         }}
       >
         {dialogContentText && (
@@ -112,7 +112,11 @@ const TrackDialog: FC<TrackDialogProps> = ({
       </DialogContent>
       {isActionsRequired && (
         <DialogActions
-          sx={{ padding: "16px 40px 24px 40px", borderRadius: "0 0 4px 4px" }}
+          sx={{
+            padding: "16px 40px 24px 40px",
+            borderRadius: "0 0 4px 4px",
+            borderTop: `1px solid ${Palette.neutral.bg.dark}`,
+          }}
         >
           {isCancelRequired && (
             <Button size="large" onClick={onCancel} variant="outlined">

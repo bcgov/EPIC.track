@@ -75,7 +75,6 @@ const StaffList = () => {
           return (
             <FilterSelect
               isMulti
-              menuIsOpen={true}
               header={header}
               column={column}
               variant="inline"

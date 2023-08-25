@@ -147,6 +147,21 @@ const MasterTrackTable = <T extends Record<string, any>>({
             maxHeight: "100%",
           },
         })}
+        muiTableBodyProps={{
+          sx: {
+            "& tr:hover td": {
+              backgroundColor: Palette.primary.bg.light,
+            },
+          },
+        }}
+        muiTableBodyRowProps={{
+          hover: true,
+          sx: {
+            "&.Mui-selected": {
+              backgroundColor: Palette.primary.bg.main,
+            },
+          },
+        }}
         sortingFns={{
           sortFn: (rowA: any, rowB: any, columnId: string) => {
             return rowA

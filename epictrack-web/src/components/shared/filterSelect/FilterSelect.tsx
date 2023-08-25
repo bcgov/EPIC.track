@@ -170,7 +170,7 @@ const FilterSelect = (props: SelectProps) => {
           background: props.isFocused ? Palette.neutral.bg.main : "transparent",
           color: props.isSelected
             ? Palette.primary.accent.main
-            : Palette.text.primary,
+            : Palette.neutral.accent.dark,
           cursor: props.isFocused ? "pointer" : "default",
         }),
         control: (base, props) => ({

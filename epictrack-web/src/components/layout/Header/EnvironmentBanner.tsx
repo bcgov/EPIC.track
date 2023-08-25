@@ -32,7 +32,7 @@ const EnvironmentBanner = () => {
     <Box
       sx={{
         backgroundColor: Palette.secondary.main,
-        color: Palette.text.primary,
+        color: Palette.neutral.accent.dark,
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

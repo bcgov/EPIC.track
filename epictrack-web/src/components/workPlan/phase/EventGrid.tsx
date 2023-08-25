@@ -467,7 +467,7 @@ const EventGrid = () => {
       <TrackDialog
         open={showTemplateConfirmation}
         dialogTitle="Upload this Template?"
-        dialogContentText="Once the selected template is uploaded, all other templates will be locked for this phase?"
+        dialogContentText="Once the selected template is uploaded, all other templates will be locked for this phase"
         disableEscapeKeyDown
         fullWidth
         okButtonText="Upload"
