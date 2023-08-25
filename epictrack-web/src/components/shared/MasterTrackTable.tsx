@@ -160,6 +160,9 @@ const MasterTrackTable = <T extends Record<string, any>>({
             "&.Mui-selected": {
               backgroundColor: Palette.primary.bg.main,
             },
+            "&.MuiTableRow-hover:hover": {
+              backgroundColor: Palette.primary.bg.light,
+            },
           },
         }}
         sortingFns={{

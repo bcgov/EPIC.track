@@ -31,6 +31,9 @@ const useStyles = makeStyles({
   content: {
     minHeight: "1.5rem",
     color: `${Palette.neutral.dark}`,
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
   },
   accordionIcon: {
     fill: Palette.primary.main,

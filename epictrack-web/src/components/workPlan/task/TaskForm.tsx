@@ -97,9 +97,6 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
       });
-      if (onSave) {
-        onSave();
-      }
     }
   };
 
