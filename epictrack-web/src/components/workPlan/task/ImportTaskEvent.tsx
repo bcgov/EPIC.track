@@ -22,6 +22,8 @@ const useStyle = makeStyles({
   templateContainer: {
     padding: "1.5rem 1.5rem 1.5rem 2rem",
     borderRight: `1px solid ${Palette.neutral.bg.dark}`,
+    height: "100%",
+    overflowY: "scroll",
   },
   templateItem: {
     padding: "0.5rem 1rem",
@@ -31,6 +33,8 @@ const useStyle = makeStyles({
   taskContainer: {
     padding: "1.5rem 2rem 1rem 1.5rem",
     backgroundColor: Palette.neutral.bg.light,
+    height: "100%",
+    overflowY: "scroll",
   },
 });
 
@@ -109,7 +113,8 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
           component={"form"}
           id="import-tasks-form"
           sx={{
-            borderBottom: `1px solid ${Palette.neutral.bg.dark}`,
+            height: "350px",
+            overflowY: "hidden",
           }}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
@@ -121,6 +126,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
                   selected={templateIndex === index}
                   onClick={() => setTemplateIndex(index)}
                   sx={{
+                    borderRadius: "4px",
                     "&.MuiListItemButton-root": {
                       ":hover": {
                         backgroundColor: Palette.primary.bg.light,
@@ -129,6 +135,9 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
                       "&.Mui-selected": {
                         backgroundColor: Palette.primary.bg.light,
                         color: Palette.primary.accent.main,
+                      },
+                      "& .MuiListItemText-root": {
+                        margin: 0,
                       },
                     },
                   }}
@@ -151,24 +160,23 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
                 >
                   {templates[templateIndex].name}
                 </ETParagraph>
-                <ETCaption2
-                  sx={{
-                    color: Palette.neutral.main,
-                  }}
-                >
-                  List of Tasks
+                <Box>
+                  <ETCaption2
+                    sx={{
+                      color: Palette.neutral.main,
+                    }}
+                  >
+                    List of Tasks
+                  </ETCaption2>
                   <Chip
+                    size="small"
                     sx={{
                       ml: "0.25rem",
                       backgroundColor: Palette.neutral.bg.dark,
-                      fontSize: "13px",
-                      padding: "2px 8px",
-                      borderRadius: "-4px",
-                      height: "auto",
                     }}
                     label={tasks.length}
                   />
-                </ETCaption2>
+                </Box>
               </>
             )}
             {tasks.map((item, index) => (
