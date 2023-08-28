@@ -70,13 +70,11 @@ const StaffList = () => {
       {
         accessorKey: "position.name",
         header: "Position",
-        filterFn: "equals",
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
             <FilterSelect
               isMulti
-              menuIsOpen={true}
               header={header}
               column={column}
               variant="inline"
