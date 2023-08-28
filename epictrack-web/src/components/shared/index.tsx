@@ -24,7 +24,6 @@ interface HeaderProps {
   sx?: SxProps;
   color?: string;
   bold?: boolean;
-  titleText?: string;
   children?: React.ReactNode | string;
   [prop: string]: unknown;
 }
@@ -157,34 +156,33 @@ export const ETSubhead = ({
   );
 };
 
-export const ETParagraph = ({
-  bold,
-  color,
-  children,
-  sx,
-  ...rest
-}: HeaderProps) => {
-  return (
-    <Tooltip title={rest.titleText}>
-      <Typography
-        color={color}
-        sx={{
-          ...sx,
-          fontSize: "1rem",
-          lineHeight: "1.5rem",
-          fontWeight: bold
-            ? MET_Header_Font_Weight_Bold
-            : MET_Header_Font_Weight_Regular,
-          fontFamily: MET_Header_Font_Family,
-        }}
-        variant="body1"
-        {...rest}
-      >
-        {children}
-      </Typography>
-    </Tooltip>
-  );
-};
+export const ETParagraph = React.forwardRef(
+  (
+    { bold, color, children, sx, ...rest }: HeaderProps,
+    ref: React.ForwardedRef<HTMLDivElement>
+  ) => {
+    return (
+      <div ref={ref}>
+        <Typography
+          color={color}
+          sx={{
+            ...sx,
+            fontSize: "1rem",
+            lineHeight: "1.5rem",
+            fontWeight: bold
+              ? MET_Header_Font_Weight_Bold
+              : MET_Header_Font_Weight_Regular,
+            fontFamily: MET_Header_Font_Family,
+          }}
+          variant="body1"
+          {...rest}
+        >
+          {children}
+        </Typography>
+      </div>
+    );
+  }
+);
 
 export const ETCaption1 = ({
   bold,

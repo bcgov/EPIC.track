@@ -1,4 +1,4 @@
-import { Box, Grid, LinearProgress, SxProps } from "@mui/material";
+import { Box, Grid, LinearProgress, SxProps, Tooltip } from "@mui/material";
 import React, { useContext } from "react";
 import Moment from "moment";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -39,17 +39,15 @@ const useStyles = makeStyles({
     fill: Palette.primary.main,
     cursor: "pointer",
   },
-  accordionIcon: {
-    fill: Palette.primary.main,
-    cursor: "pointer",
-  },
 });
 
 interface SummaryItemProps {
   isTitleBold?: boolean;
   title: string;
   content?: string;
+  maxLength?: number;
   children?: React.ReactNode;
+  enableTooltip?: boolean;
   sx?: SxProps;
 }
 const SummaryItem = (props: SummaryItemProps) => {
@@ -64,13 +62,19 @@ const SummaryItem = (props: SummaryItemProps) => {
       <ETCaption1 className={clasess.title}>{props.title}</ETCaption1>
       {props.children && props.children}
       {props.content && (
-        <ETParagraph
-          className={clasess.content}
-          bold={props.isTitleBold}
-          sx={{ color: `${Palette.neutral.dark}` }}
+        <Tooltip
+          arrow
+          title={props.content}
+          disableHoverListener={!props.enableTooltip}
         >
-          {props.content}
-        </ETParagraph>
+          <ETParagraph
+            className={clasess.content}
+            bold={props.isTitleBold}
+            sx={{ color: `${Palette.neutral.dark}` }}
+          >
+            {props.content}
+          </ETParagraph>
+        </Tooltip>
       )}
     </Box>
   );
@@ -130,6 +134,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                 <SummaryItem
                   title="Phase"
                   content={phase.phase}
+                  enableTooltip={true}
                   isTitleBold={isSelectedPhase}
                   sx={{
                     ml: "12px",
@@ -158,6 +163,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={2}>
                 <SummaryItem
                   title="Next milestone"
+                  enableTooltip={true}
                   content={phase.next_milestone}
                   isTitleBold={isSelectedPhase}
                 />
