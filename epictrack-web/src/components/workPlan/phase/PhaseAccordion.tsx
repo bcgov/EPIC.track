@@ -63,7 +63,6 @@ const SummaryItem = (props: SummaryItemProps) => {
       {props.children && props.children}
       {props.content && (
         <Tooltip
-          arrow
           title={props.content}
           disableHoverListener={!props.enableTooltip}
         >
