@@ -8,6 +8,10 @@ export const store = configureStore({
     user: userSlice,
     uiState: uiStateSlice,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }),
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors
