@@ -232,7 +232,8 @@ const EventGrid = () => {
             bold={row.original.type === EVENT_TYPE.MILESTONE}
             className={classes.textEllipsis}
             onClick={(event: any) => onRowClick(event, row.original)}
-            titleText={cell.getValue<string>()}
+            enableTooltip={true}
+            tooltip={cell.getValue<string>()}
           >
             {cell.getValue<string>()}
           </ETGridTitle>
