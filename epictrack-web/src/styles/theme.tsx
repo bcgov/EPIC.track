@@ -13,6 +13,7 @@ export const Palette = {
     light: "#858A8C",
     accent: {
       light: "#C2C4C5",
+      dark: "#494949",
     },
     bg: {
       main: "#F2F2F2",
@@ -63,9 +64,6 @@ export const Palette = {
   hover: {
     light: "#4C81AF",
   },
-  text: {
-    primary: "#494949",
-  },
 };
 
 export const BaseTheme = createTheme({
@@ -86,9 +84,6 @@ export const BaseTheme = createTheme({
       dark: Palette.secondary.dark,
       light: Palette.secondary.light,
       contrastText: Palette.black,
-    },
-    text: {
-      primary: Palette.text.primary,
     },
     error: {
       main: Palette.error.main,
@@ -237,6 +232,26 @@ export const BaseTheme = createTheme({
     MuiFormLabel: {
       defaultProps: {
         focused: false,
+      },
+    },
+    MuiTooltip: {
+      styleOverrides: {
+        tooltip: {
+          backgroundColor: Palette.neutral.accent.dark,
+          color: Palette.white,
+          borderRadius: "4px",
+          padding: "4px 8px",
+          fontSize: "0.75rem",
+          maxWidth: "300px",
+          margin: "2px",
+          overflowWrap: "break-word",
+          fontWeight: MET_Header_Font_Weight_Regular,
+          lineHeight: "1rem",
+          textAlign: "center",
+        },
+        tooltipArrow: {
+          backgroundColor: Palette.neutral.accent.dark,
+        },
       },
     },
     MuiTableCell: {

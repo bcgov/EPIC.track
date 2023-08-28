@@ -97,28 +97,24 @@ const UserMenu = (props: UserMenuProps) => {
           <ETCaption2 bold>Contact</ETCaption2>
           <Box className={classes.menuItem}>
             <Box className={classes.contactInfo}>
-              <Tooltip title={email} arrow>
+              <ETCaption2
+                color={Palette.primary.accent.main}
+                sx={{ flexGrow: 1 }}
+                noWrap
+              >
+                {email}
+              </ETCaption2>
+              <CopyButton copyText={email} />
+            </Box>
+            {phone && (
+              <Box className={classes.contactInfo}>
                 <ETCaption2
                   color={Palette.primary.accent.main}
                   sx={{ flexGrow: 1 }}
                   noWrap
                 >
-                  {email}
+                  {phone}
                 </ETCaption2>
-              </Tooltip>
-              <CopyButton copyText={email} />
-            </Box>
-            {phone && (
-              <Box className={classes.contactInfo}>
-                <Tooltip title={phone} arrow>
-                  <ETCaption2
-                    color={Palette.primary.accent.main}
-                    sx={{ flexGrow: 1 }}
-                    noWrap
-                  >
-                    {phone}
-                  </ETCaption2>
-                </Tooltip>
                 <CopyButton copyText={phone} />
               </Box>
             )}
