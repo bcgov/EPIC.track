@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all the request validation schemas"""
-from .event_request import MilestoneEventQueryParamSchema
+from .event_request import MilestoneEventQueryParamSchema, MilestoneEventBodyParameterSchema
 from .event_template_request import EventTemplateBodyParameterSchema
 from .indigenous_nation_request import (
     IndigenousNationBodyParameterSchema, IndigenousNationExistenceQueryParamSchema,
@@ -33,3 +33,4 @@ from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkPlanDownloadQueryParamSchema)
+from .event_configuration_request import EventConfigurationQueryParamSchema

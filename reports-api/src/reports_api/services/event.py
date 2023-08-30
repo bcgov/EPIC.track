@@ -19,6 +19,7 @@ from sqlalchemy import and_
 from reports_api.models import Event
 from reports_api.models.event_configuration import EventConfiguration
 from reports_api.schemas import EventSchema
+from .event_configuration import EventConfigurationService
 
 
 class EventService:  # pylint: disable=too-few-public-methods
@@ -33,6 +34,15 @@ class EventService:  # pylint: disable=too-few-public-methods
             instance = Event(**event)
             instance.flush()
         Event.commit()
+    
+    @classmethod
+    def create_event(cls, data: dict) -> Event:
+        """Create milestone event"""
+        event = Event(**data)
+        event_configuration = EventConfiguration.find_by_id(data["event_configuration_id"])
+        if not event_configuration:
+            raise("Incorrect configuration provided")
+        
 
     @classmethod
     def find_next_milestone_event_by_work_id(cls, work_id: int) -> Event:

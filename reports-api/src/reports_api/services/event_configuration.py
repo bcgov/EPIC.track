@@ -28,13 +28,14 @@ class EventConfigurationService:
         db.session.flush()
 
     @classmethod
-    def find_mandatory_configurations(cls, phase_id: int, work_id: int,
+    def find_configurations(cls, phase_id: int, work_id: int, mandatory: bool = False, 
                                       event_categories: [EventCategoryEnum] = []) -> [EventConfiguration]:
         # pylint: disable=dangerous-default-value
         """Get all the mandatory configurations for a given phase"""
         query = db.session.query(EventConfiguration).filter(EventConfiguration.work_id == work_id,
                                                             EventConfiguration.phase_id == phase_id,
-                                                            EventConfiguration.mandatory.is_(True),
+                                                            EventConfiguration.parent_id == None,
+                                                            EventConfiguration.mandatory.is_(mandatory),
                                                             EventConfiguration.is_active.is_(True))
         if len(event_categories) > 0:
             query.filter(EventConfiguration.event_category_id.in_(event_categories))

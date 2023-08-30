@@ -39,7 +39,7 @@ export const WorkplanProvider = ({
       setLoading(false);
     }
   }, [work_id]);
-  console.log("SELECTED PHASE ", selectedPhase);
+  console.log("SELECTED PHASE CTX", selectedPhase);
   return (
     <WorkplanContext.Provider
       value={{

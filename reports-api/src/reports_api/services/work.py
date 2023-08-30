@@ -271,6 +271,7 @@ class WorkService:
             "number_of_days": data["number_of_days"],
             "mandatory": data["mandatory"],
             "sort_order": data["sort_order"],
+            "template_id": data["id"]
         }
 
     @classmethod

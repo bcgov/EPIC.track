@@ -28,16 +28,15 @@ from reports_api.utils.util import cors_preflight
 API = Namespace("events", description="Events")
 
 
-@cors_preflight("GET")
-@API.route("/milestones", methods=["GET", "OPTIONS"])
-class Templates(Resource):
+@cors_preflight("GET, POST")
+@API.route("/milestones", methods=["GET", "POST", "OPTIONS"])
+class Events(Resource):
     """Endpoint resource to return all milestone events for given work id"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all task templates."""
         args = req.MilestoneEventQueryParamSchema().load(request.args)
@@ -50,3 +49,7 @@ class Templates(Resource):
             jsonify(res.EventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,
         )
+    
+    def post():
+        """Create a milestone event"""
+        request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)

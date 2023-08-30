@@ -46,6 +46,7 @@ from .task import API as TASK_API
 from .task_template import API as TASK_TEMPLATE_API
 from .user import API as USER_API
 from .work import API as WORK_API
+from .event_configuration import API as EVENT_CONFIGURATION_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -97,3 +98,4 @@ API.add_namespace(TASK_TEMPLATE_API, path="/task-templates")
 API.add_namespace(EVENT_TEMPLATE_API, path="/event-templates")
 API.add_namespace(TASK_API, path="/tasks")
 API.add_namespace(EVENT_API, path="/events")
+API.add_namespace(EVENT_CONFIGURATION_API, path="/event-configurations")
