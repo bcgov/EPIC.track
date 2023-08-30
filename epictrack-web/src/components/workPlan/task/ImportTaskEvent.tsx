@@ -24,6 +24,9 @@ const useStyle = makeStyles({
     borderRight: `1px solid ${Palette.neutral.bg.dark}`,
     height: "100%",
     overflowY: "scroll",
+    "& ul": {
+      padding: 0,
+    },
   },
   templateItem: {
     padding: "0.5rem 1rem",
