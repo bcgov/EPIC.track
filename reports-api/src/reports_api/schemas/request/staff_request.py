@@ -85,6 +85,11 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
         required=True,
     )
 
+    is_active = fields.Boolean(
+        metadat = {"description": "Active status of the staff"},
+        required=True
+    )
+
 
 class StaffEmailPathParameterSchema(RequestPathParameterSchema):
     """Staff email path parameter schema"""

@@ -24,6 +24,9 @@ const useStyle = makeStyles({
     borderRight: `1px solid ${Palette.neutral.bg.dark}`,
     height: "100%",
     overflowY: "scroll",
+    "& ul": {
+      padding: 0,
+    },
   },
   templateItem: {
     padding: "0.5rem 1rem",
@@ -47,6 +50,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
   const [tasks, setTasks] = React.useState<ListType[]>([]);
   const [templateIndex, setTemplateIndex] = React.useState<number>(0);
   const ctx = React.useContext(WorkplanContext);
+  const taskContainerRef = React.useRef(null);
   const classes = useStyle();
   React.useEffect(() => {
     getTemplates();
@@ -68,6 +72,11 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
     () => (templates.length > 0 ? templates[templateIndex].id : 0),
     [templates, templateIndex]
   );
+
+  const onTemplateClickHandler = (index: number) => {
+    setTemplateIndex(index);
+    (taskContainerRef.current as any).scrollIntoView({ behavior: "smooth" });
+  };
 
   const getTemplates = async () => {
     try {
@@ -124,7 +133,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
                 <ListItemButton
                   key={`template-list-${index}`}
                   selected={templateIndex === index}
-                  onClick={() => setTemplateIndex(index)}
+                  onClick={() => onTemplateClickHandler(index)}
                   sx={{
                     borderRadius: "4px",
                     "&.MuiListItemButton-root": {
@@ -153,6 +162,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
             {templates.length > 0 && tasks.length > 0 && (
               <>
                 <ETParagraph
+                  ref={taskContainerRef}
                   sx={{
                     mb: "0.5rem",
                   }}

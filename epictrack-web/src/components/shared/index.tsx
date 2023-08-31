@@ -30,6 +30,7 @@ interface HeaderProps {
 
 interface LinkHeaderProps extends HeaderProps {
   to: string | Partial<Path>;
+  enableTooltip?: boolean;
   onClick?: (eventArg?: any) => void;
 }
 
@@ -248,9 +249,14 @@ export const ETGridTitle = ({
     //   {children}
     // </ETParagraph>
     <ETLink to={rest.to} onClick={rest.onClick}>
-      <ETParagraph bold={bold} {...rest} color={Palette.primary.accent.main}>
-        {children}
-      </ETParagraph>
+      <Tooltip
+        title={rest.tooltip as string}
+        disableHoverListener={!rest.enableTooltip}
+      >
+        <ETParagraph bold={bold} {...rest} color={Palette.primary.accent.main}>
+          {children}
+        </ETParagraph>
+      </Tooltip>
     </ETLink>
   );
 };
