@@ -28,6 +28,18 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
         required=True,
     )
 
+    work_id = fields.Int(
+        metadata={"description": "Id of work"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    phase_id = fields.Int(
+        metadata={"description": "Id of the phase"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
     short_description = fields.Str(
         metadata={"description": "Short description of milestone event"},
         validate=validate.Length(max=2000)

@@ -39,11 +39,13 @@ class Event(BaseModelVersioned):
     is_complete = Column(Boolean(), default=False, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
     source_event_id = Column(Integer, nullable=True)
+    work_id = Column(ForeignKey("works.id"), nullable=False)
     event_configuration_id = Column(
         ForeignKey("event_configurations.id"), nullable=False
     )
 
     outcome = relationship("Outcome", foreign_keys=[outcome_id], lazy="select")
+    work = relationship("Work", foreign_keys=[work_id], lazy="select")
     event_configuration = relationship(
         "EventConfiguration", foreign_keys=[event_configuration_id], lazy="select"
     )

@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage Event Configuration."""
 from typing import Iterable
+from sqlalchemy import or_
 
 from reports_api.models import EventConfiguration, db
 from reports_api.models.event_category import EventCategoryEnum
@@ -39,5 +40,21 @@ class EventConfigurationService:
                                                             EventConfiguration.is_active.is_(True))
         if len(event_categories) > 0:
             query.filter(EventConfiguration.event_category_id.in_(event_categories))
+        configurations = query.all()
+        return configurations
+    
+    @classmethod
+    def find_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
+        """Get all the child configurations for a given phase"""
+        query = db.session.query(EventConfiguration).filter(EventConfiguration.parent_id == configuration_id,
+                                                            EventConfiguration.is_active.is_(True))
+        configurations = query.all()
+        return configurations
+
+    @classmethod
+    def find_parent_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
+        """Get both parent and child configurations""" 
+        query = db.session.query(EventConfiguration).filter(or_(EventConfiguration.id == configuration_id, EventConfiguration.parent_id == configuration_id),
+                                                            EventConfiguration.is_active.is_(True))
         configurations = query.all()
         return configurations

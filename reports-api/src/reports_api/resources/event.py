@@ -50,6 +50,12 @@ class Events(Resource):
             HTTPStatus.OK,
         )
     
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
     def post():
         """Create a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        EventService.create_event(request_json)
