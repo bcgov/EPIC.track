@@ -6,6 +6,7 @@ import MultiValue from "./components/MultiValueContainer";
 import { OptionType, SelectProps } from "./type";
 import { Palette } from "../../../styles/theme";
 import SingleValue from "./components/SingleValueContainer";
+import DropdownIndicator from "./components/DropDownIndicator";
 
 const FilterSelect = (props: SelectProps) => {
   const { name, isMulti, header, column } = props;
@@ -102,8 +103,6 @@ const FilterSelect = (props: SelectProps) => {
     setSelectValue(isMulti ? [] : "");
     header.column.setFilterValue(isMulti ? [] : "");
     selectRef.current?.clearValue();
-    setMenuIsOpen(false);
-    selectRef.current?.blur();
   };
 
   const onCancel = () => {
@@ -142,6 +141,7 @@ const FilterSelect = (props: SelectProps) => {
         MultiValue,
         SingleValue,
         IndicatorSeparator: () => null,
+        DropdownIndicator,
       }}
       filterProps={{
         applyFilters,
@@ -198,6 +198,10 @@ const FilterSelect = (props: SelectProps) => {
           ...base,
           zIndex: 2,
           marginTop: "4px",
+        }),
+        input: (base, props) => ({
+          ...base,
+          fontWeight: "400",
         }),
       }}
       isClearable={false}

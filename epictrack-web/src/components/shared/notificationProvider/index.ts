@@ -1,4 +1,4 @@
-import { SnackbarMessage, SnackbarOrigin, enqueueSnackbar } from "notistack";
+import { SnackbarMessage, enqueueSnackbar } from "notistack";
 import { CustomAction, NotificationOptions } from "./type";
 
 export const showNotification = (
@@ -41,20 +41,17 @@ export const showNotification = (
    *             }],
    *         });
    */
-  let anchorOrigin: SnackbarOrigin = {
-    vertical: "bottom",
-    horizontal: "right",
-  };
-  if (options?.actions && options.actions?.length > 0) {
-    anchorOrigin = { vertical: "top", horizontal: "center" };
-  }
+
   return enqueueSnackbar(title, {
     variant: "etNotification",
     type: options.type,
     autoHideDuration: options.duration !== undefined ? options.duration : 2000,
     helpText: options.message,
     actions: options.actions,
-    anchorOrigin,
+    anchorOrigin: {
+      vertical: "bottom",
+      horizontal: "right",
+    },
     persist: Boolean(options.actions),
   });
 };

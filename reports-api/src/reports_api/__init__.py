@@ -25,8 +25,8 @@ from marshmallow import ValidationError
 
 from reports_api import config
 from reports_api.config import _Config
-from reports_api.exceptions import (PermissionDeniedError, ResourceExistsError,
-                                    ResourceNotFoundError, UnprocessableEntityError)
+from reports_api.exceptions import (
+    PermissionDeniedError, ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError)
 from reports_api.models import db
 from reports_api.utils.auth import jwt
 from reports_api.utils.caching import AppCache

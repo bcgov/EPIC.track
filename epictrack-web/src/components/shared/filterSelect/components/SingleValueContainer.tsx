@@ -1,5 +1,5 @@
 import React from "react";
-import { PlaceholderProps, SingleValueProps, components } from "react-select";
+import { SingleValueProps, components } from "react-select";
 import { Box } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
 import { ETCaption2 } from "../..";
@@ -19,6 +19,7 @@ const SingleValue = (props: SingleValueProps) => {
             alignSelf: "stretch",
             borderRadius: "4px",
             background: Palette.primary.bg.light,
+            cursor: "pointer",
           }}
           className={clsx(
             emotionCss(props.getStyles("singleValue", props)),

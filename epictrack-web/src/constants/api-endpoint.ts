@@ -23,6 +23,7 @@ const Endpoints = {
     WORK_RESOURCES: "works/resources",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
     WORK_TEAM_MEMBERS: "works/:work_id/staff",
+    CHECK_TEMPLATE_UPLOAD_STATUS: "works/:work_id/phase/:phase_id",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

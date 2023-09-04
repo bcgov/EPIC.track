@@ -1,5 +1,5 @@
 import React from "react";
-import { MRT_ColumnDef } from "material-react-table";
+import { MRT_ColumnDef, MRT_Row } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import StaffForm from "./StaffForm";
@@ -84,6 +84,7 @@ const StaffList = () => {
           );
         },
         filterSelectOptions: positions,
+        filterFn: "multiSelectFilter",
       },
       {
         accessorKey: "is_active",

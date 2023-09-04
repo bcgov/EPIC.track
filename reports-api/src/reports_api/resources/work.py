@@ -175,3 +175,19 @@ class WorkPlan(Resource):
         phase_id = args.get("phase_id")
         file = WorkService.generate_workplan(work_id, phase_id)
         return send_file(BytesIO(file), as_attachment=True, download_name="work_plan.xlsx")
+
+
+@cors_preflight("GET")
+@API.route("/<int:work_id>/phase/<int:phase_id>", methods=["GET", "OPTIONS"])
+class WorkPhaseTemplateStatus(Resource):
+    """Endpoints to get work phase template upload status"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id, phase_id):
+        """Get the status if template upload is available"""
+        req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
+        template_upload_status = WorkPhaseService.get_template_upload_status(work_id, phase_id)
+        return {"template_available": template_upload_status}, HTTPStatus.OK

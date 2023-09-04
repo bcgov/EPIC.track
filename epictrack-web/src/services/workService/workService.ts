@@ -59,5 +59,13 @@ class WorkService implements ServiceBase {
       }
     );
   }
+
+  async checkTemplateUploadStatus(workId: string, phaseId: string) {
+    const url = Endpoints.Works.CHECK_TEMPLATE_UPLOAD_STATUS.replace(
+      ":work_id",
+      workId
+    ).replace(":phase_id", phaseId);
+    return await http.GetRequest(url);
+  }
 }
 export default new WorkService();

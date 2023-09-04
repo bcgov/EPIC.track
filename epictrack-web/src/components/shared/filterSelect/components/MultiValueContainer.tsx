@@ -18,6 +18,7 @@ const MultiValue = (props: MultiValueProps) => {
             alignSelf: "stretch",
             borderRadius: "4px",
             background: Palette.primary.bg.light,
+            cursor: "pointer",
           }}
           key={props.index}
         >
