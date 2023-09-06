@@ -20,8 +20,7 @@ from flask_restx import Namespace, Resource, cors
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services.event import EventService
-from reports_api.utils import auth, constants, profiletime
-from reports_api.utils.caching import AppCache
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 
@@ -46,7 +45,6 @@ class Events(Resource):
             jsonify(res.EventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,
         )
-    
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -57,6 +55,7 @@ class Events(Resource):
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
         event_response = EventService.create_event(request_json, work_id, phase_id)
         return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
+
 
 @cors_preflight("GET, PUT")
 @API.route("/events/<int:event_id>", methods=["GET", "PUT", "OPTIONS"])
@@ -82,5 +81,3 @@ class Event(Resource):
         req.MilestoneEventPathParameterSchema().load(request.view_args)
         milestone_event = EventService.find_milestone_event(event_id)
         return res.EventResponseSchema().dump(milestone_event), HTTPStatus.OK
-
-

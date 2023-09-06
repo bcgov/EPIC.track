@@ -203,6 +203,12 @@ const MasterTrackTable = <T extends Record<string, any>>({
         icons={{
           FilterAltIcon: () => null,
         }}
+        filterFns={{
+          multiSelectFilter: (row, id, filterValue) => {
+            if (filterValue.length === 0) return true;
+            return filterValue.includes(row.getValue(id));
+          },
+        }}
       />
     </>
   );

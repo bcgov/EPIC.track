@@ -151,3 +151,19 @@ class WorkPlanDownloadQueryParamSchema(RequestQueryParameterSchema):
         validate=validate.Range(min=1),
         required=True,
     )
+
+
+class WorkIdPhaseIdPathParameterSchema(RequestPathParameterSchema):
+    """Work id and phase id path parameter schema"""
+
+    work_id = fields.Int(
+        metadata={"description": "ID of the work"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
+
+    phase_id = fields.Int(
+        metadata={"description": "ID of the phase"},
+        validate=validate.Range(min=1),
+        required=True,
+    )

@@ -42,7 +42,7 @@ class EventCategory(BaseModelVersioned):
 
 
 PRIMARY_CATEGORIES = [EventCategoryEnum.MILESTONE,
-                    EventCategoryEnum.DECISION,
-                    EventCategoryEnum.EXTENSION,
-                    EventCategoryEnum.SUSPENSION,
-                    EventCategoryEnum.PCP]
+                      EventCategoryEnum.DECISION,
+                      EventCategoryEnum.EXTENSION,
+                      EventCategoryEnum.SUSPENSION,
+                      EventCategoryEnum.PCP]

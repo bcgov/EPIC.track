@@ -21,8 +21,7 @@ from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services.event_configuration import EventConfigurationService
 from reports_api.models.event_category import PRIMARY_CATEGORIES
-from reports_api.utils import auth, constants, profiletime
-from reports_api.utils.caching import AppCache
+from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
 
 

@@ -1,7 +1,7 @@
 """Event resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import RequestQueryParameterSchema, RequestBodyParameterSchema, RequestPathParameterSchema
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema
 
 
 # class MilestoneEventQueryParamSchema(RequestQueryParameterSchema):

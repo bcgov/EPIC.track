@@ -66,8 +66,9 @@ class WorkPlanSchema(Schema):
             return "Not Started"
         if hasattr(instance, "actual_date") and instance.actual_date:
             return "Completed"
-        elif hasattr(instance, "status"):
+        if hasattr(instance, "status"):
             return status_dict.get(instance.status.value)
+        return ""
 
     def get_notes(self, instance):
         """Return notes"""

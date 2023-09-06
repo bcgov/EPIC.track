@@ -26,11 +26,12 @@ from .staff_request import (
     StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffEmailPathParameterSchema,
     StaffExistanceQueryParamSchema, StaffIdPathParameterSchema)
 from .task_request import (
-    TaskBodyParameterSchema, TaskEventQueryParamSchema, TaskTemplateBodyParameterSchema,
-    TaskTemplateIdPathParameterSchema, TaskEventBodyParamSchema, TaskEventIdPathParameterSchema,
-    TaskTemplateImportEventsBodyParamSchema, TaskTemplateQueryParamSchema)
+    TaskBodyParameterSchema, TaskEventBodyParamSchema, TaskEventIdPathParameterSchema, TaskEventQueryParamSchema,
+    TaskTemplateBodyParameterSchema, TaskTemplateIdPathParameterSchema, TaskTemplateImportEventsBodyParamSchema,
+    TaskTemplateQueryParamSchema)
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (
-    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkPlanDownloadQueryParamSchema)
+    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
+    WorkPlanDownloadQueryParamSchema)
 from .event_configuration_request import EventConfigurationQueryParamSchema

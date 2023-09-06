@@ -53,3 +53,7 @@ export interface WorkPhaseSkeleton extends MasterBase {
   milestone_progress: number;
   next_milestone: string;
 }
+
+export interface TemplateStatus extends MasterBase {
+  template_available: boolean;
+}

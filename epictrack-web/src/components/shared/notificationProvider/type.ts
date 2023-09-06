@@ -13,10 +13,6 @@ export interface NotificationOptions {
   actions?: CustomAction[];
 }
 
-export interface StyleProps {
-  drawerWidth: number;
-}
-
 export interface ETNotificationProps extends CustomContentProps {
   helpText?: string;
   actions?: CustomAction[];

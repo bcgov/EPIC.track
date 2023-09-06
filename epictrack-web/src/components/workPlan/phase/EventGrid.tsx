@@ -33,9 +33,9 @@ import {
   NotStartedIcon,
 } from "../../icons/status";
 import EventForm from "../event/EventForm";
-import { convertToRaw } from "draft-js";
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
 import { CheckboxChecked } from "../../icons/checkbox";
+import { TemplateStatus } from "../../../models/work";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -384,6 +384,37 @@ const EventGrid = () => {
     setShowMilestoneForm(false);
     setEventId(undefined);
   };
+
+  const getTemplateUploadStatus = React.useCallback(async () => {
+    if (ctx.work && ctx.selectedPhase) {
+      const response = await workService.checkTemplateUploadStatus(
+        ctx.work?.id.toString(),
+        ctx.selectedPhase?.phase_id.toString()
+      );
+      const templateUploadStatus: TemplateStatus =
+        response.data as TemplateStatus;
+      if (templateUploadStatus.template_available) {
+        showNotification("Task Templates are available!", {
+          type: "info",
+          duration: 3000,
+          message:
+            "Do you want to preview available Templates with lists of tasks?",
+          actions: [
+            {
+              label: "Preview Templates",
+              color: "primary",
+              callback: () => setShowTemplateForm(true),
+            },
+          ],
+        });
+      }
+    }
+  }, [ctx.selectedPhase]);
+
+  React.useEffect(() => {
+    getTemplateUploadStatus();
+  }, [ctx.selectedPhase]);
+
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
@@ -426,7 +457,6 @@ const EventGrid = () => {
           enablePagination
           muiSelectCheckboxProps={({ row, table }) => ({
             indeterminate: row.original.type === EVENT_TYPE.MILESTONE,
-            indeterminateIcon: <CheckboxChecked />,
           })}
           columns={columns}
           data={events}

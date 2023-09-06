@@ -86,7 +86,7 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     is_active = fields.Boolean(
-        metadat = {"description": "Active status of the staff"},
+        metadata={"description": "Active status of the staff"},
         required=True
     )
 

@@ -26,6 +26,7 @@ from .ea_act import EAAct
 from .eao_team import EAOTeam
 from .event import Event
 from .event_category import EventCategory, EventCategoryEnum, PRIMARY_CATEGORIES
+from .event_configuration import EventConfiguration
 from .event_field import EventField
 from .event_field_value import EventFieldValue
 from .event_template import EventTemplate
@@ -55,7 +56,7 @@ from .staff_work_role import StaffWorkRole
 from .sub_types import SubType
 from .substitution_acts import SubstitutionAct
 from .task import Task
-from .task_event import TaskEvent, StatusEnum
+from .task_event import StatusEnum, TaskEvent
 from .task_event_assignee import TaskEventAssignee
 from .task_template import TaskTemplate
 from .types import Type
@@ -64,4 +65,3 @@ from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
-from .event_configuration import EventConfiguration

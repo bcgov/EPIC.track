@@ -29,21 +29,25 @@ class EventConfigurationService:
         db.session.flush()
 
     @classmethod
-    def find_configurations(cls, phase_id: int, work_id: int, mandatory, 
-                                      event_categories: [EventCategoryEnum] = []) -> [EventConfiguration]:
+    def find_configurations(cls,
+                            phase_id: int,
+                            work_id: int,
+                            mandatory,
+                            event_categories: [EventCategoryEnum] = []) -> [EventConfiguration]:
         # pylint: disable=dangerous-default-value
         """Get all the mandatory configurations for a given phase"""
         query = db.session.query(EventConfiguration).filter(EventConfiguration.work_id == work_id,
                                                             EventConfiguration.phase_id == phase_id,
-                                                            EventConfiguration.parent_id == None,
+                                                            EventConfiguration.parent_id.is_(None),
                                                             EventConfiguration.is_active.is_(True))
         if len(event_categories) > 0:
-            query = query.filter(EventConfiguration.event_category_id.in_(list(map(lambda x: x.value, event_categories))))
+            category_ids = list(map(lambda x: x.value, event_categories))
+            query = query.filter(EventConfiguration.event_category_id.in_(category_ids))
         if mandatory is not None:
             query = query.filter(EventConfiguration.mandatory.is_(mandatory))
         configurations = query.all()
         return configurations
-    
+
     @classmethod
     def find_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
         """Get all the child configurations for a given phase"""
@@ -54,8 +58,12 @@ class EventConfigurationService:
 
     @classmethod
     def find_parent_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
-        """Get both parent and child configurations""" 
-        query = db.session.query(EventConfiguration).filter(or_(EventConfiguration.id == configuration_id, EventConfiguration.parent_id == configuration_id),
-                                                            EventConfiguration.is_active.is_(True))
+        """Get both parent and child configurations"""
+        query = db.session.query(EventConfiguration)\
+            .filter(or_(
+                EventConfiguration.id == configuration_id,
+                EventConfiguration.parent_id == configuration_id),
+                EventConfiguration.is_active.is_(True)
+                   )
         configurations = query.all()
         return configurations

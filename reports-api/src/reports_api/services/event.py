@@ -36,20 +36,22 @@ class EventService:  # pylint: disable=too-few-public-methods
             instance = Event(**event)
             instance.flush()
         Event.commit()
-    
+
     @classmethod
-    def create_event(cls, data: dict, work_id: int, phase_id: int ,commit: bool = True) -> Event:
+    def create_event(cls, data: dict, work_id: int, phase_id: int, commit: bool = True) -> Event:
         """Create milestone event"""
-        event = Event(**
-            {
-            "name": data.get("name"),
-            "anticipated_date": data.get("anticipated_date"),
-            "actual_date": data.get("actual_date"),
-            "number_of_days": data.get("number_of_days"),
-            "event_configuration_id": data.get("event_configuration_id"),
-            "work_id": work_id
-        })
-        event_configurations = EventConfigurationService.find_parent_child_configurations(data.get("event_configuration_id"))
+        event = Event(
+            **{
+                "name": data.get("name"),
+                "anticipated_date": data.get("anticipated_date"),
+                "actual_date": data.get("actual_date"),
+                "number_of_days": data.get("number_of_days"),
+                "event_configuration_id": data.get("event_configuration_id"),
+                "work_id": work_id
+            }
+                    )
+        event_configurations = EventConfigurationService.find_parent_child_configurations(
+            data.get("event_configuration_id"))
         if not event_configurations:
             raise UnprocessableEntityError("Incorrect configuration provided")
 
@@ -78,14 +80,15 @@ class EventService:  # pylint: disable=too-few-public-methods
         return event
 
     @classmethod
-    def update_event(cls, data: dict, event_id: int, commit: bool = True ) -> Event:
+    def update_event(cls, data: dict, event_id: int, commit: bool = True) -> Event:
         """Update the event"""
         event = Event.find_by_id(event_id)
         if not event:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        event_configurations = EventConfigurationService.find_parent_child_configurations(data.get("event_configuration_id"))
+        event_configurations = EventConfigurationService.find_parent_child_configurations(
+            data.get("event_configuration_id"))
         if not event_configurations:
             raise UnprocessableEntityError("Incorrect configuration provided")
         child_configurations = list(filter(lambda x: x.parent_id, event_configurations))
@@ -99,7 +102,7 @@ class EventService:  # pylint: disable=too-few-public-methods
     def find_milestone_event(cls, event_id: int) -> Event:
         """Get the milestone event"""
         m_event = Event.find_by_id(event_id)
-        if not m_event or m_event.is_active == False:
+        if not m_event or not m_event.is_active:
             raise ResourceNotFoundError("Milestone event either not found or inactive")
         return m_event
 
@@ -127,13 +130,14 @@ class EventService:  # pylint: disable=too-few-public-methods
     def _handle_child_events(cls, child_configurations: [EventConfiguration], event: [Event]) -> None:
         """Create events based on the child event configurations"""
         for c_event_conf in child_configurations:
-             c_event_start_date = cls._find_event_date(event) + timedelta(
-                        days=cls._find_start_at_value(
-                            c_event_conf.start_at, event.number_of_days))
-             if c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value:
-                work_calendar_event = db.session.query(WorkCalendarEvent).filter(WorkCalendarEvent.event_configuration_id == c_event_conf.id,
-                                                                                 WorkCalendarEvent.source_event_id == event.id,
-                                                                                 WorkCalendarEvent.is_active.is_(True)).scalar()
+            c_event_start_date = cls._find_event_date(event) + timedelta(
+                days=cls._find_start_at_value(
+                    c_event_conf.start_at, event.number_of_days))
+            if c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value:
+                work_calendar_event = db.session.query(WorkCalendarEvent)\
+                    .filter(WorkCalendarEvent.event_configuration_id == c_event_conf.id,
+                            WorkCalendarEvent.source_event_id == event.id,
+                            WorkCalendarEvent.is_active.is_(True)).scalar()
                 if work_calendar_event:
                     cal_event = CalendarEvent.find_by_id(work_calendar_event.calendar_event_id)
                     cal_event.anticipated = c_event_start_date
@@ -157,7 +161,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                             }
                         )
                     )
-             else:
+            else:
                 existing_event = db.session.query(Event).filter(Event.source_event_id == event.id,
                                                                 Event.is_active.is_(True))
                 if existing_event:
@@ -181,8 +185,9 @@ class EventService:  # pylint: disable=too-few-public-methods
     def _find_events_by_work(cls, work_id: int, event_categories: [EventCategoryEnum] = []) -> [Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
-        events_query = db.session.query(Event).join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)\
-        .filter(Event.is_active.is_(True), EventConfiguration.work_id == work_id)
+        events_query = db.session.query(Event)\
+            .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)\
+            .filter(Event.is_active.is_(True), EventConfiguration.work_id == work_id)
         if len(event_categories) > 0:
             events_query.filter(EventConfiguration.event_category_id.in_(event_categories))
         return events_query.all()
