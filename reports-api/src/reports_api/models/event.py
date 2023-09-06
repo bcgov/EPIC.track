@@ -35,7 +35,7 @@ class Event(BaseModelVersioned):
     actual_date = Column(DateTime(timezone=True), nullable=True)
     number_of_days = Column(Integer, default=0, nullable=False)
     outcome_id = Column(ForeignKey("outcomes.id"), nullable=True, default=None)
-    is_active = Column(Boolean(), default=False, nullable=False)
+    is_active = Column(Boolean(), default=True, nullable=False)
     is_complete = Column(Boolean(), default=False, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
     source_event_id = Column(Integer, nullable=True)
@@ -49,6 +49,7 @@ class Event(BaseModelVersioned):
     event_configuration = relationship(
         "EventConfiguration", foreign_keys=[event_configuration_id], lazy="select"
     )
+    notes = Column(String)
 
     @classmethod
     def find_by_work_id(cls, work_id: int):

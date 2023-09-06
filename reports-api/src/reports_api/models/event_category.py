@@ -39,3 +39,10 @@ class EventCategory(BaseModelVersioned):
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String, nullable=False)
     sort_order = sa.Column(sa.Integer, nullable=False)
+
+
+PRIMARY_CATEGORIES = [EventCategoryEnum.MILESTONE,
+                    EventCategoryEnum.DECISION,
+                    EventCategoryEnum.EXTENSION,
+                    EventCategoryEnum.SUSPENSION,
+                    EventCategoryEnum.PCP]

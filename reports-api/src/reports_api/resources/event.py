@@ -25,23 +25,20 @@ from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
 
 
-API = Namespace("events", description="Events")
+API = Namespace("milestones", description="Milestones")
 
 
 @cors_preflight("GET, POST")
-@API.route("/milestones", methods=["GET", "POST", "OPTIONS"])
+@API.route("/events/works/<int:work_id>/phases/<int:phase_id>", methods=["GET", "POST", "OPTIONS"])
 class Events(Resource):
-    """Endpoint resource to return all milestone events for given work id"""
+    """Endpoint resource to return all milestone events"""
 
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get():
+    def get(work_id, phase_id):
         """Return all task templates."""
-        args = req.MilestoneEventQueryParamSchema().load(request.args)
-        work_id = args.get("work_id")
-        phase_id = args.get("phase_id")
         task_events = EventService.find_milestone_events_by_work_phase(
             work_id, phase_id
         )
@@ -55,7 +52,35 @@ class Events(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def post():
+    def post(work_id, phase_id):
         """Create a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-        EventService.create_event(request_json)
+        event_response = EventService.create_event(request_json, work_id, phase_id)
+        return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
+
+@cors_preflight("GET, PUT")
+@API.route("/events/<int:event_id>", methods=["GET", "PUT", "OPTIONS"])
+class Event(Resource):
+    """Endpoint resource to manage individual event"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def put(event_id):
+        """Endpoint to update a milestone event"""
+        request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        event_response = EventService.update_event(request_json, event_id)
+        return res.EventResponseSchema().dump(event_response), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(event_id):
+        """Endpoint to update a milestone event"""
+        req.MilestoneEventPathParameterSchema().load(request.view_args)
+        milestone_event = EventService.find_milestone_event(event_id)
+        return res.EventResponseSchema().dump(milestone_event), HTTPStatus.OK
+
+

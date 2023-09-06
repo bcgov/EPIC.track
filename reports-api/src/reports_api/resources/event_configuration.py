@@ -20,7 +20,7 @@ from flask_restx import Namespace, Resource, cors
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services.event_configuration import EventConfigurationService
-from reports_api.models.event_category import EventCategoryEnum
+from reports_api.models.event_category import PRIMARY_CATEGORIES
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
@@ -44,11 +44,7 @@ class EventConfigurations(Resource):
         work_id = args.get("work_id")
         phase_id = args.get("phase_id")
         mandatory = args.get("mandatory")
-        configurations = EventConfigurationService.find_configurations(phase_id, work_id, mandatory, [EventCategoryEnum.MILESTONE,
-                                                                                                   EventCategoryEnum.DECISION,
-                                                                                                   EventCategoryEnum.EXTENSION,
-                                                                                                   EventCategoryEnum.SUSPENSION,
-                                                                                                   EventCategoryEnum.PCP])
+        configurations = EventConfigurationService.find_configurations(phase_id, work_id, mandatory, PRIMARY_CATEGORIES)
         return (
             jsonify(res.EventConfigurationResponseSchema(many=True).dump(configurations)),
             HTTPStatus.OK,

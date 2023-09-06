@@ -21,5 +21,4 @@ class EventConfigurationQueryParamSchema(RequestQueryParameterSchema):
 
     mandatory = fields.Bool(
         metadata={"description": "Mandatory configurations or not"},
-        missing=False
     )
