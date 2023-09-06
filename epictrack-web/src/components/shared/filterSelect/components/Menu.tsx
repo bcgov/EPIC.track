@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, RadioGroup } from "@mui/material";
+import { Box, Button } from "@mui/material";
 
 import { components, MenuProps } from "react-select";
 import { Palette } from "../../../../styles/theme";
@@ -31,6 +31,7 @@ const Menu = (props: MenuProps) => {
                 background: Palette.neutral.bg.light,
                 borderTopLeftRadius: "4px",
                 borderTopRightRadius: "4px",
+                whiteSpace: "nowrap",
               }}
             >
               {filterProps?.selectedOptions && (

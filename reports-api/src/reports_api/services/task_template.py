@@ -16,9 +16,10 @@ from typing import IO, List
 
 import pandas as pd
 from flask import current_app
+from sqlalchemy.sql import exists
 
 from reports_api.exceptions import ResourceNotFoundError
-from reports_api.models import Responsibility, Task, TaskTemplate
+from reports_api.models import Responsibility, Task, TaskTemplate, db
 from reports_api.schemas import request as req
 
 
@@ -41,8 +42,11 @@ class TaskTemplateService:
         task_data.loc[0:, ["template_id", "is_active"]] = [task_template.id, False]
         responsibilities = Responsibility.find_all()
         for res in responsibilities:
-            task_data = task_data.replace({'responsibility_id': rf'^{res.name}$'},
-                                          {'responsibility_id': res.id}, regex=True)
+            task_data = task_data.replace(
+                {"responsibility_id": rf"^{res.name}$"},
+                {"responsibility_id": res.id},
+                regex=True,
+            )
         tasks = task_data.to_dict("records")
         cls.create_bulk_tasks(tasks)
         TaskTemplate.commit()
@@ -53,7 +57,7 @@ class TaskTemplateService:
         """Read the template excel file"""
         column_map = {
             "No": "template_id",
-            "Task \"Title\"": "name",
+            'Task "Title"': "name",
             "Length (Days)": "number_of_days",
             "Start Plus": "start_at",
             "Responsibility": "responsibility_id",
@@ -115,3 +119,14 @@ class TaskTemplateService:
                 f"Task template with id '{template_id}' not found"
             )
         return template
+
+    @classmethod
+    def check_template_exists(cls, work_type_id: int, phase_id: int) -> bool:
+        """Checks if any template exists for given work and phase"""
+        return db.session.query(
+            exists().where(
+                TaskTemplate.work_type_id == work_type_id,
+                TaskTemplate.phase_id == phase_id,
+                TaskTemplate.is_active.is_(True)
+            )
+        ).scalar()
