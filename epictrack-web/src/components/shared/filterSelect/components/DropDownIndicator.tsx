@@ -10,7 +10,8 @@ const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 
 const useStyles = makeStyles({
   accordionIcon: {
-    fill: Palette.neutral.dark,
+    fill: (props: DropdownIndicatorProps) =>
+      props.hasValue ? Palette.primary.accent.light : Palette.neutral.dark,
     cursor: "pointer",
   },
   menuOpen: {
@@ -18,7 +19,7 @@ const useStyles = makeStyles({
   },
 });
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
-  const classes = useStyles();
+  const classes = useStyles(props);
 
   return (
     <components.DropdownIndicator

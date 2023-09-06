@@ -13,12 +13,12 @@
 # limitations under the License.
 """Service to manage Tasks"""
 from datetime import timedelta
-
 from sqlalchemy import and_
 from sqlalchemy.orm import contains_eager
 
 from reports_api.exceptions import UnprocessableEntityError
-from reports_api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, db
+from reports_api.models import (StaffWorkRole, StatusEnum, TaskEvent,
+                                TaskEventAssignee, db)
 
 from .task_template import TaskTemplateService
 from .work_phase import WorkPhaseService

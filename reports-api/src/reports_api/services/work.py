@@ -110,6 +110,7 @@ class WorkService:
                 event_templates
             )
             event_configurations = []
+            # copying event configuration from template
             for parent_config in list(
                 filter(lambda x: not x["parent_id"], event_template_json)
             ):
@@ -131,6 +132,7 @@ class WorkService:
                                 EventConfiguration(**cls._prepare_configuration(child))
                     )
                     event_configurations.append(c_result)
+
             work.current_phase_id = phases[0].id
             phase_start_date = work.start_date
             for phase in phases:
@@ -160,6 +162,7 @@ class WorkService:
                                 str(p_event_start_date),
                                 p_event_conf.number_of_days,
                                 p_event_conf.id,
+                                p_event_conf.work_id
                             )
                         )
                     )
@@ -205,6 +208,7 @@ class WorkService:
                                         str(c_event_start_date),
                                         c_event_conf.number_of_days,
                                         c_event_conf.id,
+                                        c_event_conf.work_id,
                                         p_event.id,
                                     )
                                 )
@@ -246,6 +250,7 @@ class WorkService:
         start_date: str,
         number_of_days: int,
         ev_config_id: int,
+        work_id: int,
         source_e_id: int = None,
     ) -> dict:
         """Prepare the event object"""
@@ -255,6 +260,7 @@ class WorkService:
             "number_of_days": number_of_days,
             "event_configuration_id": ev_config_id,
             "source_event_id": source_e_id,
+            "work_id": work_id
         }
 
     @classmethod
@@ -271,6 +277,7 @@ class WorkService:
             "number_of_days": data["number_of_days"],
             "mandatory": data["mandatory"],
             "sort_order": data["sort_order"],
+            "template_id": data["id"]
         }
 
     @classmethod

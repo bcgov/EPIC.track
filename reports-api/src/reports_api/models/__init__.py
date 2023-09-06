@@ -25,7 +25,7 @@ from .db import db  # noqa: I001
 from .ea_act import EAAct
 from .eao_team import EAOTeam
 from .event import Event
-from .event_category import EventCategory
+from .event_category import EventCategory, EventCategoryEnum, PRIMARY_CATEGORIES
 from .event_configuration import EventConfiguration
 from .event_field import EventField
 from .event_field_value import EventFieldValue

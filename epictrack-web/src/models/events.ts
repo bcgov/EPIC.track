@@ -19,3 +19,16 @@ export interface EventsGridModel {
   notes: string;
   status: EVENT_STATUS;
 }
+
+export interface MilestoneEvent {
+  name: string;
+  event_configuration_id: number;
+  anticipated_date: string;
+  actual_date: string;
+  id: number;
+  notes: string;
+  short_description: string;
+  long_description: string;
+  number_of_days: number;
+  outcome_id?: number;
+}

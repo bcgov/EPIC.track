@@ -36,6 +36,7 @@ const TemplateList = () => {
     setShowCreateDialog(false);
     setShowDetailsDialog(false);
     setTemplateId(undefined);
+    getTemplates();
   };
   const onViewDetails = (id: number) => {
     setTemplateId(id);

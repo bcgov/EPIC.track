@@ -40,11 +40,14 @@ const Endpoints = {
     TEMPLATES: "task-templates",
   },
   Events: {
-    MILESTONE_EVENTS: "events/milestones",
+    MILESTONE_EVENTS: "milestones/events",
   },
   TaskEvents: {
     EVENTS: "tasks/events",
     TASKS: "tasks",
+  },
+  Configurations: {
+    CONFIGURATIONS: "/event-configurations",
   },
 };
 export default Endpoints;

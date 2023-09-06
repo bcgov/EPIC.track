@@ -32,6 +32,9 @@ import {
   InProgressIcon,
   NotStartedIcon,
 } from "../../icons/status";
+import EventForm from "../event/EventForm";
+import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
+import { CheckboxChecked } from "../../icons/checkbox";
 import { TemplateStatus } from "../../../models/work";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -58,6 +61,8 @@ const EventGrid = () => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
+  const [showMilestoneForm, setShowMilestoneForm] =
+    React.useState<boolean>(false);
   const [eventId, setEventId] = React.useState<number | undefined>();
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
     React.useState<boolean>(false);
@@ -90,7 +95,6 @@ const EventGrid = () => {
       ]).then((data: Array<EventsGridModel[]>) => {
         setLoading(false);
         data.forEach((array: EventsGridModel[]) => {
-          console.log(array);
           result = result.concat(array);
         });
         result = result.sort((a, b) =>
@@ -139,7 +143,9 @@ const EventGrid = () => {
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
           element.type = EVENT_TYPE.MILESTONE;
-          element.status = EVENT_STATUS.NOT_STARTED;
+          element.status = element.is_complete
+            ? EVENT_STATUS.COMPLETED
+            : EVENT_STATUS.NOT_STARTED;
           if (element.actual_date) {
             element.end_date = dateUtils.formatDate(
               dateUtils
@@ -162,6 +168,7 @@ const EventGrid = () => {
   const onDialogClose = React.useCallback(() => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
+    setShowMilestoneForm(false);
     getCombinedEvents();
   }, [ctx.work, ctx.selectedPhase]);
 
@@ -326,7 +333,7 @@ const EventGrid = () => {
         size: 250,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
-            {cell.getValue<string>()}
+            {getTextFromDraftJsContentState(cell.getValue<string>())}
           </ETParagraph>
         ),
       },
@@ -369,13 +376,14 @@ const EventGrid = () => {
     event.preventDefault();
     setEventId(row.id);
     setShowTaskForm(row.type === EVENT_TYPE.TASK);
+    setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
   };
   const onCancelHandler = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
+    setShowMilestoneForm(false);
     setEventId(undefined);
   };
-  console.log("SELECTED PHASE Grid ", ctx.selectedPhase);
 
   const getTemplateUploadStatus = React.useCallback(async () => {
     if (ctx.work && ctx.selectedPhase) {
@@ -416,7 +424,9 @@ const EventGrid = () => {
           </Button>
         </Grid>
         <Grid item xs="auto">
-          <Button variant="outlined">Add Milestone</Button>
+          <Button variant="outlined" onClick={() => setShowMilestoneForm(true)}>
+            Add Milestone
+          </Button>
         </Grid>
         <Grid item xs={8}></Grid>
         <Grid
@@ -445,12 +455,13 @@ const EventGrid = () => {
           enableRowSelection={(row) => row.original.type !== "Milestone"}
           enableSelectAll
           enablePagination
-          // onRowSelectionChange={setRowSelection}
+          muiSelectCheckboxProps={({ row, table }) => ({
+            indeterminate: row.original.type === EVENT_TYPE.MILESTONE,
+          })}
           columns={columns}
           data={events}
           enableTopToolbar={false}
           state={{
-            // rowSelection,
             isLoading: loading,
             showGlobalFilter: true,
           }}
@@ -476,7 +487,26 @@ const EventGrid = () => {
       >
         <TaskForm onSave={onDialogClose} eventId={eventId} />
       </TrackDialog>
-
+      <TrackDialog
+        open={showMilestoneForm}
+        dialogTitle="Add Milestone"
+        //onClose={(event, reason) => onDialogClose(event, reason)}
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="md"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        onCancel={() => onCancelHandler()}
+        formId="event-form"
+        sx={{
+          "& .MuiDialogContent-root": {
+            padding: 0,
+          },
+        }}
+      >
+        <EventForm onSave={onDialogClose} eventId={eventId} />
+      </TrackDialog>
       <TrackDialog
         open={showTemplateForm}
         dialogTitle="Task Template"
