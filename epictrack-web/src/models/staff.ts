@@ -17,3 +17,14 @@ export interface Staff extends MasterBase {
 export interface StaffRole extends Staff {
   role: Role;
 }
+
+export interface StaffWorkRole {
+  id: number;
+  staff_id: number;
+  staff: Staff;
+  role_id: number;
+  role: Role;
+  work_id: number;
+  is_active: boolean;
+  status: string;
+}

@@ -221,15 +221,17 @@ class WorkService:
         return work
 
     @classmethod
-    def find_staff(cls, work_id: int) -> [Staff]:
+    def find_staff(cls, work_id: int, is_active) -> [Staff]:
         """Active staff assigned on a work"""
-        query = db.session.query(Staff)\
-            .join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)\
-            .filter(StaffWorkRole.is_active.is_(True),
-                    StaffWorkRole.is_deleted.is_(False),
+        query = db.session.query(StaffWorkRole)\
+            .join(Staff, StaffWorkRole.staff_id == Staff.id)\
+            .join(Role, StaffWorkRole.role_id == Role.id)\
+            .filter(StaffWorkRole.is_deleted.is_(False),
                     StaffWorkRole.work_id == work_id,
                     Staff.is_active.is_(True),
                     Staff.is_deleted.is_(False))
+        if is_active is not None:
+            query = query.filter(StaffWorkRole.is_active.is_(is_active))
         return query.all()
 
     @classmethod

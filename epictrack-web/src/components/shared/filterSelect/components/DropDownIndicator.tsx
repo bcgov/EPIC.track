@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 });
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
   const classes = useStyles(props);
-
+  console.log(props.hasValue);
   return (
     <components.DropdownIndicator
       {...props}

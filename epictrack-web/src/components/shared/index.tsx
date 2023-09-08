@@ -16,9 +16,10 @@ import {
   MET_Header_Font_Weight_Regular,
 } from "../../styles/constants";
 import { useAppSelector } from "../../hooks";
-import { styled } from "@mui/system";
+import clsx from "clsx";
 import { Link, LinkProps, Path } from "react-router-dom";
 import { Palette } from "../../styles/theme";
+import { makeStyles } from "@mui/styles";
 
 interface HeaderProps {
   sx?: SxProps;
@@ -31,6 +32,7 @@ interface HeaderProps {
 interface LinkHeaderProps extends HeaderProps {
   to: string | Partial<Path>;
   enableTooltip?: boolean;
+  enableEllipsis?: boolean;
   onClick?: (eventArg?: any) => void;
 }
 
@@ -40,6 +42,13 @@ interface PageContainerProps {
   sx?: SxProps;
 }
 
+const useStyle = makeStyles({
+  textEllipsis: {
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+  },
+});
 export const ETPageContainer = (props: PageContainerProps) => {
   const state = useAppSelector((state) => state.uiState);
   return (
@@ -163,7 +172,7 @@ export const ETParagraph = React.forwardRef(
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
     return (
-      <div ref={ref}>
+      <div ref={ref} {...rest}>
         <Typography
           color={color}
           sx={{
@@ -176,7 +185,6 @@ export const ETParagraph = React.forwardRef(
             fontFamily: MET_Header_Font_Family,
           }}
           variant="body1"
-          {...rest}
         >
           {children}
         </Typography>
@@ -244,16 +252,21 @@ export const ETGridTitle = ({
   sx,
   ...rest
 }: LinkHeaderProps) => {
+  const classes = useStyle();
   return (
-    // <ETParagraph bold={bold} {...rest} color={Palette.primary.accent.main}>
-    //   {children}
-    // </ETParagraph>
     <ETLink to={rest.to} onClick={rest.onClick}>
       <Tooltip
         title={rest.tooltip as string}
         disableHoverListener={!rest.enableTooltip}
       >
-        <ETParagraph bold={bold} {...rest} color={Palette.primary.accent.main}>
+        <ETParagraph
+          bold={bold}
+          {...rest}
+          className={clsx({
+            [classes.textEllipsis]: [rest.enableEllipsis],
+          })}
+          color={Palette.primary.accent.main}
+        >
           {children}
         </ETParagraph>
       </Tooltip>

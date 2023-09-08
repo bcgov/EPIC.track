@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { EVENT_TYPE } from "./type";
+import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -32,9 +32,8 @@ import {
   InProgressIcon,
   NotStartedIcon,
 } from "../../icons/status";
-import EventForm from "../event/EventForm";
+import EventForm from "./EventForm";
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
-import { CheckboxChecked } from "../../icons/checkbox";
 import { TemplateStatus } from "../../../models/work";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -238,7 +237,7 @@ const EventGrid = () => {
           <ETGridTitle
             to="#"
             bold={row.original.type === EVENT_TYPE.MILESTONE}
-            className={classes.textEllipsis}
+            enableEllipsis
             onClick={(event: any) => onRowClick(event, row.original)}
             enableTooltip={true}
             tooltip={cell.getValue<string>()}

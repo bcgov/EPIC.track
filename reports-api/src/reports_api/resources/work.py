@@ -155,8 +155,9 @@ class WorkStaff(Resource):
     def get(work_id):
         """Get all the active staff allocated to the work"""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        staff = WorkService.find_staff(work_id)
-        return res.StaffResponseSchema(many=True).dump(staff), HTTPStatus.OK
+        args = req.BasicRequestQueryParameterSchema().load(request.args)
+        staff = WorkService.find_staff(work_id, args.get("is_active"))
+        return res.StaffWorkRoleResponseSchema(many=True).dump(staff), HTTPStatus.OK
 
 
 @cors_preflight("GET,POST")

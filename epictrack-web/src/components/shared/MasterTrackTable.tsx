@@ -134,9 +134,9 @@ const MasterTrackTable = <T extends Record<string, any>>({
           variant: "outlined",
           sx: {
             backgroundColor: "white",
-            "& .MuiInputAdornment-root": {
-              display: "none",
-            },
+            // "& .MuiInputAdornment-root": {
+            //   display: "none",
+            // },
             "& .MuiSelect-icon": {
               mr: "0px !important",
             },
@@ -185,6 +185,9 @@ const MasterTrackTable = <T extends Record<string, any>>({
         renderToolbarInternalActions={({ table }) => (
           <>{/* <MRT_ToggleFiltersButton table={table} /> */}</>
         )}
+        renderEmptyRowsFallback={({ table }) => (
+          <NoDataComponent table={table} />
+        )}
         {...rest}
         initialState={{
           showColumnFilters: true,
@@ -197,9 +200,6 @@ const MasterTrackTable = <T extends Record<string, any>>({
           columnPinning: { right: ["mrt-row-actions"] },
           ...rest.state,
         }}
-        renderEmptyRowsFallback={({ table }) => (
-          <NoDataComponent table={table} />
-        )}
         icons={{
           FilterAltIcon: () => null,
         }}
