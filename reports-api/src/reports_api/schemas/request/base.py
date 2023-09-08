@@ -40,3 +40,11 @@ class RequestBodyParameterSchema(Schema):  # pylint: disable=too-few-public-meth
 
 class RequestQueryParameterSchema(Schema):
     """Request query parameter schema base class"""
+
+
+class BasicRequestQueryParameterSchema(RequestQueryParameterSchema):
+    """Request query parameter schema for basic query"""
+
+    is_active = fields.Bool(
+        metadata={"description": "Active/Inactive"},
+    )

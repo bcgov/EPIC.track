@@ -38,10 +38,15 @@ class WorkService implements ServiceBase {
     return await http.GetRequest(Endpoints.Works.WORK_RESOURCES);
   }
 
-  async getWorkTeamMembers(workId: number) {
-    return await http.GetRequest(
-      Endpoints.Works.WORK_TEAM_MEMBERS.replace(":work_id", workId.toString())
-    );
+  async getWorkTeamMembers(workId: number, isActive: any = undefined) {
+    let query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+    if (isActive !== undefined) {
+      query += `?is_active=${isActive}`;
+    }
+    return await http.GetRequest(query);
   }
 
   async getWorkPhases(workId: string) {

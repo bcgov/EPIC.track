@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from "react";
+import React from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,20 +11,14 @@ import {
 } from "../../../constants/application-constant";
 import { Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
-import { TaskEvent, statusOptions } from "../../../models/task_event";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
-import { Staff } from "../../../models/staff";
 import { WorkplanContext } from "../WorkPlanContext";
-import workService from "../../../services/workService/workService";
-import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { ListType } from "../../../models/code";
-import codeService from "../../../services/codeService";
 import RichTextEditor from "../../shared/richTextEditor";
-import { dateUtils } from "../../../utils";
 import eventService from "../../../services/eventService/eventService";
 import { MilestoneEvent } from "../../../models/events";
 import configurationService from "../../../services/configurationService/configurationService";

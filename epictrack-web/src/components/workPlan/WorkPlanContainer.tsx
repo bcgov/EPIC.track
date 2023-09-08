@@ -10,10 +10,18 @@ import { ETTab, ETTabs } from "../shared/tab/Tab";
 import TabPanel from "../shared/tab/TabPanel";
 import PhaseContainer from "./phase/PhaseContainer";
 import { WorkplanContext } from "./WorkPlanContext";
+import TeamContainer from "./team/TeamContainer";
+import { makeStyles } from "@mui/styles";
 
+const useStyle = makeStyles({
+  tabPanel: {
+    padding: "2rem 2.5rem 1.5rem 2.5rem",
+  },
+});
 const WorkPlanContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
   const ctx = useContext(WorkplanContext);
+  const classes = useStyle();
 
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
@@ -66,8 +74,19 @@ const WorkPlanContainer = () => {
               </ETTabs>
             </Box>
           </ETPageContainer>
-          <TabPanel index={0} value={selectedTabIndex}>
+          <TabPanel
+            index={0}
+            value={selectedTabIndex}
+            className={classes.tabPanel}
+          >
             <PhaseContainer />
+          </TabPanel>
+          <TabPanel
+            index={4}
+            value={selectedTabIndex}
+            className={classes.tabPanel}
+          >
+            <TeamContainer />
           </TabPanel>
         </>
       )}

@@ -108,10 +108,12 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
   };
   const getWorkTeamMembers = async () => {
     const assigneeResult = await workService.getWorkTeamMembers(
-      Number(ctx.work?.id)
+      Number(ctx.work?.id),
+      true
     );
     if (assigneeResult.status === 200) {
-      setAssignees(assigneeResult.data as Staff[]);
+      const staff = (assigneeResult.data as any[]).map((p) => p.staff);
+      setAssignees(staff);
     }
   };
   const statuses = React.useMemo(() => statusOptions, []);

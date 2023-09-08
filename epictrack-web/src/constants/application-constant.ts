@@ -30,3 +30,7 @@ export const PAGINATION_DEFAULT = {
   PAGE_INDEX: 0,
 };
 export const COMMON_ERROR_MESSAGE = "Error during processing the request";
+export const ACTIVE_STATUS = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+};

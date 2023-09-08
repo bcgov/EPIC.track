@@ -6,7 +6,6 @@ const commonProps = {
   width: "24",
   height: "24",
   viewBox: "0 0 24 24",
-  fill: "none",
   xmlns: "http://www.w3.org/2000/svg",
 };
 const AllIcon = (props: IconProps) => {
@@ -174,6 +173,14 @@ const ExpandIcon = (props: IconProps) => {
   );
 };
 
+const EditIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
+      <path d="M14.1562 7.90625L6.875 15.1875L5.8125 14.125L5.9375 14H4.5C4.21875 14 4 13.7812 4 13.5V12.0625L3.875 12.1875C3.71875 12.3438 3.625 12.5 3.5625 12.7188L2.84375 15.1562L5.28125 14.4375C5.46875 14.375 5.65625 14.2812 5.8125 14.125L6.875 15.1875C6.5625 15.5 6.15625 15.75 5.71875 15.875L1.9375 16.9688C1.6875 17.0625 1.40625 17 1.21875 16.7812C1 16.5938 0.9375 16.3125 1 16.0625L2.125 12.2812C2.25 11.8438 2.5 11.4375 2.8125 11.125L10.0938 3.84375L14.1562 7.90625ZM16.375 2.84375C17.1562 3.625 17.1562 4.90625 16.375 5.6875L14.875 7.1875L10.8125 3.125L12.3125 1.625C13.0938 0.84375 14.375 0.84375 15.1562 1.625L16.375 2.84375Z" />
+    </svg>
+  );
+};
+
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   DashboardIcon,
@@ -194,6 +201,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   DownloadIcon,
   CollapseIcon,
   ExpandIcon,
+  EditIcon,
 };
 
 export default icons;

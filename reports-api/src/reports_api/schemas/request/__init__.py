@@ -35,3 +35,4 @@ from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
     WorkPlanDownloadQueryParamSchema)
 from .event_configuration_request import EventConfigurationQueryParamSchema
+from .base import BasicRequestQueryParameterSchema
