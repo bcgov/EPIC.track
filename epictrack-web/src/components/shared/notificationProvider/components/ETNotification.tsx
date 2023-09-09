@@ -17,6 +17,7 @@ const useStyles = makeStyles({
     padding: "16px 24px",
     gap: "16px",
     flexDirection: "column",
+    borderRadius: "4px",
   },
   withTitle: {
     flexDirection: "column",
@@ -115,7 +116,10 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
                   <Button
                     variant="outlined"
                     color={action.color}
-                    onClick={action.callback}
+                    onClick={() => {
+                      handleDismiss();
+                      action.callback();
+                    }}
                     sx={{ bgcolor: "inherit" }}
                     key={action.label}
                   >
