@@ -203,6 +203,9 @@ export const BaseTheme = createTheme({
             "&.Mui-focused fieldset": {
               borderColor: Palette.primary.accent.light,
             },
+            "&.Mui-disabled": {
+              backgroundColor: Palette.neutral.bg.dark,
+            },
           },
         },
       },

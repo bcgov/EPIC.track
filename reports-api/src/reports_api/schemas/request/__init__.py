@@ -36,3 +36,5 @@ from .work_request import (
     WorkPlanDownloadQueryParamSchema)
 from .event_configuration_request import EventConfigurationQueryParamSchema
 from .base import BasicRequestQueryParameterSchema
+from .staff_work_role_request import (StaffWorkExistenceCheckQueryParamSchema, StaffWorkPathParamSchema,
+                                      StaffWorkBodyParamSchema)

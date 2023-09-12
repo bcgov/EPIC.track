@@ -1,14 +1,14 @@
-import React, { FC } from "react";
-import { Checkbox, CheckboxProps } from "@mui/material";
+import React from "react";
+import { CheckboxProps, Switch } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 
-type IFormCheckboxProps = {
+type IFormSwitchProps = {
   name: string;
 } & CheckboxProps;
 
-const ControlledCheckbox: React.ForwardRefRenderFunction<
+const ControlledSwitch: React.ForwardRefRenderFunction<
   HTMLButtonElement,
-  IFormCheckboxProps
+  IFormSwitchProps
 > = ({ name, ...otherProps }, ref) => {
   const {
     control,
@@ -21,15 +21,10 @@ const ControlledCheckbox: React.ForwardRefRenderFunction<
       name={name}
       defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
-        <Checkbox
-          {...otherProps}
-          {...field}
-          ref={ref}
-          checked={!!field.value}
-        />
+        <Switch {...otherProps} {...field} ref={ref} checked={!!field.value} />
       )}
     />
   );
 };
 
-export default React.forwardRef(ControlledCheckbox);
+export default React.forwardRef(ControlledSwitch);

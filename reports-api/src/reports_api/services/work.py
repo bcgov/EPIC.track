@@ -235,6 +235,58 @@ class WorkService:
         return query.all()
 
     @classmethod
+    def find_work_staff(cls, work_staff_id: int) -> StaffWorkRole:
+        """Get the staff Work"""
+        work_staff = db.session.query(StaffWorkRole).filter(StaffWorkRole.id == work_staff_id).scalar()
+        if not work_staff:
+            raise ResourceExistsError("No work staff association found")
+        return work_staff
+
+    @classmethod
+    def check_work_staff_existence(cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None) -> bool:
+        """Check the existence of staff in work"""
+        query = db.session.query(StaffWorkRole).filter(StaffWorkRole.work_id == work_id,
+                                                       StaffWorkRole.staff_id == staff_id,
+                                                       StaffWorkRole.is_deleted.is_(False),
+                                                       StaffWorkRole.role_id == role_id)
+        if work_staff_id:
+            query = query.filter(StaffWorkRole.id != work_staff_id)
+        if query.count() > 0:
+            return True
+        return False
+
+    @classmethod
+    def create_work_staff(cls, work_id: int, data: dict, commit: bool = True) -> StaffWorkRole:
+        """Create Staff Work"""
+        if cls.check_work_staff_existence(work_id, data.get("staff_id"), data.get("role_id")):
+            raise ResourceExistsError("Staff Work association already exists")
+        work_staff = StaffWorkRole(
+            **{
+                "work_id": work_id,
+                "staff_id": data.get("staff_id"),
+                "role_id": data.get("role_id")
+            }
+        )
+        work_staff.flush()
+        if commit:
+            db.session.commit()
+        return work_staff
+
+    @classmethod
+    def update_work_staff(cls, work_staff_id: int, data: dict) -> StaffWorkRole:
+        """Update work staff"""
+        work_staff = db.session.query(StaffWorkRole).filter(StaffWorkRole.id == work_staff_id).scalar()
+        if not work_staff:
+            raise ResourceNotFoundError("No staff work association found")
+        if cls.check_work_staff_existence(work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id):
+            raise ResourceExistsError("Staff Work association already exists")
+        work_staff.is_active = data.get("is_active")
+        work_staff.role_id = data.get("role_id")
+        work_staff.flush()
+        db.session.commit()
+        return work_staff
+
+    @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
         """Calculate the start at value"""
         # pylint: disable=eval-used

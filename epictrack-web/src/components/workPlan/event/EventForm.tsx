@@ -97,15 +97,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     try {
       const result = await eventService.getById(Number(eventId));
       if (result.status === 200) {
-        // const assignee_ids: any[] = (result.data as any)["assignees"].map(
-        //   (p: any) => p["assignee_id"]
-        // );
         const taskEvent = result.data as MilestoneEvent;
-        // (endDateRef?.current as any)["value"] = dateUtils.formatDate(
-        //   dateUtils
-        //     .add(taskEvent.start_date, taskEvent.number_of_days, "days")
-        //     .toISOString()
-        // );
         setEvent(taskEvent);
       }
     } catch (e) {
@@ -160,18 +152,6 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     }
   };
 
-  //   const daysOnChangeHandler = (event: SyntheticEvent) => {
-  //     (endDateRef?.current as any)["value"] = dateUtils.formatDate(
-  //       dateUtils
-  //         .add(
-  //           String((startDateRef?.current as any)["value"]),
-  //           Number((event.target as any)["value"]),
-  //           "days"
-  //         )
-  //         .toISOString()
-  //     );
-  //   };
-
   return (
     <>
       <FormProvider {...methods}>
@@ -187,8 +167,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
         >
           <Grid
             container
-            columnSpacing={2}
-            rowSpacing={2}
+            spacing={2}
             sx={{
               backgroundColor: Palette.neutral.bg.light,
               padding: "24px 40px",

@@ -3,7 +3,7 @@ import { Grid } from "@mui/material";
 import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import { makeStyles } from "@mui/styles";
-import TeamGrid from "./TeamGrid";
+import TeamGrid from "./TeamList";
 import TeamInfo from "./TeamInfo";
 const useStyle = makeStyles({
   title: {
