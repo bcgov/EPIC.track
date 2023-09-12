@@ -142,7 +142,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
           Number(workStaffId)
         );
         if (createResult.status === 200) {
-          showNotification("Milestone details updated", {
+          showNotification("Team details updated", {
             type: "success",
           });
           if (onSave) {
@@ -155,7 +155,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
           Number(ctx.work?.id)
         );
         if (createResult.status === 201) {
-          showNotification("Milestone details inserted", {
+          showNotification("Team details inserted", {
             type: "success",
           });
           if (onSave) {

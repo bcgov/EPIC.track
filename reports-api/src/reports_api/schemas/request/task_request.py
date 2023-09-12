@@ -15,6 +15,7 @@
 from marshmallow import fields, validate
 
 from reports_api.models.task_event import StatusEnum
+
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
@@ -58,19 +59,19 @@ class TaskTemplateQueryParamSchema(RequestQueryParameterSchema):
     phase_id = fields.Int(
         metadata={"description": "Phase ID of the template"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
     ea_act_id = fields.Int(
         metadata={"description": "EA Act ID of the template"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
     work_type_id = fields.Int(
         metadata={"description": "Work Type ID of the template"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
 
@@ -167,35 +168,30 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
     responsibility_id = fields.Int(
         metadata={"description": "Id of the responsible entity"},
         allow_none=True,
-        validate=validate.Range(min=1)
+        validate=validate.Range(min=1),
     )
 
     start_date = fields.DateTime(
-        metadata={"description": "Start date for the work"},
-        required=True
+        metadata={"description": "Start date for the work"}, required=True
     )
 
-    number_of_days = fields.Int(
-        metadata={"description": "Number of days of the task"}
-    )
+    number_of_days = fields.Int(metadata={"description": "Number of days of the task"})
 
     tips = fields.Str(
         metadata={"description": "Tips for the task"},
         allow_none=True,
     )
 
-    notes = fields.Str(
-        metadata={"description": "Notes for the task"}
-    )
+    notes = fields.Str(metadata={"description": "Notes for the task"})
 
-    assignee_ids = fields.List(fields.Int(
-        metadata={"description": "List of assignees of the task"}
-    ))
+    assignee_ids = fields.List(
+        fields.Int(metadata={"description": "List of assignees of the task"})
+    )
 
     status = fields.Str(
         metadata={"description": "Status of the task"},
         required=True,
-        validate=validate.OneOf([v.value for v in StatusEnum])
+        validate=validate.OneOf([v.value for v in StatusEnum]),
     )
 
 
@@ -222,4 +218,39 @@ class TaskTemplateImportEventsBodyParamSchema(RequestBodyParameterSchema):
         metadata={"description": "Id of the phase"},
         validate=validate.Range(min=1),
         required=True,
+    )
+
+
+class TaskEventBulkUpdateBodyParamSchema(RequestBodyParameterSchema):
+    """Task events body parameter"""
+
+    task_ids = fields.List(
+        fields.Int(validate=validate.Range(min=1)),
+        metadata={"description": "Ids of tasks"},
+        validate=validate.Length(min=1),
+        required=True,
+    )
+
+    responsibility_id = fields.Int(
+        metadata={"description": "Id of the responsible entity"},
+        allow_none=True,
+        required=False,
+        validate=validate.Range(min=1),
+    )
+
+    assignee_ids = fields.List(
+        fields.Int(
+            metadata={"description": "List of assignees of the task"},
+            validate=validate.Range(min=1),
+        ),
+        allow_none=True,
+        required=False,
+        validate=validate.Length(min=1),
+    )
+
+    status = fields.Str(
+        metadata={"description": "Status of the task"},
+        allow_none=True,
+        required=False,
+        validate=validate.OneOf([v.value for v in StatusEnum]),
     )

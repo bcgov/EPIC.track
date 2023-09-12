@@ -25,8 +25,8 @@ from reports_api.utils.util import cors_preflight
 API = Namespace("tasks", description="Tasks")
 
 
-@cors_preflight("GET,POST")
-@API.route("/events", methods=["GET", "POST", "OPTIONS"])
+@cors_preflight("GET,POST,PATCH")
+@API.route("/events", methods=["GET", "POST", "PATCH", "OPTIONS"])
 class Events(Resource):
     """Endpoint resource to return all task events for given work id and phase id"""
 
@@ -54,6 +54,16 @@ class Events(Resource):
         request_json = req.TaskEventBodyParamSchema().load(API.payload)
         task_response = TaskService.create_task_event(request_json)
         return res.TaskEventResponseSchema().dump(task_response), HTTPStatus.CREATED
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch():
+        """Bulk update tasks."""
+        request_json = req.TaskEventBulkUpdateBodyParamSchema(partial=True).load(API.payload)
+        result = TaskService.bulk_update(request_json)
+        return result, HTTPStatus.OK
 
 
 @cors_preflight("GET,PUT")
