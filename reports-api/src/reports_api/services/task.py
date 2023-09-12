@@ -122,8 +122,7 @@ class TaskService:
                 "work_id": params.get("work_id"),
                 "phase_id": params.get("phase_id"),
                 "responsibility_id": task.responsibility_id,
-                "start_date": work_phase.start_date
-                + timedelta(days=task.start_at + task.number_of_days),
+                "start_date": work_phase.start_date + timedelta(days=task.start_at + task.number_of_days),
                 "number_of_days": task.number_of_days,
                 "tips": task.tips,
                 "status": StatusEnum.NOT_STARTED,

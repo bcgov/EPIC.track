@@ -16,10 +16,11 @@ from datetime import datetime, timedelta
 
 from sqlalchemy import and_
 
-from reports_api.models import Event, WorkPhase, PRIMARY_CATEGORIES, EventCategoryEnum, db
-from reports_api.exceptions import UnprocessableEntityError, ResourceNotFoundError
-from reports_api.models import EventConfiguration, CalendarEvent, WorkCalendarEvent
+from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
+from reports_api.models import (
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
 from reports_api.schemas import EventSchema
+
 from .event_configuration import EventConfigurationService
 from .work_phase import WorkPhaseService
 
