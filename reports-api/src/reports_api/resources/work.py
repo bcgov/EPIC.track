@@ -143,9 +143,9 @@ class WorkPhases(Resource):
         return res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases), HTTPStatus.OK
 
 
-@cors_preflight("GET")
-@API.route("/<int:work_id>/staff", methods=["GET", "OPTIONS"])
-class WorkStaff(Resource):
+@cors_preflight("GET, POST")
+@API.route("/<int:work_id>/staff-roles", methods=["GET", "POST", "OPTIONS"])
+class WorkStaffs(Resource):
     """Endpoints to handle work and staff"""
 
     @staticmethod
@@ -159,8 +159,64 @@ class WorkStaff(Resource):
         staff = WorkService.find_staff(work_id, args.get("is_active"))
         return res.StaffWorkRoleResponseSchema(many=True).dump(staff), HTTPStatus.OK
 
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id):
+        """Get all the active staff allocated to the work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        request_json = req.StaffWorkBodyParamSchema().load(API.payload)
+        staff = WorkService.create_work_staff(work_id, request_json)
+        return res.StaffWorkRoleResponseSchema().dump(staff), HTTPStatus.CREATED
 
-@cors_preflight("GET,POST")
+
+@cors_preflight("GET, PUT")
+@API.route("/staff-roles/<int:work_staff_id>", methods=["GET", "PUT", "OPTIONS"])
+class WorkStaff(Resource):
+    """Endpoint to handle work staff"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_staff_id):
+        """Get all the active staff allocated to the work"""
+        req.StaffWorkPathParamSchema().load(request.view_args)
+        staff = WorkService.find_work_staff(work_staff_id)
+        return res.StaffWorkRoleResponseSchema().dump(staff), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def put(work_staff_id):
+        """Get all the active staff allocated to the work"""
+        req.StaffWorkPathParamSchema().load(request.view_args)
+        request_json = req.StaffWorkBodyParamSchema().load(API.payload)
+        staff = WorkService.update_work_staff(work_staff_id, request_json)
+        return res.StaffWorkRoleResponseSchema().dump(staff), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:work_id>/staff-roles/exists", methods=["GET", "OPTIONS"])
+class ValidateWorkStaff(Resource):
+    """Endpoint to check the existance of staff in work"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id):
+        """Check for existing staff work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        args = req.StaffWorkExistenceCheckQueryParamSchema().load(request.args)
+        exists = WorkService.check_work_staff_existence(work_id, args.get("staff_id"),
+                                                        args.get("role_id"), args.get("work_staff_id"))
+        return {"exists": exists}, HTTPStatus.OK
+
+
+@cors_preflight("GET, POST")
 @API.route("/workplan/download", methods=["GET", "POST", "OPTIONS"])
 class WorkPlan(Resource):
     """Endpoint resource to download workplan."""

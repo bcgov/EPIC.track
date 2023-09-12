@@ -72,9 +72,15 @@ const TeamInfo = () => {
   const ctx = React.useContext(WorkplanContext);
   return (
     <>
-      <TeamInfoBox title="Name" value={ctx.work?.eao_team.name} />
-      <TeamInfoBox title="Lead" value={ctx.work?.work_lead.full_name} />
-      <TeamInfoBox title="EPD" value={ctx.work?.responsible_epd.full_name} />
+      {ctx.work?.eao_team && (
+        <TeamInfoBox title="Name" value={ctx.work?.eao_team.name} />
+      )}
+      {ctx.work?.work_lead && (
+        <TeamInfoBox title="Lead" value={ctx.work?.work_lead.full_name} />
+      )}
+      {ctx.work?.responsible_epd && (
+        <TeamInfoBox title="EPD" value={ctx.work?.responsible_epd.full_name} />
+      )}
     </>
   );
 };

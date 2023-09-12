@@ -2,6 +2,7 @@ import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
 import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
+import { StaffWorkRole } from "../../models/staff";
 
 class WorkService implements ServiceBase {
   async getAll() {
@@ -46,6 +47,49 @@ class WorkService implements ServiceBase {
     if (isActive !== undefined) {
       query += `?is_active=${isActive}`;
     }
+    return await http.GetRequest(query);
+  }
+
+  async updateWorkStaff(data: StaffWorkRole, workStaffId: number) {
+    const query = `${Endpoints.Works.WORK_TEAM_MEMBER.replace(
+      ":work_staff_id",
+      workStaffId.toString()
+    )}`;
+    return await http.PutRequest(query, JSON.stringify(data));
+  }
+
+  async createWorkStaff(data: StaffWorkRole, workId: number) {
+    const query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+
+    return await http.PostRequest(query, JSON.stringify(data));
+  }
+
+  async checkWorkStaffExists(
+    workId: number,
+    staffId: number,
+    roleId: number,
+    workStaffId?: number
+  ) {
+    const query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+    return await http.GetRequest(
+      query +
+        `/exists?staff_id=${staffId}&role_id=${roleId}${
+          workStaffId ? "&work_staff_id=" + workStaffId : ""
+        }`
+    );
+  }
+
+  async getWorkTeamMember(workStaffId: number) {
+    const query = `${Endpoints.Works.WORK_TEAM_MEMBER.replace(
+      ":work_staff_id",
+      workStaffId.toString()
+    )}`;
     return await http.GetRequest(query);
   }
 

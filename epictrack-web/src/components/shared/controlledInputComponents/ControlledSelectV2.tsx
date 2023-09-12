@@ -11,6 +11,8 @@ type IFormInputProps = {
   getOptionLabel: (option: any) => string;
   getOptionValue: (option: any) => string;
   helperText?: string | undefined;
+  disabled?: boolean;
+  onHandleChange?: (val: any) => void;
   // menuPortalTarget: HTMLElement | undefined;
 };
 
@@ -24,7 +26,9 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
     getOptionLabel,
     getOptionValue,
     isMulti,
+    disabled,
     helperText,
+    onHandleChange,
     // menuPortalTarget,
     ...otherProps
   },
@@ -52,6 +56,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               getOptionValue={getOptionValue}
               getOptionLabel={getOptionLabel}
               isSearchable={true}
+              isDisabled={!!disabled}
               isClearable={true}
               value={options.filter((c) => {
                 if (isMulti && value) {
@@ -66,6 +71,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                 let v;
                 if (isMulti) v = val.map((v: any) => getOptionValue(v));
                 else v = getOptionValue(val);
+                if (onHandleChange !== undefined) onHandleChange(v);
                 return onChange(v);
               }}
               menuPortalTarget={document.body}

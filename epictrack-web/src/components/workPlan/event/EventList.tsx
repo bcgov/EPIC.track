@@ -56,7 +56,7 @@ const IButton = styled(IconButton)({
   },
 });
 
-const EventGrid = () => {
+const EventList = () => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
@@ -544,4 +544,4 @@ const EventGrid = () => {
   );
 };
 
-export default EventGrid;
+export default EventList;

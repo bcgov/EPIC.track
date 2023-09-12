@@ -15,6 +15,7 @@ export type Code =
   | "sub_types"
   | "federal_involvements"
   | "responsibilities"
+  | "roles"
   | "substitution_acts";
 
 const getCodes = async (codeType: Code, apiUrl?: string) => {

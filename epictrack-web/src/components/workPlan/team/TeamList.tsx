@@ -14,12 +14,16 @@ import {
 import AddIcon from "@mui/icons-material/Add";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
+import TrackDialog from "../../shared/TrackDialog";
+import TeamForm from "./TeamForm";
 
-const TeamGrid = () => {
+const TeamList = () => {
   const [teamMembers, setTeamMembers] = React.useState<StaffWorkRole[]>([]);
   const [roles, setRoles] = React.useState<string[]>([]);
   const [statuses, setStatuses] = React.useState<string[]>([]);
+  const [workStaffId, setWorkStaffId] = React.useState<number | undefined>();
   const [loading, setLoading] = React.useState<boolean>(true);
+  const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
 
   React.useEffect(() => {
@@ -51,7 +55,7 @@ const TeamGrid = () => {
           <ETGridTitle
             to="#"
             enableEllipsis
-            onClick={(event: any) => event.preventDefault()}
+            onClick={(event: any) => onRowClick(event, row.original)}
             enableTooltip={true}
             tooltip={cell.getValue<string>()}
           >
@@ -61,7 +65,7 @@ const TeamGrid = () => {
         sortingFn: "sortFn",
       },
       {
-        accessorFn: (row: StaffWorkRole) => row.role.name,
+        accessorFn: (row: StaffWorkRole) => row.role?.name,
         header: "Role",
         size: 150,
         filterVariant: "multi-select",
@@ -122,6 +126,24 @@ const TeamGrid = () => {
     ],
     [teamMembers]
   );
+
+  const onCancelHandler = () => {
+    setShowTeamForm(false);
+    setWorkStaffId(undefined);
+  };
+
+  const onRowClick = (event: any, row: StaffWorkRole) => {
+    event.preventDefault();
+    setWorkStaffId(row.id);
+    setShowTeamForm(true);
+  };
+
+  const onSave = () => {
+    setShowTeamForm(false);
+    setWorkStaffId(undefined);
+    getWorkTeamMembers();
+  };
+
   const getWorkTeamMembers = async () => {
     try {
       const teamResult = await workService.getWorkTeamMembers(
@@ -143,11 +165,14 @@ const TeamGrid = () => {
     }
     setLoading(false);
   };
-  console.log(teamMembers);
   return (
     <Grid container rowSpacing={1}>
       <Grid item xs={12}>
-        <Button variant="contained" startIcon={<AddIcon />}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setShowTeamForm(true)}
+        >
           Team Member
         </Button>
       </Grid>
@@ -162,8 +187,21 @@ const TeamGrid = () => {
           }}
         />
       </Grid>
+      <TrackDialog
+        open={showTeamForm}
+        dialogTitle="Add Team Member"
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="sm"
+        okButtonText="Add"
+        formId="team-form"
+        onCancel={() => onCancelHandler()}
+        isActionsRequired
+      >
+        <TeamForm onSave={onSave} workStaffId={workStaffId} />
+      </TrackDialog>
     </Grid>
   );
 };
 
-export default TeamGrid;
+export default TeamList;

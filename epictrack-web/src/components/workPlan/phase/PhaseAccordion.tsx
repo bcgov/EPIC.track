@@ -8,7 +8,7 @@ import ETAccordionSummary from "../../shared/accordion/components/AccordionSumma
 import { ETCaption1, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
-import EventGrid from "../event/EventGrid";
+import EventGrid from "../event/EventList";
 import { WorkplanContext } from "../WorkPlanContext";
 import BorderLinearProgress from "../../shared/progress/Progress";
 import Icons from "../../icons/index";

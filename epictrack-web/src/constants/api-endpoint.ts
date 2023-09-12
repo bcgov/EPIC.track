@@ -22,7 +22,8 @@ const Endpoints = {
     WORKS: "works",
     WORK_RESOURCES: "works/resources",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
-    WORK_TEAM_MEMBERS: "works/:work_id/staff",
+    WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
+    WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
     CHECK_TEMPLATE_UPLOAD_STATUS: "works/:work_id/phase/:phase_id",
   },
   SubTypes: {
