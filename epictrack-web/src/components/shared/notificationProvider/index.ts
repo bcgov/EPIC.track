@@ -1,5 +1,6 @@
 import { SnackbarMessage, enqueueSnackbar } from "notistack";
 import { CustomAction, NotificationOptions } from "./type";
+import React from "react";
 
 export const showNotification = (
   title: SnackbarMessage,
@@ -61,7 +62,7 @@ declare module "notistack" {
   interface VariantOverrides {
     etNotification: {
       type: string;
-      helpText?: string;
+      helpText?: string | React.ReactElement;
       actions?: CustomAction[];
     };
   }

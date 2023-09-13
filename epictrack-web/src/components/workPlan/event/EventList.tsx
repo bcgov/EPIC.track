@@ -13,7 +13,14 @@ import {
 } from "material-react-table";
 import { ETGridTitle, ETParagraph } from "../../shared";
 import { dateUtils } from "../../../utils";
-import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
+import {
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { styled } from "@mui/system";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
@@ -35,6 +42,7 @@ import {
 import EventForm from "./EventForm";
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
 import { TemplateStatus } from "../../../models/work";
+import { SnackbarKey, closeSnackbar } from "notistack";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -53,6 +61,9 @@ const IButton = styled(IconButton)({
   "&:hover": {
     backgroundColor: Palette.neutral.bg.main,
     borderRadius: "4px",
+  },
+  "&.Mui-disabled .icon": {
+    fill: Palette.neutral.light,
   },
 });
 
@@ -73,6 +84,9 @@ const EventList = () => {
     {}
   );
   const classes = useStyle();
+  const notificationId = React.useRef<SnackbarKey | null>(null);
+  const [templateAvailable, setTemplateAvailable] =
+    React.useState<boolean>(false);
   React.useEffect(() => setEvents([]), [ctx.selectedPhase?.phase_id]);
   React.useEffect(() => {
     getCombinedEvents();
@@ -385,6 +399,9 @@ const EventList = () => {
   };
 
   const getTemplateUploadStatus = React.useCallback(async () => {
+    if (notificationId.current !== null) {
+      closeSnackbar(notificationId.current);
+    }
     if (ctx.work && ctx.selectedPhase) {
       const response = await workService.checkTemplateUploadStatus(
         ctx.work?.id.toString(),
@@ -392,12 +409,21 @@ const EventList = () => {
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
+      setTemplateAvailable(templateUploadStatus.template_available);
+
       if (templateUploadStatus.template_available) {
-        showNotification("Task Templates are available!", {
+        const notification = showNotification("Task Templates are available!", {
           type: "info",
           duration: 3000,
-          message:
-            "Do you want to preview available Templates with lists of tasks?",
+          message: (
+            <Typography>
+              Do you want to preview available Templates for{" "}
+              <Typography style={{ fontWeight: "bold" }} component="span">
+                {ctx.selectedPhase.phase}
+              </Typography>{" "}
+              with lists of tasks?
+            </Typography>
+          ),
           actions: [
             {
               label: "Preview Templates",
@@ -406,6 +432,7 @@ const EventList = () => {
             },
           ],
         });
+        notificationId.current = notification;
       }
     }
   }, [ctx.selectedPhase]);
@@ -413,6 +440,18 @@ const EventList = () => {
   React.useEffect(() => {
     getTemplateUploadStatus();
   }, [ctx.selectedPhase]);
+
+  // Clear notification on unmount
+  React.useEffect(() => {
+    return () => {
+      if (notificationId.current !== null) {
+        closeSnackbar(notificationId.current);
+        notificationId.current = null;
+        ctx.setSelectedPhase(undefined);
+        setTemplateAvailable(false);
+      }
+    };
+  }, []);
 
   return (
     <Grid container rowSpacing={1}>
@@ -438,7 +477,10 @@ const EventList = () => {
           }}
         >
           <Tooltip title="Import tasks from template">
-            <IButton onClick={() => setShowTemplateForm(true)}>
+            <IButton
+              onClick={() => setShowTemplateForm(true)}
+              disabled={!templateAvailable}
+            >
               <ImportFileIcon className="icon" />
             </IButton>
           </Tooltip>

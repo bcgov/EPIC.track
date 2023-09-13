@@ -1,4 +1,5 @@
 import { CustomContentProps } from "notistack";
+import React from "react";
 
 export interface CustomAction {
   label: string;
@@ -9,7 +10,7 @@ export interface CustomAction {
 export interface NotificationOptions {
   type: "success" | "warning" | "error" | "info";
   duration?: number | null;
-  message?: string;
+  message?: string | React.ReactElement;
   actions?: CustomAction[];
 }
 
