@@ -44,6 +44,10 @@ class TaskService:
         task_event = task_event.flush()
         if data.get("assignee_ids"):
             cls._handle_assignees(data.get("assignee_ids"), task_event)
+        work_phase = WorkPhaseService.find_by_work_nd_phase(
+            data.get("work_id"), data.get("phase_id")
+        )
+        work_phase.template_uploaded = True
         if commit:
             db.session.commit()
         return task_event

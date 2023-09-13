@@ -74,14 +74,32 @@ const useStyles = makeStyles({
 
 const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
   (props, ref) => {
-    const { id, message, type, helpText, actions, iconVariant, ...other } =
-      props;
+    const {
+      id,
+      message,
+      type,
+      helpText: HelpText,
+      actions,
+      iconVariant,
+      ...other
+    } = props;
     const { closeSnackbar } = useSnackbar();
     const classes = useStyles();
 
     const handleDismiss = React.useCallback(() => {
       closeSnackbar(id);
     }, [id, closeSnackbar]);
+
+    const helpTextComponent = React.useMemo(() => {
+      return (
+        React.isValidElement(HelpText) ? (
+          // { helpText }
+          HelpText
+        ) : (
+          <Typography>{HelpText}</Typography>
+        )
+      ) as React.ReactElement;
+    }, [HelpText]);
 
     return (
       <SnackbarContent
@@ -93,7 +111,7 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
           [classes.warning]: type === "warning",
           [classes.error]: type === "error",
           [classes.info]: type === "info",
-          [classes.withTitle]: Boolean(helpText),
+          [classes.withTitle]: Boolean(HelpText),
         })}
       >
         <Box className={classes.header}>
@@ -107,9 +125,9 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
             <CloseIconComponent />
           </IconButton>
         </Box>
-        {(helpText || actions) && (
+        {(HelpText || actions) && (
           <Box className={classes.content}>
-            <Typography>{helpText}</Typography>
+            {helpTextComponent}
             {actions && actions.length > 0 && (
               <Box className={classes.actions}>
                 {actions?.map((action) => (
