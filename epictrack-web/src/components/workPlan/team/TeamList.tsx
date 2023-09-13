@@ -1,4 +1,4 @@
-import { Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Skeleton } from "@mui/material";
 import React from "react";
 import { Staff, StaffWorkRole } from "../../../models/staff";
 import workService from "../../../services/workService/workService";
@@ -16,19 +16,18 @@ import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import TrackDialog from "../../shared/TrackDialog";
 import TeamForm from "./TeamForm";
+import NoDataEver from "../../shared/NoDataEver";
 
 const TeamList = () => {
-  const [teamMembers, setTeamMembers] = React.useState<StaffWorkRole[]>([]);
   const [roles, setRoles] = React.useState<string[]>([]);
   const [statuses, setStatuses] = React.useState<string[]>([]);
   const [workStaffId, setWorkStaffId] = React.useState<number | undefined>();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
+  const teamMembers = React.useMemo(() => ctx.team, [ctx.team]);
 
-  React.useEffect(() => {
-    getWorkTeamMembers();
-  }, []);
+  React.useEffect(() => setLoading(ctx.loading), []);
 
   React.useEffect(() => {
     if (teamMembers) {
@@ -144,7 +143,12 @@ const TeamList = () => {
     getWorkTeamMembers();
   };
 
+  const onAddButtonClickHandler = () => {
+    setShowTeamForm(true);
+  };
+
   const getWorkTeamMembers = async () => {
+    setLoading(true);
     try {
       const teamResult = await workService.getWorkTeamMembers(
         Number(ctx.work?.id)
@@ -156,7 +160,7 @@ const TeamList = () => {
             status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
           };
         });
-        setTeamMembers(team);
+        ctx.setTeam(team);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -165,28 +169,41 @@ const TeamList = () => {
     }
     setLoading(false);
   };
+  console.log(teamMembers);
   return (
-    <Grid container rowSpacing={1}>
-      <Grid item xs={12}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setShowTeamForm(true)}
-        >
-          Team Member
-        </Button>
-      </Grid>
-      <Grid item xs={12}>
-        <MasterTrackTable
-          columns={columns}
-          data={teamMembers}
-          enableTopToolbar={false}
-          state={{
-            isLoading: loading,
-            showGlobalFilter: true,
-          }}
+    <>
+      {teamMembers.length > 0 && (
+        <Grid container rowSpacing={1}>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={() => setShowTeamForm(true)}
+            >
+              Team Member
+            </Button>
+          </Grid>
+          <Grid item xs={12}>
+            <MasterTrackTable
+              columns={columns}
+              data={teamMembers}
+              enableTopToolbar={false}
+              state={{
+                isLoading: loading,
+                showGlobalFilter: true,
+              }}
+            />
+          </Grid>
+        </Grid>
+      )}
+      {teamMembers.length === 0 && (
+        <NoDataEver
+          title="You don't have any Team Members yet"
+          subTitle="Start adding your Team"
+          buttonText="Team Member"
+          onClickHandler={() => onAddButtonClickHandler()}
         />
-      </Grid>
+      )}
       <TrackDialog
         open={showTeamForm}
         dialogTitle="Add Team Member"
@@ -200,7 +217,7 @@ const TeamList = () => {
       >
         <TeamForm onSave={onSave} workStaffId={workStaffId} />
       </TrackDialog>
-    </Grid>
+    </>
   );
 };
 

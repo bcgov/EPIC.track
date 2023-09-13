@@ -171,7 +171,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                 <SummaryItem title="Milestone progress">
                   <BorderLinearProgress
                     variant="determinate"
-                    value={50}
+                    value={phase.milestone_progress}
                     sx={{ marginTop: "10px" }}
                   />
                 </SummaryItem>

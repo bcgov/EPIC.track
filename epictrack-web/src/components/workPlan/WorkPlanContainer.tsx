@@ -23,6 +23,10 @@ const WorkPlanContainer = () => {
   const ctx = useContext(WorkplanContext);
   const classes = useStyle();
 
+  const activeStaff = React.useMemo(
+    () => ctx.team.filter((p) => p.is_active),
+    [ctx.team]
+  );
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
@@ -66,9 +70,8 @@ const WorkPlanContainer = () => {
                 <ETTab label="About Project" />
                 <ETTab
                   label="Teams"
-                  identifier="4"
+                  identifier={activeStaff.length.toString()}
                   data-title="dddd"
-                  value={4}
                 />
                 <Tab label="Indigenous Nations" />
               </ETTabs>

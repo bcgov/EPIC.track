@@ -264,7 +264,8 @@ class WorkService:
             **{
                 "work_id": work_id,
                 "staff_id": data.get("staff_id"),
-                "role_id": data.get("role_id")
+                "role_id": data.get("role_id"),
+                "is_active": data.get("is_active"),
             }
         )
         work_staff.flush()

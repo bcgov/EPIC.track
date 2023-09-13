@@ -23,19 +23,19 @@ interface TeamFormProps {
 }
 
 const schema = yup.object().shape({
-  role_id: yup.number().required("Please select the role"),
+  role_id: yup.string().required("Please select the role"),
   staff_id: yup
-    .number()
+    .string()
     .required("Please select the staff")
     .test({
       name: "checkDuplicateStaffWorkAssociation",
       exclusive: true,
       message: "Selected Staff-Work Association already exists",
       test: async (value, { parent }) => {
-        if (value) {
+        if (value && parent["role_id"]) {
           const validateWorkStaff = await workService.checkWorkStaffExists(
             parent["work_id"],
-            value,
+            Number(value),
             parent["role_id"],
             parent["id"]
           );

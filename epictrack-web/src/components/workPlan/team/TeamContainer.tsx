@@ -3,7 +3,7 @@ import { Grid } from "@mui/material";
 import { ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import { makeStyles } from "@mui/styles";
-import TeamGrid from "./TeamList";
+import TeamList from "./TeamList";
 import TeamInfo from "./TeamInfo";
 const useStyle = makeStyles({
   title: {
@@ -33,7 +33,7 @@ const TeamContainer = () => {
           pt: "2rem",
         }}
       >
-        <TeamGrid />
+        <TeamList />
       </Grid>
       <Grid
         item

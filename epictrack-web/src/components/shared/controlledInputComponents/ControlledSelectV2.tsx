@@ -80,11 +80,13 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                   return {
                     ...baseStyles,
                     borderColor: !!errors[name] ? "#d32f2f" : undefined,
+                    fontSize: "1rem",
                   };
                 },
                 menuPortal: (base: CSSObjectWithLabel) => ({
                   ...base,
                   zIndex: 99999,
+                  fontSize: "1rem",
                 }),
               }}
             ></Select>
