@@ -36,7 +36,5 @@ from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSche
 from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
     WorkPlanDownloadQueryParamSchema)
-from .event_configuration_request import EventConfigurationQueryParamSchema
-from .base import BasicRequestQueryParameterSchema
 from .staff_work_role_request import (StaffWorkExistenceCheckQueryParamSchema, StaffWorkPathParamSchema,
                                       StaffWorkBodyParamSchema)
