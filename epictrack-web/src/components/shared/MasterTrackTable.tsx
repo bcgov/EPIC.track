@@ -14,6 +14,10 @@ import SearchIcon from "../../assets/images/search.svg";
 import { ETHeading2 } from ".";
 import { Palette } from "../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../styles/constants";
+import Icons from "../icons";
+import { IconProps } from "../icons/type";
+
+const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
@@ -202,6 +206,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
         }}
         icons={{
           FilterAltIcon: () => null,
+          // CloseIcon: () => null,
         }}
         filterFns={{
           multiSelectFilter: (row, id, filterValue) => {

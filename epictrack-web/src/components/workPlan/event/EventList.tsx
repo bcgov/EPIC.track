@@ -46,6 +46,7 @@ import { SnackbarKey, closeSnackbar } from "notistack";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
 const useStyle = makeStyles({
   textEllipsis: {
@@ -166,9 +167,8 @@ const EventList = () => {
                 .toISOString()
             );
           }
-          element.start_date = element.actual_date
-            ? element.actual_date
-            : element.anticipated_date;
+          element.start_date = element.anticipated_date;
+          element.mandatory = element.event_configuration.mandatory;
           return element;
         });
       }
@@ -247,7 +247,7 @@ const EventList = () => {
         header: "Task / Milestone",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 300,
-        Cell: ({ cell, row }) => (
+        Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle
             to="#"
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -256,7 +256,7 @@ const EventList = () => {
             enableTooltip={true}
             tooltip={cell.getValue<string>()}
           >
-            {cell.getValue<string>()}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
@@ -354,7 +354,7 @@ const EventList = () => {
         accessorKey: "status",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         header: "Progress",
-        size: 140,
+        size: 150,
         Cell: ({ cell, row }) => (
           <Box
             sx={{
@@ -452,7 +452,6 @@ const EventList = () => {
       }
     };
   }, []);
-
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
@@ -497,7 +496,13 @@ const EventList = () => {
           enableSelectAll
           enablePagination
           muiSelectCheckboxProps={({ row, table }) => ({
-            indeterminate: row.original.type === EVENT_TYPE.MILESTONE,
+            indeterminateIcon: <LockIcon />,
+            disabled:
+              row.original.mandatory &&
+              row.original.type === EVENT_TYPE.MILESTONE,
+            indeterminate:
+              row.original.end_date !== undefined &&
+              row.original.type === EVENT_TYPE.MILESTONE,
           })}
           columns={columns}
           data={events}

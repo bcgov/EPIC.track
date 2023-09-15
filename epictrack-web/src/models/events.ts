@@ -18,6 +18,7 @@ export interface EventsGridModel {
   responsibility: string;
   notes: string;
   status: EVENT_STATUS;
+  mandatory: boolean;
 }
 
 export interface MilestoneEvent {

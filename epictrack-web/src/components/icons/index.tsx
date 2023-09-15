@@ -181,6 +181,14 @@ const EditIcon = (props: IconProps) => {
   );
 };
 
+const LockIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
+      <path d="M8.75 12C8.75 12.4375 8.40625 12.75 8 12.75C7.5625 12.75 7.25 12.4375 7.25 12V10C7.25 9.59375 7.5625 9.25 8 9.25C8.40625 9.25 8.75 9.59375 8.75 10V12ZM8 0C10.1875 0 12 1.8125 12 4V6H13C14.0938 6 15 6.90625 15 8V14C15 15.125 14.0938 16 13 16H3C1.875 16 1 15.125 1 14V8C1 6.90625 1.875 6 3 6H4V4C4 1.8125 5.78125 0 8 0ZM8 1.5C6.59375 1.5 5.5 2.625 5.5 4V6H10.5V4C10.5 2.625 9.375 1.5 8 1.5ZM3 7.5C2.71875 7.5 2.5 7.75 2.5 8V14C2.5 14.2812 2.71875 14.5 3 14.5H13C13.25 14.5 13.5 14.2812 13.5 14V8C13.5 7.75 13.25 7.5 13 7.5H3Z" />
+    </svg>
+  );
+};
+
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   DashboardIcon,
@@ -202,6 +210,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   CollapseIcon,
   ExpandIcon,
   EditIcon,
+  LockIcon,
 };
 
 export default icons;

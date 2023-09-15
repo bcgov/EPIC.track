@@ -41,7 +41,7 @@ const TeamList = () => {
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
       setStatuses(statuses);
     }
-  }, [teamMembers]);
+  }, []);
 
   const columns = React.useMemo<MRT_ColumnDef<StaffWorkRole>[]>(
     () => [
