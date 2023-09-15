@@ -127,6 +127,7 @@ class TaskTemplateService:
             exists().where(
                 TaskTemplate.work_type_id == work_type_id,
                 TaskTemplate.phase_id == phase_id,
-                TaskTemplate.is_active.is_(True)
+                TaskTemplate.is_active.is_(True),
+                TaskTemplate.is_deleted.is_(False)
             )
         ).scalar()

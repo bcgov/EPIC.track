@@ -54,6 +54,7 @@ export const showNotification = (
       horizontal: "right",
     },
     persist: Boolean(options.actions),
+    key: options.key,
   });
 };
 

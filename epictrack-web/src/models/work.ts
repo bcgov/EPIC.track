@@ -56,4 +56,5 @@ export interface WorkPhaseSkeleton extends MasterBase {
 
 export interface TemplateStatus extends MasterBase {
   template_available: boolean;
+  task_added: boolean;
 }

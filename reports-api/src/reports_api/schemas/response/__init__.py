@@ -27,6 +27,6 @@ from .user_group_response import UserGroupResponseSchema
 from .user_response import UserResponseSchema
 from .work_response import (
     WorkPhaseResponseSchema, WorkPhaseSkeletonResponseSchema, WorkResourceResponseSchema, WorkResponseSchema,
-    WorkStaffRoleReponseSchema)
+    WorkStaffRoleReponseSchema, WorkPhaseTemplateAvailableResponse)
 from .staff_work_role_response import StaffWorkRoleResponseSchema
 from .role_response import RoleResponseSchema

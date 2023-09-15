@@ -151,3 +151,14 @@ class WorkPhaseSkeletonResponseSchema(Schema):
     def get_milestone_progress(self, instance: WorkPhase) -> float:
         """Returns the percentage of milestones completed"""
         return EventService.find_milestone_progress_by_work_id(instance.work_id)
+
+
+class WorkPhaseTemplateAvailableResponse(Schema):
+    template_available = fields.Boolean(
+        metadata={"description": "Is template available"},
+        required=True
+    )
+    task_added = fields.Boolean(
+        metadata={"description": "Is task added already"},
+        required=True
+    )
