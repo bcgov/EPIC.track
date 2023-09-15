@@ -216,6 +216,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 options={configurations || []}
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
+                disabled={!!eventId}
                 {...register("event_configuration_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -292,25 +293,14 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <ETFormLabel>Short Description</ETFormLabel>
+              <ETFormLabel>Description</ETFormLabel>
               <TextField
                 fullWidth
                 multiline
                 rows={3}
-                error={!!errors?.short_description?.message}
-                helperText={errors?.short_description?.message?.toString()}
-                {...register("short_description")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ETFormLabel>Long Description</ETFormLabel>
-              <TextField
-                fullWidth
-                multiline
-                rows={5}
-                error={!!errors?.long_description?.message}
-                helperText={errors?.long_description?.message?.toString()}
-                {...register("long_description")}
+                error={!!errors?.description?.message}
+                helperText={errors?.description?.message?.toString()}
+                {...register("description")}
               />
             </Grid>
           </Grid>

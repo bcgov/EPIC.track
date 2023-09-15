@@ -47,7 +47,7 @@ class TaskService:
         work_phase = WorkPhaseService.find_by_work_nd_phase(
             data.get("work_id"), data.get("phase_id")
         )
-        work_phase.template_uploaded = True
+        work_phase.task_added = True
         if commit:
             db.session.commit()
         return task_event
@@ -109,7 +109,7 @@ class TaskService:
         )
         if not work_phase:
             raise UnprocessableEntityError("No data found for the given work and phase")
-        if work_phase.template_uploaded:
+        if work_phase.task_added:
             raise UnprocessableEntityError(
                 "Template can be uploaded only once for a phase"
             )
@@ -132,7 +132,7 @@ class TaskService:
                 "status": StatusEnum.NOT_STARTED,
             }
             result_events.append(cls.create_task_event(task_event_dic, commit=False))
-        work_phase.template_uploaded = True
+        work_phase.task_added = True
         db.session.commit()
         return result_events
 

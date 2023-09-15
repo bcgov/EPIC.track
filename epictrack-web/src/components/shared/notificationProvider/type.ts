@@ -12,6 +12,7 @@ export interface NotificationOptions {
   duration?: number | null;
   message?: string | React.ReactElement;
   actions?: CustomAction[];
+  key?: string | number;
 }
 
 export interface ETNotificationProps extends CustomContentProps {

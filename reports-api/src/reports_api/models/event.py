@@ -29,14 +29,12 @@ class Event(BaseModelVersioned):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    short_description = Column(String(2000), nullable=True)
-    long_description = Column(Text, nullable=True)
+    description = Column(String(2000), nullable=True)
     anticipated_date = Column(DateTime(timezone=True), nullable=True)
     actual_date = Column(DateTime(timezone=True), nullable=True)
     number_of_days = Column(Integer, default=0, nullable=False)
     outcome_id = Column(ForeignKey("outcomes.id"), nullable=True, default=None)
     is_active = Column(Boolean(), default=True, nullable=False)
-    is_complete = Column(Boolean(), default=False, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
     source_event_id = Column(Integer, nullable=True)
     work_id = Column(ForeignKey("works.id"), nullable=False)
@@ -77,3 +75,18 @@ class Event(BaseModelVersioned):
             )
             .all()
         )
+
+    @classmethod
+    def create_object(cls, data: dict):
+        """create the event object"""
+
+        return Event(
+            **{
+                "name": data.get("name"),
+                "anticipated_date": data.get("anticipated_date"),
+                "actual_date": data.get("actual_date"),
+                "number_of_days": data.get("number_of_days"),
+                "event_configuration_id": data.get("event_configuration_id"),
+                "work_id": data.get("work_id")
+            }
+                    )
