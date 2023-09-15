@@ -62,8 +62,11 @@ const IButton = styled(IconButton)({
     backgroundColor: Palette.neutral.bg.main,
     borderRadius: "4px",
   },
-  "&.Mui-disabled .icon": {
-    fill: Palette.neutral.light,
+  "&.Mui-disabled": {
+    pointerEvents: "auto",
+    "& .icon": {
+      fill: Palette.neutral.light,
+    },
   },
 });
 
@@ -86,7 +89,7 @@ const EventList = () => {
   const classes = useStyle();
   const notificationId = React.useRef<SnackbarKey | null>(null);
   const [templateAvailable, setTemplateAvailable] =
-    React.useState<boolean>(false);
+    React.useState<TemplateStatus>();
   React.useEffect(() => setEvents([]), [ctx.selectedPhase?.phase_id]);
   React.useEffect(() => {
     getCombinedEvents();
@@ -399,22 +402,26 @@ const EventList = () => {
   };
 
   const getTemplateUploadStatus = React.useCallback(async () => {
-    if (notificationId.current !== null) {
-      closeSnackbar(notificationId.current);
-    }
     if (ctx.work && ctx.selectedPhase) {
+      if (notificationId.current !== null) {
+        closeSnackbar(notificationId.current);
+        notificationId.current = null;
+      }
       const response = await workService.checkTemplateUploadStatus(
         ctx.work?.id.toString(),
         ctx.selectedPhase?.phase_id.toString()
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
-      setTemplateAvailable(templateUploadStatus.template_available);
+      setTemplateAvailable(templateUploadStatus);
 
-      if (templateUploadStatus.template_available) {
+      if (
+        templateUploadStatus.template_available &&
+        !templateUploadStatus.task_added
+      ) {
         const notification = showNotification("Task Templates are available!", {
           type: "info",
-          duration: 3000,
+          duration: null,
           message: (
             <Typography>
               Do you want to preview available Templates for{" "}
@@ -431,6 +438,7 @@ const EventList = () => {
               callback: () => setShowTemplateForm(true),
             },
           ],
+          key: `template-available-${ctx.selectedPhase.phase}`,
         });
         notificationId.current = notification;
       }
@@ -448,7 +456,7 @@ const EventList = () => {
         closeSnackbar(notificationId.current);
         notificationId.current = null;
         ctx.setSelectedPhase(undefined);
-        setTemplateAvailable(false);
+        setTemplateAvailable(undefined);
       }
     };
   }, []);
@@ -476,14 +484,22 @@ const EventList = () => {
             gap: "0.5rem",
           }}
         >
-          <Tooltip title="Import tasks from template">
-            <IButton
-              onClick={() => setShowTemplateForm(true)}
-              disabled={!templateAvailable}
+          {templateAvailable?.template_available && (
+            <Tooltip
+              title={
+                templateAvailable.task_added
+                  ? "You've already used the template"
+                  : "Import tasks from template"
+              }
             >
-              <ImportFileIcon className="icon" />
-            </IButton>
-          </Tooltip>
+              <IButton
+                onClick={() => setShowTemplateForm(true)}
+                disabled={templateAvailable?.task_added}
+              >
+                <ImportFileIcon className="icon" />
+              </IButton>
+            </Tooltip>
+          )}
           <Tooltip title="Export workplan to excel">
             <IButton onClick={downloadPDFReport}>
               <DownloadIcon className="icon" />

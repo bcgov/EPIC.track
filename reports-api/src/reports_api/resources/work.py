@@ -247,4 +247,4 @@ class WorkPhaseTemplateStatus(Resource):
         """Get the status if template upload is available"""
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
         template_upload_status = WorkPhaseService.get_template_upload_status(work_id, phase_id)
-        return {"template_available": template_upload_status}, HTTPStatus.OK
+        return res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status), HTTPStatus.OK

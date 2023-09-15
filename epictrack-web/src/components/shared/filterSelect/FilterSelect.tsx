@@ -71,7 +71,7 @@ const FilterSelect = (props: SelectProps) => {
           )
         );
       } else {
-        let value = [...selectedOptions, newValue.at(-1).value];
+        let value = [...selectedOptions, option.value];
         value = Array.from(new Set<string>(value));
         setSelectedOptions(value || []);
       }

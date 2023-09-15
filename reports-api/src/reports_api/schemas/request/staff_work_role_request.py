@@ -13,7 +13,8 @@
 # limitations under the License.
 """Input validation for staff work role"""
 from marshmallow import fields, validate
-from .base import RequestQueryParameterSchema, RequestPathParameterSchema, RequestBodyParameterSchema
+
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
 class StaffWorkExistenceCheckQueryParamSchema(RequestQueryParameterSchema):
