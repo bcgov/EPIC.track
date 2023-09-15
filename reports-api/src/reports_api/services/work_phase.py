@@ -62,7 +62,6 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         result = {}
         work_phase = cls.find_by_work_nd_phase(work_id, phase_id)
         result["task_added"] = work_phase.task_added
-        
         template_available = TaskTemplateService.check_template_exists(
             work_type_id=work_phase.work.work_type_id, phase_id=phase_id
         )

@@ -154,6 +154,8 @@ class WorkPhaseSkeletonResponseSchema(Schema):
 
 
 class WorkPhaseTemplateAvailableResponse(Schema):
+    """Schema for work phase template available response"""
+
     template_available = fields.Boolean(
         metadata={"description": "Is template available"},
         required=True

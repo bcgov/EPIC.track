@@ -27,6 +27,8 @@ from .reminder_configuration_request import ReminderConfigurationExistenceQueryP
 from .staff_request import (
     StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffEmailPathParameterSchema,
     StaffExistanceQueryParamSchema, StaffIdPathParameterSchema)
+from .staff_work_role_request import (
+    StaffWorkBodyParamSchema, StaffWorkExistenceCheckQueryParamSchema, StaffWorkPathParamSchema)
 from .task_request import (
     TaskBodyParameterSchema, TaskEventBodyParamSchema, TaskEventBulkUpdateBodyParamSchema,
     TaskEventIdPathParameterSchema, TaskEventQueryParamSchema, TaskTemplateBodyParameterSchema,
@@ -36,5 +38,3 @@ from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSche
 from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
     WorkPlanDownloadQueryParamSchema)
-from .staff_work_role_request import (StaffWorkExistenceCheckQueryParamSchema, StaffWorkPathParamSchema,
-                                      StaffWorkBodyParamSchema)
