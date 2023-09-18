@@ -54,6 +54,7 @@ class Work(BaseModelVersioned):
     substitution_act_id = Column(ForeignKey('substitution_acts.id'), nullable=True, default=None)
     eac_decision_by_id = Column(ForeignKey('staffs.id'), nullable=True)
     decision_by_id = Column(ForeignKey('staffs.id'), nullable=True)
+    start_date_locked = Column(Boolean(), default=False)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')

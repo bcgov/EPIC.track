@@ -120,7 +120,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
   const onSubmitHandler = async (data: TaskEvent) => {
     try {
       data.work_id = Number(ctx.work?.id);
-      data.phase_id = Number(ctx.selectedPhase?.phase_id);
+      data.phase_id = Number(ctx.selectedWorkPhase?.phase.id);
       data.start_date = Moment(data.start_date).format();
       data.number_of_days =
         data.number_of_days.toString() === "" ? 0 : data.number_of_days;

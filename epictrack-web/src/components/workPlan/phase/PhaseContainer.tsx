@@ -17,9 +17,9 @@ const PhaseContainer = () => {
   React.useEffect(() => {
     if (ctx.work?.current_phase_id && phases.length > 0) {
       const phase = phases.filter(
-        (p) => p.phase_id === ctx.work?.current_phase_id
+        (p) => p.phase.id === ctx.work?.current_phase_id
       )[0];
-      ctx.setSelectedPhase(phase);
+      ctx.setSelectedWorkPhase(phase);
     }
   }, [phases, ctx.work]);
 

@@ -1,6 +1,4 @@
 """Work model schema"""
-from datetime import datetime
-
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
@@ -117,31 +115,21 @@ class WorkResourceResponseSchema(
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
 
 
-class WorkPhaseSkeletonResponseSchema(Schema):
+class WorkPhaseSkeletonResponseSchema(AutoSchemaBase):
     """Schema for work phase skeleton details"""
 
-    phase = fields.Method("get_phase_name")
-    phase_id = fields.Method("get_phase_id")
-    start_date = fields.Method("get_start_date")
-    end_date = fields.Method("get_end_date")
+    class Meta(
+        AutoSchemaBase.Meta
+    ):  # pylint: disable=too-many-ancestors,too-few-public-methods
+        """Meta information"""
+
+        model = WorkPhase
+        include_fk = False
+        unknown = EXCLUDE
+
+    phase = fields.Nested(PhaseSchema, dump_only=True)
     next_milestone = fields.Method("get_next_milestone")
     milestone_progress = fields.Method("get_milestone_progress")
-
-    def get_phase_name(self, instance: WorkPhase) -> str:
-        """Returns the phase name"""
-        return instance.phase.name
-
-    def get_phase_id(self, instance: WorkPhase) -> int:
-        """Returns the phase's id"""
-        return instance.phase_id
-
-    def get_start_date(self, instance: WorkPhase) -> datetime:
-        """Returns the phase start date"""
-        return instance.start_date
-
-    def get_end_date(self, instance: WorkPhase) -> datetime:
-        """Returns the phase end date"""
-        return instance.end_date
 
     def get_next_milestone(self, instance: WorkPhase) -> str:
         """Returns the next milestone event name"""

@@ -3,7 +3,11 @@ import Endpoints from "../../constants/api-endpoint";
 import { MilestoneEvent } from "../../models/events";
 
 class EventService {
-  async create(taskEvent: MilestoneEvent, workId: number, phaseId: number) {
+  async create(
+    taskEvent: MilestoneEvent | undefined,
+    workId: number,
+    phaseId: number
+  ) {
     return await http.PostRequest(
       `${Endpoints.Events.MILESTONE_EVENTS}/works/:work_id/phases/:phase_id`
         .replace(":work_id", workId.toString())
@@ -25,7 +29,7 @@ class EventService {
     );
   }
 
-  async update(event: MilestoneEvent, eventId: number) {
+  async update(event: MilestoneEvent | undefined, eventId: number) {
     return await http.PutRequest(
       `${Endpoints.Events.MILESTONE_EVENTS}/${eventId}`,
       JSON.stringify(event)

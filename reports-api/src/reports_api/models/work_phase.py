@@ -32,6 +32,8 @@ class WorkPhase(BaseModelVersioned):
     work_id = Column(ForeignKey('works.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
     task_added = Column(Boolean, default=False,)
+    number_of_days = Column(Integer, default=0)
+    is_completed = Column(Boolean, default=False)
 
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')

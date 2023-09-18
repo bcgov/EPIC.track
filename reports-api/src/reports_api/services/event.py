@@ -41,19 +41,10 @@ class EventService:  # pylint: disable=too-few-public-methods
     @classmethod
     def create_event(cls, data: dict, work_id: int, phase_id: int, commit: bool = True) -> Event:
         """Create milestone event"""
-        event = Event(
-            **{
-                "name": data.get("name"),
-                "anticipated_date": data.get("anticipated_date"),
-                "actual_date": data.get("actual_date"),
-                "number_of_days": data.get("number_of_days"),
-                "event_configuration_id": data.get("event_configuration_id"),
-                "work_id": work_id
-            }
-                    )
-        event_configurations = EventConfigurationService.find_parent_child_configurations(
-            data.get("event_configuration_id"))
-        if not event_configurations:
+        data["work_id"] = work_id
+        event = Event(**data)
+        event_configurations = EventConfigurationService.find_configurations(event.work_id, all=True)
+        if not next((config for config in event_configurations if config.id == event.event_configuration_id), None):
             raise UnprocessableEntityError("Incorrect configuration provided")
 
         work_phase = WorkPhaseService.find_by_work_nd_phase(work_id, phase_id)
@@ -63,18 +54,12 @@ class EventService:  # pylint: disable=too-few-public-methods
         if not work_phase.phase.legislated and cls._validate_date(work_phase, event):
             raise UnprocessableEntityError("The event dates should be within the start and end dates of the phase")
 
-        child_configurations = list(filter(lambda x: x.parent_id, event_configurations))
-        events = cls._find_events_by_work(work_id, PRIMARY_CATEGORIES)
+        events = cls._find_events_by_work(work_id, phase_id, PRIMARY_CATEGORIES)
         event = event.flush()
-        events.append(event)
-        events = sorted(events, key=lambda x: x.anticipated_date)
-        event_index = -1
-        for index, item in enumerate(events):
-            if item.id == event.id:
-                event_index = index
-                break
-        if event_index > 0 and event.actual_date and not events[event_index - 1].actual_date:
+        if event.actual_date and not cls._is_previous_event_completed(events, event_configurations, event):
             raise UnprocessableEntityError("Prevous event must be completed")
+        child_configurations = list(filter(lambda x, p_id=event.event_configuration_id:
+                                           x.parent_id == p_id, event_configurations))
         cls._handle_child_events(child_configurations, event)
         if commit:
             db.session.commit()
@@ -119,13 +104,51 @@ class EventService:  # pylint: disable=too-few-public-methods
             ),
         )
         events_total = events_query.count()
-        events_completed = events_query.filter(Event.is_complete.is_(True)).count()
+        events_completed = events_query.filter(Event.actual_date is not None).count()
         return (events_completed / events_total) * 100
 
     @classmethod
     def find_milestone_events_by_work_phase(cls, work_id: int, phase_id: int):
         """Find all milestone events by work id and phase id"""
         return Event.find_milestones_by_work_phase(work_id, phase_id)
+
+    @classmethod
+    def _is_previous_event_completed(cls, events: [Event],
+                                     event_configurations: [EventConfiguration], event: Event) -> bool:
+        """Check to see if the previous event has actual date present"""
+        config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
+        phase_events = list(filter(lambda x, _phase_id=config.phase_id:
+                                   x.event_configuration.phase_id == _phase_id, events))
+        phase_events.append(event)
+        phase_events = sorted(phase_events, key=lambda x: x.actual_date or x.anticipated_date)
+        event_index = -1
+        for index, item in enumerate(phase_events):
+            if item.id == event.id:
+                event_index = index
+                break
+        if event_index > 0 and event.actual_date and not phase_events[event_index - 1].actual_date:
+            return False
+        return True
+
+    @classmethod
+    def _handle_event_types(cls, events: [Event], event_configurations: [EventConfiguration], event):
+        """Handle the event and related actions"""
+        pass
+        # config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
+        # child_configurations = list(filter(lambda x,
+        #                                    p_id=event.event_configuration_id:
+        #                                    x.parent_id == p_id, event_configurations))
+        # match config.event_category_id:
+        #     case EventCategoryEnum.EXTENSION:
+        #         work_phases = WorkPhaseService.find_by_work_id(event.work_id)
+        #     case EventCategoryEnum.SUSPENSION:
+        #         pass
+        #     case EventCategoryEnum.DECISION:
+        #         pass
+        #     case EventCategoryEnum.PCP:
+        #         pass
+        #     case _:
+        #         cls._handle_child_events(child_configurations, event)
 
     @classmethod
     def _handle_child_events(cls, child_configurations: [EventConfiguration], event: [Event]) -> None:
@@ -183,7 +206,8 @@ class EventService:  # pylint: disable=too-few-public-methods
                     )
 
     @classmethod
-    def _find_events_by_work(cls, work_id: int, event_categories: [EventCategoryEnum] = []) -> [Event]:
+    def _find_events_by_work(cls, work_id: int, phase_id: int = None,
+                             event_categories: [EventCategoryEnum] = []) -> [Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
         events_query = db.session.query(Event)\
@@ -191,6 +215,8 @@ class EventService:  # pylint: disable=too-few-public-methods
             .filter(Event.is_active.is_(True), EventConfiguration.work_id == work_id)
         if len(event_categories) > 0:
             events_query.filter(EventConfiguration.event_category_id.in_(event_categories))
+        if not phase_id:
+            events_query = events_query.filter(EventConfiguration.phase_id == phase_id)
         return events_query.all()
 
     @classmethod

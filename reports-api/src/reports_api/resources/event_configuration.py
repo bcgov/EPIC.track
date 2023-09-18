@@ -43,7 +43,8 @@ class EventConfigurations(Resource):
         work_id = args.get("work_id")
         phase_id = args.get("phase_id")
         mandatory = args.get("mandatory")
-        configurations = EventConfigurationService.find_configurations(phase_id, work_id, mandatory, PRIMARY_CATEGORIES)
+        configurations = EventConfigurationService.find_configurations(work_id, phase_id,
+                                                                       mandatory, PRIMARY_CATEGORIES)
         return (
             jsonify(res.EventConfigurationResponseSchema(many=True).dump(configurations)),
             HTTPStatus.OK,

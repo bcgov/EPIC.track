@@ -22,6 +22,7 @@ import RichTextEditor from "../../shared/richTextEditor";
 import eventService from "../../../services/eventService/eventService";
 import { MilestoneEvent } from "../../../models/events";
 import configurationService from "../../../services/configurationService/configurationService";
+import TrackDialog from "../../shared/TrackDialog";
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
   event_configuration_id: yup.string().required("Please select milestone type"),
@@ -34,13 +35,16 @@ interface TaskFormProps {
 }
 const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const [event, setEvent] = React.useState<MilestoneEvent>();
+  const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<ListType[]>([]);
   const [notes, setNotes] = React.useState("");
+  const [showEventLockDialog, setShowEventLockDialog] =
+    React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
   const workId = React.useMemo(() => ctx.work?.id, [ctx.work?.id]);
   const selectedPhaseId = React.useMemo(
-    () => ctx.selectedPhase?.phase_id,
-    [ctx.selectedPhase?.phase_id]
+    () => ctx.selectedWorkPhase?.phase.id,
+    [ctx.selectedWorkPhase?.phase.id]
   );
   const endDateRef = React.useRef();
   const startDateRef = React.useRef();
@@ -115,31 +119,16 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
       }
       data.number_of_days = !!data.number_of_days ? 0 : data.number_of_days;
       data.notes = notes;
-      if (eventId) {
-        const createResult = await eventService.update(data, Number(eventId));
-        if (createResult.status === 200) {
-          showNotification("Milestone details updated", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
-      } else {
-        const createResult = await eventService.create(
-          data,
-          Number(ctx.work?.id),
-          Number(ctx.selectedPhase?.phase_id)
-        );
-        if (createResult.status === 201) {
-          showNotification("Milestone details inserted", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
+      setSubmittedEvent(data);
+      const showConfirmDialog =
+        (event === undefined && data.actual_date != null) ||
+        (event != null &&
+          event.actual_date == null &&
+          data.actual_date != null);
+      if (!showConfirmDialog) {
+        saveEvent(data);
       }
+      setShowEventLockDialog(showConfirmDialog);
     } catch (e: any) {
       const error = getAxiosError(e);
       const message =
@@ -151,6 +140,41 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
       });
     }
   };
+
+  const saveEvent = React.useCallback(
+    async (data?: MilestoneEvent) => {
+      const dataToBeSubmitted = data || submittedEvent;
+      if (eventId) {
+        const createResult = await eventService.update(
+          dataToBeSubmitted,
+          Number(eventId)
+        );
+        if (createResult.status === 200) {
+          showNotification("Milestone details updated", {
+            type: "success",
+          });
+          if (onSave) {
+            onSave();
+          }
+        }
+      } else {
+        const createResult = await eventService.create(
+          dataToBeSubmitted,
+          Number(ctx.work?.id),
+          Number(ctx.selectedWorkPhase?.phase.id)
+        );
+        if (createResult.status === 201) {
+          showNotification("Milestone details inserted", {
+            type: "success",
+          });
+          if (onSave) {
+            onSave();
+          }
+        }
+      }
+    },
+    [eventId, submittedEvent]
+  );
 
   return (
     <>
@@ -192,6 +216,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 options={configurations || []}
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
+                disabled={!!eventId}
                 {...register("event_configuration_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -254,13 +279,13 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                         },
                         ...register("actual_date"),
                       }}
-                      // value={dayjs(value)}
+                      value={dayjs(value)}
                       onChange={(event) => {
                         onChange(event);
                       }}
-                      // defaultValue={dayjs(
-                      //   event?.actual_date ? event?.actual_date : ""
-                      // )}
+                      defaultValue={dayjs(
+                        event?.actual_date ? event?.actual_date : ""
+                      )}
                       sx={{ display: "block" }}
                     />
                   </LocalizationProvider>
@@ -268,25 +293,14 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <ETFormLabel>Short Description</ETFormLabel>
+              <ETFormLabel>Description</ETFormLabel>
               <TextField
                 fullWidth
                 multiline
                 rows={3}
-                error={!!errors?.short_description?.message}
-                helperText={errors?.short_description?.message?.toString()}
-                {...register("short_description")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ETFormLabel>Long Description</ETFormLabel>
-              <TextField
-                fullWidth
-                multiline
-                rows={5}
-                error={!!errors?.long_description?.message}
-                helperText={errors?.long_description?.message?.toString()}
-                {...register("long_description")}
+                error={!!errors?.description?.message}
+                helperText={errors?.description?.message?.toString()}
+                {...register("description")}
               />
             </Grid>
           </Grid>
@@ -309,6 +323,19 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
             </Grid>
           </Grid>
         </Grid>
+        <TrackDialog
+          open={showEventLockDialog}
+          dialogTitle="Lock Milestone?"
+          dialogContentText="The event will be locked. Do you want to continue?"
+          disableEscapeKeyDown
+          fullWidth
+          okButtonText="Upload"
+          onOk={() => saveEvent()}
+          onCancel={() => {
+            setShowEventLockDialog(false);
+          }}
+          isActionsRequired
+        />
       </FormProvider>
     </>
   );

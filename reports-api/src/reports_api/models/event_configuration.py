@@ -37,12 +37,14 @@ class EventConfiguration(BaseModelVersioned):
     number_of_days = sa.Column(sa.Integer, default=0, nullable=False)
     mandatory = sa.Column(sa.Boolean, default=False)
     sort_order = sa.Column(sa.Integer, nullable=False)
+    work_phase_id = sa.Column(sa.ForeignKey('work_phases.id'), nullable=True)
 
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
     event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')
     event_template = relationship('EventTemplate', foreign_keys=[template_id], lazy='select')
+    work_phase = relationship('WorkPhase', foreign_keys=[work_phase_id], lazy='select')
 
     @classmethod
     def find_by_phase_id(cls, _phase_id):

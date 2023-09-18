@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Event Response response schema"""
-from marshmallow import EXCLUDE
+from marshmallow import EXCLUDE, fields
 
 from reports_api.models import Event
 from reports_api.schemas.base import AutoSchemaBase
+from .event_configuration_response import EventConfigurationResponseSchema
 
 
 class EventResponseSchema(
@@ -29,3 +30,4 @@ class EventResponseSchema(
         model = Event
         include_fk = True
         unknown = EXCLUDE
+    event_configuration = fields.Nested(EventConfigurationResponseSchema(), dump_only=True)

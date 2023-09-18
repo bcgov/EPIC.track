@@ -21,6 +21,7 @@ from reports_api.exceptions import BadRequestError
 from reports_api.models import EventTemplate
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
+from reports_api.services.phaseservice import PhaseService
 from reports_api.utils.str import escape_characters
 
 
@@ -31,13 +32,15 @@ class EventTemplateService:
     """Service to manage configurations"""
 
     @classmethod
-    def import_events_template(cls, configuration_file):
+    def import_events_template_new(cls, configuration_file):
         """Import event configurations in to database"""
         final_result = []
         excel_dict = cls._read_excel(configuration_file=configuration_file)
         work_types, ea_acts, event_types, event_categories = cls._get_event_configuration_lookup_entities()
         event_dict = excel_dict.get("Events")
         phase_dict = excel_dict.get("Phases")
+        # outcome_dict = excel_dict.get("Outcomes")
+        # action_dict = excel_dict.get("Actions")
         for event_type in event_types:
             event_dict = event_dict.replace({'event_type_id': rf'^{event_type.name}$'},
                                             {'event_type_id': event_type.id}, regex=True)
@@ -54,56 +57,44 @@ class EventTemplateService:
 
         event_dict = event_dict.to_dict('records')
         phase_dict = phase_dict.to_dict('records')
-
-        phases_per_wt_ea_act_dict = {}
-        events_per_phase = {}
+        existing_phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(phase_dict[0]['ea_act_id'],
+                                                                                phase_dict[0]['work_type_id'])
         for phase in phase_dict:
-            phases_key = str(phase['ea_act_id']) + str(phase['work_type_id'])
-            if phases_key in phases_per_wt_ea_act_dict:
-                existing_phases = phases_per_wt_ea_act_dict[phases_key]
-            else:
-                existing_phases = models.PhaseCode.find_by_ea_act_and_work_type(
-                    phase['ea_act_id'], phase['work_type_id'])
-                phases_per_wt_ea_act_dict[phases_key] = existing_phases
-            phase_id = None
-            phase_no = phase['no']
-            del phase['no']
             selected_phase = next((p for p in existing_phases if p.name == phase['name']), None)
             phase_obj = req.PhaseBodyParameterSchema().load(phase)
             if selected_phase:
-                phase_result = selected_phase.update(phase_obj)
+                phase_result = selected_phase.update(phase_obj, commit=False)
             else:
-                phase_result = models.PhaseCode(**phase_obj).save()
-            phase_id = phase_result.id
-
+                phase_result = models.PhaseCode(**phase_obj).flush()
             phase_result_copy = res.PhaseResponseSchema().dump(phase_result)
             phase_result_copy['events'] = []
-            parent_events = list(filter(lambda x, _phase_no=phase_no: 'phase_no'
+            parent_events = list(filter(lambda x, _phase_no=phase['no']: 'phase_no'
                                         in x and x['phase_no'] == _phase_no and not x['parent_id'], event_dict))
+            existing_events = models.EventTemplate.find_by_phase_id(phase_result.id)
             for event in parent_events:
-                event['phase_id'] = phase_id
+                event['phase_id'] = phase_result.id
                 event['start_at'] = str(event['start_at'])
-                event_result = cls._save_event_template(events_per_phase, event, phase_id)
+                event_result = cls._save_event_template(existing_events, event, phase_result.id)
                 (phase_result_copy['events']).append(res.EventTemplateResponseSchema().dump(event_result))
                 child_events = list(filter(lambda x, _parent_id=event['no']: 'parent_id'
                                            in x and x['parent_id'] == _parent_id, event_dict))
                 for child in child_events:
-                    child['phase_id'] = phase_id
+                    child['phase_id'] = phase_result.id
                     child['parent_id'] = event_result.id
                     child['start_at'] = str(child['start_at'])
-                    child_event_result = cls._save_event_template(events_per_phase, child, phase_id, event_result.id)
+                    child_event_result = cls._save_event_template(existing_events, child,
+                                                                  phase_result.id, event_result.id)
                     (phase_result_copy['events']).append(res.EventTemplateResponseSchema().dump(child_event_result))
             final_result.append(phase_result_copy)
-        return final_result
 
     @classmethod
-    def _save_event_template(cls, events_per_phase, event, phase_id, parent_id=None) -> EventTemplate:
+    def _save_event_template(cls, existing_events, event, phase_id, parent_id=None) -> EventTemplate:
         """Save the event templateI"""
-        if phase_id in events_per_phase:
-            existing_events = events_per_phase[phase_id]
-        else:
-            existing_events = models.EventTemplate.find_by_phase_id(phase_id)
-            events_per_phase[phase_id] = existing_events
+        # if phase_id in events_per_phase:
+        #     existing_events = events_per_phase[phase_id]
+        # else:
+        #     existing_events = models.EventTemplate.find_by_phase_id(phase_id)
+        #     events_per_phase[phase_id] = existing_events
         selected_event = next((e for e in existing_events if e.name == event['name'] and
                                e.phase_id == phase_id and
                                (e.parent_id == parent_id) and
@@ -111,16 +102,16 @@ class EventTemplateService:
                                e.event_category_id == event['event_category_id']), None)
         event_obj = req.EventTemplateBodyParameterSchema().load(event)
         if selected_event:
-            event_result = selected_event.update(event_obj)
+            event_result = selected_event.update(event_obj, commit=False)
         else:
-            event_result = models.EventTemplate(**event_obj).save()
+            event_result = models.EventTemplate(**event_obj).flush()
         return event_result
 
     @classmethod
     def _read_excel(cls, configuration_file: IO) -> Dict[str, pd.DataFrame]:
         """Read the excel and return the data frame"""
         result = {}
-        sheets = ['Phases', 'Events']
+        sheets = ['Phases', 'Events', 'Outcomes', 'Actions']
         sheet_obj_map = {
             'phases': {
                 'No': 'no',
@@ -144,7 +135,22 @@ class EventTemplateService:
                 'StartAt': 'start_at',
                 'Mandatory': 'mandatory',
                 'SortOrder': 'sort_order'
-            }
+            },
+            'outcomes': {
+                'No': 'no',
+                'TemplateNo': 'template_no',
+                'TemplateName': 'event_template_id',
+                'OutcomeName': 'name',
+                'SortOrder': 'sort_order'
+            },
+            'actions': {
+                'No': 'no',
+                'OutcomeNo': 'outcome_no',
+                'OutcomeName': 'outcome_id',
+                'ActionName': 'name',
+                'AdditionalParams': 'additional_params',
+                'SortOrder': 'sort_order'
+            },
         }
         try:
             excel_dict = pd.read_excel(configuration_file, sheets, na_filter=False)
@@ -185,3 +191,69 @@ class EventTemplateService:
         """Get event templates under given phases"""
         templates = EventTemplate.find_by_phase_ids(phase_ids)
         return templates
+
+    # @classmethod
+    # def import_events_template(cls, configuration_file):
+    #     """Import event configurations in to database"""
+    #     final_result = []
+    #     excel_dict = cls._read_excel(configuration_file=configuration_file)
+    #     work_types, ea_acts, event_types, event_categories = cls._get_event_configuration_lookup_entities()
+    #     event_dict = excel_dict.get("Events")
+    #     phase_dict = excel_dict.get("Phases")
+    #     for event_type in event_types:
+    #         event_dict = event_dict.replace({'event_type_id': rf'^{event_type.name}$'},
+    #                                         {'event_type_id': event_type.id}, regex=True)
+    #     for event_category in event_categories:
+    #         event_dict = event_dict.replace({'event_category_id': rf'^{event_category.name}$'},
+    #                                         {'event_category_id': event_category.id}, regex=True)
+    #     for work_type in work_types:
+    #         phase_dict = phase_dict.replace({'work_type_id': rf'^{work_type.name}$'},
+    #                                         {'work_type_id': work_type.id}, regex=True)
+    #     for ea_act in ea_acts:
+    #         name = escape_characters(ea_act.name, ['(', ')'])
+    #         phase_dict = phase_dict.replace({'ea_act_id': rf'^{name}$'},
+    #                                         {'ea_act_id': ea_act.id}, regex=True)
+
+    #     event_dict = event_dict.to_dict('records')
+    #     phase_dict = phase_dict.to_dict('records')
+
+    #     phases_per_wt_ea_act_dict = {}
+    #     events_per_phase = {}
+    #     for phase in phase_dict:
+    #         phases_key = str(phase['ea_act_id']) + str(phase['work_type_id'])
+    #         if phases_key in phases_per_wt_ea_act_dict:
+    #             existing_phases = phases_per_wt_ea_act_dict[phases_key]
+    #         else:
+    #             existing_phases = models.PhaseCode.find_by_ea_act_and_work_type(
+    #                 phase['ea_act_id'], phase['work_type_id'])
+    #             phases_per_wt_ea_act_dict[phases_key] = existing_phases
+    #         phase_id = None
+    #         phase_no = phase['no']
+    #         del phase['no']
+    #         selected_phase = next((p for p in existing_phases if p.name == phase['name']), None)
+    #         phase_obj = req.PhaseBodyParameterSchema().load(phase)
+    #         if selected_phase:
+    #             phase_result = selected_phase.update(phase_obj)
+    #         else:
+    #             phase_result = models.PhaseCode(**phase_obj).save()
+    #         phase_id = phase_result.id
+
+    #         phase_result_copy = res.PhaseResponseSchema().dump(phase_result)
+    #         phase_result_copy['events'] = []
+    #         parent_events = list(filter(lambda x, _phase_no=phase_no: 'phase_no'
+    #                                     in x and x['phase_no'] == _phase_no and not x['parent_id'], event_dict))
+    #         for event in parent_events:
+    #             event['phase_id'] = phase_id
+    #             event['start_at'] = str(event['start_at'])
+    #             event_result = cls._save_event_template(events_per_phase, event, phase_id)
+    #             (phase_result_copy['events']).append(res.EventTemplateResponseSchema().dump(event_result))
+    #             child_events = list(filter(lambda x, _parent_id=event['no']: 'parent_id'
+    #                                        in x and x['parent_id'] == _parent_id, event_dict))
+    #             for child in child_events:
+    #                 child['phase_id'] = phase_id
+    #                 child['parent_id'] = event_result.id
+    #                 child['start_at'] = str(child['start_at'])
+    #                 child_event_result = cls._save_event_template(events_per_phase, child, phase_id, event_result.id)
+    #                 (phase_result_copy['events']).append(res.EventTemplateResponseSchema().dump(child_event_result))
+    #         final_result.append(phase_result_copy)
+    #     return final_result

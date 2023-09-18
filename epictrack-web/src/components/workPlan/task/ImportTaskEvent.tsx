@@ -54,7 +54,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
   const classes = useStyle();
   React.useEffect(() => {
     getTemplates();
-  }, [ctx.work, ctx.selectedPhase]);
+  }, [ctx.work, ctx.selectedWorkPhase]);
 
   React.useEffect(() => {
     if (templates.length > 0) {
@@ -83,7 +83,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
       const result = await templateService.getTemplatesByParams(
         Number(ctx.work?.ea_act_id),
         Number(ctx.work?.work_type_id),
-        Number(ctx.selectedPhase?.phase_id)
+        Number(ctx.selectedWorkPhase?.phase.id)
       );
       if (result.status === 200) {
         const templatesData = (result.data as any[]).filter(
