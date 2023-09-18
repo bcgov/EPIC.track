@@ -46,12 +46,13 @@ export interface Work extends MasterBase {
 }
 
 export interface WorkPhaseSkeleton extends MasterBase {
-  phase_id: number;
   end_date: string;
   start_date: string;
-  phase: string;
+  phase: ListType;
   milestone_progress: number;
   next_milestone: string;
+  is_completed: boolean;
+  number_of_days: string;
 }
 
 export interface TemplateStatus extends MasterBase {

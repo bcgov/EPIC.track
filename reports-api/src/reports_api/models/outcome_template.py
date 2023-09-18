@@ -13,22 +13,21 @@
 # limitations under the License.
 """Model to handle all operations related to Outcome."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
 
 
-class Outcome(BaseModelVersioned):
+class OutcomeTemplate(BaseModelVersioned):
     """Model class for Outcome."""
 
-    __tablename__ = 'outcomes'
+    __tablename__ = 'outcome_templates'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     event_template_id = Column(ForeignKey("event_templates.id"), nullable=False)
     sort_order = Column(Integer, nullable=False)
-    terminates_work = Column(Boolean, default=False, nullable=False)
 
     event_template = relationship('EventTemplate', foreign_keys=[event_template_id], lazy='select')
 

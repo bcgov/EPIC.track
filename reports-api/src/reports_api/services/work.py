@@ -122,11 +122,12 @@ class WorkService:
                                         "start_date": f"{phase_start_date}",
                                         "end_date": f"{end_date}",
                                         "number_of_days": phase.number_of_days
-                                        }
-                                    )
+                                    }
                                 )
+                            )
                 for parent_config in list(
-                    filter(lambda x, _phase_id=phase.id: not x["parent_id"] and x["phase_id"]==_phase_id, event_template_json)
+                    filter(lambda x, _phase_id=phase.id: not x["parent_id"] and x["phase_id"] == _phase_id,
+                           event_template_json)
                 ):
                     parent_config["work_id"] = work.id
                     parent_config["work_phase_id"] = work_phase.id
@@ -148,12 +149,10 @@ class WorkService:
                                     EventConfiguration(**cls._prepare_configuration(child))
                         )
                         event_configurations.append(c_result)
-
-                
                 parent_event_configs = list(
                         filter(lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and
-                            x.phase_id == _phase_id, event_configurations)
-                    )
+                               x.phase_id == _phase_id, event_configurations)
+                               )
                 for p_event_conf in parent_event_configs:
                     p_event_start_date = phase_start_date + timedelta(
                         days=cls._find_start_at_value(p_event_conf.start_at, 0)
@@ -179,7 +178,7 @@ class WorkService:
                     for c_event_conf in c_events:
                         c_event_start_date = p_event_start_date + timedelta(
                             days=cls._find_start_at_value(
-                                c_event_conf.start_at, p_event_conf.number_of_days
+                                c_event_conf.start_at, 0
                             )
                         )
                         if (

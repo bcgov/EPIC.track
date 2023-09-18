@@ -43,7 +43,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         """Create milestone event"""
         data["work_id"] = work_id
         event = Event(**data)
-        event_configurations = EventConfigurationService.find_configurations(event.work_id,all=True)
+        event_configurations = EventConfigurationService.find_configurations(event.work_id, all=True)
         if not next((config for config in event_configurations if config.id == event.event_configuration_id), None):
             raise UnprocessableEntityError("Incorrect configuration provided")
 
@@ -58,7 +58,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         event = event.flush()
         if event.actual_date and not cls._is_previous_event_completed(events, event_configurations, event):
             raise UnprocessableEntityError("Prevous event must be completed")
-        child_configurations = list(filter(lambda x, p_id=event.event_configuration_id: x.parent_id == p_id, event_configurations))
+        child_configurations = list(filter(lambda x, p_id=event.event_configuration_id:
+                                           x.parent_id == p_id, event_configurations))
         cls._handle_child_events(child_configurations, event)
         if commit:
             db.session.commit()
@@ -103,7 +104,7 @@ class EventService:  # pylint: disable=too-few-public-methods
             ),
         )
         events_total = events_query.count()
-        events_completed = events_query.filter(Event.actual_date != None).count()
+        events_completed = events_query.filter(Event.actual_date is not None).count()
         return (events_completed / events_total) * 100
 
     @classmethod
@@ -112,10 +113,12 @@ class EventService:  # pylint: disable=too-few-public-methods
         return Event.find_milestones_by_work_phase(work_id, phase_id)
 
     @classmethod
-    def _is_previous_event_completed(cls, events: [Event], event_configurations: [EventConfiguration], event: Event) -> bool:
+    def _is_previous_event_completed(cls, events: [Event],
+                                     event_configurations: [EventConfiguration], event: Event) -> bool:
         """Check to see if the previous event has actual date present"""
         config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
-        phase_events = list(filter(lambda x, _phase_id=config.phase_id: x.event_configuration.phase_id == _phase_id, events))
+        phase_events = list(filter(lambda x, _phase_id=config.phase_id:
+                                   x.event_configuration.phase_id == _phase_id, events))
         phase_events.append(event)
         phase_events = sorted(phase_events, key=lambda x: x.actual_date or x.anticipated_date)
         event_index = -1
@@ -130,8 +133,11 @@ class EventService:  # pylint: disable=too-few-public-methods
     @classmethod
     def _handle_event_types(cls, events: [Event], event_configurations: [EventConfiguration], event):
         """Handle the event and related actions"""
-        config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
-        child_configurations = list(filter(lambda x, p_id=event.event_configuration_id: x.parent_id == p_id, event_configurations))
+        pass
+        # config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
+        # child_configurations = list(filter(lambda x,
+        #                                    p_id=event.event_configuration_id:
+        #                                    x.parent_id == p_id, event_configurations))
         # match config.event_category_id:
         #     case EventCategoryEnum.EXTENSION:
         #         work_phases = WorkPhaseService.find_by_work_id(event.work_id)
@@ -200,7 +206,8 @@ class EventService:  # pylint: disable=too-few-public-methods
                     )
 
     @classmethod
-    def _find_events_by_work(cls, work_id: int,phase_id: int = None, event_categories: [EventCategoryEnum] = []) -> [Event]:
+    def _find_events_by_work(cls, work_id: int, phase_id: int = None,
+                             event_categories: [EventCategoryEnum] = []) -> [Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
         events_query = db.session.query(Event)\

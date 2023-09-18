@@ -10,8 +10,8 @@ import {
 import { showNotification } from "../shared/notificationProvider";
 
 interface WorkplanContextProps {
-  selectedPhase?: WorkPhaseSkeleton;
-  setSelectedPhase: Dispatch<SetStateAction<WorkPhaseSkeleton | undefined>>;
+  selectedWorkPhase?: WorkPhaseSkeleton;
+  setSelectedWorkPhase: Dispatch<SetStateAction<WorkPhaseSkeleton | undefined>>;
   loading: boolean;
   team: StaffWorkRole[];
   setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
@@ -21,8 +21,8 @@ interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
 export const WorkplanContext = createContext<WorkplanContextProps>({
-  selectedPhase: undefined,
-  setSelectedPhase: () => ({}),
+  selectedWorkPhase: undefined,
+  setSelectedWorkPhase: () => ({}),
   setTeam: () => ({}),
   loading: true,
   team: [],
@@ -34,7 +34,8 @@ export const WorkplanProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [selectedPhase, setSelectedPhase] = React.useState<WorkPhaseSkeleton>();
+  const [selectedWorkPhase, setSelectedWorkPhase] =
+    React.useState<WorkPhaseSkeleton>();
   const [work, setWork] = React.useState<Work>();
   const [team, setTeam] = React.useState<StaffWorkRole[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
@@ -76,8 +77,8 @@ export const WorkplanProvider = ({
   return (
     <WorkplanContext.Provider
       value={{
-        selectedPhase,
-        setSelectedPhase,
+        selectedWorkPhase,
+        setSelectedWorkPhase,
         loading,
         work,
         team,

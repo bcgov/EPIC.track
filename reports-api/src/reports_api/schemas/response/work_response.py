@@ -1,6 +1,4 @@
 """Work model schema"""
-from datetime import datetime
-
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 

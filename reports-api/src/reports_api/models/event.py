@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Event."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, and_
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 
 from reports_api.models.event_category import EventCategory
@@ -33,7 +33,7 @@ class Event(BaseModelVersioned):
     anticipated_date = Column(DateTime(timezone=True), nullable=True)
     actual_date = Column(DateTime(timezone=True), nullable=True)
     number_of_days = Column(Integer, default=0, nullable=False)
-    outcome_id = Column(ForeignKey("outcomes.id"), nullable=True, default=None)
+    outcome_id = Column(ForeignKey("outcome_templates.id"), nullable=True, default=None)
     is_active = Column(Boolean(), default=True, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
     source_event_id = Column(Integer, nullable=True)
@@ -42,7 +42,7 @@ class Event(BaseModelVersioned):
         ForeignKey("event_configurations.id"), nullable=False
     )
 
-    outcome = relationship("Outcome", foreign_keys=[outcome_id], lazy="select")
+    outcome = relationship("OutcomeTemplate", foreign_keys=[outcome_id], lazy="select")
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     event_configuration = relationship(
         "EventConfiguration", foreign_keys=[event_configuration_id], lazy="select"
@@ -75,18 +75,3 @@ class Event(BaseModelVersioned):
             )
             .all()
         )
-
-    @classmethod
-    def create_object(cls, data: dict):
-        """create the event object"""
-
-        return Event(
-            **{
-                "name": data.get("name"),
-                "anticipated_date": data.get("anticipated_date"),
-                "actual_date": data.get("actual_date"),
-                "number_of_days": data.get("number_of_days"),
-                "event_configuration_id": data.get("event_configuration_id"),
-                "work_id": data.get("work_id")
-            }
-                    )

@@ -42,7 +42,7 @@ from .inspection_detail import InspectionDetail
 from .issue import Issue
 from .milestone_type import MilestoneType
 from .ministry import Ministry
-from .outcome import Outcome
+from .outcome_template import OutcomeTemplate
 from .phase_code import PhaseCode
 from .position import Position
 from .project import Project
@@ -65,3 +65,4 @@ from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
+from .action_template import ActionTemplate

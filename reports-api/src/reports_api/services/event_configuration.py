@@ -32,7 +32,7 @@ class EventConfigurationService:
     def find_configurations(cls,
                             work_id: int,
                             phase_id: int = None,
-                            mandatory = None,
+                            mandatory=None,
                             event_categories: [EventCategoryEnum] = [],
                             all: bool = False) -> [EventConfiguration]:
         # pylint: disable=dangerous-default-value

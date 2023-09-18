@@ -43,8 +43,8 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const ctx = React.useContext(WorkplanContext);
   const workId = React.useMemo(() => ctx.work?.id, [ctx.work?.id]);
   const selectedPhaseId = React.useMemo(
-    () => ctx.selectedPhase?.phase_id,
-    [ctx.selectedPhase?.phase_id]
+    () => ctx.selectedWorkPhase?.phase.id,
+    [ctx.selectedWorkPhase?.phase.id]
   );
   const endDateRef = React.useRef();
   const startDateRef = React.useRef();
@@ -161,7 +161,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
         const createResult = await eventService.create(
           dataToBeSubmitted,
           Number(ctx.work?.id),
-          Number(ctx.selectedPhase?.phase_id)
+          Number(ctx.selectedWorkPhase?.phase.id)
         );
         if (createResult.status === 201) {
           showNotification("Milestone details inserted", {

@@ -91,23 +91,23 @@ const EventList = () => {
   const notificationId = React.useRef<SnackbarKey | null>(null);
   const [templateAvailable, setTemplateAvailable] =
     React.useState<TemplateStatus>();
-  React.useEffect(() => setEvents([]), [ctx.selectedPhase?.phase_id]);
+  React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
-  }, [ctx.work?.id, ctx.selectedPhase?.phase_id]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase]);
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
-    if (ctx.work?.id && ctx.selectedPhase?.phase_id) {
+    if (ctx.work?.id && ctx.selectedWorkPhase?.phase.id) {
       setLoading(true);
       Promise.all([
         getMilestoneEvents(
           Number(ctx.work?.id),
-          Number(ctx.selectedPhase?.phase_id)
+          Number(ctx.selectedWorkPhase.phase.id)
         ),
         getTaskEvents(
           Number(ctx.work?.id),
-          Number(ctx.selectedPhase?.phase_id)
+          Number(ctx.selectedWorkPhase.phase.id)
         ),
       ]).then((data: Array<EventsGridModel[]>) => {
         setLoading(false);
@@ -120,7 +120,7 @@ const EventList = () => {
         setEvents(result);
       });
     }
-  }, [ctx.work, ctx.selectedPhase]);
+  }, [ctx.work, ctx.selectedWorkPhase]);
   const getTaskEvents = async (
     workId: number,
     currentPhase: number
@@ -186,7 +186,7 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-  }, [ctx.work, ctx.selectedPhase]);
+  }, [ctx.work, ctx.selectedWorkPhase]);
 
   const onTemplateFormSaveHandler = (templateId: number) => {
     setShowTemplateForm(false);
@@ -199,7 +199,7 @@ const EventList = () => {
       const result = await taskEventService.importTasksFromTemplate(
         {
           work_id: ctx.work?.id,
-          phase_id: ctx.selectedPhase?.phase_id,
+          phase_id: ctx.selectedWorkPhase?.phase.id,
         },
         Number(selectedTemplateId)
       );
@@ -226,14 +226,14 @@ const EventList = () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
         Number(ctx.work?.id),
-        Number(ctx.selectedPhase?.phase_id)
+        Number(ctx.selectedWorkPhase?.phase.id)
       );
       const url = window.URL.createObjectURL(
         new Blob([(binaryReponse as any).data])
       );
       const link = document.createElement("a");
       link.href = url;
-      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_${ctx.selectedPhase?.phase}`;
+      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_${ctx.selectedWorkPhase?.phase.name}`;
       link.setAttribute("download", `${fileName}.xlsx`);
       document.body.appendChild(link);
       link.click();
@@ -241,7 +241,7 @@ const EventList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedPhase?.phase_id]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
     () => [
@@ -402,14 +402,14 @@ const EventList = () => {
   };
 
   const getTemplateUploadStatus = React.useCallback(async () => {
-    if (ctx.work && ctx.selectedPhase) {
+    if (ctx.work && ctx.selectedWorkPhase) {
       if (notificationId.current !== null) {
         closeSnackbar(notificationId.current);
         notificationId.current = null;
       }
       const response = await workService.checkTemplateUploadStatus(
         ctx.work?.id.toString(),
-        ctx.selectedPhase?.phase_id.toString()
+        ctx.selectedWorkPhase?.phase.id.toString()
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
@@ -426,7 +426,7 @@ const EventList = () => {
             <Typography>
               Do you want to preview available Templates for{" "}
               <Typography style={{ fontWeight: "bold" }} component="span">
-                {ctx.selectedPhase.phase}
+                {ctx.selectedWorkPhase.phase.name}
               </Typography>{" "}
               with lists of tasks?
             </Typography>
@@ -438,16 +438,16 @@ const EventList = () => {
               callback: () => setShowTemplateForm(true),
             },
           ],
-          key: `template-available-${ctx.selectedPhase.phase}`,
+          key: `template-available-${ctx.selectedWorkPhase.phase.name}`,
         });
         notificationId.current = notification;
       }
     }
-  }, [ctx.selectedPhase]);
+  }, [ctx.selectedWorkPhase]);
 
   React.useEffect(() => {
     getTemplateUploadStatus();
-  }, [ctx.selectedPhase]);
+  }, [ctx.selectedWorkPhase]);
 
   // Clear notification on unmount
   React.useEffect(() => {
@@ -455,7 +455,7 @@ const EventList = () => {
       if (notificationId.current !== null) {
         closeSnackbar(notificationId.current);
         notificationId.current = null;
-        ctx.setSelectedPhase(undefined);
+        ctx.setSelectedWorkPhase(undefined);
         setTemplateAvailable(undefined);
       }
     };

@@ -14,7 +14,7 @@
 """Service to manage Outcome."""
 from flask import current_app
 
-from reports_api.models import Outcome
+from reports_api.models import OutcomeTemplate
 
 
 class OutcomeService:
@@ -24,12 +24,12 @@ class OutcomeService:
     def find_by_milestone_id(cls, milestone_id: int):
         """Find outcomes by milestone_id"""
         current_app.logger.debug(f"Find outcomes by milestone_id {milestone_id}")
-        outcomes = Outcome.find_by_milestone_id(milestone_id)
+        outcomes = OutcomeTemplate.find_by_milestone_id(milestone_id)
         return outcomes
 
     @classmethod
     def find_all_active_milestones(cls):
         """Find all active outcomes"""
         current_app.logger.debug("Find all active outcomes")
-        outcomes = Outcome.find_all()
+        outcomes = OutcomeTemplate.find_all()
         return outcomes

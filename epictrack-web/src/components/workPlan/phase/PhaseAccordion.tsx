@@ -84,16 +84,16 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const ctx = useContext(WorkplanContext);
   const classes = useStyles();
   const isSelectedPhase = React.useMemo<boolean>(
-    () => phase.phase_id === ctx.selectedPhase?.phase_id,
-    [ctx.selectedPhase]
+    () => phase.phase.id === ctx.selectedWorkPhase?.phase.id,
+    [ctx.selectedWorkPhase]
   );
   React.useEffect(
-    () => setExpanded(phase.phase_id === ctx.selectedPhase?.phase_id),
-    [phase, ctx.selectedPhase]
+    () => setExpanded(phase.phase.id === ctx.selectedWorkPhase?.phase.id),
+    [phase, ctx.selectedWorkPhase]
   );
   const onExpandHandler = (expand: boolean) => {
     setExpanded(expand);
-    ctx.setSelectedPhase(phase);
+    ctx.setSelectedWorkPhase(phase);
   };
   const fromDate = React.useMemo(
     () =>
@@ -132,7 +132,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={3}>
                 <SummaryItem
                   title="Phase"
-                  content={phase.phase}
+                  content={phase.phase.name}
                   enableTooltip={true}
                   isTitleBold={isSelectedPhase}
                   sx={{
