@@ -127,7 +127,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
               padding: "8px !important",
               "&.Mui-disabled": {
                 svg: {
-                  fill: Palette.neutral.accent.light,
+                  fill: Palette.neutral.light,
                 },
               },
             },
@@ -138,9 +138,14 @@ const MasterTrackTable = <T extends Record<string, any>>({
           variant: "outlined",
           sx: {
             backgroundColor: "white",
-            // "& .MuiInputAdornment-root": {
-            //   display: "none",
-            // },
+            "& .MuiInputBase-input": {
+              color: Palette.neutral.light,
+              fontSize: "0.875rem",
+              lineHeight: "1rem",
+            },
+            "& .MuiInputAdornment-root": {
+              display: "none",
+            },
             "& .MuiSelect-icon": {
               mr: "0px !important",
             },
@@ -206,7 +211,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
         }}
         icons={{
           FilterAltIcon: () => null,
-          // CloseIcon: () => null,
+          CloseIcon: () => null,
         }}
         filterFns={{
           multiSelectFilter: (row, id, filterValue) => {

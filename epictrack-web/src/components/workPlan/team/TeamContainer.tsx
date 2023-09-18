@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import { ETParagraph } from "../../shared";
+import { ETHeading3, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import { makeStyles } from "@mui/styles";
 import TeamList from "./TeamList";
@@ -17,14 +17,14 @@ const TeamContainer = () => {
   return (
     <Grid container columnSpacing={1.5}>
       <Grid item xs={8}>
-        <ETParagraph className={classes.title} color={Palette.primary.main}>
+        <ETHeading3 className={classes.title} color={Palette.primary.main}>
           Team Members
-        </ETParagraph>
+        </ETHeading3>
       </Grid>
       <Grid item xs={4}>
-        <ETParagraph className={classes.title} color={Palette.primary.main}>
+        <ETHeading3 className={classes.title} color={Palette.primary.main}>
           Team Information
-        </ETParagraph>
+        </ETHeading3>
       </Grid>
       <Grid
         item
