@@ -16,9 +16,8 @@ from typing import IO, Dict
 
 import pandas as pd
 
-from reports_api import models
 from reports_api.exceptions import BadRequestError
-from reports_api.models import EventTemplate
+from reports_api.models import EventTemplate, OutcomeTemplate, PhaseCode
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services.phaseservice import PhaseService
@@ -39,8 +38,8 @@ class EventTemplateService:
         work_types, ea_acts, event_types, event_categories = cls._get_event_configuration_lookup_entities()
         event_dict = excel_dict.get("Events")
         phase_dict = excel_dict.get("Phases")
-        # outcome_dict = excel_dict.get("Outcomes")
-        # action_dict = excel_dict.get("Actions")
+        outcome_dict = excel_dict.get("Outcomes")
+        action_dict = excel_dict.get("Actions")
         for event_type in event_types:
             event_dict = event_dict.replace({'event_type_id': rf'^{event_type.name}$'},
                                             {'event_type_id': event_type.id}, regex=True)
@@ -65,12 +64,14 @@ class EventTemplateService:
             if selected_phase:
                 phase_result = selected_phase.update(phase_obj, commit=False)
             else:
-                phase_result = models.PhaseCode(**phase_obj).flush()
+                phase_result = PhaseCode(**phase_obj).flush()
             phase_result_copy = res.PhaseResponseSchema().dump(phase_result)
             phase_result_copy['events'] = []
             parent_events = list(filter(lambda x, _phase_no=phase['no']: 'phase_no'
                                         in x and x['phase_no'] == _phase_no and not x['parent_id'], event_dict))
-            existing_events = models.EventTemplate.find_by_phase_id(phase_result.id)
+            existing_events = EventTemplate.find_by_phase_id(phase_result.id)
+            template_ids = list(map(lambda x: x.id, existing_events))
+            existing_outcomes = OutcomeTemplate.find_by_template_ids(template_ids)
             for event in parent_events:
                 event['phase_id'] = phase_result.id
                 event['start_at'] = str(event['start_at'])
@@ -78,6 +79,9 @@ class EventTemplateService:
                 (phase_result_copy['events']).append(res.EventTemplateResponseSchema().dump(event_result))
                 child_events = list(filter(lambda x, _parent_id=event['no']: 'parent_id'
                                            in x and x['parent_id'] == _parent_id, event_dict))
+                outcome_dict = outcome_dict.replace({'template_no': rf'^{event["no"]}$'},
+                                            {'event_template_id': event_result.id}, regex=True)
+                cls._handle_outcomes(outcome_dict, existing_outcomes, event)
                 for child in child_events:
                     child['phase_id'] = phase_result.id
                     child['parent_id'] = event_result.id
@@ -85,7 +89,22 @@ class EventTemplateService:
                     child_event_result = cls._save_event_template(existing_events, child,
                                                                   phase_result.id, event_result.id)
                     (phase_result_copy['events']).append(res.EventTemplateResponseSchema().dump(child_event_result))
+                    cls._handle_outcomes(outcome_dict, existing_outcomes, child)
             final_result.append(phase_result_copy)
+
+    @classmethod
+    def _handle_outcomes(cls, outcome_dict, existing_outcomes, event):
+        """Save the outcome"""
+        outcome_list = outcome_dict.to_dict('records')
+        for outcome in outcome_list:
+            selected_outcome = next((e for e in existing_outcomes if e.name == outcome['name'] and
+                                     e.event_template_id == outcome.id))
+            outcome_obj = req.OutcomeTemplateBodyParameterSchema().load(outcome)
+            if selected_outcome:
+                outcome_result = selected_outcome.update(outcome_obj, commit=False)
+            else:
+                outcome_result = OutcomeTemplate(**outcome).flush()
+        return outcome_result
 
     @classmethod
     def _save_event_template(cls, existing_events, event, phase_id, parent_id=None) -> EventTemplate:
@@ -104,7 +123,7 @@ class EventTemplateService:
         if selected_event:
             event_result = selected_event.update(event_obj, commit=False)
         else:
-            event_result = models.EventTemplate(**event_obj).flush()
+            event_result = EventTemplate(**event_obj).flush()
         return event_result
 
     @classmethod

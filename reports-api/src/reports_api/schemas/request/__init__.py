@@ -38,3 +38,4 @@ from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSche
 from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
     WorkPlanDownloadQueryParamSchema)
+from .outcome_template_request import OutcomeTemplateBodyParameterSchema
