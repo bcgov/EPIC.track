@@ -7,6 +7,7 @@ import { OptionType, SelectProps } from "./type";
 import { Palette } from "../../../styles/theme";
 import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
+import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 
 const FilterSelect = (props: SelectProps) => {
   const { name, isMulti, header, column } = props;
@@ -192,7 +193,10 @@ const FilterSelect = (props: SelectProps) => {
         }),
         placeholder: (base, props) => ({
           ...base,
-          fontWeight: "normal",
+          fontWeight: MET_Header_Font_Weight_Regular,
+          color: Palette.neutral.light,
+          fontSize: "0.875rem",
+          lineHeight: "1rem",
         }),
         menuPortal: (base, props) => ({
           ...base,

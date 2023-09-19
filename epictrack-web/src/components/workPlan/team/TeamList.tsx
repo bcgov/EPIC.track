@@ -27,7 +27,9 @@ const TeamList = () => {
   const ctx = React.useContext(WorkplanContext);
   const teamMembers = React.useMemo(() => ctx.team, [ctx.team]);
 
-  React.useEffect(() => setLoading(ctx.loading), []);
+  React.useEffect(() => {
+    setLoading(ctx.loading);
+  }, []);
 
   React.useEffect(() => {
     if (teamMembers) {
@@ -41,7 +43,7 @@ const TeamList = () => {
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
       setStatuses(statuses);
     }
-  }, []);
+  }, [teamMembers]);
 
   const columns = React.useMemo<MRT_ColumnDef<StaffWorkRole>[]>(
     () => [
@@ -123,7 +125,7 @@ const TeamList = () => {
         ),
       },
     ],
-    [teamMembers]
+    [teamMembers, roles, statuses]
   );
 
   const onCancelHandler = () => {
