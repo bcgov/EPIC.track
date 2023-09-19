@@ -39,3 +39,4 @@ from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
     WorkPlanDownloadQueryParamSchema)
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
+from .action_template_request import ActionTemplateBodyParameterSchema

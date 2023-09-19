@@ -16,7 +16,6 @@ from .event import EventResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_template_response import EventTemplateResponseSchema
 from .indigenous_nation_response import IndigenousResponseNationSchema
-from .outcome_response import OutcomeResponseSchema
 from .phase_response import PhaseResponseSchema
 from .project_response import ProjectResponseSchema
 from .proponent_response import ProponentResponseSchema
@@ -30,3 +29,5 @@ from .work_response import (
     WorkStaffRoleReponseSchema, WorkPhaseTemplateAvailableResponse)
 from .staff_work_role_response import StaffWorkRoleResponseSchema
 from .role_response import RoleResponseSchema
+from .action_template_response import ActionTemplateResponseSchema
+from .outcome_template_response import OutcomeTemplateResponseSchema

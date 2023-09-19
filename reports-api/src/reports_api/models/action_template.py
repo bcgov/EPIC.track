@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Actions."""
+import enum
 
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
-from .base_model import BaseModelVersioned
+from .base_model import BaseModelVersioned, db
 
 
 class ActionTemplate(BaseModelVersioned):
@@ -32,3 +33,14 @@ class ActionTemplate(BaseModelVersioned):
     sort_order = Column(Integer, nullable=False)
 
     outcome = relationship('OutcomeTemplate', foreign_keys=[outcome_id], lazy='select')
+
+    @classmethod
+    def find_by_outcome_ids(cls, outcome_ids):
+        """Returns the event configurations based on phase ids"""
+        actions = db.session.query(
+            ActionTemplate
+        ).filter(
+            ActionTemplate.outcome_id.in_(outcome_ids),
+            ActionTemplate.is_active.is_(True)
+        ).all()  # pylint: disable=no-member
+        return actions

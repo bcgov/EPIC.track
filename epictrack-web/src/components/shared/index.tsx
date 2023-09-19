@@ -171,10 +171,14 @@ export const ETParagraph = React.forwardRef(
     { bold, color, children, sx, ...rest }: HeaderProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
+    const classes = useStyle();
     return (
       <div ref={ref} {...rest}>
         <Typography
           color={color}
+          className={clsx({
+            [classes.textEllipsis]: [rest.enableEllipsis],
+          })}
           sx={{
             ...sx,
             fontSize: "1rem",

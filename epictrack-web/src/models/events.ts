@@ -1,4 +1,5 @@
 import { EVENT_TYPE } from "../components/workPlan/phase/type";
+import { Staff } from "./staff";
 import { EVENT_STATUS } from "./task_event";
 
 export interface EventsGridModel {
@@ -14,7 +15,7 @@ export interface EventsGridModel {
   end_date: string;
   outcome_id: string;
   short_description: string;
-  assigned: string;
+  assignees: Assignee[];
   responsibility: string;
   notes: string;
   status: EVENT_STATUS;
@@ -31,4 +32,12 @@ export interface MilestoneEvent {
   description: string;
   number_of_days: number;
   outcome_id?: number;
+}
+
+export interface Assignee {
+  id: number;
+  is_active: boolean;
+  task_event_id: number;
+  assignee_id: number;
+  assignee: Staff;
 }

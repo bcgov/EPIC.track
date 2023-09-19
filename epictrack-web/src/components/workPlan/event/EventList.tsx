@@ -94,7 +94,7 @@ const EventList = () => {
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
-  }, [ctx.work?.id, ctx.selectedWorkPhase]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
@@ -120,7 +120,7 @@ const EventList = () => {
         setEvents(result);
       });
     }
-  }, [ctx.work, ctx.selectedWorkPhase]);
+  }, [ctx.work, ctx.selectedWorkPhase?.phase.id]);
   const getTaskEvents = async (
     workId: number,
     currentPhase: number
@@ -321,12 +321,18 @@ const EventList = () => {
         ),
       },
       {
-        accessorKey: "assigned",
+        accessorFn: (row: EventsGridModel) =>
+          row.assignees
+            ?.map((p) => `${p.assignee.first_name} ${p.assignee.last_name}`)
+            .join(", "),
         header: "Assigned",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
+          <ETParagraph
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+            enableEllipsis
+          >
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -443,7 +449,7 @@ const EventList = () => {
         notificationId.current = notification;
       }
     }
-  }, [ctx.selectedWorkPhase]);
+  }, [ctx.selectedWorkPhase?.phase.id]);
 
   React.useEffect(() => {
     getTemplateUploadStatus();
@@ -460,6 +466,7 @@ const EventList = () => {
       }
     };
   }, []);
+  console.log(events);
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
