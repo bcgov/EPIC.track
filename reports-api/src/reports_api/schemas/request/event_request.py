@@ -40,7 +40,8 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
 
     outcome_id = fields.Int(
         metadata={"description": "Outcome of the decision event"},
-        validate=validate.Range(min=0)
+        validate=validate.Range(min=0),
+        allow_none=True
     )
 
     notes = fields.Str(

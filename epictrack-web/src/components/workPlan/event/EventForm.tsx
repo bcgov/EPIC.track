@@ -329,7 +329,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
           dialogContentText="The event will be locked. Do you want to continue?"
           disableEscapeKeyDown
           fullWidth
-          okButtonText="Upload"
+          okButtonText="Save"
           onOk={() => saveEvent()}
           onCancel={() => {
             setShowEventLockDialog(false);
