@@ -10,7 +10,7 @@ import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 
 const FilterSelect = (props: SelectProps) => {
-  const { name, isMulti, header, column } = props;
+  const { name, isMulti, styles } = props;
   const [options, setOptions] = React.useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = React.useState<any>();
   const [selectValue, setSelectValue] = React.useState<any>(isMulti ? [] : "");
@@ -59,10 +59,8 @@ const FilterSelect = (props: SelectProps) => {
       if (isSelectAllSelected()) {
         setSelectedOptions([]);
       } else {
-        setSelectedOptions([
-          selectAllOption.value,
-          ...column.columnDef.filterSelectOptions,
-        ]);
+        const options = [...(props.options?.map((o: any) => o.value) || [])];
+        setSelectedOptions([selectAllOption.value, ...options]);
       }
     } else {
       if (isOptionSelected(option)) {
@@ -80,7 +78,10 @@ const FilterSelect = (props: SelectProps) => {
   };
 
   const applyFilters = () => {
-    header.column.setFilterValue(selectedOptions);
+    // header.column.setFilterValue(selectedOptions);
+    if (props.filterAppliedCallback) {
+      props.filterAppliedCallback(selectedOptions);
+    }
     if (selectedOptions.length === 0) {
       selectRef.current?.clearValue();
     }
@@ -102,7 +103,10 @@ const FilterSelect = (props: SelectProps) => {
   const clearFilters = () => {
     setSelectedOptions([]);
     setSelectValue(isMulti ? [] : "");
-    header.column.setFilterValue(isMulti ? [] : "");
+    // header.column.setFilterValue(isMulti ? [] : "");
+    if (props.filterClearedCallback) {
+      props.filterClearedCallback(isMulti ? [] : "");
+    }
     selectRef.current?.clearValue();
   };
 
@@ -116,17 +120,10 @@ const FilterSelect = (props: SelectProps) => {
   };
 
   React.useEffect(() => {
-    let filterOptions = column.columnDef.filterSelectOptions;
-    // TODO: Decide whether to do this here, or format the options at cell definition level
-    filterOptions = filterOptions.map((option: string) => ({
-      label: option,
-      value: option,
-    }));
-
+    let filterOptions = props.options as OptionType[];
     if (isMulti) filterOptions = [selectAllOption, ...filterOptions];
-
     setOptions(filterOptions);
-  }, [column]);
+  }, [props.options]);
 
   return (
     <Select
@@ -197,6 +194,10 @@ const FilterSelect = (props: SelectProps) => {
           color: Palette.neutral.light,
           fontSize: "0.875rem",
           lineHeight: "1rem",
+          ...(props.selectProps.filterProps?.variant == "bar" && {
+            color: Palette.primary.accent.main,
+            fontWeight: 700,
+          }),
         }),
         menuPortal: (base, props) => ({
           ...base,
@@ -210,6 +211,7 @@ const FilterSelect = (props: SelectProps) => {
       }}
       isClearable={false}
       menuPortalTarget={document.body}
+      controlShouldRenderValue={props.controlShouldRenderValue}
     />
   );
 };

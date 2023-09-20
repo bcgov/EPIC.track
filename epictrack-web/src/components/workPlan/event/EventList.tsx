@@ -16,6 +16,7 @@ import { dateUtils } from "../../../utils";
 import {
   Box,
   Button,
+  Divider,
   Grid,
   IconButton,
   Tooltip,
@@ -43,6 +44,8 @@ import EventForm from "./EventForm";
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
 import { TemplateStatus } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
+import { OptionType } from "../../shared/filterSelect/type";
+import FilterSelect from "../../shared/filterSelect/FilterSelect";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -91,10 +94,25 @@ const EventList = () => {
   const notificationId = React.useRef<SnackbarKey | null>(null);
   const [templateAvailable, setTemplateAvailable] =
     React.useState<TemplateStatus>();
+
+  const [staffSelectOptions, setStaffSelectOptions] = React.useState<
+    OptionType[]
+  >([]);
+
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
   }, [ctx.work?.id, ctx.selectedWorkPhase]);
+
+  React.useEffect(() => {
+    const options: OptionType[] = ctx.team.map((staff) => {
+      return {
+        value: staff.staff_id.toString(),
+        label: staff.staff.full_name,
+      };
+    });
+    setStaffSelectOptions(options);
+  }, [ctx.team]);
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
@@ -210,6 +228,7 @@ const EventList = () => {
         setShowTemplateConfirmation(false);
         getCombinedEvents();
         setSelectedTemplateId(undefined);
+        getTemplateUploadStatus();
       }
     } catch (e) {
       const error = getAxiosError(e);
@@ -460,6 +479,36 @@ const EventList = () => {
       }
     };
   }, []);
+
+  React.useEffect(() => {
+    //do something when the row selection changes...
+    console.log(rowSelection);
+  }, [rowSelection]);
+
+  const assignTasks = React.useCallback(async (assignee_ids: any) => {
+    // const taskIds = Object.keys(rowSelection)
+    // const assignee_ids
+    const data = { task_ids: Object.keys(rowSelection), assignee_ids };
+    console.log(`Assign tasks to ${JSON.stringify(data)}`);
+    const result = await taskEventService.patchTasks(data);
+    try {
+      if (result.status === 200) {
+        showNotification("Tasks assigned", {
+          type: "success",
+        });
+      }
+    } catch (e) {
+      const error = getAxiosError(e);
+      const message =
+        error?.response?.status === 422
+          ? error.response.data?.toString()
+          : COMMON_ERROR_MESSAGE;
+      showNotification(message, {
+        type: "error",
+      });
+    }
+  }, []);
+
   return (
     <Grid container rowSpacing={1}>
       <Grid container item columnSpacing={2}>
@@ -473,7 +522,38 @@ const EventList = () => {
             Add Milestone
           </Button>
         </Grid>
-        <Grid item xs={8}></Grid>
+        <Grid
+          item
+          xs={8}
+          sx={{
+            display: "flex",
+            gap: ".5rem",
+            alignItems: "center",
+            fontSize: ".875rem",
+          }}
+        >
+          {Object.keys(rowSelection).length > 0 && (
+            <>
+              <Typography color={Palette.primary.accent.main}>
+                {Object.keys(rowSelection).length} selected
+              </Typography>
+              <Divider
+                variant="middle"
+                flexItem
+                orientation="vertical"
+                sx={{ borderColor: Palette.neutral[300] }}
+              />
+              <FilterSelect
+                options={staffSelectOptions}
+                isMulti
+                variant="bar"
+                placeholder="Assign To"
+                // controlShouldRenderValue={false}
+                filterAppliedCallback={assignTasks}
+              />
+            </>
+          )}
+        </Grid>
         <Grid
           item
           xs
@@ -526,6 +606,18 @@ const EventList = () => {
           state={{
             isLoading: loading,
             showGlobalFilter: true,
+            rowSelection,
+            // columnVisibility: { id: false },
+          }}
+          onRowSelectionChange={setRowSelection}
+          getRowId={(
+            originalRow: EventsGridModel,
+            index: number,
+            parent?: MRT_Row<EventsGridModel>
+          ) => {
+            return originalRow.type === EVENT_TYPE.MILESTONE
+              ? `milestone_${originalRow.id}`
+              : originalRow.id?.toString();
           }}
         />
       </Grid>
