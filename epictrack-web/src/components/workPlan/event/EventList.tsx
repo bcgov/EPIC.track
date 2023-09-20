@@ -186,6 +186,7 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
+    getTemplateUploadStatus();
   }, [ctx.work, ctx.selectedWorkPhase]);
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -210,6 +211,7 @@ const EventList = () => {
         setShowTemplateConfirmation(false);
         getCombinedEvents();
         setSelectedTemplateId(undefined);
+        getTemplateUploadStatus();
       }
     } catch (e) {
       const error = getAxiosError(e);
