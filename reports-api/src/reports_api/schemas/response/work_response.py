@@ -115,7 +115,7 @@ class WorkResourceResponseSchema(
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
 
 
-class WorkPhaseSkeletonResponseSchema(AutoSchemaBase):
+class WorkPhaseSkeletonResponseSchema(AutoSchemaBase):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Schema for work phase skeleton details"""
 
     class Meta(

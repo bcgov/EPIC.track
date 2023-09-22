@@ -47,7 +47,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         data["work_id"] = work_id
         event = Event(**data)
         event_configurations = EventConfigurationService.find_configurations(
-            event.work_id, all=True
+            event.work_id, _all=True
         )
         if not next(
             (
@@ -174,7 +174,6 @@ class EventService:  # pylint: disable=too-few-public-methods
         cls, events: [Event], event_configurations: [EventConfiguration], event
     ):
         """Handle the event and related actions"""
-        pass
         # config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
         # child_configurations = list(filter(lambda x,
         #                                    p_id=event.event_configuration_id:

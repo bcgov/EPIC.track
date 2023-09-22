@@ -19,7 +19,7 @@ from reports_api.models import EventConfiguration, db
 from reports_api.models.event_category import EventCategoryEnum
 
 
-class EventConfigurationService:
+class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-many-arguments
     """Service to manage event configurations"""
 
     @classmethod
@@ -34,8 +34,7 @@ class EventConfigurationService:
                             phase_id: int = None,
                             mandatory=None,
                             event_categories: [EventCategoryEnum] = [],
-                            all: bool = False) -> [EventConfiguration]:
-        # pylint: disable=dangerous-default-value
+                            _all: bool = False) -> [EventConfiguration]:
         """Get all the mandatory configurations for a given phase"""
         query = db.session.query(EventConfiguration).filter(EventConfiguration.work_id == work_id,
                                                             EventConfiguration.is_active.is_(True))
@@ -46,7 +45,7 @@ class EventConfigurationService:
             query = query.filter(EventConfiguration.mandatory.is_(mandatory))
         if phase_id is not None:
             query = query.filter(EventConfiguration.phase_id == phase_id)
-        if not all:
+        if not _all:
             query = query.filter(EventConfiguration.parent_id.is_(None))
         configurations = query.all()
         return configurations

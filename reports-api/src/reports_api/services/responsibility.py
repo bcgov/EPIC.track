@@ -21,10 +21,10 @@ class ResponsibilityService:  # pylint:disable=too-few-public-methods
     """Service to manage sub type related operations"""
 
     @classmethod
-    def find_by_id(cls, id: int):
+    def find_by_id(cls, _id: int):
         """Find responsibility by id"""
-        current_app.logger.debug(f"find responsibility by id {id}")
-        responsibility = Responsibility.find_by_id(id)
+        current_app.logger.debug(f"find responsibility by id {_id}")
+        responsibility = Responsibility.find_by_id(_id)
         return responsibility
 
     @classmethod
