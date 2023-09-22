@@ -32,6 +32,17 @@ class TaskEventService {
       JSON.stringify(payload)
     );
   }
+
+  async patchTasks(payload: any) {
+    return await http.PatchRequest(
+      Endpoints.TaskEvents.EVENTS,
+      JSON.stringify(payload)
+    );
+  }
+
+  async deleteTasks(params: any) {
+    return await http.DeleteRequest(Endpoints.TaskEvents.EVENTS, params);
+  }
 }
 
 export default new TaskEventService();

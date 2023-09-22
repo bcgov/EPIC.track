@@ -35,5 +35,5 @@ class EventTemplates(Resource):
     def post():
         """Create new task template"""
         template_file = request.files["event_template"]
-        event_template = EventTemplateService.import_events_template(template_file)
+        event_template = EventTemplateService.import_events_template_new(template_file)
         return jsonify(event_template), HTTPStatus.CREATED

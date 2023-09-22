@@ -14,7 +14,8 @@
 """Exposes all the request validation schemas"""
 from .base import BasicRequestQueryParameterSchema
 from .event_configuration_request import EventConfigurationQueryParamSchema
-from .event_request import MilestoneEventBodyParameterSchema, MilestoneEventPathParameterSchema
+from .event_request import (
+    MilestoneEventBodyParameterSchema, MilestoneEventBulkDeleteQueryParamSchema, MilestoneEventPathParameterSchema)
 from .event_template_request import EventTemplateBodyParameterSchema
 from .indigenous_nation_request import (
     IndigenousNationBodyParameterSchema, IndigenousNationExistenceQueryParamSchema,
@@ -31,8 +32,9 @@ from .staff_work_role_request import (
     StaffWorkBodyParamSchema, StaffWorkExistenceCheckQueryParamSchema, StaffWorkPathParamSchema)
 from .task_request import (
     TaskBodyParameterSchema, TaskEventBodyParamSchema, TaskEventBulkUpdateBodyParamSchema,
-    TaskEventIdPathParameterSchema, TaskEventQueryParamSchema, TaskTemplateBodyParameterSchema,
-    TaskTemplateIdPathParameterSchema, TaskTemplateImportEventsBodyParamSchema, TaskTemplateQueryParamSchema)
+    TaskEventIdPathParameterSchema, TaskEventQueryParamSchema, TasksBulkDeleteQueryParamSchema,
+    TaskTemplateBodyParameterSchema, TaskTemplateIdPathParameterSchema, TaskTemplateImportEventsBodyParamSchema,
+    TaskTemplateQueryParamSchema)
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (

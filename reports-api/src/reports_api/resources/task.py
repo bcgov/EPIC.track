@@ -25,8 +25,8 @@ from reports_api.utils.util import cors_preflight
 API = Namespace("tasks", description="Tasks")
 
 
-@cors_preflight("GET,POST,PATCH")
-@API.route("/events", methods=["GET", "POST", "PATCH", "OPTIONS"])
+@cors_preflight("GET,POST,PATCH,DELETE")
+@API.route("/events", methods=["GET", "DELETE", "POST", "PATCH", "OPTIONS"])
 class Events(Resource):
     """Endpoint resource to return all task events for given work id and phase id"""
 
@@ -63,6 +63,16 @@ class Events(Resource):
         """Bulk update tasks."""
         request_json = req.TaskEventBulkUpdateBodyParamSchema(partial=True).load(API.payload)
         result = TaskService.bulk_update(request_json)
+        return result, HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def delete():
+        """Delete tasks."""
+        request_json = req.TasksBulkDeleteQueryParamSchema().load(request.args)
+        result = TaskService.bulk_delete_tasks(request_json["task_ids"])
         return result, HTTPStatus.OK
 
 

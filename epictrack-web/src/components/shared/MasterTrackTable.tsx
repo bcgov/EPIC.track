@@ -138,7 +138,7 @@ const MasterTrackTable = <T extends Record<string, any>>({
           variant: "outlined",
           sx: {
             backgroundColor: "white",
-            "& .MuiInputBase-input": {
+            "& .MuiInputBase-input::placeholder": {
               color: Palette.neutral.light,
               fontSize: "0.875rem",
               lineHeight: "1rem",

@@ -27,7 +27,9 @@ const SingleValue = (props: SingleValueProps) => {
           )}
         >
           <ETCaption2 bold color={Palette.primary.accent.light}>
-            Filtered
+            {props.selectProps.filterProps?.variant === "inline"
+              ? "Filtered"
+              : props.selectProps.placeholder}
           </ETCaption2>
         </Box>
       ) : (

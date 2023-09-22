@@ -81,3 +81,19 @@ class Event(Resource):
         req.MilestoneEventPathParameterSchema().load(request.view_args)
         milestone_event = EventService.find_milestone_event(event_id)
         return res.EventResponseSchema().dump(milestone_event), HTTPStatus.OK
+
+
+@cors_preflight("DELETE")
+@API.route("/events", methods=["DELETE", "OPTIONS"])
+class MilestoneEvents(Resource):
+    """Endpoint resource to manage milestone events"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def delete():
+        """Delete milestone events."""
+        request_json = req.MilestoneEventBulkDeleteQueryParamSchema().load(request.args)
+        result = EventService.bulk_delete_milestones(request_json["milestone_ids"])
+        return result, HTTPStatus.OK
