@@ -10,7 +10,7 @@ import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 
 const FilterSelect = (props: SelectProps) => {
-  const { name, isMulti, styles } = props;
+  const { name, isMulti } = props;
   const [options, setOptions] = React.useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = React.useState<any>();
   const [selectValue, setSelectValue] = React.useState<any>(isMulti ? [] : "");
@@ -180,6 +180,9 @@ const FilterSelect = (props: SelectProps) => {
             ? Palette.primary.accent.light
             : Palette.neutral.accent.light,
           boxShadow: "none",
+          ...(props.selectProps.filterProps?.variant === "bar" && {
+            borderStyle: props.isFocused ? "solid" : "none",
+          }),
         }),
         menu: (base, props) => ({
           ...base,

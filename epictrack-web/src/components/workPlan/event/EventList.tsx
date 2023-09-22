@@ -46,16 +46,22 @@ import { TemplateStatus } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
+import { ListType } from "../../../models/code";
+import responsibilityService from "../../../services/responsibilityService/responsibilityService";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
+const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
 
 const useStyle = makeStyles({
   textEllipsis: {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     overflow: "hidden",
+  },
+  deleteIcon: {
+    fill: "currentcolor",
   },
 });
 const IButton = styled(IconButton)({
@@ -98,6 +104,15 @@ const EventList = () => {
   const [staffSelectOptions, setStaffSelectOptions] = React.useState<
     OptionType[]
   >([]);
+
+  const [responsibilities, setResponsibilities] = React.useState<OptionType[]>(
+    []
+  );
+
+  const [tasksSelected, setTasksSelected] = React.useState<string[]>([]);
+  const [milestonesSelected, setMilestonesSelected] = React.useState<string[]>(
+    []
+  );
 
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
@@ -152,11 +167,9 @@ const EventList = () => {
       if (taskResult.status === 200) {
         result = (taskResult.data as EventsGridModel[]).map((element) => {
           element.type = EVENT_TYPE.TASK;
-          element.end_date = dateUtils.formatDate(
-            dateUtils
-              .add(element.start_date, element.number_of_days, "days")
-              .toISOString()
-          );
+          element.end_date = dateUtils
+            .add(element.start_date, element.number_of_days, "days")
+            .toISOString();
           return element;
         });
       }
@@ -469,8 +482,35 @@ const EventList = () => {
     getTemplateUploadStatus();
   }, [ctx.selectedWorkPhase]);
 
-  // Clear notification on unmount
   React.useEffect(() => {
+    const ids = Object.keys(rowSelection);
+    const taskIds = ids.filter((id: any) => Number(id) == id);
+    const milestoneIds = ids.filter((id: any) => Number(id) != id);
+    setTasksSelected(taskIds);
+    setMilestonesSelected(milestoneIds);
+  }, [rowSelection]);
+
+  const getResponsibilities = async (): Promise<ListType[]> => {
+    const result: ListType[] = [];
+    try {
+      const responsibilities =
+        await responsibilityService.getResponsibilities();
+      if (responsibilities.status === 200) {
+        const result = (responsibilities.data as ListType[]).map((element) => ({
+          value: element.id.toString(),
+          label: element.name,
+        }));
+        setResponsibilities(result);
+      }
+    } catch (e) {
+      setLoading(false);
+    }
+    return Promise.resolve(result);
+  };
+
+  React.useEffect(() => {
+    getResponsibilities();
+
     return () => {
       if (notificationId.current !== null) {
         closeSnackbar(notificationId.current);
@@ -481,34 +521,135 @@ const EventList = () => {
     };
   }, []);
 
-  React.useEffect(() => {
-    //do something when the row selection changes...
-    console.log(rowSelection);
-  }, [rowSelection]);
-
-  const assignTasks = React.useCallback(async (assignee_ids: any) => {
-    // const taskIds = Object.keys(rowSelection)
-    // const assignee_ids
-    const data = { task_ids: Object.keys(rowSelection), assignee_ids };
-    console.log(`Assign tasks to ${JSON.stringify(data)}`);
-    const result = await taskEventService.patchTasks(data);
-    try {
-      if (result.status === 200) {
-        showNotification("Tasks assigned", {
-          type: "success",
+  const assignTasks = React.useCallback(
+    async (assignee_ids: any) => {
+      assignee_ids = assignee_ids.filter(
+        (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
+      );
+      const data = { task_ids: tasksSelected, assignee_ids };
+      console.log(`Assign tasks to ${JSON.stringify(data)}`);
+      const result = await taskEventService.patchTasks(data);
+      try {
+        if (result.status === 200) {
+          showNotification("Tasks assigned", {
+            type: "success",
+          });
+          getCombinedEvents();
+        }
+      } catch (e) {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
+          type: "error",
         });
       }
-    } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
-      showNotification(message, {
-        type: "error",
-      });
-    }
-  }, []);
+    },
+    [tasksSelected]
+  );
+
+  const assignResponsibility = React.useCallback(
+    async (responsibility_id: any) => {
+      // debugger;
+      const data = {
+        task_ids: tasksSelected,
+        responsibility_id: responsibility_id,
+      };
+      console.log(`Assign responsibility to ${JSON.stringify(data)}`);
+      const result = await taskEventService.patchTasks(data);
+      try {
+        if (result.status === 200) {
+          showNotification("Responsibility updated", {
+            type: "success",
+          });
+          getCombinedEvents();
+        }
+      } catch (e) {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
+          type: "error",
+        });
+      }
+    },
+    [tasksSelected]
+  );
+
+  const assignProgress = React.useCallback(
+    async (status: any) => {
+      // debugger;
+      const data = {
+        task_ids: tasksSelected,
+        status,
+      };
+      console.log(`Update progress to ${JSON.stringify(data)}`);
+      const result = await taskEventService.patchTasks(data);
+      try {
+        if (result.status === 200) {
+          showNotification("Progress updated", {
+            type: "success",
+          });
+          getCombinedEvents();
+        }
+      } catch (e) {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
+          type: "error",
+        });
+      }
+    },
+    [tasksSelected]
+  );
+
+  const deleteTasks = async (): Promise<string> => {
+    const data = {
+      task_ids: tasksSelected.join(","),
+    };
+    let result = "";
+    const response = await taskEventService.deleteTasks(data);
+    try {
+      if (response.status === 200) {
+        result = response.data as string;
+      }
+    } catch (e) {}
+    return Promise.resolve(result);
+  };
+
+  const deleteMilestones = async (): Promise<string> => {
+    const data = {
+      milestone_ids: milestonesSelected
+        .map((milestone_id: string) => milestone_id.split("_")[1])
+        .join(","),
+    };
+    let result = "";
+    const response = await eventService.deleteMilestones(data);
+    try {
+      if (response.status === 200) {
+        result = response.data as string;
+      }
+    } catch (e) {}
+    return Promise.resolve(result);
+  };
+
+  const handleDelete = React.useCallback(async () => {
+    Promise.all([deleteTasks(), deleteMilestones()]).then(
+      (data: Array<string>) => {
+        showNotification("Deleted successfully", {
+          type: "success",
+        });
+        getCombinedEvents();
+      }
+    );
+  }, [tasksSelected, milestonesSelected]);
 
   return (
     <Grid container rowSpacing={1}>
@@ -544,14 +685,43 @@ const EventList = () => {
                 orientation="vertical"
                 sx={{ borderColor: Palette.neutral[300] }}
               />
-              <FilterSelect
-                options={staffSelectOptions}
-                isMulti
-                variant="bar"
-                placeholder="Assign To"
-                // controlShouldRenderValue={false}
-                filterAppliedCallback={assignTasks}
-              />
+              {tasksSelected.length > 0 && milestonesSelected.length === 0 && (
+                <>
+                  <FilterSelect
+                    options={staffSelectOptions}
+                    isMulti
+                    variant="bar"
+                    placeholder="Assign To"
+                    filterAppliedCallback={assignTasks}
+                    name="assignTo"
+                  />
+                  <FilterSelect
+                    options={responsibilities}
+                    variant="bar"
+                    placeholder="Responsibility"
+                    filterAppliedCallback={assignResponsibility}
+                    name="responsibility"
+                  />
+                  <FilterSelect
+                    options={statusOptions}
+                    variant="bar"
+                    placeholder="Progress"
+                    filterAppliedCallback={assignProgress}
+                    name="progress"
+                  />
+                </>
+              )}
+              <Button
+                variant="outlined"
+                startIcon={<DeleteIcon className={classes.deleteIcon} />}
+                sx={{
+                  color: Palette.primary.accent.main,
+                  border: "none",
+                }}
+                onClick={handleDelete}
+              >
+                Delete
+              </Button>
             </>
           )}
         </Grid>
@@ -589,7 +759,10 @@ const EventList = () => {
       </Grid>
       <Grid item xs={12}>
         <MasterTrackTable
-          enableRowSelection={(row) => row.original.type !== "Milestone"}
+          enableRowSelection={(row) =>
+            row.original.type === EVENT_TYPE.TASK ||
+            (!row.original.mandatory && row.original.end_date === undefined)
+          }
           enableSelectAll
           enablePagination
           muiSelectCheckboxProps={({ row, table }) => ({

@@ -50,5 +50,8 @@ const Endpoints = {
   Configurations: {
     CONFIGURATIONS: "/event-configurations",
   },
+  Responsibilities: {
+    RESPONSIBILITIES: "/responsibilities",
+  },
 };
 export default Endpoints;

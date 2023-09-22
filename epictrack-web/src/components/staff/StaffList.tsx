@@ -1,17 +1,15 @@
 import React from "react";
-import { MRT_ColumnDef, MRT_Row } from "material-react-table";
+import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
+import { Box, Button, Grid, IconButton } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer, ETParagraph } from "../shared";
+import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
-import { Link } from "react-router-dom";
-import { Palette } from "../../styles/theme";
-import FilterSelect from "../shared/filterSelect/FilterSelect";
+import TableFilter from "../shared/filterSelect/TableFilter";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -73,7 +71,7 @@ const StaffList = () => {
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
-            <FilterSelect
+            <TableFilter
               isMulti
               header={header}
               column={column}

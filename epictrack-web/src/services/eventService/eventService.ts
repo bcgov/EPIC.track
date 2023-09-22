@@ -35,5 +35,9 @@ class EventService {
       JSON.stringify(event)
     );
   }
+
+  async deleteMilestones(params: any) {
+    return await http.DeleteRequest(Endpoints.Events.MILESTONE_EVENTS, params);
+  }
 }
 export default new EventService();

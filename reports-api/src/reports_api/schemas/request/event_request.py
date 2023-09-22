@@ -1,7 +1,9 @@
 """Event resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import RequestBodyParameterSchema, RequestPathParameterSchema
+from reports_api.schemas.request.custom_fields import IntegerList
+
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
 class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
@@ -57,3 +59,9 @@ class MilestoneEventPathParameterSchema(RequestPathParameterSchema):
         validate=validate.Range(min=0),
         required=True
     )
+
+
+class MilestoneEventBulkDeleteQueryParamSchema(RequestQueryParameterSchema):
+    """Milestone events bulk delete query parameter"""
+
+    milestone_ids = IntegerList(metadata={"description": "comma separated milestone ids"})
