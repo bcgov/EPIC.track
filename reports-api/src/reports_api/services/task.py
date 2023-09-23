@@ -14,10 +14,11 @@
 """Service to manage Tasks"""
 from datetime import timedelta
 from itertools import product
+from typing import List
 
 from flask import current_app
 from sqlalchemy import and_, tuple_
-from sqlalchemy.orm import contains_eager
+from sqlalchemy.orm import contains_eager, lazyload
 
 from reports_api.exceptions import UnprocessableEntityError
 from reports_api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, db
@@ -78,6 +79,9 @@ class TaskService:
                 TaskEvent.is_deleted.is_(False),
                 TaskEvent.work_id == work_id,
                 TaskEvent.phase_id == phase_id,
+            )
+            .options(
+                lazyload(TaskEvent.assignees).joinedload(TaskEventAssignee.assignee)
             )
             .all()
         )
@@ -275,3 +279,12 @@ class TaskService:
             db.session.bulk_update_mappings(TaskEvent, mappings=task_event_mappings)
         db.session.commit()
         return "Updated successfully"
+
+    @classmethod
+    def bulk_delete_tasks(cls, task_ids: List):
+        """Mark tasks as deleted"""
+        db.session.query(TaskEvent).filter(TaskEvent.id.in_(task_ids)).update(
+            {"is_active": False, "is_deleted": True}
+        )
+        db.session.commit()
+        return "Deleted successfully"

@@ -15,6 +15,7 @@
 from marshmallow import fields, validate
 
 from reports_api.models.task_event import StatusEnum
+from reports_api.schemas.request.custom_fields import IntegerList
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
@@ -254,3 +255,9 @@ class TaskEventBulkUpdateBodyParamSchema(RequestBodyParameterSchema):
         required=False,
         validate=validate.OneOf([v.value for v in StatusEnum]),
     )
+
+
+class TasksBulkDeleteQueryParamSchema(RequestQueryParameterSchema):
+    """Tasks bulk delete query parameter"""
+
+    task_ids = IntegerList(metadata={"description": "comma separated task ids"})

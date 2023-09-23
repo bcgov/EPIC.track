@@ -66,11 +66,18 @@ class TaskEventResponseSchema(
     """TaskEvent model schema class"""
 
     status = fields.Method("get_status_value")
-    assignees = fields.Nested(TaskEventAssigneeResponseSchema(), many=True, dump_only=True)
+    assigned = fields.Method("get_assignees")
+    # assignees = fields.Nested(TaskEventAssigneeResponseSchema(), many=True, dump_only=True)
 
     def get_status_value(self, obj):
         """Get status value"""
         return obj.status.value
+
+    def get_assignees(self, obj):
+        """Get assignees value"""
+        assignees = list(map(lambda x: x.assignee.full_name, obj.assignees))
+        assignees = sorted(assignees)
+        return "; ".join(assignees)
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""

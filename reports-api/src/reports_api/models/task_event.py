@@ -30,37 +30,46 @@ from .base_model import BaseModelVersioned
 #     # pylint: disable=C0103
 #     FederalAgencies = 3
 
+
 class StatusEnum(enum.Enum):
     """Enum for responsible entity"""
 
-    NOT_STARTED = 'NOT_STARTED'
-    INPROGRESS = 'INPROGRESS'
-    COMPLETED = 'COMPLETED'
+    NOT_STARTED = "NOT_STARTED"
+    INPROGRESS = "INPROGRESS"
+    COMPLETED = "COMPLETED"
 
 
 class TaskEvent(BaseModelVersioned):
     """Model class for Tasks."""
 
-    __tablename__ = 'task_events'
+    __tablename__ = "task_events"
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(
+        sa.Integer, primary_key=True, autoincrement=True
+    )  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String)
-    work_id = sa.Column(sa.Integer, sa.ForeignKey('works.id'), nullable=False)
-    phase_id = sa.Column(sa.Integer, sa.ForeignKey('phase_codes.id'), nullable=False)
-    responsibility_id = sa.Column(sa.Integer, sa.ForeignKey('responsibilities.id'), nullable=True)
+    work_id = sa.Column(sa.Integer, sa.ForeignKey("works.id"), nullable=False)
+    phase_id = sa.Column(sa.Integer, sa.ForeignKey("phase_codes.id"), nullable=False)
+    responsibility_id = sa.Column(
+        sa.Integer, sa.ForeignKey("responsibilities.id"), nullable=True
+    )
     start_date = sa.Column(sa.DateTime(timezone=True))
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
     tips = sa.Column(sa.String)
     notes = sa.Column(sa.String)
     status = sa.Column(sa.Enum(StatusEnum), default=StatusEnum.NOT_STARTED)
 
-    phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
-    work = relationship('Work', foreign_keys=[work_id], lazy='select')
-    responsibility = relationship('Responsibility', foreign_keys=[responsibility_id], lazy='select')
+    phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
+    work = relationship("Work", foreign_keys=[work_id], lazy="select")
+    responsibility = relationship(
+        "Responsibility", foreign_keys=[responsibility_id], lazy="select"
+    )
 
     assignees = relationship(
         "TaskEventAssignee",
-        primaryjoin="TaskEvent.id==TaskEventAssignee.task_event_id",
+        primaryjoin="and_(TaskEvent.id==TaskEventAssignee.task_event_id,\
+          TaskEventAssignee.is_active.is_(True), \
+          TaskEventAssignee.is_deleted.is_(False))",
         back_populates="task_event",
     )
 

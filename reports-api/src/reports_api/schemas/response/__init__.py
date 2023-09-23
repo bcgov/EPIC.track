@@ -19,7 +19,10 @@ from .indigenous_nation_response import IndigenousResponseNationSchema
 from .phase_response import PhaseResponseSchema
 from .project_response import ProjectResponseSchema
 from .proponent_response import ProponentResponseSchema
+from .responsibility_response import ResponsibilityResponseSchema
+from .role_response import RoleResponseSchema
 from .staff_response import StaffResponseSchema
+from .staff_work_role_response import StaffWorkRoleResponseSchema
 from .task_response import TaskEventResponseSchema, TaskResponseSchema, TaskTemplateResponseSchema
 from .types_response import SubTypeResponseSchema, TypeResponseSchema
 from .user_group_response import UserGroupResponseSchema
