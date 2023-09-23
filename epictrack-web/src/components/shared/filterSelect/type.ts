@@ -21,11 +21,16 @@ declare module "react-select/dist/declarations/src/Select" {
       onCancel: () => void;
       variant: "inline" | "bar";
     };
+    filterAppliedCallback?: (value?: string[] | string) => void;
+    filterClearedCallback?: (value?: [] | "") => void;
   }
 }
 
 export type SelectProps = {
-  header: any;
-  column: any;
   variant: "inline" | "bar";
 } & Props<OptionType>;
+
+export type TableFilterProps = {
+  header: any;
+  column: any;
+} & SelectProps;

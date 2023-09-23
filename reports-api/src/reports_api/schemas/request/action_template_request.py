@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Action Template resource's input validations"""
-from marshmallow import fields, validate
+import json
+from marshmallow import fields, validate, pre_load
 
 from .base import RequestBodyParameterSchema
 
@@ -20,8 +21,8 @@ from .base import RequestBodyParameterSchema
 class ActionTemplateBodyParameterSchema(RequestBodyParameterSchema):
     """ActionTemplate body schema"""
 
-    name = fields.Str(
-        metadata={"description": "Name of the action"},
+    action_id = fields.Int(
+        metadata={"description": "Id of the action"},
         required=True
     )
 
@@ -37,3 +38,7 @@ class ActionTemplateBodyParameterSchema(RequestBodyParameterSchema):
     sort_order = fields.Int(
         metadata={"description": "Sort order of the event template item"}
     )
+    # @pre_load
+    # def unwrap_envelope(self, data, **kwargs):
+    #     data["additional_params"] = json.loads(data["additional_params"])
+    #     return data

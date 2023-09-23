@@ -25,7 +25,9 @@ const MultiValue = (props: MultiValueProps) => {
           <ETCaption2 bold color={Palette.primary.accent.light}>
             {filterProps?.variant === "inline"
               ? "Filtered"
-              : `Filtered(${(props.selectProps.value as []).length})`}
+              : `${props.selectProps.placeholder}(${
+                  (props.selectProps.value as []).length
+                })`}
           </ETCaption2>
         </Box>
       )}

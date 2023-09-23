@@ -13,8 +13,9 @@
 # limitations under the License.
 """Service to manage Event."""
 from datetime import datetime, timedelta
+from typing import List
 
-from sqlalchemy import and_
+from sqlalchemy import and_, or_
 
 from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
@@ -39,12 +40,23 @@ class EventService:  # pylint: disable=too-few-public-methods
         Event.commit()
 
     @classmethod
-    def create_event(cls, data: dict, work_id: int, phase_id: int, commit: bool = True) -> Event:
+    def create_event(
+        cls, data: dict, work_id: int, phase_id: int, commit: bool = True
+    ) -> Event:
         """Create milestone event"""
         data["work_id"] = work_id
         event = Event(**data)
-        event_configurations = EventConfigurationService.find_configurations(event.work_id, all=True)
-        if not next((config for config in event_configurations if config.id == event.event_configuration_id), None):
+        event_configurations = EventConfigurationService.find_configurations(
+            event.work_id, _all=True
+        )
+        if not next(
+            (
+                config
+                for config in event_configurations
+                if config.id == event.event_configuration_id
+            ),
+            None,
+        ):
             raise UnprocessableEntityError("Incorrect configuration provided")
 
         work_phase = WorkPhaseService.find_by_work_nd_phase(work_id, phase_id)
@@ -52,14 +64,22 @@ class EventService:  # pylint: disable=too-few-public-methods
             raise UnprocessableEntityError("Invalid Work/Phase provided")
 
         if not work_phase.phase.legislated and cls._validate_date(work_phase, event):
-            raise UnprocessableEntityError("The event dates should be within the start and end dates of the phase")
+            raise UnprocessableEntityError(
+                "The event dates should be within the start and end dates of the phase"
+            )
 
         events = cls._find_events_by_work(work_id, phase_id, PRIMARY_CATEGORIES)
         event = event.flush()
-        if event.actual_date and not cls._is_previous_event_completed(events, event_configurations, event):
+        if event.actual_date and not cls._is_previous_event_completed(
+            events, event_configurations, event
+        ):
             raise UnprocessableEntityError("Prevous event must be completed")
-        child_configurations = list(filter(lambda x, p_id=event.event_configuration_id:
-                                           x.parent_id == p_id, event_configurations))
+        child_configurations = list(
+            filter(
+                lambda x, p_id=event.event_configuration_id: x.parent_id == p_id,
+                event_configurations,
+            )
+        )
         cls._handle_child_events(child_configurations, event)
         if commit:
             db.session.commit()
@@ -73,8 +93,11 @@ class EventService:  # pylint: disable=too-few-public-methods
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        event_configurations = EventConfigurationService.find_parent_child_configurations(
-            data.get("event_configuration_id"))
+        event_configurations = (
+            EventConfigurationService.find_parent_child_configurations(
+                data.get("event_configuration_id")
+            )
+        )
         if not event_configurations:
             raise UnprocessableEntityError("Incorrect configuration provided")
         child_configurations = list(filter(lambda x: x.parent_id, event_configurations))
@@ -113,27 +136,44 @@ class EventService:  # pylint: disable=too-few-public-methods
         return Event.find_milestones_by_work_phase(work_id, phase_id)
 
     @classmethod
-    def _is_previous_event_completed(cls, events: [Event],
-                                     event_configurations: [EventConfiguration], event: Event) -> bool:
+    def _is_previous_event_completed(
+        cls, events: [Event], event_configurations: [EventConfiguration], event: Event
+    ) -> bool:
         """Check to see if the previous event has actual date present"""
-        config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
-        phase_events = list(filter(lambda x, _phase_id=config.phase_id:
-                                   x.event_configuration.phase_id == _phase_id, events))
+        config = next(
+            (
+                config
+                for config in event_configurations
+                if config.id == event.event_configuration_id
+            ),
+            None,
+        )
+        phase_events = list(
+            filter(
+                lambda x, _phase_id=config.phase_id: x.event_configuration.phase_id == _phase_id,
+                events,
+            )
+        )
         phase_events.append(event)
-        phase_events = sorted(phase_events, key=lambda x: x.actual_date or x.anticipated_date)
+        phase_events = sorted(
+            phase_events, key=lambda x: x.actual_date or x.anticipated_date
+        )
         event_index = -1
         for index, item in enumerate(phase_events):
             if item.id == event.id:
                 event_index = index
                 break
-        if event_index > 0 and event.actual_date and not phase_events[event_index - 1].actual_date:
+        if (
+            event_index > 0 and event.actual_date and not phase_events[event_index - 1].actual_date
+        ):
             return False
         return True
 
     @classmethod
-    def _handle_event_types(cls, events: [Event], event_configurations: [EventConfiguration], event):
+    def _handle_event_types(
+        cls, events: [Event], event_configurations: [EventConfiguration], event
+    ):
         """Handle the event and related actions"""
-        pass
         # config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
         # child_configurations = list(filter(lambda x,
         #                                    p_id=event.event_configuration_id:
@@ -151,19 +191,30 @@ class EventService:  # pylint: disable=too-few-public-methods
         #         cls._handle_child_events(child_configurations, event)
 
     @classmethod
-    def _handle_child_events(cls, child_configurations: [EventConfiguration], event: [Event]) -> None:
+    def _handle_child_events(
+        cls, child_configurations: [EventConfiguration], event: [Event]
+    ) -> None:
         """Create events based on the child event configurations"""
         for c_event_conf in child_configurations:
             c_event_start_date = cls._find_event_date(event) + timedelta(
                 days=cls._find_start_at_value(
-                    c_event_conf.start_at, event.number_of_days))
+                    c_event_conf.start_at, event.number_of_days
+                )
+            )
             if c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value:
-                work_calendar_event = db.session.query(WorkCalendarEvent)\
-                    .filter(WorkCalendarEvent.event_configuration_id == c_event_conf.id,
-                            WorkCalendarEvent.source_event_id == event.id,
-                            WorkCalendarEvent.is_active.is_(True)).scalar()
+                work_calendar_event = (
+                    db.session.query(WorkCalendarEvent)
+                    .filter(
+                        WorkCalendarEvent.event_configuration_id == c_event_conf.id,
+                        WorkCalendarEvent.source_event_id == event.id,
+                        WorkCalendarEvent.is_active.is_(True),
+                    )
+                    .scalar()
+                )
                 if work_calendar_event:
-                    cal_event = CalendarEvent.find_by_id(work_calendar_event.calendar_event_id)
+                    cal_event = CalendarEvent.find_by_id(
+                        work_calendar_event.calendar_event_id
+                    )
                     cal_event.anticipated = c_event_start_date
                     cal_event.update(cal_event.as_dict(), commit=False)
                 else:
@@ -186,8 +237,9 @@ class EventService:  # pylint: disable=too-few-public-methods
                         )
                     )
             else:
-                existing_event = db.session.query(Event).filter(Event.source_event_id == event.id,
-                                                                Event.is_active.is_(True))
+                existing_event = db.session.query(Event).filter(
+                    Event.source_event_id == event.id, Event.is_active.is_(True)
+                )
                 if existing_event:
                     existing_event.anticipated_date = c_event_start_date
                     existing_event.update(existing_event.as_dict(), commit=False)
@@ -206,15 +258,26 @@ class EventService:  # pylint: disable=too-few-public-methods
                     )
 
     @classmethod
-    def _find_events_by_work(cls, work_id: int, phase_id: int = None,
-                             event_categories: [EventCategoryEnum] = []) -> [Event]:
+    def _find_events_by_work(
+        cls,
+        work_id: int,
+        phase_id: int = None,
+        event_categories: [EventCategoryEnum] = [],
+    ) -> [Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
-        events_query = db.session.query(Event)\
-            .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)\
+        events_query = (
+            db.session.query(Event)
+            .join(
+                EventConfiguration,
+                Event.event_configuration_id == EventConfiguration.id,
+            )
             .filter(Event.is_active.is_(True), EventConfiguration.work_id == work_id)
+        )
         if len(event_categories) > 0:
-            events_query.filter(EventConfiguration.event_category_id.in_(event_categories))
+            events_query.filter(
+                EventConfiguration.event_category_id.in_(event_categories)
+            )
         if not phase_id:
             events_query = events_query.filter(EventConfiguration.phase_id == phase_id)
         return events_query.all()
@@ -252,7 +315,7 @@ class EventService:  # pylint: disable=too-few-public-methods
             "number_of_days": number_of_days,
             "event_configuration_id": ev_config_id,
             "source_event_id": source_e_id,
-            "work_id": work_id
+            "work_id": work_id,
         }
 
     @classmethod
@@ -278,3 +341,12 @@ class EventService:  # pylint: disable=too-few-public-methods
             .first()
         )
         return event
+
+    @classmethod
+    def bulk_delete_milestones(cls, milestone_ids: List):
+        """Mark milestones as deleted"""
+        db.session.query(Event).filter(
+            or_(Event.id.in_(milestone_ids), Event.source_event_id.in_(milestone_ids))
+        ).update({"is_active": False, "is_deleted": True})
+        db.session.commit()
+        return "Deleted successfully"

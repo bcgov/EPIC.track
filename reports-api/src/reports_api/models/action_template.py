@@ -28,11 +28,12 @@ class ActionTemplate(BaseModelVersioned):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     outcome_id = Column(ForeignKey('outcome_templates.id'), nullable=False)
-    name = Column(String, nullable=False)
+    action_id = Column(ForeignKey('actions.id'), nullable=False)
     additional_params = Column(JSONB)
     sort_order = Column(Integer, nullable=False)
 
     outcome = relationship('OutcomeTemplate', foreign_keys=[outcome_id], lazy='select')
+    action = relationship('Action', foreign_keys=[action_id], lazy='select')
 
     @classmethod
     def find_by_outcome_ids(cls, outcome_ids):

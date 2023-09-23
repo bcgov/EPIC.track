@@ -17,10 +17,11 @@ from typing import IO, Dict
 import pandas as pd
 from reports_api.exceptions import BadRequestError
 from reports_api.models import (EAAct, EventCategory, EventTemplate, EventType,
-                                OutcomeTemplate, ActionTemplate, PhaseCode, WorkType, db)
+                                OutcomeTemplate, ActionTemplate, PhaseCode, WorkType, Action, ActionEnum, db)
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
 from reports_api.services.phaseservice import PhaseService
+from reports_api.services.action_template import ActionTemplateService
 from reports_api.utils.str import escape_characters
 
 
@@ -35,7 +36,7 @@ class EventTemplateService:
         """Import event configurations in to database"""
         final_result = []
         excel_dict = cls._read_excel(configuration_file=configuration_file)
-        work_types, ea_acts, event_types, event_categories = cls._get_event_configuration_lookup_entities()
+        work_types, ea_acts, event_types, event_categories, actions = cls._get_event_configuration_lookup_entities()
         event_dict = excel_dict.get("Events")
         phase_dict = excel_dict.get("Phases")
         outcome_dict = excel_dict.get("Outcomes")
@@ -53,6 +54,9 @@ class EventTemplateService:
             name = escape_characters(ea_act.name, ['(', ')'])
             phase_dict = phase_dict.replace({'ea_act_id': rf'^{name}$'},
                                             {'ea_act_id': ea_act.id}, regex=True)
+        for action in actions:
+            action_dict = action_dict.replace({'action_id': rf'^{action.name}$'},
+                                            {'action_id': action.id}, regex=True)
 
         event_dict = event_dict.to_dict('records')
         phase_dict = phase_dict.to_dict('records')
@@ -119,8 +123,9 @@ class EventTemplateService:
                                             {'outcome_id': outcome_result.id}, regex=True)
             actions_list = list(filter(lambda x: x['outcome_no'] == outcome['no'], action_dict.to_dict('records')))
             for action in actions_list:
-                selected_action = next((e for e in existing_actions if e.name == action['name'] and
+                selected_action = next((e for e in existing_actions if e.action_id == action['action_id'] and
                                         e.outcome_id == action['outcome_id']), None)
+                action['additional_params'] = ActionTemplateService.get_action_params(ActionEnum(action['action_id']), action['additional_params'])
                 action_obj = req.ActionTemplateBodyParameterSchema().load(action)
                 if selected_action:
                     action_result = selected_action.update(action_obj, commit=False)
@@ -185,7 +190,7 @@ class EventTemplateService:
                 'No': 'no',
                 'OutcomeNo': 'outcome_no',
                 'OutcomeName': 'outcome_id',
-                'ActionName': 'name',
+                'ActionName': 'action_id',
                 'AdditionalParams': 'additional_params',
                 'SortOrder': 'sort_order'
             },
@@ -216,7 +221,8 @@ class EventTemplateService:
         ea_acts = EAAct.find_all()
         event_types = EventType.find_all()
         event_categories = EventCategory.find_all()
-        return work_types, ea_acts, event_types, event_categories
+        actions = Action.find_all()
+        return work_types, ea_acts, event_types, event_categories, actions
 
     @classmethod
     def find_mandatory_event_templates(cls, phase_id: int):

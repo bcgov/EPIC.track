@@ -20,6 +20,7 @@ export const Palette = {
       dark: "#DBDCDC",
       light: "#F9F9FB",
     },
+    "300": "#B2B5B6",
   },
   primary: {
     main: "#036",

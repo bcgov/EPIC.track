@@ -1,6 +1,6 @@
-import { Box, Button, Grid, Skeleton } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import React from "react";
-import { Staff, StaffWorkRole } from "../../../models/staff";
+import { StaffWorkRole } from "../../../models/staff";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
@@ -13,10 +13,10 @@ import {
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
-import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import TrackDialog from "../../shared/TrackDialog";
 import TeamForm from "./TeamForm";
 import NoDataEver from "../../shared/NoDataEver";
+import TableFilter from "../../shared/filterSelect/TableFilter";
 
 const TeamList = () => {
   const [roles, setRoles] = React.useState<string[]>([]);
@@ -72,7 +72,7 @@ const TeamList = () => {
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
-            <FilterSelect
+            <TableFilter
               isMulti
               header={header}
               column={column}
@@ -102,7 +102,7 @@ const TeamList = () => {
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
-            <FilterSelect
+            <TableFilter
               isMulti
               header={header}
               column={column}
