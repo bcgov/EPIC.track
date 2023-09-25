@@ -153,6 +153,7 @@ const EventList = () => {
         setEvents(result);
       });
     }
+    setRowSelection({});
   }, [ctx.work, ctx.selectedWorkPhase]);
   const getTaskEvents = async (
     workId: number,

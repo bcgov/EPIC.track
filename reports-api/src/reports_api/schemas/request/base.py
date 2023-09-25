@@ -32,7 +32,7 @@ class RequestBodyParameterSchema(Schema):  # pylint: disable=too-few-public-meth
         """Parse the input and convert empty strings to None for integer fields"""
         for field in data:
             if (
-                data[field] == "" and isinstance(self.load_fields[field], fields.Integer)
+                data[field] == "" and isinstance(self.load_fields.get(field, None), fields.Integer)
             ):
                 data[field] = None
         return data

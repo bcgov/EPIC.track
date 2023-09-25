@@ -1,4 +1,4 @@
-import React from "react";
+import React, { MouseEventHandler } from "react";
 import { components, OptionProps } from "react-select";
 import Checkbox from "@mui/material/Checkbox";
 import { OptionType } from "../type";
@@ -52,11 +52,11 @@ const Option = ({
             name={rest.selectProps.name}
             value={data.value}
             checked={isSelected}
-            onChange={(
-              event: React.ChangeEvent<HTMLInputElement>,
-              checked: boolean
-            ) => {
-              rest.setValue(checked ? event.target.value : "", "select-option");
+            onClick={(event: any) => {
+              rest.setValue(
+                event.target.checked ? event.target.value : "",
+                "select-option"
+              );
             }}
           />
         )}
