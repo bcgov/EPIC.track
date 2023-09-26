@@ -74,9 +74,9 @@ class TaskEventResponseSchema(
 
     def get_assigned_staff_names(self, obj):
         """Get assignees value"""
-        assignees = list(map(lambda x: x.assignee.full_name, obj.assignees))
+        assignees = list(map(lambda x: f'{x.assignee.first_name} {x.assignee.last_name}', obj.assignees))
         assignees = sorted(assignees)
-        return "; ".join(assignees)
+        return ", ".join(assignees)
 
     def get_responsibility(self, obj):
         """Get status value"""
