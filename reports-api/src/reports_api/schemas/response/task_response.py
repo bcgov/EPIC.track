@@ -80,7 +80,7 @@ class TaskEventResponseSchema(
 
     def get_responsibility(self, obj):
         """Get status value"""
-        return obj.responsibility.name
+        return obj.responsibility.name if obj.responsibility else None
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""
