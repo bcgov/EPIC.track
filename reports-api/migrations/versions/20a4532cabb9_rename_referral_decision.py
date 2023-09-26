@@ -18,11 +18,7 @@ depends_on = None
 
 
 def upgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-    referral_decision =  session.query(PhaseCode).filter(PhaseCode.name == "Referral/Decision").first()
-    referral_decision.name = "EA Certificate Decision"
-    session.commit()
+    op.execute("Update phase_codes set name='EA Certificate Decision' where name='Referral/Decision'")
 
 
 def downgrade():

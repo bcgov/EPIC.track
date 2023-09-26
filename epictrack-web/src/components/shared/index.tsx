@@ -174,24 +174,29 @@ export const ETParagraph = React.forwardRef(
     const classes = useStyle();
     return (
       <div ref={ref} {...rest}>
-        <Typography
-          color={color}
-          className={clsx({
-            [classes.textEllipsis]: [rest.enableEllipsis],
-          })}
-          sx={{
-            ...sx,
-            fontSize: "1rem",
-            lineHeight: "1.5rem",
-            fontWeight: bold
-              ? MET_Header_Font_Weight_Bold
-              : MET_Header_Font_Weight_Regular,
-            fontFamily: MET_Header_Font_Family,
-          }}
-          variant="body1"
+        <Tooltip
+          title={rest.tooltip as string}
+          disableHoverListener={!rest.enableTooltip}
         >
-          {children}
-        </Typography>
+          <Typography
+            color={color}
+            sx={{
+              ...sx,
+              fontSize: "1rem",
+              lineHeight: "1.5rem",
+              fontWeight: bold
+                ? MET_Header_Font_Weight_Bold
+                : MET_Header_Font_Weight_Regular,
+              fontFamily: MET_Header_Font_Family,
+            }}
+            variant="body1"
+            className={clsx({
+              [classes.textEllipsis]: [rest.enableEllipsis],
+            })}
+          >
+            {children}
+          </Typography>
+        </Tooltip>
       </div>
     );
   }

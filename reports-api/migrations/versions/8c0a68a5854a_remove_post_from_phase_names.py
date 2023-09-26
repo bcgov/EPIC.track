@@ -19,12 +19,7 @@ depends_on = None
 
 
 def upgrade():
-    bind = op.get_bind()
-    session = sa.orm.Session(bind=bind)
-    phases =  session.query(PhaseCode).filter(PhaseCode.name.like("Post:%")).all()
-    for phase in phases:
-        phase.name = phase.name.replace("Post: ", "")
-    session.commit()
+    op.execute("UPDATE phase_codes SET name = REPLACE(name, 'Post: ', '') WHERE name like 'Post:%'")
 
 
 def downgrade():
