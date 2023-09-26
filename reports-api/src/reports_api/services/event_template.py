@@ -87,12 +87,11 @@ class EventTemplateService:
                 event_result = cls._save_event_template(existing_events, event, phase_result.id)
                 child_events = copy.deepcopy(list(filter(lambda x, _parent_id=event['no']: 'parent_id'
                                                          in x and x['parent_id'] == _parent_id, event_dict)))
-                outcome_dict = outcome_dict.replace({'event_template_id': event["no"]},
-                                                    {'event_template_id': event_result.id}, regex=True)
+                outcome_dict.loc[outcome_dict['template_no'] == event['no'], 'event_template_id'] =\
+                    event_result.id
                 outcome_results = cls._handle_outcomes(outcome_dict, existing_outcomes,
                                                        existing_actions, action_dict, event)
                 event_result_copy = res.EventTemplateResponseSchema().dump(event_result)
-                event_result_copy = res.EventTemplateResponseSchema().dump(event_result_copy)
                 event_result_copy['outcomes'] = outcome_results
                 (phase_result_copy['events']).append(event_result_copy)
                 for child in child_events:
@@ -101,12 +100,11 @@ class EventTemplateService:
                     child['start_at'] = str(child['start_at'])
                     child_event_result = cls._save_event_template(existing_events, child,
                                                                   phase_result.id, event_result.id)
-                    outcome_dict = outcome_dict.replace({'event_template_id': child["no"]},
-                                                        {'event_template_id': event_result.id}, regex=True)
+                    outcome_dict.loc[outcome_dict['template_no'] == child['no'], 'event_template_id'] =\
+                        child_event_result.id
                     outcome_results = cls._handle_outcomes(outcome_dict, existing_outcomes,
                                                            existing_actions, action_dict, child)
                     event_result_copy = res.EventTemplateResponseSchema().dump(child_event_result)
-                    event_result_copy = res.EventTemplateResponseSchema().dump(event_result_copy)
                     event_result_copy['outcomes'] = outcome_results
                     (phase_result_copy['events']).append(event_result_copy)
                 child_events = []
@@ -168,8 +166,8 @@ class EventTemplateService:
                 outcome_result = OutcomeTemplate(**outcome_obj).flush()
             outcome_result_copy = res.OutcomeTemplateResponseSchema().dump(outcome_result)
             (outcome_result_copy['actions']) = []
-            action_dict = action_dict.replace({'outcome_id': outcome['no']},
-                                              {'outcome_id': outcome_result.id}, regex=True)
+            action_dict.loc[action_dict['outcome_no'] == outcome['no'], 'outcome_id'] =\
+                outcome_result.id
             actions_list = copy.deepcopy(list(filter(lambda x, _outcome_no=outcome['no']:
                                                      x['outcome_no'] == _outcome_no,
                                                      action_dict.to_dict('records'))))
