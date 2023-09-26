@@ -360,7 +360,12 @@ const EventList = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
+          <ETParagraph
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+            enableEllipsis
+            enableTooltip
+            tooltip={cell.getValue<string>()}
+          >
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -528,7 +533,6 @@ const EventList = () => {
         (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
       );
       const data = { task_ids: tasksSelected, assignee_ids };
-      console.log(`Assign tasks to ${JSON.stringify(data)}`);
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
@@ -553,12 +557,10 @@ const EventList = () => {
 
   const assignResponsibility = React.useCallback(
     async (responsibility_id: any) => {
-      // debugger;
       const data = {
         task_ids: tasksSelected,
         responsibility_id: responsibility_id,
       };
-      console.log(`Assign responsibility to ${JSON.stringify(data)}`);
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
@@ -583,7 +585,6 @@ const EventList = () => {
 
   const assignProgress = React.useCallback(
     async (status: any) => {
-      // debugger;
       const data = {
         task_ids: tasksSelected,
         status,
@@ -612,10 +613,11 @@ const EventList = () => {
   );
 
   const deleteTasks = async (): Promise<string> => {
+    let result = "";
+    if (tasksSelected.length === 0) return Promise.resolve(result);
     const data = {
       task_ids: tasksSelected.join(","),
     };
-    let result = "";
     const response = await taskEventService.deleteTasks(data);
     try {
       if (response.status === 200) {
@@ -626,12 +628,13 @@ const EventList = () => {
   };
 
   const deleteMilestones = async (): Promise<string> => {
+    let result = "";
+    if (milestonesSelected.length === 0) return Promise.resolve(result);
     const data = {
       milestone_ids: milestonesSelected
         .map((milestone_id: string) => milestone_id.split("_")[1])
         .join(","),
     };
-    let result = "";
     const response = await eventService.deleteMilestones(data);
     try {
       if (response.status === 200) {
