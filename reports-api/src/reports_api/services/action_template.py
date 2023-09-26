@@ -16,7 +16,7 @@ from reports_api.models.action import ActionEnum
 from reports_api.models.phase_code import PhaseCode
 
 
-class ActionTemplateService:
+class ActionTemplateService: # pylint: disable=too-few-public-methods
     """Service to manage action templates"""
 
     @classmethod
@@ -24,8 +24,7 @@ class ActionTemplateService:
         """Return the action params for the template"""
         if action_type == ActionEnum.DUPLICATE_PHASE:
             return cls._get_phase_param(request_data)
-        else:
-            return request_data
+        return request_data
 
     @classmethod
     def _get_phase_param(cls, request_data: dict) -> dict:

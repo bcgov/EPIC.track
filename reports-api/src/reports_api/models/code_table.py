@@ -73,7 +73,7 @@ class CodeTable():  # pylint: disable=too-few-public-methods
             query['is_active'] = True
         if hasattr(cls, 'is_deleted'):
             query['is_deleted'] = False
-        rows = cls.query.filter_by(**query).all()
+        rows = cls.query.filter_by(**query).all() # pylint: disable=no-member
         return rows
 
     @staticmethod
