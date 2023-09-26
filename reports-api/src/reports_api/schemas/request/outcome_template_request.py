@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Outcome Template resource's input validations"""
-from marshmallow import fields, validate
+from marshmallow import fields
 
 from .base import RequestBodyParameterSchema
 

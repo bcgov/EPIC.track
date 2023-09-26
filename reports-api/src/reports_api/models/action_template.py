@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Actions."""
-import enum
-
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 

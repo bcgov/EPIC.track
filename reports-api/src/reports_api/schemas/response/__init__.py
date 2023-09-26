@@ -30,7 +30,5 @@ from .user_response import UserResponseSchema
 from .work_response import (
     WorkPhaseResponseSchema, WorkPhaseSkeletonResponseSchema, WorkResourceResponseSchema, WorkResponseSchema,
     WorkStaffRoleReponseSchema, WorkPhaseTemplateAvailableResponse)
-from .staff_work_role_response import StaffWorkRoleResponseSchema
-from .role_response import RoleResponseSchema
 from .action_template_response import ActionTemplateResponseSchema
 from .outcome_template_response import OutcomeTemplateResponseSchema

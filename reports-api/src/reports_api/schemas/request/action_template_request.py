@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Action Template resource's input validations"""
-import json
-from marshmallow import fields, validate, pre_load
+from marshmallow import fields
 
 from .base import RequestBodyParameterSchema
 
@@ -38,7 +37,3 @@ class ActionTemplateBodyParameterSchema(RequestBodyParameterSchema):
     sort_order = fields.Int(
         metadata={"description": "Sort order of the event template item"}
     )
-    # @pre_load
-    # def unwrap_envelope(self, data, **kwargs):
-    #     data["additional_params"] = json.loads(data["additional_params"])
-    #     return data

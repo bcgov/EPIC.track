@@ -12,32 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Action Template"""
-import json
 from reports_api.models.action import ActionEnum
 from reports_api.models.phase_code import PhaseCode
+
 
 class ActionTemplateService:
     """Service to manage action templates"""
 
-
     @classmethod
-    def get_action_params(cls, actionType: ActionEnum, request_data: dict):
-        """return the action params for the template"""
-        request_data = json.loads(request_data)
-        if actionType == ActionEnum.DUPLICATE_PHASE:
+    def get_action_params(cls, action_type: ActionEnum, request_data: dict):
+        """Return the action params for the template"""
+        if action_type == ActionEnum.DUPLICATE_PHASE:
             return cls._get_phase_param(request_data)
         else:
             return request_data
 
-    def _get_phase_param(request_data: dict) -> dict:
+    @classmethod
+    def _get_phase_param(cls, request_data: dict) -> dict:
         """Return the phase_id as dict"""
         param = {
-            "name": request_data.get("phase_name"),
+            "name": request_data.get("phase_name").strip(),
             "work_type_id": request_data.get("work_type_id"),
             "ea_act_id": request_data.get("ea_act_id")
         }
         result = PhaseCode.find_by_params(param)
         return {
-            "phase_id": result.id
+            "phase_id": result[0].id
         }
-    

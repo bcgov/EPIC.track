@@ -30,7 +30,6 @@ from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
 from reports_api.services.phaseservice import PhaseService
 from reports_api.services.task import TaskService
-from reports_api.services.outcome import OutcomeService
 
 
 class WorkService:
@@ -290,13 +289,14 @@ class WorkService:
         db.session.commit()
         return work_staff
 
-    @classmethod
-    def _copy_outcome_and_actions(template: dict, config: EventConfiguration) -> None:
-        """Copy the outcome and actions"""
-        outcome_params = {
-            "event_template_id": template.get("id")
-        }
-        outcomes = OutcomeService.find_all_outcomes(outcome_params)
+    # @classmethod
+    # def _copy_outcome_and_actions(cls, template: dict, config: EventConfiguration) -> None:
+    #     """Copy the outcome and actions"""
+    #     outcome_params = {
+    #         "event_template_id": template.get("id")
+    #     }
+    #     outcomes = OutcomeService.find_all_outcomes(outcome_params)
+
     @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
         """Calculate the start at value"""

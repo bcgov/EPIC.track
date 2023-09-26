@@ -21,6 +21,7 @@ from .db import db
 
 class ActionEnum(enum.Enum):
     """Action enum"""
+
     COMPLETE_CURRENT_PHASE = 1
     DISABLE_WORK_START_DATE = 2
     CLOSE_EVERYTHING = 3
@@ -28,7 +29,7 @@ class ActionEnum(enum.Enum):
     DEACTIVATE_ALL_EVENTS = 5
     DELETE_ALL_EVENTS = 6
     CLOSE_WORK = 7
-
+    CREATE_NEW_WORK = 8
 
 
 class Action(db.Model, CodeTableVersioned):
