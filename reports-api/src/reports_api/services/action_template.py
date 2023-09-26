@@ -16,7 +16,7 @@ from reports_api.models.action import ActionEnum
 from reports_api.models.phase_code import PhaseCode
 
 
-class ActionTemplateService: # pylint: disable=too-few-public-methods
+class ActionTemplateService:  # pylint: disable=too-few-public-methods
     """Service to manage action templates"""
 
     @classmethod

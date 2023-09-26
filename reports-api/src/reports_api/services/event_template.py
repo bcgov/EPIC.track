@@ -123,7 +123,8 @@ class EventTemplateService:
         return final_result
 
     @classmethod
-    def _handle_deletion_templates(cls, existing_events, existing_outcomes, existing_actions, results, phase_id): # pylint: disable=too-many-arguments
+    def _handle_deletion_templates(cls, existing_events, existing_outcomes, existing_actions, results, phase_id):
+        # pylint: disable=too-many-arguments
         """Handle deletion"""
         # events
         existing_set = set(list(map(lambda x: x.id, existing_events)))
@@ -151,7 +152,8 @@ class EventTemplateService:
             .update({ActionTemplate.is_active: False, ActionTemplate.is_deleted: False})
 
     @classmethod
-    def _handle_outcomes(cls, outcome_dict, existing_outcomes, existing_actions, action_dict, event): # pylint: disable=too-many-arguments
+    def _handle_outcomes(cls, outcome_dict, existing_outcomes, existing_actions, action_dict, event):
+        # pylint: disable=too-many-arguments
         """Save the outcome"""
         outcome_list = copy.deepcopy(list(filter(lambda x: x['template_no'] == event['no'],
                                                  outcome_dict.to_dict('records'))))
@@ -168,7 +170,7 @@ class EventTemplateService:
             (outcome_result_copy['actions']) = []
             action_dict = action_dict.replace({'outcome_id': outcome['no']},
                                               {'outcome_id': outcome_result.id}, regex=True)
-            actions_list = copy.deepcopy(list(filter(lambda x, _outcome_no = outcome['no']:
+            actions_list = copy.deepcopy(list(filter(lambda x, _outcome_no=outcome['no']:
                                                      x['outcome_no'] == _outcome_no,
                                                      action_dict.to_dict('records'))))
             for action in actions_list:

@@ -56,5 +56,6 @@ class ActiveOutcomes(Resource):
     def get():
         """Return single milestone based on the milestone id given"""
         outcomes = OutcomeService.find_all_active_milestones()
-        outcomes_schema = res.OutcomeTemplateResponseSchema(many=True, only=("id", "name", "milestone_id", "terminates_work"))
+        outcomes_schema = res.OutcomeTemplateResponseSchema(many=True,
+                                                            only=("id", "name", "milestone_id", "terminates_work"))
         return outcomes_schema.dump(outcomes), HTTPStatus.OK
