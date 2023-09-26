@@ -63,6 +63,19 @@ class CodeTable():  # pylint: disable=too-few-public-methods
             codes = cls.query.filter_by(**query).order_by(cls.id).all()  # pylint: disable=no-member
         return codes
 
+    @classmethod
+    def find_by_params(cls, params: dict, default_filters=True):
+        """Returns based on the params"""
+        query = {}
+        for key, value in params.items():
+            query[key] = value
+        if default_filters and hasattr(cls, 'is_active'):
+            query['is_active'] = True
+        if hasattr(cls, 'is_deleted'):
+            query['is_deleted'] = False
+        rows = cls.query.filter_by(**query).all()  # pylint: disable=no-member
+        return rows
+
     @staticmethod
     def commit():
         """Commit the session."""

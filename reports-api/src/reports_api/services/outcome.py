@@ -33,3 +33,9 @@ class OutcomeService:
         current_app.logger.debug("Find all active outcomes")
         outcomes = OutcomeTemplate.find_all()
         return outcomes
+
+    @classmethod
+    def find_all_outcomes(cls, params: dict) -> [OutcomeTemplate]:
+        """Return all active outcomes"""
+        outcomes = OutcomeTemplate.find_by_criteria(params)
+        return outcomes

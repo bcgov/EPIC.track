@@ -16,7 +16,7 @@
 from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModelVersioned
+from .base_model import BaseModelVersioned, db
 
 
 class OutcomeTemplate(BaseModelVersioned):
@@ -35,4 +35,15 @@ class OutcomeTemplate(BaseModelVersioned):
     def find_by_criteria(cls, criteria: dict):
         """Returns collection of outcomes by milestone_id"""
         outcomes = cls.query.filter_by(**criteria).all()
+        return outcomes
+
+    @classmethod
+    def find_by_template_ids(cls, template_ids):
+        """Returns the event configurations based on phase ids"""
+        outcomes = db.session.query(
+            OutcomeTemplate
+        ).filter(
+            OutcomeTemplate.event_template_id.in_(template_ids),
+            OutcomeTemplate.is_active.is_(True)
+        ).all()  # pylint: disable=no-member
         return outcomes

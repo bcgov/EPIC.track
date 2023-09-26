@@ -8,6 +8,7 @@ from reports_api.schemas.base import AutoSchemaBase
 
 from .ea_act_response import EAActResponseSchema
 from .phase_response import PhaseResponseSchema
+from .staff_response import StaffResponseSchema
 from .work_type_response import WorkTypeResponseSchema
 
 
@@ -56,6 +57,7 @@ class TaskEventAssigneeResponseSchema(
         model = TaskEventAssignee
         include_fk = True
         unknown = EXCLUDE
+    assignee = fields.Nested(StaffResponseSchema())
 
 
 class TaskEventResponseSchema(

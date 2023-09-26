@@ -289,6 +289,14 @@ class WorkService:
         db.session.commit()
         return work_staff
 
+    # @classmethod
+    # def _copy_outcome_and_actions(cls, template: dict, config: EventConfiguration) -> None:
+    #     """Copy the outcome and actions"""
+    #     outcome_params = {
+    #         "event_template_id": template.get("id")
+    #     }
+    #     outcomes = OutcomeService.find_all_outcomes(outcome_params)
+
     @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
         """Calculate the start at value"""
