@@ -91,7 +91,7 @@ const TemplateTaskList = ({ ...props }) => {
 
   return (
     <>
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ overflowY: "hidden" }}>
         {templateId && (
           <MasterTrackTable
             columns={columns}
@@ -114,6 +114,11 @@ const TemplateTaskList = ({ ...props }) => {
                 maxHeight: "700px",
               },
             }}
+            muiTableHeadProps={{
+              sx: {
+                opacity: 100,
+              },
+            }}
           />
         )}
       </Grid>
@@ -125,13 +130,15 @@ const TemplateTaskList = ({ ...props }) => {
           gap: "0.5rem",
           justifyContent: "right",
           marginTop: ".5rem",
+          marginLeft: "auto",
+          marginRight: 0,
         }}
       >
         <Button variant="outlined" type="reset" onClick={props.onCancel}>
           Cancel
         </Button>
         <Button
-          variant="outlined"
+          variant="contained"
           type="button"
           onClick={handleApproval}
           color="primary"
