@@ -19,7 +19,7 @@ from .event_template import EventTemplateService
 from .indigenous_nation import IndigenousNationService
 from .inspection import InspectionService
 from .lookups import LookupService
-from .outcome import OutcomeService
+from .outcome import OutcomeTemplateService
 from .phaseservice import PhaseService
 from .project import ProjectService
 from .proponent import ProponentService
