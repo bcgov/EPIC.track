@@ -16,7 +16,7 @@ from http import HTTPStatus
 from flask import jsonify
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.services import OutcomeService
+from reports_api.services import OutcomeTemplateService
 from reports_api.utils import auth, constants, profiletime
 from reports_api.utils.caching import AppCache
 from reports_api.utils.util import cors_preflight
@@ -38,7 +38,7 @@ class Outcomes(Resource):
     @profiletime
     def get(milestone_id):
         """Return all outcomes based on milestone_id."""
-        outcomes = OutcomeService.find_by_milestone_id(milestone_id)
+        outcomes = OutcomeTemplateService.find_by_milestone_id(milestone_id)
         outcomes_schema = res.OutcomeTemplateResponseSchema(many=True, only=("id", "name", "terminates_work"))
         return jsonify(outcomes_schema.dump(outcomes)), HTTPStatus.OK
 
@@ -55,7 +55,7 @@ class ActiveOutcomes(Resource):
     @profiletime
     def get():
         """Return single milestone based on the milestone id given"""
-        outcomes = OutcomeService.find_all_active_milestones()
+        outcomes = OutcomeTemplateService.find_all_active_milestones()
         outcomes_schema = res.OutcomeTemplateResponseSchema(many=True,
                                                             only=("id", "name", "milestone_id", "terminates_work"))
         return outcomes_schema.dump(outcomes), HTTPStatus.OK
