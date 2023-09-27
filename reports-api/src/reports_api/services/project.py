@@ -30,7 +30,7 @@ class ProjectService:
     @classmethod
     def find_all(cls):
         """Find all projects"""
-        return Project.find_all()
+        return Project.find_all(default_filters=False)
 
     @classmethod
     def create_project(cls, payload: dict):
