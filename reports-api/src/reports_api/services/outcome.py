@@ -17,7 +17,7 @@ from flask import current_app
 from reports_api.models import OutcomeTemplate
 
 
-class OutcomeService:
+class OutcomeTemplateService:
     """Service to manage outcome related operations"""
 
     @classmethod

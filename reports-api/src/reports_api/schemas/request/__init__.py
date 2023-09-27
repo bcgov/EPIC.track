@@ -42,3 +42,5 @@ from .work_request import (
     WorkPlanDownloadQueryParamSchema)
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
 from .action_template_request import ActionTemplateBodyParameterSchema
+from .action_configuration_request import ActionConfigurationBodyParameterSchema
+from .outcome_configuration_request import OutcomeConfigurationBodyParameterSchema
