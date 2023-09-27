@@ -52,7 +52,8 @@ class WorkService:
         lead = aliased(Staff)
         epd = aliased(Staff)
         work_result = (
-            Work.query.join(Project)
+            Work.query.filter(Work.is_deleted.is_(False))
+            .join(Project)
             .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
             .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
             .outerjoin(lead, lead.id == Work.work_lead_id)
