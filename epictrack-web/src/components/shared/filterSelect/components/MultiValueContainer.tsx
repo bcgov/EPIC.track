@@ -19,10 +19,18 @@ const MultiValue = (props: MultiValueProps) => {
             borderRadius: "4px",
             background: Palette.primary.bg.light,
             cursor: "pointer",
+            maxWidth: "70%",
           }}
           key={props.index}
         >
-          <ETCaption2 bold color={Palette.primary.accent.light}>
+          <ETCaption2
+            bold
+            color={Palette.primary.accent.light}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
             {filterProps?.variant === "inline"
               ? "Filtered"
               : `${props.selectProps.placeholder}(${
