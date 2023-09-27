@@ -134,6 +134,7 @@ export const MasterProvider = ({
             showNotification(`${title} details updated`, {
               type: "success",
             });
+            setItem(undefined);
             setBackdrop(false);
             callback();
           }
