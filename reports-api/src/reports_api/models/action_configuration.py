@@ -25,12 +25,12 @@ class ActionCofiguration(BaseModelVersioned):
     __tablename__ = 'action_configurations'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    outcome_configuration_id = Column(ForeignKey('outcome_configuration.id'), nullable=False)
+    outcome_configuration_id = Column(ForeignKey('outcome_configurations.id'), nullable=False)
     action_id = Column(ForeignKey('actions.id'), nullable=False)
     additional_params = Column(JSONB)
     sort_order = Column(Integer, nullable=False)
 
-    outcome_configuration = relationship('OutconeConfiguration', foreign_keys=[outcome_configuration_id], lazy='select')
+    outcome_configuration = relationship('OutcomeConfiguration', foreign_keys=[outcome_configuration_id], lazy='select')
     action = relationship('Action', foreign_keys=[action_id], lazy='select')
 
     @classmethod

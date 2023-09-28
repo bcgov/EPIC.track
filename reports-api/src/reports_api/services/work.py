@@ -18,16 +18,24 @@ from io import BytesIO
 import pandas as pd
 from sqlalchemy import exc
 from sqlalchemy.orm import aliased
-
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
-from reports_api.models import (
-    CalendarEvent, EAOTeam, Event, EventConfiguration, Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent,
-    WorkPhase, db)
+from reports_api.exceptions import (ResourceExistsError, ResourceNotFoundError,
+                                    UnprocessableEntityError)
+from reports_api.models import (ActionCofiguration, ActionTemplate,
+                                CalendarEvent, EAOTeam, Event,
+                                EventConfiguration, OutcomeConfiguration,
+                                Project, Role, Staff, StaffWorkRole, Work,
+                                WorkCalendarEvent, WorkPhase, db)
 from reports_api.models.event_category import EventCategoryEnum
-from reports_api.schemas.response import EventTemplateResponseSchema
+from reports_api.schemas.request import (
+    ActionConfigurationBodyParameterSchema,
+    OutcomeConfigurationBodyParameterSchema)
+from reports_api.schemas.response import (ActionTemplateResponseSchema,
+                                          EventTemplateResponseSchema,
+                                          OutcomeTemplateResponseSchema)
 from reports_api.schemas.work_plan import WorkPlanSchema
 from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
+from reports_api.services.outcome import OutcomeTemplateService
 from reports_api.services.phaseservice import PhaseService
 from reports_api.services.task import TaskService
 
@@ -52,7 +60,8 @@ class WorkService:
         lead = aliased(Staff)
         epd = aliased(Staff)
         work_result = (
-            Work.query.join(Project)
+            Work.query.filter(Work.is_deleted.is_(False))
+            .join(Project)
             .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
             .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
             .outerjoin(lead, lead.id == Work.work_lead_id)
@@ -136,6 +145,7 @@ class WorkService:
                     )
                     p_result.flush()
                     event_configurations.append(p_result)
+                    cls._copy_outcome_and_actions(parent_config, p_result)
                     for child in list(
                         filter(
                             lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] == _parent_config_id,
@@ -149,6 +159,7 @@ class WorkService:
                                     EventConfiguration(**cls._prepare_configuration(child))
                         )
                         event_configurations.append(c_result)
+                        cls._copy_outcome_and_actions(child, c_result)
                 parent_event_configs = list(
                         filter(lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and
                                x.phase_id == _phase_id, event_configurations)
@@ -296,6 +307,26 @@ class WorkService:
     #         "event_template_id": template.get("id")
     #     }
     #     outcomes = OutcomeService.find_all_outcomes(outcome_params)
+
+    @classmethod
+    def _copy_outcome_and_actions(cls, template: dict, config: EventConfiguration) -> None:
+        """Copy the outcome and actions"""
+        outcome_params = {
+            "event_template_id": template.get("id")
+        }
+        outcomes = OutcomeTemplateService.find_all_outcomes(outcome_params)
+        outcome_ids = list(map(lambda x: x.id, outcomes))
+        actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
+        for outcome in outcomes:
+            outcome_json = OutcomeTemplateResponseSchema().dump(outcome)
+            outcome_json['event_configuration_id'] = config.id
+            outcome_result = OutcomeConfiguration(**OutcomeConfigurationBodyParameterSchema()
+                                                  .load(outcome_json)).flush()
+            outcome_actions = list(filter(lambda x, _outcome_id=outcome.id: x.outcome_id == _outcome_id, actions))
+            for outcome_action in outcome_actions:
+                action_json = ActionTemplateResponseSchema().dump(outcome_action)
+                action_json['outcome_configuration_id'] = outcome_result.id
+                ActionCofiguration(**ActionConfigurationBodyParameterSchema().load(action_json)).flush()
 
     @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:

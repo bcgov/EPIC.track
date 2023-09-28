@@ -67,3 +67,5 @@ from .work_status import WorkStatus
 from .work_type import WorkType
 from .action_template import ActionTemplate
 from .action import Action, ActionEnum
+from .outcome_configuration import OutcomeConfiguration
+from .action_configuration import ActionCofiguration
