@@ -193,7 +193,6 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         spacing={2}
         container
         sx={{
-          margin: 0,
           width: "100%",
         }}
         onSubmit={handleSubmit(onSubmitHandler)}
@@ -201,6 +200,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         <Grid item xs={12}>
           <ETFormLabel required>Name</ETFormLabel>
           <ControlledSelectV2
+            placeholder="Search for a Name"
             helperText={errors?.staff_id?.message?.toString()}
             defaultValue={staffWorkRole?.staff_id}
             options={staff || []}
@@ -236,6 +236,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         <Grid item xs={12}>
           <ETFormLabel required>Role</ETFormLabel>
           <ControlledSelectV2
+            placeholder="Select a Role"
             helperText={errors?.role_id?.message?.toString()}
             defaultValue={staffWorkRole?.role_id}
             options={roles || []}
