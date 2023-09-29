@@ -38,7 +38,7 @@ class Report(Resource):
     @profiletime
     def post(report_type):
         """Generate report from given date."""
-        report_date = datetime.fromisoformat(API.payload['report_date'])
+        report_date = datetime.strptime(API.payload['report_date'], '%m-%d-%Y')
         filters = API.payload.get('filters', None)
         report = ReportService.generate_report(report_type, report_date, 'json', filters=filters)
         if report:
@@ -57,7 +57,7 @@ class FileReport(Resource):
     @profiletime
     def post(report_type):
         """Generate report from given date."""
-        report_date = datetime.fromisoformat(API.payload['report_date'])
+        report_date = datetime.strptime(API.payload['report_date'], '%m-%d-%Y')
         filters = API.payload.get('filters', None)
         report, file_name = ReportService.generate_report(report_type, report_date, 'file', filters=filters)
         if report:

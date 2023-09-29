@@ -12,18 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Event Template."""
-import json
 import copy
+import json
 from typing import IO, Dict
 
 import pandas as pd
+
 from reports_api.exceptions import BadRequestError
-from reports_api.models import (EAAct, EventCategory, EventTemplate, EventType,
-                                OutcomeTemplate, ActionTemplate, PhaseCode, WorkType, Action, ActionEnum, db)
+from reports_api.models import (
+    Action, ActionEnum, ActionTemplate, EAAct, EventCategory, EventTemplate, EventType, OutcomeTemplate, PhaseCode,
+    WorkType, db)
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
-from reports_api.services.phaseservice import PhaseService
 from reports_api.services.action_template import ActionTemplateService
+from reports_api.services.phaseservice import PhaseService
 from reports_api.utils.str import escape_characters
 
 

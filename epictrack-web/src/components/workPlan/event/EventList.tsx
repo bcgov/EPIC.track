@@ -113,6 +113,8 @@ const EventList = () => {
   const [milestonesSelected, setMilestonesSelected] = React.useState<string[]>(
     []
   );
+  const [showDeleteDialog, setShowDeleteDialog] =
+    React.useState<boolean>(false);
 
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
@@ -196,11 +198,9 @@ const EventList = () => {
             ? EVENT_STATUS.COMPLETED
             : EVENT_STATUS.NOT_STARTED;
           if (element.actual_date) {
-            element.end_date = dateUtils.formatDate(
-              dateUtils
-                .add(element.actual_date, element.number_of_days, "days")
-                .toISOString()
-            );
+            element.end_date = dateUtils
+              .add(element.actual_date, element.number_of_days, "days")
+              .toISOString();
           }
           element.start_date = element.anticipated_date;
           element.mandatory = element.event_configuration.mandatory;
@@ -653,6 +653,7 @@ const EventList = () => {
         showNotification("Deleted successfully", {
           type: "success",
         });
+        setShowDeleteDialog(false);
         getCombinedEvents();
       }
     );
@@ -725,7 +726,7 @@ const EventList = () => {
                   color: Palette.primary.accent.main,
                   border: "none",
                 }}
-                onClick={handleDelete}
+                onClick={() => setShowDeleteDialog(true)}
               >
                 Delete
               </Button>
@@ -875,6 +876,16 @@ const EventList = () => {
           setSelectedTemplateId(undefined);
         }}
         isActionsRequired
+      />
+      <TrackDialog
+        open={showDeleteDialog}
+        dialogTitle="Delete"
+        dialogContentText="Are you sure you want to delete this?"
+        okButtonText="Yes"
+        cancelButtonText="No"
+        isActionsRequired
+        onCancel={() => setShowDeleteDialog(!showDeleteDialog)}
+        onOk={() => handleDelete()}
       />
     </Grid>
   );
