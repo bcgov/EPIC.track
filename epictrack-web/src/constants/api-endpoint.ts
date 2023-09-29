@@ -41,7 +41,7 @@ const Endpoints = {
     TEMPLATES: "task-templates",
   },
   Events: {
-    MILESTONE_EVENTS: "milestones/events",
+    MILESTONE_EVENTS: "milestones",
   },
   TaskEvents: {
     EVENTS: "tasks/events",

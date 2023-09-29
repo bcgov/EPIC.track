@@ -12,13 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Event Template."""
-
+import enum
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
 from .db import db
 
+
+class EventPositionEnum(enum.Enum):
+    """Event position enum"""
+
+    START='START'
+    INTERMEDIATE='INTERMEDIATE'
+    END='END'
 
 class EventTemplate(BaseModelVersioned):
     """Model class for Event Template."""
@@ -30,6 +37,8 @@ class EventTemplate(BaseModelVersioned):
     parent_id = sa.Column(sa.Integer, nullable=True)
     phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
+    event_position = sa.Column(sa.String)
+    multiple_days = sa.Column(sa.Boolean, default=False)
     event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
     start_at = sa.Column(sa.String, nullable=True)
     number_of_days = sa.Column(sa.Integer, default=0, nullable=False)

@@ -64,3 +64,11 @@ class EventTemplateBodyParameterSchema(RequestBodyParameterSchema):
     sort_order = fields.Int(
         metadata={"description": "Sort order of the event template item"}
     )
+
+    event_position = fields.Str(
+        metadata={"description": "position of the event in the phase"}
+    )
+
+    multiple_days = fields.Bool(
+        metadata={"description": "Indicate if it is a multi day event"}
+    )

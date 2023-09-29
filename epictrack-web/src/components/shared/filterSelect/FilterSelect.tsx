@@ -129,6 +129,7 @@ const FilterSelect = (props: SelectProps) => {
     <Select
       value={selectValue}
       placeholder={props.placeholder || "Filter"}
+      onMenuClose={onCancel}
       name={name}
       options={options}
       isMulti={isMulti}

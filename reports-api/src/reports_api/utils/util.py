@@ -32,3 +32,9 @@ def cors_preflight(methods: str = 'GET'):
         return f
 
     return wrapper
+
+def find_index_in_array(json_array, target_object):
+    for index, json_obj in enumerate(json_array):
+        if json_obj == target_object:
+            return index
+    return -1  # Return -1 if not found

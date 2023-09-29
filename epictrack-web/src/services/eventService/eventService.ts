@@ -4,40 +4,44 @@ import { MilestoneEvent } from "../../models/events";
 
 class EventService {
   async create(
-    taskEvent: MilestoneEvent | undefined,
-    workId: number,
-    phaseId: number
+    milestoneEvent: MilestoneEvent | undefined,
+    workPhaseId: number
   ) {
     return await http.PostRequest(
-      `${Endpoints.Events.MILESTONE_EVENTS}/works/:work_id/phases/:phase_id`
-        .replace(":work_id", workId.toString())
-        .replace(":phase_id", phaseId.toString()),
-      JSON.stringify(taskEvent)
+      `${Endpoints.Events.MILESTONE_EVENTS}/workphases/:work_phase_id/events`.replace(
+        ":work_phase_id",
+        workPhaseId.toString()
+      ),
+      JSON.stringify(milestoneEvent)
     );
   }
-  async GetMilestoneEvents(workId: number, phaseId: number) {
+  async GetMilestoneEvents(workPhaseId: number) {
     return await http.GetRequest(
-      `${Endpoints.Events.MILESTONE_EVENTS}/works/:work_id/phases/:phase_id`
-        .replace(":work_id", workId.toString())
-        .replace(":phase_id", phaseId.toString())
+      `${Endpoints.Events.MILESTONE_EVENTS}/workphases/:work_phase_id/events`.replace(
+        ":work_phase_id",
+        workPhaseId.toString()
+      )
     );
   }
 
   async getById(eventId: number) {
     return await http.GetRequest(
-      `${Endpoints.Events.MILESTONE_EVENTS}/${eventId}`
+      `${Endpoints.Events.MILESTONE_EVENTS}/events/${eventId}`
     );
   }
 
   async update(event: MilestoneEvent | undefined, eventId: number) {
     return await http.PutRequest(
-      `${Endpoints.Events.MILESTONE_EVENTS}/${eventId}`,
+      `${Endpoints.Events.MILESTONE_EVENTS}/events/${eventId}`,
       JSON.stringify(event)
     );
   }
 
   async deleteMilestones(params: any) {
-    return await http.DeleteRequest(Endpoints.Events.MILESTONE_EVENTS, params);
+    return await http.DeleteRequest(
+      `${Endpoints.Events.MILESTONE_EVENTS}/events`,
+      params
+    );
   }
 }
 export default new EventService();

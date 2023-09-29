@@ -55,15 +55,14 @@ class Event(BaseModelVersioned):
         return cls.query.filter_by(work_id=work_id)
 
     @classmethod
-    def find_milestones_by_work_phase(cls, work_id: int, phase_id: int):
+    def find_milestone_events_by_work_phase(cls, work_phase_id: int):
         """Return milestones by work id and phase id."""
         return (
             Event.query.join(
                 EventConfiguration,
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.work_id == work_id,
-                    EventConfiguration.phase_id == phase_id,
+                    EventConfiguration.work_phase_id == work_phase_id,
                     Event.is_deleted.is_(False)
                 ),
             )

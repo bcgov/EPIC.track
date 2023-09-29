@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Event."""
+import copy
 from datetime import datetime, timedelta
 from typing import List
 
@@ -19,11 +20,21 @@ from sqlalchemy import and_, or_
 
 from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
+    PRIMARY_CATEGORIES,
+    CalendarEvent,
+    Event,
+    EventCategoryEnum,
+    EventConfiguration,
+    WorkCalendarEvent,
+    WorkPhase,
+    db,
+)
+from reports_api.models.event_template import EventPositionEnum
 from reports_api.schemas import EventSchema
 
 from .event_configuration import EventConfigurationService
 from .work_phase import WorkPhaseService
+from reports_api.utils import util
 
 
 class EventService:  # pylint: disable=too-few-public-methods
@@ -40,50 +51,106 @@ class EventService:  # pylint: disable=too-few-public-methods
         Event.commit()
 
     @classmethod
-    def create_event(
-        cls, data: dict, work_id: int, phase_id: int, commit: bool = True
-    ) -> Event:
+    def create_event(cls, data: dict, work_phase_id: int, commit: bool = True) -> Event:
         """Create milestone event"""
-        data["work_id"] = work_id
+        current_work_phase = WorkPhase.find_by_id(work_phase_id)
+
+        data["work_id"] = current_work_phase.work_id
         event = Event(**data)
-        event_configurations = EventConfigurationService.find_configurations(
+        event = event.flush()
+
+        all_work_events = cls._find_events(
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES
+        )
+        all_work_events.append(event)
+
+        cls._previous_event_completed_check(all_work_events, event)
+
+        all_work_event_configurations = EventConfigurationService.find_configurations(
             event.work_id, _all=True
         )
-        if not next(
-            (
-                config
-                for config in event_configurations
-                if config.id == event.event_configuration_id
-            ),
-            None,
-        ):
-            raise UnprocessableEntityError("Incorrect configuration provided")
-
-        work_phase = WorkPhaseService.find_by_work_nd_phase(work_id, phase_id)
-        if not work_phase:
-            raise UnprocessableEntityError("Invalid Work/Phase provided")
-
-        if not work_phase.phase.legislated and cls._validate_date(work_phase, event):
-            raise UnprocessableEntityError(
-                "The event dates should be within the start and end dates of the phase"
-            )
-
-        events = cls._find_events_by_work(work_id, phase_id, PRIMARY_CATEGORIES)
-        event = event.flush()
-        if event.actual_date and not cls._is_previous_event_completed(
-            events, event_configurations, event
-        ):
-            raise UnprocessableEntityError("Prevous event must be completed")
-        child_configurations = list(
-            filter(
-                lambda x, p_id=event.event_configuration_id: x.parent_id == p_id,
-                event_configurations,
-            )
+        all_work_phases = WorkPhase.find_by_params(
+            {"work_id": current_work_phase.work_id}
         )
-        cls._handle_child_events(child_configurations, event)
-        if commit:
-            db.session.commit()
+        cls._handle_child_events(all_work_event_configurations, event)
+
+        number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(event, current_work_phase)
+
+        if current_work_phase.phase.legislated:
+            phase_events = list(
+                filter(
+                    lambda x, _work_phase_id=current_work_phase.id: x.work_phase_id
+                    == _work_phase_id
+                    and x.event_configuration.event_position
+                    != EventPositionEnum.END.value,
+                    all_work_events,
+                )
+            )
+            current_event_index = util.find_index_in_array(phase_events, event)
+            cls._push_events(phase_events[current_event_index + 1 :],number_of_days_to_be_pushed, event, all_work_event_configurations)
+
+        current_work_phase_index = util.find_index_in_array(
+            all_work_phases, current_work_phase
+        )
+        current_future_work_phases = all_work_phases[current_work_phase_index:]
+        if not current_work_phase.phase.legislated:
+            for each_work_phase, index in enumerate(current_future_work_phases):
+                phase_events = list(
+                    filter(
+                        lambda x, _work_phase_id=each_work_phase.id: x.work_phase_id
+                        == _work_phase_id,
+                        all_work_events,
+                    )
+                )
+                current_event_index = util.find_index_in_array(phase_events, event) if index == 0 else -1
+                cls._push_events(phase_events[current_event_index + 1 :],number_of_days_to_be_pushed, event, all_work_event_configurations)
+
+        # if commit:
+        #     db.session.commit()
         return event
+
+    @classmethod
+    def _get_number_of_days_to_be_pushed(
+        cls, event: Event, current_work_phase: WorkPhase
+    ) -> int:
+        """Returns the number of days to be pushed"""
+        if event.event_configuration.event_category_id in [
+            EventCategoryEnum.EXTENSION,
+            EventCategoryEnum.SUSPENSION,
+        ]:
+            return event.number_of_days
+        date_diff_from_phase_end = (
+            cls._find_event_date(event) - current_work_phase.end_date
+        ).days + event.number_of_days
+        number_of_days_to_be_pushed = (
+            0
+            if current_work_phase.end_date + timedelta(days=date_diff_from_phase_end)
+            < current_work_phase.end_date
+            else date_diff_from_phase_end
+        )
+        return number_of_days_to_be_pushed
+
+    @classmethod
+    def _push_events(
+        cls,
+        phase_events: [Event],
+        number_of_days_to_be_pushed: int,
+        event: Event,
+        all_work_event_configurations: [EventConfiguration]
+    ) -> None:
+        """Push events the given number of days"""
+        for event_to_update, index in phase_events:
+            if event_to_update.actual_date:
+                event_to_update.actual_date = event_to_update.actual_date + timedelta(
+                    days=number_of_days_to_be_pushed
+                )
+            elif event_to_update.anticipated_date:
+                event_to_update.anticipated_date = (
+                    event_to_update.anticipated_date
+                    + timedelta(days=number_of_days_to_be_pushed)
+                )
+            event_to_update.update(**event_to_update.as_dict(), commit=False)
+            cls._handle_child_events(all_work_event_configurations, event)
 
     @classmethod
     def update_event(cls, data: dict, event_id: int, commit: bool = True) -> Event:
@@ -102,7 +169,7 @@ class EventService:  # pylint: disable=too-few-public-methods
             raise UnprocessableEntityError("Incorrect configuration provided")
         child_configurations = list(filter(lambda x: x.parent_id, event_configurations))
         event.update(data, commit=False)
-        cls._handle_child_events(child_configurations, event)
+        cls._handle_child_events(event_configurations, event)
         if commit:
             db.session.commit()
         return event
@@ -131,15 +198,49 @@ class EventService:  # pylint: disable=too-few-public-methods
         return (events_completed / events_total) * 100
 
     @classmethod
-    def find_milestone_events_by_work_phase(cls, work_id: int, phase_id: int):
+    def find_milestone_events_by_work_phase(cls, work_phase_id: int):
         """Find all milestone events by work id and phase id"""
-        return Event.find_milestones_by_work_phase(work_id, phase_id)
+        return Event.find_milestone_events_by_work_phase(work_phase_id)
 
     @classmethod
-    def _is_previous_event_completed(
-        cls, events: [Event], event_configurations: [EventConfiguration], event: Event
-    ) -> bool:
+    def _previous_event_completed_check(
+        cls, all_work_events: [Event], event: Event
+    ) -> None:
         """Check to see if the previous event has actual date present"""
+        if event.actual_date:
+            phase_events = list(
+                filter(
+                    lambda x, _phase_id=event.event_configuration.phase_id: x.event_configuration.phase_id
+                    == _phase_id,
+                    all_work_events,
+                )
+            )
+            phase_events = sorted(
+                phase_events, key=lambda x: x.actual_date or x.anticipated_date
+            )
+            event_index = -1
+            for index, item in enumerate(phase_events):
+                if item.id == event.id:
+                    event_index = index
+                    break
+            if (
+                event_index > 0
+                and event.actual_date
+                and not phase_events[event_index - 1].actual_date
+            ):
+                raise UnprocessableEntityError(
+                    "The event dates should be within the start and end dates of the phase"
+                )
+
+    @classmethod
+    def _handle_event_types(
+        cls,
+        all_events: [Event],
+        event_configurations: [EventConfiguration],
+        event: Event,
+        work_phase: WorkPhase,
+    ):
+        """Handle the event and related actions"""
         config = next(
             (
                 config
@@ -148,53 +249,56 @@ class EventService:  # pylint: disable=too-few-public-methods
             ),
             None,
         )
-        phase_events = list(
+        child_configurations = list(
             filter(
-                lambda x, _phase_id=config.phase_id: x.event_configuration.phase_id == _phase_id,
-                events,
+                lambda x, p_id=event.event_configuration_id: x.parent_id == p_id,
+                event_configurations,
             )
         )
-        phase_events.append(event)
-        phase_events = sorted(
-            phase_events, key=lambda x: x.actual_date or x.anticipated_date
-        )
-        event_index = -1
-        for index, item in enumerate(phase_events):
-            if item.id == event.id:
-                event_index = index
-                break
-        if (
-            event_index > 0 and event.actual_date and not phase_events[event_index - 1].actual_date
-        ):
-            return False
-        return True
+        if config.event_category_id in [
+            EventCategoryEnum.EXTENSION,
+            EventCategoryEnum.SUSPENSION,
+        ]:
+            if cls._find_event_date(event) > work_phase.end_date:
+                work_phase.end_date = work_phase.end_date + timedelta(
+                    days=event.number_of_days
+                )
+                # phase_events = list(filter(lambda x: x.work_phase_id = work_phase_id, all_events)
+                # last_event = phase_events[-2]
+                # last_event.actual_date = last_event.actual_date + event.number_of_days
+                filtered_events = list(
+                    filter(
+                        lambda x, _work_phase_id=work_phase.id: x.event_configuration.work_phase_id
+                        > _work_phase_id,
+                        all_events,
+                    )
+                )
+                cls._push_event_dates(
+                    event_configurations, filtered_events, event.number_of_days
+                )
+            if cls._find_event_date(event) < work_phase.end_date:
+                event_index = -1
+                for index, item in enumerate(all_events):
+                    if item.id == event.id:
+                        event_index = index
+                        break
+                events_after_the_current = all_events[event_index + 1 :]
+                cls._push_event_dates(
+                    event_configurations, events_after_the_current, event.number_of_days
+                )
 
-    @classmethod
-    def _handle_event_types(
-        cls, events: [Event], event_configurations: [EventConfiguration], event
-    ):
-        """Handle the event and related actions"""
-        # config = next((config for config in event_configurations if config.id == event.event_configuration_id), None)
-        # child_configurations = list(filter(lambda x,
-        #                                    p_id=event.event_configuration_id:
-        #                                    x.parent_id == p_id, event_configurations))
-        # match config.event_category_id:
-        #     case EventCategoryEnum.EXTENSION:
-        #         work_phases = WorkPhaseService.find_by_work_id(event.work_id)
-        #     case EventCategoryEnum.SUSPENSION:
-        #         pass
-        #     case EventCategoryEnum.DECISION:
-        #         pass
-        #     case EventCategoryEnum.PCP:
-        #         pass
-        #     case _:
-        #         cls._handle_child_events(child_configurations, event)
 
     @classmethod
     def _handle_child_events(
-        cls, child_configurations: [EventConfiguration], event: [Event]
+        cls, event_configurations: [EventConfiguration], event: [Event]
     ) -> None:
         """Create events based on the child event configurations"""
+        child_configurations = list(
+            filter(
+                lambda x, p_id=event.event_configuration_id: x.parent_id == p_id,
+                event_configurations,
+            )
+        )
         for c_event_conf in child_configurations:
             c_event_start_date = cls._find_event_date(event) + timedelta(
                 days=cls._find_start_at_value(
@@ -258,10 +362,10 @@ class EventService:  # pylint: disable=too-few-public-methods
                     )
 
     @classmethod
-    def _find_events_by_work(
+    def _find_events(
         cls,
         work_id: int,
-        phase_id: int = None,
+        work_phase_id: int,
         event_categories: [EventCategoryEnum] = [],
     ) -> [Event]:
         # pylint: disable=dangerous-default-value
@@ -272,18 +376,21 @@ class EventService:  # pylint: disable=too-few-public-methods
                 EventConfiguration,
                 Event.event_configuration_id == EventConfiguration.id,
             )
-            .filter(Event.is_active.is_(True), EventConfiguration.work_id == work_id)
+            .filter(Event.is_active.is_(True), Event.work_id == work_id)
         )
         if len(event_categories) > 0:
-            events_query.filter(
-                EventConfiguration.event_category_id.in_(event_categories)
+            category_ids = list(map(lambda x: x.value, event_categories))
+            events_query = events_query.filter(
+                EventConfiguration.event_category_id.in_(category_ids)
             )
-        if not phase_id:
-            events_query = events_query.filter(EventConfiguration.phase_id == phase_id)
+        if work_phase_id:
+            events_query = events_query.filter(
+                EventConfiguration.work_phase_id == work_phase_id
+            )
         return events_query.all()
 
     @classmethod
-    def _find_event_date(cls, event):
+    def _find_event_date(cls, event) -> datetime:
         """Returns the event actual or anticipated date"""
         return event.actual_date if event.actual_date else event.anticipated_date
 

@@ -28,7 +28,7 @@ API = Namespace("milestones", description="Milestones")
 
 
 @cors_preflight("GET, POST")
-@API.route("/events/works/<int:work_id>/phases/<int:phase_id>", methods=["GET", "POST", "OPTIONS"])
+@API.route("/workphases/<int:work_phase_id>/events", methods=["GET", "POST", "OPTIONS"])
 class Events(Resource):
     """Endpoint resource to return all milestone events"""
 
@@ -36,13 +36,13 @@ class Events(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get(work_id, phase_id):
+    def get(work_phase_id):
         """Return all task templates."""
-        task_events = EventService.find_milestone_events_by_work_phase(
-            work_id, phase_id
+        milestone_events = EventService.find_milestone_events_by_work_phase(
+            work_phase_id
         )
         return (
-            jsonify(res.EventResponseSchema(many=True).dump(task_events)),
+            jsonify(res.EventResponseSchema(many=True).dump(milestone_events)),
             HTTPStatus.OK,
         )
 
@@ -50,10 +50,10 @@ class Events(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def post(work_id, phase_id):
+    def post(work_phase_id):
         """Create a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-        event_response = EventService.create_event(request_json, work_id, phase_id)
+        event_response = EventService.create_event(request_json, work_phase_id)
         return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
 
 
