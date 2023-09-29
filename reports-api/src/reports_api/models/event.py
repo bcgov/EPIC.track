@@ -63,7 +63,8 @@ class Event(BaseModelVersioned):
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
                     EventConfiguration.work_phase_id == work_phase_id,
-                    Event.is_deleted.is_(False)
+                    Event.is_deleted.is_(False),
+                    Event.is_active.is_(True)
                 ),
             )
             .join(

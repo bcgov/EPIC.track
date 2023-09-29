@@ -13,7 +13,7 @@ import {
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
-import { ETHeading3, ETSubhead } from ".";
+import { ETHeading3, ETHeading4, ETSubhead } from ".";
 
 type TrackDialogProps = {
   onCancel?: () => void;
@@ -84,9 +84,9 @@ const TrackDialog: FC<TrackDialogProps> = ({
         >
           <CloseIconComponent />
         </IconButton>
-        <ETHeading3 bold sx={{ color: Palette.primary.main, width: "100%" }}>
+        <ETHeading4 bold sx={{ color: Palette.primary.main, width: "100%" }}>
           {dialogTitle}
-        </ETHeading3>
+        </ETHeading4>
       </Box>
       <DialogContent
         sx={{
@@ -97,6 +97,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
           alignItems: "flex-start",
           alignSelf: "stretch",
           // overflowY: "auto",
+          backgroundColor: Palette.neutral.bg.light,
         }}
       >
         {dialogContentText && (
@@ -119,12 +120,22 @@ const TrackDialog: FC<TrackDialogProps> = ({
           }}
         >
           {isCancelRequired && (
-            <Button size="large" onClick={onCancel} variant="outlined">
+            <Button
+              size="large"
+              onClick={onCancel}
+              variant="outlined"
+              sx={{
+                width: "124px",
+              }}
+            >
               {cancelButtonText || "Cancel"}
             </Button>
           )}
           {isOkRequired && (
             <Button
+              sx={{
+                width: "124px",
+              }}
               onClick={formId ? undefined : onOk}
               autoFocus
               size="large"

@@ -4,6 +4,7 @@ import { Controller, useFormContext } from "react-hook-form";
 import Select, { CSSObjectWithLabel, Props, ThemeConfig } from "react-select";
 
 type IFormInputProps = {
+  placeholder?: string;
   name: string;
   options: Array<any>;
   defaultValue?: string | number | undefined | number[];
@@ -21,6 +22,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
   IFormInputProps
 > = (
   {
+    placeholder,
     name,
     options,
     getOptionLabel,
@@ -48,6 +50,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
         return (
           <>
             <Select
+              placeholder={placeholder}
               {...field}
               ref={ref}
               {...otherProps}
@@ -80,7 +83,9 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                   return {
                     ...baseStyles,
                     borderColor: !!errors[name] ? "#d32f2f" : undefined,
-                    fontSize: "1rem",
+                    fontSize: "16px",
+                    lineHeight: "24px",
+                    fontWeight: "400",
                   };
                 },
                 menuPortal: (base: CSSObjectWithLabel) => ({
