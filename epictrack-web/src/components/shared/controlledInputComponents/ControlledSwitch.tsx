@@ -1,6 +1,7 @@
 import React from "react";
-import { CheckboxProps, Switch } from "@mui/material";
+import { CheckboxProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
+import { CustomSwitch } from "../CustomSwitch";
 
 type IFormSwitchProps = {
   name: string;
@@ -21,7 +22,16 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
       name={name}
       defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
-        <Switch {...otherProps} {...field} ref={ref} checked={!!field.value} />
+        <CustomSwitch
+          sx={{
+            marginLeft: "10px",
+            marginRight: "10px",
+          }}
+          {...otherProps}
+          {...field}
+          ref={ref}
+          checked={!!field.value}
+        />
       )}
     />
   );
