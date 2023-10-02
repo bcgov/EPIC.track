@@ -372,6 +372,8 @@ class WorkService:
             "start_at": data["start_at"],
             "number_of_days": data["number_of_days"],
             "mandatory": data["mandatory"],
+            "event_position": data["event_position"],
+            "multiple_days": data["multiple_days"],
             "sort_order": data["sort_order"],
             "template_id": data["id"],
             "work_phase_id": data["work_phase_id"]
