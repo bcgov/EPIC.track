@@ -37,7 +37,6 @@ from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
 from reports_api.services.outcome import OutcomeTemplateService
 from reports_api.services.phaseservice import PhaseService
-from reports_api.services.task import TaskService
 
 
 class WorkService:
@@ -372,6 +371,8 @@ class WorkService:
             "start_at": data["start_at"],
             "number_of_days": data["number_of_days"],
             "mandatory": data["mandatory"],
+            "event_position": data["event_position"],
+            "multiple_days": data["multiple_days"],
             "sort_order": data["sort_order"],
             "template_id": data["id"],
             "work_phase_id": data["work_phase_id"]
@@ -407,13 +408,11 @@ class WorkService:
 
     @classmethod
     def generate_workplan(
-        cls, work_id: int, phase_id: int
+        cls, work_phase_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
-        milestone_events = EventService.find_milestone_events_by_work_phase(
-            work_id, phase_id
-        )
-        task_events = TaskService.find_task_events(work_id, phase_id)
+        milestone_events = EventService.find_milestone_events_by_work_phase(work_phase_id)
+        task_events = None  # TaskService.find_task_events(work_id, phase_id)
 
         work_plan_schema = WorkPlanSchema(many=True)
         work_plan_schema.context["type"] = "Milestone"

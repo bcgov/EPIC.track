@@ -254,8 +254,7 @@ const EventList = () => {
   const downloadPDFReport = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        Number(ctx.work?.id),
-        Number(ctx.selectedWorkPhase?.phase.id)
+        Number(ctx.selectedWorkPhase?.id)
       );
       const url = window.URL.createObjectURL(
         new Blob([(binaryReponse as any).data])

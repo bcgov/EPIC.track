@@ -228,9 +228,8 @@ class WorkPlan(Resource):
     def post():
         """Return a phase details based on id."""
         args = req.WorkPlanDownloadQueryParamSchema().load(request.args)
-        work_id = args.get("work_id")
-        phase_id = args.get("phase_id")
-        file = WorkService.generate_workplan(work_id, phase_id)
+        work_phase_id = args.get("work_phase_id")
+        file = WorkService.generate_workplan(work_phase_id)
         return send_file(BytesIO(file), as_attachment=True, download_name="work_plan.xlsx")
 
 

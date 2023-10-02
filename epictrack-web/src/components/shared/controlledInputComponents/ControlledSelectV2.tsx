@@ -2,6 +2,7 @@ import React from "react";
 import { FormHelperText } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import Select, { CSSObjectWithLabel, Props, ThemeConfig } from "react-select";
+import { Palette } from "../../../styles/theme";
 
 type IFormInputProps = {
   placeholder?: string;
@@ -82,10 +83,19 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                 control: (baseStyles, state) => {
                   return {
                     ...baseStyles,
-                    borderColor: !!errors[name] ? "#d32f2f" : undefined,
+                    borderColor: !!errors[name]
+                      ? "#d32f2f"
+                      : Palette.neutral.accent.light,
+                    borderWidth: "2px",
                     fontSize: "16px",
                     lineHeight: "24px",
+                    backgroundColor: !!disabled
+                      ? Palette.neutral.bg.dark
+                      : Palette.white,
                     fontWeight: "400",
+                    "&:hover": {
+                      borderColor: Palette.primary.accent.light,
+                    },
                   };
                 },
                 menuPortal: (base: CSSObjectWithLabel) => ({
