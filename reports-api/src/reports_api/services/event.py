@@ -230,7 +230,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         all_work_event_configurations: [EventConfiguration],
         number_of_days_to_be_pushed: int,
         event: Event,
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
+        # pylint: disable=too-many-arguments
         """Push all the events and work phases"""
         for index, each_work_phase in enumerate(work_phases):
             phase_events = list(
