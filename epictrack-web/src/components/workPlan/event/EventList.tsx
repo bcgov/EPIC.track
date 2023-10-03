@@ -42,7 +42,7 @@ import {
 } from "../../icons/status";
 import EventForm from "./EventForm";
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
-import { TemplateStatus } from "../../../models/work";
+import { TemplateStatus, WorkPhase } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
@@ -192,12 +192,7 @@ const EventList = () => {
           element.status = element.is_complete
             ? EVENT_STATUS.COMPLETED
             : EVENT_STATUS.NOT_STARTED;
-          if (element.actual_date) {
-            element.end_date = dateUtils
-              .add(element.actual_date, element.number_of_days, "days")
-              .toISOString();
-          }
-          element.start_date = element.anticipated_date;
+          element.start_date = element.actual_date || element.anticipated_date;
           element.mandatory = element.event_configuration.mandatory;
           return element;
         });
@@ -208,12 +203,24 @@ const EventList = () => {
     return Promise.resolve(result);
   };
 
+  const getWorkPhases = React.useCallback(async () => {
+    if (ctx.work?.id) {
+      setLoading(true);
+      const workPhasesResult = await workService.getWorkPhases(
+        String(ctx.work?.id)
+      );
+      ctx.setWorkPhases(workPhasesResult.data as WorkPhase[]);
+      setLoading(false);
+    }
+  }, []);
+
   const onDialogClose = React.useCallback(() => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
     getTemplateUploadStatus();
+    getWorkPhases();
   }, [ctx.work, ctx.selectedWorkPhase]);
 
   const onTemplateFormSaveHandler = (templateId: number) => {

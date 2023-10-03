@@ -9,8 +9,8 @@ import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
-import { Grid, TextField } from "@mui/material";
-import { ETFormLabel } from "../../shared";
+import { Box, Grid, TextField, Typography } from "@mui/material";
+import { ETFormLabel, ETParagraph } from "../../shared";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
@@ -38,6 +38,8 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<ListType[]>([]);
   const [notes, setNotes] = React.useState("");
+  const [titleCharacterCount, setTitleCharacterCount] =
+    React.useState<number>(0);
   const [showEventLockDialog, setShowEventLockDialog] =
     React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
@@ -46,8 +48,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     () => ctx.selectedWorkPhase?.phase.id,
     [ctx.selectedWorkPhase?.phase.id]
   );
-  const endDateRef = React.useRef();
-  const startDateRef = React.useRef();
+  const titleRef = React.useRef();
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -175,6 +176,19 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     [eventId, submittedEvent]
   );
 
+  const onChangeMilestoneType = (configuration_id: number) => {
+    const configuration = configurations.filter(
+      (p) => p.id === Number(configuration_id)
+    )[0];
+    (titleRef?.current as any)["value"] = configuration.name;
+    setTitleCharacterCount(configuration.name.length);
+    (titleRef?.current as any).focus();
+  };
+
+  const onChangeTitle = (event: any) => {
+    setTitleCharacterCount(event.target.value.length);
+  };
+
   return (
     <>
       <FormProvider {...methods}>
@@ -197,17 +211,6 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
             }}
           >
             <Grid item xs={12}>
-              <ETFormLabel required>Title</ETFormLabel>
-              <TextField
-                fullWidth
-                placeholder="Title"
-                defaultValue={event?.name}
-                error={!!errors?.name?.message}
-                helperText={errors?.name?.message?.toString()}
-                {...register("name")}
-              />
-            </Grid>
-            <Grid item xs={10}>
               <ETFormLabel required>Milestone Type</ETFormLabel>
               <ControlledSelectV2
                 helperText={errors?.event_configuration_id?.message?.toString()}
@@ -216,8 +219,42 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
                 disabled={!!eventId}
+                onHandleChange={(configuration_id) =>
+                  onChangeMilestoneType(configuration_id)
+                }
                 {...register("event_configuration_id")}
               ></ControlledSelectV2>
+            </Grid>
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                }}
+              >
+                <ETFormLabel required>Title</ETFormLabel>
+                <ETParagraph
+                  sx={{
+                    color: Palette.neutral.light,
+                  }}
+                >
+                  {titleCharacterCount}/150 character left
+                </ETParagraph>
+              </Box>
+              <TextField
+                fullWidth
+                placeholder="Title"
+                defaultValue={event?.name}
+                error={!!errors?.name?.message}
+                inputRef={titleRef}
+                inputProps={{
+                  maxLength: 150,
+                }}
+                helperText={errors?.name?.message?.toString()}
+                {...register("name")}
+                onChange={onChangeTitle}
+              />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel required>Anticipated Date</ETFormLabel>
@@ -278,13 +315,13 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                         },
                         ...register("actual_date"),
                       }}
-                      value={dayjs(value)}
+                      value={value ? dayjs(value) : value}
                       onChange={(event) => {
                         onChange(event);
                       }}
-                      defaultValue={dayjs(
-                        event?.actual_date ? event?.actual_date : ""
-                      )}
+                      defaultValue={
+                        event?.actual_date ? dayjs(event?.actual_date) : ""
+                      }
                       sx={{ display: "block" }}
                     />
                   </LocalizationProvider>
