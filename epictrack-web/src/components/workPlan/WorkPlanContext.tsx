@@ -14,7 +14,9 @@ interface WorkplanContextProps {
   setSelectedWorkPhase: Dispatch<SetStateAction<WorkPhase | undefined>>;
   loading: boolean;
   team: StaffWorkRole[];
+  workPhases: WorkPhase[];
   setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
+  setWorkPhases: Dispatch<SetStateAction<WorkPhase[]>>;
   work: Work | undefined;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
@@ -24,8 +26,10 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   selectedWorkPhase: undefined,
   setSelectedWorkPhase: () => ({}),
   setTeam: () => ({}),
+  setWorkPhases: () => ({}),
   loading: true,
   team: [],
+  workPhases: [],
   work: undefined,
 });
 
@@ -39,10 +43,12 @@ export const WorkplanProvider = ({
   const [team, setTeam] = React.useState<StaffWorkRole[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
+  const [workPhases, setWorkPhases] = React.useState<WorkPhase[]>([]);
   const workId = React.useMemo(() => query.get("work_id"), [query]);
   React.useEffect(() => {
     getWorkById();
     getWorkTeamMembers();
+    getWorkPhases();
   }, [workId]);
 
   const getWorkTeamMembers = React.useCallback(async () => {
@@ -73,11 +79,21 @@ export const WorkplanProvider = ({
       setLoading(false);
     }
   }, [workId]);
+  const getWorkPhases = React.useCallback(async () => {
+    if (workId) {
+      setLoading(true);
+      const workPhasesResult = await workService.getWorkPhases(String(workId));
+      setWorkPhases(workPhasesResult.data as WorkPhase[]);
+      setLoading(false);
+    }
+  }, [workId]);
   return (
     <WorkplanContext.Provider
       value={{
         selectedWorkPhase,
         setSelectedWorkPhase,
+        workPhases,
+        setWorkPhases,
         loading,
         work,
         team,

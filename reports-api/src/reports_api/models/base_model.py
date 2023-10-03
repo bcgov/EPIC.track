@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Super class to handle all operations related to base model."""
-from sqlalchemy import Boolean, Column, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, String, asc
 from reports_api.models.history import Versioned
 
 from reports_api.utils.utcnow import utcnow
@@ -80,7 +80,7 @@ class BaseModel(db.Model):
             query['is_active'] = True
         if hasattr(cls, 'is_deleted'):
             query['is_deleted'] = False
-        rows = cls.query.filter_by(**query).all()
+        rows = cls.query.filter_by(**query).order_by(asc("id")).all()
         return rows
 
     def update(self, payload: dict, commit=True):
