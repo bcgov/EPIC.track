@@ -136,10 +136,7 @@ const EventList = () => {
     if (ctx.work?.id && ctx.selectedWorkPhase?.phase.id) {
       setLoading(true);
       Promise.all([
-        getMilestoneEvents(
-          Number(ctx.work?.id),
-          Number(ctx.selectedWorkPhase.phase.id)
-        ),
+        getMilestoneEvents(Number(ctx.selectedWorkPhase.id)),
         getTaskEvents(
           Number(ctx.work?.id),
           Number(ctx.selectedWorkPhase.phase.id)
@@ -182,14 +179,12 @@ const EventList = () => {
     return Promise.resolve(result);
   };
   const getMilestoneEvents = async (
-    workId: number,
-    currentPhase: number
+    workPhaseId: number
   ): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
       const milestoneResult = await eventService.GetMilestoneEvents(
-        Number(workId),
-        Number(currentPhase)
+        Number(ctx.selectedWorkPhase?.id)
       );
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
@@ -259,8 +254,7 @@ const EventList = () => {
   const downloadPDFReport = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        Number(ctx.work?.id),
-        Number(ctx.selectedWorkPhase?.phase.id)
+        Number(ctx.selectedWorkPhase?.id)
       );
       const url = window.URL.createObjectURL(
         new Blob([(binaryReponse as any).data])

@@ -160,8 +160,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
       } else {
         const createResult = await eventService.create(
           dataToBeSubmitted,
-          Number(ctx.work?.id),
-          Number(ctx.selectedWorkPhase?.phase.id)
+          Number(ctx.selectedWorkPhase?.id)
         );
         if (createResult.status === 201) {
           showNotification("Milestone details inserted", {

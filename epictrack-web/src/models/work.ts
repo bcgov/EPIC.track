@@ -45,13 +45,14 @@ export interface Work extends MasterBase {
   decision_by: Staff;
 }
 
-export interface WorkPhaseSkeleton extends MasterBase {
+export interface WorkPhase extends MasterBase {
   end_date: string;
   start_date: string;
   phase: ListType;
   milestone_progress: number;
   next_milestone: string;
   is_completed: boolean;
+  id: number;
   number_of_days: string;
 }
 

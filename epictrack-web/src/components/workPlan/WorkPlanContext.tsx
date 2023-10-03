@@ -1,7 +1,7 @@
 import React, { Dispatch, SetStateAction, createContext } from "react";
 import { useSearchParams } from "../../hooks/SearchParams";
 import workService from "../../services/workService/workService";
-import { Work, WorkPhaseSkeleton } from "../../models/work";
+import { Work, WorkPhase } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
 import {
   ACTIVE_STATUS,
@@ -10,8 +10,8 @@ import {
 import { showNotification } from "../shared/notificationProvider";
 
 interface WorkplanContextProps {
-  selectedWorkPhase?: WorkPhaseSkeleton;
-  setSelectedWorkPhase: Dispatch<SetStateAction<WorkPhaseSkeleton | undefined>>;
+  selectedWorkPhase?: WorkPhase;
+  setSelectedWorkPhase: Dispatch<SetStateAction<WorkPhase | undefined>>;
   loading: boolean;
   team: StaffWorkRole[];
   setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
@@ -34,8 +34,7 @@ export const WorkplanProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [selectedWorkPhase, setSelectedWorkPhase] =
-    React.useState<WorkPhaseSkeleton>();
+  const [selectedWorkPhase, setSelectedWorkPhase] = React.useState<WorkPhase>();
   const [work, setWork] = React.useState<Work>();
   const [team, setTeam] = React.useState<StaffWorkRole[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);

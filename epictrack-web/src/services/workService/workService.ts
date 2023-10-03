@@ -97,10 +97,9 @@ class WorkService implements ServiceBase {
     return await http.GetRequest(Endpoints.Works.WORKS + `/${workId}/phases`);
   }
 
-  async downloadWorkplan(workId: number, phaseId: number) {
+  async downloadWorkplan(workPhaseId: number) {
     return await http.PostRequest(
-      Endpoints.Works.DOWNLOAD_WORK_PLAN +
-        `?work_id=${workId}&phase_id=${phaseId}`,
+      Endpoints.Works.DOWNLOAD_WORK_PLAN + `?work_phase_id=${workPhaseId}`,
       {},
       {},
       {

@@ -5,6 +5,13 @@
   margin-top: 10px;
 }
 
+@font-face {
+  font-family: 'BCSans';
+  src: url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff') format('woff'),
+       url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff2') format('woff2'),
+       url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff') format('woff'),
+       url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff2') format('woff2'),
+}
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;

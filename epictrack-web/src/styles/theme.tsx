@@ -121,6 +121,7 @@ export const BaseTheme = createTheme({
         root: ({ ownerState, theme }) => ({
           boxShadow: "none",
           fontWeight: MET_Header_Font_Weight_Bold,
+          fontFamily: "BCSans",
           padding: "0.75rem 1rem",
           ...(ownerState.size === "medium" && {
             fontSize: "0.875rem",
@@ -195,6 +196,13 @@ export const BaseTheme = createTheme({
       styleOverrides: {
         root: {
           "&.MuiOutlinedInput-root": {
+            backgroundColor: Palette.white,
+            input: {
+              "&::disabled": {
+                color: "red",
+                backgroundColor: "white !important",
+              },
+            },
             "& fieldset": {
               border: `2px solid ${Palette.neutral.accent.light}`,
             },
@@ -204,8 +212,9 @@ export const BaseTheme = createTheme({
             "&.Mui-focused fieldset": {
               borderColor: Palette.primary.accent.light,
             },
-            "&.Mui-disabled": {
+            "&.Mui-disabled fieldset": {
               backgroundColor: Palette.neutral.bg.dark,
+              borderColor: Palette.neutral.accent.light,
             },
           },
         },
@@ -216,6 +225,13 @@ export const BaseTheme = createTheme({
         disableRipple: true,
         icon: <CheckboxRegular />,
         checkedIcon: <CheckboxChecked />,
+      },
+      styleOverrides: {
+        root: {
+          "&.Mui-disabled svg": {
+            fill: `${Palette.neutral.bg.dark} !important`,
+          },
+        },
       },
     },
     MuiTextField: {

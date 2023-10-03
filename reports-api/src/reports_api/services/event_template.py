@@ -227,6 +227,8 @@ class EventTemplateService:
                 'Phase': 'phase_id',
                 'EventType': 'event_type_id',
                 'EventCategory': 'event_category_id',
+                'EventPosition': 'event_position',
+                'MultipleDays': 'multiple_days',
                 'NumberOfDays': 'number_of_days',
                 'StartAt': 'start_at',
                 'Mandatory': 'mandatory',

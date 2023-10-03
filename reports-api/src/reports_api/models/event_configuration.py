@@ -32,6 +32,8 @@ class EventConfiguration(BaseModelVersioned):
     phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     template_id = sa.Column(sa.ForeignKey('event_templates.id'), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
+    event_position = sa.Column(sa.String)
+    multiple_days = sa.Column(sa.Boolean, default=False)
     event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
     start_at = sa.Column(sa.String, nullable=True)
     number_of_days = sa.Column(sa.Integer, default=0, nullable=False)

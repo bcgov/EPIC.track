@@ -1,7 +1,7 @@
-import { WorkPhaseSkeleton } from "../../../models/work";
+import { WorkPhase } from "../../../models/work";
 
 export interface PhaseAccordionProps {
-  phase: WorkPhaseSkeleton;
+  phase: WorkPhase;
 }
 
 export enum EVENT_TYPE {

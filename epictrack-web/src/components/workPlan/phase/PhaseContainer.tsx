@@ -1,13 +1,13 @@
 import React, { useContext } from "react";
 import PhaseAccordion from "./PhaseAccordion";
-import { WorkPhaseSkeleton } from "../../../models/work";
+import { WorkPhase } from "../../../models/work";
 import workService from "../../../services/workService/workService";
 import { Box, Skeleton } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
 
 const PhaseContainer = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [phases, setPhases] = React.useState<WorkPhaseSkeleton[]>([]);
+  const [phases, setPhases] = React.useState<WorkPhase[]>([]);
   const ctx = useContext(WorkplanContext);
 
   React.useEffect(() => {
@@ -27,7 +27,7 @@ const PhaseContainer = () => {
     if (ctx.work?.id) {
       setLoading(true);
       const work = await workService.getWorkPhases(String(ctx.work?.id));
-      setPhases(work.data as WorkPhaseSkeleton[]);
+      setPhases(work.data as WorkPhase[]);
       setLoading(false);
     }
   }, [ctx.work?.id]);
