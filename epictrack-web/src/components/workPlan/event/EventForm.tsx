@@ -9,7 +9,7 @@ import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
-import { Box, Grid, TextField, Typography } from "@mui/material";
+import { Box, FormControlLabel, Grid, TextField } from "@mui/material";
 import { ETFormLabel, ETParagraph } from "../../shared";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
@@ -23,11 +23,10 @@ import eventService from "../../../services/eventService/eventService";
 import { MilestoneEvent } from "../../../models/events";
 import configurationService from "../../../services/configurationService/configurationService";
 import TrackDialog from "../../shared/TrackDialog";
-const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  event_configuration_id: yup.string().required("Please select milestone type"),
-  anticipated_date: yup.string().required("Please select start date"),
-});
+import EventConfiguration from "../../../models/eventConfiguration";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import MultiDaysInput from "./components/MultiDaysInput";
+import { dateUtils } from "../../../utils";
 
 interface TaskFormProps {
   onSave: () => void;
@@ -36,19 +35,45 @@ interface TaskFormProps {
 const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const [event, setEvent] = React.useState<MilestoneEvent>();
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
-  const [configurations, setConfigurations] = React.useState<ListType[]>([]);
+  const [configurations, setConfigurations] = React.useState<
+    EventConfiguration[]
+  >([]);
   const [notes, setNotes] = React.useState("");
   const [titleCharacterCount, setTitleCharacterCount] =
     React.useState<number>(0);
   const [showEventLockDialog, setShowEventLockDialog] =
     React.useState<boolean>(false);
+  const [selectedConfiguration, setSelectedConfiguration] =
+    React.useState<EventConfiguration>();
+  const anticipatedDateRef = React.useRef();
+  const numberOfDaysRef = React.useRef();
+  const endDateRef = React.useRef();
   const ctx = React.useContext(WorkplanContext);
   const workId = React.useMemo(() => ctx.work?.id, [ctx.work?.id]);
+  const [anticipatedLabel, setAnticipatedLabel] =
+    React.useState("Anticipated Date");
+  const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
   const selectedPhaseId = React.useMemo(
     () => ctx.selectedWorkPhase?.phase.id,
     [ctx.selectedWorkPhase?.phase.id]
   );
   const titleRef = React.useRef();
+  const schema = React.useMemo(
+    () =>
+      yup.object().shape({
+        name: yup.string().required("Name is required"),
+        event_configuration_id: yup
+          .string()
+          .required("Please select milestone type"),
+        anticipated_date: yup.string().required("Please select start date"),
+        number_of_days: yup.string().when([], {
+          is: () => selectedConfiguration?.multiple_days === true,
+          then: () => yup.string().required("Number of days is required"),
+          otherwise: () => yup.string().nullable(),
+        }),
+      }),
+    [selectedConfiguration]
+  );
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -70,6 +95,15 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   }, [eventId]);
 
   React.useEffect(() => {
+    if (selectedConfiguration && selectedConfiguration.multiple_days) {
+      setAnticipatedLabel("Anticipated Start Date");
+      setActualDateLabel("Actual Start Date");
+    } else {
+      setAnticipatedLabel("Anticipated Date");
+      setAnticipatedLabel("Actual Date");
+    }
+  }, [selectedConfiguration]);
+  React.useEffect(() => {
     reset(event);
   }, [event]);
 
@@ -85,11 +119,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
         eventId === undefined ? false : undefined
       );
       if (result.status === 200) {
-        const configurations = (result.data as any[]).map((p) => ({
-          name: p.name,
-          id: p.id,
-        }));
-        setConfigurations(configurations);
+        setConfigurations(result.data as any[]);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -102,8 +132,8 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     try {
       const result = await eventService.getById(Number(eventId));
       if (result.status === 200) {
-        const taskEvent = result.data as MilestoneEvent;
-        setEvent(taskEvent);
+        const event = result.data as MilestoneEvent;
+        setEvent(event);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -180,6 +210,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     const configuration = configurations.filter(
       (p) => p.id === Number(configuration_id)
     )[0];
+    setSelectedConfiguration(configuration);
     (titleRef?.current as any)["value"] = configuration.name;
     setTitleCharacterCount(configuration.name.length);
     (titleRef?.current as any).focus();
@@ -188,7 +219,17 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const onChangeTitle = (event: any) => {
     setTitleCharacterCount(event.target.value.length);
   };
-
+  const daysOnChangeHandler = () => {
+    (endDateRef?.current as any)["value"] = dateUtils.formatDate(
+      dateUtils
+        .add(
+          String((anticipatedDateRef?.current as any)["value"]),
+          Number((numberOfDaysRef?.current as any)["value"]),
+          "days"
+        )
+        .toISOString()
+    );
+  };
   return (
     <>
       <FormProvider {...methods}>
@@ -257,7 +298,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <ETFormLabel required>Anticipated Date</ETFormLabel>
+              <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
               <Controller
                 name="anticipated_date"
                 control={control}
@@ -273,6 +314,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                         textField: {
                           id: "anticipated_date",
                           fullWidth: true,
+                          inputRef: anticipatedDateRef,
                           error: error ? true : false,
                           helperText: error?.message,
                           placeholder: "MM-DD-YYYY",
@@ -293,7 +335,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               />
             </Grid>
             <Grid item xs={6}>
-              <ETFormLabel>Actual Date</ETFormLabel>
+              <ETFormLabel>{actualDateLabel}</ETFormLabel>
               <Controller
                 name="actual_date"
                 control={control}
@@ -339,6 +381,17 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 {...register("description")}
               />
             </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <ControlledSwitch
+                    {...register("high_priority")}
+                    defaultChecked={event?.high_priority}
+                  />
+                }
+                label="High Priority"
+              />
+            </Grid>
           </Grid>
           <Grid
             container
@@ -347,9 +400,17 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
             sx={{
               padding: "0px 40px 16px 40px",
               mt: 0,
+              backgroundColor: Palette.white,
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}
           >
+            {selectedConfiguration?.multiple_days && (
+              <MultiDaysInput
+                endDateRef={endDateRef}
+                numberOfDaysRef={numberOfDaysRef}
+                onChangeDay={daysOnChangeHandler}
+              />
+            )}
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor

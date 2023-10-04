@@ -197,11 +197,8 @@ export const BaseTheme = createTheme({
         root: {
           "&.MuiOutlinedInput-root": {
             backgroundColor: Palette.white,
-            input: {
-              "&::disabled": {
-                color: "red",
-                backgroundColor: "white !important",
-              },
+            "&.Mui-disabled": {
+              backgroundColor: Palette.neutral.bg.dark,
             },
             "& fieldset": {
               border: `2px solid ${Palette.neutral.accent.light}`,
@@ -213,7 +210,6 @@ export const BaseTheme = createTheme({
               borderColor: Palette.primary.accent.light,
             },
             "&.Mui-disabled fieldset": {
-              backgroundColor: Palette.neutral.bg.dark,
               borderColor: Palette.neutral.accent.light,
             },
           },

@@ -29,7 +29,7 @@ import workService from "../../../services/workService/workService";
 import { makeStyles } from "@mui/styles";
 import TrackDialog from "../../shared/TrackDialog";
 import TaskForm from "../task/TaskForm";
-import { EVENT_STATUS, statusOptions } from "../../../models/task_event";
+import { EVENT_STATUS, statusOptions } from "../../../models/taskEvent";
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
