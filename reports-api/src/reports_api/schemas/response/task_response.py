@@ -4,6 +4,7 @@ from marshmallow import EXCLUDE, fields
 from reports_api.models import Task, TaskTemplate
 from reports_api.models.task_event import TaskEvent
 from reports_api.models.task_event_assignee import TaskEventAssignee
+from reports_api.models.task_event_responsibility import TaskEventResponsibility
 from reports_api.schemas.base import AutoSchemaBase
 
 from .ea_act_response import EAActResponseSchema
@@ -60,6 +61,19 @@ class TaskEventAssigneeResponseSchema(
     assignee = fields.Nested(StaffResponseSchema())
 
 
+class TaskEventResponsibilityResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """TaskEventResponsibility response schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = TaskEventResponsibility
+        include_fk = True
+        unknown = EXCLUDE
+
+
 class TaskEventResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
@@ -67,8 +81,9 @@ class TaskEventResponseSchema(
 
     status = fields.Method("get_status_value")
     assigned = fields.Method("get_assigned_staff_names")
-    responsibility = fields.Method("get_responsibility")
+    responsibility = fields.Method("get_responsibility_names")
     assignees = fields.Nested(TaskEventAssigneeResponseSchema(), many=True, dump_only=True)
+    responsibilities = fields.Nested(TaskEventResponsibilityResponseSchema(), many=True, dump_only=True)
 
     def get_status_value(self, obj):
         """Get status value"""
@@ -80,9 +95,11 @@ class TaskEventResponseSchema(
         assignees = sorted(assignees)
         return ", ".join(assignees)
 
-    def get_responsibility(self, obj):
-        """Get status value"""
-        return obj.responsibility.name if obj.responsibility else None
+    def get_responsibility_names(self, obj):
+        """Get responsibility value"""
+        responsibilities = list(map(lambda x: f'{x.responsibility.name}', obj.responsibilities))
+        responsibilities = sorted(responsibilities)
+        return ", ".join(responsibilities)
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""

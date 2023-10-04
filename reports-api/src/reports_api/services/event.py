@@ -15,19 +15,12 @@
 import copy
 from datetime import datetime, timedelta
 from typing import List
+
 from sqlalchemy import and_, or_
 
 from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
-    PRIMARY_CATEGORIES,
-    CalendarEvent,
-    Event,
-    EventCategoryEnum,
-    EventConfiguration,
-    WorkCalendarEvent,
-    WorkPhase,
-    db,
-)
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
 from reports_api.models.event_template import EventPositionEnum
 from reports_api.utils import util
 
@@ -459,6 +452,15 @@ class EventService:  # pylint: disable=too-few-public-methods
         """Mark milestones as deleted"""
         db.session.query(Event).filter(
             or_(Event.id.in_(milestone_ids), Event.source_event_id.in_(milestone_ids))
+        ).update({"is_active": False, "is_deleted": True})
+        db.session.commit()
+        return "Deleted successfully"
+
+    @classmethod
+    def delete_milestone(cls, milestone_id: int):
+        """Mark milestone as deleted by id"""
+        db.session.query(Event).filter(
+            or_(Event.id == milestone_id, Event.source_event_id == milestone_id)
         ).update({"is_active": False, "is_deleted": True})
         db.session.commit()
         return "Deleted successfully"

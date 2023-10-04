@@ -43,5 +43,11 @@ class EventService {
       params
     );
   }
+
+  async deleteMilestone(milestoneId: any) {
+    return await http.DeleteRequest(
+      `${Endpoints.Events.MILESTONE_EVENTS}/events/${milestoneId}`
+    );
+  }
 }
 export default new EventService();

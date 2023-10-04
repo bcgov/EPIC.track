@@ -22,11 +22,11 @@ export interface TaskEvent {
   name: string;
   work_id: number;
   phase_id: number;
-  responsibility_id: number;
   start_date: string;
   number_of_days: number;
   tips: string;
   notes: string;
   assignee_ids?: string[];
+  responsibility_ids?: string[];
   status: EVENT_STATUS;
 }
