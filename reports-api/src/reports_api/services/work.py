@@ -132,8 +132,7 @@ class WorkService:
                 )
                 for parent_config in list(
                     filter(
-                        lambda x, _phase_id=phase.id: not x["parent_id"]
-                        and x["phase_id"] == _phase_id,
+                        lambda x, _phase_id=phase.id: not x["parent_id"] and x["phase_id"] == _phase_id,
                         event_template_json,
                     )
                 ):
@@ -149,8 +148,7 @@ class WorkService:
                         filter(
                             lambda x, _parent_config_id=parent_config["id"]: x[
                                 "parent_id"
-                            ]
-                            == _parent_config_id,
+                            ] == _parent_config_id,
                             event_template_json,
                         )
                     ):
@@ -164,9 +162,7 @@ class WorkService:
                         cls._copy_outcome_and_actions(child, c_result)
                 parent_event_configs = list(
                     filter(
-                        lambda x, _phase_id=phase.id: not x.parent_id
-                        and x.mandatory
-                        and x.phase_id == _phase_id,
+                        lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and x.phase_id == _phase_id,
                         event_configurations,
                     )
                 )
@@ -187,10 +183,8 @@ class WorkService:
                     )
                     c_events = list(
                         filter(
-                            lambda x, _parent_id=p_event_conf.id, _phase_id=phase.id: x.parent_id
-                            == _parent_id
-                            and x.mandatory
-                            and x.phase_id == _phase_id,
+                            lambda x, _parent_id=p_event_conf.id, _phase_id=phase.id: x.parent_id == _parent_id
+                            and x.mandatory and x.phase_id == _phase_id,  # noqa: W503
                             event_configurations,
                         )
                     )
@@ -199,8 +193,7 @@ class WorkService:
                             days=cls._find_start_at_value(c_event_conf.start_at, 0)
                         )
                         if (
-                            c_event_conf.event_category_id
-                            == EventCategoryEnum.CALENDAR.value
+                            c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value
                         ):
                             cal_event = CalendarEvent.flush(
                                 CalendarEvent(
@@ -499,7 +492,7 @@ class WorkService:
         return file_buffer.getvalue()
 
     @classmethod
-    def find_first_nations(work_id: int, is_active) -> [IndigenousNation]:
+    def find_first_nations(cls, work_id: int, is_active) -> [IndigenousNation]:
         """Active first nations assigned on a work"""
         query = (
             db.session.query(IndigenousWork)

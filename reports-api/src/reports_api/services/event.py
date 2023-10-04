@@ -15,19 +15,12 @@
 import copy
 from datetime import datetime, timedelta
 from typing import List
+
 from sqlalchemy import and_, or_
 
 from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
-    PRIMARY_CATEGORIES,
-    CalendarEvent,
-    Event,
-    EventCategoryEnum,
-    EventConfiguration,
-    WorkCalendarEvent,
-    WorkPhase,
-    db,
-)
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
 from reports_api.models.event_template import EventPositionEnum
 from reports_api.utils import util
 

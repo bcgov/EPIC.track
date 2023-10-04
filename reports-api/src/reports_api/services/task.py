@@ -47,7 +47,9 @@ class TaskService:
         if data.get("assignee_ids"):
             cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
         if data.get("responsibility_ids"):
-            cls._handle_responsibilities(data.get("responsibility_ids"), [task_event.id])
+            cls._handle_responsibilities(
+                data.get("responsibility_ids"), [task_event.id]
+            )
         work_phase = WorkPhaseService.find_by_work_nd_phase(
             data.get("work_id"), data.get("phase_id")
         )
@@ -70,7 +72,9 @@ class TaskService:
         if data.get("assignee_ids"):
             cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
         if data.get("responsibility_ids"):
-            cls._handle_responsibilities(data.get("responsibility_ids"), [task_event.id])
+            cls._handle_responsibilities(
+                data.get("responsibility_ids"), [task_event.id]
+            )
         db.session.commit()
         return task_event
 
@@ -154,50 +158,10 @@ class TaskService:
     @classmethod
     def _handle_assignees(cls, assignees: list, task_event_ids: List[int]) -> None:
         """Handles the assignees for the task event"""
-        # TODO: Delete commented code after verifying new code works
-        # existing_assignees = (
-        #     db.session.query(TaskEventAssignee)
-        #     .filter(
-        #         TaskEventAssignee.is_active.is_(True),
-        #         TaskEventAssignee.is_deleted.is_(False),
-        #         TaskEventAssignee.task_event_id == task_event.id,
-        #     )
-        #     .all()
-        # )
-        # existing_set = set(list(map(lambda x: x.assignee_id, existing_assignees)))
-        # incoming_set = set(assignees)
-        # difference = list(existing_set.difference(incoming_set))
-
-        # task_assignee = [
-        #     TaskEventAssignee(
-        #         **{"task_event_id": task_event.id, "assignee_id": assigne_id}
-        #     )
-        #     for assigne_id in assignees
-        # ]
-        # # add or update the assignees
-        # for new_assginee in task_assignee:
-        #     if new_assginee.assignee_id in existing_set:
-        #         new_assginee.update(new_assginee.as_dict(recursive=False), commit=False)
-        #     else:
-        #         new_assginee.flush()
-        # to_be_inactive = (
-        #     db.session.query(TaskEventAssignee)
-        #     .filter(
-        #         TaskEventAssignee.is_active.is_(True),
-        #         TaskEventAssignee.is_deleted.is_(False),
-        #         TaskEventAssignee.task_event_id == task_event.id,
-        #         TaskEventAssignee.assignee_id.in_(difference),
-        #     )
-        #     .all()
-        # )
-        # for item in to_be_inactive:
-        #     item.is_active = False
-        #     item.update(item.as_dict(recursive=False), commit=False)
-
         existing_assignees_qry = db.session.query(TaskEventAssignee).filter(
-                TaskEventAssignee.is_deleted.is_(False),
-                TaskEventAssignee.task_event_id.in_(task_event_ids),
-            )
+            TaskEventAssignee.is_deleted.is_(False),
+            TaskEventAssignee.task_event_id.in_(task_event_ids),
+        )
 
         existing_assignees = list(
             map(
@@ -218,9 +182,7 @@ class TaskService:
 
         # Update existing entries to be active
         enabled_count = existing_assignees_qry.filter(
-            tuple_(
-                TaskEventAssignee.assignee_id, TaskEventAssignee.task_event_id
-            ).in_(
+            tuple_(TaskEventAssignee.assignee_id, TaskEventAssignee.task_event_id).in_(
                 [
                     (x["assignee_id"], x["task_event_id"])
                     for x in existing_assignees
@@ -300,13 +262,16 @@ class TaskService:
         return "Deleted successfully"
 
     @classmethod
-    def _handle_responsibilities(cls, responsibilities: list, task_event_ids: List[int]) -> None:
+    def _handle_responsibilities(
+        cls, responsibilities: list, task_event_ids: List[int]
+    ) -> None:
         """Handles the responsibilities for the task event"""
-        
-        existing_responsibilities_qry = db.session.query(TaskEventResponsibility).filter(
-                TaskEventResponsibility.is_deleted.is_(False),
-                TaskEventResponsibility.task_event_id.in_(task_event_ids),
-            )
+        existing_responsibilities_qry = db.session.query(
+            TaskEventResponsibility
+        ).filter(
+            TaskEventResponsibility.is_deleted.is_(False),
+            TaskEventResponsibility.task_event_id.in_(task_event_ids),
+        )
 
         existing_responsibilities = list(
             map(
@@ -328,7 +293,8 @@ class TaskService:
         # Update existing entries to be active
         enabled_count = existing_responsibilities_qry.filter(
             tuple_(
-                TaskEventResponsibility.responsibility_id, TaskEventResponsibility.task_event_id
+                TaskEventResponsibility.responsibility_id,
+                TaskEventResponsibility.task_event_id,
             ).in_(
                 [
                     (x["responsibility_id"], x["task_event_id"])
@@ -346,7 +312,8 @@ class TaskService:
         task_event_responsibilities = [
             task_responsibility
             for i, j in product(task_event_ids, responsibilities)
-            if (task_responsibility := dict(zip(keys, (i, j)))) not in existing_responsibilities
+            if (task_responsibility := dict(zip(keys, (i, j))))
+            not in existing_responsibilities
         ]
         db.session.bulk_insert_mappings(
             TaskEventResponsibility, mappings=task_event_responsibilities
