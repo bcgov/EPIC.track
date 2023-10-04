@@ -22,6 +22,7 @@ from sqlalchemy.orm import contains_eager, lazyload
 
 from reports_api.exceptions import UnprocessableEntityError
 from reports_api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, db
+from reports_api.models.task_event_responsibility import TaskEventResponsibility
 
 from .task_template import TaskTemplateService
 from .work_phase import WorkPhaseService
@@ -44,7 +45,9 @@ class TaskService:
             )
         task_event = task_event.flush()
         if data.get("assignee_ids"):
-            cls._handle_assignees(data.get("assignee_ids"), task_event)
+            cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
+        if data.get("responsibility_ids"):
+            cls._handle_responsibilities(data.get("responsibility_ids"), [task_event.id])
         work_phase = WorkPhaseService.find_by_work_nd_phase(
             data.get("work_id"), data.get("phase_id")
         )
@@ -65,7 +68,9 @@ class TaskService:
             )
         task_event.update(data, commit=False)
         if data.get("assignee_ids"):
-            cls._handle_assignees(data.get("assignee_ids"), task_event)
+            cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
+        if data.get("responsibility_ids"):
+            cls._handle_responsibilities(data.get("responsibility_ids"), [task_event.id])
         db.session.commit()
         return task_event
 
@@ -129,7 +134,7 @@ class TaskService:
                 "name": task.name,
                 "work_id": params.get("work_id"),
                 "phase_id": params.get("phase_id"),
-                "responsibility_id": task.responsibility_id,
+                # "responsibility_id": task.responsibility_id,
                 "start_date": work_phase.start_date + timedelta(days=task.start_at + task.number_of_days),
                 "number_of_days": task.number_of_days,
                 "tips": task.tips,
@@ -147,46 +152,96 @@ class TaskService:
         return {key: data[key] for key in data.keys() if key not in exclude}
 
     @classmethod
-    def _handle_assignees(cls, assignees: list, task_event: TaskEvent) -> None:
+    def _handle_assignees(cls, assignees: list, task_event_ids: List[int]) -> None:
         """Handles the assignees for the task event"""
-        existing_assignees = (
-            db.session.query(TaskEventAssignee)
-            .filter(
-                TaskEventAssignee.is_active.is_(True),
-                TaskEventAssignee.is_deleted.is_(False),
-                TaskEventAssignee.task_event_id == task_event.id,
-            )
-            .all()
-        )
-        existing_set = set(list(map(lambda x: x.assignee_id, existing_assignees)))
-        incoming_set = set(assignees)
-        difference = list(existing_set.difference(incoming_set))
+        # TODO: Delete commented code after verifying new code works
+        # existing_assignees = (
+        #     db.session.query(TaskEventAssignee)
+        #     .filter(
+        #         TaskEventAssignee.is_active.is_(True),
+        #         TaskEventAssignee.is_deleted.is_(False),
+        #         TaskEventAssignee.task_event_id == task_event.id,
+        #     )
+        #     .all()
+        # )
+        # existing_set = set(list(map(lambda x: x.assignee_id, existing_assignees)))
+        # incoming_set = set(assignees)
+        # difference = list(existing_set.difference(incoming_set))
 
-        task_assignee = [
-            TaskEventAssignee(
-                **{"task_event_id": task_event.id, "assignee_id": assigne_id}
-            )
-            for assigne_id in assignees
-        ]
-        # add or update the assignees
-        for new_assginee in task_assignee:
-            if new_assginee.assignee_id in existing_set:
-                new_assginee.update(new_assginee.as_dict(recursive=False), commit=False)
-            else:
-                new_assginee.flush()
-        to_be_inactive = (
-            db.session.query(TaskEventAssignee)
-            .filter(
-                TaskEventAssignee.is_active.is_(True),
+        # task_assignee = [
+        #     TaskEventAssignee(
+        #         **{"task_event_id": task_event.id, "assignee_id": assigne_id}
+        #     )
+        #     for assigne_id in assignees
+        # ]
+        # # add or update the assignees
+        # for new_assginee in task_assignee:
+        #     if new_assginee.assignee_id in existing_set:
+        #         new_assginee.update(new_assginee.as_dict(recursive=False), commit=False)
+        #     else:
+        #         new_assginee.flush()
+        # to_be_inactive = (
+        #     db.session.query(TaskEventAssignee)
+        #     .filter(
+        #         TaskEventAssignee.is_active.is_(True),
+        #         TaskEventAssignee.is_deleted.is_(False),
+        #         TaskEventAssignee.task_event_id == task_event.id,
+        #         TaskEventAssignee.assignee_id.in_(difference),
+        #     )
+        #     .all()
+        # )
+        # for item in to_be_inactive:
+        #     item.is_active = False
+        #     item.update(item.as_dict(recursive=False), commit=False)
+
+        existing_assignees_qry = db.session.query(TaskEventAssignee).filter(
                 TaskEventAssignee.is_deleted.is_(False),
-                TaskEventAssignee.task_event_id == task_event.id,
-                TaskEventAssignee.assignee_id.in_(difference),
+                TaskEventAssignee.task_event_id.in_(task_event_ids),
             )
-            .all()
+
+        existing_assignees = list(
+            map(
+                lambda x: {
+                    "task_event_id": x.task_event_id,
+                    "assignee_id": x.assignee_id,
+                },
+                existing_assignees_qry.all(),
+            )
         )
-        for item in to_be_inactive:
-            item.is_active = False
-            item.update(item.as_dict(recursive=False), commit=False)
+
+        # Mark removed entries as inactive
+        disabled_count = existing_assignees_qry.filter(
+            TaskEventAssignee.is_active.is_(True),
+            TaskEventAssignee.assignee_id.notin_(assignees),
+        ).update({"is_active": False})
+        current_app.logger.info(f"Disabled {disabled_count} TaskEventAssignees")
+
+        # Update existing entries to be active
+        enabled_count = existing_assignees_qry.filter(
+            tuple_(
+                TaskEventAssignee.assignee_id, TaskEventAssignee.task_event_id
+            ).in_(
+                [
+                    (x["assignee_id"], x["task_event_id"])
+                    for x in existing_assignees
+                    if x["assignee_id"] in assignees
+                ]
+            )
+        ).update({"is_active": True})
+        current_app.logger.info(f"Enabled {enabled_count} TaskEventAssignees")
+
+        keys = ("task_event_id", "assignee_id")
+        # Create mappings for new entries
+        # dict(zip(keys, (i, j))) below creates a dict of the form
+        # {"task_event_id": i, "assignee_id": j
+        task_event_assignees = [
+            task_assignee
+            for i, j in product(task_event_ids, assignees)
+            if (task_assignee := dict(zip(keys, (i, j)))) not in existing_assignees
+        ]
+        db.session.bulk_insert_mappings(
+            TaskEventAssignee, mappings=task_event_assignees
+        )
 
     @classmethod
     def _validate_assignees(cls, assignees: list, data: dict) -> bool:
@@ -222,54 +277,9 @@ class TaskService:
         """Bulk update task events"""
         task_ids = data.pop("task_ids")
         if "assignee_ids" in data:
-            existing_assignees_qry = db.session.query(TaskEventAssignee).filter(
-                TaskEventAssignee.is_deleted.is_(False),
-                TaskEventAssignee.task_event_id.in_(task_ids),
-            )
-
-            existing_assignees = list(
-                map(
-                    lambda x: {
-                        "task_event_id": x.task_event_id,
-                        "assignee_id": x.assignee_id,
-                    },
-                    existing_assignees_qry.all(),
-                )
-            )
-
-            # Mark removed entries as inactive
-            disabled_count = existing_assignees_qry.filter(
-                TaskEventAssignee.is_active.is_(True),
-                TaskEventAssignee.assignee_id.notin_(data["assignee_ids"]),
-            ).update({"is_active": False})
-            current_app.logger.info(f"Disabled {disabled_count} TaskEventAssignees")
-
-            # Update existing entries to be active
-            enabled_count = existing_assignees_qry.filter(
-                tuple_(
-                    TaskEventAssignee.assignee_id, TaskEventAssignee.task_event_id
-                ).in_(
-                    [
-                        (x["assignee_id"], x["task_event_id"])
-                        for x in existing_assignees
-                        if x["assignee_id"] in data["assignee_ids"]
-                    ]
-                )
-            ).update({"is_active": True})
-            current_app.logger.info(f"Enabled {enabled_count} TaskEventAssignees")
-
-            keys = ("task_event_id", "assignee_id")
-            # Create mappings for new entries
-            # dict(zip(keys, (i, j))) below creates a dict of the form
-            # {"task_event_id": i, "assignee_id": j
-            task_event_assignees = [
-                task_assignee
-                for i, j in product(task_ids, data["assignee_ids"])
-                if (task_assignee := dict(zip(keys, (i, j)))) not in existing_assignees
-            ]
-            db.session.bulk_insert_mappings(
-                TaskEventAssignee, mappings=task_event_assignees
-            )
+            cls._handle_assignees(data["assignee_ids"], task_ids)
+        elif "responsibility_ids" in data:
+            cls._handle_responsibilities(data["responsibility_ids"], task_ids)
         else:
             field = list(data.keys())[0]
             keys = ("id", field)
@@ -288,3 +298,56 @@ class TaskService:
         )
         db.session.commit()
         return "Deleted successfully"
+
+    @classmethod
+    def _handle_responsibilities(cls, responsibilities: list, task_event_ids: List[int]) -> None:
+        """Handles the responsibilities for the task event"""
+        
+        existing_responsibilities_qry = db.session.query(TaskEventResponsibility).filter(
+                TaskEventResponsibility.is_deleted.is_(False),
+                TaskEventResponsibility.task_event_id.in_(task_event_ids),
+            )
+
+        existing_responsibilities = list(
+            map(
+                lambda x: {
+                    "task_event_id": x.task_event_id,
+                    "responsibility_id": x.responsibility_id,
+                },
+                existing_responsibilities_qry.all(),
+            )
+        )
+
+        # Mark removed entries as inactive
+        disabled_count = existing_responsibilities_qry.filter(
+            TaskEventResponsibility.is_active.is_(True),
+            TaskEventResponsibility.responsibility_id.notin_(responsibilities),
+        ).update({"is_active": False})
+        current_app.logger.info(f"Disabled {disabled_count} TaskEventResponsibilities")
+
+        # Update existing entries to be active
+        enabled_count = existing_responsibilities_qry.filter(
+            tuple_(
+                TaskEventResponsibility.responsibility_id, TaskEventResponsibility.task_event_id
+            ).in_(
+                [
+                    (x["responsibility_id"], x["task_event_id"])
+                    for x in existing_responsibilities
+                    if x["responsibility_id"] in responsibilities
+                ]
+            )
+        ).update({"is_active": True})
+        current_app.logger.info(f"Enabled {enabled_count} TaskEventResponsibilities")
+
+        keys = ("task_event_id", "responsibility_id")
+        # Create mappings for new entries
+        # dict(zip(keys, (i, j))) below creates a dict of the form
+        # {"task_event_id": i, "responsibility_id": j
+        task_event_responsibilities = [
+            task_responsibility
+            for i, j in product(task_event_ids, responsibilities)
+            if (task_responsibility := dict(zip(keys, (i, j)))) not in existing_responsibilities
+        ]
+        db.session.bulk_insert_mappings(
+            TaskEventResponsibility, mappings=task_event_responsibilities
+        )

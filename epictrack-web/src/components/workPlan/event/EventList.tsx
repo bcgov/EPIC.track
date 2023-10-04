@@ -109,10 +109,8 @@ const EventList = () => {
     []
   );
 
-  const [tasksSelected, setTasksSelected] = React.useState<string[]>([]);
-  const [milestonesSelected, setMilestonesSelected] = React.useState<string[]>(
-    []
-  );
+  const [showDeleteMilestoneButton, setShowDeleteMilestoneButton] =
+    React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
 
@@ -221,6 +219,7 @@ const EventList = () => {
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
+    setEventId(undefined);
   }, [ctx.work, ctx.selectedWorkPhase]);
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -380,7 +379,12 @@ const EventList = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
+          <ETParagraph
+            bold={row.original.type === EVENT_TYPE.MILESTONE}
+            enableEllipsis
+            enableTooltip
+            tooltip={cell.getValue<string>()}
+          >
             {cell.getValue<string>()}
           </ETParagraph>
         ),
@@ -436,6 +440,9 @@ const EventList = () => {
     setEventId(row.id);
     setShowTaskForm(row.type === EVENT_TYPE.TASK);
     setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
+    setShowDeleteMilestoneButton(
+      row.type === EVENT_TYPE.MILESTONE && !row.mandatory
+    );
   };
   const onCancelHandler = () => {
     setShowTaskForm(false);
@@ -492,14 +499,6 @@ const EventList = () => {
     getTemplateUploadStatus();
   }, [ctx.selectedWorkPhase]);
 
-  React.useEffect(() => {
-    const ids = Object.keys(rowSelection);
-    const taskIds = ids.filter((id: any) => Number(id) == id);
-    const milestoneIds = ids.filter((id: any) => Number(id) != id);
-    setTasksSelected(taskIds);
-    setMilestonesSelected(milestoneIds);
-  }, [rowSelection]);
-
   const getResponsibilities = async (): Promise<ListType[]> => {
     const result: ListType[] = [];
     try {
@@ -536,7 +535,7 @@ const EventList = () => {
       assignee_ids = assignee_ids.filter(
         (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
       );
-      const data = { task_ids: tasksSelected, assignee_ids };
+      const data = { task_ids: Object.keys(rowSelection), assignee_ids };
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
@@ -556,19 +555,22 @@ const EventList = () => {
         });
       }
     },
-    [tasksSelected]
+    [rowSelection]
   );
 
   const assignResponsibility = React.useCallback(
-    async (responsibility_id: any) => {
+    async (responsibility_ids: any) => {
+      responsibility_ids = responsibility_ids.filter(
+        (responsibility_id: string) => responsibility_id !== "<SELECT_ALL>"
+      );
       const data = {
-        task_ids: tasksSelected,
-        responsibility_id: responsibility_id,
+        task_ids: Object.keys(rowSelection),
+        responsibility_ids,
       };
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
-          showNotification("Responsibility updated", {
+          showNotification("Responsible entities updated", {
             type: "success",
           });
           getCombinedEvents();
@@ -584,13 +586,13 @@ const EventList = () => {
         });
       }
     },
-    [tasksSelected]
+    [rowSelection]
   );
 
   const assignProgress = React.useCallback(
     async (status: any) => {
       const data = {
-        task_ids: tasksSelected,
+        task_ids: Object.keys(rowSelection),
         status,
       };
       console.log(`Update progress to ${JSON.stringify(data)}`);
@@ -613,52 +615,76 @@ const EventList = () => {
         });
       }
     },
-    [tasksSelected]
+    [rowSelection]
   );
 
-  const deleteTasks = async (): Promise<string> => {
-    let result = "";
-    if (tasksSelected.length === 0) return Promise.resolve(result);
+  const deleteTasks = async () => {
     const data = {
-      task_ids: tasksSelected.join(","),
+      task_ids: Object.keys(rowSelection).join(","),
     };
     const response = await taskEventService.deleteTasks(data);
     try {
       if (response.status === 200) {
-        result = response.data as string;
+        showNotification("Deleted successfully", {
+          type: "success",
+        });
+        getCombinedEvents();
       }
     } catch (e) {}
-    return Promise.resolve(result);
   };
 
-  const deleteMilestones = async (): Promise<string> => {
-    let result = "";
-    if (milestonesSelected.length === 0) return Promise.resolve(result);
-    const data = {
-      milestone_ids: milestonesSelected
-        .map((milestone_id: string) => milestone_id.split("_")[1])
-        .join(","),
-    };
-    const response = await eventService.deleteMilestones(data);
+  const deleteMilestone = async () => {
+    const response = await eventService.deleteMilestone(eventId);
     try {
       if (response.status === 200) {
-        result = response.data as string;
-      }
-    } catch (e) {}
-    return Promise.resolve(result);
-  };
-
-  const handleDelete = React.useCallback(async () => {
-    Promise.all([deleteTasks(), deleteMilestones()]).then(
-      (data: Array<string>) => {
         showNotification("Deleted successfully", {
           type: "success",
         });
         setShowDeleteDialog(false);
         getCombinedEvents();
+        onDialogClose();
       }
-    );
-  }, [tasksSelected, milestonesSelected]);
+    } catch (e) {}
+  };
+
+  const handleDelete = () => {
+    if (eventId === undefined) {
+      deleteTasks();
+    } else {
+      deleteMilestone();
+    }
+    setShowDeleteDialog(false);
+  };
+
+  const deleteAction = (
+    <>
+      {showDeleteMilestoneButton && (
+        <Box
+          sx={{
+            display: "flex",
+            minWidth: "327px",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            alignItems: "flex-start",
+            gap: "8px",
+            flexGrow: 1,
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<DeleteIcon className={classes.deleteIcon} />}
+            sx={{
+              color: Palette.primary.accent.main,
+              border: "none",
+            }}
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            Delete
+          </Button>
+        </Box>
+      )}
+    </>
+  );
 
   return (
     <Grid container rowSpacing={1}>
@@ -694,32 +720,29 @@ const EventList = () => {
                 orientation="vertical"
                 sx={{ borderColor: Palette.neutral[300] }}
               />
-              {tasksSelected.length > 0 && milestonesSelected.length === 0 && (
-                <>
-                  <FilterSelect
-                    options={staffSelectOptions}
-                    isMulti
-                    variant="bar"
-                    placeholder="Assign To"
-                    filterAppliedCallback={assignTasks}
-                    name="assignTo"
-                  />
-                  <FilterSelect
-                    options={responsibilities}
-                    variant="bar"
-                    placeholder="Responsibility"
-                    filterAppliedCallback={assignResponsibility}
-                    name="responsibility"
-                  />
-                  <FilterSelect
-                    options={statusOptions}
-                    variant="bar"
-                    placeholder="Progress"
-                    filterAppliedCallback={assignProgress}
-                    name="progress"
-                  />
-                </>
-              )}
+              <FilterSelect
+                options={staffSelectOptions}
+                isMulti
+                variant="bar"
+                placeholder="Assign To"
+                filterAppliedCallback={assignTasks}
+                name="assignTo"
+              />
+              <FilterSelect
+                options={responsibilities}
+                variant="bar"
+                placeholder="Responsibility"
+                filterAppliedCallback={assignResponsibility}
+                name="responsibility"
+                isMulti
+              />
+              <FilterSelect
+                options={statusOptions}
+                variant="bar"
+                placeholder="Progress"
+                filterAppliedCallback={assignProgress}
+                name="progress"
+              />
               <Button
                 variant="outlined"
                 startIcon={<DeleteIcon className={classes.deleteIcon} />}
@@ -768,16 +791,13 @@ const EventList = () => {
       </Grid>
       <Grid item xs={12}>
         <MasterTrackTable
-          enableRowSelection={(row) =>
-            row.original.type === EVENT_TYPE.TASK ||
-            (!row.original.mandatory && row.original.end_date === undefined)
-          }
+          enableRowSelection={(row) => row.original.type !== "Milestone"}
           enableSelectAll
           enablePagination
           muiSelectCheckboxProps={({ row, table }) => ({
             indeterminateIcon: <LockIcon />,
             disabled:
-              row.original.mandatory &&
+              row.original.end_date === undefined &&
               row.original.type === EVENT_TYPE.MILESTONE,
             indeterminate:
               row.original.end_date !== undefined &&
@@ -841,6 +861,7 @@ const EventList = () => {
             padding: 0,
           },
         }}
+        additionalActions={deleteAction}
       >
         <EventForm onSave={onDialogClose} eventId={eventId} />
       </TrackDialog>

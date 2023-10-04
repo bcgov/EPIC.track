@@ -462,3 +462,12 @@ class EventService:  # pylint: disable=too-few-public-methods
         ).update({"is_active": False, "is_deleted": True})
         db.session.commit()
         return "Deleted successfully"
+
+    @classmethod
+    def delete_milestone(cls, milestone_id: int):
+        """Mark milestone as deleted by id"""
+        db.session.query(Event).filter(
+            or_(Event.id == milestone_id, Event.source_event_id == milestone_id)
+        ).update({"is_active": False, "is_deleted": True})
+        db.session.commit()
+        return "Deleted successfully"
