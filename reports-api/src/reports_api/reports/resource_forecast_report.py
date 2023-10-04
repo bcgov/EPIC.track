@@ -64,10 +64,9 @@ class EAResourceForeCastReport(ReportFactory):
         self.report_title = "EAO Resource Forecast"
         start_event_configurations = (
             db.session.query(
-                func.min(EventConfiguration.id).label("event_configuration_id"), EventConfiguration.phase_id
+                EventConfiguration.id.label("event_configuration_id"), EventConfiguration.phase_id
             )
             .filter(EventConfiguration.mandatory.is_(True), EventConfiguration.start_at == '0')  # Is 0 needed?
-            .group_by(EventConfiguration.phase_id)
             .all()
         )
         self.start_event_configurations = [x.event_configuration_id for x in start_event_configurations]
