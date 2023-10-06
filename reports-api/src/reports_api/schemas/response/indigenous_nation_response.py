@@ -2,6 +2,7 @@
 from marshmallow import EXCLUDE, fields
 
 from reports_api.models import IndigenousNation
+from reports_api.models.indigenous_work import IndigenousWork
 from reports_api.schemas.base import AutoSchemaBase
 from reports_api.schemas.staff import StaffSchema
 
@@ -18,4 +19,21 @@ class IndigenousResponseNationSchema(
         include_fk = True
         unknown = EXCLUDE
 
-    relationship_holder = fields.Nested(StaffSchema, dump_only=True, exclude=("position",))
+    relationship_holder = fields.Nested(
+        StaffSchema, dump_only=True, exclude=("position",)
+    )
+
+
+class WorkIndigenousNationResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work indigenous nation schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = IndigenousWork
+        include_fk = True
+        unknown = EXCLUDE
+
+    indigenous_nation = fields.Nested(IndigenousResponseNationSchema, dump_only=True)

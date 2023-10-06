@@ -198,7 +198,7 @@ export const ETParagraph = React.forwardRef(
             }}
             variant="body1"
             className={clsx({
-              [classes.textEllipsis]: [rest.enableEllipsis],
+              [classes.textEllipsis]: rest.enableEllipsis,
             })}
           >
             {children}
@@ -279,7 +279,7 @@ export const ETGridTitle = ({
           bold={bold}
           {...rest}
           className={clsx({
-            [classes.textEllipsis]: [rest.enableEllipsis],
+            [classes.textEllipsis]: rest.enableEllipsis,
           })}
           color={Palette.primary.accent.main}
         >

@@ -510,3 +510,11 @@ class WorkService:
         if is_active is not None:
             query = query.filter(IndigenousWork.is_active.is_(is_active))
         return query.all()
+
+    @classmethod
+    def save_first_nation_notes(cls, work_id: int, notes: str) -> Work:
+        """Save first nation note to given work"""
+        work = cls.find_by_id(work_id)
+        work.first_nation_notes = notes
+        work.save()
+        return work

@@ -8,6 +8,7 @@ import {
   COMMON_ERROR_MESSAGE,
 } from "../../constants/application-constant";
 import { showNotification } from "../shared/notificationProvider";
+import { WorkFirstNation } from "../../models/firstNation";
 
 interface WorkplanContextProps {
   selectedWorkPhase?: WorkPhase;
@@ -18,6 +19,8 @@ interface WorkplanContextProps {
   setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
   setWorkPhases: Dispatch<SetStateAction<WorkPhase[]>>;
   work: Work | undefined;
+  firstNations: WorkFirstNation[];
+  setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -31,6 +34,8 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   team: [],
   workPhases: [],
   work: undefined,
+  firstNations: [],
+  setFirstNations: () => ({}),
 });
 
 export const WorkplanProvider = ({
@@ -44,6 +49,7 @@ export const WorkplanProvider = ({
   const [loading, setLoading] = React.useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
   const [workPhases, setWorkPhases] = React.useState<WorkPhase[]>([]);
+  const [firstNations, setFirstNations] = React.useState<WorkFirstNation[]>([]);
   const workId = React.useMemo(() => query.get("work_id"), [query]);
   React.useEffect(() => {
     getWorkById();
@@ -98,6 +104,8 @@ export const WorkplanProvider = ({
         work,
         team,
         setTeam,
+        firstNations,
+        setFirstNations,
       }}
     >
       {children}

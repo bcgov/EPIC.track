@@ -15,6 +15,7 @@
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
+from sqlalchemy_utils import URLType
 
 from .code_table import CodeTableVersioned
 from .db import db
@@ -28,6 +29,8 @@ class IndigenousNation(db.Model, CodeTableVersioned):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
+    pip_link = Column(URLType, default=None, nullable=True)
+    pin = Column(String(100))
 
     relationship_holder_id = Column(
         ForeignKey("staffs.id"), nullable=True, default=None
