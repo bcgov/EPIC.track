@@ -27,9 +27,7 @@ class EventConfiguration(BaseModelVersioned):
 
     id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String)
-    work_id = sa.Column(sa.ForeignKey('works.id'), nullable=False)
     parent_id = sa.Column(sa.Integer, nullable=True)
-    phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)
     template_id = sa.Column(sa.ForeignKey('event_templates.id'), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
     event_position = sa.Column(sa.String)
@@ -41,8 +39,6 @@ class EventConfiguration(BaseModelVersioned):
     sort_order = sa.Column(sa.Integer, nullable=False)
     work_phase_id = sa.Column(sa.ForeignKey('work_phases.id'), nullable=True)
 
-    work = relationship('Work', foreign_keys=[work_id], lazy='select')
-    phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')
     event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
     event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')
     event_template = relationship('EventTemplate', foreign_keys=[template_id], lazy='select')

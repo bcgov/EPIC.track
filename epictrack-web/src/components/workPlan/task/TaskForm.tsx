@@ -11,7 +11,7 @@ import {
 } from "../../../constants/application-constant";
 import { Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
-import { TaskEvent, statusOptions } from "../../../models/task_event";
+import { TaskEvent, statusOptions } from "../../../models/taskEvent";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";

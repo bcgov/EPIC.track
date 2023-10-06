@@ -9,6 +9,7 @@ import {
   FormLabelTypeMap,
   FormLabelOwnProps,
   FormLabelBaseProps,
+  Box,
 } from "@mui/material";
 import {
   MET_Header_Font_Family,
@@ -41,6 +42,12 @@ interface PageContainerProps {
   [prop: string]: unknown;
   sx?: SxProps;
 }
+
+type FormLabelWithCharacterCountProps = {
+  characterCount: number;
+  maxCharacterLength: number;
+} & FormLabelBaseProps &
+  FormLabelOwnProps;
 
 const useStyle = makeStyles({
   textEllipsis: {
@@ -326,6 +333,42 @@ export const ETFormLabel = (props: FormLabelBaseProps & FormLabelOwnProps) => {
     >
       {props.children}
     </FormLabel>
+  );
+};
+
+export const ETFormLabelWithCharacterLimit = (
+  props: FormLabelWithCharacterCountProps
+) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+      }}
+    >
+      <FormLabel
+        required={props.required}
+        sx={{
+          fontSize: "16px",
+          fontWeight: "bold",
+          lineHeight: "1.5rem",
+          color: Palette.neutral.dark,
+          "& .MuiFormLabel-asterisk": {
+            color: Palette.error.main,
+          },
+        }}
+      >
+        {props.children}
+      </FormLabel>
+      <ETParagraph
+        sx={{
+          color: Palette.neutral.light,
+        }}
+      >
+        {props.characterCount}/{props.maxCharacterLength} character left
+      </ETParagraph>
+    </Box>
   );
 };
 

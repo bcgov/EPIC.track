@@ -234,7 +234,7 @@ class WorkPlan(Resource):
 
 
 @cors_preflight("GET")
-@API.route("/<int:work_id>/phase/<int:phase_id>", methods=["GET", "OPTIONS"])
+@API.route("/work-phases/<int:work_phase_id>", methods=["GET", "OPTIONS"])
 class WorkPhaseTemplateStatus(Resource):
     """Endpoints to get work phase template upload status"""
 
@@ -242,8 +242,8 @@ class WorkPhaseTemplateStatus(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get(work_id, phase_id):
+    def get(work_phase_id):
         """Get the status if template upload is available"""
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
-        template_upload_status = WorkPhaseService.get_template_upload_status(work_id, phase_id)
+        template_upload_status = WorkPhaseService.get_template_upload_status(work_phase_id)
         return res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status), HTTPStatus.OK

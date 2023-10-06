@@ -40,10 +40,9 @@ class EventConfigurations(Resource):
     def get():
         """Return all task templates."""
         args = req.EventConfigurationQueryParamSchema().load(request.args)
-        work_id = args.get("work_id")
-        phase_id = args.get("phase_id")
+        work_phase_id = args.get("work_phase_id")
         mandatory = args.get("mandatory")
-        configurations = EventConfigurationService.find_configurations(work_id, phase_id,
+        configurations = EventConfigurationService.find_configurations(work_phase_id,
                                                                        mandatory, PRIMARY_CATEGORIES)
         return (
             jsonify(res.EventConfigurationResponseSchema(many=True).dump(configurations)),

@@ -3,7 +3,7 @@ import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
-import { EventsGridModel } from "../../../models/events";
+import { EventsGridModel } from "../../../models/event";
 import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import {
@@ -29,7 +29,7 @@ import workService from "../../../services/workService/workService";
 import { makeStyles } from "@mui/styles";
 import TrackDialog from "../../shared/TrackDialog";
 import TaskForm from "../task/TaskForm";
-import { EVENT_STATUS, statusOptions } from "../../../models/task_event";
+import { EVENT_STATUS, statusOptions } from "../../../models/taskEvent";
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
@@ -458,8 +458,7 @@ const EventList = () => {
         notificationId.current = null;
       }
       const response = await workService.checkTemplateUploadStatus(
-        ctx.work?.id.toString(),
-        ctx.selectedWorkPhase?.phase.id.toString()
+        Number(ctx.selectedWorkPhase.id)
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
@@ -810,7 +809,6 @@ const EventList = () => {
             isLoading: loading,
             showGlobalFilter: true,
             rowSelection,
-            // columnVisibility: { id: false },
           }}
           onRowSelectionChange={setRowSelection}
           getRowId={(

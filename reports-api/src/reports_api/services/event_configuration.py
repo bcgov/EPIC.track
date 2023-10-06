@@ -30,21 +30,18 @@ class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-
 
     @classmethod
     def find_configurations(cls,
-                            work_id: int,
-                            phase_id: int = None,
+                            work_phase_id: int,
                             mandatory=None,
                             event_categories: [EventCategoryEnum] = [],
                             _all: bool = False) -> [EventConfiguration]:
         """Get all the mandatory configurations for a given phase"""
-        query = db.session.query(EventConfiguration).filter(EventConfiguration.work_id == work_id,
+        query = db.session.query(EventConfiguration).filter(EventConfiguration.work_phase_id == work_phase_id,
                                                             EventConfiguration.is_active.is_(True))
         if len(event_categories) > 0:
             category_ids = list(map(lambda x: x.value, event_categories))
             query = query.filter(EventConfiguration.event_category_id.in_(category_ids))
         if mandatory is not None:
             query = query.filter(EventConfiguration.mandatory.is_(mandatory))
-        if phase_id is not None:
-            query = query.filter(EventConfiguration.phase_id == phase_id)
         if not _all:
             query = query.filter(EventConfiguration.parent_id.is_(None))
         configurations = query.all()

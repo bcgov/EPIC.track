@@ -71,13 +71,13 @@ class EventService:  # pylint: disable=too-few-public-methods
         return m_event
 
     @classmethod
-    def find_milestone_progress_by_work_id(cls, work_id: int) -> float:
+    def find_milestone_progress_by_work_phase_id(cls, work_phase_id: int) -> float:
         """Find the percentage of milestone events completed for given work_id"""
         events_query = Event.query.join(
             EventConfiguration,
             and_(
                 Event.event_configuration_id == EventConfiguration.id,
-                EventConfiguration.work_id == work_id,
+                EventConfiguration.work_phase_id == work_phase_id,
                 EventConfiguration.parent_id.is_(None),
             ),
         )
@@ -430,14 +430,14 @@ class EventService:  # pylint: disable=too-few-public-methods
         return work_phase.start_date < event_date < work_phase.end_date
 
     @classmethod
-    def find_next_milestone_event_by_work_id(cls, work_id: int) -> Event:
+    def find_next_milestone_event_by_work_phase_id(cls, work_phase_id: int) -> Event:
         """Find the next milestone event for given work id"""
         event = (
             Event.query.join(
                 EventConfiguration,
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.work_id == work_id,
+                    EventConfiguration.work_phase_id == work_phase_id,
                     EventConfiguration.parent_id.is_(None),
                 ),
             )

@@ -7,14 +7,8 @@ from .base import RequestQueryParameterSchema
 class EventConfigurationQueryParamSchema(RequestQueryParameterSchema):
     """Milestone events per work/phase query parameters"""
 
-    work_id = fields.Int(
-        metadata={"description": "Work ID of the event configuration"},
-        validate=validate.Range(min=1),
-        required=True,
-    )
-
-    phase_id = fields.Int(
-        metadata={"description": "Phase ID of the event configuration"},
+    work_phase_id = fields.Int(
+        metadata={"description": "Work phase ID of the event configuration"},
         validate=validate.Range(min=1),
         required=True,
     )

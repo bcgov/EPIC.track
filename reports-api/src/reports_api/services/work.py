@@ -32,7 +32,7 @@ from reports_api.schemas.response import (
 from reports_api.schemas.work_plan import WorkPlanSchema
 from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
-from reports_api.services.outcome import OutcomeTemplateService
+from reports_api.services.outcome_template import OutcomeTemplateService
 from reports_api.services.phaseservice import PhaseService
 
 

@@ -12,13 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Outcome Configuration resource's input validations"""
-from marshmallow import fields
+from marshmallow import fields, validate
 
-from .base import RequestBodyParameterSchema
+from .base import RequestBodyParameterSchema, RequestQueryParameterSchema
+
+
+class OutcomeConfigurationQueryParameterSchema(RequestQueryParameterSchema):
+    """Outcome Configuration query by configuration id"""
+
+    configuration_id = fields.Int(
+        metadata={"description": "Event configuration id"},
+        required=True,
+        validate=validate.Range(min=1)
+    )
 
 
 class OutcomeConfigurationBodyParameterSchema(RequestBodyParameterSchema):
-    """EventTemplate body schema"""
+    """Outcome Configuration body schema"""
 
     name = fields.Str(
         metadata={"description": "Name of the outcome"},

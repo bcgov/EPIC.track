@@ -1,4 +1,4 @@
-import { TaskEvent } from "../../models/task_event";
+import { TaskEvent } from "../../models/taskEvent";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 

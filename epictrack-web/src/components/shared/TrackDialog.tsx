@@ -129,7 +129,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
               onClick={onCancel}
               variant="outlined"
               sx={{
-                width: "124px",
+                minWidth: "124px",
               }}
             >
               {cancelButtonText || "Cancel"}
@@ -138,7 +138,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
           {isOkRequired && (
             <Button
               sx={{
-                width: "124px",
+                minWidth: "124px",
               }}
               onClick={formId ? undefined : onOk}
               autoFocus
