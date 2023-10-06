@@ -5,6 +5,10 @@ import { ETHeading2, ETHeading3 } from ".";
 import FolderIcon from "../../assets/images/folder.svg";
 import { makeStyles } from "@mui/styles";
 import { Palette } from "../../styles/theme";
+import { IconProps } from "../icons/type";
+import Icons from "../icons";
+
+const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 
 const useStyle = makeStyles({
   folderIcon: {
@@ -23,20 +27,29 @@ const useStyle = makeStyles({
     color: Palette.neutral.main,
     lineHeight: "2rem",
   },
+  importIcon: {
+    fill: "currentColor",
+  },
 });
 
 interface NoDataEverProps {
   title: string;
   subTitle: string;
-  onClickHandler: () => void;
-  buttonText: string;
+  onAddNewClickHandler: () => void;
+  addNewButtonText: string;
+  isImportRequired?: boolean;
+  importButtonText?: string;
+  onImportClickHandler?: () => void;
 }
 
 const NoDataEver = ({
   title,
   subTitle,
-  buttonText,
-  onClickHandler,
+  addNewButtonText,
+  onAddNewClickHandler,
+  isImportRequired,
+  importButtonText,
+  onImportClickHandler,
 }: NoDataEverProps) => {
   const classes = useStyle();
   return (
@@ -76,16 +89,30 @@ const NoDataEver = ({
               {title}
             </ETHeading2>
             <ETHeading3 className={classes.subTitle}>{subTitle}</ETHeading3>
-            <Button
-              sx={{
-                mt: "3rem",
-              }}
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={onClickHandler}
-            >
-              {buttonText}
-            </Button>
+            <Box sx={{ display: "flex", gap: "1.5rem" }}>
+              <Button
+                sx={{
+                  mt: "3rem",
+                }}
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={onAddNewClickHandler}
+              >
+                {addNewButtonText}
+              </Button>
+              {isImportRequired && (
+                <Button
+                  sx={{
+                    mt: "3rem",
+                  }}
+                  variant="outlined"
+                  startIcon={<ImportFileIcon className={classes.importIcon} />}
+                  onClick={onImportClickHandler}
+                >
+                  {importButtonText}
+                </Button>
+              )}
+            </Box>
           </Box>
         </Box>
       </Container>

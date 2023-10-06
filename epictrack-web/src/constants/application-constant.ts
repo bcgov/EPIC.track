@@ -34,3 +34,36 @@ export const ACTIVE_STATUS = {
   ACTIVE: "Active",
   INACTIVE: "Inactive",
 };
+
+export const FN_RESOURCES = [
+  {
+    title: "Link to Consultative Areas Database (CAD)",
+    url: "https://arcmaps.gov.bc.ca/ess/hm/cadb/",
+    description:
+      "A version of iMapBC that allows users to view First Nation territorial and reserve boundaries, as well as cultural, heritage, and traditional use sites.",
+  },
+  {
+    title: "Link to Profile of Indigenous Peoples (PIP)",
+    url: "https://apps.nrs.gov.bc.ca/int/fnp/",
+    description:
+      "Resource for contact information, consultation advice, and consultation area maps for Indigenous Peoples in BC and neighbouring regions.",
+  },
+  {
+    title: "Link to Agreement, Rights and Title System (ARTS)",
+    url: "https://apps.nrs.gov.bc.ca/int/arts/index.xhtml?tab=agreements",
+    description:
+      "Database of agreements between Indigenous organizations and the government and Indigenous organization's established rights or title as decided by a court.",
+  },
+  {
+    title: "Link to E-Guide",
+    url: "https://intranet.gov.bc.ca/eao/our-work/eguide-2018/engaging-indigenous-nations",
+    description:
+      "EAO procedural information, templates, policies and guidance for all aspects of the 2018 Environmental Assessment process.",
+  },
+  {
+    title: "Link to Consultation Guide (C-Guide)",
+    url: "https://cguide.nrs.gov.bc.ca/",
+    description:
+      "Information, guidance and tools regarding the government's section 35 consultation obligations.",
+  },
+];

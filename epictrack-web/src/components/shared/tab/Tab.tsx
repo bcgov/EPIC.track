@@ -8,6 +8,16 @@ import { Chip, Tab, Tabs } from "@mui/material";
 import ETTabProps from "./type";
 
 const ETTabs = styled(Tabs)({
+  position: "relative",
+  "&::after": {
+    content: '""',
+    position: "absolute",
+    width: "100%",
+    height: "2px",
+    backgroundColor: Palette.neutral.bg.dark,
+    bottom: 0,
+    zIndex: -1,
+  },
   "& .MuiTabs-flexContainer": {
     gap: "2rem",
   },
