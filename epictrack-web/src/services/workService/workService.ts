@@ -115,5 +115,13 @@ class WorkService implements ServiceBase {
     );
     return await http.GetRequest(url);
   }
+
+  async saveFirstNationNotes(workId: number, notes: string) {
+    const url = Endpoints.Works.WORK_FIRST_NATION_NOTES.replace(
+      ":work_id",
+      workId.toString()
+    );
+    return await http.PatchRequest(url, { notes });
+  }
 }
 export default new WorkService();

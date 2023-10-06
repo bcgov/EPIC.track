@@ -202,8 +202,8 @@ const TeamList = () => {
         <NoDataEver
           title="You don't have any Team Members yet"
           subTitle="Start adding your Team"
-          buttonText="Team Member"
-          onClickHandler={() => onAddButtonClickHandler()}
+          addNewButtonText="Team Member"
+          onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       )}
       <TrackDialog

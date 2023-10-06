@@ -12,6 +12,7 @@ import PhaseContainer from "./phase/PhaseContainer";
 import { WorkplanContext } from "./WorkPlanContext";
 import TeamContainer from "./team/TeamContainer";
 import { makeStyles } from "@mui/styles";
+import FirstNationContainer from "./firstNations/FirstNationContainer";
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -36,10 +37,7 @@ const WorkPlanContainer = () => {
         <>
           <ETPageContainer
             sx={{
-              borderBottom: "2px solid",
               paddingBottom: "0rem !important",
-              borderColor: Palette.neutral.bg.dark,
-              backgroundColor: Palette.neutral.bg.light,
             }}
           >
             <Box>
@@ -73,7 +71,10 @@ const WorkPlanContainer = () => {
                   identifier={activeStaff.length.toString()}
                   data-title="dddd"
                 />
-                <Tab label="Indigenous Nations" />
+                <ETTab
+                  label="First Nations"
+                  identifier={ctx.firstNations.length.toString()}
+                />
               </ETTabs>
             </Box>
           </ETPageContainer>
@@ -90,6 +91,13 @@ const WorkPlanContainer = () => {
             className={classes.tabPanel}
           >
             <TeamContainer />
+          </TabPanel>
+          <TabPanel
+            index={5}
+            value={selectedTabIndex}
+            className={classes.tabPanel}
+          >
+            <FirstNationContainer />
           </TabPanel>
         </>
       )}

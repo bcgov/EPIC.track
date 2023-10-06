@@ -247,3 +247,37 @@ class WorkPhaseTemplateStatus(Resource):
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
         template_upload_status = WorkPhaseService.get_template_upload_status(work_phase_id)
         return res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:work_id>/first-nations", methods=["GET", "OPTIONS"])
+class WorkFirstNations(Resource):
+    """Endpoints to handle work and first nation"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id):
+        """Get all the active first nations allocated to the work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        args = req.BasicRequestQueryParameterSchema().load(request.args)
+        first_nations = WorkService.find_first_nations(work_id, args.get("is_active"))
+        return res.WorkIndigenousNationResponseSchema(many=True).dump(first_nations), HTTPStatus.OK
+
+
+@cors_preflight("PATCH")
+@API.route("/<int:work_id>/first-nation-notes", methods=["PATCH", "OPTIONS"])
+class WorkFirstNationNotes(Resource):
+    """Endpoints to handle work and first nation notes"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_id):
+        """Save the first nation notes to corresponding work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        notes = req.WorkFirstNationNotesBodySchema().load(API.payload)["notes"]
+        work = WorkService.save_first_nation_notes(work_id, notes)
+        return res.WorkResourceResponseSchema().dump(work), HTTPStatus.OK

@@ -3,7 +3,7 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
-import { IndigenousNation } from "../../models/indigenousNation";
+import { FirstNation } from "../../models/firstNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
 import IndigenousNationForm from "./IndigneousNationForm";
@@ -36,7 +36,7 @@ export default function IndigenousNationList() {
   }, []);
 
   const indigenousNations = React.useMemo(
-    () => ctx.data as IndigenousNation[],
+    () => ctx.data as FirstNation[],
     [ctx.data]
   );
 
@@ -45,7 +45,7 @@ export default function IndigenousNationList() {
     ctx.setId(id);
   };
 
-  const columns = React.useMemo<MRT_ColumnDef<IndigenousNation>[]>(
+  const columns = React.useMemo<MRT_ColumnDef<FirstNation>[]>(
     () => [
       {
         accessorKey: "name",

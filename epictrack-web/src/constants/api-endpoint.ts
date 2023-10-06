@@ -25,6 +25,7 @@ const Endpoints = {
     WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
     CHECK_TEMPLATE_UPLOAD_STATUS: "works/work-phases/:work_phase_id",
+    WORK_FIRST_NATION_NOTES: "works/:work_id/first-nation-notes",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

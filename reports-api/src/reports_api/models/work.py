@@ -37,6 +37,7 @@ class Work(BaseModelVersioned):
     is_deleted = Column(Boolean(), default=False, nullable=False)
     project_tracking_number = Column(String(255), nullable=True, default=None)
     work_tracking_number = Column(String(255), nullable=True, default=None)
+    first_nation_notes = Column(String)
 
     start_date = Column(DateTime(timezone=True))
     anticipated_decision_date = Column(DateTime(timezone=True))

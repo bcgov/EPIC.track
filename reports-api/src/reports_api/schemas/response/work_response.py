@@ -134,7 +134,7 @@ class WorkPhaseSkeletonResponseSchema(AutoSchemaBase):  # pylint: disable=too-ma
     def get_next_milestone(self, instance: WorkPhase) -> str:
         """Returns the next milestone event name"""
         event = EventService.find_next_milestone_event_by_work_phase_id(instance.id)
-        return event.name
+        return event.name if event else None
 
     def get_milestone_progress(self, instance: WorkPhase) -> float:
         """Returns the percentage of milestones completed"""

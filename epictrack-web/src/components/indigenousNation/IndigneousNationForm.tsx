@@ -7,7 +7,7 @@ import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
-import { IndigenousNation } from "../../models/indigenousNation";
+import { FirstNation } from "../../models/firstNation";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
@@ -47,7 +47,7 @@ export default function IndigenousNationForm({ ...props }) {
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as IndigenousNation,
+    defaultValues: ctx.item as FirstNation,
     mode: "onBlur",
   });
 
@@ -71,7 +71,7 @@ export default function IndigenousNationForm({ ...props }) {
   React.useEffect(() => {
     getStaffs();
   }, []);
-  const onSubmitHandler = async (data: IndigenousNation) => {
+  const onSubmitHandler = async (data: FirstNation) => {
     ctx.onSave(data, () => {
       reset();
     });
@@ -99,7 +99,7 @@ export default function IndigenousNationForm({ ...props }) {
             <ETFormLabel>Relationship Holder</ETFormLabel>
             <ControlledSelectV2
               defaultValue={
-                (ctx.item as IndigenousNation)?.relationship_holder_id || ""
+                (ctx.item as FirstNation)?.relationship_holder_id || ""
               }
               getOptionLabel={(o: Staff) => (o ? o.full_name : "")}
               getOptionValue={(o: Staff) => (o ? o.id.toString() : "")}
@@ -109,7 +109,7 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
-              defaultChecked={(ctx.item as IndigenousNation)?.is_active}
+              defaultChecked={(ctx.item as FirstNation)?.is_active}
               {...register("is_active")}
             />
             <ETFormLabel id="active">Active</ETFormLabel>

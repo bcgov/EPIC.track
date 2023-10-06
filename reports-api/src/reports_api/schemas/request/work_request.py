@@ -155,3 +155,13 @@ class WorkIdPhaseIdPathParameterSchema(RequestPathParameterSchema):
         validate=validate.Range(min=1),
         required=True,
     )
+
+
+class WorkFirstNationNotesBodySchema(RequestBodyParameterSchema):
+    """Work first nation notes body parameter schema"""
+
+    notes = fields.Str(
+        metadata={"description": "First nation notes"},
+        validate=validate.Length(min=1),
+        required=True
+    )
