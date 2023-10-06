@@ -19,10 +19,14 @@ class IndigenousResponseNationSchema(
         include_fk = True
         unknown = EXCLUDE
 
-    relationship_holder = fields.Nested(StaffSchema, dump_only=True, exclude=("position",))
+    relationship_holder = fields.Nested(
+        StaffSchema, dump_only=True, exclude=("position",)
+    )
 
 
-class WorkIndigenousNationResponseSchema(AutoSchemaBase):  # pylint-disable=too-many-ancestors,too-few-public-methods
+class WorkIndigenousNationResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Work indigenous nation schema class"""
 
     class Meta(AutoSchemaBase.Meta):
