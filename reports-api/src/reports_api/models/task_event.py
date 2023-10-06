@@ -50,9 +50,7 @@ class TaskEvent(BaseModelVersioned):
     name = sa.Column(sa.String)
     work_id = sa.Column(sa.Integer, sa.ForeignKey("works.id"), nullable=False)
     phase_id = sa.Column(sa.Integer, sa.ForeignKey("phase_codes.id"), nullable=False)
-    responsibility_id = sa.Column(
-        sa.Integer, sa.ForeignKey("responsibilities.id"), nullable=True
-    )
+
     start_date = sa.Column(sa.DateTime(timezone=True))
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
     tips = sa.Column(sa.String)
@@ -61,15 +59,20 @@ class TaskEvent(BaseModelVersioned):
 
     phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
-    responsibility = relationship(
-        "Responsibility", foreign_keys=[responsibility_id], lazy="select"
-    )
 
     assignees = relationship(
         "TaskEventAssignee",
         primaryjoin="and_(TaskEvent.id==TaskEventAssignee.task_event_id,\
           TaskEventAssignee.is_active.is_(True), \
           TaskEventAssignee.is_deleted.is_(False))",
+        back_populates="task_event",
+    )
+
+    responsibilities = relationship(
+        "TaskEventResponsibility",
+        primaryjoin="and_(TaskEvent.id==TaskEventResponsibility.task_event_id,\
+          TaskEventResponsibility.is_active.is_(True), \
+          TaskEventResponsibility.is_deleted.is_(False))",
         back_populates="task_event",
     )
 

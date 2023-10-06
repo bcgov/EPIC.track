@@ -10,7 +10,11 @@ import {
   DATE_FORMAT,
 } from "../../../constants/application-constant";
 import { Box, FormControlLabel, Grid, TextField } from "@mui/material";
-import { ETFormLabel, ETParagraph } from "../../shared";
+import {
+  ETFormLabel,
+  ETFormLabelWithCharacterLimit,
+  ETParagraph,
+} from "../../shared";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
@@ -20,13 +24,19 @@ import { getAxiosError } from "../../../utils/axiosUtils";
 import { ListType } from "../../../models/code";
 import RichTextEditor from "../../shared/richTextEditor";
 import eventService from "../../../services/eventService/eventService";
-import { MilestoneEvent } from "../../../models/events";
+import {
+  EventCategory,
+  EventType,
+  MilestoneEvent,
+} from "../../../models/event";
 import configurationService from "../../../services/configurationService/configurationService";
 import TrackDialog from "../../shared/TrackDialog";
 import EventConfiguration from "../../../models/eventConfiguration";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import MultiDaysInput from "./components/MultiDaysInput";
 import { dateUtils } from "../../../utils";
+import ExtSusInput from "./components/ExtSusInput";
+import PCPInput from "./components/PCPInput";
 
 interface TaskFormProps {
   onSave: () => void;
@@ -114,8 +124,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const getConfigurations = async () => {
     try {
       const result = await configurationService.getAll(
-        Number(workId),
-        Number(selectedPhaseId),
+        Number(ctx.selectedWorkPhase?.id),
         eventId === undefined ? false : undefined
       );
       if (result.status === 200) {
@@ -267,7 +276,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               ></ControlledSelectV2>
             </Grid>
             <Grid item xs={12}>
-              <Box
+              {/* <Box
                 sx={{
                   display: "flex",
                   flexDirection: "row",
@@ -282,7 +291,13 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 >
                   {titleCharacterCount}/150 character left
                 </ETParagraph>
-              </Box>
+              </Box> */}
+              <ETFormLabelWithCharacterLimit
+                characterCount={titleCharacterCount}
+                maxCharacterLength={150}
+              >
+                Title
+              </ETFormLabelWithCharacterLimit>
               <TextField
                 fullWidth
                 placeholder="Title"
@@ -411,6 +426,16 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 onChangeDay={daysOnChangeHandler}
               />
             )}
+            {[EventCategory.EXTENSION, EventCategory.SUSPENSION].includes(
+              Number(selectedConfiguration?.event_category_id)
+            ) && <ExtSusInput />}
+            {selectedConfiguration?.event_category_id === EventCategory.PCP &&
+              ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
+                selectedConfiguration?.event_type_id
+              ) && <PCPInput />}
+            {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
+              Number(selectedConfiguration?.event_type_id)
+            ) && <></>}
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor

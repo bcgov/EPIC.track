@@ -32,3 +32,4 @@ from .user_response import UserResponseSchema
 from .work_response import (
     WorkPhaseResponseSchema, WorkPhaseSkeletonResponseSchema, WorkPhaseTemplateAvailableResponse,
     WorkResourceResponseSchema, WorkResponseSchema, WorkStaffRoleReponseSchema)
+from .outcome_configuration_response import OutcomeConfigurationResponseSchema

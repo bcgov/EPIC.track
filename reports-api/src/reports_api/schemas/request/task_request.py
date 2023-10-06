@@ -166,10 +166,11 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         required=True,
     )
 
-    responsibility_id = fields.Int(
-        metadata={"description": "Id of the responsible entity"},
-        allow_none=True,
-        validate=validate.Range(min=1),
+    responsibility_ids = fields.List(
+        fields.Int(validate=validate.Range(min=1)),
+        metadata={"description": "Ids of the responsible entities"},
+        required=False,
+        validate=validate.Length(min=1),
     )
 
     start_date = fields.DateTime(
@@ -232,11 +233,11 @@ class TaskEventBulkUpdateBodyParamSchema(RequestBodyParameterSchema):
         required=True,
     )
 
-    responsibility_id = fields.Int(
-        metadata={"description": "Id of the responsible entity"},
-        allow_none=True,
+    responsibility_ids = fields.List(
+        fields.Int(validate=validate.Range(min=1)),
+        metadata={"description": "Ids of the responsible entities"},
         required=False,
-        validate=validate.Range(min=1),
+        validate=validate.Length(min=1),
     )
 
     assignee_ids = fields.List(
@@ -244,7 +245,6 @@ class TaskEventBulkUpdateBodyParamSchema(RequestBodyParameterSchema):
             metadata={"description": "List of assignees of the task"},
             validate=validate.Range(min=1),
         ),
-        allow_none=True,
         required=False,
         validate=validate.Length(min=1),
     )

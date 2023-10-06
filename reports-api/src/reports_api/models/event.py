@@ -41,8 +41,17 @@ class Event(BaseModelVersioned):
     event_configuration_id = Column(
         ForeignKey("event_configurations.id"), nullable=False
     )
+    high_priority = Column(Boolean)
+    act_section_id = Column(ForeignKey("act_sections.id"), nullable=True)
+    reason = Column(String, nullable=True)
+    decision_maker_id = Column(ForeignKey("staffs.id"), nullable=True)
+    number_of_attendees = Column(Integer, nullable=True)
+    number_of_responses = Column(Integer, nullable=True)
+    topic = Column(String, nullable=True)
 
     outcome = relationship("OutcomeTemplate", foreign_keys=[outcome_id], lazy="select")
+    act_section = relationship("ActSection", foreign_keys=[act_section_id], lazy="select")
+    decision_maker = relationship("Staff", foreign_keys=[decision_maker_id], lazy="select")
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     event_configuration = relationship(
         "EventConfiguration", foreign_keys=[event_configuration_id], lazy="select"

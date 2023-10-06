@@ -33,6 +33,11 @@ export interface MilestoneEvent {
   number_of_days: number;
   outcome_id?: number;
   high_priority: boolean;
+  number_of_responses: number;
+  topic: string;
+  act_section_id: number;
+  reason: string;
+  decision_maker_id: number;
 }
 
 export interface Assignee {
@@ -50,4 +55,8 @@ export enum EventCategory {
   PCP = 5,
   CALENDAR = 6,
   FINANCE = 7,
+}
+export enum EventType {
+  OPEN_HOUSE = 23,
+  VIRTUAL_OPEN_HOUSE = 24,
 }

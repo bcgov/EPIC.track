@@ -14,10 +14,9 @@ import templateService from "../../../services/taskService/templateService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { showNotification } from "../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import { ETCaption1, ETCaption2, ETParagraph } from "../../shared";
+import { ETCaption2, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import taskEventService from "../../../services/taskEventService/taskEventService";
-import { getAxiosError } from "../../../utils/axiosUtils";
+
 const useStyle = makeStyles({
   templateContainer: {
     padding: "1.5rem 1.5rem 1.5rem 2rem",
@@ -75,7 +74,9 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
 
   const onTemplateClickHandler = (index: number) => {
     setTemplateIndex(index);
-    (taskContainerRef.current as any).scrollIntoView({ behavior: "smooth" });
+    if (taskContainerRef.current as any) {
+      (taskContainerRef.current as any).scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const getTemplates = async () => {

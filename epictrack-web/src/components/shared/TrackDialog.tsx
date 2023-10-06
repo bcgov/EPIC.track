@@ -13,7 +13,7 @@ import {
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
-import { ETHeading3, ETHeading4, ETSubhead } from ".";
+import { ETHeading4, ETSubhead } from ".";
 
 type TrackDialogProps = {
   onCancel?: () => void;
@@ -25,6 +25,7 @@ type TrackDialogProps = {
   isActionsRequired?: boolean;
   isOkRequired?: boolean;
   isCancelRequired?: boolean;
+  additionalActions?: React.ReactNode;
   formId?: string;
 } & DialogProps;
 
@@ -42,6 +43,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
   dialogTitle,
   dialogContentText,
   formId,
+  additionalActions,
   ...props
 }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -55,6 +57,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
   if (!onCancel) {
     onCancel = () => setOpenDialog(false);
   }
+
   return (
     <Dialog
       open={openDialog}
@@ -119,13 +122,14 @@ const TrackDialog: FC<TrackDialogProps> = ({
             borderTop: `1px solid ${Palette.neutral.bg.dark}`,
           }}
         >
+          {additionalActions}
           {isCancelRequired && (
             <Button
               size="large"
               onClick={onCancel}
               variant="outlined"
               sx={{
-                width: "124px",
+                minWidth: "124px",
               }}
             >
               {cancelButtonText || "Cancel"}
@@ -134,7 +138,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
           {isOkRequired && (
             <Button
               sx={{
-                width: "124px",
+                minWidth: "124px",
               }}
               onClick={formId ? undefined : onOk}
               autoFocus

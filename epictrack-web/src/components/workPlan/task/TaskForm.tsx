@@ -44,7 +44,6 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
   const [notes, setNotes] = React.useState("");
   const endDateRef = React.useRef();
   const startDateRef = React.useRef();
-  const numberOfDaysRef = React.useRef();
   const ctx = React.useContext(WorkplanContext);
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -85,8 +84,12 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
         const assignee_ids: any[] = (result.data as any)["assignees"].map(
           (p: any) => p["assignee_id"]
         );
+        const responsibility_ids: any[] = (result.data as any)[
+          "responsibilities"
+        ].map((p: any) => p["responsibility_id"]);
         const taskEvent = result.data as TaskEvent;
         taskEvent.assignee_ids = assignee_ids;
+        taskEvent.responsibility_ids = responsibility_ids;
         (endDateRef?.current as any)["value"] = dateUtils.formatDate(
           dateUtils
             .add(taskEvent.start_date, taskEvent.number_of_days, "days")
@@ -162,12 +165,12 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
     }
   };
 
-  const daysOnChangeHandler = () => {
+  const daysOnChangeHandler = (event: SyntheticEvent) => {
     (endDateRef?.current as any)["value"] = dateUtils.formatDate(
       dateUtils
         .add(
-          String((startDateRef?.current as any)["value"]),
-          Number((numberOfDaysRef?.current as any)["value"]),
+          String((startDateRef?.current as any)["value"]).replaceAll("-", "/"),
+          Number((event.target as any)["value"]),
           "days"
         )
         .toISOString()
@@ -234,7 +237,6 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
                       value={dayjs(value)}
                       onChange={(event) => {
                         onChange(event);
-                        daysOnChangeHandler();
                       }}
                       defaultValue={dayjs(
                         taskEvent?.start_date ? taskEvent?.start_date : ""
@@ -250,7 +252,6 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
               <TextField
                 fullWidth
                 defaultValue={taskEvent?.number_of_days}
-                inputRef={numberOfDaysRef}
                 InputProps={{
                   inputProps: {
                     min: 0,
@@ -306,11 +307,14 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
             <Grid item xs={6}>
               <ETFormLabel>Responsibility</ETFormLabel>
               <ControlledSelectV2
-                defaultValue={taskEvent?.responsibility_id}
+                isMulti
+                defaultValue={taskEvent?.responsibility_ids?.map((p) =>
+                  parseInt(p)
+                )}
                 options={responsibilities || []}
                 getOptionValue={(o: ListType) => o?.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
-                {...register("responsibility_id")}
+                {...register("responsibility_ids")}
               ></ControlledSelectV2>
             </Grid>
             <Grid item xs={12}>

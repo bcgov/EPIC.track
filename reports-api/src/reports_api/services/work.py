@@ -18,24 +18,21 @@ from io import BytesIO
 import pandas as pd
 from sqlalchemy import exc
 from sqlalchemy.orm import aliased
-from reports_api.exceptions import (ResourceExistsError, ResourceNotFoundError,
-                                    UnprocessableEntityError)
-from reports_api.models import (ActionCofiguration, ActionTemplate,
-                                CalendarEvent, EAOTeam, Event,
-                                EventConfiguration, OutcomeConfiguration,
-                                Project, Role, Staff, StaffWorkRole, Work,
-                                WorkCalendarEvent, WorkPhase, db)
+
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
+from reports_api.models import (
+    ActionCofiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
+    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, db)
 from reports_api.models.event_category import EventCategoryEnum
-from reports_api.schemas.request import (
-    ActionConfigurationBodyParameterSchema,
-    OutcomeConfigurationBodyParameterSchema)
-from reports_api.schemas.response import (ActionTemplateResponseSchema,
-                                          EventTemplateResponseSchema,
-                                          OutcomeTemplateResponseSchema)
+from reports_api.models.indigenous_nation import IndigenousNation
+from reports_api.models.indigenous_work import IndigenousWork
+from reports_api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
+from reports_api.schemas.response import (
+    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
 from reports_api.schemas.work_plan import WorkPlanSchema
 from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
-from reports_api.services.outcome import OutcomeTemplateService
+from reports_api.services.outcome_template import OutcomeTemplateService
 from reports_api.services.phaseservice import PhaseService
 
 
@@ -123,19 +120,21 @@ class WorkService:
             for phase in phases:
                 end_date = phase_start_date + timedelta(days=phase.number_of_days)
                 work_phase = WorkPhase.flush(
-                                WorkPhase(
-                                    **{
-                                        "work_id": work.id,
-                                        "phase_id": phase.id,
-                                        "start_date": f"{phase_start_date}",
-                                        "end_date": f"{end_date}",
-                                        "number_of_days": phase.number_of_days
-                                    }
-                                )
-                            )
+                    WorkPhase(
+                        **{
+                            "work_id": work.id,
+                            "phase_id": phase.id,
+                            "start_date": f"{phase_start_date}",
+                            "end_date": f"{end_date}",
+                            "number_of_days": phase.number_of_days,
+                        }
+                    )
+                )
                 for parent_config in list(
-                    filter(lambda x, _phase_id=phase.id: not x["parent_id"] and x["phase_id"] == _phase_id,
-                           event_template_json)
+                    filter(
+                        lambda x, _phase_id=phase.id: not x["parent_id"] and x["phase_id"] == _phase_id,
+                        event_template_json,
+                    )
                 ):
                     parent_config["work_id"] = work.id
                     parent_config["work_phase_id"] = work_phase.id
@@ -147,7 +146,9 @@ class WorkService:
                     cls._copy_outcome_and_actions(parent_config, p_result)
                     for child in list(
                         filter(
-                            lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] == _parent_config_id,
+                            lambda x, _parent_config_id=parent_config["id"]: x[
+                                "parent_id"
+                            ] == _parent_config_id,
                             event_template_json,
                         )
                     ):
@@ -155,14 +156,16 @@ class WorkService:
                         child["parent_id"] = p_result.id
                         child["work_phase_id"] = work_phase.id
                         c_result = EventConfiguration.flush(
-                                    EventConfiguration(**cls._prepare_configuration(child))
+                            EventConfiguration(**cls._prepare_configuration(child))
                         )
                         event_configurations.append(c_result)
                         cls._copy_outcome_and_actions(child, c_result)
                 parent_event_configs = list(
-                        filter(lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and
-                               x.phase_id == _phase_id, event_configurations)
-                               )
+                    filter(
+                        lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and x.phase_id == _phase_id,
+                        event_configurations,
+                    )
+                )
                 for p_event_conf in parent_event_configs:
                     p_event_start_date = phase_start_date + timedelta(
                         days=cls._find_start_at_value(p_event_conf.start_at, 0)
@@ -174,22 +177,20 @@ class WorkService:
                                 str(p_event_start_date),
                                 p_event_conf.number_of_days,
                                 p_event_conf.id,
-                                p_event_conf.work_id
+                                p_event_conf.work_id,
                             )
                         )
                     )
                     c_events = list(
                         filter(
-                            lambda x, _parent_id=p_event_conf.id, _phase_id=phase.id: x.parent_id == _parent_id and
-                            x.mandatory and x.phase_id == _phase_id,
+                            lambda x, _parent_id=p_event_conf.id, _phase_id=phase.id: x.parent_id == _parent_id
+                            and x.mandatory and x.phase_id == _phase_id,  # noqa: W503
                             event_configurations,
                         )
                     )
                     for c_event_conf in c_events:
                         c_event_start_date = p_event_start_date + timedelta(
-                            days=cls._find_start_at_value(
-                                c_event_conf.start_at, 0
-                            )
+                            days=cls._find_start_at_value(c_event_conf.start_at, 0)
                         )
                         if (
                             c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value
@@ -235,13 +236,17 @@ class WorkService:
     @classmethod
     def find_staff(cls, work_id: int, is_active) -> [Staff]:
         """Active staff assigned on a work"""
-        query = db.session.query(StaffWorkRole)\
-            .join(Staff, StaffWorkRole.staff_id == Staff.id)\
-            .join(Role, StaffWorkRole.role_id == Role.id)\
-            .filter(StaffWorkRole.is_deleted.is_(False),
-                    StaffWorkRole.work_id == work_id,
-                    Staff.is_active.is_(True),
-                    Staff.is_deleted.is_(False))
+        query = (
+            db.session.query(StaffWorkRole)
+            .join(Staff, StaffWorkRole.staff_id == Staff.id)
+            .join(Role, StaffWorkRole.role_id == Role.id)
+            .filter(
+                StaffWorkRole.is_deleted.is_(False),
+                StaffWorkRole.work_id == work_id,
+                Staff.is_active.is_(True),
+                Staff.is_deleted.is_(False),
+            )
+        )
         if is_active is not None:
             query = query.filter(StaffWorkRole.is_active.is_(is_active))
         return query.all()
@@ -249,18 +254,26 @@ class WorkService:
     @classmethod
     def find_work_staff(cls, work_staff_id: int) -> StaffWorkRole:
         """Get the staff Work"""
-        work_staff = db.session.query(StaffWorkRole).filter(StaffWorkRole.id == work_staff_id).scalar()
+        work_staff = (
+            db.session.query(StaffWorkRole)
+            .filter(StaffWorkRole.id == work_staff_id)
+            .scalar()
+        )
         if not work_staff:
             raise ResourceExistsError("No work staff association found")
         return work_staff
 
     @classmethod
-    def check_work_staff_existence(cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None) -> bool:
+    def check_work_staff_existence(
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+    ) -> bool:
         """Check the existence of staff in work"""
-        query = db.session.query(StaffWorkRole).filter(StaffWorkRole.work_id == work_id,
-                                                       StaffWorkRole.staff_id == staff_id,
-                                                       StaffWorkRole.is_deleted.is_(False),
-                                                       StaffWorkRole.role_id == role_id)
+        query = db.session.query(StaffWorkRole).filter(
+            StaffWorkRole.work_id == work_id,
+            StaffWorkRole.staff_id == staff_id,
+            StaffWorkRole.is_deleted.is_(False),
+            StaffWorkRole.role_id == role_id,
+        )
         if work_staff_id:
             query = query.filter(StaffWorkRole.id != work_staff_id)
         if query.count() > 0:
@@ -268,9 +281,13 @@ class WorkService:
         return False
 
     @classmethod
-    def create_work_staff(cls, work_id: int, data: dict, commit: bool = True) -> StaffWorkRole:
+    def create_work_staff(
+        cls, work_id: int, data: dict, commit: bool = True
+    ) -> StaffWorkRole:
         """Create Staff Work"""
-        if cls.check_work_staff_existence(work_id, data.get("staff_id"), data.get("role_id")):
+        if cls.check_work_staff_existence(
+            work_id, data.get("staff_id"), data.get("role_id")
+        ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff = StaffWorkRole(
             **{
@@ -288,10 +305,16 @@ class WorkService:
     @classmethod
     def update_work_staff(cls, work_staff_id: int, data: dict) -> StaffWorkRole:
         """Update work staff"""
-        work_staff = db.session.query(StaffWorkRole).filter(StaffWorkRole.id == work_staff_id).scalar()
+        work_staff = (
+            db.session.query(StaffWorkRole)
+            .filter(StaffWorkRole.id == work_staff_id)
+            .scalar()
+        )
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
-        if cls.check_work_staff_existence(work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id):
+        if cls.check_work_staff_existence(
+            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
+        ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff.is_active = data.get("is_active")
         work_staff.role_id = data.get("role_id")
@@ -308,24 +331,32 @@ class WorkService:
     #     outcomes = OutcomeService.find_all_outcomes(outcome_params)
 
     @classmethod
-    def _copy_outcome_and_actions(cls, template: dict, config: EventConfiguration) -> None:
+    def _copy_outcome_and_actions(
+        cls, template: dict, config: EventConfiguration
+    ) -> None:
         """Copy the outcome and actions"""
-        outcome_params = {
-            "event_template_id": template.get("id")
-        }
+        outcome_params = {"event_template_id": template.get("id")}
         outcomes = OutcomeTemplateService.find_all_outcomes(outcome_params)
         outcome_ids = list(map(lambda x: x.id, outcomes))
         actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
         for outcome in outcomes:
             outcome_json = OutcomeTemplateResponseSchema().dump(outcome)
-            outcome_json['event_configuration_id'] = config.id
-            outcome_result = OutcomeConfiguration(**OutcomeConfigurationBodyParameterSchema()
-                                                  .load(outcome_json)).flush()
-            outcome_actions = list(filter(lambda x, _outcome_id=outcome.id: x.outcome_id == _outcome_id, actions))
+            outcome_json["event_configuration_id"] = config.id
+            outcome_result = OutcomeConfiguration(
+                **OutcomeConfigurationBodyParameterSchema().load(outcome_json)
+            ).flush()
+            outcome_actions = list(
+                filter(
+                    lambda x, _outcome_id=outcome.id: x.outcome_id == _outcome_id,
+                    actions,
+                )
+            )
             for outcome_action in outcome_actions:
                 action_json = ActionTemplateResponseSchema().dump(outcome_action)
-                action_json['outcome_configuration_id'] = outcome_result.id
-                ActionCofiguration(**ActionConfigurationBodyParameterSchema().load(action_json)).flush()
+                action_json["outcome_configuration_id"] = outcome_result.id
+                ActionCofiguration(
+                    **ActionConfigurationBodyParameterSchema().load(action_json)
+                ).flush()
 
     @classmethod
     def _find_start_at_value(cls, start_at: str, number_of_days: int) -> int:
@@ -355,7 +386,7 @@ class WorkService:
             "number_of_days": number_of_days,
             "event_configuration_id": ev_config_id,
             "source_event_id": source_e_id,
-            "work_id": work_id
+            "work_id": work_id,
         }
 
     @classmethod
@@ -375,7 +406,7 @@ class WorkService:
             "multiple_days": data["multiple_days"],
             "sort_order": data["sort_order"],
             "template_id": data["id"],
-            "work_phase_id": data["work_phase_id"]
+            "work_phase_id": data["work_phase_id"],
         }
 
     @classmethod
@@ -424,9 +455,13 @@ class WorkService:
         data["start_date"] = pd.to_datetime(data["start_date"])
         data = data.sort_values(by="start_date")
 
-        data["start_date"] = data["start_date"].dt.strftime("%b. %d %Y")  # pylint: disable=unsubscriptable-object,
+        data["start_date"] = data["start_date"].dt.strftime(
+            "%b. %d %Y"
+        )  # pylint: disable=unsubscriptable-object,
         # unsupported-assignment-operation
-        data["end_date"] = data["end_date"].dt.strftime("%b. %d %Y")  # pylint: disable=unsubscriptable-object,
+        data["end_date"] = data["end_date"].dt.strftime(
+            "%b. %d %Y"
+        )  # pylint: disable=unsubscriptable-object,
         # unsupported-assignment-operation
 
         file_buffer = BytesIO()
@@ -455,3 +490,23 @@ class WorkService:
         data.to_excel(file_buffer, index=False, columns=columns, header=headers)
         file_buffer.seek(0, 0)
         return file_buffer.getvalue()
+
+    @classmethod
+    def find_first_nations(cls, work_id: int, is_active) -> [IndigenousNation]:
+        """Active first nations assigned on a work"""
+        query = (
+            db.session.query(IndigenousWork)
+            .join(
+                IndigenousNation,
+                IndigenousWork.indigenous_nation_id == IndigenousNation.id,
+            )
+            .filter(
+                IndigenousWork.is_deleted.is_(False),
+                IndigenousWork.work_id == work_id,
+                IndigenousNation.is_active.is_(True),
+                IndigenousNation.is_deleted.is_(False),
+            )
+        )
+        if is_active is not None:
+            query = query.filter(IndigenousWork.is_active.is_(is_active))
+        return query.all()

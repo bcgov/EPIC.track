@@ -108,11 +108,11 @@ class WorkService implements ServiceBase {
     );
   }
 
-  async checkTemplateUploadStatus(workId: string, phaseId: string) {
+  async checkTemplateUploadStatus(workPhaseId: number) {
     const url = Endpoints.Works.CHECK_TEMPLATE_UPLOAD_STATUS.replace(
-      ":work_id",
-      workId
-    ).replace(":phase_id", phaseId);
+      ":work_phase_id",
+      workPhaseId.toString()
+    );
     return await http.GetRequest(url);
   }
 }

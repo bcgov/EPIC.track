@@ -121,12 +121,13 @@ class TaskTemplateService:
         return template
 
     @classmethod
-    def check_template_exists(cls, work_type_id: int, phase_id: int) -> bool:
+    def check_template_exists(cls, work_type_id: int, phase_id: int, ea_act_id: int) -> bool:
         """Checks if any template exists for given work and phase"""
         return db.session.query(
             exists().where(
                 TaskTemplate.work_type_id == work_type_id,
                 TaskTemplate.phase_id == phase_id,
+                TaskTemplate.ea_act_id == ea_act_id,
                 TaskTemplate.is_active.is_(True),
                 TaskTemplate.is_deleted.is_(False)
             )

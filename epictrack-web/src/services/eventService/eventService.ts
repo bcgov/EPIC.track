@@ -1,6 +1,6 @@
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
-import { MilestoneEvent } from "../../models/events";
+import { MilestoneEvent } from "../../models/event";
 
 class EventService {
   async create(
@@ -41,6 +41,12 @@ class EventService {
     return await http.DeleteRequest(
       `${Endpoints.Events.MILESTONE_EVENTS}/events`,
       params
+    );
+  }
+
+  async deleteMilestone(milestoneId: any) {
+    return await http.DeleteRequest(
+      `${Endpoints.Events.MILESTONE_EVENTS}/events/${milestoneId}`
     );
   }
 }
