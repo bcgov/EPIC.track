@@ -20,10 +20,19 @@ from sqlalchemy import and_, or_
 
 from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
+    PRIMARY_CATEGORIES,
+    CalendarEvent,
+    Event,
+    EventCategoryEnum,
+    EventConfiguration,
+    WorkCalendarEvent,
+    WorkPhase,
+    db,
+)
 from reports_api.models.event_template import EventPositionEnum
 from reports_api.utils import util
 
+from reports_api.utils.datetime_helper import get_start_of_day
 from .event_configuration import EventConfigurationService
 
 
@@ -36,10 +45,11 @@ class EventService:  # pylint: disable=too-few-public-methods
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
 
         data["work_id"] = current_work_phase.work_id
+        data['anticipated_date'] = get_start_of_day(data.get('anticipated_date'))
+        data['actual_date'] = get_start_of_day(data.get('actual_date'))
         event = Event(**data)
-        event_old = copy.copy(event)
         event = event.flush()
-        cls._process_event(current_work_phase, event, event_old)
+        cls._process_event(current_work_phase, event, None)
         if commit:
             db.session.commit()
         return event
@@ -49,15 +59,19 @@ class EventService:  # pylint: disable=too-few-public-methods
         """Update the event"""
         event = Event.find_by_id(event_id)
         event_old = copy.copy(event)
+        current_work_phase = WorkPhase.find_by_id(
+            event.event_configuration.work_phase_id
+        )
+        all_work_phase_events = cls._find_events(current_work_phase.work_id, current_work_phase.id, PRIMARY_CATEGORIES)
+        current_event_old_index = util.find_index_in_array(all_work_phase_events, event)
         if not event:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
+        data['anticipated_date'] = get_start_of_day(data.get('anticipated_date'))
+        data['actual_date'] = get_start_of_day(data.get('actual_date'))
         event = event.update(data, commit=False)
-        current_work_phase = WorkPhase.find_by_id(
-            event.event_configuration.work_phase_id
-        )
-        cls._process_event(current_work_phase, event, event_old)
+        cls._process_event(current_work_phase, event, event_old, current_event_old_index)
         if commit:
             db.session.commit()
         return event
@@ -92,9 +106,17 @@ class EventService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def _process_event(
-        cls, current_work_phase: WorkPhase, event: Event, event_old: Event
+        cls,
+        current_work_phase: WorkPhase,
+        event: Event,
+        event_old: Event = None,
+        current_event_old_index: int = None,
     ) -> None:
         """Process the event date logic"""
+        all_work_event_configurations = (
+                EventConfigurationService.find_configurations(event.work_id, _all=True)
+        )
+        cls._handle_child_events(all_work_event_configurations, event)
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, current_work_phase, event_old
         )
@@ -108,13 +130,9 @@ class EventService:  # pylint: disable=too-few-public-methods
                 all_work_events, key=lambda x: x.actual_date or x.anticipated_date
             )
             cls._previous_event_acutal_date_rule(all_work_events, event)
-            all_work_event_configurations = EventConfigurationService.find_configurations(
-                event.work_id, _all=True
-            )
             all_work_phases = WorkPhase.find_by_params(
                 {"work_id": current_work_phase.work_id}
             )
-            cls._handle_child_events(all_work_event_configurations, event)
 
             current_work_phase_index = util.find_index_in_array(
                 all_work_phases, current_work_phase
@@ -123,36 +141,44 @@ class EventService:  # pylint: disable=too-few-public-methods
             if current_work_phase.phase.legislated:
                 phase_events = list(
                     filter(
-                        lambda x, _work_phase_id=current_work_phase.id:
-                        x.event_configuration.work_phase_id == _work_phase_id,
+                        lambda x, _work_phase_id=current_work_phase.id: x.event_configuration.work_phase_id
+                        == _work_phase_id,
                         all_work_events,
                     )
                 )
-                current_event_index = util.find_index_in_array(phase_events, event)
+                current_event_index = current_event_old_index if current_event_old_index else util.find_index_in_array(phase_events, event)
                 if (
-                    event.event_configuration.event_position == EventPositionEnum.START.value or
-                    event.event_configuration.event_category_id
+                    event.event_configuration.event_position
+                    == EventPositionEnum.START.value
+                    or event.event_configuration.event_category_id
                     in [
                         EventCategoryEnum.EXTENSION.value,
                         EventCategoryEnum.SUSPENSION.value,
                     ]
                 ):
+                    end_event_index = None
+                    if cls._find_event_date(event) >= current_work_phase.end_date:
+                        end_event = next(filter(lambda x: x.event_configuration.event_position == EventPositionEnum.END.value, phase_events))
+                        end_event_index = util.find_index_in_array(phase_events, end_event)
                     cls._push_work_phases(
                         current_future_work_phases,
                         all_work_events,
                         all_work_event_configurations,
                         number_of_days_to_be_pushed,
                         event,
+                        current_work_phase,
+                        (end_event_index - 1) if end_event_index else current_event_old_index
                     )
                 else:
                     phase_events = list(
                         filter(
-                            lambda x: x.event_configuration.event_position != EventPositionEnum.END.value,
+                            lambda x: x.event_configuration.event_position
+                            != EventPositionEnum.END.value,
                             phase_events,
                         )
                     )
                     cls._push_events(
-                        phase_events[current_event_index + 1:],
+                        phase_events[current_event_index :],
                         number_of_days_to_be_pushed,
                         event,
                         all_work_event_configurations,
@@ -164,33 +190,52 @@ class EventService:  # pylint: disable=too-few-public-methods
                     all_work_event_configurations,
                     number_of_days_to_be_pushed,
                     event,
+                    current_work_phase,
+                    current_event_old_index
                 )
 
     @classmethod
     def _get_number_of_days_to_be_pushed(
-        cls, event: Event, current_work_phase: WorkPhase, event_old: Event
+        cls, event: Event, event_old: Event
     ) -> int:
         """Returns the number of days to be pushed"""
+        delta = (
+            (cls._find_event_date(event) - cls._find_event_date(event_old)).days
+            if event_old
+            else 0
+        )  # used to have the difference
+        number_of_days = event.number_of_days
         if event.event_configuration.event_category_id in [
             EventCategoryEnum.EXTENSION.value,
             EventCategoryEnum.SUSPENSION.value,
         ]:
-            return event.number_of_days
+            # return 0 days to be pushed unless actual date is entered
+            return 0 if not event.actual_date else event.number_of_days
+
         if event.event_configuration.event_position in [
             EventPositionEnum.START.value,
             EventPositionEnum.END.value,
         ]:
             return (cls._find_event_date(event) - cls._find_event_date(event_old)).days
 
-        date_diff_from_phase_end = (
-            cls._find_event_date(event) - current_work_phase.end_date
-        ).days + event.number_of_days
-        number_of_days_to_be_pushed = (
-            0
-            if current_work_phase.end_date + timedelta(days=date_diff_from_phase_end) < current_work_phase.end_date
-            else date_diff_from_phase_end
-        )
-        return number_of_days_to_be_pushed
+        if event.event_configuration.multiple_days and event_old:
+            number_of_days = (
+                (event.number_of_days - event_old.number_of_days)
+                if event_old
+                else event.number_of_days
+            )
+            return number_of_days + delta
+
+        # date_diff_from_phase_end = (
+        #     cls._find_event_date(event) - current_work_phase.end_date
+        # ).days + event.number_of_days
+        # number_of_days_to_be_pushed = (
+        #     0
+        #     if current_work_phase.end_date + timedelta(days=date_diff_from_phase_end)
+        #     < current_work_phase.end_date
+        #     else date_diff_from_phase_end + delta
+        # )
+        return delta
 
     @classmethod
     def _push_events(
@@ -202,18 +247,21 @@ class EventService:  # pylint: disable=too-few-public-methods
     ) -> None:
         """Push events the given number of days"""
         for event_to_update in phase_events:
-            if event_to_update.actual_date:
-                event_to_update.actual_date = event_to_update.actual_date + timedelta(
-                    days=number_of_days_to_be_pushed
+            if event_to_update.id != event.id:
+                if event_to_update.actual_date:
+                    event_to_update.actual_date = (
+                        event_to_update.actual_date
+                        + timedelta(days=number_of_days_to_be_pushed)
+                    )
+                elif event_to_update.anticipated_date:
+                    event_to_update.anticipated_date = (
+                        event_to_update.anticipated_date
+                        + timedelta(days=number_of_days_to_be_pushed)
+                    )
+                event_to_update.update(
+                    event_to_update.as_dict(recursive=False), commit=False
                 )
-            elif event_to_update.anticipated_date:
-                event_to_update.anticipated_date = (
-                    event_to_update.anticipated_date + timedelta(days=number_of_days_to_be_pushed)
-                )
-            event_to_update.update(
-                event_to_update.as_dict(recursive=False), commit=False
-            )
-            cls._handle_child_events(all_work_event_configurations, event)
+                cls._handle_child_events(all_work_event_configurations, event)
 
     @classmethod
     def _push_work_phases(
@@ -223,34 +271,52 @@ class EventService:  # pylint: disable=too-few-public-methods
         all_work_event_configurations: [EventConfiguration],
         number_of_days_to_be_pushed: int,
         event: Event,
+        current_work_phase: WorkPhase,
+        current_event_index: int = None,
     ) -> None:
         # pylint: disable=too-many-arguments
         """Push all the events and work phases"""
-        for index, each_work_phase in enumerate(work_phases):
+        for each_work_phase in enumerate(work_phases):
             phase_events = list(
                 filter(
-                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id == _work_phase_id,
+                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id
+                    == _work_phase_id,
                     all_work_events,
                 )
             )
-            current_event_index = (
-                util.find_index_in_array(phase_events, event) if index == 0 else -1
-            )
+            # if updating: get the old event index if we are in the current phase
+            # if inserting: get the event index when we are in the current phase
+            _current_event_index = -1
+            if each_work_phase.id == current_work_phase.id:
+                _current_event_index = (
+                    current_event_index
+                    if current_event_index
+                    else util.find_index_in_array(phase_events, event)
+                )
             cls._push_events(
-                phase_events[current_event_index + 1:],
+                phase_events[_current_event_index + 1 :],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
             )
-            each_work_phase.start_date = each_work_phase.start_date + timedelta(days=number_of_days_to_be_pushed)
-            each_work_phase.end_date = each_work_phase.end_date + timedelta(days=number_of_days_to_be_pushed)
-            each_work_phase.update(each_work_phase.as_dict(recursive=False), commit=False)
+            if not event.event_configuration.event_category_id in [EventCategoryEnum.EXTENSION.value, EventCategoryEnum.SUSPENSION.value]:
+                each_work_phase.start_date = each_work_phase.start_date + timedelta(
+                    days=number_of_days_to_be_pushed
+                )
+            each_work_phase.end_date = each_work_phase.end_date + timedelta(
+                days=number_of_days_to_be_pushed
+            )
+            each_work_phase.update(
+                each_work_phase.as_dict(recursive=False), commit=False
+            )
 
     @classmethod
     def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
         """Anticipated date of end event cannot be changed"""
-        if event.event_configuration.event_position == EventPositionEnum.END.value and\
-                (event_old.anticipated_date - event.anticipated_date).days != 0:
+        if (
+            event.event_configuration.event_position == EventPositionEnum.END.value
+            and (event_old.anticipated_date - event.anticipated_date).days != 0
+        ):
             raise UnprocessableEntityError(
                 "Anticipated date of the phase end event should not be changed"
             )
@@ -267,7 +333,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         if event.actual_date:
             phase_events = list(
                 filter(
-                    lambda x, _phase_id=event.event_configuration.phase_id: x.event_configuration.phase_id == _phase_id,
+                    lambda x, _work_phase_id=event.event_configuration.work_phase_id: x.event_configuration.work_phase_id
+                    == _work_phase_id,
                     all_work_events,
                 )
             )
@@ -280,7 +347,13 @@ class EventService:  # pylint: disable=too-few-public-methods
                     event_index = index
                     break
             if (
-                event_index > 0 and event.actual_date and not phase_events[event_index - 1].actual_date
+                event_index > 0
+                and event.actual_date
+                and (
+                    not phase_events[event_index - 1].actual_date
+                    and not phase_events[event_index - 1].event_configuration.event_position
+                    == EventPositionEnum.END.value
+                )
             ):
                 raise UnprocessableEntityError(
                     "Previous event should be completed to proceed"
@@ -375,6 +448,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                 Event.event_configuration_id == EventConfiguration.id,
             )
             .filter(Event.is_active.is_(True), Event.work_id == work_id)
+            .order_by(Event.actual_date, Event.anticipated_date)
         )
         if len(event_categories) > 0:
             category_ids = list(map(lambda x: x.value, event_categories))

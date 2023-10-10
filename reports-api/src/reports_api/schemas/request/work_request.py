@@ -14,7 +14,11 @@
 """Work resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
+from .base import (
+    RequestBodyParameterSchema,
+    RequestPathParameterSchema,
+    RequestQueryParameterSchema,
+)
 
 
 class WorkBodyParameterSchema(RequestBodyParameterSchema):
@@ -38,77 +42,78 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
         load_default=None,
     )
     start_date = fields.DateTime(
-        metadata={"description": "Start date for the work"},
-        required=True
+        metadata={"description": "Start date for the work"}, required=True
     )
 
     ea_act_id = fields.Int(
         metadata={"description": "EA Act id of the work"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
 
     work_type_id = fields.Int(
         metadata={"description": "WorkType id of the work"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
 
     project_id = fields.Int(
         metadata={"description": "Project id of the work"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
 
     ministry_id = fields.Int(
         metadata={"description": "Ministry id of the work"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
     federal_involvement_id = fields.Int(
         metadata={"description": "Federal involvement id of the work"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
 
     substitution_act_id = fields.Int(
         metadata={"description": "Substitution act id of the work"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
     eao_team_id = fields.Int(
         metadata={"description": "EAO Team id of the work"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
     responsible_epd_id = fields.Int(
         metadata={"description": "Responsible EPD id of the work"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
     work_lead_id = fields.Int(
         metadata={"description": "Work lead id of the work"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
     decision_by_id = fields.Int(
         metadata={"description": "Decision maker id of the work"},
         validate=validate.Range(min=1),
-        allow_none=True
+        allow_none=True,
     )
 
-    is_active = fields.Bool(
-        metadata={"description": "Active state of the work"})
+    is_active = fields.Bool(metadata={"description": "Active state of the work"})
     is_watched = fields.Bool(
-        metadata={"description": "Watched state of the work"}, default=False)
+        metadata={"description": "Watched state of the work"}, default=False
+    )
     is_cac_recommended = fields.Bool(
-        metadata={"description": "Is CAC recommended for the work"}, default=False)
+        metadata={"description": "Is CAC recommended for the work"}, default=False
+    )
     is_pecp_required = fields.Bool(
-        metadata={"description": "Is PCP recommended for the work"}, default=False)
+        metadata={"description": "Is PCP recommended for the work"}, default=False
+    )
 
 
 class WorkExistenceQueryParamSchema(RequestQueryParameterSchema):
@@ -117,13 +122,13 @@ class WorkExistenceQueryParamSchema(RequestQueryParameterSchema):
     title = fields.Str(
         metadata={"description": "Title of the work"},
         validate=validate.Length(max=150),
-        required=True
+        required=True,
     )
 
     work_id = fields.Int(
         metadata={"description": "The id of the work"},
         validate=validate.Range(min=1),
-        load_default=None
+        load_default=None,
     )
 
 
@@ -133,7 +138,7 @@ class WorkIdPathParameterSchema(RequestPathParameterSchema):
     work_id = fields.Int(
         metadata={"description": "The id of the work"},
         validate=validate.Range(min=1),
-        required=True
+        required=True,
     )
 
 
@@ -163,5 +168,5 @@ class WorkFirstNationNotesBodySchema(RequestBodyParameterSchema):
     notes = fields.Str(
         metadata={"description": "First nation notes"},
         validate=validate.Length(min=1),
-        required=True
+        required=True,
     )

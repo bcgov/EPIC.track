@@ -64,10 +64,10 @@ class EAResourceForeCastReport(ReportFactory):
         self.report_title = "EAO Resource Forecast"
         start_event_configurations = (
             db.session.query(
-                func.min(EventConfiguration.id).label("event_configuration_id"), EventConfiguration.phase_id
+                func.min(EventConfiguration.id).label("event_configuration_id"), EventConfiguration.work_phase_id
             )
             .filter(EventConfiguration.mandatory.is_(True), EventConfiguration.start_at == '0')  # Is 0 needed?
-            .group_by(EventConfiguration.phase_id)
+            .group_by(EventConfiguration.work_phase_id)
             .all()
         )
         self.start_event_configurations = [x.event_configuration_id for x in start_event_configurations]
@@ -207,6 +207,7 @@ class EAResourceForeCastReport(ReportFactory):
         responsible_epd = aliased(Staff)
         work_lead = aliased(Staff)
         project_phase = aliased(PhaseCode)
+        work_phase = aliased(WorkPhase)
 
         project_phase_query = (
             db.session.query(
@@ -267,7 +268,7 @@ class EAResourceForeCastReport(ReportFactory):
                 ),
             )
             .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
-            .join(project_phase, EventConfiguration.phase_id == project_phase.id)
+            .join(work_phase, EventConfiguration.work_phase_id == work_phase.id)
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
             .join(env_region, env_region.id == Project.region_id_env)
@@ -329,7 +330,8 @@ class EAResourceForeCastReport(ReportFactory):
                 func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
             )
             .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
-            .join(PhaseCode, EventConfiguration.phase_id == PhaseCode.id)
+            .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+            .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .order_by(func.coalesce(Event.actual_date, Event.anticipated_date))
             .add_columns(
                 Event.work_id.label("work_id"),
@@ -423,7 +425,7 @@ class EAResourceForeCastReport(ReportFactory):
                     ),
                 )
                 .join(WorkType, PhaseCode.work_type_id == WorkType.id)
-                .join(EventConfiguration, and_(EventConfiguration.phase_id == PhaseCode.id,
+                .join(EventConfiguration, and_(EventConfiguration.work_phase_id == WorkPhase.id,
                                                EventConfiguration.mandatory.is_(True)))
                 .join(Event, EventConfiguration.id == Event.event_configuration_id)
                 .filter(

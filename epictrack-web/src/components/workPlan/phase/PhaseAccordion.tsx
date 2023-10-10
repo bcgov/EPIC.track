@@ -150,11 +150,11 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={1}>
                 <SummaryItem
                   title="Days left"
-                  content={Moment.duration(
-                    Moment(phase.end_date).diff(fromDate)
-                  )
-                    .asDays()
-                    .toFixed(0)}
+                  content={Math.ceil(
+                    Moment.duration(
+                      Moment(phase.end_date).diff(fromDate)
+                    ).asDays()
+                  ).toString()}
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>

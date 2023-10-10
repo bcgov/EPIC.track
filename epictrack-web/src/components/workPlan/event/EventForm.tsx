@@ -42,6 +42,11 @@ interface TaskFormProps {
   onSave: () => void;
   eventId?: number;
 }
+interface NumberOfDaysChangeProps {
+  numberOfDays?: number | undefined;
+  anticipatedDate?: string | undefined;
+  actualDate?: string | undefined;
+}
 const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const [event, setEvent] = React.useState<MilestoneEvent>();
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
@@ -110,12 +115,26 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
       setActualDateLabel("Actual Start Date");
     } else {
       setAnticipatedLabel("Anticipated Date");
-      setAnticipatedLabel("Actual Date");
+      setActualDateLabel("Actual Date");
     }
   }, [selectedConfiguration]);
+
   React.useEffect(() => {
-    reset(event);
+    if (event) {
+      reset(event);
+      daysOnChangeHandler();
+      setTitleCharacterCount(Number(event?.name.length));
+    }
   }, [event]);
+
+  React.useEffect(() => {
+    if (configurations && event) {
+      const config = configurations.filter(
+        (p) => p.id == event.event_configuration_id
+      )[0];
+      setSelectedConfiguration(config);
+    }
+  }, [event, configurations]);
 
   React.useEffect(() => {
     getConfigurations();
@@ -157,7 +176,6 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
       if (!!data.actual_date) {
         data.actual_date = Moment(data.actual_date).format();
       }
-      data.number_of_days = !!data.number_of_days ? 0 : data.number_of_days;
       data.notes = notes;
       setSubmittedEvent(data);
       const showConfirmDialog =
@@ -221,23 +239,34 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     )[0];
     setSelectedConfiguration(configuration);
     (titleRef?.current as any)["value"] = configuration.name;
-    setTitleCharacterCount(configuration.name.length);
+    setTitleCharacterCount(Number(configuration.name.length));
     (titleRef?.current as any).focus();
   };
 
   const onChangeTitle = (event: any) => {
-    setTitleCharacterCount(event.target.value.length);
+    setTitleCharacterCount(Number(event.target.value.length));
   };
-  const daysOnChangeHandler = () => {
-    (endDateRef?.current as any)["value"] = dateUtils.formatDate(
-      dateUtils
-        .add(
-          String((anticipatedDateRef?.current as any)["value"]),
-          Number((numberOfDaysRef?.current as any)["value"]),
-          "days"
-        )
-        .toISOString()
-    );
+
+  const daysOnChangeHandler = (params: NumberOfDaysChangeProps = {}) => {
+    let number_of_days = 0;
+    if (numberOfDaysRef?.current as any) {
+      number_of_days =
+        params.numberOfDays ||
+        Number((numberOfDaysRef?.current as any)["value"]);
+    }
+    if (endDateRef?.current as any) {
+      (endDateRef?.current as any)["value"] = dateUtils.formatDate(
+        dateUtils
+          .add(
+            params.actualDate ||
+              params.anticipatedDate ||
+              String((anticipatedDateRef?.current as any)["value"]),
+            number_of_days,
+            "days"
+          )
+          .toISOString()
+      );
+    }
   };
   return (
     <>
@@ -276,22 +305,6 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               ></ControlledSelectV2>
             </Grid>
             <Grid item xs={12}>
-              {/* <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <ETFormLabel required>Title</ETFormLabel>
-                <ETParagraph
-                  sx={{
-                    color: Palette.neutral.light,
-                  }}
-                >
-                  {titleCharacterCount}/150 character left
-                </ETParagraph>
-              </Box> */}
               <ETFormLabelWithCharacterLimit
                 characterCount={titleCharacterCount}
                 maxCharacterLength={150}
@@ -322,7 +335,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs} for>
                     <DatePicker
                       format={DATE_FORMAT}
                       slotProps={{
@@ -337,8 +350,11 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                         ...register("anticipated_date"),
                       }}
                       value={dayjs(value)}
-                      onChange={(event) => {
+                      onChange={(event: any) => {
                         onChange(event);
+                        daysOnChangeHandler({
+                          anticipatedDate: event["$d"],
+                        });
                       }}
                       defaultValue={dayjs(
                         event?.anticipated_date ? event?.anticipated_date : ""
@@ -354,7 +370,6 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
               <Controller
                 name="actual_date"
                 control={control}
-                // defaultValue={Moment(event?.actual_date).format()}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
@@ -373,8 +388,11 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                         ...register("actual_date"),
                       }}
                       value={value ? dayjs(value) : value}
-                      onChange={(event) => {
-                        onChange(event);
+                      onChange={(event: any) => {
+                        onChange(event["$d"]);
+                        daysOnChangeHandler({
+                          actualDate: event["$d"],
+                        });
                       }}
                       defaultValue={
                         event?.actual_date ? dayjs(event?.actual_date) : ""
