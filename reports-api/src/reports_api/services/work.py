@@ -34,6 +34,7 @@ from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
 from reports_api.services.outcome_template import OutcomeTemplateService
 from reports_api.services.phaseservice import PhaseService
+from reports_api.utils.datetime_helper import get_start_of_day
 
 
 class WorkService:
@@ -100,6 +101,7 @@ class WorkService:
         # pylint: disable=too-many-locals
         """Create a new work"""
         try:
+            payload['start_date'] = get_start_of_day(payload['start_date'])
             if cls.check_existence(payload["title"]):
                 raise ResourceExistsError("Work with same title already exists")
             work = Work(**payload)
@@ -115,7 +117,7 @@ class WorkService:
             )
             event_configurations = []
             work.current_phase_id = phases[0].id
-            work.flush()
+            work = work.flush()
             phase_start_date = work.start_date
             for phase in phases:
                 end_date = phase_start_date + timedelta(days=phase.number_of_days)
@@ -136,7 +138,6 @@ class WorkService:
                         event_template_json,
                     )
                 ):
-                    parent_config["work_id"] = work.id
                     parent_config["work_phase_id"] = work_phase.id
                     p_result = EventConfiguration(
                         **cls._prepare_configuration(parent_config)
@@ -152,7 +153,6 @@ class WorkService:
                             event_template_json,
                         )
                     ):
-                        child["work_id"] = work.id
                         child["parent_id"] = p_result.id
                         child["work_phase_id"] = work_phase.id
                         c_result = EventConfiguration.flush(
@@ -162,7 +162,8 @@ class WorkService:
                         cls._copy_outcome_and_actions(child, c_result)
                 parent_event_configs = list(
                     filter(
-                        lambda x, _phase_id=phase.id: not x.parent_id and x.mandatory and x.phase_id == _phase_id,
+                        lambda x, _work_phase_id=work_phase.id: not x.parent_id and x.mandatory and
+                        x.work_phase_id == _work_phase_id,
                         event_configurations,
                     )
                 )
@@ -177,14 +178,15 @@ class WorkService:
                                 str(p_event_start_date),
                                 p_event_conf.number_of_days,
                                 p_event_conf.id,
-                                p_event_conf.work_id,
+                                p_event_conf.work_phase.work.id,
                             )
                         )
                     )
                     c_events = list(
                         filter(
-                            lambda x, _parent_id=p_event_conf.id, _phase_id=phase.id: x.parent_id == _parent_id
-                            and x.mandatory and x.phase_id == _phase_id,  # noqa: W503
+                            lambda x, _parent_id=p_event_conf.id,
+                            _work_phase_id=work_phase.id: x.parent_id == _parent_id
+                            and x.mandatory and x.work_phase_id == _work_phase_id,  # noqa: W503
                             event_configurations,
                         )
                     )
@@ -221,7 +223,7 @@ class WorkService:
                                         str(c_event_start_date),
                                         c_event_conf.number_of_days,
                                         c_event_conf.id,
-                                        c_event_conf.work_id,
+                                        c_event_conf.work_phase.work.id,
                                         p_event.id,
                                     )
                                 )
@@ -322,14 +324,6 @@ class WorkService:
         db.session.commit()
         return work_staff
 
-    # @classmethod
-    # def _copy_outcome_and_actions(cls, template: dict, config: EventConfiguration) -> None:
-    #     """Copy the outcome and actions"""
-    #     outcome_params = {
-    #         "event_template_id": template.get("id")
-    #     }
-    #     outcomes = OutcomeService.find_all_outcomes(outcome_params)
-
     @classmethod
     def _copy_outcome_and_actions(
         cls, template: dict, config: EventConfiguration
@@ -394,8 +388,6 @@ class WorkService:
         """Prepare the configuration object"""
         return {
             "name": data["name"],
-            "work_id": data["work_id"],
-            "phase_id": data["phase_id"],
             "parent_id": data["parent_id"],
             "event_type_id": data["event_type_id"],
             "event_category_id": data["event_category_id"],

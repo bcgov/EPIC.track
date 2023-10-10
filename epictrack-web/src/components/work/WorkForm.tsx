@@ -3,6 +3,7 @@ import { TextField, Grid, Divider } from "@mui/material";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import * as yup from "yup";
+import Moment from "moment";
 import { yupResolver } from "@hookform/resolvers/yup";
 import codeService from "../../services/codeService";
 import { Work } from "../../models/work";
@@ -133,6 +134,7 @@ export default function WorkForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
+    data.start_date = Moment(data.start_date).format();
     ctx.onSave(data, () => {
       reset();
     });
