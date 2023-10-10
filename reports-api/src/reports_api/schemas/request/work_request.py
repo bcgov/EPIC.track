@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Work resource's input validations"""
-from marshmallow import fields, validate
+from marshmallow import fields, validate, pre_load
+from datetime import datetime
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
+from reports_api.utils.datetime_helper import get_start_of_day
 
 
 class WorkBodyParameterSchema(RequestBodyParameterSchema):
@@ -109,6 +111,12 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "Is CAC recommended for the work"}, default=False)
     is_pecp_required = fields.Bool(
         metadata={"description": "Is PCP recommended for the work"}, default=False)
+
+    # @pre_load
+    # def convert_start_date_to_start_of_the_day(self, data, **kwargs):  # pylint: disable=unused-argument
+    #     """Convert the start date to start of the day"""
+    #     data['start_date'] = get_start_of_day(datetime.strptime(data['start_date'], '%Y-%m-%dT%H:%M:%S%z'))
+    #     return data
 
 
 class WorkExistenceQueryParamSchema(RequestQueryParameterSchema):
