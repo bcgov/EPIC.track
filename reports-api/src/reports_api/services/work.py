@@ -162,7 +162,8 @@ class WorkService:
                         cls._copy_outcome_and_actions(child, c_result)
                 parent_event_configs = list(
                     filter(
-                        lambda x, _work_phase_id=work_phase.id: not x.parent_id and x.mandatory and x.work_phase_id == _work_phase_id,
+                        lambda x, _work_phase_id=work_phase.id: not x.parent_id and x.mandatory and
+                        x.work_phase_id == _work_phase_id,
                         event_configurations,
                     )
                 )
@@ -183,7 +184,8 @@ class WorkService:
                     )
                     c_events = list(
                         filter(
-                            lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id == _parent_id
+                            lambda x, _parent_id=p_event_conf.id,
+                            _work_phase_id=work_phase.id: x.parent_id == _parent_id
                             and x.mandatory and x.work_phase_id == _work_phase_id,  # noqa: W503
                             event_configurations,
                         )

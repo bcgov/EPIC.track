@@ -45,8 +45,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
 
         data["work_id"] = current_work_phase.work_id
-        data['anticipated_date'] = get_start_of_day(data.get('anticipated_date'))
-        data['actual_date'] = get_start_of_day(data.get('actual_date'))
+        data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
+        data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = Event(**data)
         event = event.flush()
         cls._process_event(current_work_phase, event, None)
@@ -62,16 +62,20 @@ class EventService:  # pylint: disable=too-few-public-methods
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
-        all_work_phase_events = cls._find_events(current_work_phase.work_id, current_work_phase.id, PRIMARY_CATEGORIES)
+        all_work_phase_events = cls._find_events(
+            current_work_phase.work_id, current_work_phase.id, PRIMARY_CATEGORIES
+        )
         current_event_old_index = util.find_index_in_array(all_work_phase_events, event)
         if not event:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        data['anticipated_date'] = get_start_of_day(data.get('anticipated_date'))
-        data['actual_date'] = get_start_of_day(data.get('actual_date'))
+        data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
+        data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = event.update(data, commit=False)
-        cls._process_event(current_work_phase, event, event_old, current_event_old_index)
+        cls._process_event(
+            current_work_phase, event, event_old, current_event_old_index
+        )
         if commit:
             db.session.commit()
         return event
@@ -113,8 +117,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         current_event_old_index: int = None,
     ) -> None:
         """Process the event date logic"""
-        all_work_event_configurations = (
-                EventConfigurationService.find_configurations(event.work_id, _all=True)
+        all_work_event_configurations = EventConfigurationService.find_configurations(
+            event.work_id, _all=True
         )
         cls._handle_child_events(all_work_event_configurations, event)
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
@@ -146,7 +150,11 @@ class EventService:  # pylint: disable=too-few-public-methods
                         all_work_events,
                     )
                 )
-                current_event_index = current_event_old_index if current_event_old_index else util.find_index_in_array(phase_events, event)
+                current_event_index = (
+                    current_event_old_index
+                    if current_event_old_index
+                    else util.find_index_in_array(phase_events, event)
+                )
                 if (
                     event.event_configuration.event_position
                     == EventPositionEnum.START.value
@@ -158,8 +166,16 @@ class EventService:  # pylint: disable=too-few-public-methods
                 ):
                     end_event_index = None
                     if cls._find_event_date(event) >= current_work_phase.end_date:
-                        end_event = next(filter(lambda x: x.event_configuration.event_position == EventPositionEnum.END.value, phase_events))
-                        end_event_index = util.find_index_in_array(phase_events, end_event)
+                        end_event = next(
+                            filter(
+                                lambda x: x.event_configuration.event_position
+                                == EventPositionEnum.END.value,
+                                phase_events,
+                            )
+                        )
+                        end_event_index = util.find_index_in_array(
+                            phase_events, end_event
+                        )
                     cls._push_work_phases(
                         current_future_work_phases,
                         all_work_events,
@@ -167,7 +183,9 @@ class EventService:  # pylint: disable=too-few-public-methods
                         number_of_days_to_be_pushed,
                         event,
                         current_work_phase,
-                        (end_event_index - 1) if end_event_index else current_event_old_index
+                        (end_event_index - 1)
+                        if end_event_index
+                        else current_event_old_index,
                     )
                 else:
                     phase_events = list(
@@ -178,7 +196,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                         )
                     )
                     cls._push_events(
-                        phase_events[current_event_index :],
+                        phase_events[current_event_index:],
                         number_of_days_to_be_pushed,
                         event,
                         all_work_event_configurations,
@@ -191,13 +209,11 @@ class EventService:  # pylint: disable=too-few-public-methods
                     number_of_days_to_be_pushed,
                     event,
                     current_work_phase,
-                    current_event_old_index
+                    current_event_old_index,
                 )
 
     @classmethod
-    def _get_number_of_days_to_be_pushed(
-        cls, event: Event, event_old: Event
-    ) -> int:
+    def _get_number_of_days_to_be_pushed(cls, event: Event, event_old: Event) -> int:
         """Returns the number of days to be pushed"""
         delta = (
             (cls._find_event_date(event) - cls._find_event_date(event_old)).days
@@ -294,12 +310,19 @@ class EventService:  # pylint: disable=too-few-public-methods
                     else util.find_index_in_array(phase_events, event)
                 )
             cls._push_events(
-                phase_events[_current_event_index + 1 :],
+                phase_events[_current_event_index + 1:],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
             )
-            if not event.event_configuration.event_category_id in [EventCategoryEnum.EXTENSION.value, EventCategoryEnum.SUSPENSION.value]:
+            if (
+                event.event_configuration.event_category_id
+                not in [
+                    EventCategoryEnum.EXTENSION.value,
+                    EventCategoryEnum.SUSPENSION.value,
+                ]
+                or each_work_phase.id != current_work_phase.id
+            ):
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
@@ -333,7 +356,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         if event.actual_date:
             phase_events = list(
                 filter(
-                    lambda x, _work_phase_id=event.event_configuration.work_phase_id: x.event_configuration.work_phase_id
+                    lambda x,
+                    _work_phase_id=event.event_configuration.work_phase_id: x.event_configuration.work_phase_id
                     == _work_phase_id,
                     all_work_events,
                 )
@@ -351,7 +375,9 @@ class EventService:  # pylint: disable=too-few-public-methods
                 and event.actual_date
                 and (
                     not phase_events[event_index - 1].actual_date
-                    and not phase_events[event_index - 1].event_configuration.event_position
+                    and not phase_events[
+                        event_index - 1
+                    ].event_configuration.event_position
                     == EventPositionEnum.END.value
                 )
             ):
