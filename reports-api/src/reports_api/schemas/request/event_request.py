@@ -50,6 +50,42 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "Notes for the milestone event"},
     )
 
+    high_priority = fields.Bool(
+        metadata={"description": "Indicate if the event is high priority"},
+        load_default=False,
+        allow_none=True
+    )
+
+    act_section_id = fields.Int(
+        metadata={"description": "Act section id of the extension/suspension event"},
+        allow_none=True
+    )
+
+    reason = fields.Str(
+        metadata={"description": "Reason of the extension/suspension event"},
+        allow_none=True
+    )
+
+    decision_make_id = fields.Int(
+        metadata={"description": "Decision maker ID of the decision event"},
+        allow_none=True
+    )
+
+    number_of_attendees = fields.Int(
+        metadata={"description": "Number of attendees for open house"},
+        allow_none=True
+    )
+
+    number_of_responses = fields.Str(
+        metadata={"description": "Number of responses for PCP"},
+        allow_none=True
+    )
+
+    topic = fields.Str(
+        metadata={"description": "PCP topic"},
+        allow_none=True
+    )
+
 
 class MilestoneEventPathParameterSchema(RequestPathParameterSchema):
     """Milestone event path parameter schema"""

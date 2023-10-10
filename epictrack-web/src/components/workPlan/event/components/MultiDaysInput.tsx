@@ -44,7 +44,13 @@ const MultiDaysInput = ({
       </Grid>
       <Grid item xs={6}>
         <ETFormLabel required>End Date</ETFormLabel>
-        <Controller
+        <TextField
+          fullWidth
+          disabled
+          placeholder="MM-DD-YYYY"
+          inputRef={endDateRef}
+        />
+        {/* <Controller
           name="anticipated_date"
           control={control}
           render={({ field: { onChange, value }, fieldState: { error } }) => (
@@ -70,7 +76,7 @@ const MultiDaysInput = ({
               />
             </LocalizationProvider>
           )}
-        />
+        /> */}
       </Grid>
     </>
   );
