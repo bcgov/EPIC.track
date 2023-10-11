@@ -30,13 +30,15 @@ const schema = yup.object().shape({
   start_date: yup.string().required("Please select start date"),
   status: yup.string().required("Please select status"),
 });
-
+interface NumberOfDaysChangeProps {
+  numberOfDays?: number | undefined;
+  startDate?: string | undefined;
+}
 interface TaskFormProps {
   onSave: () => void;
-  eventId?: number;
+  taskEvent?: TaskEvent;
 }
-const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
-  const [taskEvent, setTaskEvent] = React.useState<TaskEvent>();
+const TaskForm = ({ onSave, taskEvent }: TaskFormProps) => {
   const [assignees, setAssignees] = React.useState<Staff[]>([]);
   const [responsibilities, setResponsibilities] = React.useState<ListType[]>(
     []
@@ -44,6 +46,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
   const [notes, setNotes] = React.useState("");
   const endDateRef = React.useRef();
   const startDateRef = React.useRef();
+  const numberOfDaysRef = React.useRef();
   const ctx = React.useContext(WorkplanContext);
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -64,45 +67,16 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
   }, []);
 
   React.useEffect(() => {
-    if (eventId) {
-      getTaskEvent();
-    }
-  }, [eventId]);
-
-  React.useEffect(() => {
     getWorkTeamMembers();
   }, [ctx.work?.id]);
 
   React.useEffect(() => {
     reset(taskEvent);
+    daysOnChangeHandler({
+      numberOfDays: taskEvent?.number_of_days,
+      startDate: taskEvent?.start_date,
+    });
   }, [taskEvent]);
-
-  const getTaskEvent = async () => {
-    try {
-      const result = await taskEventService.getById(Number(eventId));
-      if (result.status === 200) {
-        const assignee_ids: any[] = (result.data as any)["assignees"].map(
-          (p: any) => p["assignee_id"]
-        );
-        const responsibility_ids: any[] = (result.data as any)[
-          "responsibilities"
-        ].map((p: any) => p["responsibility_id"]);
-        const taskEvent = result.data as TaskEvent;
-        taskEvent.assignee_ids = assignee_ids;
-        taskEvent.responsibility_ids = responsibility_ids;
-        (endDateRef?.current as any)["value"] = dateUtils.formatDate(
-          dateUtils
-            .add(taskEvent.start_date, taskEvent.number_of_days, "days")
-            .toISOString()
-        );
-        setTaskEvent(taskEvent);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
 
   const getResponsibilites = async () => {
     const result = await codeService.getCodes("responsibilities");
@@ -129,10 +103,10 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
       data.number_of_days =
         data.number_of_days.toString() === "" ? 0 : data.number_of_days;
       data.notes = notes;
-      if (eventId) {
+      if (taskEvent) {
         const createResult = await taskEventService.update(
           data,
-          Number(eventId)
+          Number(taskEvent.id)
         );
         if (createResult.status === 200) {
           showNotification("Task details updated", {
@@ -165,16 +139,24 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
     }
   };
 
-  const daysOnChangeHandler = (event: SyntheticEvent) => {
-    (endDateRef?.current as any)["value"] = dateUtils.formatDate(
-      dateUtils
-        .add(
-          String((startDateRef?.current as any)["value"]).replaceAll("-", "/"),
-          Number((event.target as any)["value"]),
-          "days"
-        )
-        .toISOString()
-    );
+  const daysOnChangeHandler = (params: NumberOfDaysChangeProps | any = {}) => {
+    let number_of_days = 0;
+    if (numberOfDaysRef?.current as any) {
+      number_of_days =
+        params.numberOfDays ||
+        Number((numberOfDaysRef?.current as any)["value"]);
+    }
+    if (endDateRef?.current as any) {
+      (endDateRef?.current as any)["value"] = dateUtils.formatDate(
+        dateUtils
+          .add(
+            params.startDate || String((startDateRef?.current as any)["value"]),
+            number_of_days,
+            "days"
+          )
+          .toISOString()
+      );
+    }
   };
 
   return (
@@ -257,6 +239,7 @@ const TaskForm = ({ onSave, eventId }: TaskFormProps) => {
                     min: 0,
                   },
                 }}
+                inputRef={numberOfDaysRef}
                 type="number"
                 {...register("number_of_days")}
                 onChange={daysOnChangeHandler}

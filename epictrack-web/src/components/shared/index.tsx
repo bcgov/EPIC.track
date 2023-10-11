@@ -366,7 +366,8 @@ export const ETFormLabelWithCharacterLimit = (
           color: Palette.neutral.light,
         }}
       >
-        {props.characterCount}/{props.maxCharacterLength} character left
+        {props.maxCharacterLength - props.characterCount}/
+        {props.maxCharacterLength} character left
       </ETParagraph>
     </Box>
   );

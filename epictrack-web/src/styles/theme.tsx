@@ -116,6 +116,18 @@ export const BaseTheme = createTheme({
         },
       },
     },
+    MuiDialog: {
+      styleOverrides: {
+        paper: ({ ownerState, theme }) => ({
+          ...(ownerState.maxWidth === "md" && {
+            maxWidth: "680px",
+          }),
+          ...(ownerState.maxWidth === "lg" && {
+            maxWidth: "832px",
+          }),
+        }),
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: ({ ownerState, theme }) => ({
@@ -177,6 +189,27 @@ export const BaseTheme = createTheme({
               },
               "&:disabled": {
                 border: `2px solid ${Palette.neutral.light}`,
+                backgroundColor: Palette.white,
+                color: Palette.neutral.light,
+              },
+            }),
+          ...(ownerState.variant === "text" &&
+            ownerState.color === "primary" && {
+              background: Palette.white,
+              border: `2px solid ${Palette.white}`,
+              color: Palette.primary.accent.main,
+              borderRadius: "4px",
+              "&:hover": {
+                backgroundColor: Palette.neutral.bg.main,
+                border: `2px solid ${Palette.neutral.bg.main}`,
+                boxShadow: "none",
+              },
+              "&:active": {
+                backgroundColor: Palette.white,
+                border: `2px solid ${Palette.primary.accent.light}`,
+              },
+              "&:disabled": {
+                border: `2px solid ${Palette.white}`,
                 backgroundColor: Palette.white,
                 color: Palette.neutral.light,
               },

@@ -3,7 +3,7 @@ import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
-import { EventsGridModel } from "../../../models/event";
+import { EventsGridModel, MilestoneEvent } from "../../../models/event";
 import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import {
@@ -29,7 +29,11 @@ import workService from "../../../services/workService/workService";
 import { makeStyles } from "@mui/styles";
 import TrackDialog from "../../shared/TrackDialog";
 import TaskForm from "../task/TaskForm";
-import { EVENT_STATUS, statusOptions } from "../../../models/taskEvent";
+import {
+  EVENT_STATUS,
+  TaskEvent,
+  statusOptions,
+} from "../../../models/taskEvent";
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
@@ -82,11 +86,13 @@ const IButton = styled(IconButton)({
 
 const EventList = () => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
+  const [milestoneEvent, setMilestoneEvent] = React.useState<MilestoneEvent>();
+  const [taskEvent, setTaskEvent] = React.useState<TaskEvent>();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
   const [showMilestoneForm, setShowMilestoneForm] =
     React.useState<boolean>(false);
-  const [eventId, setEventId] = React.useState<number | undefined>();
+  // const [eventId, setEventId] = React.useState<number | undefined>();
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
     React.useState<boolean>(false);
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
@@ -133,34 +139,27 @@ const EventList = () => {
     let result: EventsGridModel[] = [];
     if (ctx.work?.id && ctx.selectedWorkPhase?.phase.id) {
       setLoading(true);
-      Promise.all([
-        getMilestoneEvents(Number(ctx.selectedWorkPhase.id)),
-        getTaskEvents(
-          Number(ctx.work?.id),
-          Number(ctx.selectedWorkPhase.phase.id)
-        ),
-      ]).then((data: Array<EventsGridModel[]>) => {
-        setLoading(false);
-        data.forEach((array: EventsGridModel[]) => {
-          result = result.concat(array);
-        });
-        result = result.sort((a, b) =>
-          Moment(a.start_date).diff(b.start_date, "seconds")
-        );
-        setEvents(result);
-      });
+      Promise.all([getMilestoneEvents(), getTaskEvents()]).then(
+        (data: Array<EventsGridModel[]>) => {
+          setLoading(false);
+          data.forEach((array: EventsGridModel[]) => {
+            result = result.concat(array);
+          });
+          result = result.sort((a, b) =>
+            Moment(a.start_date).diff(b.start_date, "seconds")
+          );
+          setEvents(result);
+        }
+      );
     }
     setRowSelection({});
   }, [ctx.work, ctx.selectedWorkPhase?.phase.id]);
-  const getTaskEvents = async (
-    workId: number,
-    currentPhase: number
-  ): Promise<EventsGridModel[]> => {
+  const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
       const taskResult = await taskEventService.getAllByWorkNdPhase(
-        Number(workId),
-        Number(currentPhase)
+        Number(ctx.work?.id),
+        Number(ctx.selectedWorkPhase?.phase.id)
       );
       if (taskResult.status === 200) {
         result = (taskResult.data as EventsGridModel[]).map((element) => {
@@ -176,9 +175,7 @@ const EventList = () => {
     }
     return Promise.resolve(result);
   };
-  const getMilestoneEvents = async (
-    workPhaseId: number
-  ): Promise<EventsGridModel[]> => {
+  const getMilestoneEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
       const milestoneResult = await eventService.GetMilestoneEvents(
@@ -219,7 +216,9 @@ const EventList = () => {
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
-    setEventId(undefined);
+    // setEventId(undefined);
+    setTaskEvent(undefined);
+    setMilestoneEvent(undefined);
   }, [ctx.work, ctx.selectedWorkPhase]);
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -437,9 +436,15 @@ const EventList = () => {
   );
   const onRowClick = (event: any, row: EventsGridModel) => {
     event.preventDefault();
-    setEventId(row.id);
-    setShowTaskForm(row.type === EVENT_TYPE.TASK);
-    setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
+    // setEventId(row.id);
+    if (row.type === EVENT_TYPE.MILESTONE) {
+      getMilestoneEvent(row.id);
+      setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
+    }
+    if (row.type === EVENT_TYPE.TASK) {
+      getTaskEvent(row.id);
+      setShowTaskForm(row.type === EVENT_TYPE.TASK);
+    }
     setShowDeleteMilestoneButton(
       row.type === EVENT_TYPE.MILESTONE && !row.mandatory
     );
@@ -448,7 +453,45 @@ const EventList = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
-    setEventId(undefined);
+    // setEventId(undefined);
+    setMilestoneEvent(undefined);
+    setTaskEvent(undefined);
+  };
+
+  const getMilestoneEvent = async (eventId: number) => {
+    try {
+      const result = await eventService.getById(eventId);
+      if (result.status === 200) {
+        const event = result.data as MilestoneEvent;
+        setMilestoneEvent(event);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
+
+  const getTaskEvent = async (eventId: number) => {
+    try {
+      const result = await taskEventService.getById(Number(eventId));
+      if (result.status === 200) {
+        const assignee_ids: any[] = (result.data as any)["assignees"].map(
+          (p: any) => p["assignee_id"]
+        );
+        const responsibility_ids: any[] = (result.data as any)[
+          "responsibilities"
+        ].map((p: any) => p["responsibility_id"]);
+        const taskEvent = result.data as TaskEvent;
+        taskEvent.assignee_ids = assignee_ids;
+        taskEvent.responsibility_ids = responsibility_ids;
+        setTaskEvent(taskEvent);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
   };
 
   const getTemplateUploadStatus = React.useCallback(async () => {
@@ -633,7 +676,7 @@ const EventList = () => {
   };
 
   const deleteMilestone = async () => {
-    const response = await eventService.deleteMilestone(eventId);
+    const response = await eventService.deleteMilestone(milestoneEvent?.id);
     try {
       if (response.status === 200) {
         showNotification("Deleted successfully", {
@@ -647,7 +690,7 @@ const EventList = () => {
   };
 
   const handleDelete = () => {
-    if (eventId === undefined) {
+    if (milestoneEvent === undefined) {
       deleteTasks();
     } else {
       deleteMilestone();
@@ -670,11 +713,10 @@ const EventList = () => {
           }}
         >
           <Button
-            variant="outlined"
+            variant="text"
             startIcon={<DeleteIcon className={classes.deleteIcon} />}
             sx={{
-              color: Palette.primary.accent.main,
-              border: "none",
+              border: `2px solid ${Palette.white}`,
             }}
             onClick={() => setShowDeleteDialog(true)}
           >
@@ -840,12 +882,11 @@ const EventList = () => {
           },
         }}
       >
-        <TaskForm onSave={onDialogClose} eventId={eventId} />
+        <TaskForm onSave={onDialogClose} taskEvent={taskEvent} />
       </TrackDialog>
       <TrackDialog
         open={showMilestoneForm}
-        dialogTitle="Add Milestone"
-        //onClose={(event, reason) => onDialogClose(event, reason)}
+        dialogTitle={milestoneEvent ? milestoneEvent.name : "Add Milestone"}
         disableEscapeKeyDown
         fullWidth
         maxWidth="md"
@@ -861,7 +902,7 @@ const EventList = () => {
         }}
         additionalActions={deleteAction}
       >
-        <EventForm onSave={onDialogClose} eventId={eventId} />
+        <EventForm onSave={onDialogClose} event={milestoneEvent} />
       </TrackDialog>
       <TrackDialog
         open={showTemplateForm}

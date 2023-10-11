@@ -40,15 +40,15 @@ import PCPInput from "./components/PCPInput";
 
 interface TaskFormProps {
   onSave: () => void;
-  eventId?: number;
+  event?: MilestoneEvent;
 }
 interface NumberOfDaysChangeProps {
   numberOfDays?: number | undefined;
   anticipatedDate?: string | undefined;
   actualDate?: string | undefined;
 }
-const EventForm = ({ onSave, eventId }: TaskFormProps) => {
-  const [event, setEvent] = React.useState<MilestoneEvent>();
+const EventForm = ({ onSave, event }: TaskFormProps) => {
+  // const [event, setEvent] = React.useState<MilestoneEvent>();
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<
     EventConfiguration[]
@@ -103,11 +103,11 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
     control,
   } = methods;
 
-  React.useEffect(() => {
-    if (eventId) {
-      getEvent();
-    }
-  }, [eventId]);
+  // React.useEffect(() => {
+  //   if (eventId) {
+  //     getEvent();
+  //   }
+  // }, [eventId]);
 
   React.useEffect(() => {
     if (selectedConfiguration && selectedConfiguration.multiple_days) {
@@ -122,10 +122,21 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   React.useEffect(() => {
     if (event) {
       reset(event);
-      daysOnChangeHandler();
+      daysOnChangeHandler({
+        anticipatedDate: !event.actual_date
+          ? undefined
+          : event.anticipated_date,
+        actualDate: event.actual_date ? event.actual_date : undefined,
+        numberOfDays: event.number_of_days,
+      });
       setTitleCharacterCount(Number(event?.name.length));
     }
-  }, [event]);
+  }, [
+    event,
+    numberOfDaysRef?.current,
+    endDateRef?.current,
+    anticipatedDateRef?.current,
+  ]);
 
   React.useEffect(() => {
     if (configurations && event) {
@@ -138,30 +149,16 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
 
   React.useEffect(() => {
     getConfigurations();
-  }, []);
+  }, [event]);
 
   const getConfigurations = async () => {
     try {
       const result = await configurationService.getAll(
         Number(ctx.selectedWorkPhase?.id),
-        eventId === undefined ? false : undefined
+        event === undefined ? false : undefined
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-
-  const getEvent = async () => {
-    try {
-      const result = await eventService.getById(Number(eventId));
-      if (result.status === 200) {
-        const event = result.data as MilestoneEvent;
-        setEvent(event);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -202,10 +199,10 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
   const saveEvent = React.useCallback(
     async (data?: MilestoneEvent) => {
       const dataToBeSubmitted = data || submittedEvent;
-      if (eventId) {
+      if (event) {
         const createResult = await eventService.update(
           dataToBeSubmitted,
-          Number(eventId)
+          Number(event.id)
         );
         if (createResult.status === 200) {
           showNotification("Milestone details updated", {
@@ -230,7 +227,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
         }
       }
     },
-    [eventId, submittedEvent]
+    [event, submittedEvent]
   );
 
   const onChangeMilestoneType = (configuration_id: number) => {
@@ -297,7 +294,7 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 options={configurations || []}
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
-                disabled={!!eventId}
+                disabled={!!event}
                 onHandleChange={(configuration_id) =>
                   onChangeMilestoneType(configuration_id)
                 }
@@ -323,6 +320,28 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                 helperText={errors?.name?.message?.toString()}
                 {...register("name")}
                 onChange={onChangeTitle}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <ETFormLabel>Description</ETFormLabel>
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                error={!!errors?.description?.message}
+                helperText={errors?.description?.message?.toString()}
+                {...register("description")}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <ControlledSwitch
+                    {...register("high_priority")}
+                    defaultChecked={event?.high_priority}
+                  />
+                }
+                label="High Priority"
               />
             </Grid>
             <Grid item xs={6}>
@@ -401,28 +420,6 @@ const EventForm = ({ onSave, eventId }: TaskFormProps) => {
                     />
                   </LocalizationProvider>
                 )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <ETFormLabel>Description</ETFormLabel>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                error={!!errors?.description?.message}
-                helperText={errors?.description?.message?.toString()}
-                {...register("description")}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <ControlledSwitch
-                    {...register("high_priority")}
-                    defaultChecked={event?.high_priority}
-                  />
-                }
-                label="High Priority"
               />
             </Grid>
           </Grid>
