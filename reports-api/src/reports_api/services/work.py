@@ -40,7 +40,7 @@ from reports_api.services.phaseservice import PhaseService
 from reports_api.utils.datetime_helper import get_start_of_day
 
 
-class WorkService:
+class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
 
     @classmethod
