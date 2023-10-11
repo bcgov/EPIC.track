@@ -270,7 +270,7 @@ export const ETGridTitle = ({
 }: LinkHeaderProps) => {
   const classes = useStyle();
   return (
-    <ETLink to={rest.to} onClick={rest.onClick}>
+    <ETLink onClick={rest.onClick} {...rest}>
       <Tooltip
         title={rest.tooltip as string}
         disableHoverListener={!rest.enableTooltip}

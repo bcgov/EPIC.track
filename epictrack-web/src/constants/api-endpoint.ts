@@ -8,6 +8,8 @@ const Endpoints = {
   },
   Projects: {
     PROJECTS: "projects",
+    WORK_TYPES: "projects/:project_id/work-types",
+    FIRST_NATIONS: "projects/:project_id/first-nations",
   },
   Codes: {
     GET_CODES: "codes",
@@ -26,6 +28,10 @@ const Endpoints = {
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
     CHECK_TEMPLATE_UPLOAD_STATUS: "works/work-phases/:work_phase_id",
     WORK_FIRST_NATION_NOTES: "works/:work_id/first-nation-notes",
+    WORK_FIRST_NATIONS: "works/:work_id/first-nations",
+    DOWNLOAD_WORK_FIRST_NATIONS: "works/:work_id/first-nations/download",
+    WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
+    WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

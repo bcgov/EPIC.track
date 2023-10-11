@@ -14,11 +14,7 @@
 """Work resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import (
-    RequestBodyParameterSchema,
-    RequestPathParameterSchema,
-    RequestQueryParameterSchema,
-)
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
 class WorkBodyParameterSchema(RequestBodyParameterSchema):
@@ -169,4 +165,26 @@ class WorkFirstNationNotesBodySchema(RequestBodyParameterSchema):
         metadata={"description": "First nation notes"},
         validate=validate.Length(min=1),
         required=True,
+    )
+
+
+class WorkTypeIdQueryParamSchema(RequestQueryParameterSchema):
+    """Work type id query parameters"""
+
+    work_type_id = fields.Int(
+        metadata={"description": "The id of the work type"},
+        validate=validate.Range(min=1),
+        load_default=None,
+        allow_none=True
+    )
+
+
+class WorkFirstNationImportBodyParamSchema(RequestBodyParameterSchema):
+    """Work First nation import body parameter schema"""
+
+    indigenous_nation_ids = fields.List(
+        fields.Int(validate=validate.Range(min=1)),
+        metadata={"description": "Ids of the first nations"},
+        required=True,
+        validate=validate.Length(min=1),
     )

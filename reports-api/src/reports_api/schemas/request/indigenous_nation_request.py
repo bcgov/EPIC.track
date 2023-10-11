@@ -14,6 +14,8 @@
 """Indigenous nation resource's input validations"""
 from marshmallow import fields, validate
 
+from reports_api.models.indigenous_work import PinEnum
+
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
@@ -60,4 +62,54 @@ class IndigenousNationIdPathParameterSchema(RequestPathParameterSchema):
         metadata={"description": "The id of the indigenous nation"},
         validate=validate.Range(min=1),
         required=True
+    )
+
+
+class WorkIndigenousNationIdPathParameterSchema(RequestPathParameterSchema):
+    """Work indigenous nation id path parameter schema"""
+
+    work_nation_id = fields.Int(
+        metadata={"description": "Work indigenous nation id"},
+        validate=validate.Range(min=1),
+        required=True
+    )
+
+
+class IndigenousWorkBodyParameterSchema(RequestBodyParameterSchema):
+    """Indigenous work body parameter schema"""
+
+    indigenous_nation_id = fields.Int(
+        metadata={"description": "First nation ID"},
+        required=True,
+        validate=validate.Range(min=1)
+    )
+
+    indigenous_category_id = fields.Int(
+        metadata={"description": "Indigenous Category ID"},
+        required=False,
+        allow_none=True,
+        missing=None,
+        validate=validate.Range(min=1)
+    )
+
+    pin = fields.Str(
+        metadata={"description": "First nation PIN status"},
+        required=False,
+        validate=validate.OneOf([x.value for x in PinEnum.__iter__()]),
+        allow_none=True
+    )
+
+    is_active = fields.Bool(
+        metadata={"description": "First nation Work association is active or not"},
+        required=True
+    )
+
+
+class WorkNationExistenceCheckQueryParamSchema(RequestQueryParameterSchema):
+    """WorkNation Existence check query parameter"""
+
+    indigenous_nation_id = fields.Int(
+        metadata={"description": "First nation ID"},
+        required=True,
+        validate=validate.Range(min=1)
     )

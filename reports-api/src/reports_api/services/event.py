@@ -20,19 +20,11 @@ from sqlalchemy import and_, or_
 
 from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from reports_api.models import (
-    PRIMARY_CATEGORIES,
-    CalendarEvent,
-    Event,
-    EventCategoryEnum,
-    EventConfiguration,
-    WorkCalendarEvent,
-    WorkPhase,
-    db,
-)
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
 from reports_api.models.event_template import EventPositionEnum
 from reports_api.utils import util
-
 from reports_api.utils.datetime_helper import get_start_of_day
+
 from .event_configuration import EventConfigurationService
 
 
@@ -145,8 +137,8 @@ class EventService:  # pylint: disable=too-few-public-methods
             if current_work_phase.phase.legislated:
                 phase_events = list(
                     filter(
-                        lambda x, _work_phase_id=current_work_phase.id: x.event_configuration.work_phase_id
-                        == _work_phase_id,
+                        lambda x, _work_phase_id=current_work_phase.id: x.event_configuration.work_phase_id ==
+                        _work_phase_id,
                         all_work_events,
                     )
                 )
@@ -156,9 +148,8 @@ class EventService:  # pylint: disable=too-few-public-methods
                     else util.find_index_in_array(phase_events, event)
                 )
                 if (
-                    event.event_configuration.event_position
-                    == EventPositionEnum.START.value
-                    or event.event_configuration.event_category_id
+                    event.event_configuration.event_position == EventPositionEnum.START.value or
+                    event.event_configuration.event_category_id
                     in [
                         EventCategoryEnum.EXTENSION.value,
                         EventCategoryEnum.SUSPENSION.value,
@@ -168,8 +159,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                     if cls._find_event_date(event) >= current_work_phase.end_date:
                         end_event = next(
                             filter(
-                                lambda x: x.event_configuration.event_position
-                                == EventPositionEnum.END.value,
+                                lambda x: x.event_configuration.event_position == EventPositionEnum.END.value,
                                 phase_events,
                             )
                         )
@@ -190,8 +180,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                 else:
                     phase_events = list(
                         filter(
-                            lambda x: x.event_configuration.event_position
-                            != EventPositionEnum.END.value,
+                            lambda x: x.event_configuration.event_position != EventPositionEnum.END.value,
                             phase_events,
                         )
                     )
@@ -266,13 +255,11 @@ class EventService:  # pylint: disable=too-few-public-methods
             if event_to_update.id != event.id:
                 if event_to_update.actual_date:
                     event_to_update.actual_date = (
-                        event_to_update.actual_date
-                        + timedelta(days=number_of_days_to_be_pushed)
+                        event_to_update.actual_date + timedelta(days=number_of_days_to_be_pushed)
                     )
                 elif event_to_update.anticipated_date:
                     event_to_update.anticipated_date = (
-                        event_to_update.anticipated_date
-                        + timedelta(days=number_of_days_to_be_pushed)
+                        event_to_update.anticipated_date + timedelta(days=number_of_days_to_be_pushed)
                     )
                 event_to_update.update(
                     event_to_update.as_dict(recursive=False), commit=False
@@ -295,8 +282,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         for each_work_phase in enumerate(work_phases):
             phase_events = list(
                 filter(
-                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id
-                    == _work_phase_id,
+                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id ==
+                    _work_phase_id,
                     all_work_events,
                 )
             )
@@ -320,8 +307,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                 not in [
                     EventCategoryEnum.EXTENSION.value,
                     EventCategoryEnum.SUSPENSION.value,
-                ]
-                or each_work_phase.id != current_work_phase.id
+                ] or each_work_phase.id != current_work_phase.id
             ):
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
@@ -337,8 +323,8 @@ class EventService:  # pylint: disable=too-few-public-methods
     def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
         """Anticipated date of end event cannot be changed"""
         if (
-            event.event_configuration.event_position == EventPositionEnum.END.value
-            and (event_old.anticipated_date - event.anticipated_date).days != 0
+            event.event_configuration.event_position == EventPositionEnum.END.value and
+            (event_old.anticipated_date - event.anticipated_date).days != 0
         ):
             raise UnprocessableEntityError(
                 "Anticipated date of the phase end event should not be changed"
@@ -357,8 +343,8 @@ class EventService:  # pylint: disable=too-few-public-methods
             phase_events = list(
                 filter(
                     lambda x,
-                    _work_phase_id=event.event_configuration.work_phase_id: x.event_configuration.work_phase_id
-                    == _work_phase_id,
+                    _work_phase_id=event.event_configuration.work_phase_id: x.event_configuration.work_phase_id ==
+                    _work_phase_id,
                     all_work_events,
                 )
             )
@@ -371,14 +357,10 @@ class EventService:  # pylint: disable=too-few-public-methods
                     event_index = index
                     break
             if (
-                event_index > 0
-                and event.actual_date
-                and (
-                    not phase_events[event_index - 1].actual_date
-                    and not phase_events[
+                event_index > 0 and event.actual_date and (
+                    not phase_events[event_index - 1].actual_date and not phase_events[
                         event_index - 1
-                    ].event_configuration.event_position
-                    == EventPositionEnum.END.value
+                    ].event_configuration.event_position == EventPositionEnum.END.value
                 )
             ):
                 raise UnprocessableEntityError(

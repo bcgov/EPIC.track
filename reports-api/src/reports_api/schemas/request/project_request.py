@@ -129,3 +129,20 @@ class ProjectIdPathParameterSchema(RequestPathParameterSchema):
         validate=validate.Range(min=1),
         required=True
     )
+
+
+class ProjectFirstNationsQueryParamSchema(RequestQueryParameterSchema):
+    """Project first nations query parameters"""
+
+    work_id = fields.Int(
+        metadata={"description": "The id of the work"},
+        validate=validate.Range(min=1),
+        required=True
+    )
+    work_type_id = fields.Int(
+        metadata={"description": "The id of the work type"},
+        validate=validate.Range(min=1),
+        load_default=None,
+        allow_none=True,
+        missing=None
+    )
