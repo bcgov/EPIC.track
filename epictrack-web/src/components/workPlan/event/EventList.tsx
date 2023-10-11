@@ -126,12 +126,18 @@ const EventList = () => {
   }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
 
   React.useEffect(() => {
-    const options: OptionType[] = ctx.team.map((staff) => {
-      return {
-        value: staff.staff_id.toString(),
-        label: staff.staff.full_name,
-      };
-    });
+    const options: OptionType[] = ctx.team
+      .filter((staff) => staff.is_active)
+      .map((staff) => {
+        return {
+          value: staff.staff_id.toString(),
+          label: staff.staff.full_name,
+        };
+      })
+      .filter(
+        (ele, index, arr) =>
+          arr.findIndex((t) => t.value === ele.value) === index
+      );
     setStaffSelectOptions(options);
   }, [ctx.team]);
 
@@ -768,6 +774,7 @@ const EventList = () => {
                 placeholder="Assign To"
                 filterAppliedCallback={assignTasks}
                 name="assignTo"
+                info={true}
               />
               <FilterSelect
                 options={responsibilities}
@@ -776,6 +783,7 @@ const EventList = () => {
                 filterAppliedCallback={assignResponsibility}
                 name="responsibility"
                 isMulti
+                info={true}
               />
               <FilterSelect
                 options={statusOptions}
@@ -783,15 +791,20 @@ const EventList = () => {
                 placeholder="Progress"
                 filterAppliedCallback={assignProgress}
                 name="progress"
+                info={true}
               />
               <Button
-                variant="outlined"
+                variant="text"
                 startIcon={<DeleteIcon className={classes.deleteIcon} />}
                 sx={{
                   color: Palette.primary.accent.main,
                   border: "none",
+                  "&:hover": {
+                    backgroundColor: Palette.neutral.bg.main,
+                  },
                 }}
                 onClick={() => setShowDeleteDialog(true)}
+                color="primary"
               >
                 Delete
               </Button>
