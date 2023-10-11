@@ -21,7 +21,7 @@ const PCPInput = () => {
   return (
     <>
       <Grid item xs={6}>
-        <ETFormLabel required>Number of Responses</ETFormLabel>
+        <ETFormLabel>Number of Responses</ETFormLabel>
         <TextField
           fullWidth
           helperText={errors?.number_of_responses?.message?.toString()}
@@ -36,27 +36,24 @@ const PCPInput = () => {
         />
       </Grid>
       <Grid item xs={6}>
-        <Grid item xs={6}>
-          <ETFormLabelWithCharacterLimit
-            characterCount={topicCount}
-            maxCharacterLength={150}
-          >
-            Topic
-          </ETFormLabelWithCharacterLimit>
-          <TextField
-            fullWidth
-            helperText={errors?.topic?.message?.toString()}
-            error={!!errors?.topic?.message}
-            InputProps={{
-              inputProps: {
-                maxLength: 150,
-              },
-            }}
-            type="number"
-            {...register("topic")}
-            onChange={topicChangeHandler}
-          />
-        </Grid>
+        <ETFormLabelWithCharacterLimit
+          characterCount={topicCount}
+          maxCharacterLength={150}
+        >
+          Topic
+        </ETFormLabelWithCharacterLimit>
+        <TextField
+          fullWidth
+          helperText={errors?.topic?.message?.toString()}
+          error={!!errors?.topic?.message}
+          InputProps={{
+            inputProps: {
+              maxLength: 150,
+            },
+          }}
+          {...register("topic")}
+          onChange={topicChangeHandler}
+        />
       </Grid>
     </>
   );

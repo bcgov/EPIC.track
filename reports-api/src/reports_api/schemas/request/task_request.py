@@ -170,7 +170,7 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         fields.Int(validate=validate.Range(min=1)),
         metadata={"description": "Ids of the responsible entities"},
         required=False,
-        validate=validate.Length(min=1),
+        validate=validate.Length(min=0),
     )
 
     start_date = fields.DateTime(
