@@ -13,34 +13,49 @@
 # limitations under the License.
 """Model to handle all operations related to Indigenous Work."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+import enum
 
 from .base_model import BaseModelVersioned
+
+
+class PinEnum(enum.Enum):
+    """Pin enum"""
+
+    YES = 'Yes'
+    NO = 'No'
 
 
 class IndigenousWork(BaseModelVersioned):
     """Model class for IndigenousWork."""
 
-    __tablename__ = 'indigenous_works'
+    __tablename__ = "indigenous_works"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    work_id = Column(ForeignKey('works.id'), nullable=False)
-    indigenous_nation_id = Column(ForeignKey('indigenous_nations.id'), nullable=False)
-    indigenous_category_id = Column(ForeignKey('indigenous_categories.id'), nullable=False)
+    work_id = Column(ForeignKey("works.id"), nullable=False)
+    indigenous_nation_id = Column(ForeignKey("indigenous_nations.id"), nullable=False)
+    indigenous_category_id = Column(
+        ForeignKey("indigenous_categories.id"), nullable=True, default=None
+    )
     is_deleted = Column(Boolean(), default=False, nullable=False)
+    pin = Column(String(100))
 
-    work = relationship('Work', foreign_keys=[work_id], lazy='select')
-    indigenous_nation = relationship('IndigenousNation', foreign_keys=[indigenous_nation_id], lazy='select')
-    indigenous_category = relationship('IndigenousCategory', foreign_keys=[indigenous_category_id], lazy='select')
+    work = relationship("Work", foreign_keys=[work_id], lazy="select")
+    indigenous_nation = relationship(
+        "IndigenousNation", foreign_keys=[indigenous_nation_id], lazy="select"
+    )
+    indigenous_category = relationship(
+        "IndigenousCategory", foreign_keys=[indigenous_category_id], lazy="select"
+    )
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return Json representation."""
         return {
-            'id': self.id,
-            'work_id': self.work_id,
-            'indigenous_nation': self.indigenous_nation.as_dict(),
-            'indigenous_category': self.indigenous_category.as_dict()
+            "id": self.id,
+            "work_id": self.work_id,
+            "indigenous_nation": self.indigenous_nation.as_dict(),
+            "indigenous_category": self.indigenous_category.as_dict(),
         }
 
     @classmethod

@@ -3,6 +3,7 @@ import http from "../../apiManager/http-request-handler";
 import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
+import { WorkFirstNation } from "../../models/firstNation";
 
 class WorkService implements ServiceBase {
   async getAll() {
@@ -122,6 +123,71 @@ class WorkService implements ServiceBase {
       workId.toString()
     );
     return await http.PatchRequest(url, { notes });
+  }
+
+  async getWorkFirstNations(workId: number) {
+    const url = Endpoints.Works.WORK_FIRST_NATIONS.replace(
+      ":work_id",
+      workId.toString()
+    );
+    return await http.GetRequest(url);
+  }
+
+  async getWorkFirstNation(workNationId: number) {
+    const query = `${Endpoints.Works.WORK_FIRST_NATION.replace(
+      ":work_first_nation_id",
+      workNationId.toString()
+    )}`;
+    return await http.GetRequest(query);
+  }
+
+  async updateFirstNation(data: WorkFirstNation, workNationId: number) {
+    const query = `${Endpoints.Works.WORK_FIRST_NATION.replace(
+      ":work_first_nation_id",
+      workNationId.toString()
+    )}`;
+    return await http.PutRequest(query, JSON.stringify(data));
+  }
+
+  async createFirstNation(data: WorkFirstNation, workId: number) {
+    const query = `${Endpoints.Works.WORK_FIRST_NATIONS.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+
+    return await http.PostRequest(query, JSON.stringify(data));
+  }
+
+  async importFirstNations(workId: number, data: any) {
+    const query = `${Endpoints.Works.WORK_IMPORT_FIRST_NATIONS.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+
+    return await http.PostRequest(query, JSON.stringify(data));
+  }
+
+  async downloadFirstNations(workId: number) {
+    return await http.PostRequest(
+      Endpoints.Works.DOWNLOAD_WORK_FIRST_NATIONS.replace(
+        ":work_id",
+        workId.toString()
+      ),
+      {},
+      {},
+      {
+        responseType: "blob",
+      }
+    );
+  }
+  async checkWorkNationExists(workId: number, indigenous_nation_id: number) {
+    const query = `${Endpoints.Works.WORK_FIRST_NATIONS.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+    return await http.GetRequest(query + "/exists", {
+      indigenous_nation_id,
+    });
   }
 }
 export default new WorkService();

@@ -30,7 +30,6 @@ class IndigenousNation(db.Model, CodeTableVersioned):
     name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     pip_link = Column(URLType, default=None, nullable=True)
-    pin = Column(String(100))
 
     relationship_holder_id = Column(
         ForeignKey("staffs.id"), nullable=True, default=None
@@ -43,6 +42,7 @@ class IndigenousNation(db.Model, CodeTableVersioned):
         """Return JSON Representation."""
         result = CodeTableVersioned.as_dict(self)
         result["is_active"] = self.is_active
+        result["pip_link"] = self.pip_link
         result["relationship_holder_id"] = self.relationship_holder_id
         result["relationship_holder"] = (
             self.relationship_holder.as_dict() if self.relationship_holder else None

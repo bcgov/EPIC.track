@@ -19,6 +19,7 @@ from flask_restx import Namespace, Resource, cors
 
 from reports_api.schemas import request as req
 from reports_api.schemas import response as res
+from reports_api.schemas.work_type import WorkTypeSchema
 from reports_api.services import ProjectService
 from reports_api.utils import auth, profiletime
 from reports_api.utils.util import cors_preflight
@@ -108,3 +109,40 @@ class ValidateProject(Resource):
         project_id = args["project_id"]
         exists = ProjectService.check_existence(name=name, project_id=project_id)
         return {"exists": exists}, HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:project_id>/work-types", methods=["GET", "OPTIONS"])
+class ProjectWorkTypes(Resource):
+    """Endpoint resource to get all work types associated with a project."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(project_id):
+        """Return work types associated with a project."""
+        req.ProjectIdPathParameterSchema().load(request.view_args)
+        args = req.WorkIdPathParameterSchema().load(request.args)
+        work_id = args["work_id"]
+        work_types = ProjectService.find_project_work_types(project_id, work_id)
+        return WorkTypeSchema(many=True).dump(work_types), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:project_id>/first-nations", methods=["GET", "OPTIONS"])
+class ProjectFirstNations(Resource):
+    """Endpoint resource to get all first nations associated with a project."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(project_id):
+        """Return first nations associated with a project."""
+        req.ProjectIdPathParameterSchema().load(request.view_args)
+        args = req.ProjectFirstNationsQueryParamSchema().load(request.args)
+        work_type_id = args["work_type_id"]
+        work_id = args["work_id"]
+        first_nations = ProjectService.find_first_nations(project_id, work_id, work_type_id)
+        return res.IndigenousResponseNationSchema(many=True).dump(first_nations), HTTPStatus.OK

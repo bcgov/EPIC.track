@@ -87,7 +87,10 @@ class WorkResources(Resource):
     def get():
         """Return all resource and work details"""
         works = WorkService.find_allocated_resources()
-        return jsonify(res.WorkResourceResponseSchema(many=True).dump(works)), HTTPStatus.OK
+        return (
+            jsonify(res.WorkResourceResponseSchema(many=True).dump(works)),
+            HTTPStatus.OK,
+        )
 
 
 @cors_preflight("GET, DELETE, PUT")
@@ -140,7 +143,10 @@ class WorkPhases(Resource):
         """Return a phase details based on id."""
         req.WorkIdPathParameterSchema().load(request.view_args)
         work_phases = WorkPhaseService.find_by_work_id(work_id)
-        return res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases), HTTPStatus.OK
+        return (
+            res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases),
+            HTTPStatus.OK,
+        )
 
 
 @cors_preflight("GET, POST")
@@ -211,8 +217,12 @@ class ValidateWorkStaff(Resource):
         """Check for existing staff work"""
         req.WorkIdPathParameterSchema().load(request.view_args)
         args = req.StaffWorkExistenceCheckQueryParamSchema().load(request.args)
-        exists = WorkService.check_work_staff_existence(work_id, args.get("staff_id"),
-                                                        args.get("role_id"), args.get("work_staff_id"))
+        exists = WorkService.check_work_staff_existence(
+            work_id,
+            args.get("staff_id"),
+            args.get("role_id"),
+            args.get("work_staff_id"),
+        )
         return {"exists": exists}, HTTPStatus.OK
 
 
@@ -230,7 +240,9 @@ class WorkPlan(Resource):
         args = req.WorkPlanDownloadQueryParamSchema().load(request.args)
         work_phase_id = args.get("work_phase_id")
         file = WorkService.generate_workplan(work_phase_id)
-        return send_file(BytesIO(file), as_attachment=True, download_name="work_plan.xlsx")
+        return send_file(
+            BytesIO(file), as_attachment=True, download_name="work_plan.xlsx"
+        )
 
 
 @cors_preflight("GET")
@@ -245,12 +257,17 @@ class WorkPhaseTemplateStatus(Resource):
     def get(work_phase_id):
         """Get the status if template upload is available"""
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
-        template_upload_status = WorkPhaseService.get_template_upload_status(work_phase_id)
-        return res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status), HTTPStatus.OK
+        template_upload_status = WorkPhaseService.get_template_upload_status(
+            work_phase_id
+        )
+        return (
+            res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status),
+            HTTPStatus.OK,
+        )
 
 
-@cors_preflight("GET")
-@API.route("/<int:work_id>/first-nations", methods=["GET", "OPTIONS"])
+@cors_preflight("GET,POST")
+@API.route("/<int:work_id>/first-nations", methods=["GET", "POST", "OPTIONS"])
 class WorkFirstNations(Resource):
     """Endpoints to handle work and first nation"""
 
@@ -263,7 +280,26 @@ class WorkFirstNations(Resource):
         req.WorkIdPathParameterSchema().load(request.view_args)
         args = req.BasicRequestQueryParameterSchema().load(request.args)
         first_nations = WorkService.find_first_nations(work_id, args.get("is_active"))
-        return res.WorkIndigenousNationResponseSchema(many=True).dump(first_nations), HTTPStatus.OK
+        return (
+            res.WorkIndigenousNationResponseSchema(many=True).dump(first_nations),
+            HTTPStatus.OK,
+        )
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id):
+        """Create new work first nation association"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        request_json = req.IndigenousWorkBodyParameterSchema().load(API.payload)
+        work_indigenous_nation = WorkService.create_work_indigenous_nation(
+            work_id, request_json
+        )
+        return (
+            res.WorkIndigenousNationResponseSchema().dump(work_indigenous_nation),
+            HTTPStatus.CREATED,
+        )
 
 
 @cors_preflight("PATCH")
@@ -281,3 +317,95 @@ class WorkFirstNationNotes(Resource):
         notes = req.WorkFirstNationNotesBodySchema().load(API.payload)["notes"]
         work = WorkService.save_first_nation_notes(work_id, notes)
         return res.WorkResourceResponseSchema().dump(work), HTTPStatus.OK
+
+
+@cors_preflight("GET, PUT")
+@API.route("/first-nations/<int:work_nation_id>", methods=["GET", "PUT", "OPTIONS"])
+class WorkFirstNation(Resource):
+    """Endpoint to handle work staff"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_nation_id):
+        """Get the active fist nation assigned to the work"""
+        req.WorkIndigenousNationIdPathParameterSchema().load(request.view_args)
+        work_first_nation = WorkService.find_work_first_nation(work_nation_id)
+        return (
+            res.WorkIndigenousNationResponseSchema().dump(work_first_nation),
+            HTTPStatus.OK,
+        )
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def put(work_nation_id):
+        """Get all the active staff allocated to the work"""
+        req.WorkIndigenousNationIdPathParameterSchema().load(request.view_args)
+        request_json = req.IndigenousWorkBodyParameterSchema().load(API.payload)
+        work_indigenous_nation = WorkService.update_work_indigenous_nation(
+            work_nation_id, request_json
+        )
+        return (
+            res.WorkIndigenousNationResponseSchema().dump(work_indigenous_nation),
+            HTTPStatus.OK,
+        )
+
+
+@cors_preflight("POST")
+@API.route("/<int:work_id>/first-nations/download", methods=["POST", "OPTIONS"])
+class WorkFirstNationsDownload(Resource):
+    """Endpoints to download first nations for given work in Excel format"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id):
+        """Return first nations based on work id"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        file = WorkService.generate_first_nations_excel(work_id)
+        return send_file(
+            BytesIO(file), as_attachment=True, download_name="first_nations.xlsx"
+        )
+
+
+@cors_preflight("POST")
+@API.route("/<int:work_id>/first-nations/import", methods=["POST", "OPTIONS"])
+class WorkFirstNationsImport(Resource):
+    """Endpoints to import first nations"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id):
+        """Return first nations based on work id"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        indigenous_nation_ids = req.WorkFirstNationImportBodyParamSchema().load(
+            API.payload
+        )["indigenous_nation_ids"]
+        response = WorkService.import_first_nations(work_id, indigenous_nation_ids)
+        return response, HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:work_id>/first-nations/exists", methods=["GET", "OPTIONS"])
+class ValidateWorkNation(Resource):
+    """Endpoint to check the existence of first nation in work"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id):
+        """Check for existing first nation work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        args = req.WorkNationExistenceCheckQueryParamSchema().load(request.args)
+        exists = WorkService.check_work_nation_existence(
+            work_id,
+            args.get("indigenous_nation_id"),
+        )
+        return {"exists": exists}, HTTPStatus.OK

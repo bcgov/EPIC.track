@@ -21,12 +21,15 @@ from .event_request import (
 from .event_template_request import EventTemplateBodyParameterSchema
 from .indigenous_nation_request import (
     IndigenousNationBodyParameterSchema, IndigenousNationExistenceQueryParamSchema,
-    IndigenousNationIdPathParameterSchema)
+    IndigenousNationIdPathParameterSchema, IndigenousWorkBodyParameterSchema, WorkIndigenousNationIdPathParameterSchema,
+    WorkNationExistenceCheckQueryParamSchema)
 from .outcome_configuration_request import (
     OutcomeConfigurationBodyParameterSchema, OutcomeConfigurationQueryParameterSchema)
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
 from .phase_request import PhaseBodyParameterSchema
-from .project_request import ProjectBodyParameterSchema, ProjectExistenceQueryParamSchema, ProjectIdPathParameterSchema
+from .project_request import (
+    ProjectBodyParameterSchema, ProjectExistenceQueryParamSchema, ProjectFirstNationsQueryParamSchema,
+    ProjectIdPathParameterSchema)
 from .proponent_request import (
     ProponentBodyParameterSchema, ProponentExistenceQueryParamSchema, ProponentIdPathParameterSchema)
 from .reminder_configuration_request import ReminderConfigurationExistenceQueryParamSchema
@@ -43,5 +46,6 @@ from .task_request import (
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (
-    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkFirstNationNotesBodySchema, WorkIdPathParameterSchema,
-    WorkIdPhaseIdPathParameterSchema, WorkPlanDownloadQueryParamSchema)
+    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkFirstNationImportBodyParamSchema,
+    WorkFirstNationNotesBodySchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
+    WorkPlanDownloadQueryParamSchema, WorkTypeIdQueryParamSchema)

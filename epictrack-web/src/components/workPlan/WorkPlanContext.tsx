@@ -55,6 +55,7 @@ export const WorkplanProvider = ({
     getWorkById();
     getWorkTeamMembers();
     getWorkPhases();
+    getWorkFirstNations();
   }, [workId]);
 
   const getWorkTeamMembers = React.useCallback(async () => {
@@ -90,6 +91,35 @@ export const WorkplanProvider = ({
       setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(String(workId));
       setWorkPhases(workPhasesResult.data as WorkPhase[]);
+      setLoading(false);
+    }
+  }, [workId]);
+
+  const getWorkFirstNations = React.useCallback(async () => {
+    if (workId) {
+      setLoading(true);
+      try {
+        const firstNationsResult = await workService.getWorkFirstNations(
+          Number(workId)
+        );
+        if (firstNationsResult.status === 200) {
+          const firstNations = (
+            firstNationsResult.data as WorkFirstNation[]
+          ).map((p) => {
+            return {
+              ...p,
+              status: p.is_active
+                ? ACTIVE_STATUS.ACTIVE
+                : ACTIVE_STATUS.INACTIVE,
+            };
+          });
+          setFirstNations(firstNations);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
+      }
       setLoading(false);
     }
   }, [workId]);

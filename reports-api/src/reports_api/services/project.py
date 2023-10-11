@@ -13,9 +13,14 @@
 # limitations under the License.
 """Service to manage Project."""
 from flask import current_app
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
+from sqlalchemy import and_
 
-from reports_api.models import Project
+from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
+from reports_api.models import Project, db
+from reports_api.models.indigenous_nation import IndigenousNation
+from reports_api.models.indigenous_work import IndigenousWork
+from reports_api.models.work import Work
+from reports_api.models.work_type import WorkType
 
 
 class ProjectService:
@@ -67,3 +72,48 @@ class ProjectService:
     def check_existence(cls, name, project_id=None):
         """Checks if a project exists with given name"""
         return Project.check_existence(name, project_id)
+
+    @classmethod
+    def find_project_work_types(cls, project_id: int, work_id: int) -> [WorkType]:
+        """Find all work types associated with the project"""
+        return (
+            db.session.query(WorkType)
+            .join(
+                Work,
+                and_(
+                    Work.work_type_id == WorkType.id,
+                    Work.project_id == project_id,
+                    Work.id != work_id,
+                ),
+            )
+            .filter(
+                WorkType.is_active.is_(True),
+                WorkType.is_deleted.is_(False),
+            )
+            .all()
+        )
+
+    @classmethod
+    def find_first_nations(
+        cls, project_id: int, work_id: int, work_type_id: int = None
+    ) -> [IndigenousNation]:
+        """Find all first nations associated with the project"""
+        qry = (
+            db.session.query(IndigenousNation)
+            .join(
+                IndigenousWork,
+                IndigenousWork.indigenous_nation_id == IndigenousNation.id,
+            )
+            .join(
+                Work,
+                and_(Work.id == IndigenousWork.work_id, Work.project_id == project_id),
+            )
+            .filter(
+                IndigenousNation.is_active.is_(True),
+                IndigenousNation.is_deleted.is_(False),
+                Work.id != work_id,
+            )
+        )
+        if work_type_id:
+            qry.filter(Work.work_type_id == work_type_id)
+        return qry.all()

@@ -14,9 +14,11 @@
 """Service to manage Works."""
 from datetime import timedelta
 from io import BytesIO
+from itertools import product
 
 import pandas as pd
-from sqlalchemy import exc
+from flask import current_app
+from sqlalchemy import exc, tuple_
 from sqlalchemy.orm import aliased
 
 from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
@@ -29,6 +31,7 @@ from reports_api.models.indigenous_work import IndigenousWork
 from reports_api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from reports_api.schemas.response import (
     ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
+from reports_api.schemas.work_first_nation import WorkFirstNationSchema
 from reports_api.schemas.work_plan import WorkPlanSchema
 from reports_api.services.event import EventService
 from reports_api.services.event_template import EventTemplateService
@@ -434,8 +437,10 @@ class WorkService:
         cls, work_phase_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
-        milestone_events = EventService.find_milestone_events_by_work_phase(work_phase_id)
-        task_events = None  # TaskService.find_task_events(work_id, phase_id)
+        milestone_events = EventService.find_milestone_events_by_work_phase(
+            work_phase_id
+        )
+        task_events = []  # TaskService.find_task_events(work_id, phase_id)
 
         work_plan_schema = WorkPlanSchema(many=True)
         work_plan_schema.context["type"] = "Milestone"
@@ -497,7 +502,7 @@ class WorkService:
                 IndigenousWork.work_id == work_id,
                 IndigenousNation.is_active.is_(True),
                 IndigenousNation.is_deleted.is_(False),
-            )
+            ).order_by(IndigenousNation.name)
         )
         if is_active is not None:
             query = query.filter(IndigenousWork.is_active.is_(is_active))
@@ -510,3 +515,160 @@ class WorkService:
         work.first_nation_notes = notes
         work.save()
         return work
+
+    @classmethod
+    def find_work_first_nation(cls, work_nation_id: int) -> IndigenousWork:
+        """Find work indigenous nation by id"""
+        work_indigenous_nation = (
+            db.session.query(IndigenousWork)
+            .filter(IndigenousWork.id == work_nation_id)
+            .scalar()
+        )
+        if not work_indigenous_nation:
+            raise ResourceExistsError("No work first nation association found")
+        return work_indigenous_nation
+
+    @classmethod
+    def create_work_indigenous_nation(
+        cls, work_id: int, data: dict, commit: bool = True
+    ) -> IndigenousWork:
+        """Create Indigenous Work"""
+        if cls.check_work_nation_existence(work_id, data.get("indigenous_nation_id")):
+            raise ResourceExistsError("First nation Work association already exists")
+        indigenous_work = IndigenousWork(
+            **{
+                "work_id": work_id,
+                "indigenous_nation_id": data.get("indigenous_nation_id"),
+                "indigenous_category_id": data.get("indigenous_category_id", None),
+                "pin": data.get("pin", None),
+                "is_active": data.get("is_active"),
+            }
+        )
+        indigenous_work.flush()
+        if commit:
+            db.session.commit()
+        return indigenous_work
+
+    @classmethod
+    def update_work_indigenous_nation(
+        cls, work_indigenous_nation_id: int, data: dict
+    ) -> IndigenousWork:
+        """Update work indigenous nation"""
+        work_indigenous_nation = (
+            db.session.query(IndigenousWork)
+            .filter(IndigenousWork.id == work_indigenous_nation_id)
+            .scalar()
+        )
+        if not work_indigenous_nation:
+            raise ResourceNotFoundError("No first nation work association found")
+        if cls.check_work_nation_existence(
+            work_indigenous_nation.work_id,
+            data.get("indigenous_nation_id"),
+            work_indigenous_nation_id,
+        ):
+            raise ResourceExistsError("First nation Work association already exists")
+        work_indigenous_nation.is_active = data.get("is_active")
+        work_indigenous_nation.indigenous_category_id = data.get(
+            "indigenous_category_id"
+        )
+        work_indigenous_nation.pin = data.get("pin")
+        work_indigenous_nation.flush()
+        db.session.commit()
+        return work_indigenous_nation
+
+    @classmethod
+    def generate_first_nations_excel(
+        cls, work_id: int
+    ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
+        """Generate the workplan excel file for given work and phase"""
+        first_nations = cls.find_first_nations(work_id, None)
+
+        schema = WorkFirstNationSchema(many=True)
+        data = schema.dump(first_nations)
+
+        data = pd.DataFrame(data)
+
+        file_buffer = BytesIO()
+        columns = [
+            "nation",
+            "pin",
+            "relationship_holder",
+            "pip_link",
+            "active",
+        ]
+        headers = [
+            "Nation",
+            "PIN",
+            "Relationship Holder",
+            "PIP Link",
+            "Active",
+        ]
+        data.to_excel(file_buffer, index=False, columns=columns, header=headers)
+        file_buffer.seek(0, 0)
+        return file_buffer.getvalue()
+
+    @classmethod
+    def import_first_nations(cls, work_id: int, indigenous_nation_ids: [int]):
+        """Create associations for given work and first nations"""
+        existing_first_nations_qry = db.session.query(IndigenousWork).filter(
+            IndigenousWork.work_id == work_id,
+            IndigenousWork.is_deleted.is_(False),
+        )
+
+        existing_first_nations = list(
+            map(
+                lambda x: {
+                    "work_id": x.work_id,
+                    "indigenous_nation_id": x.indigenous_nation_id,
+                },
+                existing_first_nations_qry.filter(
+                    IndigenousWork.indigenous_nation_id.in_(indigenous_nation_ids),
+                ).all(),
+            )
+        )
+
+        # Mark removed entries as inactive
+        # TODO:CHECK THIS LOGIC
+        disabled_count = existing_first_nations_qry.filter(
+            IndigenousWork.is_active.is_(True),
+            IndigenousWork.indigenous_nation_id.notin_(indigenous_nation_ids),
+        ).update({"is_active": False})
+        current_app.logger.info(f"Disabled {disabled_count} IndigenousWork")
+
+        # Update existing entries to be active
+        enabled_count = existing_first_nations_qry.filter(
+            tuple_(IndigenousWork.work_id, IndigenousWork.indigenous_nation_id).in_(
+                [
+                    (x["work_id"], x["indigenous_nation_id"])
+                    for x in existing_first_nations
+                    if x["indigenous_nation_id"] in indigenous_nation_ids
+                ]
+            )
+        ).update({"is_active": True})
+        current_app.logger.info(f"Enabled {enabled_count} IndigenousWorks")
+
+        keys = ("work_id", "indigenous_nation_id")
+        indigenous_works = [
+            task_assignee
+            for i, j in product([work_id], indigenous_nation_ids)
+            if (task_assignee := dict(zip(keys, (i, j)))) not in existing_first_nations
+        ]
+        db.session.bulk_insert_mappings(IndigenousWork, mappings=indigenous_works)
+        db.session.commit()
+        return "Imported successfully"
+
+    @classmethod
+    def check_work_nation_existence(
+        cls, work_id: int, nation_id: int, work_nation_id: int = None
+    ) -> bool:
+        """Check the existence of first nation in work"""
+        query = db.session.query(IndigenousWork).filter(
+            IndigenousWork.work_id == work_id,
+            IndigenousWork.indigenous_nation_id == nation_id,
+            IndigenousWork.is_deleted.is_(False),
+        )
+        if work_nation_id:
+            query = query.filter(IndigenousWork.id != work_nation_id)
+        if query.count() > 0:
+            return True
+        return False
