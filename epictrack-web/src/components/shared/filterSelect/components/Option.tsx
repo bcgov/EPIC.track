@@ -58,6 +58,7 @@ const Option = ({
                 "select-option"
               );
             }}
+            sx={{ color: "inherit !important" }}
           />
         )}
         {children}

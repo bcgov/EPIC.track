@@ -28,6 +28,7 @@ declare module "react-select/dist/declarations/src/Select" {
 
 export type SelectProps = {
   variant: "inline" | "bar";
+  info?: boolean;
 } & Props<OptionType>;
 
 export type TableFilterProps = {
