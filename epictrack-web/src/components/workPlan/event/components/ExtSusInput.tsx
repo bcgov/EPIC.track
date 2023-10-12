@@ -13,8 +13,15 @@ const ExtSusInput = () => {
   };
   const {
     register,
+    unregister,
     formState: { errors },
   } = useFormContext();
+  React.useEffect(() => {
+    return () => {
+      unregister("act_section_id");
+      unregister("reason");
+    };
+  }, []);
   return (
     <>
       <Grid item xs={12}>

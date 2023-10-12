@@ -9,7 +9,7 @@ import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
-import { Box, FormControlLabel, Grid, TextField } from "@mui/material";
+import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
 import {
   ETFormLabel,
   ETFormLabelWithCharacterLimit,
@@ -37,6 +37,9 @@ import MultiDaysInput from "./components/MultiDaysInput";
 import { dateUtils } from "../../../utils";
 import ExtSusInput from "./components/ExtSusInput";
 import PCPInput from "./components/PCPInput";
+import Icons from "../../icons/index";
+import { IconProps } from "../../icons/type";
+import SingleDayPCPInput from "./components/SingleDayPCPInput";
 
 interface TaskFormProps {
   onSave: () => void;
@@ -47,8 +50,9 @@ interface NumberOfDaysChangeProps {
   anticipatedDate?: string | undefined;
   actualDate?: string | undefined;
 }
+const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
+
 const EventForm = ({ onSave, event }: TaskFormProps) => {
-  // const [event, setEvent] = React.useState<MilestoneEvent>();
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<
     EventConfiguration[]
@@ -103,12 +107,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
     control,
   } = methods;
 
-  // React.useEffect(() => {
-  //   if (eventId) {
-  //     getEvent();
-  //   }
-  // }, [eventId]);
-
   React.useEffect(() => {
     if (selectedConfiguration && selectedConfiguration.multiple_days) {
       setAnticipatedLabel("Anticipated Start Date");
@@ -130,6 +128,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
         numberOfDays: event.number_of_days,
       });
       setTitleCharacterCount(Number(event?.name.length));
+      setNotes(event.notes);
     }
   }, [
     event,
@@ -334,15 +333,25 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <ControlledSwitch
-                    {...register("high_priority")}
-                    defaultChecked={event?.high_priority}
-                  />
-                }
-                label="High Priority"
-              />
+              <Box>
+                <FormControlLabel
+                  sx={{
+                    mr: "2px",
+                  }}
+                  control={
+                    <ControlledSwitch
+                      {...register("high_priority")}
+                      defaultChecked={event?.high_priority}
+                    />
+                  }
+                  label="High Priority"
+                />
+                <Tooltip title="High Priority Milestones will appear on reports">
+                  <Box component={"span"}>
+                    <InfoIcon />
+                  </Box>
+                </Tooltip>
+              </Box>
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
@@ -450,7 +459,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               ) && <PCPInput />}
             {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
               Number(selectedConfiguration?.event_type_id)
-            ) && <></>}
+            ) && <SingleDayPCPInput />}
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor
