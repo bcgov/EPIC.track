@@ -51,14 +51,26 @@ export const WorkplanProvider = ({
   const [workPhases, setWorkPhases] = React.useState<WorkPhase[]>([]);
   const [firstNations, setFirstNations] = React.useState<WorkFirstNation[]>([]);
   const workId = React.useMemo(() => query.get("work_id"), [query]);
+
   React.useEffect(() => {
-    getWorkById();
-    getWorkTeamMembers();
-    getWorkPhases();
+    loadData();
   }, [workId]);
 
-  const getWorkTeamMembers = React.useCallback(async () => {
-    setLoading(true);
+  const loadData = async () => {
+    try {
+      await getWorkById();
+      await getWorkTeamMembers();
+      await getWorkPhases();
+      setLoading(false);
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+      setLoading(false);
+    }
+  };
+
+  const getWorkTeamMembers = async () => {
     try {
       const teamResult = await workService.getWorkTeamMembers(Number(workId));
       if (teamResult.status === 200) {
@@ -69,30 +81,31 @@ export const WorkplanProvider = ({
           };
         });
         setTeam(team);
+        return Promise.resolve();
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
       });
     }
-    setLoading(false);
-  }, [workId]);
+  };
 
-  const getWorkById = React.useCallback(async () => {
+  const getWorkById = async () => {
     if (workId) {
       const work = await workService.getById(String(workId));
       setWork(work.data as Work);
-      setLoading(false);
     }
-  }, [workId]);
-  const getWorkPhases = React.useCallback(async () => {
+    return Promise.resolve();
+  };
+
+  const getWorkPhases = async () => {
     if (workId) {
-      setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(String(workId));
       setWorkPhases(workPhasesResult.data as WorkPhase[]);
-      setLoading(false);
     }
-  }, [workId]);
+    return Promise.resolve();
+  };
+
   return (
     <WorkplanContext.Provider
       value={{

@@ -13,6 +13,7 @@ import { WorkplanContext } from "./WorkPlanContext";
 import TeamContainer from "./team/TeamContainer";
 import { makeStyles } from "@mui/styles";
 import FirstNationContainer from "./firstNations/FirstNationContainer";
+import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -21,87 +22,72 @@ const useStyle = makeStyles({
 });
 const WorkPlanContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
-  const ctx = useContext(WorkplanContext);
+  const { team, loading, work, firstNations } = useContext(WorkplanContext);
   const classes = useStyle();
 
-  const activeStaff = React.useMemo(
-    () => ctx.team.filter((p) => p.is_active),
-    [ctx.team]
-  );
+  const activeStaff = team.filter((staffWorkRole) => staffWorkRole.is_active);
+
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
+
+  if (loading) {
+    return <WorkPlanSkeleton />;
+  }
+
   return (
-    <>
-      {!ctx.loading && (
-        <>
-          <ETPageContainer
+    <ETPageContainer
+      sx={{
+        paddingBottom: "0rem !important",
+      }}
+    >
+      <Box>
+        <ETHeading2 bold color={Palette.primary.main}>
+          {work?.title}
+        </ETHeading2>
+      </Box>
+      <Box
+        sx={{
+          marginTop: "1rem",
+        }}
+      >
+        <ETTabs
+          sx={{
+            gap: "2rem",
+          }}
+          onChange={handleTabSelected}
+          value={selectedTabIndex}
+        >
+          <ETTab
             sx={{
-              paddingBottom: "0rem !important",
+              paddingLeft: 0,
             }}
-          >
-            <Box>
-              <ETHeading2 bold color={Palette.primary.main}>
-                {ctx.work?.title}
-              </ETHeading2>
-            </Box>
-            <Box
-              sx={{
-                marginTop: "1rem",
-              }}
-            >
-              <ETTabs
-                sx={{
-                  gap: "2rem",
-                }}
-                onChange={handleTabSelected}
-                value={selectedTabIndex}
-              >
-                <ETTab
-                  sx={{
-                    paddingLeft: 0,
-                  }}
-                  label="Workplan"
-                />
-                <ETTab label="Status" />
-                <ETTab label="Issues" />
-                <ETTab label="About Project" />
-                <ETTab
-                  label="Teams"
-                  identifier={activeStaff.length.toString()}
-                  data-title="dddd"
-                />
-                <ETTab
-                  label="First Nations"
-                  identifier={ctx.firstNations.length.toString()}
-                />
-              </ETTabs>
-            </Box>
-          </ETPageContainer>
-          <TabPanel
-            index={0}
-            value={selectedTabIndex}
-            className={classes.tabPanel}
-          >
-            <PhaseContainer />
-          </TabPanel>
-          <TabPanel
-            index={4}
-            value={selectedTabIndex}
-            className={classes.tabPanel}
-          >
-            <TeamContainer />
-          </TabPanel>
-          <TabPanel
-            index={5}
-            value={selectedTabIndex}
-            className={classes.tabPanel}
-          >
-            <FirstNationContainer />
-          </TabPanel>
-        </>
-      )}
-    </>
+            label="Workplan"
+          />
+          <ETTab label="Status" />
+          <ETTab label="Issues" />
+          <ETTab label="About Project" />
+          <ETTab
+            label="Teams"
+            identifier={activeStaff.length.toString()}
+            data-title="dddd"
+          />
+          <ETTab
+            label="First Nations"
+            identifier={firstNations.length.toString()}
+          />
+        </ETTabs>
+      </Box>
+      <TabPanel index={0} value={selectedTabIndex} className={classes.tabPanel}>
+        <PhaseContainer />
+      </TabPanel>
+      <TabPanel index={4} value={selectedTabIndex} className={classes.tabPanel}>
+        <TeamContainer />
+      </TabPanel>
+      <TabPanel index={5} value={selectedTabIndex} className={classes.tabPanel}>
+        <FirstNationContainer />
+      </TabPanel>
+    </ETPageContainer>
   );
 };
 
