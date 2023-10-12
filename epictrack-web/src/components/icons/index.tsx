@@ -205,6 +205,16 @@ const LinkIcon = (props: IconProps) => {
   );
 };
 
+const InfoIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} width="12" height="13" viewBox="0 0 12 13">
+      <path
+        opacity="0.8"
+        d="M6 0.5C9.30469 0.5 12 3.19531 12 6.5C12 9.82812 9.30469 12.5 6 12.5C2.67188 12.5 0 9.82812 0 6.5C0 3.19531 2.67188 0.5 6 0.5ZM6 3.5C5.57812 3.5 5.25 3.85156 5.25 4.25C5.25 4.67188 5.57812 5 6 5C6.39844 5 6.75 4.67188 6.75 4.25C6.75 3.85156 6.39844 3.5 6 3.5ZM6.9375 9.5C7.24219 9.5 7.5 9.26562 7.5 8.9375C7.5 8.63281 7.24219 8.375 6.9375 8.375H6.5625V6.3125C6.5625 6.00781 6.30469 5.75 6 5.75H5.25C4.92188 5.75 4.6875 6.00781 4.6875 6.3125C4.6875 6.64062 4.92188 6.875 5.25 6.875H5.4375V8.375H5.0625C4.73438 8.375 4.5 8.63281 4.5 8.9375C4.5 9.26562 4.73438 9.5 5.0625 9.5H6.9375Z"
+      />
+    </svg>
+  );
+};
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   DashboardIcon,
@@ -229,6 +239,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   LockIcon,
   DeleteIcon,
   LinkIcon,
+  InfoIcon,
 };
 
 export default icons;
