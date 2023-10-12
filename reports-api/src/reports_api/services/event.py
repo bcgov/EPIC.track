@@ -279,7 +279,7 @@ class EventService:  # pylint: disable=too-few-public-methods
     ) -> None:
         # pylint: disable=too-many-arguments
         """Push all the events and work phases"""
-        for each_work_phase in enumerate(work_phases):
+        for each_work_phase in work_phases:
             phase_events = list(
                 filter(
                     lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id ==
