@@ -194,6 +194,7 @@ const EventList = () => {
             ? EVENT_STATUS.COMPLETED
             : EVENT_STATUS.NOT_STARTED;
           element.start_date = element.actual_date || element.anticipated_date;
+          element.is_complete = !!element.actual_date;
           element.mandatory = element.event_configuration.mandatory;
           return element;
         });
@@ -851,10 +852,10 @@ const EventList = () => {
           muiSelectCheckboxProps={({ row, table }) => ({
             indeterminateIcon: <LockIcon />,
             disabled:
-              row.original.end_date === undefined &&
+              !row.original.is_complete &&
               row.original.type === EVENT_TYPE.MILESTONE,
             indeterminate:
-              row.original.end_date !== undefined &&
+              row.original.is_complete &&
               row.original.type === EVENT_TYPE.MILESTONE,
           })}
           columns={columns}

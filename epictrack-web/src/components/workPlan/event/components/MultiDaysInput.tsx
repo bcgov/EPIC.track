@@ -14,9 +14,16 @@ const MultiDaysInput = ({
   onChangeDay,
 }: MultiDaysInputProps) => {
   const {
+    unregister,
     register,
     formState: { errors },
   } = useFormContext();
+  React.useEffect(() => {
+    return () => {
+      console.log("unregistering");
+      unregister("number_of_days");
+    };
+  }, []);
   return (
     <>
       <Grid item xs={6}>

@@ -11,6 +11,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 const PCPInput = () => {
   const {
     register,
+    unregister,
     control,
     formState: { errors },
   } = useFormContext();
@@ -18,6 +19,12 @@ const PCPInput = () => {
   const topicChangeHandler = (event: any) => {
     setTopicCount(event.target.value.length);
   };
+  React.useEffect(() => {
+    return () => {
+      unregister("number_of_responses");
+      unregister("topic");
+    };
+  }, []);
   return (
     <>
       <Grid item xs={6}>
