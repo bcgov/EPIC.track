@@ -56,6 +56,14 @@ class ProjectService implements ServiceBase {
     );
     return await http.GetRequest(url, { work_id, work_type_id });
   }
+
+  async checkFirstNationAvailability(projectId: number, work_id: number) {
+    const url = Endpoints.Projects.FIRST_NATION_AVAILABLE.replace(
+      ":project_id",
+      projectId.toString()
+    );
+    return await http.GetRequest(url, { work_id });
+  }
 }
 
 export default new ProjectService();

@@ -407,5 +407,6 @@ class ValidateWorkNation(Resource):
         exists = WorkService.check_work_nation_existence(
             work_id,
             args.get("indigenous_nation_id"),
+            args.get("work_indigenous_nation_id"),
         )
         return {"exists": exists}, HTTPStatus.OK

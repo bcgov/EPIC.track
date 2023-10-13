@@ -10,6 +10,7 @@ const Endpoints = {
     PROJECTS: "projects",
     WORK_TYPES: "projects/:project_id/work-types",
     FIRST_NATIONS: "projects/:project_id/first-nations",
+    FIRST_NATION_AVAILABLE: "projects/:project_id/first-nation-available",
   },
   Codes: {
     GET_CODES: "codes",
