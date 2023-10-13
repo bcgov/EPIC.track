@@ -25,14 +25,14 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
         validate=validate.Length(max=150),
         required=True,
     )
-    latitude = fields.Str(
+    latitude = fields.Float(
         metadata={"description": "Latitude of project location"},
-        validate=validate.Length(max=150),
+        validate=validate.Range(min=-90, max=90),
         required=True,
     )
-    longitude = fields.Str(
+    longitude = fields.Float(
         metadata={"description": "Longitude of project location"},
-        validate=validate.Length(max=150),
+        validate=validate.Range(min=-180, max=180),
         required=True,
     )
 
