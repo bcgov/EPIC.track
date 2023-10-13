@@ -33,7 +33,8 @@ const schema = yup.object().shape({
         if (value) {
           const validateWorkNation = await workService.checkWorkNationExists(
             parent["work_id"],
-            Number(value)
+            Number(value),
+            parent["id"]
           );
           return !(validateWorkNation.data as any)["exists"] as boolean;
         }

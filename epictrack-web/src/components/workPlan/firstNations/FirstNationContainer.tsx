@@ -55,6 +55,10 @@ const FirstNationContainer = () => {
 
   const ctx = React.useContext(WorkplanContext);
 
+  React.useEffect(() => {
+    setNotes(ctx.work?.first_nation_notes || "");
+  }, [ctx.work?.first_nation_notes]);
+
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
@@ -65,8 +69,7 @@ const FirstNationContainer = () => {
       value
     );
     if (result.status === 200) {
-      // TODO: Save this new work to ctx?
-      // const work = result.data as Work
+      ctx.setWork(result.data as Work);
       showNotification("Notes saved successfully", {
         type: "success",
         duration: 1000,
@@ -75,12 +78,14 @@ const FirstNationContainer = () => {
   }, []);
 
   const debounceSave = React.useMemo(() => {
-    return debounce(saveNationNotes, 500);
+    return debounce(saveNationNotes, 1000);
   }, [saveNationNotes]);
 
   const handleNotesChange = (value: string) => {
-    setNotes(value);
-    debounceSave(value);
+    if (value !== notes) {
+      setNotes(value);
+      debounceSave(value);
+    }
   };
 
   return (

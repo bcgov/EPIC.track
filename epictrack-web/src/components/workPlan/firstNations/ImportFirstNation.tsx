@@ -303,8 +303,9 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
                   startIcon={<DeleteIcon className={classes.deleteIcon} />}
                   sx={{
                     color: Palette.primary.accent.main,
-                    border: "none",
+                    border: "2px solid transparent",
                     paddingLeft: 0,
+                    backgroundColor: "transparent",
                   }}
                   onClick={onClearSelection}
                 >

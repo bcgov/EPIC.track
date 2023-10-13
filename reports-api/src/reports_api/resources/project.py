@@ -146,3 +146,21 @@ class ProjectFirstNations(Resource):
         work_id = args["work_id"]
         first_nations = ProjectService.find_first_nations(project_id, work_id, work_type_id)
         return res.IndigenousResponseNationSchema(many=True).dump(first_nations), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/<int:project_id>/first-nation-available", methods=["GET", "OPTIONS"])
+class ProjectFirstNationAvailableStatus(Resource):
+    """Endpoint resource to check if there are first nations associated with a project."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(project_id):
+        """Check if any first nations associated with given project."""
+        req.ProjectIdPathParameterSchema().load(request.view_args)
+        args = req.ProjectFirstNationsQueryParamSchema().load(request.args)
+        work_id = args["work_id"]
+        first_nation_availability = ProjectService.check_first_nation_available(project_id, work_id)
+        return first_nation_availability, HTTPStatus.OK

@@ -113,3 +113,10 @@ class WorkNationExistenceCheckQueryParamSchema(RequestQueryParameterSchema):
         required=True,
         validate=validate.Range(min=1)
     )
+    work_indigenous_nation_id = fields.Int(
+        metadata={"description": "First nation ID"},
+        required=False,
+        validate=validate.Range(min=1),
+        allow_none=True,
+        missing=None
+    )

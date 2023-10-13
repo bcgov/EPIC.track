@@ -73,7 +73,9 @@ const WorkPlanContainer = () => {
                 />
                 <ETTab
                   label="First Nations"
-                  identifier={ctx.firstNations.length.toString()}
+                  identifier={ctx.firstNations
+                    .filter((nation) => nation.is_active)
+                    .length.toString()}
                 />
               </ETTabs>
             </Box>

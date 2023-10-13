@@ -56,8 +56,8 @@ export const Routes: RouteType[] = [
         path: "/list-management/staffs",
       },
       {
-        name: "Indigenous Nations",
-        path: "/list-management/indigenous-nations",
+        name: "First Nations",
+        path: "/list-management/first-nations",
       },
       {
         name: "Proponents",

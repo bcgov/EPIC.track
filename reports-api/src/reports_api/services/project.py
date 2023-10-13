@@ -117,3 +117,30 @@ class ProjectService:
         if work_type_id:
             qry.filter(Work.work_type_id == work_type_id)
         return qry.all()
+
+    @classmethod
+    def check_first_nation_available(cls, project_id: int, work_id: int) -> bool:
+        """Checks if any first nation exists for given project"""
+        result = (
+            db.session.query(Project)
+            .join(
+                Work,
+                and_(Work.project_id == project_id, Work.id != work_id),
+            )
+            .join(
+                IndigenousWork,
+                Work.id == IndigenousWork.work_id,
+            )
+            .join(IndigenousNation, IndigenousNation.id == IndigenousWork.indigenous_nation_id,)
+            .filter(
+                Project.id == Work.project_id,
+                IndigenousWork.is_active.is_(True),
+                IndigenousWork.is_deleted.is_(False),
+                IndigenousNation.is_active.is_(True),
+                IndigenousNation.is_deleted.is_(False),
+                Work.is_active.is_(True),
+                Work.is_deleted.is_(False),
+            )
+        )
+        result = result.count() > 0
+        return {"first_nation_available": result}
