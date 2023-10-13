@@ -305,7 +305,7 @@ export default function ProjectForm({ ...props }) {
               defaultValue={(ctx.item as Project)?.region_id_env}
               options={envRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
-              getOptionLabel={(o: Region) => o.name}
+              getOptionLabel={(o: Region) => o?.name}
               {...register("region_id_env")}
             ></ControlledSelectV2>
           </Grid>
@@ -318,7 +318,7 @@ export default function ProjectForm({ ...props }) {
               defaultValue={(ctx.item as Project)?.region_id_flnro}
               options={nrsRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
-              getOptionLabel={(o: Region) => o.name}
+              getOptionLabel={(o: Region) => o?.name}
               {...register("region_id_flnro")}
             ></ControlledSelectV2>
           </Grid>
@@ -380,11 +380,7 @@ export default function ProjectForm({ ...props }) {
           >
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              defaultChecked={
-                (ctx?.item as Project)?.id == undefined
-                  ? true
-                  : (ctx.item as Project)?.is_active
-              }
+              defaultChecked={(ctx.item as Project)?.is_active}
               {...register("is_active")}
             />
             <ETFormLabel id="active">Active</ETFormLabel>
