@@ -180,13 +180,18 @@ class WorkService implements ServiceBase {
       }
     );
   }
-  async checkWorkNationExists(workId: number, indigenous_nation_id: number) {
+  async checkWorkNationExists(
+    workId: number,
+    indigenous_nation_id: number,
+    work_indigenous_nation_id: number | undefined
+  ) {
     const query = `${Endpoints.Works.WORK_FIRST_NATIONS.replace(
       ":work_id",
       workId.toString()
     )}`;
     return await http.GetRequest(query + "/exists", {
       indigenous_nation_id,
+      work_indigenous_nation_id,
     });
   }
 }

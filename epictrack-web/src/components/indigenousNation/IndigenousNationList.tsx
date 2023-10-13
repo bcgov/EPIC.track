@@ -23,7 +23,7 @@ export default function IndigenousNationList() {
   }, [indigenousNationID]);
 
   React.useEffect(() => {
-    ctx.setTitle("Indigenous Nation");
+    ctx.setTitle("First Nation");
   }, [ctx.title]);
 
   const onEdit = (id: number) => {
@@ -138,7 +138,7 @@ export default function IndigenousNationList() {
                   }}
                   variant="contained"
                 >
-                  Create Indigenous Nation
+                  Create First Nation
                 </Button>
               </Box>
             )}

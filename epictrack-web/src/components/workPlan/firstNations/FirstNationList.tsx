@@ -35,6 +35,7 @@ import UserMenu from "../../shared/userMenu/UserMenu";
 import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
 import { getAxiosError } from "../../../utils/axiosUtils";
+import projectService from "../../../services/projectService/projectService";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -99,6 +100,8 @@ const FirstNationList = () => {
   const [statusOptions, setStatusOptions] = React.useState<string[]>([]);
   const [showImportNationForm, setShowImportNationForm] =
     React.useState<boolean>(false);
+  const [firstNationAvailable, setFirstNationAvailable] =
+    React.useState<boolean>(false);
 
   React.useEffect(() => {
     if (workFirstNationId === undefined) {
@@ -135,6 +138,19 @@ const FirstNationList = () => {
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setStatusOptions(statuses);
   }, [firstNations]);
+
+  const getFirstNationAvailability = React.useCallback(async () => {
+    const response = await projectService.checkFirstNationAvailability(
+      Number(ctx.work?.project_id),
+      Number(ctx.work?.id)
+    );
+    const firstNationStatus = response.data as any;
+    setFirstNationAvailable(firstNationStatus["first_nation_available"]);
+  }, [ctx.work?.project_id]);
+
+  React.useEffect(() => {
+    getFirstNationAvailability();
+  }, [ctx.work?.project_id]);
 
   const handleOpenUserMenu = (
     event: React.MouseEvent<HTMLElement>,
@@ -410,7 +426,10 @@ const FirstNationList = () => {
             }}
           >
             <Tooltip title={"Import tasks from template"}>
-              <IButton onClick={() => setShowImportNationForm(true)}>
+              <IButton
+                onClick={() => setShowImportNationForm(true)}
+                disabled={!firstNationAvailable}
+              >
                 <ImportFileIcon className="icon" />
               </IButton>
             </Tooltip>
@@ -433,7 +452,6 @@ const FirstNationList = () => {
           </Grid>
         </Grid>
       )}
-      {/* TODO: ADD FUNCTIONALITY TO ADD & IMPORT BUTTONS */}
       {firstNations.length === 0 && (
         <NoDataEver
           title="You don't have any First Nations yet"
@@ -442,6 +460,8 @@ const FirstNationList = () => {
           isImportRequired
           onAddNewClickHandler={() => onAddButtonClickHandler()}
           importButtonText="Import Nations"
+          onImportClickHandler={() => setShowImportNationForm(true)}
+          isImportDisabled={!firstNationAvailable}
         />
       )}
       <TrackDialog
@@ -476,21 +496,6 @@ const FirstNationList = () => {
       >
         <ImportFirstNation onSave={onTemplateFormSaveHandler} />
       </TrackDialog>
-      {/* <TrackDialog
-        open={showImportNationConfirm}
-        dialogTitle="Upload this Template?"
-        dialogContentText="Once the selected template is uploaded, all other templates will be locked for this phase"
-        disableEscapeKeyDown
-        fullWidth
-        okButtonText="Upload"
-        onOk={onTemplateConfirmationSaveHandler}
-        onCancel={() => {
-          setShowImportNationForm(true);
-          setShowImportNationConfirm(false);
-          setSelectedFirstNations([]);
-        }}
-        isActionsRequired
-      /> */}
     </>
   );
 };

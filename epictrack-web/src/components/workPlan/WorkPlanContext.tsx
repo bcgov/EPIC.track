@@ -19,6 +19,7 @@ interface WorkplanContextProps {
   setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
   setWorkPhases: Dispatch<SetStateAction<WorkPhase[]>>;
   work: Work | undefined;
+  setWork: Dispatch<SetStateAction<Work | undefined>>;
   firstNations: WorkFirstNation[];
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
 }
@@ -34,6 +35,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   team: [],
   workPhases: [],
   work: undefined,
+  setWork: () => ({}),
   firstNations: [],
   setFirstNations: () => ({}),
 });
@@ -136,6 +138,7 @@ export const WorkplanProvider = ({
         setTeam,
         firstNations,
         setFirstNations,
+        setWork,
       }}
     >
       {children}

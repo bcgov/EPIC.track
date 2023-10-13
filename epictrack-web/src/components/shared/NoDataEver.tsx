@@ -40,6 +40,7 @@ interface NoDataEverProps {
   isImportRequired?: boolean;
   importButtonText?: string;
   onImportClickHandler?: () => void;
+  isImportDisabled?: boolean;
 }
 
 const NoDataEver = ({
@@ -50,6 +51,7 @@ const NoDataEver = ({
   isImportRequired,
   importButtonText,
   onImportClickHandler,
+  isImportDisabled,
 }: NoDataEverProps) => {
   const classes = useStyle();
   return (
@@ -108,6 +110,7 @@ const NoDataEver = ({
                   variant="outlined"
                   startIcon={<ImportFileIcon className={classes.importIcon} />}
                   onClick={onImportClickHandler}
+                  disabled={isImportDisabled}
                 >
                   {importButtonText}
                 </Button>

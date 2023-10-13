@@ -27,8 +27,6 @@ from .eao_team import EAOTeam
 from .event import Event
 from .event_category import PRIMARY_CATEGORIES, EventCategory, EventCategoryEnum
 from .event_configuration import EventConfiguration
-from .event_field import EventField
-from .event_field_value import EventFieldValue
 from .event_template import EventTemplate
 from .event_type import EventType
 from .federal_involvement import FederalInvolvement
