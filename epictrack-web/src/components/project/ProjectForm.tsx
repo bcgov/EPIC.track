@@ -40,8 +40,6 @@ const schema = yup.object<Project>().shape({
   proponent_id: yup.string().required("Proponent is required"),
   sub_type_id: yup.string().required("SubType is required"),
   description: yup.string().required("Project Description is required"),
-  region_id_env: yup.string().required("ENV Region is required"),
-  region_id_flnro: yup.string().required("NRS Region is required"),
   address: yup.string().required("Location Description is required"),
   latitude: yup
     .number()
@@ -93,6 +91,12 @@ export default function ProjectForm({ ...props }) {
   React.useEffect(() => {
     reset(ctx.item);
   }, [ctx.item]);
+
+  React.useEffect(() => {
+    const name = (ctx?.item as Project)?.name;
+    setDisabled(ctx?.item ? true : false);
+    ctx.setTitle(name || "Project");
+  }, [ctx.title, ctx.item]);
 
   const setRegions = (regions: Region[]) => {
     const envRegions = regions.filter((p) => p.entity === "ENV");
@@ -243,7 +247,7 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.sub_type_id?.message?.toString()}
               defaultValue={(ctx.item as Project)?.sub_type_id}
               options={subTypes || []}
-              getOptionValue={(o: SubType) => o.id.toString()}
+              getOptionValue={(o: SubType) => o?.id?.toString()}
               getOptionLabel={(o: SubType) => o.name}
               {...register("sub_type_id")}
             ></ControlledSelectV2>
@@ -300,7 +304,7 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.region_id_env?.message?.toString()}
               defaultValue={(ctx.item as Project)?.region_id_env}
               options={envRegions || []}
-              getOptionValue={(o: Region) => o.id.toString()}
+              getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o.name}
               {...register("region_id_env")}
             ></ControlledSelectV2>
@@ -313,7 +317,7 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.region_id_flnro?.message?.toString()}
               defaultValue={(ctx.item as Project)?.region_id_flnro}
               options={nrsRegions || []}
-              getOptionValue={(o: Region) => o.id.toString()}
+              getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o.name}
               {...register("region_id_flnro")}
             ></ControlledSelectV2>
@@ -336,7 +340,7 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.epic_guid?.message?.toString()}
             />
           </Grid>
-          {/* <Grid item xs={6}>
+          <Grid item xs={6}>
             <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
             <TextField
               fullWidth
@@ -353,7 +357,7 @@ export default function ProjectForm({ ...props }) {
               error={!!errors?.fte_positions_operation?.message}
               helperText={errors?.fte_positions_operation?.toString()}
             />
-          </Grid> */}
+          </Grid>
           <Grid item xs={6}>
             <ETFormLabel>Certificate Number</ETFormLabel>
             <TextField helperText fullWidth {...register("ea_certificate")} />
@@ -376,12 +380,16 @@ export default function ProjectForm({ ...props }) {
           >
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              defaultChecked={(ctx.item as Project)?.is_active}
+              defaultChecked={
+                (ctx?.item as Project)?.id == undefined
+                  ? true
+                  : (ctx.item as Project)?.is_active
+              }
               {...register("is_active")}
             />
             <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3}>
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Project)?.is_project_closed}

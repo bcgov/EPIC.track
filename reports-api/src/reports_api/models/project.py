@@ -35,6 +35,8 @@ class Project(BaseModelVersioned):
     epic_guid = Column(String(), nullable=True, default=None)
     is_project_closed = Column(Boolean(), default=False, nullable=False)
     address = Column(Text, nullable=True, default=None)
+    fte_positions_construction = Column(Integer(), nullable=True)
+    fte_positions_operation = Column(Integer(), nullable=True)
 
     ea_certificate = Column(String(255), nullable=True, default=None)
     sub_type_id = Column(ForeignKey("sub_types.id"), nullable=False)
