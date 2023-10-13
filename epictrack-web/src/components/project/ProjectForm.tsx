@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Button, Divider } from "@mui/material";
+import { TextField, Grid, Button, Divider, Box } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -7,7 +7,6 @@ import { ETFormLabel } from "../shared/index";
 import codeService, { Code } from "../../services/codeService";
 import { Project } from "../../models/project";
 import { Proponent } from "../../models/proponent";
-import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Region } from "../../models/region";
 import { Type } from "../../models/type";
 import { SubType } from "../../models/subtype";
@@ -15,6 +14,8 @@ import subTypeService from "../../services/subTypeService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
+import LockClosed from "../../assets/images/lock-closed.svg";
+import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 
 const schema = yup.object<Project>().shape({
   name: yup
@@ -39,10 +40,21 @@ const schema = yup.object<Project>().shape({
   proponent_id: yup.string().required("Proponent is required"),
   sub_type_id: yup.string().required("SubType is required"),
   description: yup.string().required("Project Description is required"),
-  latitude: yup.string().required("Invalid latitude value"),
-  longitude: yup.string().required("Invalid longitude value"),
   region_id_env: yup.string().required("ENV Region is required"),
   region_id_flnro: yup.string().required("NRS Region is required"),
+  address: yup.string().required("Location Description is required"),
+  latitude: yup
+    .number()
+    .typeError("Please provide a numerial value")
+    .required()
+    .min(-90, "Latitude must be greater than or equal to -90")
+    .max(90, "Latitude must be less than or equal to 90"),
+  longitude: yup
+    .number()
+    .typeError("Please provide a numerial value")
+    .required()
+    .min(-180, "Longitude must be greater than or equal to -180")
+    .max(180, "Longitude must be less than or equal to 180"),
 });
 
 export default function ProjectForm({ ...props }) {
@@ -51,6 +63,7 @@ export default function ProjectForm({ ...props }) {
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
+  const [disabled, setDisabled] = React.useState<boolean>();
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
@@ -58,6 +71,7 @@ export default function ProjectForm({ ...props }) {
   }, []);
 
   React.useEffect(() => {
+    setDisabled(props.projectId ? true : false);
     ctx.setId(props.projectId);
   }, [ctx.id]);
 
@@ -145,8 +159,30 @@ export default function ProjectForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={6}>
-            <ETFormLabel>Project Name</ETFormLabel>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingTop: "3px",
+              }}
+            >
+              <ETFormLabel required>Name</ETFormLabel>
+              <ETFormLabel>
+                <Box
+                  sx={{
+                    opacity: disabled ? "100" : "0",
+                    cursor: "pointer",
+                  }}
+                  component="img"
+                  src={LockClosed}
+                  alt="Lock"
+                />
+              </ETFormLabel>
+            </Box>
             <TextField
+              placeholder="Project Name"
+              disabled={disabled}
+              variant="outlined"
               fullWidth
               error={!!errors?.name?.message}
               helperText={errors?.name?.message?.toString()}
@@ -154,8 +190,29 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Proponent</ETFormLabel>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingTop: "3px",
+              }}
+            >
+              <ETFormLabel required>Proponent</ETFormLabel>
+              <ETFormLabel>
+                <Box
+                  sx={{
+                    opacity: disabled ? "100" : "0",
+                    cursor: "pointer",
+                  }}
+                  component="img"
+                  src={LockClosed}
+                  alt="Lock"
+                />
+              </ETFormLabel>
+            </Box>
             <ControlledSelectV2
+              placeholder="Select"
+              disabled={disabled}
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
               defaultValue={(ctx.item as Project)?.proponent_id}
@@ -166,8 +223,9 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Type</ETFormLabel>
+            <ETFormLabel required>Type</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               key={`type_select_${formValues.type_id}`}
               helperText={errors?.type_id?.message?.toString()}
               defaultValue={(ctx.item as Project)?.type_id}
@@ -178,8 +236,9 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>SubType</ETFormLabel>
+            <ETFormLabel required>Subtypes</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               key={`subtype_select_${formValues.sub_type_id}`}
               helperText={errors?.sub_type_id?.message?.toString()}
               defaultValue={(ctx.item as Project)?.sub_type_id}
@@ -190,7 +249,7 @@ export default function ProjectForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel>Project Description</ETFormLabel>
+            <ETFormLabel required>Project Description</ETFormLabel>
             <TextField
               fullWidth
               multiline
@@ -202,8 +261,9 @@ export default function ProjectForm({ ...props }) {
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
           <Grid item xs={12}>
-            <ETFormLabel>Location Description</ETFormLabel>
+            <ETFormLabel required>Location Description</ETFormLabel>
             <TextField
+              placeholder="Provide a detailed description of a project's location"
               fullWidth
               multiline
               rows={3}
@@ -215,6 +275,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>Latitude</ETFormLabel>
             <TextField
+              placeholder="e.g. 22.2222"
               fullWidth
               {...register("latitude")}
               error={!!errors?.latitude?.message}
@@ -224,6 +285,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>Longitude</ETFormLabel>
             <TextField
+              placeholder="e.g. -22.2222"
               fullWidth
               {...register("longitude")}
               error={!!errors?.longitude?.message}
@@ -233,6 +295,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>ENV Region</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               key={`env_select_${formValues.region_id_env}`}
               helperText={errors?.region_id_env?.message?.toString()}
               defaultValue={(ctx.item as Project)?.region_id_env}
@@ -245,6 +308,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>NRS Region</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               key={`nrs_select_${formValues.region_id_flnro}`}
               helperText={errors?.region_id_flnro?.message?.toString()}
               defaultValue={(ctx.item as Project)?.region_id_flnro}
@@ -272,30 +336,58 @@ export default function ProjectForm({ ...props }) {
               helperText={errors?.epic_guid?.message?.toString()}
             />
           </Grid>
+          {/* <Grid item xs={6}>
+            <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
+            <TextField
+              fullWidth
+              {...register("fte_positions_construction")}
+              error={!!errors?.fte_positions_construction?.message}
+              helperText={errors?.fte_positions_construction?.toString()}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ETFormLabel>Est. FTE Positions in Operation</ETFormLabel>
+            <TextField
+              fullWidth
+              {...register("fte_positions_operation")}
+              error={!!errors?.fte_positions_operation?.message}
+              helperText={errors?.fte_positions_operation?.toString()}
+            />
+          </Grid> */}
           <Grid item xs={6}>
             <ETFormLabel>Certificate Number</ETFormLabel>
             <TextField helperText fullWidth {...register("ea_certificate")} />
-            Provide the certificate number if available
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>Abbreviation</ETFormLabel>
-            <TextField helperText fullWidth {...register("abbreviation")} />
-            Abbreviation of the project name to be displayed in reports and
-            graphs
-          </Grid>
-          <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
-              defaultChecked={(ctx.item as Project)?.is_project_closed}
-              {...register("is_project_closed")}
+            <TextField
+              helperText
+              fullWidth
+              placeholder="EDRMS retrieval code"
+              {...register("abbreviation")}
             />
-            <ETFormLabel id="active">Is the Project Closed?</ETFormLabel>
           </Grid>
-          <Grid item xs={2} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
+          <Grid
+            item
+            xs={3}
+            sx={{
+              paddingLeft: "0px",
+            }}
+          >
+            <ControlledSwitch
+              sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Project)?.is_active}
               {...register("is_active")}
             />
             <ETFormLabel id="active">Active</ETFormLabel>
+          </Grid>
+          <Grid item xs={4}>
+            <ControlledSwitch
+              sx={{ paddingLeft: "0px", marginRight: "10px" }}
+              defaultChecked={(ctx.item as Project)?.is_project_closed}
+              {...register("is_project_closed")}
+            />
+            <ETFormLabel id="active">Closed</ETFormLabel>
           </Grid>
         </Grid>
       </FormProvider>
