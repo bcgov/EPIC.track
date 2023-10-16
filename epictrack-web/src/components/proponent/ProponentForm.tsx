@@ -1,11 +1,10 @@
 import React from "react";
-import { TextField, Grid, FormControlLabel, Box } from "@mui/material";
+import { TextField, Grid, Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Proponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
@@ -41,10 +40,11 @@ export default function ProponentForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
+    setDefaultValues();
   }, []);
   React.useEffect(() => {
     const name = (ctx?.item as Proponent)?.name;
-    setDisabled(ctx?.item ? true : false);
+    setDisabled(props.proponentId ? true : false);
     ctx.setTitle(name || "Proponent");
   }, [ctx.title, ctx.item]);
 
@@ -67,6 +67,10 @@ export default function ProponentForm({ ...props }) {
   React.useEffect(() => {
     reset(ctx.item);
   }, [ctx.item]);
+
+  const setDefaultValues = () => {
+    ctx.setItem({ is_active: true });
+  };
 
   const getStaffs = async () => {
     const staffsResult = await staffService.getAll();
