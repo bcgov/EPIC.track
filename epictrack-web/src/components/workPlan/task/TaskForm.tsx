@@ -76,6 +76,9 @@ const TaskForm = ({ onSave, taskEvent }: TaskFormProps) => {
       numberOfDays: taskEvent?.number_of_days,
       startDate: taskEvent?.start_date,
     });
+    if (taskEvent) {
+      setNotes(taskEvent?.notes);
+    }
   }, [taskEvent]);
 
   const getResponsibilites = async () => {

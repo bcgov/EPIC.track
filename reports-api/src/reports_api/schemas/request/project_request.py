@@ -25,14 +25,14 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
         validate=validate.Length(max=150),
         required=True,
     )
-    latitude = fields.Str(
+    latitude = fields.Float(
         metadata={"description": "Latitude of project location"},
-        validate=validate.Length(max=150),
+        validate=validate.Range(min=-90, max=90),
         required=True,
     )
-    longitude = fields.Str(
+    longitude = fields.Float(
         metadata={"description": "Longitude of project location"},
-        validate=validate.Length(max=150),
+        validate=validate.Range(min=-180, max=180),
         required=True,
     )
 
@@ -93,12 +93,28 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
     region_id_env = fields.Int(
         metadata={"description": "ENV Region id of the project"},
         validate=validate.Range(min=1),
-        required=True
+        allow_none=True,
+        load_default=None
     )
     region_id_flnro = fields.Int(
         metadata={"description": "NRS Region id of the project"},
         validate=validate.Range(min=1),
-        required=True
+        allow_none=True,
+        load_default=None
+    )
+
+    fte_positions_construction = fields.Int(
+        metadata={"description": "FTE Positions created during construction on project"},
+        validate=validate.Range(min=0),
+        allow_none=True,
+        load_default=None
+    )
+
+    fte_positions_operation = fields.Int(
+        metadata={"description": "FTE Positions created during operation on project"},
+        validate=validate.Range(min=0),
+        allow_none=True,
+        load_default=None
     )
 
     is_active = fields.Bool(metadata={"description": "Active state of the project"})

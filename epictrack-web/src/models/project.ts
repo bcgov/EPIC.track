@@ -26,4 +26,6 @@ export interface Project {
   is_project_closed: boolean;
   region_env: Region;
   region_flnro: Region;
+  fte_positions_construction: number;
+  fte_positions_operation: number;
 }
