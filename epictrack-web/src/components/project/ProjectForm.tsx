@@ -66,17 +66,13 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("project-form");
-    setDefaultValues();
+    reset({ is_active: true });
   }, []);
 
   React.useEffect(() => {
     setDisabled(props.projectId ? true : false);
     ctx.setId(props.projectId);
   }, [ctx.id]);
-
-  const setDefaultValues = () => {
-    ctx.setItem({ is_active: true });
-  };
 
   const methods = useForm({
     resolver: yupResolver(schema),

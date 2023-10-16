@@ -40,7 +40,7 @@ export default function ProponentForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
-    setDefaultValues();
+    reset({ is_active: true });
   }, []);
   React.useEffect(() => {
     const name = (ctx?.item as Proponent)?.name;
@@ -67,10 +67,6 @@ export default function ProponentForm({ ...props }) {
   React.useEffect(() => {
     reset(ctx.item);
   }, [ctx.item]);
-
-  const setDefaultValues = () => {
-    ctx.setItem({ is_active: true });
-  };
 
   const getStaffs = async () => {
     const staffsResult = await staffService.getAll();
