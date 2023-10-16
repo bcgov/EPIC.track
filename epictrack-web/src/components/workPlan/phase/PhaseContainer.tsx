@@ -11,7 +11,11 @@ const PhaseContainer = () => {
     return ctx.workPhases;
   }, [ctx.workPhases]);
   React.useEffect(() => {
-    if (ctx.work?.current_phase_id && phases.length > 0) {
+    if (
+      ctx?.selectedWorkPhase?.phase?.id == undefined &&
+      ctx.work?.current_phase_id &&
+      phases.length > 0
+    ) {
       const phase = phases.filter(
         (p) => p.phase.id === ctx.work?.current_phase_id
       )[0];
