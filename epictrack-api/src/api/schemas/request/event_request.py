@@ -1,7 +1,7 @@
 """Event resource's input validations"""
 from marshmallow import fields, validate
 
-from reports_api.schemas.request.custom_fields import IntegerList
+from api.schemas.request.custom_fields import IntegerList
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 

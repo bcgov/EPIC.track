@@ -13,9 +13,9 @@
 # limitations under the License.
 """Staff response schema"""
 from marshmallow import EXCLUDE, fields
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas import PositionSchema
-from reports_api.models import Staff
+from api.schemas.base import AutoSchemaBase
+from api.schemas import PositionSchema
+from api.models import Staff
 
 
 class StaffResponseSchema(

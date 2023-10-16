@@ -15,12 +15,12 @@
 from flask import current_app
 from sqlalchemy import and_
 
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
-from reports_api.models import Project, db
-from reports_api.models.indigenous_nation import IndigenousNation
-from reports_api.models.indigenous_work import IndigenousWork
-from reports_api.models.work import Work
-from reports_api.models.work_type import WorkType
+from api.exceptions import ResourceExistsError, ResourceNotFoundError
+from api.models import Project, db
+from api.models.indigenous_nation import IndigenousNation
+from api.models.indigenous_work import IndigenousWork
+from api.models.work import Work
+from api.models.work_type import WorkType
 
 
 class ProjectService:

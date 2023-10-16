@@ -2,7 +2,7 @@
 from dataclasses import dataclass, fields
 from datetime import datetime
 
-from reports_api.models.db import ma
+from api.models.db import ma
 
 
 @dataclass

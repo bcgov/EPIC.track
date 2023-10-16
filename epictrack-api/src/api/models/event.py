@@ -16,8 +16,8 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 
-from reports_api.models.event_category import EventCategory
-from reports_api.models.event_configuration import EventConfiguration
+from api.models.event_category import EventCategory
+from api.models.event_configuration import EventConfiguration
 
 from .base_model import BaseModelVersioned
 

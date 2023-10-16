@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 from dataclasses import InitVar, dataclass, fields
 from typing import List, Optional
 
-from reports_api.models import Event, Work
-from reports_api.schemas.base import BaseSchema
+from api.models import Event, Work
+from api.schemas.base import BaseSchema
 
 
 @dataclass

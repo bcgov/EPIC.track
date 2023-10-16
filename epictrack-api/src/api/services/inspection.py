@@ -14,7 +14,7 @@
 """Service to manage Inspection."""
 from flask import current_app, jsonify
 
-from reports_api.models import Inspection
+from api.models import Inspection
 
 
 class InspectionService():  # pylint:disable=too-few-public-methods

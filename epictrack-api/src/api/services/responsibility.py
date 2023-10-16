@@ -14,7 +14,7 @@
 """Service to manage Responsibilities."""
 from flask import current_app
 
-from reports_api.models import Responsibility, db
+from api.models import Responsibility, db
 
 
 class ResponsibilityService:  # pylint:disable=too-few-public-methods

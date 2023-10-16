@@ -16,8 +16,8 @@
 from flask import current_app
 from sqlalchemy import text
 
-from reports_api.models import CodeTableVersioned
-from reports_api.utils.helpers import find_model_from_table_name
+from api.models import CodeTableVersioned
+from api.utils.helpers import find_model_from_table_name
 
 
 class CodeService:

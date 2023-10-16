@@ -15,9 +15,9 @@
 from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 from flask import jsonify, request
-from reports_api.utils import auth, profiletime
-from reports_api.utils.util import cors_preflight
-from reports_api.services import EventTemplateService
+from api.utils import auth, profiletime
+from api.utils.util import cors_preflight
+from api.services import EventTemplateService
 
 
 API = Namespace("tasks", description="Tasks")

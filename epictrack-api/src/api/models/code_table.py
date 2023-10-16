@@ -13,9 +13,9 @@
 # limitations under the License.
 """Base class for code model."""
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
-from reports_api.models.history import Versioned
+from api.models.history import Versioned
 
-from reports_api.utils.utcnow import utcnow
+from api.utils.utcnow import utcnow
 
 from .db import db
 

@@ -1,10 +1,10 @@
 """Phase model schema"""
 from marshmallow import EXCLUDE, fields
 
-from reports_api.models import PhaseCode
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.ea_act import EAActSchema
-from reports_api.schemas.work_type import WorkTypeSchema
+from api.models import PhaseCode
+from api.schemas.base import AutoSchemaBase
+from api.schemas.ea_act import EAActSchema
+from api.schemas.work_type import WorkTypeSchema
 
 
 class PhaseSchema(

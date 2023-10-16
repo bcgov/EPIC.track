@@ -2,20 +2,20 @@
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from reports_api.models import Staff, Work, WorkPhase
-from reports_api.schemas import PositionSchema, RoleSchema
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.ea_act import EAActSchema
-from reports_api.schemas.eao_team import EAOTeamSchema
-from reports_api.schemas.federal_involvement import FederalInvolvementSchema
-from reports_api.schemas.ministry import MinistrySchema
-from reports_api.schemas.phase import PhaseSchema
-from reports_api.schemas.project import ProjectSchema
-from reports_api.schemas.response.staff_response import StaffResponseSchema
-from reports_api.schemas.staff import StaffSchema
-from reports_api.schemas.substitution_act import SubstitutionActSchema
-from reports_api.schemas.work_type import WorkTypeSchema
-from reports_api.services.event import EventService
+from api.models import Staff, Work, WorkPhase
+from api.schemas import PositionSchema, RoleSchema
+from api.schemas.base import AutoSchemaBase
+from api.schemas.ea_act import EAActSchema
+from api.schemas.eao_team import EAOTeamSchema
+from api.schemas.federal_involvement import FederalInvolvementSchema
+from api.schemas.ministry import MinistrySchema
+from api.schemas.phase import PhaseSchema
+from api.schemas.project import ProjectSchema
+from api.schemas.response.staff_response import StaffResponseSchema
+from api.schemas.staff import StaffSchema
+from api.schemas.substitution_act import SubstitutionActSchema
+from api.schemas.work_type import WorkTypeSchema
+from api.services.event import EventService
 
 
 class WorkResponseSchema(

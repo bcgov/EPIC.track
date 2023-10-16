@@ -23,10 +23,10 @@ from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 from sqlalchemy.schema import DropConstraint, MetaData
 
-from reports_api import create_app
-from reports_api import jwt as _jwt
-from reports_api.models import Project, Staff
-from reports_api.models import db as _db
+from api import create_app
+from api import jwt as _jwt
+from api.models import Project, Staff
+from api.models import db as _db
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -231,4 +231,4 @@ def mock_decorator(f, *args, **kwargs):
     return decorated_function
 
 
-patch("reports_api.utils.auth.require", mock_decorator, spec=True).start()
+patch("api.utils.auth.require", mock_decorator, spec=True).start()

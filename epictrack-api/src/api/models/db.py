@@ -18,7 +18,7 @@ These will get initialized by the application using the models
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 
-from reports_api.models.history import versioned_session
+from api.models.history import versioned_session
 
 
 # by convention in the Flask community these are lower case,

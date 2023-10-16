@@ -17,7 +17,7 @@ from sqlalchemy import event  # noqa: I001
 from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 
 # Import signal for it to register itself
-from reports_api.signals import before_commit
+from api.signals import before_commit
 
 from .calendar_event import CalendarEvent
 from .code_table import CodeTableVersioned

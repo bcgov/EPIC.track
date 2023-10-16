@@ -2,7 +2,7 @@
 import pydoc
 
 from flask_caching import Cache
-from reports_api import config
+from api import config
 
 
 class AppCache:  # pylint: disable=too-few-public-methods

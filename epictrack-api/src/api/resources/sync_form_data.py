@@ -17,10 +17,10 @@ import pydoc
 
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.services.sync_form_data import SyncFormDataService
-from reports_api.utils import auth, profiletime
-from reports_api.utils.constants import SCHEMA_MAPS
-from reports_api.utils.util import cors_preflight
+from api.services.sync_form_data import SyncFormDataService
+from api.utils import auth, profiletime
+from api.utils.constants import SCHEMA_MAPS
+from api.utils.util import cors_preflight
 
 
 API = Namespace('sync-form-data', description='Sync Form Data')

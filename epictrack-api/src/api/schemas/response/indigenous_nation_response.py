@@ -1,10 +1,10 @@
 """Indigenous nation model schema"""
 from marshmallow import EXCLUDE, fields
 
-from reports_api.models import IndigenousNation
-from reports_api.models.indigenous_work import IndigenousWork
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.staff import StaffSchema
+from api.models import IndigenousNation
+from api.models.indigenous_work import IndigenousWork
+from api.schemas.base import AutoSchemaBase
+from api.schemas.staff import StaffSchema
 
 
 class IndigenousResponseNationSchema(

@@ -21,23 +21,23 @@ from flask import current_app
 from sqlalchemy import exc, tuple_
 from sqlalchemy.orm import aliased
 
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
-from reports_api.models import (
+from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
+from api.models import (
     ActionCofiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
     Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, db)
-from reports_api.models.event_category import EventCategoryEnum
-from reports_api.models.indigenous_nation import IndigenousNation
-from reports_api.models.indigenous_work import IndigenousWork
-from reports_api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
-from reports_api.schemas.response import (
+from api.models.event_category import EventCategoryEnum
+from api.models.indigenous_nation import IndigenousNation
+from api.models.indigenous_work import IndigenousWork
+from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
+from api.schemas.response import (
     ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
-from reports_api.schemas.work_first_nation import WorkFirstNationSchema
-from reports_api.schemas.work_plan import WorkPlanSchema
-from reports_api.services.event import EventService
-from reports_api.services.event_template import EventTemplateService
-from reports_api.services.outcome_template import OutcomeTemplateService
-from reports_api.services.phaseservice import PhaseService
-from reports_api.utils.datetime_helper import get_start_of_day
+from api.schemas.work_first_nation import WorkFirstNationSchema
+from api.schemas.work_plan import WorkPlanSchema
+from api.services.event import EventService
+from api.services.event_template import EventTemplateService
+from api.services.outcome_template import OutcomeTemplateService
+from api.services.phaseservice import PhaseService
+from api.utils.datetime_helper import get_start_of_day
 
 
 class WorkService:  # pylint: disable=too-many-public-methods

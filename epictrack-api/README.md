@@ -35,8 +35,8 @@ flask db upgrade
 
 ## Running Liniting
 
-1. Run `make flake8` or `flake8 src/reports_api tests`.
-2. Run `make pylint` or `pylint --rcfile=setup.cfg --disable=C0301,W0511 src/reports_api test`
+1. Run `make flake8` or `flake8 src/api tests`.
+2. Run `make pylint` or `pylint --rcfile=setup.cfg --disable=C0301,W0511 src/api test`
 
 ## Running Unit Tests
 

@@ -1,7 +1,7 @@
 """Work first nation schema"""
 from marshmallow import Schema, fields
 
-from reports_api.models.indigenous_work import IndigenousWork
+from api.models.indigenous_work import IndigenousWork
 
 
 class WorkFirstNationSchema(Schema):

@@ -19,7 +19,7 @@ from importlib import reload
 
 import pytest
 
-import reports_api.config as config
+import api.config as config
 
 
 # testdata pattern is ({str: environment}, {expected return value})

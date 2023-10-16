@@ -14,7 +14,7 @@
 """Staff resource's input validations"""
 from marshmallow import fields, validate
 
-from reports_api.schemas.validators import Phone
+from api.schemas.validators import Phone
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 from .custom_fields import IntegerList

@@ -14,7 +14,7 @@
 """Indigenous nation resource's input validations"""
 from marshmallow import fields, validate
 
-from reports_api.models.indigenous_work import PinEnum
+from api.models.indigenous_work import PinEnum
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 

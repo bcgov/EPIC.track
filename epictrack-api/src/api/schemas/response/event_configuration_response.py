@@ -14,8 +14,8 @@
 """Event Template Response response schema"""
 from marshmallow import EXCLUDE
 
-from reports_api.models import EventConfiguration
-from reports_api.schemas.base import AutoSchemaBase
+from api.models import EventConfiguration
+from api.schemas.base import AutoSchemaBase
 
 
 class EventConfigurationResponseSchema(

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Reminder configuration."""
-from reports_api.models import ReminderConfiguration
+from api.models import ReminderConfiguration
 
 
 class ReminderConfigurationService:  # pylint: disable=too-few-public-methods

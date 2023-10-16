@@ -23,18 +23,18 @@ import os
 import sys
 
 from dotenv import find_dotenv, load_dotenv
-from reports_api.utils import constants
+from api.utils import constants
 
 
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
 CONFIGURATION = {
-    'development': 'reports_api.config.DevConfig',
-    'testing': 'reports_api.config.TestConfig',
-    'production': 'reports_api.config.ProdConfig',
-    'default': 'reports_api.config.ProdConfig',
-    'migration': 'reports_api.config.MigrationConfig',
+    'development': 'api.config.DevConfig',
+    'testing': 'api.config.TestConfig',
+    'production': 'api.config.ProdConfig',
+    'default': 'api.config.ProdConfig',
+    'migration': 'api.config.MigrationConfig',
 }
 
 

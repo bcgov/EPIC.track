@@ -16,12 +16,12 @@ from http import HTTPStatus
 
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
-from reports_api.exceptions import BusinessError
-from reports_api.schemas import request as req
-from reports_api.schemas import response as res
-from reports_api.services import UserService
-from reports_api.utils import auth, profiletime
-from reports_api.utils.util import cors_preflight
+from api.exceptions import BusinessError
+from api.schemas import request as req
+from api.schemas import response as res
+from api.services import UserService
+from api.utils import auth, profiletime
+from api.utils.util import cors_preflight
 
 API = Namespace("users", description="Users")
 

@@ -17,9 +17,9 @@ from typing import Union
 import json
 from flask import current_app
 from inflector import English, Inflector
-from reports_api.models import db
+from api.models import db
 
-from reports_api.utils.helpers import find_model_from_table_name
+from api.utils.helpers import find_model_from_table_name
 
 
 class SyncFormDataService:  # pylint:disable=too-few-public-methods

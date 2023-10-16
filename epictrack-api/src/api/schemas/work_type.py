@@ -1,8 +1,8 @@
 """Ministry model schema"""
 from marshmallow import EXCLUDE
 
-from reports_api.models import WorkType
-from reports_api.schemas.base import AutoSchemaBase
+from api.models import WorkType
+from api.schemas.base import AutoSchemaBase
 
 
 class WorkTypeSchema(

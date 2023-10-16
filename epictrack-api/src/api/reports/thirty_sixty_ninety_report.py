@@ -13,7 +13,7 @@ from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_
 from sqlalchemy.orm import aliased
 
-from reports_api.models import Event, Project, Work, WorkStatus, WorkType, db
+from api.models import Event, Project, Work, WorkStatus, WorkType, db
 
 from .report_factory import ReportFactory
 

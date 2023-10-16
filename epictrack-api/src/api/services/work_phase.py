@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work phases."""
-from reports_api.models import PhaseCode, WorkPhase, db
-from reports_api.schemas.work_v2 import WorkPhaseSchema
-from reports_api.services.task_template import TaskTemplateService
+from api.models import PhaseCode, WorkPhase, db
+from api.schemas.work_v2 import WorkPhaseSchema
+from api.services.task_template import TaskTemplateService
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods

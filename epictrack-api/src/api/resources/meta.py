@@ -18,7 +18,7 @@ Currently this only provides API versioning information
 from flask import jsonify
 from flask_restx import Namespace, Resource
 
-from reports_api.utils.run_version import get_run_version
+from api.utils.run_version import get_run_version
 
 
 API = Namespace('Meta', description='Metadata')
@@ -32,4 +32,4 @@ class Info(Resource):
     def get():
         """Return a JSON object with meta information about the Service."""
         version = get_run_version()
-        return jsonify(API=f'reports_api/{version}')
+        return jsonify(API=f'epictrack_api/{version}')

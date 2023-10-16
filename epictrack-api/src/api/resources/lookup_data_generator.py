@@ -17,9 +17,9 @@ import os
 from flask import send_file
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.services import CodeService, LookupService, ProjectService
-from reports_api.utils import auth, profiletime
-from reports_api.utils.util import cors_preflight
+from api.services import CodeService, LookupService, ProjectService
+from api.utils import auth, profiletime
+from api.utils.util import cors_preflight
 
 
 API = Namespace('lookups', description='Lookups')

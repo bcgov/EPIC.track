@@ -23,16 +23,16 @@ from http import HTTPStatus
 from flask import Flask
 from marshmallow import ValidationError
 
-from reports_api import config
-from reports_api.config import _Config
-from reports_api.exceptions import (
+from api import config
+from api.config import _Config
+from api.exceptions import (
     PermissionDeniedError, ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError)
-from reports_api.models import db
-from reports_api.utils.auth import jwt
-from reports_api.utils.caching import AppCache
-from reports_api.utils.json_encoder import CustomJSONEncoder
-from reports_api.utils.logging import setup_logging
-from reports_api.utils.run_version import get_run_version
+from api.models import db
+from api.utils.auth import jwt
+from api.utils.caching import AppCache
+from api.utils.json_encoder import CustomJSONEncoder
+from api.utils.logging import setup_logging
+from api.utils.run_version import get_run_version
 
 
 setup_logging(os.path.join(_Config.PROJECT_ROOT, 'logging.conf'))
@@ -51,7 +51,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         AppCache.configure_cache(run_mode, app)
         # pylint: disable=import-outside-toplevel
-        from reports_api.resources import API_BLUEPRINT, OPS_BLUEPRINT
+        from api.resources import API_BLUEPRINT, OPS_BLUEPRINT
 
         app.register_blueprint(API_BLUEPRINT)
         app.register_blueprint(OPS_BLUEPRINT)
@@ -61,24 +61,10 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         @app.after_request
         def add_version(response):  # pylint: disable=unused-variable
             version = get_run_version()
-            response.headers['API'] = f'eao_reports_api/{version}'
+            response.headers['API'] = f'eao_epictrack_api/{version}'
             # So that ERR responses don't raise CORS error in browser
             response.headers['Access-Control-Allow-Origin'] = '*'
             return response
-
-        @app.errorhandler(Exception)
-        def handle_error(err):
-            if isinstance(err, ValidationError):
-                return err.messages, HTTPStatus.BAD_REQUEST
-            if isinstance(err, ResourceExistsError):
-                return err.message, HTTPStatus.CONFLICT
-            if isinstance(err, ResourceNotFoundError):
-                return err.message, HTTPStatus.NOT_FOUND
-            if isinstance(err, PermissionDeniedError):
-                return err.message, HTTPStatus.FORBIDDEN
-            if isinstance(err, UnprocessableEntityError):
-                return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
-            return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)
 
@@ -97,7 +83,7 @@ def setup_jwt_manager(app, jwt_manager):
 
 def register_shellcontext(app):
     """Register shell context objects."""
-    from reports_api import models  # pylint: disable=import-outside-toplevel
+    from api import models  # pylint: disable=import-outside-toplevel
 
     def shell_context():
         """Shell context objects."""

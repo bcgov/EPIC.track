@@ -14,7 +14,7 @@
 """Service to manage Outcome Configuration."""
 from flask import current_app
 
-from reports_api.models import OutcomeConfiguration
+from api.models import OutcomeConfiguration
 
 
 class OutcomeConfigurationService:  # pylint: disable=too-few-public-methods

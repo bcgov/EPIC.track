@@ -18,9 +18,9 @@ import pandas as pd
 from flask import current_app
 from sqlalchemy.sql import exists
 
-from reports_api.exceptions import ResourceNotFoundError
-from reports_api.models import Responsibility, Task, TaskTemplate, db
-from reports_api.schemas import request as req
+from api.exceptions import ResourceNotFoundError
+from api.models import Responsibility, Task, TaskTemplate, db
+from api.schemas import request as req
 
 
 class TaskTemplateService:

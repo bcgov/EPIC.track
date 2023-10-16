@@ -13,9 +13,9 @@
 # limitations under the License.
 """Super class to handle all operations related to base model."""
 from sqlalchemy import Boolean, Column, DateTime, String, asc
-from reports_api.models.history import Versioned
+from api.models.history import Versioned
 
-from reports_api.utils.utcnow import utcnow
+from api.utils.utcnow import utcnow
 
 from .db import db
 

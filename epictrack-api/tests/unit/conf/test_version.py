@@ -16,8 +16,8 @@
 
 Test-Suite to ensure that the version utilities are working as expected.
 """
-from reports_api import utils
-from reports_api.version import __version__
+from api import utils
+from api.version import __version__
 from tests import skip_in_pod
 
 

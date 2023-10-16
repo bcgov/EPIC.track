@@ -14,7 +14,7 @@
 """Keycloak admin functions"""
 import requests
 from flask import current_app
-from reports_api.utils.enums import HttpMethod
+from api.utils.enums import HttpMethod
 
 
 class KeycloakService:

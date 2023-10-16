@@ -18,15 +18,15 @@ from typing import IO, Dict
 
 import pandas as pd
 
-from reports_api.exceptions import BadRequestError
-from reports_api.models import (
+from api.exceptions import BadRequestError
+from api.models import (
     Action, ActionEnum, ActionTemplate, EAAct, EventCategory, EventTemplate, EventType, OutcomeTemplate, PhaseCode,
     WorkType, db)
-from reports_api.schemas import request as req
-from reports_api.schemas import response as res
-from reports_api.services.action_template import ActionTemplateService
-from reports_api.services.phaseservice import PhaseService
-from reports_api.utils.str import escape_characters
+from api.schemas import request as req
+from api.schemas import response as res
+from api.services.action_template import ActionTemplateService
+from api.services.phaseservice import PhaseService
+from api.utils.str import escape_characters
 
 
 class EventTemplateService:

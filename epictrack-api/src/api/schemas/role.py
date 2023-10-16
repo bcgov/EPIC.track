@@ -1,8 +1,8 @@
 """Role model schema"""
 from marshmallow import EXCLUDE
 
-from reports_api.models import Role
-from reports_api.schemas.base import AutoSchemaBase
+from api.models import Role
+from api.schemas.base import AutoSchemaBase
 
 
 class RoleSchema(

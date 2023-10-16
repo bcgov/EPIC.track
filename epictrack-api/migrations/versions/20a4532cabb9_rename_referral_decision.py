@@ -7,7 +7,7 @@ Create Date: 2023-05-31 15:27:34.784655
 """
 from alembic import op
 import sqlalchemy as sa
-from reports_api.models import PhaseCode
+from api.models import PhaseCode
 
 
 # revision identifiers, used by Alembic.

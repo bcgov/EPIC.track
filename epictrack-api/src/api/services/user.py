@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """User service"""
-from reports_api.exceptions import BusinessError, PermissionDeniedError
-from reports_api.utils import TokenInfo
+from api.exceptions import BusinessError, PermissionDeniedError
+from api.utils import TokenInfo
 
 from .keycloak import KeycloakService
 

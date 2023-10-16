@@ -14,8 +14,8 @@
 """Task resource's input validations"""
 from marshmallow import fields, validate
 
-from reports_api.models.task_event import StatusEnum
-from reports_api.schemas.request.custom_fields import IntegerList
+from api.models.task_event import StatusEnum
+from api.schemas.request.custom_fields import IntegerList
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 

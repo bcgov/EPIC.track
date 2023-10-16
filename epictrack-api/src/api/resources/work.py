@@ -18,12 +18,12 @@ from io import BytesIO
 from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.schemas import request as req
-from reports_api.schemas import response as res
-from reports_api.services import WorkService
-from reports_api.services.work_phase import WorkPhaseService
-from reports_api.utils import auth, profiletime
-from reports_api.utils.util import cors_preflight
+from api.schemas import request as req
+from api.schemas import response as res
+from api.services import WorkService
+from api.services.work_phase import WorkPhaseService
+from api.utils import auth, profiletime
+from api.utils.util import cors_preflight
 
 
 API = Namespace("works", description="Works")

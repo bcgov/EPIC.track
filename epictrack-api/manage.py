@@ -19,8 +19,8 @@ import logging
 from flask_migrate import Migrate
 
 # models included so that migrate can build the database migrations
-from reports_api import create_app
-from reports_api.models import db
+from api import create_app
+from api.models import db
 from flask.cli import FlaskGroup
 
 

@@ -17,10 +17,10 @@ from http import HTTPStatus
 from flask import request
 from flask_restx import Namespace, Resource, cors
 
-from reports_api.schemas import request as req
-from reports_api.services import ReminderConfigurationService
-from reports_api.utils import auth, profiletime
-from reports_api.utils.util import cors_preflight
+from api.schemas import request as req
+from api.services import ReminderConfigurationService
+from api.utils import auth, profiletime
+from api.utils.util import cors_preflight
 
 
 API = Namespace("reminder-configurations", description="Reminder configurations")

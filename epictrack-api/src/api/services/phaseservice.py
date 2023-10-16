@@ -14,7 +14,7 @@
 """Service to manage Phase."""
 from flask import current_app
 
-from reports_api.models.phase_code import PhaseCode
+from api.models.phase_code import PhaseCode
 
 
 class PhaseService:  # pylint:disable=too-few-public-methods

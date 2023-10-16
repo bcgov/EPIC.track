@@ -2,7 +2,7 @@
 from flask import current_app, g
 from sqlalchemy import event
 
-from reports_api.models.db import db
+from api.models.db import db
 
 
 @event.listens_for(db.session, "before_flush")

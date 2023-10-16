@@ -13,7 +13,7 @@
 # limitations under the License.
 """Helper Util."""
 
-from reports_api.models import db
+from api.models import db
 
 
 def find_model_from_table_name(table_name: str):

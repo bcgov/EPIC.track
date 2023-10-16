@@ -1,11 +1,11 @@
 """TaskTemplate model schema"""
 from marshmallow import EXCLUDE, fields
 
-from reports_api.models import Task, TaskTemplate
-from reports_api.models.task_event import TaskEvent
-from reports_api.models.task_event_assignee import TaskEventAssignee
-from reports_api.models.task_event_responsibility import TaskEventResponsibility
-from reports_api.schemas.base import AutoSchemaBase
+from api.models import Task, TaskTemplate
+from api.models.task_event import TaskEvent
+from api.models.task_event_assignee import TaskEventAssignee
+from api.models.task_event_responsibility import TaskEventResponsibility
+from api.schemas.base import AutoSchemaBase
 
 from .ea_act_response import EAActResponseSchema
 from .phase_response import PhaseResponseSchema

@@ -1,11 +1,11 @@
 """Project model schema"""
 from marshmallow import EXCLUDE, fields
 
-from reports_api.models import Project
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.proponent import ProponentSchema
-from reports_api.schemas.region import RegionSchema
-from reports_api.schemas.types import SubTypeSchema, TypeSchema
+from api.models import Project
+from api.schemas.base import AutoSchemaBase
+from api.schemas.proponent import ProponentSchema
+from api.schemas.region import RegionSchema
+from api.schemas.types import SubTypeSchema, TypeSchema
 
 
 class ProjectResponseSchema(

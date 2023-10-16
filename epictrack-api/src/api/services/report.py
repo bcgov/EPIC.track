@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service to manage Reports."""
 
-from reports_api.reports import get_report_generator
+from api.reports import get_report_generator
 
 
 class ReportService:  # pylint: disable=too-few-public-methods

@@ -20,9 +20,9 @@ from flask import current_app
 from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
 
-from reports_api.exceptions import UnprocessableEntityError
-from reports_api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, db
-from reports_api.models.task_event_responsibility import TaskEventResponsibility
+from api.exceptions import UnprocessableEntityError
+from api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, db
+from api.models.task_event_responsibility import TaskEventResponsibility
 
 from .task_template import TaskTemplateService
 from .work_phase import WorkPhaseService

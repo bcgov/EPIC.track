@@ -18,7 +18,7 @@ from typing import List
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
 from sqlalchemy.orm import column_property, relationship
 
-from reports_api.models.base_model import BaseModelVersioned
+from api.models.base_model import BaseModelVersioned
 
 
 class Staff(BaseModelVersioned):

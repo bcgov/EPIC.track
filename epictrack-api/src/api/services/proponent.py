@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Proponent."""
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
-from reports_api.models import Proponent
+from api.exceptions import ResourceExistsError, ResourceNotFoundError
+from api.models import Proponent
 
 
 class ProponentService:

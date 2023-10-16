@@ -13,10 +13,10 @@
 # limitations under the License.
 """Staff Work Role response"""
 from marshmallow import EXCLUDE, fields
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.response.staff_response import StaffResponseSchema
-from reports_api.schemas.response.role_response import RoleResponseSchema
-from reports_api.models import StaffWorkRole
+from api.schemas.base import AutoSchemaBase
+from api.schemas.response.staff_response import StaffResponseSchema
+from api.schemas.response.role_response import RoleResponseSchema
+from api.models import StaffWorkRole
 
 
 class StaffWorkRoleResponseSchema(

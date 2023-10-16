@@ -14,7 +14,7 @@
 """Service to manage SubTypes."""
 from flask import current_app
 
-from reports_api.models import SubType
+from api.models import SubType
 
 
 class SubTypeService:  # pylint:disable=too-few-public-methods

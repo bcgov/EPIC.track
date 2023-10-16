@@ -13,8 +13,8 @@
 # limitations under the License.
 """Responsibility response schema"""
 from marshmallow import EXCLUDE
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.models import Responsibility
+from api.schemas.base import AutoSchemaBase
+from api.models import Responsibility
 
 
 class ResponsibilityResponseSchema(

@@ -16,10 +16,10 @@ from sqlalchemy import Date, and_, func
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
-from reports_api.models import (
+from api.models import (
     EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
     WorkPhase, WorkType, db)
-from reports_api.models.event_configuration import EventConfiguration
+from api.models.event_configuration import EventConfiguration
 
 from .report_factory import ReportFactory
 

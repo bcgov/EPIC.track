@@ -9,7 +9,7 @@ from alembic import op
 import sqlalchemy as sa
 
 
-from reports_api.models import PhaseCode
+from api.models import PhaseCode
 
 # revision identifiers, used by Alembic.
 revision = '8c0a68a5854a'

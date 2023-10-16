@@ -1,9 +1,9 @@
 """Ministry model schema"""
 from marshmallow import EXCLUDE, fields
 
-from reports_api.models import Ministry
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.staff import StaffSchema
+from api.models import Ministry
+from api.schemas.base import AutoSchemaBase
+from api.schemas.staff import StaffSchema
 
 
 class MinistrySchema(

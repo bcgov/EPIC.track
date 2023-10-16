@@ -1,8 +1,8 @@
 """Type and SubType model schema"""
 from marshmallow import EXCLUDE, fields
 
-from reports_api.models import SubType, Type
-from reports_api.schemas.base import AutoSchemaBase
+from api.models import SubType, Type
+from api.schemas.base import AutoSchemaBase
 
 
 class TypeResponseSchema(

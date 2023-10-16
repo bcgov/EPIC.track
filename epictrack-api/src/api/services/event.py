@@ -18,12 +18,12 @@ from typing import List
 
 from sqlalchemy import and_, or_
 
-from reports_api.exceptions import ResourceNotFoundError, UnprocessableEntityError
-from reports_api.models import (
+from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
+from api.models import (
     PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
-from reports_api.models.event_template import EventPositionEnum
-from reports_api.utils import util
-from reports_api.utils.datetime_helper import get_start_of_day
+from api.models.event_template import EventPositionEnum
+from api.utils import util
+from api.utils.datetime_helper import get_start_of_day
 
 from .event_configuration import EventConfigurationService
 

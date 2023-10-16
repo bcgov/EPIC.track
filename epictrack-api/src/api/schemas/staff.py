@@ -1,9 +1,9 @@
 """Staff model schema"""
 from marshmallow import EXCLUDE, ValidationError, fields, validate, validates
 
-from reports_api.models import Staff
-from reports_api.schemas.base import AutoSchemaBase
-from reports_api.schemas.position import PositionSchema
+from api.models import Staff
+from api.schemas.base import AutoSchemaBase
+from api.schemas.position import PositionSchema
 
 
 class StaffSchema(

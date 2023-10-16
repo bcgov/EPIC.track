@@ -14,10 +14,10 @@
 """Service to manage Staffs."""
 
 from flask import current_app
-from reports_api.exceptions import ResourceExistsError, ResourceNotFoundError
+from api.exceptions import ResourceExistsError, ResourceNotFoundError
 
-from reports_api.models import Staff
-from reports_api.schemas.response import StaffResponseSchema
+from api.models import Staff
+from api.schemas.response import StaffResponseSchema
 
 
 class StaffService:

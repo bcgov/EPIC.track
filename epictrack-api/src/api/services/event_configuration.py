@@ -15,8 +15,8 @@
 from typing import Iterable
 from sqlalchemy import or_
 
-from reports_api.models import EventConfiguration, db
-from reports_api.models.event_category import EventCategoryEnum
+from api.models import EventConfiguration, db
+from api.models.event_category import EventCategoryEnum
 
 
 class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-many-arguments
