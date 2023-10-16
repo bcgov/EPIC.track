@@ -76,7 +76,7 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
         allow_none=True
     )
 
-    number_of_responses = fields.Str(
+    number_of_responses = fields.Int(
         metadata={"description": "Number of responses for PCP"},
         allow_none=True
     )
