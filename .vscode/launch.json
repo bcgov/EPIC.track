@@ -8,7 +8,7 @@
             "name": "ReportsAPI",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/reports-api/wsgi.py",
+            "program": "${workspaceFolder}/epictrack-api/wsgi.py",
             "console": "integratedTerminal",
             "justMyCode": true
         }
