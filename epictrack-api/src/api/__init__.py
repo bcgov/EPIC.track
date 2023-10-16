@@ -66,6 +66,20 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             response.headers['Access-Control-Allow-Origin'] = '*'
             return response
 
+        @app.errorhandler(Exception)
+        def handle_error(err):
+            if isinstance(err, ValidationError):
+                return err.messages, HTTPStatus.BAD_REQUEST
+            if isinstance(err, ResourceExistsError):
+                return err.message, HTTPStatus.CONFLICT
+            if isinstance(err, ResourceNotFoundError):
+                return err.message, HTTPStatus.NOT_FOUND
+            if isinstance(err, PermissionDeniedError):
+                return err.message, HTTPStatus.FORBIDDEN
+            if isinstance(err, UnprocessableEntityError):
+                return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
+            return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
+
         register_shellcontext(app)
 
     return app
