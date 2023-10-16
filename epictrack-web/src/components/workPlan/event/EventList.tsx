@@ -290,6 +290,7 @@ const EventList = () => {
         header: "Task / Milestone",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 300,
+        enableSorting: false,
         Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle
             to="#"
@@ -302,13 +303,13 @@ const EventList = () => {
             {renderedCellValue}
           </ETGridTitle>
         ),
-        sortingFn: "sortFn",
       },
       {
         accessorKey: "type",
         header: "Type",
         size: 100,
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
@@ -320,6 +321,7 @@ const EventList = () => {
         header: "Start Date",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -340,6 +342,7 @@ const EventList = () => {
         size: 140,
         header: "End Date",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -354,6 +357,7 @@ const EventList = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 100,
         header: "Days",
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
@@ -368,6 +372,7 @@ const EventList = () => {
         header: "Assigned",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -384,6 +389,7 @@ const EventList = () => {
         header: "Responsibility",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         size: 140,
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -400,6 +406,7 @@ const EventList = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         header: "Notes",
         size: 250,
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {getTextFromDraftJsContentState(cell.getValue<string>())}
@@ -411,6 +418,7 @@ const EventList = () => {
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         header: "Progress",
         size: 150,
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <Box
             sx={{
