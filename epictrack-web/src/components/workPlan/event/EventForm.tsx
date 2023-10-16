@@ -40,6 +40,8 @@ import PCPInput from "./components/PCPInput";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
+import outcomeConfigurationService from "../../../services/outcomeConfigurationService/outcomeConfigurationService";
+import DecisionInput from "./components/DecisionInput";
 
 interface TaskFormProps {
   onSave: () => void;
@@ -72,6 +74,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
   const [anticipatedLabel, setAnticipatedLabel] =
     React.useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
+  const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
   const selectedPhaseId = React.useMemo(
     () => ctx.selectedWorkPhase?.phase.id,
     [ctx.selectedWorkPhase?.phase.id]
@@ -90,8 +93,13 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
           then: () => yup.string().required("Number of days is required"),
           otherwise: () => yup.string().nullable(),
         }),
+        outcome_id: yup.string().when([], {
+          is: () => outcomes.length > 0,
+          then: () => yup.string().required("Please select the decision"),
+          otherwise: () => yup.string().nullable(),
+        }),
       }),
-    [selectedConfiguration]
+    [selectedConfiguration, outcomes]
   );
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -116,7 +124,9 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
       setActualDateLabel("Actual Date");
     }
   }, [selectedConfiguration]);
-
+  React.useEffect(() => {
+    getOutcomes();
+  }, [selectedConfiguration?.id]);
   React.useEffect(() => {
     if (event) {
       reset(event);
@@ -158,6 +168,21 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
+
+  const getOutcomes = async () => {
+    try {
+      const result = await outcomeConfigurationService.getOutcomeConfigurations(
+        Number(selectedConfiguration?.id)
+      );
+      if (result.status === 200) {
+        setOutcomes(result.data as any[]);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -460,6 +485,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
             {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
               Number(selectedConfiguration?.event_type_id)
             ) && <SingleDayPCPInput />}
+            {outcomes.length > 0 && <DecisionInput outcomes={outcomes} />}
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor
