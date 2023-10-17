@@ -66,6 +66,7 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("project-form");
+    reset({ is_active: true });
   }, []);
 
   React.useEffect(() => {
@@ -94,7 +95,6 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     const name = (ctx?.item as Project)?.name;
-    setDisabled(ctx?.item ? true : false);
     ctx.setTitle(name || "Project");
   }, [ctx.title, ctx.item]);
 
