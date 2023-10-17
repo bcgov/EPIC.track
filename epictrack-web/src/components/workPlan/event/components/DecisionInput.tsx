@@ -4,16 +4,63 @@ import { ETFormLabel } from "../../../shared";
 import ControlledSelectV2 from "../../../shared/controlledInputComponents/ControlledSelectV2";
 import { useFormContext } from "react-hook-form";
 import { ListType } from "../../../../models/code";
+import staffService from "../../../../services/staffService/staffService";
+import { showNotification } from "../../../shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "../../../../constants/application-constant";
+import outcomeConfigurationService from "../../../../services/outcomeConfigurationService/outcomeConfigurationService";
+import { Staff } from "../../../../models/staff";
 
 export interface DecisionInputProps {
-  outcomes: ListType[];
+  configurationId: number;
+  decisionMakerPositionId: number;
 }
-const DecisionInput = ({ outcomes }: DecisionInputProps) => {
-  const [decisionMakers, setDecisionMakers] = React.useState<ListType[]>([]);
+const DecisionInput = ({
+  decisionMakerPositionId,
+  configurationId,
+}: DecisionInputProps) => {
+  const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
+  const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
   const {
     register,
+    unregister,
     formState: { errors },
   } = useFormContext();
+  React.useEffect(() => {
+    getDecisionMakers();
+    getOutcomes();
+    return () => {
+      unregister("decision_maker_id");
+      unregister("outcome_id");
+    };
+  }, []);
+  const getOutcomes = async () => {
+    try {
+      const result = await outcomeConfigurationService.getOutcomeConfigurations(
+        Number(configurationId)
+      );
+      if (result.status === 200) {
+        setOutcomes(result.data as any[]);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
+  const getDecisionMakers = async () => {
+    try {
+      const result = await staffService.getStaffByPosition(
+        decisionMakerPositionId.toString()
+      );
+      if (result.status === 200) {
+        setDecisionMakers(result.data as Staff[]);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
 
   return (
     <>
@@ -22,8 +69,8 @@ const DecisionInput = ({ outcomes }: DecisionInputProps) => {
         <ControlledSelectV2
           helperText={errors?.decision_maker_id?.message?.toString()}
           options={decisionMakers || []}
-          getOptionValue={(o: ListType) => o.id.toString()}
-          getOptionLabel={(o: ListType) => o.name}
+          getOptionValue={(o: Staff) => o.id.toString()}
+          getOptionLabel={(o: Staff) => o.full_name}
           {...register("decision_maker_id")}
         ></ControlledSelectV2>
       </Grid>

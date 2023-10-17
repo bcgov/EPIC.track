@@ -42,6 +42,7 @@ import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import outcomeConfigurationService from "../../../services/outcomeConfigurationService/outcomeConfigurationService";
 import DecisionInput from "./components/DecisionInput";
+import { POSITION_ENUM } from "../../../models/position";
 
 interface TaskFormProps {
   onSave: () => void;
@@ -70,15 +71,11 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
   const numberOfDaysRef = React.useRef();
   const endDateRef = React.useRef();
   const ctx = React.useContext(WorkplanContext);
-  const workId = React.useMemo(() => ctx.work?.id, [ctx.work?.id]);
+  const [actualAdded, setActualAdded] = React.useState<boolean>(false);
   const [anticipatedLabel, setAnticipatedLabel] =
     React.useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
   const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
-  const selectedPhaseId = React.useMemo(
-    () => ctx.selectedWorkPhase?.phase.id,
-    [ctx.selectedWorkPhase?.phase.id]
-  );
   const titleRef = React.useRef();
   const schema = React.useMemo(
     () =>
@@ -94,12 +91,17 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
           otherwise: () => yup.string().nullable(),
         }),
         outcome_id: yup.string().when([], {
-          is: () => outcomes.length > 0,
+          is: () => actualAdded,
           then: () => yup.string().required("Please select the decision"),
           otherwise: () => yup.string().nullable(),
         }),
+        decision_maker_id: yup.string().when([], {
+          is: () => actualAdded,
+          then: () => yup.string().required("Please select the decision maker"),
+          otherwise: () => yup.string().nullable(),
+        }),
       }),
-    [selectedConfiguration, outcomes]
+    [selectedConfiguration, outcomes, actualAdded]
   );
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -124,9 +126,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
       setActualDateLabel("Actual Date");
     }
   }, [selectedConfiguration]);
-  React.useEffect(() => {
-    getOutcomes();
-  }, [selectedConfiguration?.id]);
   React.useEffect(() => {
     if (event) {
       reset(event);
@@ -168,21 +167,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-
-  const getOutcomes = async () => {
-    try {
-      const result = await outcomeConfigurationService.getOutcomeConfigurations(
-        Number(selectedConfiguration?.id)
-      );
-      if (result.status === 200) {
-        setOutcomes(result.data as any[]);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -269,6 +253,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
   };
 
   const daysOnChangeHandler = (params: NumberOfDaysChangeProps = {}) => {
+    setActualAdded(!!params.actualDate);
     let number_of_days = 0;
     if (numberOfDaysRef?.current as any) {
       number_of_days =
@@ -442,9 +427,10 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                       }}
                       value={value ? dayjs(value) : value}
                       onChange={(event: any) => {
-                        onChange(event["$d"]);
+                        const d = event ? event["$d"] : null;
+                        onChange(d);
                         daysOnChangeHandler({
-                          actualDate: event["$d"],
+                          actualDate: d,
                         });
                       }}
                       defaultValue={
@@ -485,7 +471,17 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
             {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
               Number(selectedConfiguration?.event_type_id)
             ) && <SingleDayPCPInput />}
-            {outcomes.length > 0 && <DecisionInput outcomes={outcomes} />}
+            {actualAdded &&
+              selectedConfiguration?.event_category_id ===
+                EventCategory.DECISION && (
+                <DecisionInput
+                  configurationId={selectedConfiguration.id}
+                  decisionMakerPositionId={
+                    ctx.work?.decision_maker_position_id ||
+                    POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR
+                  }
+                />
+              )}
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor
