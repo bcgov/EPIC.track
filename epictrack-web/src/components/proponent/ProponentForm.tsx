@@ -40,7 +40,9 @@ export default function ProponentForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
-    reset({ is_active: true });
+    if ((ctx?.item as Proponent)?.is_active == undefined) {
+      reset({ is_active: true });
+    }
   }, []);
   React.useEffect(() => {
     const name = (ctx?.item as Proponent)?.name;

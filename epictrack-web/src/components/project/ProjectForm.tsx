@@ -66,7 +66,9 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("project-form");
-    reset({ is_active: true });
+    if ((ctx?.item as Project)?.is_active == undefined) {
+      reset({ is_active: true });
+    }
   }, []);
 
   React.useEffect(() => {
