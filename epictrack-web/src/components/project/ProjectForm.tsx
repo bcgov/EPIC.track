@@ -66,6 +66,11 @@ export default function ProjectForm({ ...props }) {
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
+    ctx.setFormId("project-form");
+    reset({ is_active: true });
+  }, []);
+
+  React.useEffect(() => {
     setDisabled(props.projectId ? true : false);
     ctx.setId(props.projectId);
   }, [ctx.id]);
@@ -88,6 +93,11 @@ export default function ProjectForm({ ...props }) {
   React.useEffect(() => {
     reset(ctx.item);
   }, [ctx.item]);
+
+  React.useEffect(() => {
+    const name = (ctx?.item as Project)?.name;
+    ctx.setTitle(name || "Project");
+  }, [ctx.title, ctx.item]);
 
   const setRegions = (regions: Region[]) => {
     const envRegions = regions.filter((p) => p.entity === "ENV");

@@ -5,12 +5,12 @@ on:
     branches:
       - develop
     paths:
-      - "reports-api/**"
+      - "epictrack-api/**"
 
 defaults:
   run:
     shell: bash
-    working-directory: ./reports-api
+    working-directory: ./epictrack-api
 
 jobs:
   setup-job:
