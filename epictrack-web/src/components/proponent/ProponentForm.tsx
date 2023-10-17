@@ -40,9 +40,6 @@ export default function ProponentForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
-    if ((ctx?.item as Proponent)?.is_active == undefined) {
-      reset({ is_active: true });
-    }
   }, []);
   React.useEffect(() => {
     const name = (ctx?.item as Proponent)?.name;
@@ -64,10 +61,15 @@ export default function ProponentForm({ ...props }) {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = methods;
 
   React.useEffect(() => {
-    reset(ctx.item);
+    if (ctx.item) {
+      reset(ctx.item);
+    } else {
+      setValue("is_active", true);
+    }
   }, [ctx.item]);
 
   const getStaffs = async () => {

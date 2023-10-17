@@ -66,9 +66,6 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("project-form");
-    if ((ctx?.item as Project)?.is_active == undefined) {
-      reset({ is_active: true });
-    }
   }, []);
 
   React.useEffect(() => {
@@ -88,11 +85,16 @@ export default function ProjectForm({ ...props }) {
     control,
     formState: { errors },
     reset,
+    setValue,
   } = methods;
   const formValues = useWatch({ control });
 
   React.useEffect(() => {
-    reset(ctx.item);
+    if (ctx.item) {
+      reset(ctx.item);
+    } else {
+      setValue("is_active", true);
+    }
   }, [ctx.item]);
 
   React.useEffect(() => {
