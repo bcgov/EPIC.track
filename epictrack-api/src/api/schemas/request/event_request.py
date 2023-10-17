@@ -48,6 +48,7 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
 
     notes = fields.Str(
         metadata={"description": "Notes for the milestone event"},
+        allow_none=True
     )
 
     high_priority = fields.Bool(
@@ -66,7 +67,7 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
         allow_none=True
     )
 
-    decision_make_id = fields.Int(
+    decision_maker_id = fields.Int(
         metadata={"description": "Decision maker ID of the decision event"},
         allow_none=True
     )

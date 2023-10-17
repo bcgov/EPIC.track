@@ -48,6 +48,7 @@ from .user import API as USER_API
 from .work import API as WORK_API
 from .event_configuration import API as EVENT_CONFIGURATION_API
 from .responsibility import API as RESPONSIBILITY_API
+from .outcome_configuration import API as OUTCOME_CONFIGURATION_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -101,3 +102,4 @@ API.add_namespace(TASK_API, path="/tasks")
 API.add_namespace(EVENT_API, path="/milestones")
 API.add_namespace(EVENT_CONFIGURATION_API, path="/event-configurations")
 API.add_namespace(RESPONSIBILITY_API, path="/responsibilities")
+API.add_namespace(OUTCOME_CONFIGURATION_API, path="/outcome-configurations")
