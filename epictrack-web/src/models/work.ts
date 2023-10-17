@@ -31,6 +31,7 @@ export interface Work extends MasterBase {
   substitution_act_id: number;
   eac_decision_by_id: number;
   decision_by_id: number;
+  decision_maker_position_id: number;
 
   project: ListType;
   ministry: Ministry;

@@ -1,5 +1,5 @@
 import React from "react";
-import { Avatar, Box, Menu, Tooltip } from "@mui/material";
+import { Avatar, Box, Menu, PopoverOrigin, Tooltip } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Palette } from "../../../styles/theme";
 import { ETCaption2 } from "..";
@@ -32,30 +32,41 @@ const useStyles = makeStyles({
 
 const UserMenu = (props: UserMenuProps) => {
   const classes = useStyles();
-  const { anchorEl, onClose, firstName, lastName, position, email, phone } =
-    props;
+  const {
+    anchorEl,
+    onClose,
+    firstName,
+    lastName,
+    position,
+    email,
+    phone,
+    origin,
+    id,
+  } = props;
+  const menuOrigin = React.useMemo(() => {
+    if (origin === undefined)
+      return {
+        vertical: "top",
+        horizontal: "right",
+      } as PopoverOrigin;
+    return origin;
+  }, [origin]);
   return (
     <Menu
       sx={{
         mt: "2.5rem",
+        ...props.sx,
       }}
-      id="menu-appbar"
+      id={id || "menu-appbar"}
       anchorEl={anchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
+      anchorOrigin={menuOrigin}
       keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
+      transformOrigin={menuOrigin}
       open={Boolean(anchorEl)}
       onClose={onClose}
-      style={{ pointerEvents: "none" }}
       PaperProps={{
         style: {
-          pointerEvents: "auto",
+          pointerEvents: "none",
           width: 320,
           boxShadow: "0px 12px 24px 0px rgba(0, 0, 0, 0.10)",
         },
@@ -64,8 +75,11 @@ const UserMenu = (props: UserMenuProps) => {
         style: {
           paddingTop: 0,
           paddingBottom: 0,
+          pointerEvents: "auto",
         },
       }}
+      container={document.body}
+      disablePortal
     >
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box

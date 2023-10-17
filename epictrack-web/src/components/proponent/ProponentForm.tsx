@@ -1,16 +1,17 @@
 import React from "react";
-import { TextField, Grid } from "@mui/material";
+import { TextField, Grid, Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Proponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
+import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
+import LockClosed from "../../assets/images/lock-closed.svg";
 
 const schema = yup.object().shape({
   name: yup
@@ -32,16 +33,20 @@ const schema = yup.object().shape({
     }),
 });
 
-export default function StaffForm({ ...props }) {
+export default function ProponentForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
+  const [disabled, setDisabled] = React.useState<boolean>();
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
+    reset({ is_active: true });
   }, []);
   React.useEffect(() => {
-    ctx.setTitle("Proponent/Certificate Holder");
-  }, [ctx.title]);
+    const name = (ctx?.item as Proponent)?.name;
+    setDisabled(props.proponentId ? true : false);
+    ctx.setTitle(name || "Proponent");
+  }, [ctx.title, ctx.item]);
 
   React.useEffect(() => {
     ctx.setId(props.proponentId);
@@ -88,26 +93,54 @@ export default function StaffForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={6}>
-            <ETFormLabel>Name</ETFormLabel>
-            <TextField
-              fullWidth
-              error={!!errors?.name?.message}
-              helperText={errors?.name?.message?.toString()}
-              {...register("name")}
-            />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingTop: "3px",
+              }}
+            >
+              <ETFormLabel required>Name</ETFormLabel>
+              <ETFormLabel>
+                <Box
+                  sx={{
+                    opacity: disabled ? "100" : "0",
+                    cursor: "pointer",
+                  }}
+                  component="img"
+                  src={LockClosed}
+                  alt="Lock"
+                />
+              </ETFormLabel>
+            </Box>
+            <Box sx={{ paddingTop: "4px" }}>
+              <TextField
+                variant="outlined"
+                disabled={disabled}
+                placeholder="Proponent Name"
+                fullWidth
+                error={!!errors?.name?.message}
+                helperText={errors?.name?.message?.toString()}
+                {...register("name")}
+              />
+            </Box>
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
-            <ControlledSelectV2
-              defaultValue={(ctx.item as Proponent)?.relationship_holder_id}
-              options={staffs || []}
-              getOptionValue={(o: Staff) => o.id.toString()}
-              getOptionLabel={(o: Staff) => o.full_name}
-              {...register("relationship_holder_id")}
-            ></ControlledSelectV2>
+            <Box sx={{ paddingTop: "4px" }}>
+              <ControlledSelectV2
+                placeholder="Select"
+                defaultValue={(ctx.item as Proponent)?.relationship_holder_id}
+                options={staffs || []}
+                getOptionValue={(o: Staff) => o?.id.toString()}
+                getOptionLabel={(o: Staff) => o.full_name}
+                {...register("relationship_holder_id")}
+              ></ControlledSelectV2>
+            </Box>
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
+            <ControlledSwitch
+              sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Proponent)?.is_active}
               {...register("is_active")}
             />

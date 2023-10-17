@@ -43,9 +43,9 @@ const AuthenticatedRoutes = () => {
       <Route path="/reports/30-60-90" element={<ThirtySixtyNinety />} />
       <Route path="/templates" element={<TemplateList />} />
       <Route
-        path="/list-management/indigenous-nations"
+        path="/list-management/first-nations"
         element={
-          <MasterProvider key={"/list-management/indigenous-nations"}>
+          <MasterProvider key={"/list-management/first-nations"}>
             <IndigenousNationList />
           </MasterProvider>
         }

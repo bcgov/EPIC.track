@@ -270,7 +270,7 @@ export const ETGridTitle = ({
 }: LinkHeaderProps) => {
   const classes = useStyle();
   return (
-    <ETLink to={rest.to} onClick={rest.onClick}>
+    <ETLink onClick={rest.onClick} {...rest}>
       <Tooltip
         title={rest.tooltip as string}
         disableHoverListener={!rest.enableTooltip}
@@ -366,7 +366,8 @@ export const ETFormLabelWithCharacterLimit = (
           color: Palette.neutral.light,
         }}
       >
-        {props.characterCount}/{props.maxCharacterLength} character left
+        {props.maxCharacterLength - props.characterCount}/
+        {props.maxCharacterLength} character left
       </ETParagraph>
     </Box>
   );
