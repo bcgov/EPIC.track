@@ -27,6 +27,7 @@ interface MasterContextProps {
   setForm: Dispatch<SetStateAction<React.ReactElement>>;
   setFormId: Dispatch<SetStateAction<string | undefined>>;
   onDialogClose(event: any, reason: any): any;
+  setFormStyle: Dispatch<SetStateAction<MasterBase>>;
 }
 
 export const MasterContext = createContext<MasterContextProps>({
@@ -47,6 +48,7 @@ export const MasterContext = createContext<MasterContextProps>({
   setForm: () => ({}),
   setFormId: () => ({}),
   onDialogClose: (event: any, reason: any) => ({}),
+  setFormStyle: () => ({}),
 });
 
 export const MasterProvider = ({
@@ -69,6 +71,7 @@ export const MasterProvider = ({
   const [form, setForm] = React.useState<React.ReactElement>(() => <></>);
   const [formId, setFormId] = React.useState<string | undefined>();
   const [showModalForm, setShowModalForm] = React.useState<boolean>(false);
+  const [formStyle, setFormStyle] = React.useState<MasterBase>();
 
   React.useEffect(() => {
     if (id && !showDeleteDialog) {
@@ -197,6 +200,7 @@ export const MasterProvider = ({
         setForm,
         setFormId,
         onDialogClose,
+        setFormStyle,
       }}
     >
       {children}
@@ -241,6 +245,7 @@ export const MasterProvider = ({
         onCancel={() => onDialogClose()}
         formId={formId}
         // onOk={() => deleteItem(id)}
+        sx={formStyle}
       >
         {form}
       </TrackDialog>

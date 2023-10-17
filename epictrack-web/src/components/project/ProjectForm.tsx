@@ -152,7 +152,6 @@ export default function ProjectForm({ ...props }) {
     ctx.onSave(data, () => {
       reset();
     });
-    props.onSave();
   };
   return (
     <>

@@ -1,7 +1,7 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Grid, IconButton } from "@mui/material";
+import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
 import ProjectForm from "./ProjectForm";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
@@ -9,24 +9,35 @@ import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
-import TrackDialog from "../shared/TrackDialog";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
   const [subTypes, setSubTypes] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState<number>();
-  const [showProjectForm, setShowProjectForm] = React.useState<boolean>(false);
   const ctx = React.useContext(MasterContext);
+
+  React.useEffect(() => {
+    ctx.setForm(<ProjectForm projectId={projectId} />);
+  }, [projectId]);
 
   const onEdit = (id: number) => {
     setProjectId(id);
-    setShowProjectForm(true);
+    ctx.setShowModalForm(true);
   };
 
   React.useEffect(() => {
     ctx.setService(projectService);
+    ctx.setFormStyle({
+      "& .MuiDialogContent-root": {
+        padding: 0,
+      },
+    });
   }, []);
+
+  React.useEffect(() => {
+    ctx.setTitle("Project");
+  }, [ctx.title]);
 
   const projects = React.useMemo(() => ctx.data as Project[], [ctx.data]);
 
@@ -44,17 +55,6 @@ const ProjectList = () => {
     setSubTypes(subTypes);
     setEnvRegions(envRegions);
   }, [projects]);
-
-  const onDialogClose = React.useCallback(() => {
-    setShowProjectForm(false);
-    setProjectId(undefined);
-    ctx.setItem(undefined);
-    ctx.setId(undefined);
-  }, [ctx.id]);
-
-  const onCancelHandler = () => {
-    setShowProjectForm(false);
-  };
 
   const handleDelete = (id: string) => {
     ctx.setShowDeleteDialog(true);
@@ -150,8 +150,7 @@ const ProjectList = () => {
               >
                 <Button
                   onClick={() => {
-                    ctx.setItem(undefined);
-                    setShowProjectForm(true);
+                    ctx.setShowModalForm(true);
                     setProjectId(undefined);
                   }}
                   variant="contained"
@@ -162,27 +161,6 @@ const ProjectList = () => {
             )}
           />
         </Grid>
-        <TrackDialog
-          open={showProjectForm}
-          dialogTitle={
-            projectId ? (ctx.item as Project)?.name : "Create Project"
-          }
-          disableEscapeKeyDown
-          fullWidth
-          maxWidth="md"
-          okButtonText="Save"
-          cancelButtonText="Cancel"
-          isActionsRequired
-          onCancel={() => onCancelHandler()}
-          formId="project-form"
-          sx={{
-            "& .MuiDialogContent-root": {
-              padding: 0,
-            },
-          }}
-        >
-          <ProjectForm onSave={onDialogClose} projectId={projectId} />
-        </TrackDialog>
       </ETPageContainer>
     </>
   );
