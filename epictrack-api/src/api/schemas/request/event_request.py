@@ -48,6 +48,7 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
 
     notes = fields.Str(
         metadata={"description": "Notes for the milestone event"},
+        allow_none=True
     )
 
     high_priority = fields.Bool(
