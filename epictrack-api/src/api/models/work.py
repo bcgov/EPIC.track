@@ -56,6 +56,7 @@ class Work(BaseModelVersioned):
     eac_decision_by_id = Column(ForeignKey('staffs.id'), nullable=True)
     decision_by_id = Column(ForeignKey('staffs.id'), nullable=True)
     start_date_locked = Column(Boolean(), default=False)
+    decision_maker_position_id = Column(ForeignKey('positions.id'), nullable=True)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')
@@ -69,6 +70,7 @@ class Work(BaseModelVersioned):
     substitution_act = relationship("SubstitutionAct", foreign_keys=[substitution_act_id], lazy='select')
     eac_decision_by = relationship("Staff", foreign_keys=[eac_decision_by_id], lazy='select')
     decision_by = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
+    decision_maker_position = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""

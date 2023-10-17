@@ -33,7 +33,7 @@ class Event(BaseModelVersioned):
     anticipated_date = Column(DateTime(timezone=True), nullable=True)
     actual_date = Column(DateTime(timezone=True), nullable=True)
     number_of_days = Column(Integer, default=0, nullable=False)
-    outcome_id = Column(ForeignKey("outcome_templates.id"), nullable=True, default=None)
+    outcome_id = Column(ForeignKey("outcome_configurations.id"), nullable=True, default=None)
     is_active = Column(Boolean(), default=True, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
     source_event_id = Column(Integer, nullable=True)
@@ -49,7 +49,7 @@ class Event(BaseModelVersioned):
     number_of_responses = Column(Integer, nullable=True)
     topic = Column(String, nullable=True)
 
-    outcome = relationship("OutcomeTemplate", foreign_keys=[outcome_id], lazy="select")
+    outcome = relationship("OutcomeConfiguration", foreign_keys=[outcome_id], lazy="select")
     act_section = relationship("ActSection", foreign_keys=[act_section_id], lazy="select")
     decision_maker = relationship("Staff", foreign_keys=[decision_maker_id], lazy="select")
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
