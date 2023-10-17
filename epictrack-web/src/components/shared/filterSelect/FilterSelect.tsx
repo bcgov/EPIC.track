@@ -36,6 +36,7 @@ const FilterSelect = (props: SelectProps) => {
   React.useEffect(() => {
     setSelectValue(isMulti ? [] : "");
   }, []);
+
   React.useEffect(() => {
     const currentValues = isMulti
       ? selectValue.map((v: OptionType) => v.value)

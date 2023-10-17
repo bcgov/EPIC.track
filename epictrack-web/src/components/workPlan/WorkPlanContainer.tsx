@@ -17,7 +17,7 @@ import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
 
 const useStyle = makeStyles({
   tabPanel: {
-    padding: "2rem 2.5rem 1.5rem 2.5rem",
+    paddingTop: "2rem",
   },
 });
 const WorkPlanContainer = () => {

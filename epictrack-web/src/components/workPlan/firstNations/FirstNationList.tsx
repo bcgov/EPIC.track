@@ -71,8 +71,8 @@ const FirstNationList = () => {
             />
           );
         },
-        filterSelectOptions: roles,
         filterFn: "multiSelectFilter",
+        filterSelectOptions: roles,
       },
       {
         accessorKey: "name",

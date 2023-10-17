@@ -186,12 +186,12 @@ const MasterTrackTable = <T extends Record<string, any>>({
               });
           },
         }}
-        positionGlobalFilter="left"
-        muiSearchTextFieldProps={{
-          placeholder: "Search",
-          sx: { minWidth: "300px" },
-          variant: "outlined",
-        }}
+        // positionGlobalFilter="left"
+        // muiSearchTextFieldProps={{
+        //   placeholder: "Search",
+        //   sx: { minWidth: "300px" },
+        //   variant: "outlined",
+        // }}
         renderToolbarInternalActions={({ table }) => (
           <>{/* <MRT_ToggleFiltersButton table={table} /> */}</>
         )}
