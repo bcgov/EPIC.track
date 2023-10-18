@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, createContext } from "react";
 import { MasterBase } from "../../models/type";
 import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog from "./TrackDialog";
-import { Backdrop, CircularProgress } from "@mui/material";
+import { Backdrop, CircularProgress, SxProps } from "@mui/material";
 import { showNotification } from "./notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../constants/application-constant";
 import { getAxiosError } from "../../utils/axiosUtils";
@@ -71,7 +71,7 @@ export const MasterProvider = ({
   const [form, setForm] = React.useState<React.ReactElement>(() => <></>);
   const [formId, setFormId] = React.useState<string | undefined>();
   const [showModalForm, setShowModalForm] = React.useState<boolean>(false);
-  const [formStyle, setFormStyle] = React.useState<MasterBase>();
+  const [formStyle, setFormStyle] = React.useState<SxProps>();
 
   React.useEffect(() => {
     if (id && !showDeleteDialog) {
