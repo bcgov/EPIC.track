@@ -37,6 +37,24 @@ class IndigenousNationBodyParameterSchema(RequestBodyParameterSchema):
 
     is_active = fields.Bool(
         metadata={"description": "Active state of the indigenous nation"})
+    
+    notes = fields.Str(
+        metadata={"description": "Notes for the indigenous nation"},
+        allow_none=True
+    )
+
+    pip_org_type_id = fields.Int(
+        metadata={"description": "PIP organization type for the indigenous nation"},
+        validate=validate.Range(min=1),
+        allow_none=True,
+        missing=None
+    )
+
+    pip_link = fields.Str(
+        metadata={"description": "PIP site URL for indigenous nation"},
+        allow_none=True,
+        missing=None
+    )
 
 
 class IndigenousNationExistenceQueryParamSchema(RequestQueryParameterSchema):
