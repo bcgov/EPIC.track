@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import codeService, { Code } from "../../services/codeService";
-import { Project } from "../../models/project";
+import { Project, defaultProject } from "../../models/project";
 import { Proponent } from "../../models/proponent";
 import { Region } from "../../models/region";
 import { Type } from "../../models/type";
@@ -85,7 +85,6 @@ export default function ProjectForm({ ...props }) {
     control,
     formState: { errors },
     reset,
-    setValue,
   } = methods;
   const formValues = useWatch({ control });
 
@@ -93,7 +92,7 @@ export default function ProjectForm({ ...props }) {
     if (ctx.item) {
       reset(ctx.item);
     } else {
-      setValue("is_active", true);
+      ctx.setItem(defaultProject);
     }
   }, [ctx.item]);
 

@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import { Proponent } from "../../models/proponent";
+import { Proponent, defaultProponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
@@ -61,14 +61,13 @@ export default function ProponentForm({ ...props }) {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue,
   } = methods;
 
   React.useEffect(() => {
     if (ctx.item) {
       reset(ctx.item);
     } else {
-      setValue("is_active", true);
+      ctx.setItem(defaultProponent);
     }
   }, [ctx.item]);
 

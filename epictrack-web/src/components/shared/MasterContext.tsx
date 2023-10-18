@@ -135,6 +135,7 @@ export const MasterProvider = ({
               type: "success",
             });
             setItem(undefined);
+            setId(undefined);
             setBackdrop(false);
             callback();
           }
