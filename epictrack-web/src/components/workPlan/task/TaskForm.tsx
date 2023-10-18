@@ -100,8 +100,7 @@ const TaskForm = ({ onSave, taskEvent }: TaskFormProps) => {
   const statuses = React.useMemo(() => statusOptions, []);
   const onSubmitHandler = async (data: TaskEvent) => {
     try {
-      data.work_id = Number(ctx.work?.id);
-      data.phase_id = Number(ctx.selectedWorkPhase?.phase.id);
+      data.work_phase_id = Number(ctx.selectedWorkPhase?.id);
       data.start_date = Moment(data.start_date).format();
       data.number_of_days =
         data.number_of_days.toString() === "" ? 0 : data.number_of_days;

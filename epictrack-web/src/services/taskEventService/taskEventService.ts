@@ -16,9 +16,9 @@ class TaskEventService {
     );
   }
 
-  async getAllByWorkNdPhase(workId: number, phaseId: number) {
+  async getAll(workPhaseId: number) {
     return await http.GetRequest(
-      `${Endpoints.TaskEvents.EVENTS}?work_id=${workId}&phase_id=${phaseId}`
+      `${Endpoints.TaskEvents.EVENTS}?work_phase_id=${workPhaseId}`
     );
   }
 
