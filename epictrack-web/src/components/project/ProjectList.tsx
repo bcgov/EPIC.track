@@ -44,7 +44,7 @@ const ProjectList = () => {
       .map((p) => p.sub_type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const envRegions = projects
-      .map((p) => p.region_env.name)
+      .map((p) => p.region_env?.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setTypes(types);
     setSubTypes(subTypes);

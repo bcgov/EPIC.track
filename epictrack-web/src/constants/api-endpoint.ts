@@ -61,5 +61,8 @@ const Endpoints = {
   Responsibilities: {
     RESPONSIBILITIES: "/responsibilities",
   },
+  OutcomeConfigurations: {
+    CONFIGURATIONS: "/outcome-configurations",
+  },
 };
 export default Endpoints;

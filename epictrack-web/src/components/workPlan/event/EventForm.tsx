@@ -9,7 +9,7 @@ import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
-import { Box, FormControlLabel, Grid, TextField } from "@mui/material";
+import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
 import {
   ETFormLabel,
   ETFormLabelWithCharacterLimit,
@@ -37,6 +37,12 @@ import MultiDaysInput from "./components/MultiDaysInput";
 import { dateUtils } from "../../../utils";
 import ExtSusInput from "./components/ExtSusInput";
 import PCPInput from "./components/PCPInput";
+import Icons from "../../icons/index";
+import { IconProps } from "../../icons/type";
+import SingleDayPCPInput from "./components/SingleDayPCPInput";
+import outcomeConfigurationService from "../../../services/outcomeConfigurationService/outcomeConfigurationService";
+import DecisionInput from "./components/DecisionInput";
+import { POSITION_ENUM } from "../../../models/position";
 
 interface TaskFormProps {
   onSave: () => void;
@@ -47,8 +53,9 @@ interface NumberOfDaysChangeProps {
   anticipatedDate?: string | undefined;
   actualDate?: string | undefined;
 }
+const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
+
 const EventForm = ({ onSave, event }: TaskFormProps) => {
-  // const [event, setEvent] = React.useState<MilestoneEvent>();
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<
     EventConfiguration[]
@@ -64,14 +71,11 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
   const numberOfDaysRef = React.useRef();
   const endDateRef = React.useRef();
   const ctx = React.useContext(WorkplanContext);
-  const workId = React.useMemo(() => ctx.work?.id, [ctx.work?.id]);
+  const [actualAdded, setActualAdded] = React.useState<boolean>(false);
   const [anticipatedLabel, setAnticipatedLabel] =
     React.useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
-  const selectedPhaseId = React.useMemo(
-    () => ctx.selectedWorkPhase?.phase.id,
-    [ctx.selectedWorkPhase?.phase.id]
-  );
+  const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
   const titleRef = React.useRef();
   const schema = React.useMemo(
     () =>
@@ -86,8 +90,18 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
           then: () => yup.string().required("Number of days is required"),
           otherwise: () => yup.string().nullable(),
         }),
+        outcome_id: yup.string().when([], {
+          is: () => actualAdded,
+          then: () => yup.string().required("Please select the decision"),
+          otherwise: () => yup.string().nullable(),
+        }),
+        decision_maker_id: yup.string().when([], {
+          is: () => actualAdded,
+          then: () => yup.string().required("Please select the decision maker"),
+          otherwise: () => yup.string().nullable(),
+        }),
       }),
-    [selectedConfiguration]
+    [selectedConfiguration, outcomes, actualAdded]
   );
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -103,12 +117,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
     control,
   } = methods;
 
-  // React.useEffect(() => {
-  //   if (eventId) {
-  //     getEvent();
-  //   }
-  // }, [eventId]);
-
   React.useEffect(() => {
     if (selectedConfiguration && selectedConfiguration.multiple_days) {
       setAnticipatedLabel("Anticipated Start Date");
@@ -118,7 +126,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
       setActualDateLabel("Actual Date");
     }
   }, [selectedConfiguration]);
-
   React.useEffect(() => {
     if (event) {
       reset(event);
@@ -130,6 +137,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
         numberOfDays: event.number_of_days,
       });
       setTitleCharacterCount(Number(event?.name.length));
+      setNotes(event.notes);
     }
   }, [
     event,
@@ -245,6 +253,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
   };
 
   const daysOnChangeHandler = (params: NumberOfDaysChangeProps = {}) => {
+    setActualAdded(!!params.actualDate);
     let number_of_days = 0;
     if (numberOfDaysRef?.current as any) {
       number_of_days =
@@ -334,15 +343,25 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControlLabel
-                control={
-                  <ControlledSwitch
-                    {...register("high_priority")}
-                    defaultChecked={event?.high_priority}
-                  />
-                }
-                label="High Priority"
-              />
+              <Box>
+                <FormControlLabel
+                  sx={{
+                    mr: "2px",
+                  }}
+                  control={
+                    <ControlledSwitch
+                      {...register("high_priority")}
+                      defaultChecked={event?.high_priority}
+                    />
+                  }
+                  label="High Priority"
+                />
+                <Tooltip title="High Priority Milestones will appear on reports">
+                  <Box component={"span"}>
+                    <InfoIcon />
+                  </Box>
+                </Tooltip>
+              </Box>
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
@@ -408,9 +427,10 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                       }}
                       value={value ? dayjs(value) : value}
                       onChange={(event: any) => {
-                        onChange(event["$d"]);
+                        const d = event ? event["$d"] : null;
+                        onChange(d);
                         daysOnChangeHandler({
-                          actualDate: event["$d"],
+                          actualDate: d,
                         });
                       }}
                       defaultValue={
@@ -450,7 +470,18 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               ) && <PCPInput />}
             {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
               Number(selectedConfiguration?.event_type_id)
-            ) && <></>}
+            ) && <SingleDayPCPInput />}
+            {actualAdded &&
+              selectedConfiguration?.event_category_id ===
+                EventCategory.DECISION && (
+                <DecisionInput
+                  configurationId={selectedConfiguration.id}
+                  decisionMakerPositionId={
+                    ctx.work?.decision_maker_position_id ||
+                    POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR
+                  }
+                />
+              )}
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor
