@@ -159,13 +159,12 @@ const EventList = () => {
       );
     }
     setRowSelection({});
-  }, [ctx.work, ctx.selectedWorkPhase?.phase.id]);
+  }, [ctx.work, ctx.selectedWorkPhase?.id]);
   const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
-      const taskResult = await taskEventService.getAllByWorkNdPhase(
-        Number(ctx.work?.id),
-        Number(ctx.selectedWorkPhase?.phase.id)
+      const taskResult = await taskEventService.getAll(
+        Number(ctx.selectedWorkPhase?.id)
       );
       if (taskResult.status === 200) {
         result = (taskResult.data as EventsGridModel[]).map((element) => {
@@ -223,7 +222,6 @@ const EventList = () => {
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
-    // setEventId(undefined);
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
   }, [ctx.work, ctx.selectedWorkPhase]);
@@ -238,8 +236,7 @@ const EventList = () => {
     try {
       const result = await taskEventService.importTasksFromTemplate(
         {
-          work_id: ctx.work?.id,
-          phase_id: ctx.selectedWorkPhase?.phase.id,
+          work_phase_id: ctx.selectedWorkPhase?.id,
         },
         Number(selectedTemplateId)
       );
@@ -248,7 +245,7 @@ const EventList = () => {
           type: "success",
         });
         setShowTemplateConfirmation(false);
-        getCombinedEvents();
+        await getCombinedEvents();
         setSelectedTemplateId(undefined);
         getTemplateUploadStatus();
       }
@@ -712,7 +709,7 @@ const EventList = () => {
     }
     setShowDeleteDialog(false);
   };
-
+  console.log("EVENTS", events);
   const deleteAction = (
     <>
       {showDeleteMilestoneButton && (

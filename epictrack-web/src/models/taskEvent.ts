@@ -20,8 +20,7 @@ export const statusOptions = [
 export interface TaskEvent {
   id: number;
   name: string;
-  work_id: number;
-  phase_id: number;
+  work_phase_id: number;
   start_date: string;
   number_of_days: number;
   tips: string;
