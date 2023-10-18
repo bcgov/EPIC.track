@@ -184,7 +184,6 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       ? selectedStaff.phone
       : "";
   };
-  console.log(staffWorkRole);
   return (
     <FormProvider {...methods}>
       <Grid

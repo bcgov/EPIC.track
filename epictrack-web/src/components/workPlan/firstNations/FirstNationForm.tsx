@@ -183,7 +183,6 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
       ? selectedFirstNation.pip_link
       : "";
   };
-  console.log(workFirstNation);
   return (
     <FormProvider {...methods}>
       <Grid

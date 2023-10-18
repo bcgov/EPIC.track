@@ -53,18 +53,44 @@ const EventListTable = ({
     key: keyof EventsGridModel,
     formatLabel: (value: any) => string = (value) => String(value)
   ) => {
-    const options = new Map();
+    // Step 1: Create a Map to store unique values and their formatted labels
+    const optionsMap = new Map();
 
+    // Step 2: Iterate through the events array to populate the Map
     events.forEach((event) => {
+      // Step 3: Skip undefined or null values
       if (event[key] === undefined || event[key] === null) return;
 
-      options.set(event[key], formatLabel(event[key]));
+      // Step 4: Populate the Map with unique values and their formatted labels
+      optionsMap.set(event[key], formatLabel(event[key]));
     });
-    return Array.from(options.entries()).map(([key, value]) => ({
-      text: value,
-      value: key,
-    }));
+
+    // Step 5: Convert the Map to an array of objects with 'text' and 'value' properties
+    const optionsArray = Array.from(optionsMap.entries()).map(
+      ([key, value]) => ({
+        text: value,
+        value: key,
+      })
+    );
+
+    return optionsArray;
   };
+
+  const assigneeOptions = Array.from(
+    new Set(
+      events
+        .map((event) => event.assignees || [])
+        .flat()
+        .map(
+          (assignee) =>
+            `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
+        )
+    )
+  );
+
+  const responsibilityOptions = Array.from(
+    new Set(events.map((event) => event?.responsibility?.split(", ")).flat())
+  ).filter((responsibility) => responsibility);
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
     () => [
@@ -143,12 +169,6 @@ const EventListTable = ({
       },
       {
         accessorKey: "end_date",
-        accessorFn: (row: EventsGridModel) => {
-          if (row.end_date) {
-            return dateUtils.formatDate(row.end_date, "MMM.DD YYYY");
-          }
-          return "";
-        },
         size: 140,
         header: "End Date",
         filterVariant: "multi-select",
@@ -163,7 +183,6 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
         filterSelectOptions: getOptions("end_date", (value) =>
           dateUtils.formatDate(String(value), "MMM.DD YYYY")
         ),
@@ -172,7 +191,11 @@ const EventListTable = ({
             bold={row.original.type === EVENT_TYPE.MILESTONE}
             className={classes.textEllipsis}
           >
-            {cell.getValue<string>()}
+            {cell.getValue<string>() &&
+              dateUtils.formatDate(
+                String(cell.getValue<string>()),
+                "MMM.DD YYYY"
+              )}
           </ETParagraph>
         ),
       },
@@ -203,11 +226,11 @@ const EventListTable = ({
         ),
       },
       {
+        header: "Assigned",
         accessorFn: (row: EventsGridModel) =>
           row.assignees
             ?.map((p) => `${p.assignee.first_name} ${p.assignee.last_name}`)
             .join(", "),
-        header: "Assigned",
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
@@ -220,22 +243,34 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
-        filterSelectOptions: events
-          .map((event) => event.assignees || [])
-          .flat()
-          .map((assignee) => assignee.assignee.first_name),
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length >= assigneeOptions.length
+          ) {
+            return true;
+          }
+
+          const renderedValue: string = row.renderValue(id);
+          if (!renderedValue) return false;
+          return filterValue.every((filterName: string) =>
+            renderedValue.includes(filterName)
+          );
+        },
+        filterSelectOptions: assigneeOptions,
         size: 140,
-        Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis
-            enableTooltip
-            tooltip={cell.getValue<string>()}
-          >
-            {cell.getValue<string>()}
-          </ETParagraph>
-        ),
+        Cell: ({ cell, row }) => {
+          return (
+            <ETParagraph
+              bold={row.original.type === EVENT_TYPE.MILESTONE}
+              enableEllipsis
+              enableTooltip
+              tooltip={cell.getValue<string>()}
+            >
+              {cell.getValue<string>()}
+            </ETParagraph>
+          );
+        },
       },
       {
         accessorKey: "responsibility",
@@ -252,8 +287,24 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
-        filterSelectOptions: getOptions("responsibility"),
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length >= responsibilityOptions.length
+          ) {
+            return true;
+          }
+          const value: string = row.getValue(id);
+
+          if (!value) return false;
+
+          console.log("renderedValue", value);
+          console.log("filterValue", filterValue);
+          return filterValue.every((filterName: string) =>
+            value.includes(filterName)
+          );
+        },
+        filterSelectOptions: responsibilityOptions,
         size: 140,
         Cell: ({ cell, row }) => (
           <ETParagraph

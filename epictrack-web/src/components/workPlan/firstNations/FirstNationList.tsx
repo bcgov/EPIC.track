@@ -204,7 +204,6 @@ const FirstNationList = () => {
         },
         filterSelectOptions: pinOptions.map((p) => p.value),
         filterFn: "multiSelectFilter",
-        filterSelectOptions: roles,
       },
       {
         accessorKey: "indigenous_nation.relationship_holder.full_name",
