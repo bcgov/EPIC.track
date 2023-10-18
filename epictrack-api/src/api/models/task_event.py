@@ -48,8 +48,7 @@ class TaskEvent(BaseModelVersioned):
         sa.Integer, primary_key=True, autoincrement=True
     )  # TODO check how it can be inherited from parent
     name = sa.Column(sa.String)
-    work_id = sa.Column(sa.Integer, sa.ForeignKey("works.id"), nullable=False)
-    phase_id = sa.Column(sa.Integer, sa.ForeignKey("phase_codes.id"), nullable=False)
+    work_phase_id = sa.Column(sa.ForeignKey('work_phases.id'), nullable=True)
 
     start_date = sa.Column(sa.DateTime(timezone=True))
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)
@@ -57,8 +56,7 @@ class TaskEvent(BaseModelVersioned):
     notes = sa.Column(sa.String)
     status = sa.Column(sa.Enum(StatusEnum), default=StatusEnum.NOT_STARTED)
 
-    phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
-    work = relationship("Work", foreign_keys=[work_id], lazy="select")
+    work_phase = relationship('WorkPhase', foreign_keys=[work_phase_id], lazy='select')
 
     assignees = relationship(
         "TaskEventAssignee",

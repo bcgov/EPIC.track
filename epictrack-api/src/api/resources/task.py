@@ -37,9 +37,8 @@ class Events(Resource):
     def get():
         """Return all task templates."""
         args = req.TaskEventQueryParamSchema().load(request.args)
-        work_id = args.get("work_id")
-        phase_id = args.get("phase_id")
-        task_events = TaskService.find_task_events(work_id, phase_id)
+        work_phase_id = args.get("work_phase_id")
+        task_events = TaskService.find_task_events(work_phase_id)
         return (
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.OK,

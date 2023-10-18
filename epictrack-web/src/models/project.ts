@@ -1,5 +1,3 @@
-import { Proponent } from "./proponent";
-import { ListType } from "./code";
 import { Type } from "./type";
 import { SubType } from "./subtype";
 import { Region } from "./region";
