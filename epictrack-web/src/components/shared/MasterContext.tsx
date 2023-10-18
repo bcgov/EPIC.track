@@ -27,7 +27,7 @@ interface MasterContextProps {
   setForm: Dispatch<SetStateAction<React.ReactElement>>;
   setFormId: Dispatch<SetStateAction<string | undefined>>;
   onDialogClose(event: any, reason: any): any;
-  setFormStyle: Dispatch<SetStateAction<MasterBase>>;
+  setFormStyle: Dispatch<SetStateAction<SxProps | undefined>>;
 }
 
 export const MasterContext = createContext<MasterContextProps>({
