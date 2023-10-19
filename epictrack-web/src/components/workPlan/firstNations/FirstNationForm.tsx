@@ -92,7 +92,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
 
   const getAllFirstNations = async () => {
     try {
-      const result = await indigenousNationService.getAll();
+      const result = await indigenousNationService.getAll(true);
       if (result.status === 200) {
         const firstNations = result.data as FirstNation[];
         setFirstNations(sort(firstNations, "name"));

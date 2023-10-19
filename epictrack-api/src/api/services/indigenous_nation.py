@@ -25,9 +25,9 @@ class IndigenousNationService:
         return IndigenousNation.check_existence(name, indigenous_nation_id)
 
     @classmethod
-    def find_all_indigenous_nations(cls):
+    def find_all_indigenous_nations(cls, is_active):
         """Find all active indigenous nations"""
-        indigenous_nations = IndigenousNation.find_all(default_filters=False)
+        indigenous_nations = IndigenousNation.find_all(default_filters=is_active)
         return indigenous_nations
 
     @classmethod

@@ -4,8 +4,8 @@ import { MasterBase } from "../../models/type";
 import ServiceBase from "../common/serviceBase";
 
 class StaffService implements ServiceBase {
-  async getAll() {
-    return await http.GetRequest(Endpoints.Staffs.STAFFS);
+  async getAll(is_active = false) {
+    return await http.GetRequest(Endpoints.Staffs.STAFFS, { is_active });
   }
 
   async getById(id: string) {
