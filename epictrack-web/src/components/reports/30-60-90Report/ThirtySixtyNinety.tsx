@@ -143,7 +143,6 @@ export default function ThirtySixtyNinety() {
       <Grid item sm={12}>
         {resultStatus === RESULT_STATUS.LOADED &&
           Object.keys(reports).map((key) => {
-            console.log(key);
             return (
               <>
                 <Accordion sx={{ mt: "15px" }} expanded>
@@ -152,7 +151,6 @@ export default function ThirtySixtyNinety() {
                   </AccordionSummary>
                   <AccordionDetails>
                     {((reports as any)[key] as []).map((item, itemIndex) => {
-                      console.log(itemIndex);
                       return (
                         <Accordion key={itemIndex}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
