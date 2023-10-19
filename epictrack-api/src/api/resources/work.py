@@ -141,15 +141,12 @@ class WorkPhases(Resource):
     @profiletime
     def get(work_id):
         """Return a phase details based on id."""
-        try:            
-            req.WorkIdPathParameterSchema().load(request.view_args)
-            work_phases = WorkPhaseService.find_by_work_id(work_id)
-            return (
-                res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases),
-                HTTPStatus.OK,
-            )
-        except Exception as err:
-            return str(err), HTTPStatus.INTERNAL_SERVER_ERROR
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        work_phases = WorkPhaseService.find_by_work_id(work_id)
+        return (
+            res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases),
+            HTTPStatus.OK,
+        )
 
 
 @cors_preflight("GET, POST")

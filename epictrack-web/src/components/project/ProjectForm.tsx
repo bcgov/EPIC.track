@@ -86,7 +86,6 @@ export default function ProjectForm({ ...props }) {
     control,
     formState: { errors },
     reset,
-    setValue,
   } = methods;
   const formValues = useWatch({ control });
 

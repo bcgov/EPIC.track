@@ -22,16 +22,18 @@ const useStyle = makeStyles({
 });
 const WorkPlanContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
-  const { team, loading, work, firstNations } = useContext(WorkplanContext);
+  const ctx = useContext(WorkplanContext);
   const classes = useStyle();
 
-  const activeStaff = team.filter((staffWorkRole) => staffWorkRole.is_active);
+  const activeStaff = ctx.team.filter(
+    (staffWorkRole) => staffWorkRole.is_active
+  );
 
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
 
-  if (loading) {
+  if (ctx.loading) {
     return <WorkPlanSkeleton />;
   }
 
@@ -43,7 +45,7 @@ const WorkPlanContainer = () => {
     >
       <Box>
         <ETHeading2 bold color={Palette.primary.main}>
-          {work?.title}
+          {ctx.work?.title}
         </ETHeading2>
       </Box>
       <Box
@@ -74,7 +76,7 @@ const WorkPlanContainer = () => {
           />
           <ETTab
             label="First Nations"
-            identifier={firstNations.length.toString()}
+            identifier={ctx.firstNations.length.toString()}
           />
         </ETTabs>
       </Box>
