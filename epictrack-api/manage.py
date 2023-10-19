@@ -24,7 +24,7 @@ from api.models import db
 from flask.cli import FlaskGroup
 
 
-APP = create_app()
+APP = create_app(run_mode='migration')
 cli = FlaskGroup(APP)
 
 
