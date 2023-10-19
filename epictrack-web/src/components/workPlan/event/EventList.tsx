@@ -119,7 +119,9 @@ const EventList = () => {
     React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
-
+  const isEventFormFieldLocked = React.useMemo(() => {
+    return !!milestoneEvent?.actual_date;
+  }, [milestoneEvent]);
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
@@ -151,8 +153,9 @@ const EventList = () => {
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
           });
-          result = result.sort((a, b) =>
-            Moment(a.start_date).diff(b.start_date, "seconds")
+          result = result.sort(
+            (a, b) =>
+              Moment(a.start_date).diff(b.start_date, "seconds") || a.id - b.id
           );
           setEvents(result);
         }
@@ -709,7 +712,6 @@ const EventList = () => {
     }
     setShowDeleteDialog(false);
   };
-  console.log("EVENTS", events);
   const deleteAction = (
     <>
       {showDeleteMilestoneButton && (
@@ -730,6 +732,7 @@ const EventList = () => {
             sx={{
               border: `2px solid ${Palette.white}`,
             }}
+            disabled={isEventFormFieldLocked}
             onClick={() => setShowDeleteDialog(true)}
           >
             Delete
@@ -921,7 +924,11 @@ const EventList = () => {
         }}
         additionalActions={deleteAction}
       >
-        <EventForm onSave={onDialogClose} event={milestoneEvent} />
+        <EventForm
+          onSave={onDialogClose}
+          event={milestoneEvent}
+          isFormFieldsLocked={isEventFormFieldLocked}
+        />
       </TrackDialog>
       <TrackDialog
         open={showTemplateForm}

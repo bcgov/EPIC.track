@@ -5,7 +5,10 @@ import ControlledSelectV2 from "../../../shared/controlledInputComponents/Contro
 import { useFormContext } from "react-hook-form";
 import { ListType } from "../../../../models/code";
 
-const ExtSusInput = () => {
+interface ExtSusInputProps {
+  isFormFieldsLocked: boolean;
+}
+const ExtSusInput = ({ isFormFieldsLocked }: ExtSusInputProps) => {
   const [actSections, setActSections] = React.useState<ListType[]>([]);
   const [reasonCount, setReasonCount] = React.useState<number>(0);
   const changeReasonTextHandler = (event: any) => {
@@ -27,6 +30,7 @@ const ExtSusInput = () => {
       <Grid item xs={12}>
         <ETFormLabel required>Act Section</ETFormLabel>
         <ControlledSelectV2
+          disabled={isFormFieldsLocked}
           helperText={errors?.act_section_id?.message?.toString()}
           options={actSections || []}
           getOptionValue={(o: ListType) => o.id.toString()}
@@ -44,6 +48,7 @@ const ExtSusInput = () => {
         <TextField
           fullWidth
           multiline
+          disabled={isFormFieldsLocked}
           rows={3}
           InputProps={{
             inputProps: {

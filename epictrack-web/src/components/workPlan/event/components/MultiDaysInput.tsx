@@ -7,11 +7,13 @@ export interface MultiDaysInputProps {
   numberOfDaysRef: React.MutableRefObject<any>;
   endDateRef: React.MutableRefObject<any>;
   onChangeDay: () => void;
+  isFormFieldsLocked: boolean;
 }
 const MultiDaysInput = ({
   endDateRef,
   numberOfDaysRef,
   onChangeDay,
+  isFormFieldsLocked,
 }: MultiDaysInputProps) => {
   const {
     unregister,
@@ -30,6 +32,7 @@ const MultiDaysInput = ({
         <ETFormLabel required>Number of Days</ETFormLabel>
         <TextField
           fullWidth
+          disabled={isFormFieldsLocked}
           inputRef={numberOfDaysRef}
           helperText={errors?.number_of_days?.message?.toString()}
           error={!!errors?.number_of_days?.message}
