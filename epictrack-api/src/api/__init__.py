@@ -66,7 +66,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         @app.errorhandler(Exception)
         def handle_error(err):
-            raise err
             if isinstance(err, ValidationError):
                 return err.messages, HTTPStatus.BAD_REQUEST
             if isinstance(err, ResourceExistsError):
