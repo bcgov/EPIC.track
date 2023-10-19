@@ -75,6 +75,17 @@ export default function WorkForm({ ...props }) {
     ctx.setId(props.workId);
   }, [ctx.id]);
 
+  React.useEffect(() => {
+    // const name = (ctx?.item as Work)?.name;
+    ctx.setTitle(
+      ctx.item
+        ? (ctx?.item as Work)?.title +
+            " - " +
+            (ctx?.item as Work)?.work_type?.name
+        : "Work"
+    );
+  }, [ctx.title, ctx.item]);
+
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: ctx.item as Work,
@@ -150,8 +161,9 @@ export default function WorkForm({ ...props }) {
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid item xs={4}>
-            <ETFormLabel>EA Act</ETFormLabel>
+            <ETFormLabel required>EA Act</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select EA Act"
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
               options={eaActs || []}
@@ -161,8 +173,9 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={4}>
-            <ETFormLabel>Worktype</ETFormLabel>
+            <ETFormLabel required>Worktype</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select Worktype"
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
               options={workTypes || []}
@@ -172,11 +185,12 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={4}>
-            <ETFormLabel className="start-date-label">Start date</ETFormLabel>
+            <ETFormLabel className="start-date-label" required>
+              Start date
+            </ETFormLabel>
             <Controller
               name="start_date"
               control={control}
-              defaultValue={dayjs((ctx.item as Work)?.start_date).toISOString()}
               render={({
                 field: { onChange, value },
                 fieldState: { error },
@@ -193,15 +207,10 @@ export default function WorkForm({ ...props }) {
                       },
                       ...register("start_date"),
                     }}
-                    value={dayjs(value)}
+                    value={(ctx.item as Work)?.start_date ? dayjs(value) : null}
                     onChange={(event) => {
                       onChange(event);
                     }}
-                    defaultValue={dayjs(
-                      (ctx.item as Work)?.start_date
-                        ? (ctx.item as Work).start_date
-                        : ""
-                    )}
                     sx={{ display: "block" }}
                   />
                 </LocalizationProvider>
@@ -210,7 +219,7 @@ export default function WorkForm({ ...props }) {
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
           <Grid item xs={6}>
-            <ETFormLabel>Project</ETFormLabel>
+            <ETFormLabel required>Project</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.project_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.project_id}
@@ -221,7 +230,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Responsible Ministry</ETFormLabel>
+            <ETFormLabel required>Responsible Ministry</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.ministry_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ministry_id}
@@ -232,7 +241,7 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Federal Involvement</ETFormLabel>
+            <ETFormLabel required>Federal Involvement</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.federal_involvement_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.federal_involvement_id}
@@ -244,7 +253,7 @@ export default function WorkForm({ ...props }) {
           </Grid>
 
           <Grid item xs={6}>
-            <ETFormLabel>Federal Act</ETFormLabel>
+            <ETFormLabel required>Federal Act</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.substitution_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.substitution_act_id}
@@ -255,8 +264,9 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel>Title</ETFormLabel>
+            <ETFormLabel required>Title</ETFormLabel>
             <TextField
+              placeholder="Work Title"
               fullWidth
               error={!!errors?.title?.message}
               helperText={errors?.title?.message?.toString()}
@@ -264,8 +274,9 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel>Short Description</ETFormLabel>
+            <ETFormLabel required>Report Description</ETFormLabel>
             <TextField
+              placeholder="Description will be shown on all reports"
               fullWidth
               multiline
               rows={2}
@@ -275,8 +286,9 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel>Long Description</ETFormLabel>
+            <ETFormLabel>Epic Description</ETFormLabel>
             <TextField
+              placeholder="Provide the description if differs from the report"
               fullWidth
               multiline
               rows={4}
@@ -284,13 +296,6 @@ export default function WorkForm({ ...props }) {
               helperText={errors?.long_description?.message?.toString()}
               {...register("long_description")}
             />
-          </Grid>
-          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
-              defaultChecked={(ctx.item as Work)?.is_pecp_required}
-              {...register("is_pecp_required")}
-            />
-            <ETFormLabel id="is_pcp_required">PCP Required</ETFormLabel>
           </Grid>
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledCheckbox
