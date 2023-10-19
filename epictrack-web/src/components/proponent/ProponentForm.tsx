@@ -64,11 +64,7 @@ export default function ProponentForm({ ...props }) {
   } = methods;
 
   React.useEffect(() => {
-    if (ctx.item) {
-      reset(ctx.item);
-    } else {
-      ctx.setItem(defaultProponent);
-    }
+    reset(ctx.item ?? defaultProponent);
   }, [ctx.item]);
 
   const getStaffs = async () => {

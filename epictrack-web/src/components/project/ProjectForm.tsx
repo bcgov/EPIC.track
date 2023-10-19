@@ -89,11 +89,7 @@ export default function ProjectForm({ ...props }) {
   const formValues = useWatch({ control });
 
   React.useEffect(() => {
-    if (ctx.item) {
-      reset(ctx.item);
-    } else {
-      ctx.setItem(defaultProject);
-    }
+    reset(ctx.item ?? defaultProject);
   }, [ctx.item]);
 
   React.useEffect(() => {
