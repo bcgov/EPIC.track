@@ -7,3 +7,7 @@ export interface Proponent extends ListType, MasterBase {
   relationship_holder_id?: number;
   relationship_holder?: Staff;
 }
+
+export const defaultProponent = {
+  is_active: true,
+};

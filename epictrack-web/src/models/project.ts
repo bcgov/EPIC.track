@@ -1,5 +1,3 @@
-import { Proponent } from "./proponent";
-import { ListType } from "./code";
 import { Type } from "./type";
 import { SubType } from "./subtype";
 import { Region } from "./region";
@@ -29,3 +27,7 @@ export interface Project {
   fte_positions_construction: number;
   fte_positions_operation: number;
 }
+
+export const defaultProject = {
+  is_active: true,
+};

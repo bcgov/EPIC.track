@@ -21,11 +21,10 @@ from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
 
 from api.exceptions import UnprocessableEntityError
-from api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, db
+from api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, WorkPhase, db
 from api.models.task_event_responsibility import TaskEventResponsibility
 
 from .task_template import TaskTemplateService
-from .work_phase import WorkPhaseService
 
 
 class TaskService:
@@ -35,10 +34,9 @@ class TaskService:
     def create_task_event(cls, data: dict, commit: bool = True) -> TaskEvent:
         """Create task event"""
         task_event = TaskEvent(**cls._prepare_task_event_object(data))
-        # if cls._get_task_count(task_event.work_id, task_event.phase_id) > 0:
-        #     raise UnprocessableEntityError("Maxium task count per phase has reached")
+        work_phase = WorkPhase.find_by_id(data.get("work_phase_id"))
         if data.get("assignee_ids") and not cls._validate_assignees(
-            data.get("assignee_ids"), data
+            data.get("assignee_ids"), work_phase.work_id
         ):
             raise UnprocessableEntityError(
                 "Only team members can be assigned to a task"
@@ -50,9 +48,6 @@ class TaskService:
             cls._handle_responsibilities(
                 data.get("responsibility_ids"), [task_event.id]
             )
-        work_phase = WorkPhaseService.find_by_work_nd_phase(
-            data.get("work_id"), data.get("phase_id")
-        )
         work_phase.task_added = True
         if commit:
             db.session.commit()
@@ -62,8 +57,9 @@ class TaskService:
     def update_task_event(cls, data: dict, task_event_id) -> TaskEvent:
         """Update task event"""
         task_event = TaskEvent.find_by_id(task_event_id)
+        work_phase = WorkPhase.find_by_id(data.get("work_phase_id"))
         if data.get("assignee_ids") and not cls._validate_assignees(
-            data.get("assignee_ids"), data
+            data.get("assignee_ids"), work_phase.work_id
         ):
             raise UnprocessableEntityError(
                 "Only team members can be assigned to a task"
@@ -79,15 +75,14 @@ class TaskService:
         return task_event
 
     @classmethod
-    def find_task_events(cls, work_id: int, phase_id: int) -> [TaskEvent]:
-        """Get all task events per workid, phaseid"""
+    def find_task_events(cls, work_phase_id: int) -> [TaskEvent]:
+        """Get all task events per work_phase_id"""
         return (
             db.session.query(TaskEvent)
             .filter(
                 TaskEvent.is_active.is_(True),
                 TaskEvent.is_deleted.is_(False),
-                TaskEvent.work_id == work_id,
-                TaskEvent.phase_id == phase_id,
+                TaskEvent.work_phase_id == work_phase_id,
             )
             .options(
                 lazyload(TaskEvent.assignees).joinedload(TaskEventAssignee.assignee)
@@ -117,9 +112,7 @@ class TaskService:
         cls, params: dict, template_id: int
     ) -> [TaskEvent]:
         """Create a list of task events from the given task template"""
-        work_phase = WorkPhaseService.find_by_work_nd_phase(
-            params.get("work_id"), params.get("phase_id")
-        )
+        work_phase = WorkPhase.find_by_id(params.get("work_phase_id"))
         if not work_phase:
             raise UnprocessableEntityError("No data found for the given work and phase")
         if work_phase.task_added:
@@ -136,9 +129,7 @@ class TaskService:
         for task in tasks:
             task_event_dic = {
                 "name": task.name,
-                "work_id": params.get("work_id"),
-                "phase_id": params.get("phase_id"),
-                # "responsibility_id": task.responsibility_id,
+                "work_phase_id": params.get("work_phase_id"),
                 "start_date": work_phase.start_date + timedelta(days=task.start_at + task.number_of_days),
                 "number_of_days": task.number_of_days,
                 "tips": task.tips,
@@ -206,13 +197,13 @@ class TaskService:
         )
 
     @classmethod
-    def _validate_assignees(cls, assignees: list, data: dict) -> bool:
+    def _validate_assignees(cls, assignees: list, work_id: int) -> bool:
         """Database validation"""
         work_staff = [
             r
             for (r,) in db.session.query(StaffWorkRole.staff_id)
             .filter(
-                StaffWorkRole.work_id == data["work_id"],
+                StaffWorkRole.work_id == work_id,
                 StaffWorkRole.is_deleted.is_(False),
                 StaffWorkRole.is_active.is_(True),
             )
@@ -221,15 +212,14 @@ class TaskService:
         return all(assigne in work_staff for assigne in assignees)
 
     @classmethod
-    def _get_task_count(cls, work_id: int, phase_id: int):
+    def _get_task_count(cls, work_phase_id: int):
         """Task should be inserted only once."""
         return (
             db.session.query(TaskEvent.id)
             .filter(
                 TaskEvent.is_active.is_(True),
                 TaskEvent.is_deleted.is_(False),
-                TaskEvent.work_id == work_id,
-                TaskEvent.phase_id == phase_id,
+                TaskEvent.work_phase_id == work_phase_id
             )
             .count()
         )

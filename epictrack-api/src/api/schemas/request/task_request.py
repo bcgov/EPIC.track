@@ -133,14 +133,8 @@ class TaskTemplateIdPathParameterSchema(RequestPathParameterSchema):
 class TaskEventQueryParamSchema(RequestQueryParameterSchema):
     """Task events per work/phase query parameters"""
 
-    work_id = fields.Int(
-        metadata={"description": "Work ID for the events"},
-        validate=validate.Range(min=1),
-        required=True,
-    )
-
-    phase_id = fields.Int(
-        metadata={"description": "Phase ID for the events"},
+    work_phase_id = fields.Int(
+        metadata={"description": "Work phase ID of the event configuration"},
         validate=validate.Range(min=1),
         required=True,
     )
@@ -154,14 +148,8 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         required=True,
     )
 
-    work_id = fields.Int(
-        metadata={"description": "Id of work"},
-        validate=validate.Range(min=1),
-        required=True,
-    )
-
-    phase_id = fields.Int(
-        metadata={"description": "Id of the phase"},
+    work_phase_id = fields.Int(
+        metadata={"description": "Work phase ID of the event configuration"},
         validate=validate.Range(min=1),
         required=True,
     )
@@ -210,14 +198,8 @@ class TaskEventIdPathParameterSchema(RequestPathParameterSchema):
 class TaskTemplateImportEventsBodyParamSchema(RequestBodyParameterSchema):
     """Task template import events schema"""
 
-    work_id = fields.Int(
-        metadata={"description": "Id of work"},
-        validate=validate.Range(min=1),
-        required=True,
-    )
-
-    phase_id = fields.Int(
-        metadata={"description": "Id of the phase"},
+    work_phase_id = fields.Int(
+        metadata={"description": "Work phase ID of the event configuration"},
         validate=validate.Range(min=1),
         required=True,
     )
