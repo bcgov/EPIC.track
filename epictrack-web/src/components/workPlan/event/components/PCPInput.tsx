@@ -8,7 +8,10 @@ import { Grid, TextField } from "@mui/material";
 import { DATE_FORMAT } from "../../../../constants/application-constant";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 
-const PCPInput = () => {
+interface PCPInputProps {
+  isFormFieldsLocked: boolean;
+}
+const PCPInput = ({ isFormFieldsLocked }: PCPInputProps) => {
   const {
     register,
     unregister,
@@ -31,6 +34,7 @@ const PCPInput = () => {
         <ETFormLabel>Number of Responses</ETFormLabel>
         <TextField
           fullWidth
+          disabled={isFormFieldsLocked}
           helperText={errors?.number_of_responses?.message?.toString()}
           error={!!errors?.number_of_responses?.message}
           InputProps={{
@@ -51,6 +55,7 @@ const PCPInput = () => {
         </ETFormLabelWithCharacterLimit>
         <TextField
           fullWidth
+          disabled={isFormFieldsLocked}
           helperText={errors?.topic?.message?.toString()}
           error={!!errors?.topic?.message}
           InputProps={{

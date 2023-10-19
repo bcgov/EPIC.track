@@ -24,7 +24,7 @@ export const CustomSwitch = styled((props: SwitchProps) => (
       border: "6px solid #fff",
     },
     "&.Mui-disabled .MuiSwitch-thumb": {
-      color: "red",
+      color: Palette.white,
     },
   },
   "& .MuiSwitch-track": {

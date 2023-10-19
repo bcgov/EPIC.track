@@ -539,10 +539,15 @@ class EventService:  # pylint: disable=too-few-public-methods
         return "Deleted successfully"
 
     @classmethod
-    def delete_milestone(cls, milestone_id: int):
+    def delete_event(cls, event_id: int):
         """Mark milestone as deleted by id"""
+        event = Event.find_by_id(event_id)
+        if not event:
+            raise ResourceNotFoundError("No event found with given id")
+        if event.actual_date:
+            raise UnprocessableEntityError("Locked events cannot be deleted")
         db.session.query(Event).filter(
-            or_(Event.id == milestone_id, Event.source_event_id == milestone_id)
+            or_(Event.id == event_id, Event.source_event_id == event_id)
         ).update({"is_active": False, "is_deleted": True})
         db.session.commit()
         return "Deleted successfully"
