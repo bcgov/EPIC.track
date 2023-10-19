@@ -19,6 +19,7 @@ import {
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
+import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -49,33 +50,22 @@ const EventListTable = ({
 }: EventListTable) => {
   const classes = useStyle();
 
-  const getOptions = (
-    key: keyof EventsGridModel,
-    formatLabel: (value: any) => string = (value) => String(value)
-  ) => {
-    // Step 1: Create a Map to store unique values and their formatted labels
-    const optionsMap = new Map();
-
-    // Step 2: Iterate through the events array to populate the Map
-    events.forEach((event) => {
-      // Step 3: Skip undefined or null values
-      if (event[key] === undefined || event[key] === null) return;
-
-      // Step 4: Populate the Map with unique values and their formatted labels
-      optionsMap.set(event[key], formatLabel(event[key]));
-    });
-
-    // Step 5: Convert the Map to an array of objects with 'text' and 'value' properties
-    const optionsArray = Array.from(optionsMap.entries()).map(
-      ([key, value]) => ({
-        text: value,
-        value: key,
-      })
-    );
-
-    return optionsArray;
-  };
-
+  const typeFilterOptions = getSelectFilterOptions(events, "type");
+  const startDateFilterOptions = getSelectFilterOptions(
+    events,
+    "start_date",
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
+  );
+  const endDateFilterOptions = getSelectFilterOptions(
+    events,
+    "end_date",
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
+  );
+  const numberOfDaysFilterOptions = getSelectFilterOptions(
+    events,
+    "number_of_days",
+    (value) => String(value)
+  );
   const assigneeOptions = Array.from(
     new Set(
       events
@@ -87,10 +77,17 @@ const EventListTable = ({
         )
     )
   );
-
-  const responsibilityOptions = Array.from(
+  const responsibilityFilterOptions = Array.from(
     new Set(events.map((event) => event?.responsibility?.split(", ")).flat())
   ).filter((responsibility) => responsibility);
+
+  const statusFilterOptions = getSelectFilterOptions(
+    events,
+    "status",
+    (value) =>
+      statusOptions.find((statusOption) => statusOption.value == value)
+        ?.label ?? ""
+  );
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
     () => [
@@ -117,7 +114,6 @@ const EventListTable = ({
         accessorKey: "type",
         header: "Type",
         size: 100,
-        // muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
@@ -131,7 +127,7 @@ const EventListTable = ({
           );
         },
         filterFn: "multiSelectFilter",
-        filterSelectOptions: getOptions("type"),
+        filterSelectOptions: typeFilterOptions,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>()}
@@ -154,9 +150,7 @@ const EventListTable = ({
           );
         },
         filterFn: "multiSelectFilter",
-        filterSelectOptions: getOptions("start_date", (value) =>
-          dateUtils.formatDate(String(value), "MMM.DD YYYY")
-        ),
+        filterSelectOptions: startDateFilterOptions,
         size: 140,
         Cell: ({ cell, row }) => (
           <ETParagraph
@@ -183,9 +177,7 @@ const EventListTable = ({
             />
           );
         },
-        filterSelectOptions: getOptions("end_date", (value) =>
-          dateUtils.formatDate(String(value), "MMM.DD YYYY")
-        ),
+        filterSelectOptions: endDateFilterOptions,
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -214,9 +206,7 @@ const EventListTable = ({
           );
         },
         filterFn: "multiSelectFilter",
-        filterSelectOptions: getOptions("number_of_days", (value) =>
-          String(value)
-        ),
+        filterSelectOptions: numberOfDaysFilterOptions,
         size: 100,
         header: "Days",
         Cell: ({ cell, row }) => (
@@ -290,7 +280,7 @@ const EventListTable = ({
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length >= responsibilityOptions.length
+            filterValue.length >= responsibilityFilterOptions.length
           ) {
             return true;
           }
@@ -304,7 +294,7 @@ const EventListTable = ({
             value.includes(filterName)
           );
         },
-        filterSelectOptions: responsibilityOptions,
+        filterSelectOptions: responsibilityFilterOptions,
         size: 140,
         Cell: ({ cell, row }) => (
           <ETParagraph
@@ -343,12 +333,7 @@ const EventListTable = ({
           );
         },
         filterFn: "multiSelectFilter",
-        filterSelectOptions: getOptions(
-          "status",
-          (value) =>
-            statusOptions.find((statusOption) => statusOption.value == value)
-              ?.label || ""
-        ),
+        filterSelectOptions: statusFilterOptions,
         header: "Progress",
         size: 150,
         Cell: ({ cell, row }) => {
