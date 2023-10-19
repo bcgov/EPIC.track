@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import codeService, { Code } from "../../services/codeService";
-import { Project } from "../../models/project";
+import { Project, defaultProject } from "../../models/project";
 import { Proponent } from "../../models/proponent";
 import { Region } from "../../models/region";
 import { Type } from "../../models/type";
@@ -67,7 +67,6 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("project-form");
-    reset({ is_active: true });
   }, []);
 
   React.useEffect(() => {
@@ -91,7 +90,7 @@ export default function ProjectForm({ ...props }) {
   const formValues = useWatch({ control });
 
   React.useEffect(() => {
-    reset(ctx.item);
+    reset(ctx.item ?? defaultProject);
   }, [ctx.item]);
 
   React.useEffect(() => {
