@@ -628,7 +628,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
 
         # Mark removed entries as inactive
-        # TODO:CHECK THIS LOGIC
         disabled_count = existing_first_nations_qry.filter(
             IndigenousWork.is_active.is_(True),
             IndigenousWork.indigenous_nation_id.notin_(indigenous_nation_ids),

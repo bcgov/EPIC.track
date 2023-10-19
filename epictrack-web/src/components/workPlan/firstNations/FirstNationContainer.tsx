@@ -25,7 +25,7 @@ const useStyle = makeStyles({
     paddingBottom: "0.5rem",
   },
   tabPanel: {
-    padding: "1.5rem 1rem 1rem 1rem",
+    padding: "1.5rem 0px 1rem 1rem",
     minHeight: "0px",
   },
   tab: {

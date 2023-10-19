@@ -14,8 +14,8 @@
 """Service to manage Staffs."""
 
 from flask import current_app
-from api.exceptions import ResourceExistsError, ResourceNotFoundError
 
+from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Staff
 from api.schemas.response import StaffResponseSchema
 
@@ -33,7 +33,7 @@ class StaffService:
         return response
 
     @classmethod
-    def find_by_position_ids(cls, position_ids):
+    def find_by_position_ids(cls, position_ids, is_active=False):
         """Find staffs by position ids."""
         current_app.logger.debug(f"Find staff by positions : {position_ids}")
         staffs = Staff.find_active_staff_by_positions(position_ids)
@@ -48,9 +48,9 @@ class StaffService:
         return response
 
     @classmethod
-    def find_all_non_deleted_staff(cls):
+    def find_all_non_deleted_staff(cls, is_active=False):
         """Find all non-deleted staff"""
-        staffs = Staff.find_all_non_deleted_staff()
+        staffs = Staff.find_all_non_deleted_staff(is_active)
         return staffs
 
     @classmethod

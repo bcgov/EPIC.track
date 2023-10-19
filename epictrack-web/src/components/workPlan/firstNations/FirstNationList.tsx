@@ -103,6 +103,8 @@ const FirstNationList = () => {
   const [firstNationAvailable, setFirstNationAvailable] =
     React.useState<boolean>(false);
 
+  const [menuRowIndex, setMenuRowIndex] = React.useState<number>(-1);
+
   React.useEffect(() => {
     if (workFirstNationId === undefined) {
       setModalTitle("Add Nation");
@@ -213,16 +215,34 @@ const FirstNationList = () => {
           const user = row.original.indigenous_nation.relationship_holder;
           if (user === undefined || user === null) return <></>;
           return (
-            <Box
-              className={classes.userProfileWrapper}
-              onMouseEnter={(event) => handleOpenUserMenu(event, row.original)}
-              onMouseLeave={handleCloseUserMenu}
-              sx={{ height: "100%" }}
-            >
-              <Avatar className={classes.avatar}>
+            <Box className={classes.userProfileWrapper} sx={{ height: "100%" }}>
+              <Avatar
+                className={classes.avatar}
+                onMouseEnter={(event) => {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  handleOpenUserMenu(event, row.original);
+                }}
+                onMouseLeave={handleCloseUserMenu}
+              >
                 <ETCaption2
                   bold
                 >{`${user?.first_name[0]}${user?.last_name[0]}`}</ETCaption2>
+                <UserMenu
+                  anchorEl={userMenuAnchorEl}
+                  email={relationshipHolder?.email || ""}
+                  phone={relationshipHolder?.phone || ""}
+                  position={relationshipHolder?.position?.name || ""}
+                  firstName={relationshipHolder?.first_name || ""}
+                  lastName={relationshipHolder?.last_name || ""}
+                  onClose={handleCloseUserMenu}
+                  origin={{ vertical: "top", horizontal: "left" }}
+                  sx={{
+                    marginTop: "2.1em",
+                    pointerEvents: "none",
+                  }}
+                  id={`relationship_holder_${row.original.id}`}
+                />
               </Avatar>
               <Typography
                 style={{
@@ -235,21 +255,6 @@ const FirstNationList = () => {
               >
                 {user.full_name}
               </Typography>
-              <UserMenu
-                anchorEl={userMenuAnchorEl}
-                email={relationshipHolder?.email || ""}
-                phone={relationshipHolder?.phone || ""}
-                position={relationshipHolder?.position?.name || ""}
-                firstName={relationshipHolder?.first_name || ""}
-                lastName={relationshipHolder?.last_name || ""}
-                onClose={handleCloseUserMenu}
-                origin={{ vertical: "top", horizontal: "left" }}
-                sx={{
-                  marginTop: "2.1em",
-                  pointerEvents: "none",
-                }}
-                id={`relationship_holder_${row.original.id}`}
-              />
             </Box>
           );
         },
@@ -425,7 +430,7 @@ const FirstNationList = () => {
               gap: "0.5rem",
             }}
           >
-            <Tooltip title={"Import tasks from template"}>
+            <Tooltip title={"Import Nations from existing Works"}>
               <IButton
                 onClick={() => setShowImportNationForm(true)}
                 disabled={!firstNationAvailable}
@@ -447,6 +452,9 @@ const FirstNationList = () => {
               state={{
                 isLoading: loading,
                 showGlobalFilter: true,
+              }}
+              onHoveredRowChange={({ ...params }) => {
+                debugger;
               }}
             />
           </Grid>

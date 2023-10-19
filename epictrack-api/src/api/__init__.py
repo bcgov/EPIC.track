@@ -25,8 +25,7 @@ from marshmallow import ValidationError
 
 from api import config
 from api.config import _Config
-from api.exceptions import (
-    PermissionDeniedError, ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError)
+from api.exceptions import PermissionDeniedError, ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import db
 from api.utils.auth import jwt
 from api.utils.caching import AppCache
@@ -48,7 +47,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     db.init_app(app)
 
     if run_mode != 'migration':
-
         AppCache.configure_cache(run_mode, app)
         # pylint: disable=import-outside-toplevel
         from api.resources import API_BLUEPRINT, OPS_BLUEPRINT
@@ -68,6 +66,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         @app.errorhandler(Exception)
         def handle_error(err):
+            raise err
             if isinstance(err, ValidationError):
                 return err.messages, HTTPStatus.BAD_REQUEST
             if isinstance(err, ResourceExistsError):

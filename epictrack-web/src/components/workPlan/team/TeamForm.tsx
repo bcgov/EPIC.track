@@ -95,7 +95,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
 
   const getAllStaff = async () => {
     try {
-      const result = await staffService.getAll();
+      const result = await staffService.getAll(true);
       if (result.status === 200) {
         const staff = result.data as Staff[];
         setStaff(sort(staff, "full_name"));
