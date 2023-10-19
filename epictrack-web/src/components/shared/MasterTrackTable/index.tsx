@@ -3,7 +3,7 @@ import MaterialReactTable, {
   MaterialReactTableProps,
 } from "material-react-table";
 import { Box, Container, Typography } from "@mui/material";
-import SearchIcon from "../../assets/images/search.svg";
+import SearchIcon from "../../../assets/images/search.svg";
 import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2 } from "..";
