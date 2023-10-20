@@ -21,6 +21,7 @@ import TableFilter from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
 import {
   getSelectFilterOptions,
+  roundDataSize,
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
 
@@ -53,7 +54,7 @@ const EventListTable = ({
 }: EventListTable) => {
   const classes = useStyle();
 
-  const roundedEventsSize = Math.ceil(events.length / 5) * 5;
+  const roundedEventsSize = roundDataSize(events.length);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: roundedEventsSize || 10, //customize the default page size
