@@ -29,10 +29,10 @@ export const roundDataSize = (dataSize: number) => {
 };
 export const rowsPerPageOptions = (dataSize = 10) => {
   const defaultOptions = [5, 10, 15, 20, 25, 30, 50, 100];
-  const rounderDataSize = roundDataSize(dataSize);
+  const roundedDataSize = roundDataSize(dataSize);
 
   if (dataSize > defaultOptions[defaultOptions.length - 1]) {
-    return [...defaultOptions, rounderDataSize];
+    return [...defaultOptions, roundedDataSize];
   }
 
   return defaultOptions;
