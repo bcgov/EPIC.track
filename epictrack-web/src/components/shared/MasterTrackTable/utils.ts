@@ -25,7 +25,7 @@ export function getSelectFilterOptions<T>(
 }
 
 export const rowsPerPageOptions = (dataSize = 10) => {
-  const defaultOptions = [5, 10, 15, 20, 25, 30, 50, 100];
+  const defaultOptions = [5, 15];
   const roundedDataSize = Math.ceil(dataSize / 5) * 5;
 
   if (dataSize > defaultOptions[defaultOptions.length - 1]) {
