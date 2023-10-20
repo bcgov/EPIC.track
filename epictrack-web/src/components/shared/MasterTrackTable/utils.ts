@@ -27,10 +27,6 @@ export function getSelectFilterOptions<T>(
 export const rowsPerPageOptions = (dataSize = 10) => {
   const defaultOptions = [
     {
-      value: 5,
-      label: "5",
-    },
-    {
       value: 15,
       label: "15",
     },
