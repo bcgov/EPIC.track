@@ -21,7 +21,6 @@ import TableFilter from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
 import {
   getSelectFilterOptions,
-  roundDataSize,
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
 
