@@ -59,13 +59,10 @@ const EventListTable = ({
   });
 
   useEffect(() => {
-    const firstGreaterNumber =
-      rowsPerPageOptions(events.length).find(
-        (option) => option >= events.length
-      ) || 10;
+    const options = rowsPerPageOptions(events.length);
     setPagination((prev) => ({
       ...prev,
-      pageSize: firstGreaterNumber,
+      pageSize: options[options.length - 1].value,
     }));
   }, [events]);
 

@@ -25,12 +25,20 @@ export function getSelectFilterOptions<T>(
 }
 
 export const rowsPerPageOptions = (dataSize = 10) => {
-  const defaultOptions = [5, 15];
-  const roundedDataSize = Math.ceil(dataSize / 5) * 5;
-
-  if (dataSize > defaultOptions[defaultOptions.length - 1]) {
-    return [...defaultOptions, roundedDataSize];
-  }
+  const defaultOptions = [
+    {
+      value: 5,
+      label: "5",
+    },
+    {
+      value: 15,
+      label: "15",
+    },
+    {
+      value: dataSize,
+      label: "All",
+    },
+  ];
 
   return defaultOptions;
 };
