@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
@@ -19,7 +19,10 @@ import {
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
-import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
+import {
+  getSelectFilterOptions,
+  rowsPerPageOptions,
+} from "../../shared/MasterTrackTable/utils";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -49,6 +52,19 @@ const EventListTable = ({
   setRowSelection,
 }: EventListTable) => {
   const classes = useStyle();
+
+  const roundedEventsSize = Math.ceil(events.length / 5) * 5;
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: roundedEventsSize || 10, //customize the default page size
+  });
+
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: roundedEventsSize,
+    }));
+  }, [events]);
 
   const typeFilterOptions = getSelectFilterOptions(events, "type");
   const startDateFilterOptions = getSelectFilterOptions(
@@ -288,8 +304,6 @@ const EventListTable = ({
 
           if (!value) return false;
 
-          console.log("renderedValue", value);
-          console.log("filterValue", filterValue);
           return filterValue.every((filterName: string) =>
             value.includes(filterName)
           );
@@ -377,6 +391,16 @@ const EventListTable = ({
       enableRowSelection={(row) => row.original.type !== "Milestone"}
       enableSelectAll
       enablePagination
+      onPaginationChange={setPagination}
+      muiTablePaginationProps={{
+        rowsPerPageOptions: rowsPerPageOptions(events.length),
+      }}
+      state={{
+        isLoading: loading,
+        showGlobalFilter: true,
+        rowSelection,
+        pagination,
+      }}
       muiSelectCheckboxProps={({ row }) => ({
         indeterminateIcon: <LockIcon />,
         disabled:
@@ -389,11 +413,6 @@ const EventListTable = ({
       columns={columns}
       data={events}
       enableTopToolbar={false}
-      state={{
-        isLoading: loading,
-        showGlobalFilter: true,
-        rowSelection,
-      }}
       onRowSelectionChange={setRowSelection}
       getRowId={(originalRow: EventsGridModel) => {
         return originalRow.type === EVENT_TYPE.MILESTONE
