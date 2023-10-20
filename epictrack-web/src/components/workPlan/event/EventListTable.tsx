@@ -54,16 +54,19 @@ const EventListTable = ({
 }: EventListTable) => {
   const classes = useStyle();
 
-  const roundedEventsSize = roundDataSize(events.length);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: roundedEventsSize || 10, //customize the default page size
+    pageSize: 10, //customize the default page size
   });
 
   useEffect(() => {
+    const firstGreaterNumber =
+      rowsPerPageOptions(events.length).find(
+        (option) => option >= events.length
+      ) || 10;
     setPagination((prev) => ({
       ...prev,
-      pageSize: roundedEventsSize,
+      pageSize: firstGreaterNumber,
     }));
   }, [events]);
 
