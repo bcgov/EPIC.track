@@ -23,3 +23,18 @@ export function getSelectFilterOptions<T>(
 
   return optionsArray;
 }
+
+export const rowsPerPageOptions = (dataSize = 10) => {
+  const defaultOptions = [
+    {
+      value: 15,
+      label: "15",
+    },
+    {
+      value: dataSize,
+      label: "All",
+    },
+  ];
+
+  return defaultOptions;
+};
