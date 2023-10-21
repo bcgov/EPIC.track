@@ -80,7 +80,6 @@ const EventList = () => {
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
   const [showMilestoneForm, setShowMilestoneForm] =
     React.useState<boolean>(false);
-  // const [eventId, setEventId] = React.useState<number | undefined>();
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
     React.useState<boolean>(false);
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
@@ -274,7 +273,6 @@ const EventList = () => {
 
   const onRowClick = (event: any, row: EventsGridModel) => {
     event.preventDefault();
-    // setEventId(row.id);
     if (row.type === EVENT_TYPE.MILESTONE) {
       getMilestoneEvent(row.id);
       setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
@@ -291,11 +289,13 @@ const EventList = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
-    // setEventId(undefined);
     setMilestoneEvent(undefined);
     setTaskEvent(undefined);
   };
-
+  const onAddMilestone = () => {
+    setShowMilestoneForm(true);
+    setShowDeleteMilestoneButton(false);
+  };
   const getMilestoneEvent = async (eventId: number) => {
     try {
       const result = await eventService.getById(eventId);
@@ -574,7 +574,7 @@ const EventList = () => {
           </Button>
         </Grid>
         <Grid item xs="auto">
-          <Button variant="outlined" onClick={() => setShowMilestoneForm(true)}>
+          <Button variant="outlined" onClick={onAddMilestone}>
             Add Milestone
           </Button>
         </Grid>
