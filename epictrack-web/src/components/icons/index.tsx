@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { IconProps } from "./type";
 
 const commonProps = {

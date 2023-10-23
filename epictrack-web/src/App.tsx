@@ -14,9 +14,6 @@ export function App() {
   const isLoggedIn = useAppSelector(
     (state) => state.user?.authentication.authenticated
   );
-  const isMediumScreen: boolean = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.up("md")
-  );
   const uiState = useAppSelector((state) => state.uiState);
   const drawerWidth = uiState.drawerWidth;
   React.useEffect(() => {

@@ -1,6 +1,6 @@
 import React from "react";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
+import { Delete as DeleteIcon } from "@mui/icons-material";
+import { Box, Button, IconButton, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
