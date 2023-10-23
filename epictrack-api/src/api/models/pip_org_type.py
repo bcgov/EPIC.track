@@ -17,6 +17,7 @@ from sqlalchemy import Column, Integer, String
 from .code_table import CodeTableVersioned
 from .db import db
 
+
 class PIPOrgType(db.Model, CodeTableVersioned):
     """Model class for PIP Organization Types."""
 
