@@ -1,4 +1,4 @@
-"""added notes and pip fields to indigenous nations
+"""added notes and pip fields to indigenous nations.
 
 Revision ID: 7deec389ae56
 Revises: d8b405f9d663
