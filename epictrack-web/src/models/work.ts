@@ -62,3 +62,7 @@ export interface TemplateStatus extends MasterBase {
   template_available: boolean;
   task_added: boolean;
 }
+
+export const defaultWork = {
+  is_active: true,
+};

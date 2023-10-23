@@ -1,19 +1,18 @@
 import React from "react";
-import { TextField, Grid, Divider } from "@mui/material";
+import { TextField, Grid, Divider, Tooltip, Box } from "@mui/material";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import * as yup from "yup";
 import Moment from "moment";
 import { yupResolver } from "@hookform/resolvers/yup";
 import codeService from "../../services/codeService";
-import { Work } from "../../models/work";
+import { Work, defaultWork } from "../../models/work";
 import { ListType } from "../../models/code";
 import { Ministry } from "../../models/ministry";
 import { Code } from "../../services/codeService";
 import { ETFormLabel } from "../shared";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DATE_FORMAT } from "../../constants/application-constant";
-import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import dayjs from "dayjs";
@@ -21,6 +20,10 @@ import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSe
 import workService from "../../services/workService/workService";
 import { MasterContext } from "../shared/MasterContext";
 import { dateUtils } from "../../utils";
+import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
+import { IconProps } from "../icons/type";
+import Icons from "../icons/index";
+import LockClosed from "../../assets/images/lock-closed.svg";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -52,6 +55,8 @@ const schema = yup.object<Work>().shape({
   substitution_act_id: yup.number(),
 });
 
+const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
+
 export default function WorkForm({ ...props }) {
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
@@ -76,13 +81,12 @@ export default function WorkForm({ ...props }) {
   }, [ctx.id]);
 
   React.useEffect(() => {
-    // const name = (ctx?.item as Work)?.name;
     ctx.setTitle(
       ctx.item
         ? (ctx?.item as Work)?.title +
             " - " +
             (ctx?.item as Work)?.work_type?.name
-        : "Work"
+        : "Create Work"
     );
   }, [ctx.title, ctx.item]);
 
@@ -101,7 +105,7 @@ export default function WorkForm({ ...props }) {
   } = methods;
 
   React.useEffect(() => {
-    reset(ctx.item);
+    reset(ctx.item ?? defaultWork);
   }, [ctx.item]);
 
   const codeTypes: { [x: string]: any } = {
@@ -221,6 +225,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Project</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               helperText={errors?.project_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.project_id}
               options={projects || []}
@@ -232,6 +237,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Responsible Ministry</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               helperText={errors?.ministry_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ministry_id}
               options={ministries || []}
@@ -243,6 +249,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Federal Involvement</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               helperText={errors?.federal_involvement_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.federal_involvement_id}
               options={federalInvolvements || []}
@@ -255,6 +262,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Federal Act</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               helperText={errors?.substitution_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.substitution_act_id}
               options={substitutionActs || []}
@@ -286,7 +294,7 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel>Epic Description</ETFormLabel>
+            <ETFormLabel>EPIC Description</ETFormLabel>
             <TextField
               placeholder="Provide the description if differs from the report"
               fullWidth
@@ -297,33 +305,26 @@ export default function WorkForm({ ...props }) {
               {...register("long_description")}
             />
           </Grid>
-          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
+          <Grid item xs={12}>
+            <ControlledSwitch
+              sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Work)?.is_cac_recommended}
               {...register("is_cac_recommended")}
             />
             <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
+            <Tooltip
+              sx={{ paddingLeft: "2px" }}
+              title="Select if there is a sufficient community interest in this Work to establish a Community Advisory Commitee (CAC)"
+            >
+              <Box component={"span"}>
+                <InfoIcon />
+              </Box>
+            </Tooltip>
           </Grid>
-          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
-              defaultChecked={(ctx.item as Work)?.is_watched}
-              {...register("is_watched")}
-            />
-            <ETFormLabel id="is_watched">Watched</ETFormLabel>
-          </Grid>
-          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
-              defaultChecked={(ctx.item as Work)?.is_active}
-              {...register("is_active")}
-            />
-            <ETFormLabel id="is_active">Active</ETFormLabel>
-          </Grid>
-
-          <Divider style={{ width: "100%", marginTop: "10px" }} />
-
           <Grid item xs={6}>
-            <ETFormLabel>EAO Team</ETFormLabel>
+            <ETFormLabel required>EAO Team</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               helperText={errors?.eao_team_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.eao_team_id}
               options={teams || []}
@@ -334,8 +335,32 @@ export default function WorkForm({ ...props }) {
           </Grid>
 
           <Grid item xs={6}>
-            <ETFormLabel>Responsible EPD</ETFormLabel>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingTop: "3px",
+              }}
+            >
+              <ETFormLabel required>Responsible EPD</ETFormLabel>
+              <ETFormLabel>
+                <Box
+                  sx={{
+                    opacity:
+                      (ctx.item as Work)?.responsible_epd_id != undefined
+                        ? "100"
+                        : "0",
+                    cursor: "pointer",
+                  }}
+                  component="img"
+                  src={LockClosed}
+                  alt="Lock"
+                />
+              </ETFormLabel>
+            </Box>
             <ControlledSelectV2
+              disabled={(ctx.item as Work)?.responsible_epd_id != undefined}
+              placeholder="Select"
               helperText={errors?.responsible_epd_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.responsible_epd_id}
               options={epds || []}
@@ -345,8 +370,32 @@ export default function WorkForm({ ...props }) {
             ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Work Lead</ETFormLabel>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                paddingTop: "3px",
+              }}
+            >
+              <ETFormLabel required>Work Lead</ETFormLabel>{" "}
+              <ETFormLabel>
+                <Box
+                  sx={{
+                    opacity:
+                      (ctx.item as Work)?.work_lead_id != undefined
+                        ? "100"
+                        : "0",
+                    cursor: "pointer",
+                  }}
+                  component="img"
+                  src={LockClosed}
+                  alt="Lock"
+                />
+              </ETFormLabel>
+            </Box>
             <ControlledSelectV2
+              disabled={(ctx.item as Work)?.work_lead_id != undefined}
+              placeholder="Select"
               helperText={errors?.work_lead_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.work_lead_id}
               options={leads || []}
@@ -357,8 +406,9 @@ export default function WorkForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             {/* TODO: Make the label dynamic */}
-            <ETFormLabel>Decision Maker</ETFormLabel>
+            <ETFormLabel required>Decision Maker</ETFormLabel>
             <ControlledSelectV2
+              placeholder="Select"
               helperText={errors?.decision_by_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.decision_by_id}
               options={decisionMakers || []}
@@ -366,6 +416,30 @@ export default function WorkForm({ ...props }) {
               getOptionLabel={(o: Staff) => o.full_name}
               {...register("decision_by_id")}
             ></ControlledSelectV2>
+          </Grid>
+          <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+            <ControlledSwitch
+              sx={{ paddingLeft: "0px", marginRight: "10px" }}
+              defaultChecked={(ctx.item as Work)?.is_active}
+              {...register("is_active")}
+            />
+            <ETFormLabel id="is_active">Active</ETFormLabel>
+          </Grid>
+          <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
+            <ControlledSwitch
+              sx={{ paddingLeft: "0px", marginRight: "10px" }}
+              defaultChecked={(ctx.item as Work)?.is_watched}
+              {...register("is_watched")}
+            />
+            <ETFormLabel id="is_watched">High Priority</ETFormLabel>
+            <Tooltip
+              sx={{ paddingLeft: "2px" }}
+              title="Work marked High Priority will have extra milestones appear on Reports"
+            >
+              <Box component={"span"}>
+                <InfoIcon />
+              </Box>
+            </Tooltip>
           </Grid>
         </Grid>
       </FormProvider>

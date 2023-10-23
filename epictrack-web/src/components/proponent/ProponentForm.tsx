@@ -45,7 +45,7 @@ export default function ProponentForm({ ...props }) {
   React.useEffect(() => {
     const name = (ctx?.item as Proponent)?.name;
     setDisabled(props.proponentId ? true : false);
-    ctx.setTitle(name || "Proponent");
+    ctx.setTitle(name || "Create Proponent");
   }, [ctx.title, ctx.item]);
 
   React.useEffect(() => {
