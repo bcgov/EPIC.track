@@ -6,13 +6,12 @@ import { MasterBase } from "./type";
 export interface Work extends MasterBase {
   id: number;
   title: string;
-  short_description: string;
-  long_description: string;
-  is_pecp_required: boolean;
+  report_description: string;
+  epic_description: string;
   is_cac_recommended: boolean;
   is_active: boolean;
   is_complete: boolean;
-  is_watched: boolean;
+  is_high_priority: boolean;
   is_deleted: boolean;
   start_date: string;
   anticipated_decision_date: string;

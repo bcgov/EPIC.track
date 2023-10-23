@@ -114,6 +114,7 @@ class Work(Resource):
     @profiletime
     def put(work_id):
         """Update and return a work."""
+        print("-----HERE------\n\n")
         req.WorkIdPathParameterSchema().load(request.view_args)
         request_json = req.WorkBodyParameterSchema().load(API.payload)
         work = WorkService.update_work(work_id, request_json)

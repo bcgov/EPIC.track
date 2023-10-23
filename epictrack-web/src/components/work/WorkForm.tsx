@@ -53,6 +53,10 @@ const schema = yup.object<Work>().shape({
       },
     }),
   substitution_act_id: yup.number(),
+  eao_team_id: yup.number().required("EAO team is required"),
+  responsible_epd_id: yup.number().required("Responsible EPD is required"),
+  work_lead_id: yup.number().required("Work Lead is required."),
+  decision_by_id: yup.number().required("Decision Maker is required"),
 });
 
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
@@ -288,9 +292,9 @@ export default function WorkForm({ ...props }) {
               fullWidth
               multiline
               rows={2}
-              error={!!errors?.short_description?.message}
-              helperText={errors?.short_description?.message?.toString()}
-              {...register("short_description")}
+              error={!!errors?.report_description?.message}
+              helperText={errors?.report_description?.message?.toString()}
+              {...register("report_description")}
             />
           </Grid>
           <Grid item xs={12}>
@@ -300,9 +304,9 @@ export default function WorkForm({ ...props }) {
               fullWidth
               multiline
               rows={4}
-              error={!!errors?.long_description?.message}
-              helperText={errors?.long_description?.message?.toString()}
-              {...register("long_description")}
+              error={!!errors?.epic_description?.message}
+              helperText={errors?.epic_description?.message?.toString()}
+              {...register("epic_description")}
             />
           </Grid>
           <Grid item xs={12}>
@@ -428,8 +432,8 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              defaultChecked={(ctx.item as Work)?.is_watched}
-              {...register("is_watched")}
+              defaultChecked={(ctx.item as Work)?.is_high_priority}
+              {...register("is_high_priority")}
             />
             <ETFormLabel id="is_watched">High Priority</ETFormLabel>
             <Tooltip
