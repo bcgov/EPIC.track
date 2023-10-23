@@ -1,11 +1,10 @@
 import React from "react";
-import { TextField, Grid, Button } from "@mui/material";
+import { TextField, Grid } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
 import staffService from "../../services/staffService/staffService";
