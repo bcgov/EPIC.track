@@ -14,6 +14,7 @@
 """Model to handle all operations related to Region."""
 
 from sqlalchemy import Column, Integer, String
+
 from .code_table import CodeTableVersioned
 from .db import db
 
