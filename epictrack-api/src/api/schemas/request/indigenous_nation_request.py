@@ -37,7 +37,7 @@ class IndigenousNationBodyParameterSchema(RequestBodyParameterSchema):
 
     is_active = fields.Bool(
         metadata={"description": "Active state of the indigenous nation"})
-    
+
     notes = fields.Str(
         metadata={"description": "Notes for the indigenous nation"},
         allow_none=True
