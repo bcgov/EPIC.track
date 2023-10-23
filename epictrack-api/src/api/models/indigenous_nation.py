@@ -30,12 +30,18 @@ class IndigenousNation(db.Model, CodeTableVersioned):
     name = Column(String(255), nullable=False)
     is_active = Column(Boolean, default=True, nullable=False)
     pip_link = Column(URLType, default=None, nullable=True)
+    notes = Column(String)
 
     relationship_holder_id = Column(
         ForeignKey("staffs.id"), nullable=True, default=None
     )
     relationship_holder = relationship(
         "Staff", foreign_keys=[relationship_holder_id], lazy="select"
+    )
+
+    pip_org_type_id = Column(ForeignKey("pip_org_types.id"))
+    pip_org_type = relationship(
+        "PIPOrgType", foreign_keys=[pip_org_type_id], lazy="select"
     )
 
     def as_dict(self):

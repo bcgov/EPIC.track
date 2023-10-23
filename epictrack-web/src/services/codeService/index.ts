@@ -16,7 +16,8 @@ export type Code =
   | "federal_involvements"
   | "responsibilities"
   | "roles"
-  | "substitution_acts";
+  | "substitution_acts"
+  | "pip_org_types";
 
 const getCodes = async (codeType: Code, apiUrl?: string) => {
   return await http.GetRequest(Endpoints.Codes.GET_CODES + `/${codeType}`);
