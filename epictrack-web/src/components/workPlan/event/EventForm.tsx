@@ -4,18 +4,14 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import Moment from "moment";
 import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
 import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import {
-  ETFormLabel,
-  ETFormLabelWithCharacterLimit,
-  ETParagraph,
-} from "../../shared";
-import dayjs from "dayjs";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -35,14 +31,14 @@ import EventConfiguration from "../../../models/eventConfiguration";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import MultiDaysInput from "./components/MultiDaysInput";
 import { dateUtils } from "../../../utils";
-import ExtSusInput from "./components/ExtSusInput";
 import PCPInput from "./components/PCPInput";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
-import outcomeConfigurationService from "../../../services/outcomeConfigurationService/outcomeConfigurationService";
 import DecisionInput from "./components/DecisionInput";
 import { POSITION_ENUM } from "../../../models/position";
+import { Else, If, Then } from "react-if";
+import ExtensionInput from "./components/ExtensionInput";
 
 interface EventFormProps {
   onSave: () => void;
@@ -107,10 +103,6 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
       }),
     [selectedConfiguration, actualAdded]
   );
-  // const isFormFieldsLocked = React.useMemo<boolean>(() => {
-  //   const isLocked = !!event?.actual_date;
-  //   return isLocked;
-  // }, [event]);
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -127,7 +119,13 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
   } = methods;
 
   React.useEffect(() => {
-    if (selectedConfiguration && selectedConfiguration.multiple_days) {
+    if (
+      selectedConfiguration &&
+      selectedConfiguration.event_category_id === EventCategory.EXTENSION
+    ) {
+      setAnticipatedLabel("Anticipated Order Date");
+      setActualDateLabel("Actual Order Date");
+    } else if (selectedConfiguration && selectedConfiguration.multiple_days) {
       setAnticipatedLabel("Anticipated Start Date");
       setActualDateLabel("Actual Start Date");
     } else {
@@ -193,8 +191,8 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
       data.notes = notes;
       // setSubmittedEvent(data);
       const showConfirmDialog =
-        (event === undefined && data.actual_date != "") ||
-        (event != null && event.actual_date == null && data.actual_date != "");
+        (event === undefined && !!data.actual_date) ||
+        (event != null && event.actual_date == null && !!data.actual_date);
       if (!showConfirmDialog) {
         saveEvent(data);
       }
@@ -466,17 +464,26 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}
           >
-            {selectedConfiguration?.multiple_days && (
-              <MultiDaysInput
-                endDateRef={endDateRef}
-                isFormFieldsLocked={isFormFieldsLocked}
-                numberOfDaysRef={numberOfDaysRef}
-                onChangeDay={daysOnChangeHandler}
-              />
-            )}
-            {[EventCategory.EXTENSION, EventCategory.SUSPENSION].includes(
-              Number(selectedConfiguration?.event_category_id)
-            ) && <ExtSusInput isFormFieldsLocked={isFormFieldsLocked} />}
+            <If
+              condition={
+                selectedConfiguration?.event_category_id ===
+                EventCategory.EXTENSION
+              }
+            >
+              <Then>
+                <ExtensionInput isFormFieldsLocked={isFormFieldsLocked} />
+              </Then>
+              <Else>
+                <If condition={selectedConfiguration?.multiple_days}>
+                  <MultiDaysInput
+                    endDateRef={endDateRef}
+                    isFormFieldsLocked={isFormFieldsLocked}
+                    numberOfDaysRef={numberOfDaysRef}
+                    onChangeDay={daysOnChangeHandler}
+                  />
+                </If>
+              </Else>
+            </If>
             {selectedConfiguration?.event_category_id === EventCategory.PCP &&
               ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
                 selectedConfiguration?.event_type_id

@@ -21,8 +21,8 @@ const MultiDaysInput = ({
     formState: { errors },
   } = useFormContext();
   React.useEffect(() => {
+    onChangeDay();
     return () => {
-      console.log("unregistering");
       unregister("number_of_days");
     };
   }, []);

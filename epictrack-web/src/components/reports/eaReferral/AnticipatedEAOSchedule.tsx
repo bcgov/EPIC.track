@@ -58,7 +58,6 @@ export default function AnticipatedEAOSchedule() {
     );
     setTypeFilter(filterTypes);
   }, [reports]);
-  console.log("TYPES", typeFilter);
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
