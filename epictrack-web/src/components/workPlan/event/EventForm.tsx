@@ -4,18 +4,14 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import Moment from "moment";
 import {
   COMMON_ERROR_MESSAGE,
   DATE_FORMAT,
 } from "../../../constants/application-constant";
 import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import {
-  ETFormLabel,
-  ETFormLabelWithCharacterLimit,
-  ETParagraph,
-} from "../../shared";
-import dayjs from "dayjs";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -35,18 +31,19 @@ import EventConfiguration from "../../../models/eventConfiguration";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import MultiDaysInput from "./components/MultiDaysInput";
 import { dateUtils } from "../../../utils";
-import ExtSusInput from "./components/ExtSusInput";
 import PCPInput from "./components/PCPInput";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
-import outcomeConfigurationService from "../../../services/outcomeConfigurationService/outcomeConfigurationService";
 import DecisionInput from "./components/DecisionInput";
 import { POSITION_ENUM } from "../../../models/position";
+import { Else, If, Then } from "react-if";
+import ExtensionInput from "./components/ExtensionInput";
 
-interface TaskFormProps {
+interface EventFormProps {
   onSave: () => void;
   event?: MilestoneEvent;
+  isFormFieldsLocked: boolean;
 }
 interface NumberOfDaysChangeProps {
   numberOfDays?: number | undefined;
@@ -55,7 +52,7 @@ interface NumberOfDaysChangeProps {
 }
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
-const EventForm = ({ onSave, event }: TaskFormProps) => {
+const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<
     EventConfiguration[]
@@ -75,7 +72,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
   const [anticipatedLabel, setAnticipatedLabel] =
     React.useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
-  const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
   const titleRef = React.useRef();
   const schema = React.useMemo(
     () =>
@@ -91,17 +87,21 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
           otherwise: () => yup.string().nullable(),
         }),
         outcome_id: yup.string().when([], {
-          is: () => actualAdded,
+          is: () =>
+            actualAdded &&
+            selectedConfiguration?.event_category_id === EventCategory.DECISION,
           then: () => yup.string().required("Please select the decision"),
           otherwise: () => yup.string().nullable(),
         }),
         decision_maker_id: yup.string().when([], {
-          is: () => actualAdded,
+          is: () =>
+            actualAdded &&
+            selectedConfiguration?.event_category_id === EventCategory.DECISION,
           then: () => yup.string().required("Please select the decision maker"),
           otherwise: () => yup.string().nullable(),
         }),
       }),
-    [selectedConfiguration, outcomes, actualAdded]
+    [selectedConfiguration, actualAdded]
   );
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -115,10 +115,17 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
     formState: { errors },
     reset,
     control,
+    getValues,
   } = methods;
 
   React.useEffect(() => {
-    if (selectedConfiguration && selectedConfiguration.multiple_days) {
+    if (
+      selectedConfiguration &&
+      selectedConfiguration.event_category_id === EventCategory.EXTENSION
+    ) {
+      setAnticipatedLabel("Anticipated Order Date");
+      setActualDateLabel("Actual Order Date");
+    } else if (selectedConfiguration && selectedConfiguration.multiple_days) {
       setAnticipatedLabel("Anticipated Start Date");
       setActualDateLabel("Actual Start Date");
     } else {
@@ -182,12 +189,10 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
         data.actual_date = Moment(data.actual_date).format();
       }
       data.notes = notes;
-      setSubmittedEvent(data);
+      // setSubmittedEvent(data);
       const showConfirmDialog =
-        (event === undefined && data.actual_date != null) ||
-        (event != null &&
-          event.actual_date == null &&
-          data.actual_date != null);
+        (event === undefined && !!data.actual_date) ||
+        (event != null && event.actual_date == null && !!data.actual_date);
       if (!showConfirmDialog) {
         saveEvent(data);
       }
@@ -206,7 +211,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
 
   const saveEvent = React.useCallback(
     async (data?: MilestoneEvent) => {
-      const dataToBeSubmitted = data || submittedEvent;
+      const dataToBeSubmitted = data || getValues();
       if (event) {
         const createResult = await eventService.update(
           dataToBeSubmitted,
@@ -303,7 +308,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                 options={configurations || []}
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
-                disabled={!!event}
+                disabled={!!event || isFormFieldsLocked}
                 onHandleChange={(configuration_id) =>
                   onChangeMilestoneType(configuration_id)
                 }
@@ -320,6 +325,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               <TextField
                 fullWidth
                 placeholder="Title"
+                disabled={isFormFieldsLocked}
                 defaultValue={event?.name}
                 error={!!errors?.name?.message}
                 inputRef={titleRef}
@@ -348,6 +354,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                   sx={{
                     mr: "2px",
                   }}
+                  disabled={isFormFieldsLocked}
                   control={
                     <ControlledSwitch
                       {...register("high_priority")}
@@ -375,6 +382,7 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                 }) => (
                   <LocalizationProvider dateAdapter={AdapterDayjs} for>
                     <DatePicker
+                      disabled={isFormFieldsLocked}
                       format={DATE_FORMAT}
                       slotProps={{
                         textField: {
@@ -389,9 +397,10 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                       }}
                       value={dayjs(value)}
                       onChange={(event: any) => {
-                        onChange(event);
+                        const d = event ? event["$d"] : null;
+                        onChange(d);
                         daysOnChangeHandler({
-                          anticipatedDate: event["$d"],
+                          anticipatedDate: d,
                         });
                       }}
                       defaultValue={dayjs(
@@ -408,12 +417,16 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               <Controller
                 name="actual_date"
                 control={control}
+                defaultValue={
+                  event?.actual_date ? Moment(event?.actual_date).format() : ""
+                }
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
+                      disabled={isFormFieldsLocked}
                       format={DATE_FORMAT}
                       slotProps={{
                         textField: {
@@ -433,9 +446,6 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
                           actualDate: d,
                         });
                       }}
-                      defaultValue={
-                        event?.actual_date ? dayjs(event?.actual_date) : ""
-                      }
                       sx={{ display: "block" }}
                     />
                   </LocalizationProvider>
@@ -454,27 +464,38 @@ const EventForm = ({ onSave, event }: TaskFormProps) => {
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}
           >
-            {selectedConfiguration?.multiple_days && (
-              <MultiDaysInput
-                endDateRef={endDateRef}
-                numberOfDaysRef={numberOfDaysRef}
-                onChangeDay={daysOnChangeHandler}
-              />
-            )}
-            {[EventCategory.EXTENSION, EventCategory.SUSPENSION].includes(
-              Number(selectedConfiguration?.event_category_id)
-            ) && <ExtSusInput />}
+            <If
+              condition={
+                selectedConfiguration?.event_category_id ===
+                EventCategory.EXTENSION
+              }
+            >
+              <Then>
+                <ExtensionInput isFormFieldsLocked={isFormFieldsLocked} />
+              </Then>
+              <Else>
+                <If condition={selectedConfiguration?.multiple_days}>
+                  <MultiDaysInput
+                    endDateRef={endDateRef}
+                    isFormFieldsLocked={isFormFieldsLocked}
+                    numberOfDaysRef={numberOfDaysRef}
+                    onChangeDay={daysOnChangeHandler}
+                  />
+                </If>
+              </Else>
+            </If>
             {selectedConfiguration?.event_category_id === EventCategory.PCP &&
               ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
                 selectedConfiguration?.event_type_id
-              ) && <PCPInput />}
+              ) && <PCPInput isFormFieldsLocked={isFormFieldsLocked} />}
             {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
               Number(selectedConfiguration?.event_type_id)
-            ) && <SingleDayPCPInput />}
+            ) && <SingleDayPCPInput isFormFieldsLocked={isFormFieldsLocked} />}
             {actualAdded &&
               selectedConfiguration?.event_category_id ===
                 EventCategory.DECISION && (
                 <DecisionInput
+                  isFormFieldsLocked={isFormFieldsLocked}
                   configurationId={selectedConfiguration.id}
                   decisionMakerPositionId={
                     ctx.work?.decision_maker_position_id ||

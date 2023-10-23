@@ -13,6 +13,7 @@
 # limitations under the License.
 """Resource for indigenous nation endpoints."""
 from http import HTTPStatus
+
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
@@ -99,7 +100,8 @@ class IndigenousNations(Resource):
     @profiletime
     def get():
         """Return all indigenous nations."""
-        indigenous_nations = IndigenousNationService.find_all_indigenous_nations()
+        args = req.BasicRequestQueryParameterSchema().load(request.args)
+        indigenous_nations = IndigenousNationService.find_all_indigenous_nations(args.get("is_active"))
         return jsonify(res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)), HTTPStatus.OK
 
     @staticmethod

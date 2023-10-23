@@ -5,7 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import { Proponent } from "../../models/proponent";
+import { Proponent, defaultProponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
@@ -40,7 +40,6 @@ export default function ProponentForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
-    reset({ is_active: true });
   }, []);
   React.useEffect(() => {
     const name = (ctx?.item as Proponent)?.name;
@@ -65,7 +64,7 @@ export default function ProponentForm({ ...props }) {
   } = methods;
 
   React.useEffect(() => {
-    reset(ctx.item);
+    reset(ctx.item ?? defaultProponent);
   }, [ctx.item]);
 
   const getStaffs = async () => {

@@ -69,3 +69,4 @@ from .outcome_configuration import OutcomeConfiguration
 from .action_configuration import ActionCofiguration
 from .task_event_responsibility import TaskEventResponsibility
 from .act_section import ActSection
+from .pip_org_type import PIPOrgType

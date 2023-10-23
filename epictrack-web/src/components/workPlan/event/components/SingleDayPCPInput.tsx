@@ -3,7 +3,10 @@ import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
 import { Grid, TextField } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 
-const SingleDayPCPInput = () => {
+interface SingleDayPCPInputProps {
+  isFormFieldsLocked: boolean;
+}
+const SingleDayPCPInput = ({ isFormFieldsLocked }: SingleDayPCPInputProps) => {
   const {
     register,
     unregister,
@@ -20,6 +23,7 @@ const SingleDayPCPInput = () => {
         <ETFormLabel>Number of Attendees</ETFormLabel>
         <TextField
           fullWidth
+          disabled={isFormFieldsLocked}
           helperText={errors?.number_of_attendees?.message?.toString()}
           error={!!errors?.number_of_attendees?.message}
           InputProps={{

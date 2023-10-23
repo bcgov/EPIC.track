@@ -28,6 +28,11 @@ const ProjectList = () => {
 
   React.useEffect(() => {
     ctx.setService(projectService);
+    ctx.setFormStyle({
+      "& .MuiDialogContent-root": {
+        padding: 0,
+      },
+    });
   }, []);
 
   React.useEffect(() => {

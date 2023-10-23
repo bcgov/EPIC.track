@@ -16,7 +16,9 @@ from marshmallow import fields, validate
 
 from api.schemas.validators import Phone
 
-from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
+from .base import (
+    BasicRequestQueryParameterSchema, RequestBodyParameterSchema, RequestPathParameterSchema,
+    RequestQueryParameterSchema)
 from .custom_fields import IntegerList
 
 
@@ -46,7 +48,7 @@ class StaffExistanceQueryParamSchema(RequestQueryParameterSchema):
     )
 
 
-class StaffByPositionsQueryParamSchema(RequestQueryParameterSchema):
+class StaffByPositionsQueryParamSchema(BasicRequestQueryParameterSchema):
     """Staff by positions query parameter"""
 
     positions = IntegerList(metadata={"description": "comma separated position ids"})

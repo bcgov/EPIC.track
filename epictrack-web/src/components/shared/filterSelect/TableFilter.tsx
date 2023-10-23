@@ -1,7 +1,7 @@
 import React from "react";
 
 import FilterSelect from "./FilterSelect";
-import { SelectProps, TableFilterProps } from "./type";
+import { TableFilterProps } from "./type";
 
 const makeTableFilter =
   <SelectProps extends object>(
@@ -24,10 +24,21 @@ const makeTableFilter =
 
     const options = React.useMemo(() => {
       let filterOptions = column.columnDef.filterSelectOptions;
-      filterOptions = filterOptions.map((option: string) => ({
-        label: option,
-        value: option,
-      }));
+      filterOptions = filterOptions.map(
+        (
+          option:
+            | string
+            | {
+                text: string;
+                value: any;
+              }
+        ) => {
+          if (typeof option === "object") {
+            return { label: option.text, value: option.value };
+          }
+          return { label: option, value: option };
+        }
+      );
       return filterOptions;
     }, [column]);
 

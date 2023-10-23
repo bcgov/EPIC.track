@@ -4,9 +4,10 @@ import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 
 class IndigenousNationService implements ServiceBase {
-  async getAll() {
+  async getAll(is_active = false) {
     return await http.GetRequest(
-      Endpoints.IndigenousNations.INDIGENOUS_NATIONS
+      Endpoints.IndigenousNations.INDIGENOUS_NATIONS,
+      { is_active }
     );
   }
 
