@@ -35,6 +35,8 @@ class ActionTemplateService:  # pylint: disable=too-few-public-methods
             "ea_act_id": request_data.get("ea_act_id")
         }
         result = PhaseCode.find_by_params(param)
+        if not result:
+            return {}
         return {
             "phase_id": result[0].id
         }

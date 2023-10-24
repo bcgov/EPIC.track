@@ -211,33 +211,44 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
 
   const saveEvent = React.useCallback(
     async (data?: MilestoneEvent) => {
-      const dataToBeSubmitted = data || getValues();
-      if (event) {
-        const createResult = await eventService.update(
-          dataToBeSubmitted,
-          Number(event.id)
-        );
-        if (createResult.status === 200) {
-          showNotification("Milestone details updated", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
+      try {
+        const dataToBeSubmitted = data || getValues();
+        if (event) {
+          const createResult = await eventService.update(
+            dataToBeSubmitted,
+            Number(event.id)
+          );
+          if (createResult.status === 200) {
+            showNotification("Milestone details updated", {
+              type: "success",
+            });
+            if (onSave) {
+              onSave();
+            }
+          }
+        } else {
+          const createResult = await eventService.create(
+            dataToBeSubmitted,
+            Number(ctx.selectedWorkPhase?.id)
+          );
+          if (createResult.status === 201) {
+            showNotification("Milestone details inserted", {
+              type: "success",
+            });
+            if (onSave) {
+              onSave();
+            }
           }
         }
-      } else {
-        const createResult = await eventService.create(
-          dataToBeSubmitted,
-          Number(ctx.selectedWorkPhase?.id)
-        );
-        if (createResult.status === 201) {
-          showNotification("Milestone details inserted", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
+      } catch (e) {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
+          type: "error",
+        });
       }
     },
     [event, submittedEvent]
