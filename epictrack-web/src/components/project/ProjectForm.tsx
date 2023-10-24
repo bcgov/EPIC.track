@@ -54,6 +54,18 @@ const schema = yup.object<Project>().shape({
     .required()
     .min(-180, "Longitude must be greater than or equal to -180")
     .max(180, "Longitude must be less than or equal to 180"),
+  capital_investment: yup
+    .number()
+    .typeError("Please provide a numerical value")
+    .nullable(),
+  fte_positions_construction: yup
+    .number()
+    .typeError("Please provide a numerical value")
+    .min(0, "Must be greater than or equal to 0"),
+  fte_positions_operation: yup
+    .number()
+    .typeError("Please provide a numerical value")
+    .min(0, "Must be greater than or equal to 0"),
 });
 
 export default function ProjectForm({ ...props }) {
@@ -380,7 +392,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 {...register("fte_positions_construction")}
                 error={!!errors?.fte_positions_construction?.message}
-                helperText={errors?.fte_positions_construction?.toString()}
+                helperText={errors?.fte_positions_construction?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
@@ -389,7 +401,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 {...register("fte_positions_operation")}
                 error={!!errors?.fte_positions_operation?.message}
-                helperText={errors?.fte_positions_operation?.toString()}
+                helperText={errors?.fte_positions_operation?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
