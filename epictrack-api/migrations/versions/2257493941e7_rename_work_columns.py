@@ -17,6 +17,8 @@ depends_on = None
 
 
 def upgrade():
+    op.execute("TRUNCATE works CASCADE")
+    op.execute("TRUNCATE works_history CASCADE")
     with op.batch_alter_table('works', schema=None) as batch_op:
         batch_op.alter_column('short_description', new_column_name='report_description')
         batch_op.alter_column('long_description', new_column_name='epic_description')
