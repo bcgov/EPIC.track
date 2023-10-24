@@ -235,7 +235,7 @@ export const MasterProvider = ({
       />
       <TrackDialog
         open={showModalForm}
-        dialogTitle={(id ? "Update " : "Create ") + title}
+        dialogTitle={title ? title : id ? "Update " : "Create "}
         onClose={(event, reason) => onDialogClose(event, reason)}
         disableEscapeKeyDown
         fullWidth

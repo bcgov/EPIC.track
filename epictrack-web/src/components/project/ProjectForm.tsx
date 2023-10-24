@@ -95,7 +95,7 @@ export default function ProjectForm({ ...props }) {
 
   React.useEffect(() => {
     const name = (ctx?.item as Project)?.name;
-    ctx.setTitle(name || "Project");
+    ctx.setTitle(name || "Create Project");
   }, [ctx.title, ctx.item]);
 
   const setRegions = (regions: Region[]) => {
