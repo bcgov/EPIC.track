@@ -26,13 +26,13 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
         required=True,
     )
 
-    short_description = fields.Str(
-        metadata={"description": "Short description of work"},
+    report_description = fields.Str(
+        metadata={"description": "Report description of work"},
         validate=validate.Length(max=500),
         required=True,
     )
-    long_description = fields.Str(
-        metadata={"description": "Long description of work"},
+    epic_description = fields.Str(
+        metadata={"description": "EPIC description of work"},
         validate=validate.Length(max=2000),
         allow_none=True,
         load_default=None,
@@ -101,14 +101,11 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     is_active = fields.Bool(metadata={"description": "Active state of the work"})
-    is_watched = fields.Bool(
-        metadata={"description": "Watched state of the work"}, default=False
+    is_high_priority = fields.Bool(
+        metadata={"description": "Is a high priority work"}, default=False
     )
     is_cac_recommended = fields.Bool(
         metadata={"description": "Is CAC recommended for the work"}, default=False
-    )
-    is_pecp_required = fields.Bool(
-        metadata={"description": "Is PCP recommended for the work"}, default=False
     )
 
 
