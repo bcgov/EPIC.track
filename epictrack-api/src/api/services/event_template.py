@@ -46,20 +46,24 @@ class EventTemplateService:
         outcome_dict = excel_dict.get("Outcomes")
         action_dict = excel_dict.get("Actions")
         for event_type in event_types:
-            event_dict = event_dict.replace({'event_type_id': rf'^{event_type.name}$'},
+            name = escape_characters(event_type.name, ['(', ')'])
+            event_dict = event_dict.replace({'event_type_id': rf'^{name}$'},
                                             {'event_type_id': event_type.id}, regex=True)
         for event_category in event_categories:
-            event_dict = event_dict.replace({'event_category_id': rf'^{event_category.name}$'},
+            name = escape_characters(event_category.name, ['(', ')'])
+            event_dict = event_dict.replace({'event_category_id': rf'^{name}$'},
                                             {'event_category_id': event_category.id}, regex=True)
         for work_type in work_types:
-            phase_dict = phase_dict.replace({'work_type_id': rf'^{work_type.name}$'},
+            name = escape_characters(work_type.name, ['(', ')'])
+            phase_dict = phase_dict.replace({'work_type_id': rf'^{name}$'},
                                             {'work_type_id': work_type.id}, regex=True)
         for ea_act in ea_acts:
             name = escape_characters(ea_act.name, ['(', ')'])
             phase_dict = phase_dict.replace({'ea_act_id': rf'^{name}$'},
                                             {'ea_act_id': ea_act.id}, regex=True)
         for action in actions:
-            action_dict = action_dict.replace({'action_id': rf'^{action.name}$'},
+            name = escape_characters(action.name, ['(', ')'])
+            action_dict = action_dict.replace({'action_id': rf'^{name}$'},
                                               {'action_id': action.id}, regex=True)
 
         event_dict = event_dict.to_dict('records')

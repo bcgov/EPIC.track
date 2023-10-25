@@ -12,11 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Work."""
-
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, func
+import enum
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Enum, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
+
+
+class WorkStateEnum(enum.Enum):
+    """Enum for WorkState"""
+
+    SUSPENDED = "SUSPENDED"
+    IN_PROGRESS = "IN_PROGRESS"
+    WITHDRAWN = "WITHDRAWN"
+    TERMINATED = "TERMINATED"
+    CLOSED = "CLOSED"
+    COMPLETED = "COMPLETED"
 
 
 class Work(BaseModelVersioned):
@@ -56,6 +67,7 @@ class Work(BaseModelVersioned):
     decision_by_id = Column(ForeignKey('staffs.id'), nullable=False)
     start_date_locked = Column(Boolean(), default=False)
     decision_maker_position_id = Column(ForeignKey('positions.id'), nullable=True)
+    work_state = Column(Enum(WorkStateEnum), default=WorkStateEnum.IN_PROGRESS)
 
     project = relationship('Project', foreign_keys=[project_id], lazy='select')
     ministry = relationship('Ministry', foreign_keys=[ministry_id], lazy='select')

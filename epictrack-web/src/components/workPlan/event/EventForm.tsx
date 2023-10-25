@@ -72,6 +72,7 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
   const [anticipatedLabel, setAnticipatedLabel] =
     React.useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
+  const isCreateMode = React.useMemo(() => !event, [event]);
   const titleRef = React.useRef();
   const schema = React.useMemo(
     () =>
@@ -98,6 +99,13 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
             actualAdded &&
             selectedConfiguration?.event_category_id === EventCategory.DECISION,
           then: () => yup.string().required("Please select the decision maker"),
+          otherwise: () => yup.string().nullable(),
+        }),
+        act_section_id: yup.string().when([], {
+          is: () =>
+            selectedConfiguration?.event_category_id ===
+            EventCategory.EXTENSION,
+          then: () => yup.string().required("Please select the act section"),
           otherwise: () => yup.string().nullable(),
         }),
       }),
@@ -182,19 +190,21 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
     }
   };
 
-  const onSubmitHandler = async (data: MilestoneEvent) => {
+  const onSubmitHandler = async (submittedData: MilestoneEvent) => {
     try {
-      data.anticipated_date = Moment(data.anticipated_date).format();
-      if (!!data.actual_date) {
-        data.actual_date = Moment(data.actual_date).format();
+      submittedData.anticipated_date = Moment(
+        submittedData.anticipated_date
+      ).format();
+      if (!!submittedData.actual_date) {
+        submittedData.actual_date = Moment(submittedData.actual_date).format();
       }
-      data.notes = notes;
+      submittedData.notes = notes;
       // setSubmittedEvent(data);
       const showConfirmDialog =
-        (event === undefined && !!data.actual_date) ||
-        (event != null && event.actual_date == null && !!data.actual_date);
+        (isCreateMode && !!submittedData.actual_date) ||
+        (!isCreateMode && !event?.actual_date && !!submittedData.actual_date);
       if (!showConfirmDialog) {
-        saveEvent(data);
+        saveEvent(submittedData);
       }
       setShowEventLockDialog(showConfirmDialog);
     } catch (e: any) {
@@ -211,33 +221,44 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
 
   const saveEvent = React.useCallback(
     async (data?: MilestoneEvent) => {
-      const dataToBeSubmitted = data || getValues();
-      if (event) {
-        const createResult = await eventService.update(
-          dataToBeSubmitted,
-          Number(event.id)
-        );
-        if (createResult.status === 200) {
-          showNotification("Milestone details updated", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
+      try {
+        const dataToBeSubmitted = data || getValues();
+        if (event) {
+          const createResult = await eventService.update(
+            dataToBeSubmitted,
+            Number(event.id)
+          );
+          if (createResult.status === 200) {
+            showNotification("Milestone details updated", {
+              type: "success",
+            });
+            if (onSave) {
+              onSave();
+            }
+          }
+        } else {
+          const createResult = await eventService.create(
+            dataToBeSubmitted,
+            Number(ctx.selectedWorkPhase?.id)
+          );
+          if (createResult.status === 201) {
+            showNotification("Milestone details inserted", {
+              type: "success",
+            });
+            if (onSave) {
+              onSave();
+            }
           }
         }
-      } else {
-        const createResult = await eventService.create(
-          dataToBeSubmitted,
-          Number(ctx.selectedWorkPhase?.id)
-        );
-        if (createResult.status === 201) {
-          showNotification("Milestone details inserted", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
+      } catch (e) {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
+          type: "error",
+        });
       }
     },
     [event, submittedEvent]
