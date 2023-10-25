@@ -54,18 +54,6 @@ const schema = yup.object<Project>().shape({
     .required()
     .min(-180, "Longitude must be greater than or equal to -180")
     .max(180, "Longitude must be less than or equal to 180"),
-  capital_investment: yup
-    .number()
-    .typeError("Please provide a numerical value")
-    .nullable(),
-  fte_positions_construction: yup
-    .number()
-    .typeError("Please provide a numerical value")
-    .min(0, "Must be greater than or equal to 0"),
-  fte_positions_operation: yup
-    .number()
-    .typeError("Please provide a numerical value")
-    .min(0, "Must be greater than or equal to 0"),
 });
 
 export default function ProjectForm({ ...props }) {
@@ -371,6 +359,7 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Capital Investment</ETFormLabel>
               <TextField
+                type="number"
                 fullWidth
                 {...register("capital_investment")}
                 error={!!errors?.capital_investment?.message}
@@ -389,6 +378,7 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
               <TextField
+                type="number"
                 fullWidth
                 {...register("fte_positions_construction")}
                 error={!!errors?.fte_positions_construction?.message}
@@ -398,6 +388,7 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Operation</ETFormLabel>
               <TextField
+                type="number"
                 fullWidth
                 {...register("fte_positions_operation")}
                 error={!!errors?.fte_positions_operation?.message}
