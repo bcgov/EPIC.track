@@ -109,7 +109,13 @@ const TrackDialog: FC<TrackDialogProps> = ({
               color: Palette.neutral.dark,
             }}
           >
-            <ETSubhead>{dialogContentText}</ETSubhead>
+            <ETSubhead
+              sx={{
+                lineHeight: "1.6rem",
+              }}
+            >
+              {dialogContentText}
+            </ETSubhead>
           </DialogContentText>
         )}
         {props.children}

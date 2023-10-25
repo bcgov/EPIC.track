@@ -39,6 +39,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
       unregister("phase_end_date");
     };
   }, []);
+
   React.useEffect(() => {
     let numberOfDays = Number(getValues("number_of_days"));
     if (numberOfDaysRef.current as any) {

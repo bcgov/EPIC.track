@@ -13,7 +13,9 @@
 # limitations under the License.
 """Model to handle all operations related to act sections."""
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, ForeignKey
+
+from sqlalchemy.orm import relationship
 
 from .code_table import CodeTableVersioned
 from .db import db
@@ -26,4 +28,7 @@ class ActSection(db.Model, CodeTableVersioned):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String())
+    ea_act_id = Column(ForeignKey('ea_acts.id'), nullable=False)
     sort_order = Column(Integer, nullable=False)
+
+    ea_act = relationship('EAAct', foreign_keys=[ea_act_id], lazy='select')

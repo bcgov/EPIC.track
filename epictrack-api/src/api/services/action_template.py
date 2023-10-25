@@ -22,8 +22,8 @@ class ActionTemplateService:  # pylint: disable=too-few-public-methods
     @classmethod
     def get_action_params(cls, action_type: ActionEnum, request_data: dict):
         """Return the action params for the template"""
-        if action_type == ActionEnum.DUPLICATE_PHASE:
-            return cls._get_phase_param(request_data)
+        if action_type == ActionEnum.ADD_EVENT:
+            return request_data  # cls._get_phase_param(request_data)
         return request_data
 
     @classmethod
