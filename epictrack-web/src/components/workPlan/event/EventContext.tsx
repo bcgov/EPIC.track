@@ -18,6 +18,7 @@ export const EventContext = createContext<EventContextProps>({
   },
 });
 
+let highlightTimout: null | NodeJS.Timeout = null;
 export const EventProvider = ({
   children,
 }: {
@@ -28,9 +29,12 @@ export const EventProvider = ({
 
   const handleHighlightRow = (rowToHighlight?: HighlightedRow) => {
     if (!rowToHighlight) return;
+    if (highlightTimout) {
+      clearTimeout(highlightTimout);
+    }
     const HIGHLIGHT_DURATION = 6000;
     setHighlightedRow(rowToHighlight);
-    setTimeout(() => {
+    highlightTimout = setTimeout(() => {
       setHighlightedRow(null);
     }, HIGHLIGHT_DURATION);
   };
