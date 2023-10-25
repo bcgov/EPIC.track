@@ -34,7 +34,7 @@ const schema = yup.object().shape({
         return true;
       }
     ),
-  pip_url: yup.string(),
+  pip_link: yup.string(),
 });
 
 export default function IndigenousNationForm({ ...props }) {
