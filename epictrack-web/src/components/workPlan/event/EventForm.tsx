@@ -300,7 +300,6 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
               padding: "24px 40px",
             }}
           >
-            {JSON.stringify(errors)}
             <Grid item xs={12}>
               <ETFormLabel required>Milestone Type</ETFormLabel>
               <ControlledSelectV2
