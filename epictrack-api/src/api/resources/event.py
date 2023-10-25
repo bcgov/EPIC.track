@@ -52,12 +52,9 @@ class Events(Resource):
     @profiletime
     def post(work_phase_id):
         """Create a milestone event"""
-        try:
-            request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-            event_response = EventService.create_event(request_json, work_phase_id)
-            return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
-        except Exception as e:
-            return {"message": str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+        request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        event_response = EventService.create_event(request_json, work_phase_id)
+        return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
 
 
 @cors_preflight("GET, PUT, DELETE")
@@ -71,12 +68,9 @@ class Event(Resource):
     @profiletime
     def put(event_id):
         """Endpoint to update a milestone event"""
-        try:
-            request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-            event_response = EventService.update_event(request_json, event_id)
-            return res.EventResponseSchema().dump(event_response), HTTPStatus.OK
-        except Exception as e:
-            return {"message": str(e)}, HTTPStatus.INTERNAL_SERVER_ERROR
+        request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        event_response = EventService.update_event(request_json, event_id)
+        return res.EventResponseSchema().dump(event_response), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")

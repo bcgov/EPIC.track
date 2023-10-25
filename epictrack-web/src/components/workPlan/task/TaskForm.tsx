@@ -136,9 +136,9 @@ const TaskForm = ({
 
   const saveTask = async (data: TaskEvent) => {
     if (taskEvent) {
-      return await updateTask(data);
+      return updateTask(data);
     }
-    return await createTask(data);
+    return createTask(data);
   };
 
   const onSubmitHandler = async (data: TaskEvent) => {
