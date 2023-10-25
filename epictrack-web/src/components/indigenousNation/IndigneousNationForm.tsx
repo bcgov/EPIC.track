@@ -34,6 +34,11 @@ const schema = yup.object().shape({
         return true;
       }
     ),
+  relationship_holder_id: yup.number().nullable(),
+  pip_org_type_id: yup.number().nullable(),
+  pip_link: yup.string().nullable(),
+  is_active: yup.boolean(),
+  notes: yup.string().nullable(),
 });
 
 export default function IndigenousNationForm({ ...props }) {
