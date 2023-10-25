@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -33,7 +33,6 @@ import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import EventForm from "./EventForm";
 import { TemplateStatus, WorkPhase } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
@@ -41,6 +40,7 @@ import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { ListType } from "../../../models/code";
 import responsibilityService from "../../../services/responsibilityService/responsibilityService";
 import EventListTable from "./EventListTable";
+import EventForm from "./EventForm";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -106,9 +106,11 @@ const EventList = () => {
     React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
+
   const isEventFormFieldLocked = React.useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
+
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
@@ -206,16 +208,17 @@ const EventList = () => {
     }
   }, []);
 
-  const onDialogClose = React.useCallback(() => {
+  const onDialogClose = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
+    // setEventId(undefined);
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
-  }, [ctx.work, ctx.selectedWorkPhase]);
+  };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
     setShowTemplateForm(false);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -39,6 +39,8 @@ import DecisionInput from "./components/DecisionInput";
 import { POSITION_ENUM } from "../../../models/position";
 import { Else, If, Then } from "react-if";
 import ExtensionInput from "./components/ExtensionInput";
+import { EventContext } from "./EventContext";
+import { EVENT_TYPE } from "../phase/type";
 
 interface EventFormProps {
   onSave: () => void;
@@ -52,7 +54,13 @@ interface NumberOfDaysChangeProps {
 }
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
-const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
+const EventForm = ({
+  onSave = () => {
+    return;
+  },
+  event,
+  isFormFieldsLocked,
+}: EventFormProps) => {
   const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<
     EventConfiguration[]
@@ -67,7 +75,10 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
   const anticipatedDateRef = React.useRef();
   const numberOfDaysRef = React.useRef();
   const endDateRef = React.useRef();
+
   const ctx = React.useContext(WorkplanContext);
+  const { handleHighlightRow } = useContext(EventContext);
+
   const [actualAdded, setActualAdded] = React.useState<boolean>(false);
   const [anticipatedLabel, setAnticipatedLabel] =
     React.useState("Anticipated Date");
@@ -221,9 +232,11 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
           showNotification("Milestone details updated", {
             type: "success",
           });
-          if (onSave) {
-            onSave();
-          }
+          onSave();
+          handleHighlightRow({
+            type: EVENT_TYPE.MILESTONE,
+            id: event.id,
+          });
         }
       } else {
         const createResult = await eventService.create(
@@ -234,9 +247,11 @@ const EventForm = ({ onSave, event, isFormFieldsLocked }: EventFormProps) => {
           showNotification("Milestone details inserted", {
             type: "success",
           });
-          if (onSave) {
-            onSave();
-          }
+          onSave();
+          handleHighlightRow({
+            type: EVENT_TYPE.MILESTONE,
+            id: createResult.data.id,
+          });
         }
       }
     },
