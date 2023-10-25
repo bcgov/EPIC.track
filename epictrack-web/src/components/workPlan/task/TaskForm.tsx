@@ -106,41 +106,54 @@ const TaskForm = ({
     }
   };
   const statuses = useMemo(() => statusOptions, []);
+
+  const createTask = async (data: TaskEvent) => {
+    const createResult = await taskEventService.create(data);
+    showNotification("Task details inserted", {
+      type: "success",
+    });
+    handleHighlightRow({
+      type: EVENT_TYPE.TASK,
+      id: createResult.data.id,
+    });
+    return createResult;
+  };
+
+  const updateTask = async (data: TaskEvent) => {
+    const updateResult = await taskEventService.update(
+      data,
+      Number(taskEvent?.id)
+    );
+    showNotification("Task details updated", {
+      type: "success",
+    });
+    handleHighlightRow({
+      type: EVENT_TYPE.TASK,
+      id: Number(taskEvent?.id),
+    });
+    return updateResult;
+  };
+
+  const saveTask = async (data: TaskEvent) => {
+    if (taskEvent) {
+      return await updateTask(data);
+    }
+    return await createTask(data);
+  };
+
   const onSubmitHandler = async (data: TaskEvent) => {
     try {
-      data.work_phase_id = Number(ctx.selectedWorkPhase?.id);
-      data.start_date = Moment(data.start_date).format();
-      data.number_of_days =
-        data.number_of_days.toString() === "" ? 0 : data.number_of_days;
-      data.notes = notes;
-      if (taskEvent) {
-        const createResult = await taskEventService.update(
-          data,
-          Number(taskEvent.id)
-        );
-        if (createResult.status === 200) {
-          showNotification("Task details updated", {
-            type: "success",
-          });
-          onSave();
-          handleHighlightRow({
-            type: EVENT_TYPE.TASK,
-            id: Number(taskEvent.id),
-          });
-        }
-      } else {
-        const createResult = await taskEventService.create(data);
-        if (createResult.status === 201) {
-          showNotification("Task details inserted", {
-            type: "success",
-          });
-          onSave();
-          handleHighlightRow({
-            type: EVENT_TYPE.TASK,
-            id: createResult.data.id,
-          });
-        }
-      }
+      const dataToSave = {
+        ...data,
+        work_phase_id: Number(ctx.selectedWorkPhase?.id),
+        start_date: Moment(data.start_date).format(),
+        number_of_days:
+          data.number_of_days.toString() === "" ? 0 : data.number_of_days,
+        notes: notes,
+      };
+
+      await saveTask(dataToSave);
+      onSave();
     } catch (e: any) {
       const error = getAxiosError(e);
       const message =
