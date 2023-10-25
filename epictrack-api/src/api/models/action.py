@@ -22,14 +22,17 @@ from .db import db
 class ActionEnum(enum.Enum):
     """Action enum"""
 
-    COMPLETE_CURRENT_PHASE = 1
-    DISABLE_WORK_START_DATE = 2
-    CLOSE_EVERYTHING = 3
-    DUPLICATE_PHASE = 4
-    DEACTIVATE_ALL_EVENTS = 5
-    DELETE_ALL_EVENTS = 6
-    CLOSE_WORK = 7
-    CREATE_NEW_WORK = 8
+    SET_EVENT_DATE = 1
+    ADD_EVENT = 2
+    SET_PHASES_STATUS = 3
+    SET_EVENTS_STATUS = 4
+    SET_WORK_STATE = 5
+    SET_PROJECT_STATUS = 6
+    LOCK_WORK_START_DATE = 7
+    SET_WORK_DECISION_MAKER = 8
+    ADD_PHASE = 9
+    SET_PHASE_LEGISLATION = 10
+    CREATE_WORK = 11
 
 
 class Action(db.Model, CodeTableVersioned):

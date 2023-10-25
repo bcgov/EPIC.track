@@ -172,7 +172,10 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         allow_none=True,
     )
 
-    notes = fields.Str(metadata={"description": "Notes for the task"})
+    notes = fields.Str(
+        metadata={"description": "Notes for the task"},
+        allow_none=True
+    )
 
     assignee_ids = fields.List(
         fields.Int(metadata={"description": "List of assignees of the task"})

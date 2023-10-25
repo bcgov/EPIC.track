@@ -419,7 +419,7 @@ const EventListTable = ({
           row.original.end_date === undefined &&
           row.original.type === EVENT_TYPE.MILESTONE,
         indeterminate:
-          row.original.end_date !== undefined &&
+          row.original.is_complete &&
           row.original.type === EVENT_TYPE.MILESTONE,
       })}
       columns={columns}

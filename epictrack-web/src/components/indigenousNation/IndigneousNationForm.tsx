@@ -34,7 +34,6 @@ const schema = yup.object().shape({
         return true;
       }
     ),
-  pip_url: yup.string(),
 });
 
 export default function IndigenousNationForm({ ...props }) {
@@ -102,15 +101,13 @@ export default function IndigenousNationForm({ ...props }) {
     Promise.all(promises);
   }, []);
 
-  const onSubmitHandler = async (data: FirstNation) => {
+  const onSubmitHandler = async (data: any) => {
     data.notes = notes;
     ctx.onSave(data, () => {
       reset();
     });
     ctx.setId(undefined);
   };
-
-  console.log(pipOrgTypes);
 
   return (
     <>
