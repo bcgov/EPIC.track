@@ -20,7 +20,7 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
             print(f"{e.name} action handler module not found")
             self.action_class = None
         except AttributeError as e:
-            raise UnprocessableEntityError(f"Action class {e.name} not configured properly.") from e
+            raise UnprocessableEntityError(f"Action class {action_class_name} not configured properly.") from e
 
     def _convert_class_name_to_module_name(self, class_name: str) -> str:
         """Convert class name into valid python module names
