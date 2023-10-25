@@ -1,5 +1,5 @@
 """Event resource's input validations"""
-from marshmallow import fields, validate, pre_load
+from marshmallow import fields, pre_load, validate
 
 from api.schemas.request.custom_fields import IntegerList
 

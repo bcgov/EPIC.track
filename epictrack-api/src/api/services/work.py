@@ -23,7 +23,7 @@ from sqlalchemy.orm import aliased
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    ActionCofiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
+    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
     Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, db)
 from api.models.event_category import EventCategoryEnum
 from api.models.indigenous_nation import IndigenousNation
@@ -351,7 +351,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             for outcome_action in outcome_actions:
                 action_json = ActionTemplateResponseSchema().dump(outcome_action)
                 action_json["outcome_configuration_id"] = outcome_result.id
-                ActionCofiguration(
+                ActionConfiguration(
                     **ActionConfigurationBodyParameterSchema().load(action_json)
                 ).flush()
 
