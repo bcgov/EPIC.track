@@ -4,13 +4,13 @@ import Endpoints from "../../constants/api-endpoint";
 
 class TaskEventService {
   async create(taskEvent: TaskEvent) {
-    return await http.PostRequest(
+    return await http.PostRequest<TaskEvent>(
       Endpoints.TaskEvents.EVENTS,
       JSON.stringify(taskEvent)
     );
   }
   async update(taskEvent: TaskEvent, eventId: number) {
-    return await http.PutRequest(
+    return await http.PutRequest<TaskEvent>(
       `${Endpoints.TaskEvents.EVENTS}/${eventId}`,
       JSON.stringify(taskEvent)
     );

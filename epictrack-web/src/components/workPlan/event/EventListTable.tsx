@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
@@ -23,6 +23,7 @@ import {
   getSelectFilterOptions,
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
+import { EventContext } from "./EventContext";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -52,6 +53,8 @@ const EventListTable = ({
   setRowSelection,
 }: EventListTable) => {
   const classes = useStyle();
+
+  const { highlightedRow } = useContext(EventContext);
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -395,6 +398,15 @@ const EventListTable = ({
       muiTablePaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(events.length),
       }}
+      muiTableBodyRowProps={({ row }) => ({
+        style: {
+          background:
+            row.original.type === highlightedRow?.type &&
+            row.original.id === highlightedRow?.id
+              ? Palette.success.bg.light
+              : "inherit",
+        },
+      })}
       state={{
         isLoading: loading,
         showGlobalFilter: true,
