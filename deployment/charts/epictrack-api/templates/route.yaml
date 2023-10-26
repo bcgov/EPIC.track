@@ -5,7 +5,7 @@ metadata:
     app: "{{ .Chart.Name }}"
   name: "{{ .Chart.Name }}"
 spec:
-  host: "{{ .Chart.Name }}-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca"
+  host: "{{ .Chart.Name }}-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca"
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
