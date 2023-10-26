@@ -13,9 +13,10 @@
 # limitations under the License.
 """Model to manage Project."""
 import enum
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text, Enum, func
-from sqlalchemy.orm import relationship
+
+from sqlalchemy import Boolean, Column, Enum, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import TSTZRANGE
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel, BaseModelVersioned
 

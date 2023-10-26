@@ -13,5 +13,5 @@ class ActionFactory(ABC):  # pylint: disable=too-few-public-methods
 
 
 ACTION_HANDLER_CLASS_MAPS = {
-    ActionEnum.LOCK_WORK_START_DATE : "DisableWorkStartDate"
+    ActionEnum.LOCK_WORK_START_DATE: "DisableWorkStartDate"
 }
