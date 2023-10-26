@@ -26,17 +26,17 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
-                  key: database-user
+                  key: app-db-name
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
-                  key: database-password
+                  key: app-db-password
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
-                  key: database-name
+                  key: app-db-username
             - name: DATABASE_HOST
               value: {{ .Values.database.service.name }}
             - name: DATABASE_PORT
@@ -81,26 +81,26 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
-                  key: database-user
+                  key: app-db-username
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
-                  key: database-password
+                  key: app-db-password
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
                   name: {{ .Values.database.secret }}
-                  key: database-name
+                  key: app-db-name
             - name: DATABASE_HOST
               value: {{ .Values.database.service.name }}
             - name: DATABASE_PORT
-              value: {{ .Values.database.service.name }}
+              value: "{{ .Values.database.service.port }}"
             - name: JWT_OIDC_ALGORITHMS
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
-                  key: KEYCLOAK_JWT_OIDC_ALGORITHMS
+                  key: JWT_OIDC_ALGORITHMS
             - name: JWT_OIDC_AUDIENCE
               valueFrom:
                 configMapKeyRef:
@@ -110,7 +110,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Chart.Name }}
-                  key: KEYCLOAK_JWT_OIDC_CACHING_ENABLED
+                  key: JWT_OIDC_CACHING_ENABLED
             - name: JWT_OIDC_ISSUER
               valueFrom:
                 configMapKeyRef:
@@ -194,5 +194,5 @@ triggers:
         - {{ .Chart.Name }}
       from:
         kind: ImageStreamTag
-        namespace: dc383e-tools
+        namespace: c72cba-tools
         name: "{{ tpl .Values.image.repository . }}:{{ .Values.image.tag }}"
