@@ -31,6 +31,7 @@ class WorkPhase(BaseModelVersioned):
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
+    legislated = Column(Boolean, default=False)
     task_added = Column(Boolean, default=False,)
     number_of_days = Column(Integer, default=0)
     is_completed = Column(Boolean, default=False)

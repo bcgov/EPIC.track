@@ -55,6 +55,7 @@ export enum EventCategory {
   PCP = 5,
   CALENDAR = 6,
   FINANCE = 7,
+  SPECIAL_EXTENSION = 8,
 }
 export enum EventType {
   OPEN_HOUSE = 23,
