@@ -4,7 +4,7 @@ name: EPICTRACK API CD
 on:
   push:
     branches:
-      - main
+      - develop
     paths:
       - "epictrack-api/**"
   workflow_dispatch:
