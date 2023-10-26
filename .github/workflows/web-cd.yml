@@ -24,7 +24,7 @@ env:
   TAG_NAME: "dev"
 
 jobs:
-  met-web-cd:
+  web-cd:
     runs-on: ubuntu-20.04
 
     if: github.repository == 'bcgov/EPIC.track'
