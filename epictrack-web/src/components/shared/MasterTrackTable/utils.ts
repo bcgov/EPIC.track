@@ -1,3 +1,4 @@
+export const NOT_APPLICABLE = "NA";
 export function getSelectFilterOptions<T>(
   data: T[],
   key: keyof T,
@@ -9,7 +10,10 @@ export function getSelectFilterOptions<T>(
   // Step 2: Iterate through the data array to populate the Map
   data.forEach((dataObject) => {
     // Step 3: Skip undefined or null values
-    if (dataObject[key] === undefined || dataObject[key] === null) return;
+    if (dataObject[key] === undefined || dataObject[key] === null) {
+      optionsMap.set("", NOT_APPLICABLE);
+      return;
+    }
 
     // Step 4: Populate the Map with unique values and their formatted labels
     optionsMap.set(dataObject[key], formatLabel(dataObject[key]));
