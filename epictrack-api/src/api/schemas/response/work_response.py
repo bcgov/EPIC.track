@@ -50,6 +50,7 @@ class WorkResponseSchema(
     work_state = fields.Method("get_work_state")
 
     def get_work_state(self, obj: Work) -> str:
+        """Return the work state"""
         return obj.work_state.value
 
 
