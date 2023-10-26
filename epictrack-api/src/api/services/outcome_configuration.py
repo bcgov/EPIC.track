@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Outcome Configuration."""
+from typing import List
+
 from flask import current_app
 
 from api.models import OutcomeConfiguration
@@ -21,7 +23,7 @@ class OutcomeConfigurationService:  # pylint: disable=too-few-public-methods
     """Service to manage outcome related operations"""
 
     @classmethod
-    def find_by_configuration_id(cls, configuration_id: int):
+    def find_by_configuration_id(cls, configuration_id: int) -> List[OutcomeConfiguration]:
         """Find outcomes by configuration_id"""
         current_app.logger.debug(
             f"Find outcomes by configuration id {configuration_id}"

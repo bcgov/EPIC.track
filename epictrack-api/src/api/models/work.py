@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Work."""
 import enum
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Enum, func
+
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
