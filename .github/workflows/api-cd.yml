@@ -1,33 +1,62 @@
-name: Report API CD
+name: EPICTRACK API CD
+
+
 on:
-  workflow_dispatch:
   push:
     branches:
-      - develop
+      - main
     paths:
       - "epictrack-api/**"
-    
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev/test/prod)"
+        required: true
+        default: "dev"
 
 defaults:
   run:
     shell: bash
     working-directory: ./epictrack-api
 
+env:
+  APP_NAME: "epictrack-api"
+  TAG_NAME: "${{ github.event.inputs.environment || 'dev' }}" # If the environment type is manually selected, use the input value; otherwise, use 'dev' as default
+
 jobs:
-  setup-job:
+  api-cd:
     runs-on: ubuntu-20.04
+
+    if: github.repository == 'bcgov/EPIC.track'
+    environment:
+      name: "dev"
 
     steps:
       - uses: actions/checkout@v2
-      - run: "true"
-  
-  invoke-webhook:
-    if: github.repository == 'bcgov/EPIC-FLOW'
-    needs: setup-job
-    runs-on: ubuntu-20.04
-    steps:
-      - name: Workflow Webhook Action
-        uses: distributhor/workflow-webhook@v2.0.3
-        env:
-          webhook_url: 'https://api.silver.devops.gov.bc.ca:6443/apis/build.openshift.io/v1/namespaces/dc383e-tools/buildconfigs/eao-project-reports-api/webhooks/github-secret-key/github'
-          webhook_secret: 'P@sw0rd'
+
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT_SA_TOKEN}}
+
+      - name: Login Docker
+        run: |
+          echo "${{ secrets.OPENSHIFT_SA_TOKEN }}" | 
+          docker login ${{ secrets.OPENSHIFT_IMAGE_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
+
+      - name: Build image
+        run: |
+          docker build . --file Dockerfile --tag image
+
+      - name: Push image
+        run: |
+          IMAGE_ID=${{ secrets.OPENSHIFT_IMAGE_REGISTRY }}/"${{ secrets.OPENSHIFT_REPOSITORY}}-tools"/$APP_NAME
+          docker tag image $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
+          docker push $IMAGE_ID:$TAG_NAME
+
+      - name: Rollout
+        shell: bash
+        run: |
+          oc rollout status dc/${{ env.APP_NAME }} -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ env.TAG_NAME }} -w
