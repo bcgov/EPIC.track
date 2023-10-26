@@ -7,10 +7,10 @@ export interface FirstNation extends ListType, MasterBase {
   is_active: boolean;
   relationship_holder_id?: number;
   relationship_holder?: Staff;
-  pip_link: string;
+  pip_link?: string;
   notes?: string;
-  pip_org_type_id: number;
-  pip_org_type: PIPOrgType;
+  pip_org_type_id?: number;
+  pip_org_type?: PIPOrgType;
 }
 
 export interface WorkFirstNation extends ListType, MasterBase {

@@ -1,4 +1,4 @@
-import React, { SyntheticEvent } from "react";
+import React, { useState, useContext, useRef, useEffect, useMemo } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -25,6 +25,9 @@ import { ListType } from "../../../models/code";
 import codeService from "../../../services/codeService";
 import RichTextEditor from "../../shared/richTextEditor";
 import { dateUtils } from "../../../utils";
+import { EVENT_TYPE } from "../phase/type";
+import { EventContext } from "../event/EventContext";
+
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
   start_date: yup.string().required("Please select start date"),
@@ -38,16 +41,21 @@ interface TaskFormProps {
   onSave: () => void;
   taskEvent?: TaskEvent;
 }
-const TaskForm = ({ onSave, taskEvent }: TaskFormProps) => {
-  const [assignees, setAssignees] = React.useState<Staff[]>([]);
-  const [responsibilities, setResponsibilities] = React.useState<ListType[]>(
-    []
-  );
-  const [notes, setNotes] = React.useState("");
-  const endDateRef = React.useRef();
-  const startDateRef = React.useRef();
-  const numberOfDaysRef = React.useRef();
-  const ctx = React.useContext(WorkplanContext);
+const TaskForm = ({
+  onSave = () => {
+    return;
+  },
+  taskEvent,
+}: TaskFormProps) => {
+  const [assignees, setAssignees] = useState<Staff[]>([]);
+  const [responsibilities, setResponsibilities] = useState<ListType[]>([]);
+  const [notes, setNotes] = useState("");
+  const endDateRef = useRef();
+  const startDateRef = useRef();
+  const numberOfDaysRef = useRef();
+  const ctx = useContext(WorkplanContext);
+  const { handleHighlightRow } = useContext(EventContext);
+
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: taskEvent,
@@ -62,15 +70,15 @@ const TaskForm = ({ onSave, taskEvent }: TaskFormProps) => {
     control,
   } = methods;
 
-  React.useEffect(() => {
+  useEffect(() => {
     getResponsibilites();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getWorkTeamMembers();
   }, [ctx.work?.id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     reset(taskEvent);
     daysOnChangeHandler({
       numberOfDays: taskEvent?.number_of_days,
@@ -97,38 +105,55 @@ const TaskForm = ({ onSave, taskEvent }: TaskFormProps) => {
       setAssignees(staff);
     }
   };
-  const statuses = React.useMemo(() => statusOptions, []);
+  const statuses = useMemo(() => statusOptions, []);
+
+  const createTask = async (data: TaskEvent) => {
+    const createResult = await taskEventService.create(data);
+    showNotification("Task details inserted", {
+      type: "success",
+    });
+    handleHighlightRow({
+      type: EVENT_TYPE.TASK,
+      id: createResult.data.id,
+    });
+    return createResult;
+  };
+
+  const updateTask = async (data: TaskEvent) => {
+    const updateResult = await taskEventService.update(
+      data,
+      Number(taskEvent?.id)
+    );
+    showNotification("Task details updated", {
+      type: "success",
+    });
+    handleHighlightRow({
+      type: EVENT_TYPE.TASK,
+      id: Number(taskEvent?.id),
+    });
+    return updateResult;
+  };
+
+  const saveTask = async (data: TaskEvent) => {
+    if (taskEvent) {
+      return updateTask(data);
+    }
+    return createTask(data);
+  };
+
   const onSubmitHandler = async (data: TaskEvent) => {
     try {
-      data.work_phase_id = Number(ctx.selectedWorkPhase?.id);
-      data.start_date = Moment(data.start_date).format();
-      data.number_of_days =
-        data.number_of_days.toString() === "" ? 0 : data.number_of_days;
-      data.notes = notes;
-      if (taskEvent) {
-        const createResult = await taskEventService.update(
-          data,
-          Number(taskEvent.id)
-        );
-        if (createResult.status === 200) {
-          showNotification("Task details updated", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
-      } else {
-        const createResult = await taskEventService.create(data);
-        if (createResult.status === 201) {
-          showNotification("Task details inserted", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
-      }
+      const dataToSave = {
+        ...data,
+        work_phase_id: Number(ctx.selectedWorkPhase?.id),
+        start_date: Moment(data.start_date).format(),
+        number_of_days:
+          data.number_of_days.toString() === "" ? 0 : data.number_of_days,
+        notes: notes,
+      };
+
+      await saveTask(dataToSave);
+      onSave();
     } catch (e: any) {
       const error = getAxiosError(e);
       const message =

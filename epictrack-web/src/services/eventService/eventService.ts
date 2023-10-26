@@ -7,7 +7,7 @@ class EventService {
     milestoneEvent: MilestoneEvent | undefined,
     workPhaseId: number
   ) {
-    return await http.PostRequest(
+    return await http.PostRequest<MilestoneEvent>(
       `${Endpoints.Events.MILESTONE_EVENTS}/workphases/:work_phase_id/events`.replace(
         ":work_phase_id",
         workPhaseId.toString()
@@ -31,7 +31,7 @@ class EventService {
   }
 
   async update(event: MilestoneEvent | undefined, eventId: number) {
-    return await http.PutRequest(
+    return await http.PutRequest<MilestoneEvent>(
       `${Endpoints.Events.MILESTONE_EVENTS}/events/${eventId}`,
       JSON.stringify(event)
     );

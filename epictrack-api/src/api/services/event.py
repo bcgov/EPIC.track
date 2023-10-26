@@ -139,7 +139,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                 all_work_phases, current_work_phase
             )
             current_future_work_phases = all_work_phases[current_work_phase_index:]
-            if current_work_phase.phase.legislated:
+            if current_work_phase.legislated:
                 phase_events = list(
                     filter(
                         lambda x, _work_phase_id=current_work_phase.id:
@@ -194,7 +194,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                         event,
                         all_work_event_configurations,
                     )
-            if not current_work_phase.phase.legislated:
+            if not current_work_phase.legislated:
                 cls._push_work_phases(
                     current_future_work_phases,
                     all_work_events,

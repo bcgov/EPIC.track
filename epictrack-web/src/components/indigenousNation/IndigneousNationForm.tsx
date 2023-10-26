@@ -34,7 +34,11 @@ const schema = yup.object().shape({
         return true;
       }
     ),
-  pip_url: yup.string(),
+  relationship_holder_id: yup.number().nullable(),
+  pip_org_type_id: yup.number().nullable(),
+  pip_link: yup.string().nullable(),
+  is_active: yup.boolean(),
+  notes: yup.string().nullable(),
 });
 
 export default function IndigenousNationForm({ ...props }) {
@@ -102,15 +106,13 @@ export default function IndigenousNationForm({ ...props }) {
     Promise.all(promises);
   }, []);
 
-  const onSubmitHandler = async (data: FirstNation) => {
+  const onSubmitHandler = async (data: any) => {
     data.notes = notes;
     ctx.onSave(data, () => {
       reset();
     });
     ctx.setId(undefined);
   };
-
-  console.log(pipOrgTypes);
 
   return (
     <>

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -33,7 +33,6 @@ import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import EventForm from "./EventForm";
 import { TemplateStatus, WorkPhase } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
@@ -41,6 +40,7 @@ import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { ListType } from "../../../models/code";
 import responsibilityService from "../../../services/responsibilityService/responsibilityService";
 import EventListTable from "./EventListTable";
+import EventForm from "./EventForm";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -106,9 +106,11 @@ const EventList = () => {
     React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
+
   const isEventFormFieldLocked = React.useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
+
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
@@ -180,11 +182,18 @@ const EventList = () => {
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
           element.type = EVENT_TYPE.MILESTONE;
-          element.status = element.is_complete
-            ? EVENT_STATUS.COMPLETED
-            : EVENT_STATUS.NOT_STARTED;
           element.start_date = element.actual_date || element.anticipated_date;
           element.is_complete = !!element.actual_date;
+          const actualToTodayDiff = Moment(element.start_date).diff(
+            Moment(),
+            "days"
+          );
+          console.log(actualToTodayDiff);
+          element.status = element.is_complete
+            ? EVENT_STATUS.COMPLETED
+            : actualToTodayDiff <= 0
+            ? EVENT_STATUS.INPROGRESS
+            : EVENT_STATUS.NOT_STARTED;
           element.mandatory = element.event_configuration.mandatory;
           return element;
         });
@@ -206,16 +215,17 @@ const EventList = () => {
     }
   }, []);
 
-  const onDialogClose = React.useCallback(() => {
+  const onDialogClose = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
+    // setEventId(undefined);
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
-  }, [ctx.work, ctx.selectedWorkPhase]);
+  };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
     setShowTemplateForm(false);
