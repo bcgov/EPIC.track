@@ -359,6 +359,7 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Capital Investment</ETFormLabel>
               <TextField
+                type="number"
                 fullWidth
                 {...register("capital_investment")}
                 error={!!errors?.capital_investment?.message}
@@ -377,19 +378,21 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
               <TextField
+                type="number"
                 fullWidth
                 {...register("fte_positions_construction")}
                 error={!!errors?.fte_positions_construction?.message}
-                helperText={errors?.fte_positions_construction?.toString()}
+                helperText={errors?.fte_positions_construction?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Operation</ETFormLabel>
               <TextField
+                type="number"
                 fullWidth
                 {...register("fte_positions_operation")}
                 error={!!errors?.fte_positions_operation?.message}
-                helperText={errors?.fte_positions_operation?.toString()}
+                helperText={errors?.fte_positions_operation?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
