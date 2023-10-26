@@ -1,12 +1,12 @@
-name: EPICTRACK WEB CD
+name: EPICTRACK API DEV CD
 
 
 on:
   push:
     branches:
-      - develop
+      - main
     paths:
-      - "epictrack-web/**"
+      - "epictrack-api/**"
   workflow_dispatch:
     inputs:
       environment:
@@ -17,14 +17,14 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ./epictrack-web
+    working-directory: ./epictrack-api
 
 env:
-  APP_NAME: "epictrack-web"
+  APP_NAME: "epictrack-api"
   TAG_NAME: "dev"
 
 jobs:
-  web-cd:
+  api-cd:
     runs-on: ubuntu-20.04
 
     if: github.repository == 'bcgov/EPIC.track'

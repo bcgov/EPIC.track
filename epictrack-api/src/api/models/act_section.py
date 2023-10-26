@@ -13,8 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to act sections."""
 
-from sqlalchemy import Column, Integer, String, ForeignKey
-
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .code_table import CodeTableVersioned
