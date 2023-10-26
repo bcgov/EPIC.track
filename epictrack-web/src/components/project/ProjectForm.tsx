@@ -302,6 +302,10 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Latitude</ETFormLabel>
               <TextField
+                type="number"
+                inputProps={{
+                  step: 0.000001,
+                }}
                 placeholder="e.g. 22.2222"
                 fullWidth
                 {...register("latitude")}
@@ -312,6 +316,10 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel>Longitude</ETFormLabel>
               <TextField
+                type="number"
+                inputProps={{
+                  step: 0.00001,
+                }}
                 placeholder="e.g. -22.2222"
                 fullWidth
                 {...register("longitude")}
@@ -360,6 +368,10 @@ export default function ProjectForm({ ...props }) {
               <ETFormLabel>Capital Investment</ETFormLabel>
               <TextField
                 type="number"
+                inputProps={{
+                  min: 0,
+                  step: 1,
+                }}
                 fullWidth
                 {...register("capital_investment")}
                 error={!!errors?.capital_investment?.message}
@@ -379,6 +391,10 @@ export default function ProjectForm({ ...props }) {
               <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
               <TextField
                 type="number"
+                inputProps={{
+                  min: 0,
+                  step: 1,
+                }}
                 fullWidth
                 {...register("fte_positions_construction")}
                 error={!!errors?.fte_positions_construction?.message}
@@ -389,6 +405,10 @@ export default function ProjectForm({ ...props }) {
               <ETFormLabel>Est. FTE Positions in Operation</ETFormLabel>
               <TextField
                 type="number"
+                inputProps={{
+                  min: 0,
+                  step: 1,
+                }}
                 fullWidth
                 {...register("fte_positions_operation")}
                 error={!!errors?.fte_positions_operation?.message}
