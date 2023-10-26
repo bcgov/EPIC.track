@@ -3,7 +3,7 @@
 from functools import wraps
 from http import HTTPStatus
 
-from flask import current_app, g, request
+from flask import g, request
 from flask_jwt_oidc import JwtManager
 
 from ..exceptions import BusinessError
@@ -22,7 +22,7 @@ class Auth:
         @wraps(f)
         def decorated(*args, **kwargs):
             g.authorization_header = request.headers.get("Authorization", None)
-            current_app.logger.info(f"AUTH HEADER {g.authorization_header}")
+            # current_app.logger.info(f"AUTH HEADER {g.authorization_header}")
             g.token_info = g.jwt_oidc_token_info
 
             return f(*args, **kwargs)

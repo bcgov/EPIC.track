@@ -8,10 +8,15 @@ import ControlledSelectV2 from "../../../shared/controlledInputComponents/Contro
 import { Controller, useFormContext } from "react-hook-form";
 import { ListType } from "../../../../models/code";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { DATE_FORMAT } from "../../../../constants/application-constant";
+import {
+  COMMON_ERROR_MESSAGE,
+  DATE_FORMAT,
+} from "../../../../constants/application-constant";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { dateUtils } from "../../../../utils";
 import { SyntheticEvent } from "react-draft-wysiwyg";
+import actSectionService from "../../../../services/actSectionService/actSectionService";
+import { showNotification } from "../../../shared/notificationProvider";
 
 interface ExtensionInputProps {
   isFormFieldsLocked: boolean;
@@ -49,9 +54,24 @@ const ExtensionInput = (props: ExtensionInputProps) => {
       "phase_end_date",
       Moment(ctx.selectedWorkPhase?.end_date).add(numberOfDays, "days").format()
     );
+    getActSections();
   }, []);
   const numberOfDaysRef = React.useRef();
   const endDateRef = React.useRef();
+  const getActSections = async () => {
+    try {
+      const result = await actSectionService.getActSectionsByEaAct(
+        ctx.work?.ea_act_id
+      );
+      if (result.status === 200) {
+        setActSections(result.data as ListType[]);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
   const onDayChange = (event: SyntheticEvent) => {
     if (endDateRef.current as any) {
       setValue(
@@ -140,8 +160,8 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           disabled={props.isFormFieldsLocked}
           helperText={errors?.act_section_id?.message?.toString()}
           options={actSections || []}
-          getOptionValue={(o: ListType) => o.id.toString()}
-          getOptionLabel={(o: ListType) => o.name}
+          getOptionValue={(o: ListType) => o?.id.toString()}
+          getOptionLabel={(o: ListType) => o?.name}
           {...register("act_section_id")}
         ></ControlledSelectV2>
       </Grid>
