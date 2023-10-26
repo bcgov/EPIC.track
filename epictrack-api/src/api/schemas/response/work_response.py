@@ -47,6 +47,10 @@ class WorkResponseSchema(
     substitution_act = fields.Nested(SubstitutionActSchema, dump_only=True)
     eac_decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
+    work_state = fields.Method("get_work_state")
+
+    def get_work_state(self, obj: Work) -> str:
+        return obj.work_state.value
 
 
 class WorkPhaseResponseSchema(

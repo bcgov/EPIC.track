@@ -72,7 +72,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         cls._process_event(
             current_work_phase, event, event_old, current_event_old_index
         )
-        cls._process_actions(event)
+        cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
@@ -556,23 +556,24 @@ class EventService:  # pylint: disable=too-few-public-methods
         return "Deleted successfully"
 
     @classmethod
-    def _process_actions(cls, event: Event) -> None:
+    def _process_actions(cls, event: Event, outcome_id: int = None) -> None:
         if event.actual_date is None:
             return
-        outcomes = OutcomeConfigurationService.find_by_configuration_id(
-            event.event_configuration_id
-        )
-        if not outcomes:
-            return
-        outcome_ids = list(map(lambda x: x.id, outcomes))
+        if outcome_id is None:
+            outcomes = OutcomeConfigurationService.find_by_configuration_id(
+                event.event_configuration_id
+            )
+            if not outcomes:
+                return
+            outcome_id = outcomes[0].id
         action_configurations = (
             db.session.query(ActionConfiguration)
             .join(Action, Action.id == ActionConfiguration.action_id)
-            .filter(ActionConfiguration.outcome_configuration_id.in_(outcome_ids))
+            .filter(ActionConfiguration.outcome_configuration_id == outcome_id)
             .all()
         )
         for action_configuration in action_configurations:
-            action_handler = ActionHandler(action_configuration.action.name)
-            if action_configuration.action.id == ActionEnum.DISABLE_WORK_START_DATE.value:
-                params = {"work_id": event.work_id, "start_date": event.actual_date}
+            action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
+            if action_configuration.action.id == ActionEnum.LOCK_WORK_START_DATE.value:
+                params = {"work_id": event.work_id, "start_date": event.actual_date, "start_date_locked": True}
                 action_handler.apply(params)
