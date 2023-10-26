@@ -51,7 +51,7 @@ class WorkResponseSchema(
 
     def get_work_state(self, obj: Work) -> str:
         """Return the work state"""
-        return obj.work_state.value
+        return obj.work_state.value if obj.work_state else None
 
 
 class WorkPhaseResponseSchema(

@@ -24,7 +24,7 @@ from sqlalchemy.orm import aliased
 from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
     ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
-    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, db)
+    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.event_category import EventCategoryEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
@@ -108,6 +108,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             if cls.check_existence(payload["title"]):
                 raise ResourceExistsError("Work with same title already exists")
             work = Work(**payload)
+            work.work_state = WorkStateEnum.IN_PROGRESS
             phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
                 work.ea_act_id, work.work_type_id
             )

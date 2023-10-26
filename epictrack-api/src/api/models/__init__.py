@@ -65,7 +65,7 @@ from .task_event_assignee import TaskEventAssignee
 from .task_event_responsibility import TaskEventResponsibility
 from .task_template import TaskTemplate
 from .types import Type
-from .work import Work
+from .work import Work, WorkStateEnum
 from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
