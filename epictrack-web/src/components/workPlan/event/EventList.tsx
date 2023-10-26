@@ -182,11 +182,18 @@ const EventList = () => {
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
           element.type = EVENT_TYPE.MILESTONE;
-          element.status = element.is_complete
-            ? EVENT_STATUS.COMPLETED
-            : EVENT_STATUS.NOT_STARTED;
           element.start_date = element.actual_date || element.anticipated_date;
           element.is_complete = !!element.actual_date;
+          const actualToTodayDiff = Moment(element.start_date).diff(
+            Moment(),
+            "days"
+          );
+          console.log(actualToTodayDiff);
+          element.status = element.is_complete
+            ? EVENT_STATUS.COMPLETED
+            : actualToTodayDiff <= 0
+            ? EVENT_STATUS.INPROGRESS
+            : EVENT_STATUS.NOT_STARTED;
           element.mandatory = element.event_configuration.mandatory;
           return element;
         });
