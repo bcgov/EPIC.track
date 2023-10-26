@@ -14,7 +14,7 @@ defaults:
     working-directory: ./openshift
 
 jobs:
-  met-deployment:
+  deployment:
     runs-on: ubuntu-20.04
     environment:
       name: ${{ github.event.inputs.environment }}
