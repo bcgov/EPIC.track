@@ -15,11 +15,15 @@ declare module "react-select/dist/declarations/src/Select" {
     // Marking as optional here to not raise errors for ControlledSelect
     // Make sure to add for FilterSelect
     filterProps?: {
-      applyFilters: () => void;
-      clearFilters: () => void;
+      applyFilters?: () => void;
+      clearFilters?: () => void;
       selectedOptions: any[];
-      onCancel: () => void;
-      variant: "inline" | "bar";
+      options?: any[];
+      onCancel?: () => void;
+      variant?: "inline" | "bar";
+      getOptionLabel?: (option: any) => string;
+      getOptionValue?: (option: any) => string;
+      label?: string;
     };
     filterAppliedCallback?: (value?: string[] | string) => void;
     filterClearedCallback?: (value?: [] | "") => void;
