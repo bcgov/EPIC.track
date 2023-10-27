@@ -64,5 +64,8 @@ const Endpoints = {
   OutcomeConfigurations: {
     CONFIGURATIONS: "/outcome-configurations",
   },
+  ActSections: {
+    ACT_SECTIONS: "/act-sections",
+  },
 };
 export default Endpoints;

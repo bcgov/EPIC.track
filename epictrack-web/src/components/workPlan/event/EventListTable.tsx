@@ -39,6 +39,8 @@ const useStyle = makeStyles({
   },
 });
 
+const highlightedRowBGColor = "rgb(249, 249, 251)";
+
 interface EventListTable {
   onRowClick: (event: any, rowOriginal: any) => void;
   events: EventsGridModel[];
@@ -458,15 +460,20 @@ const EventListTable = ({
       muiTablePaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(events.length),
       }}
-      muiTableBodyRowProps={({ row }) => ({
-        style: {
-          background:
-            row.original.type === highlightedRow?.type &&
-            row.original.id === highlightedRow?.id
-              ? Palette.success.bg.light
-              : "inherit",
-        },
-      })}
+      muiTableBodyRowProps={({ row }) => {
+        if (
+          row.original.type === highlightedRow?.type &&
+          row.original.id === highlightedRow?.id
+        ) {
+          return {
+            style: {
+              background: highlightedRowBGColor,
+            },
+          };
+        }
+
+        return {};
+      }}
       state={{
         isLoading: loading,
         showGlobalFilter: true,

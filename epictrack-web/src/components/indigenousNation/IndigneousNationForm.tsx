@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
-import { FirstNation } from "../../models/firstNation";
+import { FirstNation, defaultFirstNation } from "../../models/firstNation";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
@@ -73,7 +73,7 @@ export default function IndigenousNationForm({ ...props }) {
   } = methods;
 
   React.useEffect(() => {
-    reset(ctx.item);
+    reset(ctx.item ?? defaultFirstNation);
     if (ctx.item) {
       setNotes((ctx.item as FirstNation)?.notes || "");
     }
