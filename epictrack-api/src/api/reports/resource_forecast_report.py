@@ -7,6 +7,7 @@ from io import BytesIO
 
 from dateutil import rrule
 from reportlab.lib import colors
+from reportlab.lib.enums import TA_LEFT
 from reportlab.lib.pagesizes import A3, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
@@ -54,7 +55,9 @@ class EAResourceForeCastReport(ReportFactory):
             "work_id",
             "ea_type_label",
             "sector(sub)",
-            "ea_type_sort_order"
+            "ea_type_sort_order",
+            "fte_positions_construction",
+            "fte_positions_operation",
         ]
         group_by = "work_id"
         super().__init__(data_keys, group_by, None, filters)
@@ -75,32 +78,42 @@ class EAResourceForeCastReport(ReportFactory):
         self.month_labels = []
         self.report_cells = {
             "[PROJECT BACKGROUND]": [
-                {"data_key": "project_name", "label": "PROJECT NAME", "width": 0.053},
+                {"data_key": "project_name", "label": "PROJECT NAME", "width": 0.050},
                 {
                     "data_key": "capital_investment",
                     "label": "EST. CAP. INVESTMENT",
-                    "width": 0.082,
+                    "width": 0.071,
+                },
+                {
+                    "data_key": "fte_positions_construction",
+                    "label": "Est. FTEs in constructions",
+                    "width": 0.075,
+                },
+                {
+                    "data_key": "fte_positions_operation",
+                    "label": "Est. FTEs in operations",
+                    "width": 0.070,
                 },
                 {
                     "data_key": "project_phase",
                     "label": "PROJECT PHASE",
-                    "width": 0.0579,
+                    "width": 0.057,
                 },
-                {"data_key": "ea_act", "label": "EA ACT", "width": 0.0424},
+                {"data_key": "ea_act", "label": "EA ACT", "width": 0.03},
                 {"data_key": "iaac", "label": "IAAC", "width": 0.0355},
-                {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.06},
-                {"data_key": "env_region", "label": "MOE REGION", "width": 0.046},
-                {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.046},
+                {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.038},
+                {"data_key": "env_region", "label": "MOE REGION", "width": 0.041},
+                {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.041},
             ],
             "[EAO RESOURCING]": [
-                {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.0407},
+                {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.037},
                 {"data_key": "cairt_lead", "label": "FN CAIRT LEAD", "width": 0.0486},
                 {"data_key": "eao_team", "label": "TEAM", "width": 0.028},
-                {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.0488},
+                {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.045},
                 {
                     "data_key": "work_team_members",
                     "label": "WORK TEAM MEMBERS",
-                    "width": 0.0811,
+                    "width": 0.072,
                 },
             ],
             "QUARTERS": [],
@@ -156,7 +169,8 @@ class EAResourceForeCastReport(ReportFactory):
                 )
                 cell_index += 3
                 cell_headings += self.month_labels
-                cell_widths.extend([0.0625 * available_width] * 4)
+                cell_widths.extend([0.051 * available_width] * 3)
+                cell_widths.extend([0.058 * available_width])
             else:
                 filtered_cells = [
                     x for x in cells if x["data_key"] not in self.excluded_items
@@ -317,6 +331,8 @@ class EAResourceForeCastReport(ReportFactory):
                 func.concat(SubType.short_name, " (", Type.short_name, ")").label(
                     "sector(sub)"
                 ),
+                Project.fte_positions_operation.label("fte_positions_operation"),
+                Project.fte_positions_construction.label("fte_positions_construction")
             )
             .all()
         )
@@ -509,7 +525,15 @@ class EAResourceForeCastReport(ReportFactory):
         row_index = 2
         stylesheet = getSampleStyleSheet()
         normal_style = stylesheet["Normal"]
-        normal_style.fontSize = 6.5
+        normal_style.fontSize = 6.0
+        body_text_style = stylesheet["BodyText"]
+        body_text_style.fontSize = 6.0
+        body_text_style.alignment = TA_LEFT
+        body_text_style.wordWrap = None
+        body_text_style.spaceShrinkage = 0.05
+        body_text_style.splitLongWords = 0
+        body_text_style.hyphenationLang = ""
+        body_text_style.embeddedHyphenation = 1
 
         for ea_type_label, projects in formatted_data.items():
             normal_style.textColor = colors.white
@@ -533,14 +557,14 @@ class EAResourceForeCastReport(ReportFactory):
                     table_cells.remove("referral_timing")
                 for cell in table_cells:
                     row.append(
-                        Paragraph(project[cell] if project[cell] else "", normal_style)
+                        Paragraph(project[cell] if project[cell] else "", body_text_style)
                     )
                 month_cell_start = len(table_cells)
                 for month_index, month in enumerate(self.month_labels):
                     month_data = next(
                         x for x in project["months"] if x["label"] == month
                     )
-                    row.append(Paragraph(month_data["phase"], normal_style))
+                    row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
                     color = month_data["color"][1:]
                     bg_color = [int(color[i:i + 2], 16) / 255 for i in (0, 2, 4)]
@@ -553,7 +577,7 @@ class EAResourceForeCastReport(ReportFactory):
                         )
                     )
                 if "referral_timing" not in self.excluded_items:
-                    row.append(Paragraph(project["referral_timing"], normal_style))
+                    row.append(Paragraph(project["referral_timing"], body_text_style))
                 table_data.append(row)
                 row_index += 1
         table = Table(table_headers + table_data, repeatRows=3, colWidths=cell_widths)
@@ -562,7 +586,7 @@ class EAResourceForeCastReport(ReportFactory):
                 [
                     ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
                     ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
-                    ("FONTSIZE", (0, 0), (-1, -1), 6.5),
+                    ("FONTSIZE", (0, 0), (-1, -1), 6.0),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("ALIGN", (0, 0), (-1, 1), "CENTER"),
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),

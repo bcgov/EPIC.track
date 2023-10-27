@@ -1,0 +1,37 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (test/prod)"
+        required: true
+        default: "test"
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
+jobs:
+  deployment:
+    runs-on: ubuntu-20.04
+    environment:
+      name: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT_SA_TOKEN}}
+
+      - name: Tag Images and Rollout
+        shell: bash
+        run: |
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
+          oc tag epictrack-api:latest epictrack-api:${{ github.event.inputs.environment }}
+          oc tag epictrack-web:latest epictrack-web:${{ github.event.inputs.environment }}
+          
+          oc rollout status dc/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ github.event.inputs.environment }} -w
+          oc rollout status dc/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ github.event.inputs.environment }} -w

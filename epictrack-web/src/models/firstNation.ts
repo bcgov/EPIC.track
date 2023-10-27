@@ -21,3 +21,7 @@ export interface WorkFirstNation extends ListType, MasterBase {
   is_active: boolean;
   status: string;
 }
+
+export const defaultFirstNation = {
+  is_active: true,
+};
