@@ -38,6 +38,8 @@ const useStyle = makeStyles({
   },
 });
 
+const highlightedRowBGColor = "rgb(249, 249, 251)";
+
 interface EventListTable {
   onRowClick: (event: any, rowOriginal: any) => void;
   events: EventsGridModel[];
@@ -405,7 +407,7 @@ const EventListTable = ({
         ) {
           return {
             style: {
-              background: Palette.success.bg.light,
+              background: highlightedRowBGColor,
             },
           };
         }
