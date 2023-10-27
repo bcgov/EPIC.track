@@ -1,4 +1,4 @@
-export const NOT_APPLICABLE = "NA";
+export const BLANK_OPTION = "(Blanks)";
 export function getSelectFilterOptions<T>(
   data: T[],
   key: keyof T,
@@ -11,7 +11,7 @@ export function getSelectFilterOptions<T>(
   data.forEach((dataObject) => {
     // Step 3: Skip undefined or null values
     if (dataObject[key] === undefined || dataObject[key] === null) {
-      optionsMap.set("", NOT_APPLICABLE);
+      optionsMap.set("", BLANK_OPTION);
       return;
     }
 
@@ -24,6 +24,19 @@ export function getSelectFilterOptions<T>(
     text: value,
     value: key,
   }));
+
+  // Step 6: Sort the array by 'value' property
+  optionsArray.sort((a, b) => {
+    if (a.value === "") {
+      return -1;
+    }
+
+    if (b.value === "") {
+      return 1;
+    }
+
+    return a.value < b.value ? -1 : 1;
+  });
 
   return optionsArray;
 }

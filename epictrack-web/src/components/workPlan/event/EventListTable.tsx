@@ -20,7 +20,7 @@ import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/util
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
 import {
-  NOT_APPLICABLE,
+  BLANK_OPTION,
   getSelectFilterOptions,
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
@@ -94,20 +94,25 @@ const EventListTable = ({
         .map((assignee) =>
           assignee
             ? `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
-            : NOT_APPLICABLE
+            : BLANK_OPTION
         )
     )
   );
   const responsibilityFilterOptions = Array.from(
-    new Set(events.map((event) => event?.responsibility?.split(", ")).flat())
-  ).map((responsibility) => responsibility || NOT_APPLICABLE);
+    new Set(
+      events
+        .map((event) => event?.responsibility?.split(", "))
+        .flat()
+        .map((responsibility) => responsibility || BLANK_OPTION)
+    )
+  );
 
   const statusFilterOptions = getSelectFilterOptions(
     events,
     "status",
     (value) =>
       statusOptions.find((statusOption) => statusOption.value == value)
-        ?.label ?? NOT_APPLICABLE
+        ?.label ?? BLANK_OPTION
   );
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
@@ -307,7 +312,7 @@ const EventListTable = ({
             return true;
           }
 
-          const renderedValue: string = row.renderValue(id) || NOT_APPLICABLE;
+          const renderedValue: string = row.renderValue(id) || BLANK_OPTION;
           return filterValue.every((filterName: string) =>
             renderedValue.includes(filterName)
           );
@@ -349,7 +354,7 @@ const EventListTable = ({
           ) {
             return true;
           }
-          const value: string = row.getValue(id) || NOT_APPLICABLE;
+          const value: string = row.getValue(id) || BLANK_OPTION;
 
           return filterValue.every((filterName: string) =>
             value.includes(filterName)
