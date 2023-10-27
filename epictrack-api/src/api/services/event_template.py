@@ -122,7 +122,20 @@ class EventTemplateService:
         incoming_set = set(list(map(lambda x: x['id'], final_result)))
         difference = list(existing_set.difference(incoming_set))
         db.session.query(PhaseCode).filter(PhaseCode.id.in_(difference))\
-            .update({PhaseCode.is_active: False, PhaseCode.is_deleted: False})
+            .update({PhaseCode.is_active: False, PhaseCode.is_deleted: True})
+        # handling deletion of event templates, outcomes and actions of the deleted phases
+        templates_from_removed_phases = db.session.query(EventTemplate).filter(EventTemplate.phase_id.in_(difference))
+        removed_template_ids = list(map(lambda x: x.id, templates_from_removed_phases))
+        outcomes_from_removed_templates = db.session.query(OutcomeTemplate).filter(OutcomeTemplate.event_template_id.in_(removed_template_ids))
+        removed_outcome_ids = list(map(lambda x: x.id, outcomes_from_removed_templates))
+        actions_from_removed_outcomes = db.session.query(ActionTemplate).filter(ActionTemplate.outcome_id.in_(removed_outcome_ids))
+        removed_action_ids = list(map(lambda x: x.id, actions_from_removed_outcomes))
+        db.session.query(EventTemplate).filter(EventTemplate.id.in_(removed_template_ids))\
+            .update({EventTemplate.is_active: False, EventTemplate.is_deleted: True})
+        db.session.query(OutcomeTemplate).filter(OutcomeTemplate.id.in_(removed_outcome_ids))\
+            .update({OutcomeTemplate.is_active: False, OutcomeTemplate.is_deleted: True})
+        db.session.query(ActionTemplate).filter(ActionTemplate.id.in_(removed_action_ids))\
+            .update({ActionTemplate.is_active: False, ActionTemplate.is_deleted: True})
         db.session.commit()
         return final_result
 

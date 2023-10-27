@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to WorkPhase."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
@@ -31,10 +31,13 @@ class WorkPhase(BaseModelVersioned):
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     phase_id = Column(ForeignKey('phase_codes.id'), nullable=False)
+    name = Column(String(250))
     legislated = Column(Boolean, default=False)
     task_added = Column(Boolean, default=False,)
     number_of_days = Column(Integer, default=0)
     is_completed = Column(Boolean, default=False)
+    is_suspended = Column(Boolean, default=False)
+    suspended_date = Column(DateTime(timezone=True))
 
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     phase = relationship('PhaseCode', foreign_keys=[phase_id], lazy='select')

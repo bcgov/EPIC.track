@@ -416,8 +416,8 @@ const EventListTable = ({
       muiSelectCheckboxProps={({ row }) => ({
         indeterminateIcon: <LockIcon />,
         disabled:
-          row.original.end_date === undefined &&
-          row.original.type === EVENT_TYPE.MILESTONE,
+          row.original.type === EVENT_TYPE.MILESTONE &&
+          !row.original.is_complete,
         indeterminate:
           row.original.is_complete &&
           row.original.type === EVENT_TYPE.MILESTONE,
