@@ -207,6 +207,14 @@ export default function ResourceForecast() {
         header: "Capital Investment",
       },
       {
+        accessorKey: "fte_positions_construction",
+        header: "Est. FTEs in constructions",
+      },
+      {
+        accessorKey: "fte_positions_operation",
+        header: "Est. FTEs in operations",
+      },
+      {
         accessorKey: "ea_type",
         header: "EA Type",
         enableHiding: false,

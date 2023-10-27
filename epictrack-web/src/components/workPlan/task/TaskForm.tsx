@@ -151,7 +151,7 @@ const TaskForm = ({
         start_date: Moment(data.start_date).format(),
         number_of_days:
           data.number_of_days.toString() === "" ? 0 : data.number_of_days,
-        notes: notes,
+        notes: notes ?? "",
       };
 
       await saveTask(dataToSave);

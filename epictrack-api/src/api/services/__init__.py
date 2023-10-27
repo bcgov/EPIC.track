@@ -34,3 +34,4 @@ from .user import UserService
 from .work import WorkService
 from .work_phase import WorkPhaseService
 from .action_template import ActionTemplateService
+from .act_section import ActSectionService
