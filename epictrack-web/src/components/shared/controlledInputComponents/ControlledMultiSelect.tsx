@@ -71,7 +71,6 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
       }
     });
     title = title.substring(0, 30);
-    console.log(title.length);
     setLabel(title);
   }, [selectedOptions]);
 
