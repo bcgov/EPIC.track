@@ -20,6 +20,7 @@ import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/util
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
 import {
+  BLANK_OPTION,
   getSelectFilterOptions,
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
@@ -37,6 +38,8 @@ const useStyle = makeStyles({
     fill: "currentcolor",
   },
 });
+
+const highlightedRowBGColor = "rgb(249, 249, 251)";
 
 interface EventListTable {
   onRowClick: (event: any, rowOriginal: any) => void;
@@ -88,24 +91,30 @@ const EventListTable = ({
   const assigneeOptions = Array.from(
     new Set(
       events
-        .map((event) => event.assignees || [])
+        .map((event) => event.assignees || [""])
         .flat()
-        .map(
-          (assignee) =>
-            `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
+        .map((assignee) =>
+          assignee
+            ? `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
+            : BLANK_OPTION
         )
     )
   );
   const responsibilityFilterOptions = Array.from(
-    new Set(events.map((event) => event?.responsibility?.split(", ")).flat())
-  ).filter((responsibility) => responsibility);
+    new Set(
+      events
+        .map((event) => event?.responsibility?.split(", "))
+        .flat()
+        .map((responsibility) => responsibility || BLANK_OPTION)
+    )
+  );
 
   const statusFilterOptions = getSelectFilterOptions(
     events,
     "status",
     (value) =>
       statusOptions.find((statusOption) => statusOption.value == value)
-        ?.label ?? ""
+        ?.label ?? BLANK_OPTION
   );
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
@@ -145,7 +154,18 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > typeFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
         filterSelectOptions: typeFilterOptions,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
@@ -168,7 +188,18 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > startDateFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
         filterSelectOptions: startDateFilterOptions,
         size: 140,
         Cell: ({ cell, row }) => (
@@ -197,6 +228,18 @@ const EventListTable = ({
           );
         },
         filterSelectOptions: endDateFilterOptions,
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > endDateFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
@@ -224,7 +267,18 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > numberOfDaysFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
         filterSelectOptions: numberOfDaysFilterOptions,
         size: 100,
         header: "Days",
@@ -255,13 +309,12 @@ const EventListTable = ({
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length >= assigneeOptions.length
+            filterValue.length > assigneeOptions.length // select all is selected
           ) {
             return true;
           }
 
-          const renderedValue: string = row.renderValue(id);
-          if (!renderedValue) return false;
+          const renderedValue: string = row.renderValue(id) || BLANK_OPTION;
           return filterValue.every((filterName: string) =>
             renderedValue.includes(filterName)
           );
@@ -299,13 +352,11 @@ const EventListTable = ({
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length >= responsibilityFilterOptions.length
+            filterValue.length > responsibilityFilterOptions.length // select all is selected
           ) {
             return true;
           }
-          const value: string = row.getValue(id);
-
-          if (!value) return false;
+          const value: string = row.getValue(id) || BLANK_OPTION;
 
           return filterValue.every((filterName: string) =>
             value.includes(filterName)
@@ -349,7 +400,18 @@ const EventListTable = ({
             />
           );
         },
-        filterFn: "multiSelectFilter",
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statusFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
         filterSelectOptions: statusFilterOptions,
         header: "Progress",
         size: 150,
@@ -398,15 +460,20 @@ const EventListTable = ({
       muiTablePaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(events.length),
       }}
-      muiTableBodyRowProps={({ row }) => ({
-        style: {
-          background:
-            row.original.type === highlightedRow?.type &&
-            row.original.id === highlightedRow?.id
-              ? Palette.success.bg.light
-              : "inherit",
-        },
-      })}
+      muiTableBodyRowProps={({ row }) => {
+        if (
+          row.original.type === highlightedRow?.type &&
+          row.original.id === highlightedRow?.id
+        ) {
+          return {
+            style: {
+              background: highlightedRowBGColor,
+            },
+          };
+        }
+
+        return {};
+      }}
       state={{
         isLoading: loading,
         showGlobalFilter: true,
