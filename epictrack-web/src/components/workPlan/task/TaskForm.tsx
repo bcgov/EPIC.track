@@ -69,6 +69,7 @@ const TaskForm = ({
     formState: { errors },
     reset,
     control,
+    setValue,
   } = methods;
 
   useEffect(() => {
@@ -192,6 +193,7 @@ const TaskForm = ({
       const startDate = (startDateRef?.current as any)["value"];
       const dateDiff = dateUtils.diff(endDate, startDate, "days");
       (numberOfDaysRef.current as any)["value"] = dateDiff;
+      setValue("number_of_days", dateDiff);
     }
   };
 
