@@ -398,15 +398,20 @@ const EventListTable = ({
       muiTablePaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(events.length),
       }}
-      muiTableBodyRowProps={({ row }) => ({
-        style: {
-          background:
-            row.original.type === highlightedRow?.type &&
-            row.original.id === highlightedRow?.id
-              ? Palette.success.bg.light
-              : "inherit",
-        },
-      })}
+      muiTableBodyRowProps={({ row }) => {
+        if (
+          row.original.type === highlightedRow?.type &&
+          row.original.id === highlightedRow?.id
+        ) {
+          return {
+            style: {
+              background: Palette.success.bg.light,
+            },
+          };
+        }
+
+        return {};
+      }}
       state={{
         isLoading: loading,
         showGlobalFilter: true,
