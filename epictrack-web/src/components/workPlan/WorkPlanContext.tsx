@@ -63,6 +63,7 @@ export const WorkplanProvider = ({
       await getWorkById();
       await getWorkTeamMembers();
       await getWorkPhases();
+      await getWorkFirstNations();
       setLoading(false);
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -106,6 +107,27 @@ export const WorkplanProvider = ({
       setWorkPhases(workPhasesResult.data as WorkPhase[]);
     }
     return Promise.resolve();
+  };
+
+  const getWorkFirstNations = async () => {
+    if (workId) {
+      const firstNationResult = await workService.getWorkFirstNations(
+        Number(workId)
+      );
+      if (firstNationResult.status === 200) {
+        const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
+          (p) => {
+            return {
+              ...p,
+              status: p.is_active
+                ? ACTIVE_STATUS.ACTIVE
+                : ACTIVE_STATUS.INACTIVE,
+            };
+          }
+        );
+        setFirstNations(firstNations);
+      }
+    }
   };
 
   return (
