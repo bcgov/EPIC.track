@@ -125,6 +125,7 @@ const EventListTable = ({
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         sortingFn: "sortFn",
         size: 300,
+        enableSorting: false,
         Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle
             to="#"
@@ -143,6 +144,7 @@ const EventListTable = ({
         header: "Type",
         size: 100,
         filterVariant: "multi-select",
+        enableSorting: false,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -177,6 +179,7 @@ const EventListTable = ({
         accessorKey: "start_date",
         header: "Start Date",
         filterVariant: "multi-select",
+        enableSorting: false,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -216,6 +219,7 @@ const EventListTable = ({
         size: 140,
         header: "End Date",
         filterVariant: "multi-select",
+        enableSorting: false,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -256,6 +260,7 @@ const EventListTable = ({
       {
         accessorKey: "number_of_days",
         filterVariant: "multi-select",
+        enableSorting: false,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -295,6 +300,7 @@ const EventListTable = ({
             ?.map((p) => `${p.assignee.first_name} ${p.assignee.last_name}`)
             .join(", "),
         filterVariant: "multi-select",
+        enableSorting: false,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -338,6 +344,7 @@ const EventListTable = ({
         accessorKey: "responsibility",
         header: "Responsibility",
         filterVariant: "multi-select",
+        enableSorting: false,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -380,6 +387,7 @@ const EventListTable = ({
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         header: "Notes",
         size: 250,
+        enableSorting: false,
         Cell: ({ cell, row }) => (
           <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {getTextFromDraftJsContentState(cell.getValue<string>())}
@@ -415,6 +423,7 @@ const EventListTable = ({
         filterSelectOptions: statusFilterOptions,
         header: "Progress",
         size: 150,
+        enableSorting: false,
         Cell: ({ cell, row }) => {
           const value = cell.getValue<EVENT_STATUS>();
           return (
