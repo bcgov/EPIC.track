@@ -133,7 +133,7 @@ const StatusContainer = () => {
         >
           <RichTextEditor
             handleEditorStateChange={handleNotesChange}
-            initialRawEditorState={ctx.work?.first_nation_notes}
+            // initialRawEditorState={}
           />
         </TabPanel>
       </Grid>
