@@ -162,19 +162,19 @@ export default function IndigenousNationForm({ ...props }) {
             <ETFormLabel>PIP URL</ETFormLabel>
             <TextField fullWidth {...register("pip_link")} />
           </Grid>
-          <Grid item xs={12}>
-            <ETFormLabel>Notes</ETFormLabel>
-            <RichTextEditor
-              handleEditorStateChange={setNotes}
-              initialRawEditorState={(ctx.item as FirstNation)?.notes}
-            />
-          </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
               defaultChecked={(ctx.item as FirstNation)?.is_active}
               {...register("is_active")}
             />
             <ETFormLabel id="active">Active</ETFormLabel>
+          </Grid>
+          <Grid item xs={12}>
+            <ETFormLabel>Notes</ETFormLabel>
+            <RichTextEditor
+              handleEditorStateChange={setNotes}
+              initialRawEditorState={(ctx.item as FirstNation)?.notes}
+            />
           </Grid>
         </Grid>
       </FormProvider>
