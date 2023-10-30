@@ -453,6 +453,7 @@ const EventListTable = ({
 
   return (
     <MasterTrackTable
+      enableSorting={false}
       enableRowSelection={(row) => row.original.type !== "Milestone"}
       enableSelectAll
       enablePagination
