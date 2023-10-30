@@ -7,13 +7,13 @@ export interface HighlightedRow {
 }
 
 interface EventContextProps {
-  highlightedRow: HighlightedRow | null;
-  handleHighlightRow: (rowToHighlight?: HighlightedRow) => void;
+  highlightedRows: HighlightedRow[];
+  handleHighlightRows: (rowsToHighlight?: HighlightedRow[]) => void;
 }
 
 export const EventContext = createContext<EventContextProps>({
-  highlightedRow: null,
-  handleHighlightRow: (_rowToHighlight?: HighlightedRow) => {
+  highlightedRows: [],
+  handleHighlightRows: (_rowToHighlight?: HighlightedRow[]) => {
     return;
   },
 });
@@ -24,26 +24,27 @@ export const EventProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [highlightedRow, setHighlightedRow] =
-    React.useState<HighlightedRow | null>(null);
+  const [highlightedRows, setHighlightedRows] = React.useState<
+    HighlightedRow[]
+  >([]);
 
-  const handleHighlightRow = (rowToHighlight?: HighlightedRow) => {
-    if (!rowToHighlight) return;
+  const handleHighlightRows = (rowsToHighlight?: HighlightedRow[]) => {
+    if (!rowsToHighlight) return;
     if (highlightTimout) {
       clearTimeout(highlightTimout);
     }
     const HIGHLIGHT_DURATION = 6000;
-    setHighlightedRow(rowToHighlight);
+    setHighlightedRows(rowsToHighlight);
     highlightTimout = setTimeout(() => {
-      setHighlightedRow(null);
+      setHighlightedRows([]);
     }, HIGHLIGHT_DURATION);
   };
 
   return (
     <EventContext.Provider
       value={{
-        highlightedRow,
-        handleHighlightRow,
+        highlightedRows,
+        handleHighlightRows,
       }}
     >
       {children}
