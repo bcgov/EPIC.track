@@ -13,11 +13,18 @@
 # limitations under the License.
 """Model to handle all operations related to Event Types."""
 
+import enum
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
 
+class EventTypeEnum(enum.Enum):
+    """Enum for event type"""
+    
+    # pylint: disable=C0103
+    TIME_LIMIT_SUSPENSION = 12
+    TIME_LIMIT_RESUMPTION = 38
 
 class EventType(BaseModelVersioned):
     """Model class for Event Types."""

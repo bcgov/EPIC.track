@@ -26,6 +26,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services.action_template import ActionTemplateService
 from api.services.phaseservice import PhaseService
+from api.actions.action_handler import ActionHandler
 from api.utils.str import escape_characters
 
 
@@ -193,9 +194,8 @@ class EventTemplateService:
             for action in actions_list:
                 selected_action = next((e for e in existing_actions if e.action_id == action['action_id'] and
                                         e.outcome_id == action['outcome_id']), None)
-                action['additional_params'] = ActionTemplateService.get_action_params(
-                    ActionEnum(action['action_id']),
-                    json.loads(action['additional_params']))
+                action_handler = ActionHandler(ActionEnum(action['action_id']))
+                action['additional_params'] = action_handler.get_additional_params(action['additional_params'])
                 action_obj = req.ActionTemplateBodyParameterSchema().load(action)
                 if selected_action:
                     action_result = selected_action.update(action_obj, commit=False)
