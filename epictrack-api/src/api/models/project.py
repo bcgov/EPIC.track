@@ -12,12 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to manage Project."""
+import enum
 
-from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Text, func
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, Enum, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.dialects.postgresql import TSTZRANGE
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModel, BaseModelVersioned
+
+
+class ProjectStateEnum(enum.Enum):
+    """Enum for project state"""
+
+    UNDER_EAC_ASSESSMENT = "UNDER_EAC_ASSESSMENT"
+    UNDER_EXEMPTION_REQUEST = "UNDER_EXEMPTION_REQUEST"
+    UNDER_AMENDMENT = "UNDER_AMENDMENT"
+    UNDER_DISPUTE_RESOLUTION = "UNDER_DISPUTE_RESOLUTION"
+    PRE_CONSTRUCTION = "PRE_CONSTRUCTION"
+    CONSTRUCTION = "CONSTRUCTION"
+    OPERATION = "OPERATION"
+    CARE_AND_MAINTENANCE = "CARE_AND_MAINTENANCE"
+    DECOMMISSION = "DECOMMISSION"
+    UNKNOWN = "UNKNOWN"
 
 
 class Project(BaseModelVersioned):
@@ -37,6 +53,7 @@ class Project(BaseModelVersioned):
     address = Column(Text, nullable=True, default=None)
     fte_positions_construction = Column(Integer(), nullable=True)
     fte_positions_operation = Column(Integer(), nullable=True)
+    project_state = Column(Enum(ProjectStateEnum))
 
     ea_certificate = Column(String(255), nullable=True, default=None)
     sub_type_id = Column(ForeignKey("sub_types.id"), nullable=False)

@@ -27,3 +27,7 @@ export interface Project {
   fte_positions_construction: number;
   fte_positions_operation: number;
 }
+
+export const defaultProject = {
+  is_active: true,
+};

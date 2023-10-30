@@ -29,6 +29,7 @@ class EventCategoryEnum(enum.Enum):
     PCP = 5
     CALENDAR = 6
     FINANCE = 7
+    SPECIAL_EXTENSION = 8
 
 
 class EventCategory(BaseModelVersioned):

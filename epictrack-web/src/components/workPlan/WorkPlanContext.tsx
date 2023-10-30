@@ -53,15 +53,27 @@ export const WorkplanProvider = ({
   const [workPhases, setWorkPhases] = React.useState<WorkPhase[]>([]);
   const [firstNations, setFirstNations] = React.useState<WorkFirstNation[]>([]);
   const workId = React.useMemo(() => query.get("work_id"), [query]);
+
   React.useEffect(() => {
-    getWorkById();
-    getWorkTeamMembers();
-    getWorkPhases();
-    getWorkFirstNations();
+    loadData();
   }, [workId]);
 
-  const getWorkTeamMembers = React.useCallback(async () => {
-    setLoading(true);
+  const loadData = async () => {
+    try {
+      await getWorkById();
+      await getWorkTeamMembers();
+      await getWorkPhases();
+      await getWorkFirstNations();
+      setLoading(false);
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+      setLoading(false);
+    }
+  };
+
+  const getWorkTeamMembers = async () => {
     try {
       const teamResult = await workService.getWorkTeamMembers(Number(workId));
       if (teamResult.status === 200) {
@@ -72,59 +84,52 @@ export const WorkplanProvider = ({
           };
         });
         setTeam(team);
+        return Promise.resolve();
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
         type: "error",
       });
     }
-    setLoading(false);
-  }, [workId]);
+  };
 
-  const getWorkById = React.useCallback(async () => {
+  const getWorkById = async () => {
     if (workId) {
       const work = await workService.getById(String(workId));
       setWork(work.data as Work);
-      setLoading(false);
     }
-  }, [workId]);
-  const getWorkPhases = React.useCallback(async () => {
+    return Promise.resolve();
+  };
+
+  const getWorkPhases = async () => {
     if (workId) {
-      setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(String(workId));
       setWorkPhases(workPhasesResult.data as WorkPhase[]);
-      setLoading(false);
     }
-  }, [workId]);
+    return Promise.resolve();
+  };
 
-  const getWorkFirstNations = React.useCallback(async () => {
+  const getWorkFirstNations = async () => {
     if (workId) {
-      setLoading(true);
-      try {
-        const firstNationsResult = await workService.getWorkFirstNations(
-          Number(workId)
-        );
-        if (firstNationsResult.status === 200) {
-          const firstNations = (
-            firstNationsResult.data as WorkFirstNation[]
-          ).map((p) => {
+      const firstNationResult = await workService.getWorkFirstNations(
+        Number(workId)
+      );
+      if (firstNationResult.status === 200) {
+        const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
+          (p) => {
             return {
               ...p,
               status: p.is_active
                 ? ACTIVE_STATUS.ACTIVE
                 : ACTIVE_STATUS.INACTIVE,
             };
-          });
-          setFirstNations(firstNations);
-        }
-      } catch (e) {
-        showNotification(COMMON_ERROR_MESSAGE, {
-          type: "error",
-        });
+          }
+        );
+        setFirstNations(firstNations);
       }
-      setLoading(false);
     }
-  }, [workId]);
+  };
+
   return (
     <WorkplanContext.Provider
       value={{

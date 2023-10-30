@@ -18,10 +18,14 @@ from typing import List
 
 from sqlalchemy import and_, or_
 
+from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
     PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
+from api.models.action import Action, ActionEnum
+from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
+from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.utils.datetime_helper import get_start_of_day
 
@@ -68,6 +72,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         cls._process_event(
             current_work_phase, event, event_old, current_event_old_index
         )
+        cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
@@ -134,11 +139,11 @@ class EventService:  # pylint: disable=too-few-public-methods
                 all_work_phases, current_work_phase
             )
             current_future_work_phases = all_work_phases[current_work_phase_index:]
-            if current_work_phase.phase.legislated:
+            if current_work_phase.legislated:
                 phase_events = list(
                     filter(
-                        lambda x, _work_phase_id=current_work_phase.id: x.event_configuration.work_phase_id ==
-                        _work_phase_id,
+                        lambda x, _work_phase_id=current_work_phase.id:
+                            x.event_configuration.work_phase_id == _work_phase_id,
                         all_work_events,
                     )
                 )
@@ -149,8 +154,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                 )
                 if (
                     event.event_configuration.event_position == EventPositionEnum.START.value or
-                    event.event_configuration.event_category_id
-                    in [
+                    event.event_configuration.event_category_id in [
                         EventCategoryEnum.EXTENSION.value,
                         EventCategoryEnum.SUSPENSION.value,
                     ]
@@ -190,7 +194,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                         event,
                         all_work_event_configurations,
                     )
-            if not current_work_phase.phase.legislated:
+            if not current_work_phase.legislated:
                 cls._push_work_phases(
                     current_future_work_phases,
                     all_work_events,
@@ -282,8 +286,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         for each_work_phase in work_phases:
             phase_events = list(
                 filter(
-                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id ==
-                    _work_phase_id,
+                    lambda x, _work_phase_id=each_work_phase.id:
+                        x.event_configuration.work_phase_id == _work_phase_id,
                     all_work_events,
                 )
             )
@@ -342,9 +346,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         if event.actual_date:
             phase_events = list(
                 filter(
-                    lambda x,
-                    _work_phase_id=event.event_configuration.work_phase_id: x.event_configuration.work_phase_id ==
-                    _work_phase_id,
+                    lambda x, _work_phase_id=event.event_configuration.work_phase_id:
+                        x.event_configuration.work_phase_id == _work_phase_id,
                     all_work_events,
                 )
             )
@@ -539,10 +542,38 @@ class EventService:  # pylint: disable=too-few-public-methods
         return "Deleted successfully"
 
     @classmethod
-    def delete_milestone(cls, milestone_id: int):
+    def delete_event(cls, event_id: int):
         """Mark milestone as deleted by id"""
+        event = Event.find_by_id(event_id)
+        if not event:
+            raise ResourceNotFoundError("No event found with given id")
+        if event.actual_date:
+            raise UnprocessableEntityError("Locked events cannot be deleted")
         db.session.query(Event).filter(
-            or_(Event.id == milestone_id, Event.source_event_id == milestone_id)
+            or_(Event.id == event_id, Event.source_event_id == event_id)
         ).update({"is_active": False, "is_deleted": True})
         db.session.commit()
         return "Deleted successfully"
+
+    @classmethod
+    def _process_actions(cls, event: Event, outcome_id: int = None) -> None:
+        if event.actual_date is None:
+            return
+        if outcome_id is None:
+            outcomes = OutcomeConfigurationService.find_by_configuration_id(
+                event.event_configuration_id
+            )
+            if not outcomes:
+                return
+            outcome_id = outcomes[0].id
+        action_configurations = (
+            db.session.query(ActionConfiguration)
+            .join(Action, Action.id == ActionConfiguration.action_id)
+            .filter(ActionConfiguration.outcome_configuration_id == outcome_id)
+            .all()
+        )
+        for action_configuration in action_configurations:
+            action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
+            if action_configuration.action.id == ActionEnum.LOCK_WORK_START_DATE.value:
+                params = {"work_id": event.work_id, "start_date": event.actual_date, "start_date_locked": True}
+                action_handler.apply(params)

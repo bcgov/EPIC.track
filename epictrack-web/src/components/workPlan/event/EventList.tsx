@@ -1,17 +1,11 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { EVENT_TYPE } from "../phase/type";
-import MasterTrackTable from "../../shared/MasterTrackTable";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
 import { EventsGridModel, MilestoneEvent } from "../../../models/event";
 import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
-import {
-  MRT_ColumnDef,
-  MRT_Row,
-  MRT_RowSelectionState,
-} from "material-react-table";
-import { ETGridTitle, ETParagraph } from "../../shared";
+import { MRT_RowSelectionState } from "material-react-table";
 import { dateUtils } from "../../../utils";
 import {
   Box,
@@ -39,23 +33,17 @@ import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import {
-  CompletedIcon,
-  InProgressIcon,
-  NotStartedIcon,
-} from "../../icons/status";
-import EventForm from "./EventForm";
-import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
 import { TemplateStatus, WorkPhase } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { ListType } from "../../../models/code";
 import responsibilityService from "../../../services/responsibilityService/responsibilityService";
+import EventListTable from "./EventListTable";
+import EventForm from "./EventForm";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
-const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
 
 const useStyle = makeStyles({
@@ -92,7 +80,6 @@ const EventList = () => {
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
   const [showMilestoneForm, setShowMilestoneForm] =
     React.useState<boolean>(false);
-  // const [eventId, setEventId] = React.useState<number | undefined>();
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
     React.useState<boolean>(false);
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
@@ -119,6 +106,10 @@ const EventList = () => {
     React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
+
+  const isEventFormFieldLocked = React.useMemo(() => {
+    return !!milestoneEvent?.actual_date;
+  }, [milestoneEvent]);
 
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
   React.useEffect(() => {
@@ -151,8 +142,9 @@ const EventList = () => {
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
           });
-          result = result.sort((a, b) =>
-            Moment(a.start_date).diff(b.start_date, "seconds")
+          result = result.sort(
+            (a, b) =>
+              Moment(a.start_date).diff(b.start_date, "seconds") || a.id - b.id
           );
           setEvents(result);
         }
@@ -166,6 +158,7 @@ const EventList = () => {
       const taskResult = await taskEventService.getAll(
         Number(ctx.selectedWorkPhase?.id)
       );
+
       if (taskResult.status === 200) {
         result = (taskResult.data as EventsGridModel[]).map((element) => {
           element.type = EVENT_TYPE.TASK;
@@ -189,11 +182,18 @@ const EventList = () => {
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
           element.type = EVENT_TYPE.MILESTONE;
-          element.status = element.is_complete
-            ? EVENT_STATUS.COMPLETED
-            : EVENT_STATUS.NOT_STARTED;
           element.start_date = element.actual_date || element.anticipated_date;
           element.is_complete = !!element.actual_date;
+          const actualToTodayDiff = Moment(element.start_date).diff(
+            Moment(),
+            "days"
+          );
+          console.log(actualToTodayDiff);
+          element.status = element.is_complete
+            ? EVENT_STATUS.COMPLETED
+            : actualToTodayDiff <= 0
+            ? EVENT_STATUS.INPROGRESS
+            : EVENT_STATUS.NOT_STARTED;
           element.mandatory = element.event_configuration.mandatory;
           return element;
         });
@@ -215,16 +215,17 @@ const EventList = () => {
     }
   }, []);
 
-  const onDialogClose = React.useCallback(() => {
+  const onDialogClose = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
+    // setEventId(undefined);
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
-  }, [ctx.work, ctx.selectedWorkPhase]);
+  };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
     setShowTemplateForm(false);
@@ -280,175 +281,8 @@ const EventList = () => {
     } catch (error) {}
   }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
 
-  const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
-    () => [
-      {
-        accessorKey: "name",
-        header: "Task / Milestone",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
-        size: 300,
-        enableSorting: false,
-        Cell: ({ cell, row, renderedCellValue }) => (
-          <ETGridTitle
-            to="#"
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis
-            onClick={(event: any) => onRowClick(event, row.original)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
-      },
-      {
-        accessorKey: "type",
-        header: "Type",
-        size: 100,
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
-            {cell.getValue<string>()}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorKey: "start_date",
-        header: "Start Date",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
-        size: 140,
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-            className={classes.textEllipsis}
-          >
-            {dateUtils.formatDate(cell.getValue<string>(), "MMM.DD YYYY")}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorKey: "end_date",
-        accessorFn: (row: EventsGridModel) => {
-          if (row.end_date) {
-            return dateUtils.formatDate(row.end_date, "MMM.DD YYYY");
-          }
-          return "";
-        },
-        size: 140,
-        header: "End Date",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-            className={classes.textEllipsis}
-          >
-            {cell.getValue<string>()}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorKey: "number_of_days",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
-        size: 100,
-        header: "Days",
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
-            {cell.getValue<string>()}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorFn: (row: EventsGridModel) =>
-          row.assignees
-            ?.map((p) => `${p.assignee.first_name} ${p.assignee.last_name}`)
-            .join(", "),
-        header: "Assigned",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
-        size: 140,
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis
-            enableTooltip
-            tooltip={cell.getValue<string>()}
-          >
-            {cell.getValue<string>()}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorKey: "responsibility",
-        header: "Responsibility",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
-        size: 140,
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis
-            enableTooltip
-            tooltip={cell.getValue<string>()}
-          >
-            {cell.getValue<string>()}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorKey: "notes",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
-        header: "Notes",
-        size: 250,
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
-            {getTextFromDraftJsContentState(cell.getValue<string>())}
-          </ETParagraph>
-        ),
-      },
-      {
-        accessorKey: "status",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Filter" },
-        header: "Progress",
-        size: 150,
-        enableSorting: false,
-        Cell: ({ cell, row }) => (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            {cell.getValue<EVENT_STATUS>() === EVENT_STATUS.NOT_STARTED && (
-              <NotStartedIcon fill={Palette.neutral.light} />
-            )}
-            {cell.getValue<EVENT_STATUS>() === EVENT_STATUS.INPROGRESS && (
-              <InProgressIcon fill={Palette.success.light} />
-            )}
-            {cell.getValue<EVENT_STATUS>() === EVENT_STATUS.COMPLETED && (
-              <CompletedIcon fill={Palette.neutral.accent.light} />
-            )}
-            <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
-              {
-                statusOptions.filter(
-                  (p) => p.value == cell.getValue<EVENT_STATUS>()
-                )[0]?.label
-              }
-            </ETParagraph>
-          </Box>
-        ),
-      },
-    ],
-    [events]
-  );
   const onRowClick = (event: any, row: EventsGridModel) => {
     event.preventDefault();
-    // setEventId(row.id);
     if (row.type === EVENT_TYPE.MILESTONE) {
       getMilestoneEvent(row.id);
       setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
@@ -465,11 +299,13 @@ const EventList = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
-    // setEventId(undefined);
     setMilestoneEvent(undefined);
     setTaskEvent(undefined);
   };
-
+  const onAddMilestone = () => {
+    setShowMilestoneForm(true);
+    setShowDeleteMilestoneButton(false);
+  };
   const getMilestoneEvent = async (eventId: number) => {
     try {
       const result = await eventService.getById(eventId);
@@ -709,7 +545,6 @@ const EventList = () => {
     }
     setShowDeleteDialog(false);
   };
-  console.log("EVENTS", events);
   const deleteAction = (
     <>
       {showDeleteMilestoneButton && (
@@ -730,6 +565,7 @@ const EventList = () => {
             sx={{
               border: `2px solid ${Palette.white}`,
             }}
+            disabled={isEventFormFieldLocked}
             onClick={() => setShowDeleteDialog(true)}
           >
             Delete
@@ -748,7 +584,7 @@ const EventList = () => {
           </Button>
         </Grid>
         <Grid item xs="auto">
-          <Button variant="outlined" onClick={() => setShowMilestoneForm(true)}>
+          <Button variant="outlined" onClick={onAddMilestone}>
             Add Milestone
           </Button>
         </Grid>
@@ -850,37 +686,12 @@ const EventList = () => {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-        <MasterTrackTable
-          enableRowSelection={(row) => row.original.type !== "Milestone"}
-          enableSelectAll
-          enablePagination
-          muiSelectCheckboxProps={({ row, table }) => ({
-            indeterminateIcon: <LockIcon />,
-            disabled:
-              !row.original.is_complete &&
-              row.original.type === EVENT_TYPE.MILESTONE,
-            indeterminate:
-              row.original.is_complete &&
-              row.original.type === EVENT_TYPE.MILESTONE,
-          })}
-          columns={columns}
-          data={events}
-          enableTopToolbar={false}
-          state={{
-            isLoading: loading,
-            showGlobalFilter: true,
-            rowSelection,
-          }}
-          onRowSelectionChange={setRowSelection}
-          getRowId={(
-            originalRow: EventsGridModel,
-            index: number,
-            parent?: MRT_Row<EventsGridModel>
-          ) => {
-            return originalRow.type === EVENT_TYPE.MILESTONE
-              ? `milestone_${originalRow.id}`
-              : originalRow.id?.toString();
-          }}
+        <EventListTable
+          loading={loading}
+          events={events}
+          onRowClick={onRowClick}
+          rowSelection={rowSelection}
+          setRowSelection={setRowSelection}
         />
       </Grid>
       <TrackDialog
@@ -921,7 +732,11 @@ const EventList = () => {
         }}
         additionalActions={deleteAction}
       >
-        <EventForm onSave={onDialogClose} event={milestoneEvent} />
+        <EventForm
+          onSave={onDialogClose}
+          event={milestoneEvent}
+          isFormFieldsLocked={isEventFormFieldLocked}
+        />
       </TrackDialog>
       <TrackDialog
         open={showTemplateForm}

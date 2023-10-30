@@ -89,7 +89,7 @@ class Event(Resource):
     def delete(event_id):
         """Endpoint to delete a milestone event"""
         req.MilestoneEventPathParameterSchema().load(request.view_args)
-        message = EventService.delete_milestone(event_id)
+        message = EventService.delete_event(event_id)
         return message, HTTPStatus.OK
 
 

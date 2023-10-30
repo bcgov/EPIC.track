@@ -34,7 +34,7 @@ spec:
           - {{ .Chart.Name }}
         from:
           kind: ImageStreamTag
-          namespace: dc383e-tools
+          namespace: c72cba-tools
           name: "{{ tpl .Values.image.name . }}:{{ .Values.image.tag }}"
     - type: ConfigChange
   template:

@@ -13,13 +13,13 @@
 # limitations under the License.
 """Model to handle all operations related to Actions."""
 from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned, db
 
 
-class ActionCofiguration(BaseModelVersioned):
+class ActionConfiguration(BaseModelVersioned):
     """Model class for Outcome."""
 
     __tablename__ = 'action_configurations'
@@ -37,9 +37,9 @@ class ActionCofiguration(BaseModelVersioned):
     def find_by_outcome_ids(cls, outcome_ids):
         """Returns the event configurations based on phase ids"""
         actions = db.session.query(
-            ActionCofiguration
+            ActionConfiguration
         ).filter(
-            ActionCofiguration.outcome_id.in_(outcome_ids),
-            ActionCofiguration.is_active.is_(True)
+            ActionConfiguration.outcome_id.in_(outcome_ids),
+            ActionConfiguration.is_active.is_(True)
         ).all()  # pylint: disable=no-member
         return actions

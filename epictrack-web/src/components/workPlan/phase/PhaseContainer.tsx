@@ -1,45 +1,40 @@
-import React, { useContext } from "react";
+import { useContext, useEffect } from "react";
 import PhaseAccordion from "./PhaseAccordion";
-import { Box, Skeleton } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
+import { ETHeading4 } from "../../shared";
 
 const PhaseContainer = () => {
-  const [loading, setLoading] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
-  const phases = React.useMemo(() => {
-    setLoading(!(ctx.workPhases.length > 0));
-    return ctx.workPhases;
-  }, [ctx.workPhases]);
-  React.useEffect(() => {
-    if (
-      ctx?.selectedWorkPhase?.phase?.id == undefined &&
-      ctx.work?.current_phase_id &&
-      phases.length > 0
-    ) {
-      const phase = phases.filter(
-        (p) => p.phase.id === ctx.work?.current_phase_id
-      )[0];
+
+  useEffect(() => {
+    if (ctx.work?.current_phase_id && ctx.workPhases.length > 0) {
+      const phase = ctx.workPhases.find(
+        (workPhase) => workPhase.phase.id === ctx.work?.current_phase_id
+      );
       ctx.setSelectedWorkPhase(phase);
     }
-  }, [phases, ctx.work]);
+  }, [ctx.workPhases, ctx.work]);
+
+  if (ctx.workPhases.length === 0) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <ETHeading4>This work has no phases to be displayed</ETHeading4>
+      </Box>
+    );
+  }
 
   return (
-    <>
-      {loading ? (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <Skeleton variant="rectangular" height={60} />
-          <Skeleton variant="rectangular" height={60} />
-          <Skeleton variant="rectangular" height={60} />
-        </Box>
-      ) : (
-        phases.map((phase, index) => (
+    <Grid container spacing={1}>
+      {ctx.workPhases.map((phase) => (
+        <Grid item xs={12}>
           <PhaseAccordion
-            key={`phase-accordion-${index}`}
+            key={`phase-accordion-${phase.phase.id}`}
             phase={phase}
-          ></PhaseAccordion>
-        ))
-      )}
-    </>
+          />
+        </Grid>
+      ))}
+    </Grid>
   );
 };
 

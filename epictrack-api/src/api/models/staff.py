@@ -71,9 +71,12 @@ class Staff(BaseModelVersioned):
         return cls.query.filter_by(is_active=True, is_deleted=False)
 
     @classmethod
-    def find_all_non_deleted_staff(cls):
+    def find_all_non_deleted_staff(cls, is_active=False):
         """Return all non-deleted staff"""
-        return cls.query.filter_by(is_deleted=False)
+        query = {"is_deleted": False}
+        if is_active:
+            query["is_active"] = is_active
+        return cls.query.filter_by(**query)
 
     @classmethod
     def check_existence(cls, email, staff_id):

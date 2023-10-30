@@ -171,7 +171,6 @@ const TeamList = () => {
     }
     setLoading(false);
   };
-  console.log(teamMembers);
   return (
     <>
       {teamMembers.length > 0 && (

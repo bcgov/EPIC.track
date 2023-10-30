@@ -13,10 +13,12 @@ import { Staff } from "../../../../models/staff";
 export interface DecisionInputProps {
   configurationId: number;
   decisionMakerPositionId: number;
+  isFormFieldsLocked: boolean;
 }
 const DecisionInput = ({
   decisionMakerPositionId,
   configurationId,
+  isFormFieldsLocked,
 }: DecisionInputProps) => {
   const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
   const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
@@ -67,6 +69,7 @@ const DecisionInput = ({
       <Grid item xs={6}>
         <ETFormLabel required>Decision Maker</ETFormLabel>
         <ControlledSelectV2
+          disabled={isFormFieldsLocked}
           helperText={errors?.decision_maker_id?.message?.toString()}
           options={decisionMakers || []}
           getOptionValue={(o: Staff) => o.id.toString()}
@@ -77,6 +80,7 @@ const DecisionInput = ({
       <Grid item xs={6}>
         <ETFormLabel required>Decision</ETFormLabel>
         <ControlledSelectV2
+          disabled={isFormFieldsLocked}
           helperText={errors?.outcome_id?.message?.toString()}
           options={outcomes || []}
           getOptionValue={(o: ListType) => o.id.toString()}

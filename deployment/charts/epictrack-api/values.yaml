@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: epictrack-api
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
   tag: "dev"
 
@@ -15,9 +15,9 @@ resources:
     request: 256Mi
 
 database:
-  secret: reports-postgres-dev-secret
+  secret: patroni-epictrack-db
   service:
-    name: reports-postgres-dev
+    name: patroni-epictrack-db
     port: 5432
 
 
@@ -30,21 +30,21 @@ service:
 auth:
   jwt:
     alg: RS256
-    aud: forms-flow-web
+    aud: epictrack-web
     cacheEnabled: true
-    issuer: https://keycloak-dc383e-dev.apps.silver.devops.gov.bc.ca/auth/
+    issuer: https://test.loginproxy.gov.bc.ca/auth/realms/eao-epic
     cacheTimeout: "300"
-    wellKnownConfig: https://keycloak-dc383e-dev.apps.silver.devops.gov.bc.ca/auth/realms/forms-flow-ai/.well-known/openid-configuration
+    wellKnownConfig: https://test.loginproxy.gov.bc.ca/auth/realms/eao-epic/.well-known/openid-configuration
   keycloak:
-    uri: https://keycloak-dc383e-dev.apps.silver.devops.gov.bc.ca
-    realm: forms-flow-ai
-    adminClientId: realm-management
-    adminClientSecret: 9beac135-7893-4d14-8f67-4093afd6b8ce
+    uri: https://test.loginproxy.gov.bc.ca
+    realm:
+    adminClientId:
+    adminClientSecret:
 python:
   pythonBuffered: 1
   connectTimeout: 60
 cdogs:  
-  tokenEndpoint: https://dev.loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token
-  apiEndpoint: https://cdogs-dev.api.gov.bc.ca/api/v2
-  clientId: 906B4222-A6B8D86FB9F
-  clientSecret: b7145cfd-94f3-44b1-8a0b-a13b67320418
+  tokenEndpoint: https://test.loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token
+  apiEndpoint: https://cdogs-test.api.gov.bc.ca/api/v2
+  clientId:
+  clientSecret:

@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
-import { FirstNation } from "../../models/firstNation";
+import { FirstNation, defaultFirstNation } from "../../models/firstNation";
 import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
@@ -34,7 +34,15 @@ const schema = yup.object().shape({
         return true;
       }
     ),
+<<<<<<< HEAD
   pip_url: yup.string(),
+=======
+  relationship_holder_id: yup.number().nullable(),
+  pip_org_type_id: yup.number().nullable(),
+  pip_link: yup.string().nullable(),
+  is_active: yup.boolean(),
+  notes: yup.string().nullable(),
+>>>>>>> develop
 });
 
 export default function IndigenousNationForm({ ...props }) {
@@ -69,7 +77,11 @@ export default function IndigenousNationForm({ ...props }) {
   } = methods;
 
   React.useEffect(() => {
+<<<<<<< HEAD
     reset(ctx.item);
+=======
+    reset(ctx.item ?? defaultFirstNation);
+>>>>>>> develop
     if (ctx.item) {
       setNotes((ctx.item as FirstNation)?.notes || "");
     }
@@ -102,7 +114,11 @@ export default function IndigenousNationForm({ ...props }) {
     Promise.all(promises);
   }, []);
 
+<<<<<<< HEAD
   const onSubmitHandler = async (data: FirstNation) => {
+=======
+  const onSubmitHandler = async (data: any) => {
+>>>>>>> develop
     data.notes = notes;
     ctx.onSave(data, () => {
       reset();
@@ -110,8 +126,11 @@ export default function IndigenousNationForm({ ...props }) {
     ctx.setId(undefined);
   };
 
+<<<<<<< HEAD
   console.log(pipOrgTypes);
 
+=======
+>>>>>>> develop
   return (
     <>
       <FormProvider {...methods}>

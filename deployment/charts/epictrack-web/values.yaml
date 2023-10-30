@@ -1,6 +1,6 @@
 app:
   name: epictrack
-  url: epictrack-web-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+  url: epictrack-web-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
   api: https://eao-reports-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
 resources:
   cpu:
@@ -12,11 +12,11 @@ resources:
 image:
   name: epictrack-web
   tag: latest
-  repository: image-registry.openshift-image-registry.svc:5000/dc383e-tools/
+  repository: image-registry.openshift-image-registry.svc:5000/c72cba-tools/
 keycloak:
-  url: "https://keycloak-{{ tpl .Release.Namespace .}}.apps.silver.devops.gov.bc.ca"
-  realm: forms-flow-ai
-  client: forms-flow-web
+  url: "https://test.loginproxy.gov.bc.ca"
+  realm: eao-epic
+  client: epictrack-web
 service:
   port: 8080
 replicas:

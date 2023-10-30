@@ -23,8 +23,8 @@ from sqlalchemy.orm import aliased
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    ActionCofiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
-    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, db)
+    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
+    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.event_category import EventCategoryEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
@@ -108,6 +108,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             if cls.check_existence(payload["title"]):
                 raise ResourceExistsError("Work with same title already exists")
             work = Work(**payload)
+            work.work_state = WorkStateEnum.IN_PROGRESS
             phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
                 work.ea_act_id, work.work_type_id
             )
@@ -131,6 +132,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                             "phase_id": phase.id,
                             "start_date": f"{phase_start_date}",
                             "end_date": f"{end_date}",
+                            "legislated": phase.legislated,
                             "number_of_days": phase.number_of_days,
                         }
                     )
@@ -351,7 +353,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             for outcome_action in outcome_actions:
                 action_json = ActionTemplateResponseSchema().dump(outcome_action)
                 action_json["outcome_configuration_id"] = outcome_result.id
-                ActionCofiguration(
+                ActionConfiguration(
                     **ActionConfigurationBodyParameterSchema().load(action_json)
                 ).flush()
 
@@ -628,7 +630,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
 
         # Mark removed entries as inactive
-        # TODO:CHECK THIS LOGIC
         disabled_count = existing_first_nations_qry.filter(
             IndigenousWork.is_active.is_(True),
             IndigenousWork.indigenous_nation_id.notin_(indigenous_nation_ids),

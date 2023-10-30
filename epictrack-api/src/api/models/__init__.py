@@ -19,6 +19,10 @@ from sqlalchemy.engine import Engine  # noqa: I001, I003, I004
 # Import signal for it to register itself
 from api.signals import before_commit
 
+from .act_section import ActSection
+from .action import Action, ActionEnum
+from .action_configuration import ActionConfiguration
+from .action_template import ActionTemplate
 from .calendar_event import CalendarEvent
 from .code_table import CodeTableVersioned
 from .db import db  # noqa: I001
@@ -40,8 +44,10 @@ from .inspection_detail import InspectionDetail
 from .issue import Issue
 from .milestone_type import MilestoneType
 from .ministry import Ministry
+from .outcome_configuration import OutcomeConfiguration
 from .outcome_template import OutcomeTemplate
 from .phase_code import PhaseCode
+from .pip_org_type import PIPOrgType
 from .position import Position
 from .project import Project
 from .proponent import Proponent
@@ -56,13 +62,15 @@ from .substitution_acts import SubstitutionAct
 from .task import Task
 from .task_event import StatusEnum, TaskEvent
 from .task_event_assignee import TaskEventAssignee
+from .task_event_responsibility import TaskEventResponsibility
 from .task_template import TaskTemplate
 from .types import Type
-from .work import Work
+from .work import Work, WorkStateEnum
 from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
+<<<<<<< HEAD
 from .action_template import ActionTemplate
 from .action import Action, ActionEnum
 from .outcome_configuration import OutcomeConfiguration
@@ -70,3 +78,5 @@ from .action_configuration import ActionCofiguration
 from .task_event_responsibility import TaskEventResponsibility
 from .act_section import ActSection
 from .pip_org_type import PIPOrgType
+=======
+>>>>>>> develop

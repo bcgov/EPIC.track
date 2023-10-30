@@ -1,5 +1,5 @@
 """Event resource's input validations"""
-from marshmallow import fields, validate
+from marshmallow import fields, pre_load, validate
 
 from api.schemas.request.custom_fields import IntegerList
 
@@ -86,6 +86,12 @@ class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "PCP topic"},
         allow_none=True
     )
+
+    @pre_load
+    def translate_empty_date_strings(self, data, *args, **kwargs):  # pylint: disable=unused-argument
+        """Translate empty date string to None"""
+        data['actual_date'] = data.get('actual_date') or None
+        return data
 
 
 class MilestoneEventPathParameterSchema(RequestPathParameterSchema):

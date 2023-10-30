@@ -41,7 +41,6 @@ const UserList = () => {
       setResultStatus(RESULT_STATUS.LOADED);
     }
   }, []);
-  console.log(isValidGroup);
   const getGroups = React.useCallback(async () => {
     try {
       const groupResult = await UserService.getGroups();
@@ -72,7 +71,6 @@ const UserList = () => {
       .filter((p) => userDetails.groups.includes(p.name))
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
-  console.log("Current user group", currentUserGroup);
   const columns = React.useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
