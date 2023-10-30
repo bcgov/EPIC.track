@@ -143,8 +143,7 @@ class TaskService:
     @classmethod
     def _prepare_task_event_object(cls, data: dict) -> dict:
         """Prepare a task event object"""
-        exclude = ["assignee_ids"]
-        exclude = ["responsibility_ids"]
+        exclude = ["responsibility_ids", "assignee_ids"]
         return {key: data[key] for key in data.keys() if key not in exclude}
 
     @classmethod
