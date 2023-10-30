@@ -70,13 +70,3 @@ from .work_calendar_event import WorkCalendarEvent
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
-<<<<<<< HEAD
-from .action_template import ActionTemplate
-from .action import Action, ActionEnum
-from .outcome_configuration import OutcomeConfiguration
-from .action_configuration import ActionCofiguration
-from .task_event_responsibility import TaskEventResponsibility
-from .act_section import ActSection
-from .pip_org_type import PIPOrgType
-=======
->>>>>>> develop
