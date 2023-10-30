@@ -65,12 +65,10 @@ class TaskService:
                 "Only team members can be assigned to a task"
             )
         task_event.update(data, commit=False)
-        if data.get("assignee_ids"):
-            cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
-        if data.get("responsibility_ids"):
-            cls._handle_responsibilities(
-                data.get("responsibility_ids"), [task_event.id]
-            )
+        cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
+        cls._handle_responsibilities(
+            data.get("responsibility_ids"), [task_event.id]
+        )
         db.session.commit()
         return task_event
 
