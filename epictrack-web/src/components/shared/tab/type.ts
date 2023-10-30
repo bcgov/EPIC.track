@@ -5,6 +5,7 @@ type ETTabProps = {
   identifier?: string;
   label: string | React.ReactNode;
   value?: any;
+  icon?: undefined | React.ReactNode;
   [x: string]: unknown;
 };
 
