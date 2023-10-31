@@ -267,9 +267,6 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={12}>
               <ETFormLabel required>Project Description</ETFormLabel>
               <TextField
-                defaultValue={
-                  "[Proponent] proposes to develop the [Project name], a [project type] which would be located approximately [distance]km from [known near population centre/known near landmark] within the boundaries of [the QQQ Region]. The proposed project is anticipated to produce approximately [production yield] per year of [product], and would include [describe major project components]."
-                }
                 fullWidth
                 multiline
                 rows={4}
