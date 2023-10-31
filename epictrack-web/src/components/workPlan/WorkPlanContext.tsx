@@ -10,6 +10,7 @@ import {
 import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
+import { Issue } from "../../models/Issue";
 
 interface WorkplanContextProps {
   selectedWorkPhase?: WorkPhase;
@@ -24,6 +25,8 @@ interface WorkplanContextProps {
   firstNations: WorkFirstNation[];
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
   status: Status[];
+  issues: Issue[];
+  setIssues: Dispatch<SetStateAction<Issue[]>>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -41,6 +44,8 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   firstNations: [],
   setFirstNations: () => ({}),
   status: [],
+  issues: [],
+  setIssues: () => ({}),
 });
 
 export const WorkplanProvider = ({
@@ -52,6 +57,7 @@ export const WorkplanProvider = ({
   const [work, setWork] = React.useState<Work>();
   const [team, setTeam] = React.useState<StaffWorkRole[]>([]);
   const [status, setStatus] = React.useState<Status[]>([]);
+  const [issues, setIssues] = React.useState<Issue[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
   const [workPhases, setWorkPhases] = React.useState<WorkPhase[]>([]);
@@ -149,6 +155,8 @@ export const WorkplanProvider = ({
         setFirstNations,
         setWork,
         status,
+        issues,
+        setIssues,
       }}
     >
       {children}
