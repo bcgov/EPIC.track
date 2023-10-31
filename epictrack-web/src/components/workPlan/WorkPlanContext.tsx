@@ -23,7 +23,7 @@ interface WorkplanContextProps {
   setWork: Dispatch<SetStateAction<Work | undefined>>;
   firstNations: WorkFirstNation[];
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
-  status: Status[];
+  statuses: Status[];
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -40,7 +40,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   setWork: () => ({}),
   firstNations: [],
   setFirstNations: () => ({}),
-  status: [],
+  statuses: [],
 });
 
 export const WorkplanProvider = ({
@@ -51,7 +51,7 @@ export const WorkplanProvider = ({
   const [selectedWorkPhase, setSelectedWorkPhase] = React.useState<WorkPhase>();
   const [work, setWork] = React.useState<Work>();
   const [team, setTeam] = React.useState<StaffWorkRole[]>([]);
-  const [status, setStatus] = React.useState<Status[]>([]);
+  const [statuses, setStatuses] = React.useState<Status[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
   const [workPhases, setWorkPhases] = React.useState<WorkPhase[]>([]);
@@ -148,7 +148,7 @@ export const WorkplanProvider = ({
         firstNations,
         setFirstNations,
         setWork,
-        status,
+        statuses,
       }}
     >
       {children}

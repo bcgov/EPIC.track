@@ -1,8 +1,13 @@
 import React from "react";
 import StatusContainer from "./StatusContainer";
+import { StatusProvider } from "./StatusContext";
 
 const Status = () => {
-  return <StatusContainer />;
+  return (
+    <StatusProvider>
+      <StatusContainer />
+    </StatusProvider>
+  );
 };
 
 export default Status;

@@ -4,6 +4,6 @@ export interface Status {
   description: string;
   active: boolean;
   high_priority: boolean;
-  start_date: number;
+  start_date: string;
   expected_resolution_date: number;
 }

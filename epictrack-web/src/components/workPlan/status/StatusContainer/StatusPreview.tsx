@@ -4,7 +4,7 @@ import { Palette } from "../../../../styles/theme";
 import { WorkplanContext } from "../../WorkPlanContext";
 
 const StatusPreview = () => {
-  const { status } = React.useContext(WorkplanContext);
+  const { statuses } = React.useContext(WorkplanContext);
   return (
     <Box
       sx={{
@@ -23,7 +23,7 @@ const StatusPreview = () => {
       >
         Status
       </Box>
-      {status.length === 0 && (
+      {statuses.length === 0 && (
         <Box
           sx={{
             color: Palette.neutral.light,
