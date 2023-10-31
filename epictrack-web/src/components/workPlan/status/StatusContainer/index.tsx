@@ -1,13 +1,13 @@
 import React from "react";
-import { Box, Grid } from "@mui/material";
-import { ETHeading3 } from "../../shared";
-import { Palette } from "../../../styles/theme";
+import { Grid } from "@mui/material";
+import { ETHeading3 } from "../../../shared";
+import { Palette } from "../../../../styles/theme";
 import { makeStyles } from "@mui/styles";
-import StatusView from "./StatusView";
-import { WorkplanContext } from "../WorkPlanContext";
-import { ETTab, ETTabs } from "../../shared/tab/Tab";
-import RichTextEditor from "../../shared/richTextEditor";
-import TabPanel from "../../shared/tab/TabPanel";
+import StatusView from "../StatusView";
+import { ETTab, ETTabs } from "../../../shared/tab/Tab";
+import TabPanel from "../../../shared/tab/TabPanel";
+import StatusPreview from "./StatusPreview";
+import StatusNotes from "./StatusNotes";
 
 const useStyle = makeStyles({
   title: {
@@ -31,17 +31,11 @@ const useStyle = makeStyles({
 });
 
 const StatusContainer = () => {
-  const ctx = React.useContext(WorkplanContext);
   const classes = useStyle();
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
-  const status = React.useMemo(() => ctx.status, [ctx.status]);
 
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
-  };
-
-  const handleNotesChange = (value: string) => {
-    return null;
   };
 
   return (
@@ -92,49 +86,14 @@ const StatusContainer = () => {
           value={selectedTabIndex}
           className={classes.tabPanel}
         >
-          <Box
-            sx={{
-              backgroundColor: Palette.neutral.bg.light,
-              padding: "16px 24px",
-            }}
-          >
-            <Box
-              sx={{
-                fontSize: "14px",
-                fontStyle: "normal",
-                fontWeight: "700",
-                lineHeight: "16px",
-                paddingBottom: "8px",
-              }}
-            >
-              Status
-            </Box>
-            {status.length === 0 && (
-              <Box
-                sx={{
-                  color: Palette.neutral.light,
-                  fontSize: "14px",
-                  fontStyle: "normal",
-                  fontWeight: "400",
-                  lineHeight: "24px",
-                  border: `1px dashed ${Palette.success.light}`,
-                  padding: "8px",
-                }}
-              >
-                Your status will appear here.
-              </Box>
-            )}
-          </Box>
+          <StatusPreview />
         </TabPanel>
         <TabPanel
           index={1}
           value={selectedTabIndex}
           className={classes.tabPanel}
         >
-          <RichTextEditor
-            handleEditorStateChange={handleNotesChange}
-            // initialRawEditorState={}
-          />
+          <StatusNotes />
         </TabPanel>
       </Grid>
     </Grid>

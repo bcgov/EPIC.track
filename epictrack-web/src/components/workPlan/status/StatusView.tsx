@@ -1,12 +1,11 @@
 import React from "react";
-import { WorkplanContext } from "../WorkPlanContext";
 import NoDataEver from "../../shared/NoDataEver";
 import TrackDialog from "../../shared/TrackDialog";
 import StatusForm from "./StatusForm";
+import { WorkplanContext } from "../WorkPlanContext";
 
 const StatusView = () => {
-  const ctx = React.useContext(WorkplanContext);
-  const status = React.useMemo(() => ctx.status, [ctx.status]);
+  const { status } = React.useContext(WorkplanContext);
   const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
 
   const onAddButtonClickHandler = () => {
@@ -21,9 +20,9 @@ const StatusView = () => {
     <>
       {status.length === 0 && (
         <NoDataEver
-          title="You don't have any Issues yet"
-          subTitle="Start adding your Issues"
-          addNewButtonText="Add Issue"
+          title="You don't have any Statuses yet"
+          subTitle="Create your first Status"
+          addNewButtonText="Add Status"
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       )}
