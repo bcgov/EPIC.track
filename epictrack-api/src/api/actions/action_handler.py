@@ -32,8 +32,12 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
             self.action_class().run(source_event, params)
 
     def get_additional_params(self, params: dict) -> None:
-        """Derive the actual parameters required to perform the action from
+        """
+        Return additional parameters
+
+        Derive the actual parameters required to perform the action from
         the given params. This is required to extract the actual params at the
-        time of template uploading"""
+        time of template uploading
+        """
         if self.action_class:
             self.action_class().get_additional_params(params)

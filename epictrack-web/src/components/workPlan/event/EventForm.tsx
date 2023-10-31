@@ -37,10 +37,11 @@ import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import DecisionInput from "./components/DecisionInput";
 import { POSITION_ENUM } from "../../../models/position";
-import { Else, If, Then } from "react-if";
+import { Else, If, Then, When } from "react-if";
 import ExtensionInput from "./components/ExtensionInput";
 import { EventContext } from "./EventContext";
 import { EVENT_TYPE } from "../phase/type";
+import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
 
 interface EventFormProps {
   onSave: () => void;
@@ -61,7 +62,6 @@ const EventForm = ({
   event,
   isFormFieldsLocked,
 }: EventFormProps) => {
-  const [submittedEvent, setSubmittedEvent] = React.useState<MilestoneEvent>();
   const [configurations, setConfigurations] = React.useState<
     EventConfiguration[]
   >([]);
@@ -85,6 +85,8 @@ const EventForm = ({
   const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
   const isCreateMode = React.useMemo(() => !event, [event]);
   const titleRef = React.useRef();
+  const MISSING_RESUMPTION_ERROR =
+    "No resumption milestone configuration found to resume the phase";
   const schema = React.useMemo(
     () =>
       yup.object().shape({
@@ -115,13 +117,38 @@ const EventForm = ({
         act_section_id: yup.string().when([], {
           is: () =>
             selectedConfiguration?.event_category_id ===
-            EventCategory.EXTENSION,
+              EventCategory.EXTENSION ||
+            selectedConfiguration?.event_type_id ===
+              EventType.TIME_LIMIT_SUSPENSION,
           then: () => yup.string().required("Please select the act section"),
           otherwise: () => yup.string().nullable(),
         }),
       }),
     [selectedConfiguration, actualAdded]
   );
+  const isHighPriorityActive = React.useMemo(() => {
+    if (event) {
+      return event.high_priority;
+    }
+    if (
+      [
+        EventType.TIME_LIMIT_SUSPENSION,
+        EventType.TIME_LIMIT_RESUMPTION,
+      ].includes(Number(selectedConfiguration?.event_type_id))
+    ) {
+      return true;
+    }
+  }, [selectedConfiguration, event]);
+
+  const isMilestoneTypeDisabled = React.useMemo(
+    () => !!event || isFormFieldsLocked || ctx.selectedWorkPhase?.is_suspended,
+    [event]
+  );
+  const isTitleDisabled = React.useMemo(
+    () => isFormFieldsLocked || ctx.selectedWorkPhase?.is_suspended,
+    []
+  );
+
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -180,6 +207,29 @@ const EventForm = ({
       setSelectedConfiguration(config);
     }
   }, [event, configurations]);
+
+  React.useEffect(() => {
+    if (
+      ctx.selectedWorkPhase?.is_suspended &&
+      configurations.length > 0 &&
+      !event
+    ) {
+      const config = configurations.filter(
+        (p) => p.event_type_id == EventType.TIME_LIMIT_RESUMPTION
+      );
+      if (!config || config.length === 0) {
+        showNotification(MISSING_RESUMPTION_ERROR, {
+          type: "warning",
+        });
+      } else {
+        setSelectedConfiguration(config[0]);
+        reset({
+          event_configuration_id: config[0].id,
+          name: config[0].name,
+        });
+      }
+    }
+  }, [configurations, event]);
 
   React.useEffect(() => {
     getConfigurations();
@@ -352,7 +402,7 @@ const EventForm = ({
                 options={configurations || []}
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
-                disabled={!!event || isFormFieldsLocked}
+                disabled={isMilestoneTypeDisabled}
                 onHandleChange={(configuration_id) =>
                   onChangeMilestoneType(configuration_id)
                 }
@@ -369,7 +419,7 @@ const EventForm = ({
               <TextField
                 fullWidth
                 placeholder="Title"
-                disabled={isFormFieldsLocked}
+                disabled={isTitleDisabled}
                 defaultValue={event?.name}
                 error={!!errors?.name?.message}
                 inputRef={titleRef}
@@ -402,7 +452,7 @@ const EventForm = ({
                   control={
                     <ControlledSwitch
                       {...register("high_priority")}
-                      defaultChecked={event?.high_priority}
+                      defaultChecked={isHighPriorityActive}
                     />
                   }
                   label="High Priority"
@@ -518,35 +568,61 @@ const EventForm = ({
                 <ExtensionInput isFormFieldsLocked={isFormFieldsLocked} />
               </Then>
               <Else>
-                <If condition={selectedConfiguration?.multiple_days}>
+                <When condition={selectedConfiguration?.multiple_days}>
                   <MultiDaysInput
                     endDateRef={endDateRef}
                     isFormFieldsLocked={isFormFieldsLocked}
                     numberOfDaysRef={numberOfDaysRef}
                     onChangeDay={daysOnChangeHandler}
                   />
-                </If>
+                </When>
               </Else>
             </If>
-            {selectedConfiguration?.event_category_id === EventCategory.PCP &&
-              ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
-                selectedConfiguration?.event_type_id
-              ) && <PCPInput isFormFieldsLocked={isFormFieldsLocked} />}
-            {[EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
-              Number(selectedConfiguration?.event_type_id)
-            ) && <SingleDayPCPInput isFormFieldsLocked={isFormFieldsLocked} />}
-            {actualAdded &&
-              selectedConfiguration?.event_category_id ===
-                EventCategory.DECISION && (
-                <DecisionInput
-                  isFormFieldsLocked={isFormFieldsLocked}
-                  configurationId={selectedConfiguration.id}
-                  decisionMakerPositionId={
-                    ctx.work?.decision_maker_position_id ||
-                    POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR
-                  }
-                />
-              )}
+            <When
+              condition={
+                selectedConfiguration?.event_category_id ===
+                  EventCategory.PCP &&
+                ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
+                  selectedConfiguration?.event_type_id
+                )
+              }
+            >
+              <PCPInput isFormFieldsLocked={isFormFieldsLocked} />
+            </When>
+            <When
+              condition={[
+                EventType.OPEN_HOUSE,
+                EventType.VIRTUAL_OPEN_HOUSE,
+              ].includes(Number(selectedConfiguration?.event_type_id))}
+            >
+              <SingleDayPCPInput isFormFieldsLocked={isFormFieldsLocked} />
+            </When>
+            <When
+              condition={
+                actualAdded &&
+                selectedConfiguration?.event_category_id ===
+                  EventCategory.DECISION
+              }
+            >
+              <DecisionInput
+                isFormFieldsLocked={isFormFieldsLocked}
+                configurationId={selectedConfiguration?.id}
+                decisionMakerPositionId={
+                  ctx.work?.decision_maker_position_id ||
+                  POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR
+                }
+              />
+            </When>
+            <When
+              condition={
+                selectedConfiguration?.event_type_id ===
+                EventType.TIME_LIMIT_SUSPENSION
+              }
+            >
+              <ExtensionSuspensionInput
+                isFormFieldsLocked={isFormFieldsLocked}
+              />
+            </When>
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor

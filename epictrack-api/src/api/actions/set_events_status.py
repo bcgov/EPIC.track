@@ -2,8 +2,8 @@
 
 from api.actions.base import ActionFactory
 from api.models import db
-from api.models.project import Project
 from api.models.event import Event
+from api.models.project import Project
 
 
 class SetEventsStatus(ActionFactory):  # pylint: disable=too-few-public-methods
@@ -17,4 +17,5 @@ class SetEventsStatus(ActionFactory):  # pylint: disable=too-few-public-methods
         db.session.commit()
 
     def get_additional_params(self, params):
+        """Returns additional parameter"""
         return super().get_additional_params(params)

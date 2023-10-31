@@ -16,18 +16,18 @@ import copy
 from datetime import datetime, timedelta
 from typing import List
 
-from sqlalchemy import and_, or_
-
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
-from api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventTypeEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
+from api.models import (PRIMARY_CATEGORIES, CalendarEvent, Event,
+                        EventCategoryEnum, EventConfiguration, EventTypeEnum,
+                        WorkCalendarEvent, WorkPhase, db)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.utils.datetime_helper import get_start_of_day
+from sqlalchemy import and_, or_
 
 from .event_configuration import EventConfigurationService
 
@@ -125,10 +125,19 @@ class EventService:  # pylint: disable=too-few-public-methods
         if (
             event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
             and event.actual_date
-           ):
+        ):
             current_work_phase.suspended_date = event.actual_date
             current_work_phase.is_suspended = True
             current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+        if (
+                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                and event.actual_date
+        ):
+            event.number_of_days = (event.actual_date - current_work_phase.suspended_date).days
+            event.update(event.as_dict(recursive=False), commit=False)
+            current_work_phase.is_suspended = False
+            current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+
         if number_of_days_to_be_pushed != 0:
             cls._end_event_anticipated_change_rule(event, event_old)
 
@@ -142,14 +151,6 @@ class EventService:  # pylint: disable=too-few-public-methods
             all_work_phases = WorkPhase.find_by_params(
                 {"work_id": current_work_phase.work_id}
             )
-            if (
-                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                and event.actual_date
-               ):
-                event.number_of_days = (event.actual_date - current_work_phase.suspended_date).days
-                event.update(event.as_dict(recursive=False), commit=False)
-                current_work_phase.is_suspended = False
-                current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
 
             current_work_phase_index = util.find_index_in_array(
                 all_work_phases, current_work_phase
@@ -239,12 +240,11 @@ class EventService:  # pylint: disable=too-few-public-methods
         ):
             # always return 0 as suspension does not push the number of days
             return 0
-        
+
         if (
             event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
-            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
         ):
-            # always return 0 as suspension does not push the number of days
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
             else:
