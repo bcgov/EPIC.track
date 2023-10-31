@@ -4,6 +4,8 @@ from importlib import import_module
 from api.actions.base import ACTION_HANDLER_CLASS_MAPS, ActionFactory
 from api.exceptions import UnprocessableEntityError
 from api.models.action import ActionEnum
+from api.models.action_configuration import ActionConfiguration
+from api.models.event import Event
 
 
 class ActionHandler:  # pylint: disable=too-few-public-methods
@@ -20,10 +22,14 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
             print(f"{action_class_enum.name} action handler module not found")
             self.action_class = None
         except AttributeError as e:
-            raise UnprocessableEntityError(f"Action class {action_class_name} not configured properly.") from e
+            raise UnprocessableEntityError(
+                f"Action class {action_class_name} not configured properly."
+            ) from e
 
-    def apply(self, params: dict = None) -> None:
+    def apply(
+        self, source_event: Event, action_configuration: ActionConfiguration
+    ) -> None:
         """Perform the action"""
         # So that actions not done yet won't raise errors
         if self.action_class:
-            self.action_class().run(params)
+            self.action_class(source_event, action_configuration).run()

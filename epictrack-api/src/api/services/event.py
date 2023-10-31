@@ -32,7 +32,7 @@ from api.utils.datetime_helper import get_start_of_day
 from .event_configuration import EventConfigurationService
 
 
-class EventService:  # pylint: disable=too-few-public-methods
+class EventService:
     """Service to manage event related operations."""
 
     @classmethod
@@ -574,6 +574,4 @@ class EventService:  # pylint: disable=too-few-public-methods
         )
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
-            if action_configuration.action.id == ActionEnum.LOCK_WORK_START_DATE.value:
-                params = {"work_id": event.work_id, "start_date": event.actual_date, "start_date_locked": True}
-                action_handler.apply(params)
+            action_handler.apply(event, action_configuration)

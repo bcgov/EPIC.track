@@ -12,4 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """This module holds all the action handlers."""
+from .create_work import CreateWork
 from .disable_work_start_date import DisableWorkStartDate
+from .set_phases_status import SetPhasesStatus
+from .set_project_status import SetProjectStatus
+from .set_work_state import SetWorkState
