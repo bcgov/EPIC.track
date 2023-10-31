@@ -1,10 +1,9 @@
 import React from "react";
-import { Box, FormHelperText } from "@mui/material";
+import { FormHelperText } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 import Select, { CSSObjectWithLabel } from "react-select";
 import { Palette } from "../../../styles/theme";
-import Option from "./Option";
-import MultiValue from "./MultiValue";
+import Option from "./ControlledMultiSelect/Option";
 
 type IFormInputProps = {
   placeholder?: string;
@@ -45,7 +44,10 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
   ref
 ) => {
   const [selectedOptions, setSelectedOptions] = React.useState<any>([]);
-  const [label, setLabel] = React.useState("");
+
+  React.useEffect(() => {
+    setSelectedOptions(Array.from(new Set<string>(defaultValue)));
+  }, [defaultValue]);
 
   const handleChange = (item: any) => {
     const selected: Array<any> = [];
@@ -55,24 +57,6 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
     });
     setSelectedOptions(Array.from(new Set<string>(selected)));
   };
-
-  React.useEffect(() => {
-    setSelectedOptions(Array.from(new Set<string>(defaultValue)));
-  }, [defaultValue]);
-
-  React.useEffect(() => {
-    let title = "";
-    options.map((o) => {
-      if (selectedOptions.includes(getOptionValue(o))) {
-        if (title) {
-          title += ", ";
-        }
-        title += getOptionLabel(o);
-      }
-    });
-    title = title.substring(0, 30);
-    setLabel(title);
-  }, [selectedOptions]);
 
   const {
     control,
@@ -106,12 +90,10 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                 options,
                 getOptionLabel,
                 getOptionValue,
-                label,
               }}
               components={{
                 Option,
                 MultiValueRemove: () => null,
-                MultiValue,
               }}
               value={options.filter((c) => {
                 if (isMulti && value) {
@@ -132,13 +114,6 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               }}
               menuPortalTarget={document.body}
               styles={{
-                option: (baseStyles, state) => {
-                  return {
-                    ...baseStyles,
-                    backgroundColor: Palette.white,
-                    color: Palette.primary.accent.light,
-                  };
-                },
                 control: (baseStyles, state) => {
                   return {
                     ...baseStyles,
@@ -164,7 +139,8 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
                 }),
                 multiValue(base, props) {
                   return {
-                    backgroundColor: Palette.white,
+                    ...base,
+                    padding: "0px 4px 0px 2px",
                   };
                 },
               }}
