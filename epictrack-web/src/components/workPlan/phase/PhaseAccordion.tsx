@@ -132,7 +132,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={3}>
                 <SummaryItem
                   title="Phase"
-                  content={phase.phase.name}
+                  content={phase.name}
                   enableTooltip={true}
                   isTitleBold={isSelectedPhase}
                   sx={{

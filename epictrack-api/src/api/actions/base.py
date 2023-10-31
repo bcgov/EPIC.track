@@ -27,12 +27,12 @@ class ActionFactory(ABC):  # pylint: disable=too-few-public-methods
 ACTION_HANDLER_CLASS_MAPS = {
     ActionEnum.LOCK_WORK_START_DATE: "LockWorkStartDate",
     ActionEnum.SET_PROJECT_STATUS: "SetProjectStatus",
-    # ActionEnum.ADD_EVENT: "AddEvent",
-    # ActionEnum.ADD_PHASE: "AddPhase",
+    ActionEnum.ADD_EVENT: "AddEvent",
+    ActionEnum.ADD_PHASE: "AddPhase",
     ActionEnum.CREATE_WORK: "CreateWork",
-    # ActionEnum.SET_EVENT_DATE: "SetEventDate",
+    ActionEnum.SET_EVENT_DATE: "SetEventDate",
     ActionEnum.SET_EVENTS_STATUS: "SetEventsStatus",
     ActionEnum.SET_PHASES_STATUS: "SetPhasesStatus",
-    # ActionEnum.SET_WORK_DECISION_MAKER: "SetWorkDecisionMaker",
+    ActionEnum.SET_WORK_DECISION_MAKER: "SetWorkDecisionMaker",
     ActionEnum.SET_WORK_STATE: "SetWorkState"
 }

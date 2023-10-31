@@ -33,3 +33,14 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
         # So that actions not done yet won't raise errors
         if self.action_class:
             self.action_class(source_event, action_configuration).run()
+
+    def get_additional_params(self, params: dict) -> None:
+        """
+        Return additional parameters
+
+        Derive the actual parameters required to perform the action from
+        the given params. This is required to extract the actual params at the
+        time of template uploading
+        """
+        if self.action_class:
+            self.action_class().get_additional_params(params)

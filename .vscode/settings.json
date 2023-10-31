@@ -1,3 +1,14 @@
 {
-    "makefile.extensionOutputFolder": "./.vscode"
+    "makefile.extensionOutputFolder": "./.vscode",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+        "editor.formatOnSave": false,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    },
+    // "python.formatting.provider": "none",
+    "isort.check": true,
+    // "isort.": ,
+    "auto-comment-blocks.hashStyleBlocks": []
 }
