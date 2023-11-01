@@ -124,15 +124,15 @@ class EventService:
             event, event_old, current_work_phase
         )
         if (
-            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
-            and event.actual_date
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value and
+            event.actual_date
         ):
             current_work_phase.suspended_date = event.actual_date
             current_work_phase.is_suspended = True
             current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
         if (
-                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                and event.actual_date
+                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and
+                event.actual_date
         ):
             event.number_of_days = (event.actual_date - current_work_phase.suspended_date).days
             event.update(event.as_dict(recursive=False), commit=False)
@@ -240,14 +240,14 @@ class EventService:
             # return 0 days to be pushed unless actual date is entered
             return 0 if not event.actual_date else event.number_of_days
         if (
-            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
-            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value and
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
         ):
             # always return 0 as suspension does not push the number of days
             return 0
         if (
-            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
-            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value and
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
         ):
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
@@ -596,4 +596,4 @@ class EventService:
         )
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
-            action_handler.apply(event, action_configuration)
+            action_handler.apply(event, action_configuration.additional_params)

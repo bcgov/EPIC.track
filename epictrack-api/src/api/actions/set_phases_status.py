@@ -7,9 +7,9 @@ from api.models.work_phase import WorkPhase
 class SetPhasesStatus(ActionFactory):
     """Set phases status action"""
 
-    def run(self):
+    def run(self, source_event, params):
         """Sets all future PHASEs to INACTIVE"""
         db.session.query(WorkPhase).filter(
-            WorkPhase.work_id == self.source_event.work_id,
-            WorkPhase.start_date >= self.source_event.actual_date
-        ).update({"is_active": False})
+            WorkPhase.work_id == source_event.work_id,
+            WorkPhase.start_date >= source_event.actual_date
+        ).update(params)

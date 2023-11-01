@@ -2,26 +2,19 @@
 from abc import ABC, abstractmethod
 
 from api.models.action import ActionEnum
-from api.models.action_configuration import ActionConfiguration
 from api.models.event import Event
 
 
 class ActionFactory(ABC):  # pylint: disable=too-few-public-methods
     """Base class for action handlers"""
 
-    def __init__(self, source_event: Event, action_configuration: ActionConfiguration):
-        """Constructor"""
-        self.source_event = source_event
-        self.action_configuration = action_configuration
-        super().__init__()
-
     @abstractmethod
-    def run(self, source_event: Event, params: dict):
+    def run(self, source_event: Event, params: dict) -> None:
         """Perform the action"""
 
-    @abstractmethod
-    def get_additional_params(self, params):
+    def get_additional_params(self, params: dict) -> dict:
         """Returns the derived additional parameters required to perform action from templates"""
+        return params
 
 
 ACTION_HANDLER_CLASS_MAPS = {

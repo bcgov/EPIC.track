@@ -13,6 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Event Types."""
 import enum
+
 import sqlalchemy as sa
 
 from .code_table import CodeTableVersioned
