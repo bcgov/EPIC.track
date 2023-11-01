@@ -10,6 +10,7 @@ import {
 import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
+import dateUtils from "../../utils/dateUtils";
 
 interface WorkplanContextProps {
   selectedWorkPhase?: WorkPhase;
@@ -28,6 +29,38 @@ interface WorkplanContextProps {
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
+
+const testStatuses: Status[] = [
+  {
+    id: 1,
+    title: "Toms Status 1",
+    description: "this is the description for toms status",
+    active: true,
+    high_priority: false,
+    start_date: "2023-12-26",
+    approved: false,
+  },
+  {
+    id: 2,
+    title: "Toms Status 2",
+    description:
+      "The assessment was carried out through a federally appointed panel, which both levels of government are using to base their decisions about whether to approve the project to proceed.\n\n On January 23, 2023, the federal Minister of Environment and Climate Change determined that the VFPA has responded to the questions posed in the August 2020 information request in sufficient detail. The federal environmental assessment timeline of 89 days until a federal decision on RBT2 at that point resumed. This will be reached on April 23, 2023.\n\n The EAO has 30 days from that point to refer to Ministers for their decision.",
+    active: true,
+    high_priority: false,
+    start_date: "2023-11-4",
+    approved: false,
+  },
+  {
+    id: 3,
+    title: "Toms Status 3",
+    description: "middle status",
+    active: true,
+    high_priority: false,
+    start_date: "2023-12-2",
+    approved: false,
+  },
+];
+
 export const WorkplanContext = createContext<WorkplanContextProps>({
   selectedWorkPhase: undefined,
   setSelectedWorkPhase: () => ({}),
@@ -68,6 +101,7 @@ export const WorkplanProvider = ({
       await getWorkTeamMembers();
       await getWorkPhases();
       await getWorkFirstNations();
+      await getWorkStatuses();
       setLoading(false);
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -132,6 +166,22 @@ export const WorkplanProvider = ({
         setFirstNations(firstNations);
       }
     }
+  };
+
+  const getWorkStatuses = async () => {
+    // if (workId) {
+    //   const statusResult = await workService.getWorkStatuses(Number(workId));
+    //   if (statusResult.status === 200) {
+    //     setStatuses(statusResult.data as Status[]);
+    //     return Promise.resolve();
+    //   }
+    // }
+    setStatuses(
+      testStatuses.sort((a, b) => {
+        return dateUtils.diff(a.start_date, b.start_date, "days");
+      })
+    );
+    return Promise.resolve();
   };
 
   return (

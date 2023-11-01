@@ -10,8 +10,11 @@ import TeamContainer from "./team/TeamContainer";
 import { makeStyles } from "@mui/styles";
 import FirstNationContainer from "./firstNations/FirstNationContainer";
 import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
-import ErrorIcon from "@mui/icons-material/Error";
 import Status from "./status";
+import Icons from "../icons";
+import { IconProps } from "../icons/type";
+
+const NotificationError: React.FC<IconProps> = Icons["NotificationError"];
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -67,14 +70,9 @@ const WorkPlanContainer = () => {
           <ETTab
             label="Status"
             icon={
-              ctx.statuses.length === 0 && (
-                <ErrorIcon
-                  sx={{
-                    color: Palette.secondary.bg.light,
-                    backgroundColor: Palette.secondary.dark,
-                    borderRadius: "50%",
-                  }}
-                />
+              (ctx.statuses.length === 0 ||
+                ctx.statuses[0].approved === false) && (
+                <NotificationError fill={Palette.secondary.bg.light} />
               )
             }
           />

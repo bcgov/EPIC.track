@@ -23,7 +23,7 @@ const StatusPreview = () => {
       >
         Status
       </Box>
-      {statuses.length === 0 && (
+      {(statuses.length === 0 || statuses[0].approved === false) && (
         <Box
           sx={{
             color: Palette.neutral.light,

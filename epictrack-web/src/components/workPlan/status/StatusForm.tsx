@@ -3,8 +3,6 @@ import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Grid, TextField } from "@mui/material";
-import { WorkplanContext } from "../WorkPlanContext";
-import { Status } from "../../../models/status";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -20,6 +18,12 @@ const StatusForm = () => {
   const [notes, setNotes] = React.useState<string>("");
   const startDateRef = useRef();
   const { status, onSave } = useContext(StatusContext);
+
+  React.useEffect(() => {
+    if (status) {
+      setNotes(status?.description);
+    }
+  }, []);
 
   const methods = useForm({
     resolver: yupResolver(schema),

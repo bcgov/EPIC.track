@@ -22,6 +22,16 @@ export const StatusContext = createContext<StatusContextProps>({
   onSave: (data: any, callback: () => any) => ({}),
 });
 
+// const testStatus: Status = {
+//   id: 1,
+//   title: "Toms Status",
+//   description: "this is the description for toms status",
+//   active: true,
+//   high_priority: false,
+//   start_date: "2023-19-26",
+//   approved: true,
+// };
+
 export const StatusProvider = ({
   children,
 }: {
@@ -30,6 +40,10 @@ export const StatusProvider = ({
   const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
   const [backdrop, setBackdrop] = React.useState<boolean>(false);
+
+  // React.useEffect(() => {
+  //   setStatus(testStatus);
+  // }, []);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
