@@ -407,7 +407,7 @@ export const ETPreviewText = styled(Typography)(() => ({
   fontSize: "14px",
   fontStyle: "normal",
   fontWeight: "400",
-  lineHeight: "24px",
+  lineHeight: "21px",
 }));
 
 export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {

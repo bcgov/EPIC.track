@@ -5,7 +5,6 @@ import {
   ETPreviewText,
   ETSubhead,
   ETCaption2,
-  ETCaption3,
 } from "../../../shared";
 import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
@@ -35,14 +34,14 @@ export const ReferralSchedule = () => {
             <ETCaption2 bold color={Palette.neutral.light}>
               Project Description (Auto-System Generated)
             </ETCaption2>
-            <ETCaption3>{work?.project.description}</ETCaption3>
+            <ETPreviewText>{work?.project.description}</ETPreviewText>
           </Stack>
         </Grid>
         <Grid item xs={12}></Grid>
         <Grid item xs={12}>
-          <ETCaption3>
+          <ETPreviewText>
             {work?.project.name} is in {currentWorkPhase?.phase.name}
-          </ETCaption3>
+          </ETPreviewText>
         </Grid>
 
         <Grid item xs={12}>
@@ -50,7 +49,9 @@ export const ReferralSchedule = () => {
             Issues
           </ETCaption2>
           <ETPreviewBox>
-            <ETPreviewText>Your Issues will appear here.</ETPreviewText>
+            <ETPreviewText color={Palette.neutral.light}>
+              Your Issues will appear here.
+            </ETPreviewText>
           </ETPreviewBox>
         </Grid>
       </Grid>
