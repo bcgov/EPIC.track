@@ -20,7 +20,7 @@ import { useAppSelector } from "../../hooks";
 import clsx from "clsx";
 import { Link, LinkProps, Path } from "react-router-dom";
 import { Palette } from "../../styles/theme";
-import { makeStyles } from "@mui/styles";
+import { makeStyles, styled } from "@mui/styles";
 
 interface HeaderProps {
   sx?: SxProps;
@@ -382,3 +382,103 @@ export const ETLink = (props: LinkProps) => (
     {...props}
   />
 );
+
+interface GrayBoxProps {
+  children?: React.ReactNode | string;
+  [prop: string]: unknown;
+  sx?: SxProps;
+}
+export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
+  return (
+    <Box
+      {...rest}
+      sx={{
+        backgroundColor: Palette.neutral.bg.light,
+        padding: "16px 24px",
+        ...sx,
+      }}
+    >
+      {children}
+    </Box>
+  );
+};
+export const BoxLabel = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        fontSize: "14px",
+        fontStyle: "normal",
+        fontWeight: bold ? "bold" : "700",
+        lineHeight: "16px",
+        ...sx,
+      }}
+      variant="h4"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
+export const PlaceholderText = styled(Typography)(() => ({
+  fontSize: "14px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "24px",
+}));
+
+export const PreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
+  return (
+    <Box
+      {...rest}
+      sx={{
+        color: Palette.neutral.light,
+        border: `1px dashed ${Palette.success.light}`,
+        padding: "8px",
+        ...sx,
+      }}
+    >
+      {children}
+    </Box>
+  );
+};
+
+export const BoxTitle = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        fontWeight: "700",
+        fontSize: "18px",
+        fontStyle: "normal",
+        lineHeight: "24px",
+        ...sx,
+      }}
+      variant="h4"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
+export const BoxSubtitle = styled(Typography)(() => ({
+  color: Palette.neutral.light,
+  fontWeight: "700",
+  fontSize: "14px",
+  fontStyle: "normal",
+  lineHeight: "16px",
+}));

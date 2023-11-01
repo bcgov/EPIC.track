@@ -17,16 +17,19 @@ const IssuesView = () => {
     setShowIssuesForm(false);
   };
 
+  if (issues.length === 0) {
+    return (
+      <NoDataEver
+        title="You don't have any Issues yet"
+        subTitle="Start adding your Issues"
+        addNewButtonText="Add Issue"
+        onAddNewClickHandler={() => onAddButtonClickHandler()}
+      />
+    );
+  }
+
   return (
     <>
-      {issues.length === 0 && (
-        <NoDataEver
-          title="You don't have any Issues yet"
-          subTitle="Start adding your Issues"
-          addNewButtonText="Add Issue"
-          onAddNewClickHandler={() => onAddButtonClickHandler()}
-        />
-      )}
       <TrackDialog
         open={showIssuesForm}
         dialogTitle="Add Issue"

@@ -41,7 +41,7 @@ const IssuesContainer = () => {
             sx={{
               paddingLeft: 0,
             }}
-            label="Issues Preview"
+            label="Reports Preview"
             className={classes.tab}
           />
           <ETTab label="Notes" className={classes.tab} />
