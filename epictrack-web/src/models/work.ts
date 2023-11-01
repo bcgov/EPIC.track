@@ -32,7 +32,7 @@ export interface Work extends MasterBase {
   decision_by_id: number;
   decision_maker_position_id: number;
 
-  project: ListType;
+  project: ListType & { description: string };
   ministry: Ministry;
   ea_act: ListType;
   eao_team: ListType;

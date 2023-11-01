@@ -402,39 +402,15 @@ export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
     </Box>
   );
 };
-export const BoxLabel = ({
-  bold,
-  color,
-  children,
-  sx,
-  ...rest
-}: HeaderProps) => {
-  return (
-    <Typography
-      color={color}
-      sx={{
-        fontSize: "14px",
-        fontStyle: "normal",
-        fontWeight: bold ? "bold" : "700",
-        lineHeight: "16px",
-        ...sx,
-      }}
-      variant="h4"
-      {...rest}
-    >
-      {children}
-    </Typography>
-  );
-};
 
-export const PlaceholderText = styled(Typography)(() => ({
+export const ETPreviewText = styled(Typography)(() => ({
   fontSize: "14px",
   fontStyle: "normal",
   fontWeight: "400",
   lineHeight: "24px",
 }));
 
-export const PreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
+export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
   return (
     <Box
       {...rest}
@@ -449,36 +425,3 @@ export const PreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
     </Box>
   );
 };
-
-export const BoxTitle = ({
-  bold,
-  color,
-  children,
-  sx,
-  ...rest
-}: HeaderProps) => {
-  return (
-    <Typography
-      color={color}
-      sx={{
-        fontWeight: "700",
-        fontSize: "18px",
-        fontStyle: "normal",
-        lineHeight: "24px",
-        ...sx,
-      }}
-      variant="h4"
-      {...rest}
-    >
-      {children}
-    </Typography>
-  );
-};
-
-export const BoxSubtitle = styled(Typography)(() => ({
-  color: Palette.neutral.light,
-  fontWeight: "700",
-  fontSize: "14px",
-  fontStyle: "normal",
-  lineHeight: "16px",
-}));

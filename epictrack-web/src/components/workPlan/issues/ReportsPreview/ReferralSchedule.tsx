@@ -11,13 +11,12 @@ import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
 import { WorkplanContext } from "../../WorkPlanContext";
 
-export const ThirtySixtyNinety = () => {
+export const ReferralSchedule = () => {
   const { work, workPhases } = React.useContext(WorkplanContext);
 
   const currentWorkPhase = workPhases.find(
     (workPhase) => workPhase.phase.id === work?.current_phase_id
   );
-
   return (
     <GrayBox>
       <Grid container spacing={1}>
