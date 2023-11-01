@@ -15,6 +15,7 @@
 import copy
 from datetime import datetime, timedelta
 from typing import List
+from sqlalchemy import and_, or_
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
@@ -27,7 +28,6 @@ from api.models.event_template import EventPositionEnum
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.utils.datetime_helper import get_start_of_day
-from sqlalchemy import and_, or_
 
 from .event_configuration import EventConfigurationService
 
@@ -223,7 +223,11 @@ class EventService:  # pylint: disable=too-few-public-methods
                 )
 
     @classmethod
-    def _get_number_of_days_to_be_pushed(cls, event: Event, event_old: Event, current_work_phase: WorkPhase) -> int:
+    def _get_number_of_days_to_be_pushed(cls,
+                                         event: Event,
+                                         event_old: Event,
+                                         current_work_phase: WorkPhase) -> int:
+        # pylint: disable=too-many-return-statements
         """Returns the number of days to be pushed"""
         delta = (
             (cls._find_event_date(event) - cls._find_event_date(event_old)).days
@@ -240,15 +244,13 @@ class EventService:  # pylint: disable=too-few-public-methods
         ):
             # always return 0 as suspension does not push the number of days
             return 0
-
         if (
             event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
             and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
         ):
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
-            else:
-                return 0
+            return 0
 
         if event.event_configuration.event_position in [
             EventPositionEnum.START.value,

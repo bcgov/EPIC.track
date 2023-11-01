@@ -39,5 +39,4 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
         the given params. This is required to extract the actual params at the
         time of template uploading
         """
-        if self.action_class:
-            self.action_class().get_additional_params(params)
+        return self.action_class().get_additional_params(params) if self.action_class else {}

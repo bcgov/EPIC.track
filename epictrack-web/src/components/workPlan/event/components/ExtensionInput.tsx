@@ -27,8 +27,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
   const ctx = React.useContext(WorkplanContext);
   React.useEffect(() => {
     return () => {
-      unregister("act_section_id");
-      unregister("reason");
       unregister("number_of_days");
       unregister("phase_end_date");
     };
@@ -128,41 +126,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
         />
       </Grid>
       <ExtensionSuspensionInput isFormFieldsLocked={props.isFormFieldsLocked} />
-
-      {/* <Grid item xs={12}>
-        <ETFormLabel required>Act Section</ETFormLabel>
-        <ControlledSelectV2
-          disabled={props.isFormFieldsLocked}
-          helperText={errors?.act_section_id?.message?.toString()}
-          options={actSections || []}
-          getOptionValue={(o: ListType) => o?.id.toString()}
-          getOptionLabel={(o: ListType) => o?.name}
-          {...register("act_section_id")}
-        ></ControlledSelectV2>
-      </Grid>
-      <Grid item xs={12}>
-        <ETFormLabelWithCharacterLimit
-          characterCount={reasonCount}
-          maxCharacterLength={60}
-        >
-          Reason
-        </ETFormLabelWithCharacterLimit>
-        <TextField
-          fullWidth
-          multiline
-          disabled={props.isFormFieldsLocked}
-          rows={3}
-          InputProps={{
-            inputProps: {
-              maxLength: 60,
-            },
-          }}
-          error={!!errors?.reason?.message}
-          helperText={errors?.reason?.message?.toString()}
-          {...register("reason")}
-          onChange={changeReasonTextHandler}
-        />
-      </Grid> */}
     </>
   );
 };

@@ -469,12 +469,12 @@ const EventForm = ({
               <Controller
                 name="anticipated_date"
                 control={control}
-                defaultValue={Moment(event?.anticipated_date).format()}
+                defaultValue={dayjs(event?.anticipated_date).format()}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs} for>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       disabled={isFormFieldsLocked}
                       format={DATE_FORMAT}
@@ -497,9 +497,9 @@ const EventForm = ({
                           anticipatedDate: d,
                         });
                       }}
-                      defaultValue={dayjs(
-                        event?.anticipated_date ? event?.anticipated_date : ""
-                      )}
+                      // defaultValue={dayjs(
+                      //   event?.anticipated_date ? event?.anticipated_date : ""
+                      // )}
                       sx={{ display: "block" }}
                     />
                   </LocalizationProvider>
@@ -512,7 +512,7 @@ const EventForm = ({
                 name="actual_date"
                 control={control}
                 defaultValue={
-                  event?.actual_date ? Moment(event?.actual_date).format() : ""
+                  event?.actual_date ? dayjs(event?.actual_date).format() : ""
                 }
                 render={({
                   field: { onChange, value },

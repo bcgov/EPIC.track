@@ -9,8 +9,8 @@ class SetPhasesStatus(ActionFactory):  # pylint: disable=too-few-public-methods
 
     def run(self, source_event: Event, params: dict) -> None:
         """Performs the required operations"""
-        pass
+        return
 
     def get_additional_params(self, params):
         """Returns additional parameter"""
-        return super().get_additional_params(params)
+        return params
