@@ -253,12 +253,6 @@ const EventForm = ({
 
   const onSubmitHandler = async (submittedData: MilestoneEvent) => {
     try {
-      submittedData.anticipated_date = Moment(
-        submittedData.anticipated_date
-      ).format();
-      if (!!submittedData.actual_date) {
-        submittedData.actual_date = Moment(submittedData.actual_date).format();
-      }
       submittedData.notes = notes;
       // setSubmittedEvent(data);
       const showConfirmDialog =
@@ -327,6 +321,14 @@ const EventForm = ({
   const handleSaveEvent = async (data?: MilestoneEvent) => {
     try {
       const dataToBeSubmitted = data ?? getValues();
+      dataToBeSubmitted.anticipated_date = Moment(
+        dataToBeSubmitted.anticipated_date
+      ).format();
+      if (!!dataToBeSubmitted.actual_date) {
+        dataToBeSubmitted.actual_date = Moment(
+          dataToBeSubmitted.actual_date
+        ).format();
+      }
       await saveEvent(dataToBeSubmitted);
       onSave();
     } catch (e) {
