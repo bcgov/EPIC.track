@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Event Template Response response schema"""
-from marshmallow import EXCLUDE
+from marshmallow import EXCLUDE, fields
 
 from api.models import EventConfiguration
 from api.schemas.base import AutoSchemaBase
@@ -29,3 +29,8 @@ class EventConfigurationResponseSchema(
         model = EventConfiguration
         include_fk = True
         unknown = EXCLUDE
+    event_position = fields.Method("get_event_position")
+
+    def get_event_position(self, obj: EventConfiguration) -> str:
+        """Return the work state"""
+        return obj.event_position.value if obj.event_position else None

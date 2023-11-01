@@ -30,7 +30,7 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
           {...otherProps}
           {...field}
           ref={ref}
-          checked={!!field.value}
+          checked={!!field.value || otherProps.defaultChecked}
         />
       )}
     />

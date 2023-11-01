@@ -15,13 +15,13 @@
 import copy
 from datetime import datetime, timedelta
 from typing import List
-
 from sqlalchemy import and_, or_
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
-from api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, WorkCalendarEvent, WorkPhase, db)
+from api.models import (PRIMARY_CATEGORIES, CalendarEvent, Event,
+                        EventCategoryEnum, EventConfiguration, EventTypeEnum,
+                        WorkCalendarEvent, WorkPhase, db)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
@@ -45,7 +45,8 @@ class EventService:  # pylint: disable=too-few-public-methods
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = Event(**data)
         event = event.flush()
-        cls._process_event(current_work_phase, event, None)
+        cls._process_events(current_work_phase, event, None)
+        cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
@@ -69,7 +70,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = event.update(data, commit=False)
-        cls._process_event(
+        cls._process_events(
             current_work_phase, event, event_old, current_event_old_index
         )
         cls._process_actions(event, data.get("outcome_id", None))
@@ -106,7 +107,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         return Event.find_milestone_events_by_work_phase(work_phase_id)
 
     @classmethod
-    def _process_event(
+    def _process_events(
         cls,
         current_work_phase: WorkPhase,
         event: Event,
@@ -119,8 +120,24 @@ class EventService:  # pylint: disable=too-few-public-methods
         )
         cls._handle_child_events(all_work_event_configurations, event)
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
-            event, event_old
+            event, event_old, current_work_phase
         )
+        if (
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            and event.actual_date
+        ):
+            current_work_phase.suspended_date = event.actual_date
+            current_work_phase.is_suspended = True
+            current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+        if (
+                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                and event.actual_date
+        ):
+            event.number_of_days = (event.actual_date - current_work_phase.suspended_date).days
+            event.update(event.as_dict(recursive=False), commit=False)
+            current_work_phase.is_suspended = False
+            current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+
         if number_of_days_to_be_pushed != 0:
             cls._end_event_anticipated_change_rule(event, event_old)
 
@@ -206,7 +223,11 @@ class EventService:  # pylint: disable=too-few-public-methods
                 )
 
     @classmethod
-    def _get_number_of_days_to_be_pushed(cls, event: Event, event_old: Event) -> int:
+    def _get_number_of_days_to_be_pushed(cls,
+                                         event: Event,
+                                         event_old: Event,
+                                         current_work_phase: WorkPhase) -> int:
+        # pylint: disable=too-many-return-statements
         """Returns the number of days to be pushed"""
         delta = (
             (cls._find_event_date(event) - cls._find_event_date(event_old)).days
@@ -214,12 +235,22 @@ class EventService:  # pylint: disable=too-few-public-methods
             else 0
         )  # used to have the difference
         number_of_days = event.number_of_days
-        if event.event_configuration.event_category_id in [
-            EventCategoryEnum.EXTENSION.value,
-            EventCategoryEnum.SUSPENSION.value,
-        ]:
+        if event.event_configuration.event_category_id == EventCategoryEnum.EXTENSION.value:
             # return 0 days to be pushed unless actual date is entered
             return 0 if not event.actual_date else event.number_of_days
+        if (
+            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
+            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+        ):
+            # always return 0 as suspension does not push the number of days
+            return 0
+        if (
+            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
+            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+        ):
+            if event.actual_date:
+                return (event.actual_date - current_work_phase.suspended_date).days
+            return 0
 
         if event.event_configuration.event_position in [
             EventPositionEnum.START.value,
@@ -234,16 +265,6 @@ class EventService:  # pylint: disable=too-few-public-methods
                 else event.number_of_days
             )
             return number_of_days + delta
-
-        # date_diff_from_phase_end = (
-        #     cls._find_event_date(event) - current_work_phase.end_date
-        # ).days + event.number_of_days
-        # number_of_days_to_be_pushed = (
-        #     0
-        #     if current_work_phase.end_date + timedelta(days=date_diff_from_phase_end)
-        #     < current_work_phase.end_date
-        #     else date_diff_from_phase_end + delta
-        # )
         return delta
 
     @classmethod
