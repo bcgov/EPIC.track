@@ -37,7 +37,7 @@ const ETTabs = styled(Tabs)({
   },
 });
 
-const ETTab = ({ label, identifier, ...props }: ETTabProps) => {
+const ETTab = ({ label, identifier, icon, ...props }: ETTabProps) => {
   return (
     <>
       <Tab
@@ -60,6 +60,7 @@ const ETTab = ({ label, identifier, ...props }: ETTabProps) => {
                 }}
               />
             )}
+            {icon}
           </>
         }
         {...props}
