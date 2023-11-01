@@ -11,7 +11,7 @@ import outcomeConfigurationService from "../../../../services/outcomeConfigurati
 import { Staff } from "../../../../models/staff";
 
 export interface DecisionInputProps {
-  configurationId: number;
+  configurationId?: number;
   decisionMakerPositionId: number;
   isFormFieldsLocked: boolean;
 }
@@ -29,7 +29,9 @@ const DecisionInput = ({
   } = useFormContext();
   React.useEffect(() => {
     getDecisionMakers();
-    getOutcomes();
+    if (configurationId) {
+      getOutcomes();
+    }
     return () => {
       unregister("decision_maker_id");
       unregister("outcome_id");

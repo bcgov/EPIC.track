@@ -3,30 +3,19 @@ import React from "react";
 import Moment from "moment";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
-import ControlledSelectV2 from "../../../shared/controlledInputComponents/ControlledSelectV2";
 import { Controller, useFormContext } from "react-hook-form";
-import { ListType } from "../../../../models/code";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import {
-  COMMON_ERROR_MESSAGE,
-  DATE_FORMAT,
-} from "../../../../constants/application-constant";
+import { DATE_FORMAT } from "../../../../constants/application-constant";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { dateUtils } from "../../../../utils";
 import { SyntheticEvent } from "react-draft-wysiwyg";
-import actSectionService from "../../../../services/actSectionService/actSectionService";
-import { showNotification } from "../../../shared/notificationProvider";
+import { ETFormLabel } from "../../../shared";
+import ExtensionSuspensionInput from "./ExtensionSuspensionInput";
 
 interface ExtensionInputProps {
   isFormFieldsLocked: boolean;
 }
 const ExtensionInput = (props: ExtensionInputProps) => {
-  const [actSections, setActSections] = React.useState<ListType[]>([]);
-  const [reasonCount, setReasonCount] = React.useState<number>(0);
-  const changeReasonTextHandler = (event: any) => {
-    setReasonCount(event.target.value.length);
-  };
   const {
     register,
     unregister,
@@ -38,8 +27,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
   const ctx = React.useContext(WorkplanContext);
   React.useEffect(() => {
     return () => {
-      unregister("act_section_id");
-      unregister("reason");
       unregister("number_of_days");
       unregister("phase_end_date");
     };
@@ -54,24 +41,9 @@ const ExtensionInput = (props: ExtensionInputProps) => {
       "phase_end_date",
       Moment(ctx.selectedWorkPhase?.end_date).add(numberOfDays, "days").format()
     );
-    getActSections();
   }, []);
   const numberOfDaysRef = React.useRef();
   const endDateRef = React.useRef();
-  const getActSections = async () => {
-    try {
-      const result = await actSectionService.getActSectionsByEaAct(
-        ctx.work?.ea_act_id
-      );
-      if (result.status === 200) {
-        setActSections(result.data as ListType[]);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
   const onDayChange = (event: SyntheticEvent) => {
     if (endDateRef.current as any) {
       setValue(
@@ -153,41 +125,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           )}
         />
       </Grid>
-
-      <Grid item xs={12}>
-        <ETFormLabel required>Act Section</ETFormLabel>
-        <ControlledSelectV2
-          disabled={props.isFormFieldsLocked}
-          helperText={errors?.act_section_id?.message?.toString()}
-          options={actSections || []}
-          getOptionValue={(o: ListType) => o?.id.toString()}
-          getOptionLabel={(o: ListType) => o?.name}
-          {...register("act_section_id")}
-        ></ControlledSelectV2>
-      </Grid>
-      <Grid item xs={12}>
-        <ETFormLabelWithCharacterLimit
-          characterCount={reasonCount}
-          maxCharacterLength={60}
-        >
-          Reason
-        </ETFormLabelWithCharacterLimit>
-        <TextField
-          fullWidth
-          multiline
-          disabled={props.isFormFieldsLocked}
-          rows={3}
-          InputProps={{
-            inputProps: {
-              maxLength: 60,
-            },
-          }}
-          error={!!errors?.reason?.message}
-          helperText={errors?.reason?.message?.toString()}
-          {...register("reason")}
-          onChange={changeReasonTextHandler}
-        />
-      </Grid>
+      <ExtensionSuspensionInput isFormFieldsLocked={props.isFormFieldsLocked} />
     </>
   );
 };

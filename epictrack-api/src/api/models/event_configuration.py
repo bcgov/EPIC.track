@@ -16,6 +16,7 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
+from api.models.event_template import EventPositionEnum
 from .base_model import BaseModelVersioned
 from .db import db
 
@@ -30,7 +31,7 @@ class EventConfiguration(BaseModelVersioned):
     parent_id = sa.Column(sa.Integer, nullable=True)
     template_id = sa.Column(sa.ForeignKey('event_templates.id'), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey('event_types.id'), nullable=False)
-    event_position = sa.Column(sa.String)
+    event_position = sa.Column(sa.Enum(EventPositionEnum))
     multiple_days = sa.Column(sa.Boolean, default=False)
     event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
     start_at = sa.Column(sa.String, nullable=True)

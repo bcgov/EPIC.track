@@ -32,7 +32,7 @@ from .event import Event
 from .event_category import PRIMARY_CATEGORIES, EventCategory, EventCategoryEnum
 from .event_configuration import EventConfiguration
 from .event_template import EventTemplate
-from .event_type import EventType
+from .event_type import EventType, EventTypeEnum
 from .federal_involvement import FederalInvolvement
 from .indigenous_category import IndigenousCategory
 from .indigenous_nation import IndigenousNation

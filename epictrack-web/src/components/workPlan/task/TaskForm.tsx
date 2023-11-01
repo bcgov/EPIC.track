@@ -54,7 +54,7 @@ const TaskForm = ({
   const startDateRef = useRef();
   const numberOfDaysRef = useRef();
   const ctx = useContext(WorkplanContext);
-  const { handleHighlightRow } = useContext(EventContext);
+  const { handleHighlightRows } = useContext(EventContext);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -112,10 +112,12 @@ const TaskForm = ({
     showNotification("Task details inserted", {
       type: "success",
     });
-    handleHighlightRow({
-      type: EVENT_TYPE.TASK,
-      id: createResult.data.id,
-    });
+    handleHighlightRows([
+      {
+        type: EVENT_TYPE.TASK,
+        id: createResult.data.id,
+      },
+    ]);
     return createResult;
   };
 
@@ -127,10 +129,12 @@ const TaskForm = ({
     showNotification("Task details updated", {
       type: "success",
     });
-    handleHighlightRow({
-      type: EVENT_TYPE.TASK,
-      id: Number(taskEvent?.id),
-    });
+    handleHighlightRows([
+      {
+        type: EVENT_TYPE.TASK,
+        id: Number(taskEvent?.id),
+      },
+    ]);
     return updateResult;
   };
 

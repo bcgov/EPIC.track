@@ -8,7 +8,11 @@ const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
 
   useEffect(() => {
-    if (ctx.work?.current_phase_id && ctx.workPhases.length > 0) {
+    if (
+      ctx.work?.current_phase_id &&
+      ctx.workPhases.length > 0 &&
+      !ctx.selectedWorkPhase
+    ) {
       const phase = ctx.workPhases.find(
         (workPhase) => workPhase.phase.id === ctx.work?.current_phase_id
       );
