@@ -9,13 +9,13 @@ from api.models.work import Work
 class LockWorkStartDate(ActionFactory):  # pylint: disable=too-few-public-methods
     """Disable work start date action"""
 
-    def run(self) -> None:
-        """Set the work start date and mark start date as locked for changes"""
-        db.session.query(Work).filter(Work.id == self.source_event.work_id).update(
-            {"start_date_locked": True}
+    def run(self, source_event: Event, params: dict) -> None:
+        """Performs the required operations"""
+        db.session.query(Work).filter(Work.id == source_event.work_id).update(
+            {Work.start_date_locked: True}
         )
         db.session.commit()
 
     def get_additional_params(self, params):
         """Returns additional parameter"""
-        return super().get_additional_params(params)
+        return params

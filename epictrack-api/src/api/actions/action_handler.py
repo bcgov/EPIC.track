@@ -4,7 +4,6 @@ from importlib import import_module
 from api.actions.base import ACTION_HANDLER_CLASS_MAPS, ActionFactory
 from api.exceptions import UnprocessableEntityError
 from api.models.action import ActionEnum
-from api.models.action_configuration import ActionConfiguration
 from api.models.event import Event
 
 
@@ -26,13 +25,11 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
                 f"Action class {action_class_name} not configured properly."
             ) from e
 
-    def apply(
-        self, source_event: Event, action_configuration: ActionConfiguration
-    ) -> None:
+    def apply(self, source_event: Event, params: dict = None) -> None:
         """Perform the action"""
         # So that actions not done yet won't raise errors
         if self.action_class:
-            self.action_class(source_event, action_configuration).run()
+            self.action_class().run(source_event, params)
 
     def get_additional_params(self, params: dict) -> None:
         """
@@ -42,5 +39,4 @@ class ActionHandler:  # pylint: disable=too-few-public-methods
         the given params. This is required to extract the actual params at the
         time of template uploading
         """
-        if self.action_class:
-            self.action_class().get_additional_params(params)
+        return self.action_class().get_additional_params(params) if self.action_class else {}

@@ -23,13 +23,13 @@ const ExtensionSuspensionInput = (props: ExtensionSuspensionInputProps) => {
     register,
     unregister,
     formState: { errors },
-    control,
-    setValue,
-    getValues,
   } = useFormContext();
   const ctx = React.useContext(WorkplanContext);
+
   React.useEffect(() => {
     getActSections();
+  }, []);
+  React.useEffect(() => {
     return () => {
       unregister("act_section_id");
       unregister("reason");

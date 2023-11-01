@@ -16,11 +16,10 @@ import copy
 from typing import IO, Dict
 
 import pandas as pd
-from api.actions.action_handler import ActionHandler
+
 from api.exceptions import BadRequestError
-from api.models import (Action, ActionEnum, ActionTemplate, EAAct,
-                        EventCategory, EventTemplate, EventType,
-                        OutcomeTemplate, PhaseCode, WorkType, db)
+from api.models import (
+    Action, ActionTemplate, EAAct, EventCategory, EventTemplate, EventType, OutcomeTemplate, PhaseCode, WorkType, db)
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services.phaseservice import PhaseService
@@ -299,10 +298,7 @@ class EventTemplateService:
                     ),
                     None,
                 )
-                action_handler = ActionHandler(ActionEnum(action["action_id"]))
-                action["additional_params"] = action_handler.get_additional_params(
-                    action["additional_params"]
-                )
+                action["additional_params"] = action["additional_params"]
                 action_obj = req.ActionTemplateBodyParameterSchema().load(action)
                 if selected_action:
                     action_result = selected_action.update(action_obj, commit=False)

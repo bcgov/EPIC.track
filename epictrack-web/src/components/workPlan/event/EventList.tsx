@@ -41,6 +41,7 @@ import { ListType } from "../../../models/code";
 import responsibilityService from "../../../services/responsibilityService/responsibilityService";
 import EventListTable from "./EventListTable";
 import EventForm from "./EventForm";
+import { EventContext } from "./EventContext";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -86,6 +87,7 @@ const EventList = () => {
   const [showTemplateForm, setShowTemplateForm] =
     React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
+  const { handleHighlightRows } = useContext(EventContext);
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
     {}
   );
@@ -432,6 +434,12 @@ const EventList = () => {
             type: "success",
           });
           getCombinedEvents();
+
+          const highlightedRows = Object.keys(rowSelection).map((id) => ({
+            type: EVENT_TYPE.TASK,
+            id: Number(id),
+          }));
+          handleHighlightRows(highlightedRows);
         }
       } catch (e) {
         const error = getAxiosError(e);
@@ -463,6 +471,12 @@ const EventList = () => {
             type: "success",
           });
           getCombinedEvents();
+
+          const highlightedRows = Object.keys(rowSelection).map((id) => ({
+            type: EVENT_TYPE.TASK,
+            id: Number(id),
+          }));
+          handleHighlightRows(highlightedRows);
         }
       } catch (e) {
         const error = getAxiosError(e);
@@ -492,6 +506,12 @@ const EventList = () => {
             type: "success",
           });
           getCombinedEvents();
+
+          const highlightedRows = Object.keys(rowSelection).map((id) => ({
+            type: EVENT_TYPE.TASK,
+            id: Number(id),
+          }));
+          handleHighlightRows(highlightedRows);
         }
       } catch (e) {
         const error = getAxiosError(e);

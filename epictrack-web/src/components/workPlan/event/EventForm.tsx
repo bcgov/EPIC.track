@@ -77,7 +77,7 @@ const EventForm = ({
   const endDateRef = React.useRef();
 
   const ctx = React.useContext(WorkplanContext);
-  const { handleHighlightRow } = useContext(EventContext);
+  const { handleHighlightRows } = useContext(EventContext);
 
   const [actualAdded, setActualAdded] = React.useState<boolean>(false);
   const [anticipatedLabel, setAnticipatedLabel] =
@@ -288,10 +288,12 @@ const EventForm = ({
     showNotification("Milestone details inserted", {
       type: "success",
     });
-    handleHighlightRow({
-      type: EVENT_TYPE.MILESTONE,
-      id: createdResult.data.id,
-    });
+    handleHighlightRows([
+      {
+        type: EVENT_TYPE.MILESTONE,
+        id: createdResult.data.id,
+      },
+    ]);
 
     return createdResult;
   };
@@ -305,10 +307,12 @@ const EventForm = ({
     showNotification("Milestone details updated", {
       type: "success",
     });
-    handleHighlightRow({
-      type: EVENT_TYPE.MILESTONE,
-      id: event.id,
-    });
+    handleHighlightRows([
+      {
+        type: EVENT_TYPE.MILESTONE,
+        id: event.id,
+      },
+    ]);
     return updatedResult;
   };
 
@@ -469,12 +473,12 @@ const EventForm = ({
               <Controller
                 name="anticipated_date"
                 control={control}
-                defaultValue={Moment(event?.anticipated_date).format()}
+                defaultValue={dayjs(event?.anticipated_date).format()}
                 render={({
                   field: { onChange, value },
                   fieldState: { error },
                 }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs} for>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       disabled={isFormFieldsLocked}
                       format={DATE_FORMAT}
@@ -497,9 +501,9 @@ const EventForm = ({
                           anticipatedDate: d,
                         });
                       }}
-                      defaultValue={dayjs(
-                        event?.anticipated_date ? event?.anticipated_date : ""
-                      )}
+                      // defaultValue={dayjs(
+                      //   event?.anticipated_date ? event?.anticipated_date : ""
+                      // )}
                       sx={{ display: "block" }}
                     />
                   </LocalizationProvider>
@@ -512,7 +516,7 @@ const EventForm = ({
                 name="actual_date"
                 control={control}
                 defaultValue={
-                  event?.actual_date ? Moment(event?.actual_date).format() : ""
+                  event?.actual_date ? dayjs(event?.actual_date).format() : ""
                 }
                 render={({
                   field: { onChange, value },

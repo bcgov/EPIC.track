@@ -27,8 +27,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
   const ctx = React.useContext(WorkplanContext);
   React.useEffect(() => {
     return () => {
-      unregister("act_section_id");
-      unregister("reason");
       unregister("number_of_days");
       unregister("phase_end_date");
     };

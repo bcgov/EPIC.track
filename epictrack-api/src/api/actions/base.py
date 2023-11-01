@@ -16,11 +16,11 @@ class ActionFactory(ABC):  # pylint: disable=too-few-public-methods
         super().__init__()
 
     @abstractmethod
-    def run(self) -> None:
+    def run(self, source_event: Event, params: dict):
         """Perform the action"""
 
     @abstractmethod
-    def get_additional_params(self) -> dict:
+    def get_additional_params(self, params):
         """Returns the derived additional parameters required to perform action from templates"""
 
 

@@ -57,7 +57,7 @@ const EventListTable = ({
 }: EventListTable) => {
   const classes = useStyle();
 
-  const { highlightedRow } = useContext(EventContext);
+  const { highlightedRows } = useContext(EventContext);
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -462,10 +462,12 @@ const EventListTable = ({
         rowsPerPageOptions: rowsPerPageOptions(events.length),
       }}
       muiTableBodyRowProps={({ row }) => {
-        if (
-          row.original.type === highlightedRow?.type &&
-          row.original.id === highlightedRow?.id
-        ) {
+        const isHighlightRow = highlightedRows.find(
+          (rowToHighlight) =>
+            rowToHighlight.type === row.original.type &&
+            rowToHighlight.id === row.original.id
+        );
+        if (isHighlightRow) {
           return {
             style: {
               background: highlightedRowBGColor,
