@@ -130,6 +130,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         **{
                             "work_id": work.id,
                             "phase_id": phase.id,
+                            "name": phase.name,
                             "start_date": f"{phase_start_date}",
                             "end_date": f"{end_date}",
                             "legislated": phase.legislated,

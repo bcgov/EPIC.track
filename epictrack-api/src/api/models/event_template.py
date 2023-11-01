@@ -40,7 +40,7 @@ class EventTemplate(BaseModelVersioned):
     parent_id = sa.Column(sa.Integer, nullable=True)
     phase_id = sa.Column(sa.ForeignKey("phase_codes.id"), nullable=False)
     event_type_id = sa.Column(sa.ForeignKey("event_types.id"), nullable=False)
-    event_position = sa.Column(sa.String)
+    event_position = sa.Column(sa.Enum(EventPositionEnum))
     multiple_days = sa.Column(sa.Boolean, default=False)
     event_category_id = sa.Column(sa.ForeignKey("event_categories.id"), nullable=False)
     start_at = sa.Column(sa.String, nullable=True)

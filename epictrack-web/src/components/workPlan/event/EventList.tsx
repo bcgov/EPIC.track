@@ -146,7 +146,7 @@ const EventList = () => {
           });
           result = result.sort(
             (a, b) =>
-              Moment(a.start_date).diff(b.start_date, "seconds") || a.id - b.id
+              Moment(a.start_date).diff(b.start_date, "days") || a.id - b.id
           );
           setEvents(result);
         }
@@ -190,7 +190,6 @@ const EventList = () => {
             Moment(),
             "days"
           );
-          console.log(actualToTodayDiff);
           element.status = element.is_complete
             ? EVENT_STATUS.COMPLETED
             : actualToTodayDiff <= 0
