@@ -106,7 +106,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    []
+    [types, subTypes, envRegions]
   );
   return (
     <>
