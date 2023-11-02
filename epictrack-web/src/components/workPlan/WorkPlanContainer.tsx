@@ -78,22 +78,10 @@ const WorkPlanContainer = () => {
               )
             }
           />
-          <ETTab label="Issues" />
-              ctx.status.length === 0 && (
-                <ErrorIcon
-                  sx={{
-                    color: Palette.secondary.bg.light,
-                    backgroundColor: Palette.secondary.dark,
-                    borderRadius: "50%",
-                  }}
-                />
-              )
-            }
-          />
           <ETTab
             label="Issues"
             icon={
-              ctx.status.length === 0 && (
+              ctx.issues.length === 0 && (
                 <ErrorIcon
                   sx={{
                     color: Palette.secondary.bg.light,
@@ -121,7 +109,6 @@ const WorkPlanContainer = () => {
       </TabPanel>
       <TabPanel index={1} value={selectedTabIndex} className={classes.tabPanel}>
         <Status />
-        <StatusContainer />
       </TabPanel>
       <TabPanel index={2} value={selectedTabIndex} className={classes.tabPanel}>
         <Issues />

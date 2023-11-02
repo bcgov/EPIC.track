@@ -12,7 +12,7 @@ const ApprovedStatus = () => {
       <Box sx={{ display: "flex", gap: "8px", paddingBottom: "8px" }}>
         <ETCaption1 bold>Status</ETCaption1>
         <ETCaption1 bold sx={{ letterSpacing: "0.39px" }}>
-          {moment(statuses[0]?.start_date).format("ll")}
+          ({moment(statuses[0]?.start_date).format("ll")})
         </ETCaption1>
       </Box>
       <DashedBorder>{statuses[0]?.description}</DashedBorder>

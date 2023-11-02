@@ -20,7 +20,7 @@ import { useAppSelector } from "../../hooks";
 import clsx from "clsx";
 import { Link, LinkProps, Path } from "react-router-dom";
 import { Palette } from "../../styles/theme";
-import { makeStyles } from "@mui/styles";
+import { makeStyles, styled } from "@mui/styles";
 
 interface HeaderProps {
   sx?: SxProps;
@@ -407,6 +407,50 @@ export const ETDescription = ({
     >
       {children}
     </Typography>
+  );
+};
+
+interface GrayBoxProps {
+  children?: React.ReactNode | string;
+  [prop: string]: unknown;
+  sx?: SxProps;
+}
+
+export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
+  return (
+    <Box
+      {...rest}
+      sx={{
+        backgroundColor: Palette.neutral.bg.light,
+        padding: "16px 24px",
+        ...sx,
+      }}
+    >
+      {children}
+    </Box>
+  );
+};
+
+export const ETPreviewText = styled(Typography)(() => ({
+  fontSize: "14px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "21px",
+}));
+
+export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
+  return (
+    <Box
+      {...rest}
+      sx={{
+        color: Palette.neutral.light,
+        border: `1px dashed ${Palette.success.light}`,
+        padding: "8px",
+        ...sx,
+      }}
+    >
+      {children}
+    </Box>
   );
 };
 
