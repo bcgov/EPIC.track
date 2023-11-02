@@ -38,16 +38,3 @@ class WorkIssues(BaseModelVersioned):
 
     # Define a relationship to WorkIssueUpdates
     updates = relationship('WorkIssueUpdates', back_populates='work_issue', lazy='joined')
-
-    def as_dict(self):  # pylint:disable=arguments-differ
-        """Return Json representation."""
-        return {
-            'id': self.id,
-            'title': self.title,
-            'is_active': self.is_active,
-            'is_high_priority': self.is_high_priority,
-            'start_date': str(self.start_date) if self.start_date else None,
-            'expected_resolution_date': str(
-                self.expected_resolution_date) if self.expected_resolution_date else None,
-            'work_id': self.work_id,
-        }

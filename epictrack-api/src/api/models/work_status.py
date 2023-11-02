@@ -33,16 +33,3 @@ class WorkStatus(BaseModelVersioned):
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     is_approved = Column(Boolean(), default=False, nullable=False)
     approved_by = Column(String(255), default=None, nullable=True)
-
-    def as_dict(self):  # pylint:disable=arguments-differ
-        """Return dict representation."""
-        return {
-            'id': self.id,
-            'description': self.description,
-            'notes': self.notes,
-            'created_at': self.created_at,
-            'updated_at': self.updated_at,
-            'posted_date': self.posted_date,
-            'posted_by': self.posted_by,
-            'work_id': self.work_id
-        }
