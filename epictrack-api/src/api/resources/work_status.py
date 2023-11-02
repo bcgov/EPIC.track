@@ -22,7 +22,7 @@ from api.services import WorkStatusService
 from api.utils import auth
 from api.utils.util import cors_preflight
 
-API = Namespace("work-status", description="Work Status")
+API = Namespace("work-statuses", description="Work Statuses")
 
 
 @cors_preflight("GET, POST")
