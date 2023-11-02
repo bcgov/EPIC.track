@@ -306,7 +306,7 @@ class EventTemplateService:
                 else:
                     action_result = ActionTemplate(**action_obj).flush()
                 (outcome_result_copy["actions"]).append(
-                    res.EventTemplateResponseSchema().dump(action_result)
+                    res.ActionTemplateResponseSchema().dump(action_result)
                 )
             outcome_final.append(outcome_result_copy)
         return outcome_final
