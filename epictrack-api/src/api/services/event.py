@@ -59,6 +59,12 @@ class EventService:  # pylint: disable=too-few-public-methods
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
+        # all_work_events = cls._find_events(
+        #         current_work_phase.work_id, None, PRIMARY_CATEGORIES
+        # )
+        # all_work_events = sorted(
+        #         all_work_events, key=lambda x: x.actual_date or x.anticipated_date
+        # )
         all_work_phase_events = cls._find_events(
             current_work_phase.work_id, current_work_phase.id, PRIMARY_CATEGORIES
         )
@@ -70,10 +76,12 @@ class EventService:  # pylint: disable=too-few-public-methods
         data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = event.update(data, commit=False)
-        cls._process_events(
-            current_work_phase, event, event_old, current_event_old_index
-        )
-        cls._process_actions(event, data.get("outcome_id", None))
+        # Do not process the date logic if the event is already locked(has actual date entered)
+        if not event_old.actual_date:
+            cls._process_events(
+                current_work_phase, event, event_old, current_event_old_index
+            )
+            cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
@@ -122,7 +130,7 @@ class EventService:  # pylint: disable=too-few-public-methods
         all_work_events = sorted(
                 all_work_events, key=lambda x: x.actual_date or x.anticipated_date
                )
-        cls._previous_event_acutal_date_rule(all_work_events, event, current_event_old_index)
+        cls._previous_event_acutal_date_rule(all_work_events, event)
         all_work_event_configurations = EventConfigurationService.find_configurations(
             event.work_id, _all=True
         )
@@ -231,16 +239,16 @@ class EventService:  # pylint: disable=too-few-public-methods
                 {"work_id": current_work_phase.work_id}
         )
         current_work_phase.is_completed = True
-        current_work_phase.update(current_work_phase.as_dict(recursive=False), commit= False)
+        current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
 
         current_work_phase_index = util.find_index_in_array(
                 all_work_phases, current_work_phase
-            )
+        )
         work: Work = Work.find_by_id(current_work_phase.work_id)
         if current_work_phase_index == len(all_work_phases) - 1:
             work.work_state = WorkStateEnum.COMPLETED
         else:
-            work.current_phase_id = all_work_phases[ current_work_phase_index + 1].id
+            work.current_phase_id = all_work_phases[current_work_phase_index + 1].phase.id
         work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
@@ -378,7 +386,7 @@ class EventService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def _previous_event_acutal_date_rule(
-        cls, all_work_events: [Event], event: Event, current_event_old_index: int
+        cls, all_work_events: [Event], event: Event
     ) -> None:
         """Check to see if the previous event has actual date present
 
@@ -394,7 +402,7 @@ class EventService:  # pylint: disable=too-few-public-methods
                 )
             )
             phase_events = sorted(
-                phase_events, key=lambda x: x.actual_date or x.anticipated_date
+                phase_events, key=lambda x: x.id
             )
             event_index = -1
             for index, item in enumerate(phase_events):
