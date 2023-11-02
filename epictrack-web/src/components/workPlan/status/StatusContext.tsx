@@ -128,7 +128,7 @@ export const StatusProvider = ({
       <TrackDialog
         open={showApproveStatusDialog}
         dialogTitle="Approve this Status?"
-        dialogContentText="Once approved, this status will be automatically added to the Report"
+        dialogContentText="Once approved, this status will be automatically added to the Report."
         okButtonText="Approve"
         cancelButtonText="Cancel"
         isActionsRequired

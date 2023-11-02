@@ -14,9 +14,10 @@ import Status from "./status";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
 const NotificationError: React.FC<IconProps> = Icons["NotificationError"];
-import StatusContainer from "./status/StatusContainer";
 import ErrorIcon from "@mui/icons-material/Error";
 import Issues from "./issues";
+
+const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -73,24 +74,12 @@ const WorkPlanContainer = () => {
             label="Status"
             icon={
               (ctx.statuses.length === 0 ||
-                ctx.statuses[0].approved === false) && (
-                <NotificationError fill={Palette.secondary.bg.light} />
-              )
+                ctx.statuses[0].approved === false) && <IndicatorIcon />
             }
           />
           <ETTab
             label="Issues"
-            icon={
-              ctx.issues.length === 0 && (
-                <ErrorIcon
-                  sx={{
-                    color: Palette.secondary.bg.light,
-                    backgroundColor: Palette.secondary.dark,
-                    borderRadius: "50%",
-                  }}
-                />
-              )
-            }
+            icon={ctx.issues.length === 0 && <IndicatorIcon />}
           />
           <ETTab label="About Project" />
           <ETTab

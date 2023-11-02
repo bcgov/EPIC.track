@@ -50,8 +50,8 @@ const testStatuses: Status[] = [
       "The assessment was carried out through a federally appointed panel, which both levels of government are using to base their decisions about whether to approve the project to proceed.\n\n On January 23, 2023, the federal Minister of Environment and Climate Change determined that the VFPA has responded to the questions posed in the August 2020 information request in sufficient detail. The federal environmental assessment timeline of 89 days until a federal decision on RBT2 at that point resumed. This will be reached on April 23, 2023.\n\n The EAO has 30 days from that point to refer to Ministers for their decision.",
     active: true,
     high_priority: false,
-    start_date: "2023-11-4",
-    approved: true,
+    start_date: "2024-2-4",
+    approved: false,
   },
   {
     id: 3,
@@ -184,7 +184,7 @@ export const WorkplanProvider = ({
     // }
     setStatuses(
       testStatuses.sort((a, b) => {
-        return dateUtils.diff(a.start_date, b.start_date, "days");
+        return dateUtils.diff(b.start_date, a.start_date, "days");
       })
     );
     return Promise.resolve();
