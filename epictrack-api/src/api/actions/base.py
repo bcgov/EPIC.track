@@ -9,12 +9,12 @@ class ActionFactory(ABC):  # pylint: disable=too-few-public-methods
     """Base class for action handlers"""
 
     @abstractmethod
-    def run(self, source_event: Event, params: dict):
+    def run(self, source_event: Event, params: dict) -> None:
         """Perform the action"""
 
-    @abstractmethod
-    def get_additional_params(self, params):
+    def get_additional_params(self, params: dict) -> dict:
         """Returns the derived additional parameters required to perform action from templates"""
+        return params
 
 
 ACTION_HANDLER_CLASS_MAPS = {
