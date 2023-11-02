@@ -31,8 +31,9 @@ export interface Work extends MasterBase {
   eac_decision_by_id: number;
   decision_by_id: number;
   decision_maker_position_id: number;
+  start_date_locked: boolean;
 
-  project: ListType;
+  project: ListType & { description: string };
   ministry: Ministry;
   ea_act: ListType;
   eao_team: ListType;
@@ -49,10 +50,13 @@ export interface Work extends MasterBase {
 export interface WorkPhase extends MasterBase {
   end_date: string;
   start_date: string;
+  name: string;
   phase: ListType;
   milestone_progress: number;
   next_milestone: string;
   is_completed: boolean;
+  is_suspended: boolean;
+  suspended_date: string;
   id: number;
   number_of_days: string;
 }

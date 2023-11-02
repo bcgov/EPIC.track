@@ -32,7 +32,7 @@ from .event import Event
 from .event_category import PRIMARY_CATEGORIES, EventCategory, EventCategoryEnum
 from .event_configuration import EventConfiguration
 from .event_template import EventTemplate
-from .event_type import EventType
+from .event_type import EventType, EventTypeEnum
 from .federal_involvement import FederalInvolvement
 from .indigenous_category import IndigenousCategory
 from .indigenous_nation import IndigenousNation
@@ -41,7 +41,8 @@ from .inspection import Inspection
 from .inspection_attachment import InspectionAttachment
 from .inspection_attendee import InspectionAttendee
 from .inspection_detail import InspectionDetail
-from .issue import Issue
+from .work_issues import WorkIssues
+from .work_issue_updates import WorkIssueUpdates
 from .milestone_type import MilestoneType
 from .ministry import Ministry
 from .outcome_configuration import OutcomeConfiguration

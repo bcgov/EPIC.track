@@ -13,6 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Event Types."""
 import enum
+
 import sqlalchemy as sa
 
 from .code_table import CodeTableVersioned
@@ -31,8 +32,7 @@ class ActionEnum(enum.Enum):
     LOCK_WORK_START_DATE = 7
     SET_WORK_DECISION_MAKER = 8
     ADD_PHASE = 9
-    SET_PHASE_LEGISLATION = 10
-    CREATE_WORK = 11
+    CREATE_WORK = 10
 
 
 class Action(db.Model, CodeTableVersioned):

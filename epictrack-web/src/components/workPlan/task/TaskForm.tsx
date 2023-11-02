@@ -27,6 +27,7 @@ import RichTextEditor from "../../shared/richTextEditor";
 import { dateUtils } from "../../../utils";
 import { EVENT_TYPE } from "../phase/type";
 import { EventContext } from "../event/EventContext";
+import ControlledMultiSelect from "../../shared/controlledInputComponents/ControlledMultiSelect";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -54,7 +55,7 @@ const TaskForm = ({
   const startDateRef = useRef();
   const numberOfDaysRef = useRef();
   const ctx = useContext(WorkplanContext);
-  const { handleHighlightRow } = useContext(EventContext);
+  const { handleHighlightRows } = useContext(EventContext);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -68,6 +69,7 @@ const TaskForm = ({
     formState: { errors },
     reset,
     control,
+    setValue,
   } = methods;
 
   useEffect(() => {
@@ -112,10 +114,12 @@ const TaskForm = ({
     showNotification("Task details inserted", {
       type: "success",
     });
-    handleHighlightRow({
-      type: EVENT_TYPE.TASK,
-      id: createResult.data.id,
-    });
+    handleHighlightRows([
+      {
+        type: EVENT_TYPE.TASK,
+        id: createResult.data.id,
+      },
+    ]);
     return createResult;
   };
 
@@ -127,10 +131,12 @@ const TaskForm = ({
     showNotification("Task details updated", {
       type: "success",
     });
-    handleHighlightRow({
-      type: EVENT_TYPE.TASK,
-      id: Number(taskEvent?.id),
-    });
+    handleHighlightRows([
+      {
+        type: EVENT_TYPE.TASK,
+        id: Number(taskEvent?.id),
+      },
+    ]);
     return updateResult;
   };
 
@@ -186,6 +192,15 @@ const TaskForm = ({
     }
   };
 
+  const endDateChangeHandler = (endDate: any) => {
+    if (startDateRef?.current as any) {
+      const startDate = (startDateRef?.current as any)["value"];
+      const dateDiff = dateUtils.diff(endDate, startDate, "days");
+      (numberOfDaysRef.current as any)["value"] = dateDiff;
+      setValue("number_of_days", dateDiff);
+    }
+  };
+
   return (
     <>
       <FormProvider {...methods}>
@@ -209,7 +224,7 @@ const TaskForm = ({
             }}
           >
             <Grid item xs={12}>
-              <ETFormLabel required>Task Title</ETFormLabel>
+              <ETFormLabel required>Title</ETFormLabel>
               <TextField
                 fullWidth
                 placeholder="Title"
@@ -257,7 +272,7 @@ const TaskForm = ({
               />
             </Grid>
             <Grid item xs={4}>
-              <ETFormLabel>Days</ETFormLabel>
+              <ETFormLabel>Number of Days</ETFormLabel>
               <TextField
                 fullWidth
                 defaultValue={taskEvent?.number_of_days}
@@ -273,17 +288,50 @@ const TaskForm = ({
               />
             </Grid>
             <Grid item xs={4}>
-              <ETFormLabel required>End Date</ETFormLabel>
-              <TextField
-                fullWidth
-                disabled
-                placeholder="MM-DD-YYYY"
-                inputRef={endDateRef}
+              <ETFormLabel>End Date</ETFormLabel>
+              <Controller
+                name="start_date"
+                control={control}
+                render={({
+                  field: { onChange, value },
+                  fieldState: { error },
+                }) => (
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      format={DATE_FORMAT}
+                      slotProps={{
+                        textField: {
+                          id: "start_date",
+                          fullWidth: true,
+                          inputRef: endDateRef,
+                          error: error ? true : false,
+                          helperText: error?.message,
+                          placeholder: "MM-DD-YYYY",
+                        },
+                      }}
+                      value={dayjs(
+                        dateUtils
+                          .add(
+                            taskEvent?.start_date || "",
+                            taskEvent?.number_of_days || 0,
+                            "days"
+                          )
+                          .toString()
+                      )}
+                      onChange={(event: any) => {
+                        const d = event ? event["$d"] : null;
+                        endDateChangeHandler(d);
+                      }}
+                      sx={{ display: "block" }}
+                    />
+                  </LocalizationProvider>
+                )}
               />
             </Grid>
-            <Grid item xs={4}>
-              <ETFormLabel required>Status</ETFormLabel>
+            <Grid item xs={5}>
+              <ETFormLabel required>Progress</ETFormLabel>
               <ControlledSelectV2
+                placeholder="Select your progress"
                 helperText={errors?.status?.message?.toString()}
                 defaultValue={taskEvent?.status}
                 options={statuses || []}
@@ -305,27 +353,31 @@ const TaskForm = ({
           >
             <Grid item xs={6}>
               <ETFormLabel>Assigned</ETFormLabel>
-              <ControlledSelectV2
+              <ControlledMultiSelect
                 isMulti={true}
-                defaultValue={taskEvent?.assignee_ids?.map((p) => parseInt(p))}
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
+                defaultValue={taskEvent?.assignee_ids?.map((p) => p.toString())}
                 options={assignees || []}
                 getOptionValue={(o: Staff) => o?.id.toString()}
                 getOptionLabel={(o: Staff) => o.full_name}
                 {...register("assignee_ids")}
-              ></ControlledSelectV2>
+              ></ControlledMultiSelect>
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Responsibility</ETFormLabel>
-              <ControlledSelectV2
+              <ControlledMultiSelect
                 isMulti
+                closeMenuOnSelect={false}
+                hideSelectedOptions={false}
                 defaultValue={taskEvent?.responsibility_ids?.map((p) =>
-                  parseInt(p)
+                  p.toString()
                 )}
                 options={responsibilities || []}
                 getOptionValue={(o: ListType) => o?.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
                 {...register("responsibility_ids")}
-              ></ControlledSelectV2>
+              ></ControlledMultiSelect>
             </Grid>
             <Grid item xs={12}>
               <ETFormLabel>Notes</ETFormLabel>

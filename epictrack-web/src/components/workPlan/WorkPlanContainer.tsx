@@ -13,8 +13,10 @@ import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
 import Status from "./status";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
-
 const NotificationError: React.FC<IconProps> = Icons["NotificationError"];
+import StatusContainer from "./status/StatusContainer";
+import ErrorIcon from "@mui/icons-material/Error";
+import Issues from "./issues";
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -77,6 +79,31 @@ const WorkPlanContainer = () => {
             }
           />
           <ETTab label="Issues" />
+              ctx.status.length === 0 && (
+                <ErrorIcon
+                  sx={{
+                    color: Palette.secondary.bg.light,
+                    backgroundColor: Palette.secondary.dark,
+                    borderRadius: "50%",
+                  }}
+                />
+              )
+            }
+          />
+          <ETTab
+            label="Issues"
+            icon={
+              ctx.status.length === 0 && (
+                <ErrorIcon
+                  sx={{
+                    color: Palette.secondary.bg.light,
+                    backgroundColor: Palette.secondary.dark,
+                    borderRadius: "50%",
+                  }}
+                />
+              )
+            }
+          />
           <ETTab label="About Project" />
           <ETTab
             label="Teams"
@@ -94,6 +121,10 @@ const WorkPlanContainer = () => {
       </TabPanel>
       <TabPanel index={1} value={selectedTabIndex} className={classes.tabPanel}>
         <Status />
+        <StatusContainer />
+      </TabPanel>
+      <TabPanel index={2} value={selectedTabIndex} className={classes.tabPanel}>
+        <Issues />
       </TabPanel>
       <TabPanel index={4} value={selectedTabIndex} className={classes.tabPanel}>
         <TeamContainer />

@@ -102,7 +102,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
         : Moment(),
     [phase]
   );
-
+  console.log("selected phase", ctx.selectedWorkPhase?.id);
   return (
     <>
       <Box
@@ -132,7 +132,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={3}>
                 <SummaryItem
                   title="Phase"
-                  content={phase.phase.name}
+                  content={phase.name}
                   enableTooltip={true}
                   isTitleBold={isSelectedPhase}
                   sx={{
