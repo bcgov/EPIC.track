@@ -1,18 +1,14 @@
 import React from "react";
 import { Box, Button } from "@mui/material";
 import moment from "moment";
-import {
-  ETCaption1,
-  ETDescription,
-  ETPreviewText,
-  GrayBox,
-} from "../../../shared";
+import { ETCaption1, ETPreviewText, GrayBox } from "../../../shared";
 import { IconProps } from "../../../icons/type";
 import Icons from "../../../icons";
 import { Palette } from "../../../../styles/theme";
 import { StatusContext } from "../StatusContext";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { useAppSelector } from "../../../../hooks";
+import { Else, If, Then, When } from "react-if";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -45,31 +41,36 @@ const RecentStatus = () => {
         <ETCaption1 bold sx={{ letterSpacing: "0.39px" }}>
           {moment(statuses[0]?.start_date).format("ll")}
         </ETCaption1>
-        {statuses[0].approved === false ? (
-          <ETCaption1
-            bold
-            sx={{
-              color: Palette.error.dark,
-              backgroundColor: Palette.error.bg.light,
-              padding: "4px 8px",
-              borderRadius: "4px",
-            }}
-          >
-            Need Approval
-          </ETCaption1>
-        ) : (
-          <ETCaption1
-            bold
-            sx={{
-              color: Palette.success.dark,
-              backgroundColor: Palette.success.bg.light,
-              padding: "4px 8px",
-              borderRadius: "4px",
-            }}
-          >
-            Approved
-          </ETCaption1>
-        )}
+        <If condition={!statuses[0].approved}>
+          <Then>
+            <ETCaption1
+              bold
+              sx={{
+                color: Palette.error.dark,
+                backgroundColor: Palette.error.bg.light,
+                padding: "4px 8px",
+                borderRadius: "4px",
+              }}
+            >
+              Need Approval
+            </ETCaption1>
+          </Then>
+          <Else>
+            <When condition={statuses[0].approved}>
+              <ETCaption1
+                bold
+                sx={{
+                  color: Palette.success.dark,
+                  backgroundColor: Palette.success.bg.light,
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                }}
+              >
+                Approved
+              </ETCaption1>
+            </When>
+          </Else>
+        </If>
       </Box>
       <ETPreviewText color={Palette.neutral.dark} sx={{ paddingTop: "16px" }}>
         {statuses[0].description}
@@ -79,9 +80,49 @@ const RecentStatus = () => {
           display: "flex",
         }}
       >
-        {statuses[0].approved === false ? (
+        <If condition={!statuses[0].approved}>
+          <Then>
+            <Button
+              onClick={() => setShowApproveStatusDialog(true)}
+              sx={{
+                display: "flex",
+                gap: "8px",
+                backgroundColor: Palette.neutral.bg.light,
+                borderColor: Palette.neutral.bg.light,
+                ":hover": {
+                  backgroundColor: Palette.neutral.bg.light,
+                  borderColor: Palette.neutral.bg.light,
+                },
+              }}
+            >
+              <CheckCircleIcon />
+              Approve
+            </Button>
+          </Then>
+          <Else>
+            <Button
+              sx={{
+                display: "flex",
+                gap: "8px",
+                backgroundColor: Palette.neutral.bg.light,
+                borderColor: Palette.neutral.bg.light,
+                ":hover": {
+                  backgroundColor: Palette.neutral.bg.light,
+                  borderColor: Palette.neutral.bg.light,
+                },
+              }}
+            >
+              <CloneIcon />
+              Clone
+            </Button>
+          </Else>
+        </If>
+        <If condition={!statuses[0].approved}>
           <Button
-            onClick={() => setShowApproveStatusDialog(true)}
+            onClick={() => {
+              setShowStatusForm(true);
+              setStatus(statuses[0]);
+            }}
             sx={{
               display: "flex",
               gap: "8px",
@@ -93,46 +134,10 @@ const RecentStatus = () => {
               },
             }}
           >
-            <CheckCircleIcon />
-            Approve
+            <PencilEditIcon />
+            Edit
           </Button>
-        ) : (
-          <Button
-            sx={{
-              display: "flex",
-              gap: "8px",
-              backgroundColor: Palette.neutral.bg.light,
-              borderColor: Palette.neutral.bg.light,
-              ":hover": {
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-              },
-            }}
-          >
-            <CloneIcon />
-            Clone
-          </Button>
-        )}
-        {/*TODO If approved hide button, unless superuser. */}
-        <Button
-          onClick={() => {
-            setShowStatusForm(true);
-            setStatus(statuses[0]);
-          }}
-          sx={{
-            display: "flex",
-            gap: "8px",
-            backgroundColor: Palette.neutral.bg.light,
-            borderColor: Palette.neutral.bg.light,
-            ":hover": {
-              backgroundColor: Palette.neutral.bg.light,
-              borderColor: Palette.neutral.bg.light,
-            },
-          }}
-        >
-          <PencilEditIcon />
-          Edit
-        </Button>
+        </If>
       </Box>
     </GrayBox>
   );

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { ETCaption1, ETPreviewBox } from "../../../../shared";
+import { ETCaption1, ETPreviewBox, ETPreviewText } from "../../../../shared";
 import { Palette } from "../../../../../styles/theme";
 
 const UnapprovedStatus = () => {
@@ -7,9 +7,9 @@ const UnapprovedStatus = () => {
     <Box sx={{ display: "flex", flexDirection: "column", gap: "8px" }}>
       <ETCaption1 bold>Status</ETCaption1>
       <ETPreviewBox>
-        <ETPreviewBox color={Palette.neutral.light}>
+        <ETPreviewText color={Palette.neutral.light}>
           Once approved, Status will appear here.
-        </ETPreviewBox>
+        </ETPreviewText>
       </ETPreviewBox>
     </Box>
   );
