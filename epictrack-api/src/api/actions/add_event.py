@@ -10,7 +10,3 @@ class AddEvent(ActionFactory):  # pylint: disable=too-few-public-methods
     def run(self, source_event: Event, params: dict) -> None:
         """Performs the required operations"""
         return
-
-    def get_additional_params(self, params):
-        """Returns additional parameter"""
-        return params

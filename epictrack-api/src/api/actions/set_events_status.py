@@ -1,16 +1,15 @@
-"""Disable work start date action handler"""
-
+"""Set events status action handler"""
 from api.actions.base import ActionFactory
+from api.models import db
 from api.models.event import Event
 
 
-class SetEventsStatus(ActionFactory):  # pylint: disable=too-few-public-methods
-    """Sets all the future events status"""
+class SetEventsStatus(ActionFactory):
+    """Set events status action"""
 
-    def run(self, source_event: Event, params: dict) -> None:
-        """Performs the required operations"""
-        return
-
-    def get_additional_params(self, params):
-        """Returns additional parameter"""
-        return params
+    def run(self, source_event, params):
+        """Sets all future events to INACTIVE"""
+        db.session.query(Event).filter(
+            Event.work_id == source_event.work_id,
+            Event.anticipated_date >= source_event.actual_date
+        ).update(params)

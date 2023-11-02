@@ -15,13 +15,14 @@
 import copy
 from datetime import datetime, timedelta
 from typing import List
+
 from sqlalchemy import and_, or_
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
-from api.models import (PRIMARY_CATEGORIES, CalendarEvent, Event,
-                        EventCategoryEnum, EventConfiguration, EventTypeEnum,
-                        WorkCalendarEvent, WorkPhase, Work, WorkStateEnum, db)
+from api.models import (
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, Work,
+    WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
@@ -32,7 +33,7 @@ from api.utils.datetime_helper import get_start_of_day
 from .event_configuration import EventConfigurationService
 
 
-class EventService:  # pylint: disable=too-few-public-methods
+class EventService:
     """Service to manage event related operations."""
 
     @classmethod
@@ -141,15 +142,15 @@ class EventService:  # pylint: disable=too-few-public-methods
         if event.actual_date and event.event_configuration.event_position == EventPositionEnum.END:
             cls._complete_work_phase(current_work_phase)
         if (
-            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
-            and event.actual_date
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value and
+            event.actual_date
         ):
             current_work_phase.suspended_date = event.actual_date
             current_work_phase.is_suspended = True
             current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
         if (
-                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                and event.actual_date
+                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and
+                event.actual_date
         ):
             event.number_of_days = (event.actual_date - current_work_phase.suspended_date).days
             event.update(event.as_dict(recursive=False), commit=False)
@@ -268,14 +269,14 @@ class EventService:  # pylint: disable=too-few-public-methods
             # return 0 days to be pushed unless actual date is entered
             return 0 if not event.actual_date else event.number_of_days
         if (
-            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
-            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value and
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
         ):
             # always return 0 as suspension does not push the number of days
             return 0
         if (
-            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value
-            and event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value and
+            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
         ):
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
@@ -624,6 +625,4 @@ class EventService:  # pylint: disable=too-few-public-methods
         )
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
-            if action_configuration.action.id == ActionEnum.LOCK_WORK_START_DATE.value:
-                params = {"work_id": event.work_id, "start_date": event.actual_date, "start_date_locked": True}
-                action_handler.apply(params)
+            action_handler.apply(event, action_configuration.additional_params)
