@@ -74,13 +74,7 @@ const StatusContainer = () => {
       >
         <StatusView />
       </Grid>
-      <Grid
-        item
-        xs={4}
-        sx={{
-          pt: "2rem",
-        }}
-      >
+      <Grid item xs={4}>
         <TabPanel
           index={0}
           value={selectedTabIndex}

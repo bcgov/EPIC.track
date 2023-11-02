@@ -7,16 +7,19 @@ import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import statusService from "../../../services/statusService";
+import workService from "../../../services/workService/workService";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
   status?: Status | null;
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
   onSave(data: any, callback: () => any): any;
+  setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
 }
 
 export const StatusContext = createContext<StatusContextProps>({
   setShowStatusForm: () => ({}),
+  setShowApproveStatusDialog: () => ({}),
   status: null,
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
@@ -38,8 +41,9 @@ export const StatusProvider = ({
   children: JSX.Element | JSX.Element[];
 }) => {
   const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
+  const [showApproveStatusDialog, setShowApproveStatusDialog] =
+    React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
-  const [backdrop, setBackdrop] = React.useState<boolean>(false);
 
   // React.useEffect(() => {
   //   setStatus(testStatus);
@@ -51,7 +55,6 @@ export const StatusProvider = ({
 
   const onSave = React.useCallback(
     async (data: any, callback: () => any) => {
-      setBackdrop(true);
       try {
         if (status) {
           const result = await statusService?.update(
@@ -87,15 +90,32 @@ export const StatusProvider = ({
         showNotification(message, {
           type: "error",
         });
-        setBackdrop(false);
       }
     },
     [status]
   );
 
+  const closeApproveDialog = React.useCallback(() => {
+    setShowApproveStatusDialog(false);
+  }, []);
+
+  const approveStatus = async (id?: string) => {
+    // const result = await workService?.delete(id);
+    // if (result && result.status === 200) {
+    setShowApproveStatusDialog(false);
+    // getData();
+    // setId(undefined);
+  };
+
   return (
     <StatusContext.Provider
-      value={{ setShowStatusForm, setStatus, status, onSave }}
+      value={{
+        setShowStatusForm,
+        setShowApproveStatusDialog,
+        setStatus,
+        status,
+        onSave,
+      }}
     >
       {children}
       <TrackDialog
@@ -111,6 +131,16 @@ export const StatusProvider = ({
       >
         <StatusForm />
       </TrackDialog>
+      <TrackDialog
+        open={showApproveStatusDialog}
+        dialogTitle="Approve this Status?"
+        dialogContentText="Once approved, this status will be automatically added to the Report"
+        okButtonText="Approve"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        onCancel={closeApproveDialog}
+        onOk={() => approveStatus(status?.id.toString())}
+      />
     </StatusContext.Provider>
   );
 };

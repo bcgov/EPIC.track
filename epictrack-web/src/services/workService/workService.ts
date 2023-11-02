@@ -195,11 +195,11 @@ class WorkService implements ServiceBase {
     });
   }
   async getWorkStatuses(workId: number) {
-    // let query = `${Endpoints.Works.WORK_TEAM_MEMBERS.replace(
-    //   ":work_id",
-    //   workId.toString()
-    // )}`;
-    // return await http.GetRequest(query);
+    const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+    return await http.GetRequest(query);
   }
 }
 export default new WorkService();

@@ -48,7 +48,7 @@ const testStatuses: Status[] = [
     active: true,
     high_priority: false,
     start_date: "2023-11-4",
-    approved: false,
+    approved: true,
   },
   {
     id: 3,

@@ -409,3 +409,28 @@ export const ETDescription = ({
     </Typography>
   );
 };
+
+interface DashedBorder {
+  children?: React.ReactNode | string;
+  [prop: string]: unknown;
+  sx?: SxProps;
+}
+export const DashedBorder = ({ children, sx, ...rest }: DashedBorder) => {
+  return (
+    <Typography
+      {...rest}
+      sx={{
+        color: Palette.neutral.light,
+        fontSize: "14px",
+        fontStyle: "normal",
+        fontWeight: "400",
+        lineHeight: "24px",
+        padding: "8px",
+        border: `1px dashed ${Palette.success.light}`,
+        ...sx,
+      }}
+    >
+      {children}
+    </Typography>
+  );
+};
