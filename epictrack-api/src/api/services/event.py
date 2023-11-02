@@ -403,7 +403,7 @@ class EventService:
                 )
             )
             phase_events = sorted(
-                phase_events, key=lambda x: x.id
+                phase_events, key=lambda x: x.actual_date or x.anticipated_date
             )
             event_index = -1
             for index, item in enumerate(phase_events):
