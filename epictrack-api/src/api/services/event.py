@@ -21,8 +21,8 @@ from sqlalchemy import and_, or_
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, WorkCalendarEvent,
-    WorkPhase, db)
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, Work,
+    WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
@@ -60,6 +60,12 @@ class EventService:
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
+        # all_work_events = cls._find_events(
+        #         current_work_phase.work_id, None, PRIMARY_CATEGORIES
+        # )
+        # all_work_events = sorted(
+        #         all_work_events, key=lambda x: x.actual_date or x.anticipated_date
+        # )
         all_work_phase_events = cls._find_events(
             current_work_phase.work_id, current_work_phase.id, PRIMARY_CATEGORIES
         )
@@ -71,10 +77,12 @@ class EventService:
         data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = event.update(data, commit=False)
-        cls._process_events(
-            current_work_phase, event, event_old, current_event_old_index
-        )
-        cls._process_actions(event, data.get("outcome_id", None))
+        # Do not process the date logic if the event is already locked(has actual date entered)
+        if not event_old.actual_date:
+            cls._process_events(
+                current_work_phase, event, event_old, current_event_old_index
+            )
+            cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
@@ -116,6 +124,14 @@ class EventService:
         current_event_old_index: int = None,
     ) -> None:
         """Process the event date logic"""
+        cls._end_event_anticipated_change_rule(event, event_old)
+        all_work_events = cls._find_events(
+                current_work_phase.work_id, None, PRIMARY_CATEGORIES
+        )
+        all_work_events = sorted(
+                all_work_events, key=lambda x: x.actual_date or x.anticipated_date
+               )
+        cls._previous_event_acutal_date_rule(all_work_events, event)
         all_work_event_configurations = EventConfigurationService.find_configurations(
             event.work_id, _all=True
         )
@@ -123,6 +139,8 @@ class EventService:
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, event_old, current_work_phase
         )
+        if event.actual_date and event.event_configuration.event_position == EventPositionEnum.END:
+            cls._complete_work_phase(current_work_phase)
         if (
             event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value and
             event.actual_date
@@ -140,15 +158,7 @@ class EventService:
             current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
 
         if number_of_days_to_be_pushed != 0:
-            cls._end_event_anticipated_change_rule(event, event_old)
 
-            all_work_events = cls._find_events(
-                current_work_phase.work_id, None, PRIMARY_CATEGORIES
-            )
-            all_work_events = sorted(
-                all_work_events, key=lambda x: x.actual_date or x.anticipated_date
-            )
-            cls._previous_event_acutal_date_rule(all_work_events, event)
             all_work_phases = WorkPhase.find_by_params(
                 {"work_id": current_work_phase.work_id}
             )
@@ -222,6 +232,25 @@ class EventService:
                     current_work_phase,
                     current_event_old_index,
                 )
+
+    @classmethod
+    def _complete_work_phase(cls, current_work_phase: WorkPhase) -> None:
+        """Mark the current work phase complete and set the next work phase as the current one in the work"""
+        all_work_phases = WorkPhase.find_by_params(
+                {"work_id": current_work_phase.work_id}
+        )
+        current_work_phase.is_completed = True
+        current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+
+        current_work_phase_index = util.find_index_in_array(
+                all_work_phases, current_work_phase
+        )
+        work: Work = Work.find_by_id(current_work_phase.work_id)
+        if current_work_phase_index == len(all_work_phases) - 1:
+            work.work_state = WorkStateEnum.COMPLETED
+        else:
+            work.current_phase_id = all_work_phases[current_work_phase_index + 1].phase.id
+        work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _get_number_of_days_to_be_pushed(cls,
@@ -374,7 +403,7 @@ class EventService:
                 )
             )
             phase_events = sorted(
-                phase_events, key=lambda x: x.actual_date or x.anticipated_date
+                phase_events, key=lambda x: x.id
             )
             event_index = -1
             for index, item in enumerate(phase_events):

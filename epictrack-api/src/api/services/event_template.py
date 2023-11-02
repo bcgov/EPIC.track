@@ -14,6 +14,7 @@
 """Service to manage Event Template."""
 import copy
 from typing import IO, Dict
+import json
 
 import pandas as pd
 
@@ -293,7 +294,7 @@ class EventTemplateService:
                     ),
                     None,
                 )
-                action["additional_params"] = action["additional_params"]
+                action["additional_params"] = json.loads(action["additional_params"])
                 action_obj = req.ActionTemplateBodyParameterSchema().load(action)
                 if selected_action:
                     action_result = selected_action.update(action_obj, commit=False)

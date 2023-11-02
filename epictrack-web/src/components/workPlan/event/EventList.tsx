@@ -715,7 +715,7 @@ const EventList = () => {
       </Grid>
       <TrackDialog
         open={showTaskForm}
-        dialogTitle="Add Task"
+        dialogTitle={taskEvent ? taskEvent?.name : "Add Task"}
         //onClose={(event, reason) => onDialogClose(event, reason)}
         disableEscapeKeyDown
         fullWidth

@@ -14,6 +14,8 @@ import TeamContainer from "./team/TeamContainer";
 import { makeStyles } from "@mui/styles";
 import FirstNationContainer from "./firstNations/FirstNationContainer";
 import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
+import StatusContainer from "./status/StatusContainer";
+import ErrorIcon from "@mui/icons-material/Error";
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -66,7 +68,20 @@ const WorkPlanContainer = () => {
             }}
             label="Workplan"
           />
-          <ETTab label="Status" />
+          <ETTab
+            label="Status"
+            icon={
+              ctx.status.length === 0 && (
+                <ErrorIcon
+                  sx={{
+                    color: Palette.secondary.bg.light,
+                    backgroundColor: Palette.secondary.dark,
+                    borderRadius: "50%",
+                  }}
+                />
+              )
+            }
+          />
           <ETTab label="Issues" />
           <ETTab label="About Project" />
           <ETTab
@@ -82,6 +97,9 @@ const WorkPlanContainer = () => {
       </Box>
       <TabPanel index={0} value={selectedTabIndex} className={classes.tabPanel}>
         <PhaseContainer />
+      </TabPanel>
+      <TabPanel index={1} value={selectedTabIndex} className={classes.tabPanel}>
+        <StatusContainer />
       </TabPanel>
       <TabPanel index={4} value={selectedTabIndex} className={classes.tabPanel}>
         <TeamContainer />
