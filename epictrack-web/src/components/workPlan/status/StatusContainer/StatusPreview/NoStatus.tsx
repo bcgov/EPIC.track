@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { ETCaption1, DashedBorder } from "../../../../shared";
+import { ETCaption1, ETPreviewText, ETPreviewBox } from "../../../../shared";
 import { Palette } from "../../../../../styles/theme";
 
 const NoStatus = () => {
@@ -14,7 +14,11 @@ const NoStatus = () => {
       }}
     >
       <ETCaption1 bold>Status</ETCaption1>
-      <DashedBorder>Your status will appear here.</DashedBorder>
+      <ETPreviewBox>
+        <ETPreviewText color={Palette.neutral.light}>
+          Your status will appear here.
+        </ETPreviewText>
+      </ETPreviewBox>
     </Box>
   );
 };

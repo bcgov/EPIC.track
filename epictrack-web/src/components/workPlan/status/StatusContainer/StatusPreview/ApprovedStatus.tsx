@@ -1,8 +1,9 @@
 import React from "react";
 import { Box } from "@mui/material";
 import moment from "moment";
-import { ETCaption1, DashedBorder } from "../../../../shared";
+import { ETCaption1, ETPreviewBox, ETPreviewText } from "../../../../shared";
 import { WorkplanContext } from "../../../WorkPlanContext";
+import { Palette } from "../../../../../styles/theme";
 
 const ApprovedStatus = () => {
   const { statuses } = React.useContext(WorkplanContext);
@@ -15,7 +16,11 @@ const ApprovedStatus = () => {
           ({moment(statuses[0]?.start_date).format("ll")})
         </ETCaption1>
       </Box>
-      <DashedBorder>{statuses[0]?.description}</DashedBorder>
+      <ETPreviewBox>
+        <ETPreviewText color={Palette.neutral.dark}>
+          {statuses[0]?.description}
+        </ETPreviewText>
+      </ETPreviewBox>
     </>
   );
 };

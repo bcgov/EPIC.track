@@ -53,47 +53,41 @@ export const StatusProvider = ({
     setShowStatusForm(false);
   };
 
-  const onSave = React.useCallback(
-    async (data: any, callback: () => any) => {
-      try {
-        if (status) {
-          const result = await statusService?.update(
-            data,
-            status.id.toString()
-          );
-          // if (result && result.status === 200) {
-          //   showNotification(`${status.title} details updated`, {
-          //     type: "success",
-          //   });
-          //   setStatus(undefined);
-          //   setBackdrop(false);
-          //   callback();
-          // }
-        } else {
-          const result = await statusService?.create(data);
-          // if (result && result.status === 201) {
-          //   showNotification(`Status Created`, {
-          //     type: "success",
-          //   });
-          //   setBackdrop(false);
-          //   callback();
-          // }
-        }
-        setShowStatusForm(false);
-        // getData();
-      } catch (e) {
-        const error = getAxiosError(e);
-        const message =
-          error?.response?.status === 422
-            ? error.response.data?.toString()
-            : COMMON_ERROR_MESSAGE;
-        showNotification(message, {
-          type: "error",
-        });
+  const onSave = async (data: any, callback: () => any) => {
+    try {
+      if (status) {
+        const result = await statusService?.update(data, status.id.toString());
+        // if (result && result.status === 200) {
+        //   showNotification(`${status.title} details updated`, {
+        //     type: "success",
+        //   });
+        //   setStatus(undefined);
+        //   setBackdrop(false);
+        //   callback();
+        // }
+      } else {
+        const result = await statusService?.create(data);
+        // if (result && result.status === 201) {
+        //   showNotification(`Status Created`, {
+        //     type: "success",
+        //   });
+        //   setBackdrop(false);
+        //   callback();
+        // }
       }
-    },
-    [status]
-  );
+      setShowStatusForm(false);
+      // getData();
+    } catch (e) {
+      const error = getAxiosError(e);
+      const message =
+        error?.response?.status === 422
+          ? error.response.data?.toString()
+          : COMMON_ERROR_MESSAGE;
+      showNotification(message, {
+        type: "error",
+      });
+    }
+  };
 
   const closeApproveDialog = React.useCallback(() => {
     setShowApproveStatusDialog(false);

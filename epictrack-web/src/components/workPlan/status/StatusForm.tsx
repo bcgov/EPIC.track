@@ -44,7 +44,6 @@ const StatusForm = () => {
   };
 
   const onSubmitHandler = async (data: any) => {
-    console.log(data);
     onSave(data, () => {
       reset();
     });

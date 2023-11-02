@@ -1,7 +1,12 @@
 import React from "react";
 import { Box, Button } from "@mui/material";
 import moment from "moment";
-import { ETCaption1, ETDescription } from "../../../shared";
+import {
+  ETCaption1,
+  ETDescription,
+  ETPreviewText,
+  GrayBox,
+} from "../../../shared";
 import { IconProps } from "../../../icons/type";
 import Icons from "../../../icons";
 import { Palette } from "../../../../styles/theme";
@@ -20,10 +25,8 @@ const RecentStatus = () => {
   const { position } = useAppSelector((state) => state.user.userDetail);
 
   return (
-    <Box
+    <GrayBox
       sx={{
-        backgroundColor: Palette.neutral.bg.light,
-        padding: "16px 24px",
         width: "50%",
         gap: "16px",
         display: "flex",
@@ -68,9 +71,9 @@ const RecentStatus = () => {
           </ETCaption1>
         )}
       </Box>
-      <ETDescription sx={{ lineHeight: "1.2rem", paddingTop: "16px" }}>
+      <ETPreviewText color={Palette.neutral.dark} sx={{ paddingTop: "16px" }}>
         {statuses[0].description}
-      </ETDescription>
+      </ETPreviewText>
       <Box
         sx={{
           display: "flex",
@@ -131,7 +134,7 @@ const RecentStatus = () => {
           Edit
         </Button>
       </Box>
-    </Box>
+    </GrayBox>
   );
 };
 

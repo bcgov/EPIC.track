@@ -110,8 +110,6 @@ const WorkStaffList = () => {
     [wsData]
   );
 
-  console.log(teamFilter);
-
   const columns = React.useMemo<MRT_ColumnDef<WorkStaff>[]>(
     () => [
       {
