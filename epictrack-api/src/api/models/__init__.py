@@ -41,7 +41,8 @@ from .inspection import Inspection
 from .inspection_attachment import InspectionAttachment
 from .inspection_attendee import InspectionAttendee
 from .inspection_detail import InspectionDetail
-from .issue import Issue
+from .work_issues import WorkIssues
+from .work_issue_updates import WorkIssueUpdates
 from .milestone_type import MilestoneType
 from .ministry import Ministry
 from .outcome_configuration import OutcomeConfiguration

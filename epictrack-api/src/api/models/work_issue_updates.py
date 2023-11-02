@@ -11,25 +11,29 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Model to handle all operations related to WorkStatus."""
+"""Model to handle all operations related to Issues."""
 
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text, Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
 
 
-class WorkStatus(BaseModelVersioned):
-    """Model class for WorkStatus."""
+class WorkIssueUpdates(BaseModelVersioned):
+    """Model class for updates Connected to an issue."""
 
-    __tablename__ = 'work_statuses'
+    __tablename__ = 'work_issue_updates'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     description = Column(String(2000), nullable=False)
-    notes = Column(Text)
-    posted_date = Column(Date, nullable=False)
-    posted_by = Column(String(100), nullable=True)
-    work_id = Column(ForeignKey('works.id'), nullable=False)
-    work = relationship('Work', foreign_keys=[work_id], lazy='select')
-    is_approved = Column(Boolean(), default=False, nullable=False)
-    approved_by = Column(String(255), default=None, nullable=True)
+
+    work_issue_id = Column(ForeignKey('work_issues.id'), nullable=False)
+    work_issue = relationship('WorkIssues', back_populates='updates')
+
+    def as_dict(self):  # pylint:disable=arguments-differ
+        """Return Json representation."""
+        return {
+            'id': self.id,
+            'description': self.description,
+            'work_issue_id': self.work_issue_id,
+        }

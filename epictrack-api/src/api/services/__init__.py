@@ -35,3 +35,5 @@ from .work import WorkService
 from .work_phase import WorkPhaseService
 from .action_template import ActionTemplateService
 from .act_section import ActSectionService
+from .work_status import WorkStatusService
+from .work_issues import WorkIssuesService

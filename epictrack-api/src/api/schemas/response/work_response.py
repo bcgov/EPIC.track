@@ -2,7 +2,7 @@
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from api.models import Staff, Work, WorkPhase
+from api.models import Staff, Work, WorkPhase, WorkStatus, WorkIssues, WorkIssueUpdates
 from api.schemas import PositionSchema, RoleSchema
 from api.schemas.base import AutoSchemaBase
 from api.schemas.ea_act import EAActSchema
@@ -157,3 +157,44 @@ class WorkPhaseTemplateAvailableResponse(Schema):
         metadata={"description": "Is task added already"},
         required=True
     )
+
+
+class WorkStatusResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work status model schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = WorkStatus
+        include_fk = True
+        unknown = EXCLUDE
+
+
+class WorkIssueUpdatesResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work Issues model schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = WorkIssueUpdates
+        include_fk = True
+        unknown = EXCLUDE
+
+
+class WorkIssuesResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work Issues model schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = WorkIssues
+        include_fk = True
+        unknown = EXCLUDE
+
+    updates = fields.Nested(WorkIssueUpdatesResponseSchema(many=True), dump_default=[])
