@@ -13,52 +13,41 @@
 # limitations under the License.
 """Model to handle all operations related to Issues."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
 
 
-class Issue(BaseModelVersioned):
-    """Model class for Issue."""
+class WorkIssues(BaseModelVersioned):
+    """Model class for Issue Connected to a Work."""
 
-    __tablename__ = 'issues'
+    __tablename__ = 'work_issues'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(255), nullable=False)
-    short_description = Column(String(2000), nullable=False)
-    long_description = Column(Text, nullable=True)
-    is_key_issue = Column(Boolean(), default=False, nullable=False)
-    is_sensitive = Column(Boolean(), default=False, nullable=False)
+    title = Column(String(500), nullable=False)
     is_active = Column(Boolean(), default=True, nullable=False)
-    is_resolved = Column(Boolean(), default=False, nullable=False)
+    is_high_priority = Column(Boolean(), default=False, nullable=False)
     start_date = Column(DateTime(timezone=True), nullable=False)
-    anticipated_resolution_date = Column(DateTime(timezone=True), nullable=True)
-    resolution_date = Column(DateTime(timezone=True), nullable=True)
-    is_deleted = Column(Boolean(), default=False, nullable=False)
+    expected_resolution_date = Column(DateTime(timezone=True), nullable=True)
+    is_approved = Column(Boolean(), default=False, nullable=False)
+    approved_by = Column(String(255), default=None, nullable=True)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
+
+    # Define a relationship to WorkIssueUpdates
+    updates = relationship('WorkIssueUpdates', back_populates='work_issue', lazy='joined')
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return Json representation."""
         return {
             'id': self.id,
             'title': self.title,
-            'short_description': self.short_description,
-            'long_description': self.long_description,
             'is_active': self.is_active,
-            'is_key_issue': self.is_key_issue,
-            'is_sensitive': self.is_sensitive,
-            'is_resolved': self.is_resolved,
+            'is_high_priority': self.is_high_priority,
             'start_date': str(self.start_date) if self.start_date else None,
-            'anticipated_resolution_date': str(
-                self.anticipated_resolution_date) if self.anticipated_resolution_date else None,
-            'resolution_date': str(self.resolution_date) if self.resolution_date else None,
+            'expected_resolution_date': str(
+                self.expected_resolution_date) if self.expected_resolution_date else None,
             'work_id': self.work_id,
         }
-
-    @classmethod
-    def find_by_work_id(cls, work_id: int):
-        """Find by work id."""
-        return cls.query.filter_by(work_id=work_id)
