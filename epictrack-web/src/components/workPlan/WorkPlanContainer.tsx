@@ -92,6 +92,7 @@ const WorkPlanContainer = () => {
                     color: Palette.secondary.bg.light,
                     backgroundColor: Palette.secondary.dark,
                     borderRadius: "50%",
+                    borderColor: Palette.secondary.bg.light,
                   }}
                 />
               )
