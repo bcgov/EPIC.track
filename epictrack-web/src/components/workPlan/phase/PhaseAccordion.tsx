@@ -102,7 +102,6 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
         : Moment(),
     [phase]
   );
-  console.log("selected phase", ctx.selectedWorkPhase?.id);
   return (
     <>
       <Box

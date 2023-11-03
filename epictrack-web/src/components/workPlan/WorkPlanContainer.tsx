@@ -4,7 +4,7 @@ import workService from "../../services/workService/workService";
 import { Work } from "../../models/work";
 import { useSearchParams } from "../../hooks/SearchParams";
 import { Palette } from "../../styles/theme";
-import { Tab } from "@mui/material";
+import { CircularProgress, Tab } from "@mui/material";
 import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
 import TabPanel from "../shared/tab/TabPanel";
@@ -83,21 +83,7 @@ const WorkPlanContainer = () => {
               )
             }
           />
-          <ETTab
-            label="Issues"
-            icon={
-              ctx.status.length === 0 && (
-                <ErrorIcon
-                  sx={{
-                    color: Palette.secondary.bg.light,
-                    backgroundColor: Palette.secondary.dark,
-                    borderRadius: "50%",
-                    borderColor: Palette.secondary.bg.light,
-                  }}
-                />
-              )
-            }
-          />
+          <ETTab label="Issues" />
           <ETTab label="About Project" />
           <ETTab
             label="Teams"
