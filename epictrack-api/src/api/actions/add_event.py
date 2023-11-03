@@ -4,18 +4,11 @@ from datetime import timedelta
 
 from api.actions.base import ActionFactory
 from api.models import db
-from api.models.action_configuration import ActionConfiguration
-from api.models.action_template import ActionTemplate
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventTemplate
-from api.models.outcome_configuration import OutcomeConfiguration
 from api.models.phase_code import PhaseCode
 from api.models.work_phase import WorkPhase
-from api.schemas.request.action_configuration_request import ActionConfigurationBodyParameterSchema
-from api.schemas.request.outcome_configuration_request import OutcomeConfigurationBodyParameterSchema
-from api.schemas.response.action_template_response import ActionTemplateResponseSchema
 from api.schemas.response.event_template_response import EventTemplateResponseSchema
-from api.schemas.response.outcome_template_response import OutcomeTemplateResponseSchema
 
 
 # pylint: disable=import-outside-toplevel
@@ -33,8 +26,7 @@ class AddEvent(ActionFactory):  # pylint: disable=too-few-public-methods
             {
                 "is_active": True,
                 "work_id": source_event.work_id,
-                "anticipated_date": source_event.actual_date
-                + timedelta(days=params["start_at"]),
+                "anticipated_date": source_event.actual_date + timedelta(days=params["start_at"]),
             }
         )
         EventService.create_event(event_data, work_phase_id=work_phase_id)
