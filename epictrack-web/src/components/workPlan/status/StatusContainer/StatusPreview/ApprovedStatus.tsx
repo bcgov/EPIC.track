@@ -10,8 +10,6 @@ interface StatusPreview {
 }
 
 const ApprovedStatus = ({ statusForPreview }: StatusPreview) => {
-  console.log(statusForPreview);
-
   return (
     <>
       <Box sx={{ display: "flex", gap: "8px", paddingBottom: "8px" }}>
