@@ -23,7 +23,7 @@ const StatusView = () => {
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       )}
-      {statuses.length > 0 && !statuses[0].approved && (
+      {statuses.length > 0 && !statuses[0].is_approved && (
         <StatusOutOfDateBanner />
       )}
       {statuses.length > 0 && <RecentStatus />}

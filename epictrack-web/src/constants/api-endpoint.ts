@@ -35,7 +35,7 @@ const Endpoints = {
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
   },
   WorkStatuses: {
-    WORK_STATUSES: "work-statuses/:work_id",
+    WORK_STATUSES: "work/:work_id/statuses",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

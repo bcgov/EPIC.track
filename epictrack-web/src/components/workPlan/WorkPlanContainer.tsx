@@ -74,7 +74,7 @@ const WorkPlanContainer = () => {
             label="Status"
             icon={
               (ctx.statuses.length === 0 ||
-                ctx.statuses[0].approved === false) && <IndicatorIcon />
+                ctx.statuses[0].is_approved === false) && <IndicatorIcon />
             }
           />
           <ETTab

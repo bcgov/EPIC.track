@@ -64,9 +64,9 @@ const StatusForm = () => {
         <Grid item xs={4}>
           <ETFormLabel required>Date</ETFormLabel>
           <Controller
-            name="start_date"
+            name="posted_date"
             control={control}
-            defaultValue={Moment(status?.start_date).format()}
+            defaultValue={Moment(status?.posted_date).format()}
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
@@ -80,14 +80,14 @@ const StatusForm = () => {
                       helperText: error?.message,
                       placeholder: "MM-DD-YYYY",
                     },
-                    ...register("start_date"),
+                    ...register("posted_date"),
                   }}
                   value={dayjs(value)}
                   onChange={(event) => {
                     onChange(event);
                   }}
                   defaultValue={dayjs(
-                    status?.start_date ? status?.start_date : ""
+                    status?.posted_date ? status?.posted_date : ""
                   )}
                   sx={{ display: "block" }}
                 />

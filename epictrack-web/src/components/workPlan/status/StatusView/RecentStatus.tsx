@@ -39,9 +39,9 @@ const RecentStatus = () => {
         }}
       >
         <ETCaption1 bold sx={{ letterSpacing: "0.39px" }}>
-          {moment(statuses[0]?.start_date).format("ll")}
+          {moment(statuses[0]?.posted_date).format("ll")}
         </ETCaption1>
-        <If condition={!statuses[0].approved}>
+        <If condition={!statuses[0].is_approved}>
           <Then>
             <ETCaption1
               bold
@@ -56,7 +56,7 @@ const RecentStatus = () => {
             </ETCaption1>
           </Then>
           <Else>
-            <When condition={statuses[0].approved}>
+            <When condition={statuses[0].is_approved}>
               <ETCaption1
                 bold
                 sx={{
@@ -80,7 +80,7 @@ const RecentStatus = () => {
           display: "flex",
         }}
       >
-        <If condition={!statuses[0].approved}>
+        <If condition={!statuses[0].is_approved}>
           <Then>
             <Button
               onClick={() => setShowApproveStatusDialog(true)}
@@ -117,7 +117,7 @@ const RecentStatus = () => {
             </Button>
           </Else>
         </If>
-        <If condition={!statuses[0].approved}>
+        <If condition={!statuses[0].is_approved}>
           <Button
             onClick={() => {
               setShowStatusForm(true);
