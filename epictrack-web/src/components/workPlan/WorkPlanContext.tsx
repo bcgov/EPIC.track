@@ -19,6 +19,7 @@ import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
 import issueService from "../../services/issueService";
+import dateUtils from "../../utils/dateUtils";
 
 interface WorkplanContextProps {
   selectedWorkPhase?: WorkPhase;
@@ -32,13 +33,14 @@ interface WorkplanContextProps {
   setWork: Dispatch<SetStateAction<Work | undefined>>;
   firstNations: WorkFirstNation[];
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
-  status: Status[];
+  statuses: Status[];
   issues: WorkIssue[];
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
+
 export const WorkplanContext = createContext<WorkplanContextProps>({
   selectedWorkPhase: undefined,
   setSelectedWorkPhase: () => ({}),
@@ -51,7 +53,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   setWork: () => ({}),
   firstNations: [],
   setFirstNations: () => ({}),
-  status: [],
+  statuses: [],
   issues: [],
   setIssues: () => ({}),
 });
@@ -64,7 +66,7 @@ export const WorkplanProvider = ({
   const [selectedWorkPhase, setSelectedWorkPhase] = useState<WorkPhase>();
   const [work, setWork] = useState<Work>();
   const [team, setTeam] = useState<StaffWorkRole[]>([]);
-  const [status, setStatus] = useState<Status[]>([]);
+  const [statuses, setStatuses] = React.useState<Status[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
   const [workPhases, setWorkPhases] = useState<WorkPhase[]>([]);
@@ -79,6 +81,7 @@ export const WorkplanProvider = ({
       await getWorkTeamMembers();
       await getWorkPhases();
       await getWorkFirstNations();
+      await getWorkStatuses();
       setLoading(false);
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -149,6 +152,20 @@ export const WorkplanProvider = ({
     }
   };
 
+  const getWorkStatuses = async () => {
+    if (workId) {
+      const statusResult = await workService.getWorkStatuses(Number(workId));
+      if (statusResult.status === 200) {
+        setStatuses(
+          (statusResult.data as Status[]).sort((a, b) => {
+            return dateUtils.diff(b.posted_date, a.posted_date, "days");
+          })
+        );
+        return Promise.resolve();
+      }
+    }
+  };
+
   return (
     <WorkplanContext.Provider
       value={{
@@ -163,7 +180,7 @@ export const WorkplanProvider = ({
         firstNations,
         setFirstNations,
         setWork,
-        status,
+        statuses,
         issues,
         setIssues,
       }}

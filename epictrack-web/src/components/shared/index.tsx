@@ -383,11 +383,39 @@ export const ETLink = (props: LinkProps) => (
   />
 );
 
+export const ETDescription = ({
+  bold,
+  color,
+  children,
+  sx,
+  ...rest
+}: HeaderProps) => {
+  return (
+    <Typography
+      color={color}
+      sx={{
+        ...sx,
+        lineHeight: "21px",
+        fontSize: "14px",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="body1"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
+
 interface GrayBoxProps {
   children?: React.ReactNode | string;
   [prop: string]: unknown;
   sx?: SxProps;
 }
+
 export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
   return (
     <Box

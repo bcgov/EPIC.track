@@ -37,6 +37,9 @@ const Endpoints = {
   Issues: {
     ISSUES: "work/:work_id/issues",
   },
+  WorkStatuses: {
+    WORK_STATUSES: "work/:work_id/statuses",
+  },
   SubTypes: {
     SUB_TYPES: "sub-types",
   },

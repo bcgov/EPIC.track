@@ -1,8 +1,5 @@
 import React, { useContext } from "react";
 import { ETHeading2, ETPageContainer } from "../shared";
-import workService from "../../services/workService/workService";
-import { Work } from "../../models/work";
-import { useSearchParams } from "../../hooks/SearchParams";
 import { Palette } from "../../styles/theme";
 import { CircularProgress, Tab } from "@mui/material";
 import { Box } from "@mui/system";
@@ -14,9 +11,14 @@ import TeamContainer from "./team/TeamContainer";
 import { makeStyles } from "@mui/styles";
 import FirstNationContainer from "./firstNations/FirstNationContainer";
 import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
-import StatusContainer from "./status/StatusContainer";
+import Status from "./status";
+import Icons from "../icons";
+import { IconProps } from "../icons/type";
+const NotificationError: React.FC<IconProps> = Icons["NotificationError"];
 import ErrorIcon from "@mui/icons-material/Error";
 import Issues from "./issues";
+
+const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
 const useStyle = makeStyles({
   tabPanel: {
@@ -72,15 +74,8 @@ const WorkPlanContainer = () => {
           <ETTab
             label="Status"
             icon={
-              ctx.status.length === 0 && (
-                <ErrorIcon
-                  sx={{
-                    color: Palette.secondary.bg.light,
-                    backgroundColor: Palette.secondary.dark,
-                    borderRadius: "50%",
-                  }}
-                />
-              )
+              (ctx.statuses.length === 0 ||
+                ctx.statuses[0].is_approved === false) && <IndicatorIcon />
             }
           />
           <ETTab label="Issues" />
@@ -100,7 +95,7 @@ const WorkPlanContainer = () => {
         <PhaseContainer />
       </TabPanel>
       <TabPanel index={1} value={selectedTabIndex} className={classes.tabPanel}>
-        <StatusContainer />
+        <Status />
       </TabPanel>
       <TabPanel index={2} value={selectedTabIndex} className={classes.tabPanel}>
         <Issues />
