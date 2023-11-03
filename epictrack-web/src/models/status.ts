@@ -1,9 +1,8 @@
 export interface Status {
   id: number;
-  title: string;
   description: string;
-  active: boolean;
-  high_priority: boolean;
-  start_date: number;
-  expected_resolution_date: number;
+  posted_date: string;
+  is_active: boolean;
+  is_approved: boolean;
+  approved_by?: string;
 }
