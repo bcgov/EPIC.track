@@ -16,7 +16,14 @@ export function getSelectFilterOptions<T>(
     }
 
     // Step 4: Populate the Map with unique values and their formatted labels
-    optionsMap.set(dataObject[key], formatLabel(dataObject[key]));
+    if (["start_date", "end_date"].includes(key as string)) {
+      optionsMap.set(
+        formatLabel(dataObject[key]),
+        formatLabel(dataObject[key])
+      );
+    } else {
+      optionsMap.set(dataObject[key], formatLabel(dataObject[key]));
+    }
   });
 
   // Step 5: Convert the Map to an array of objects with 'text' and 'value' properties

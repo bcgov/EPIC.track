@@ -198,7 +198,9 @@ const EventListTable = ({
 
           const value: string = row.getValue(id) || "";
 
-          return filterValue.includes(value);
+          return filterValue.includes(
+            dateUtils.formatDate(String(value), "MMM.DD YYYY")
+          );
         },
         filterSelectOptions: startDateFilterOptions,
         size: 140,
@@ -238,7 +240,11 @@ const EventListTable = ({
 
           const value: string = row.getValue(id) || "";
 
-          return filterValue.includes(value);
+          return filterValue.includes(
+            value == ""
+              ? value
+              : dateUtils.formatDate(String(value), "MMM.DD YYYY")
+          );
         },
         Cell: ({ cell, row }) => (
           <ETParagraph
