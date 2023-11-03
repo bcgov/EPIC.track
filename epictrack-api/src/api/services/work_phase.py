@@ -37,7 +37,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             db.session.query(WorkPhase)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .filter(WorkPhase.work_id == work_id, WorkPhase.is_active.is_(True))
-            .order_by(PhaseCode.sort_order)
+            .order_by(PhaseCode.id)
             .all()
         )
         return work_phases
