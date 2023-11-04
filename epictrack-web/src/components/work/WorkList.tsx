@@ -9,6 +9,9 @@ import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { Link } from "react-router-dom";
+import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
+import { Palette } from "../../styles/theme";
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -74,8 +77,9 @@ const WorkList = () => {
         header: "Name",
         Cell: ({ row }) => (
           <ETGridTitle
+            to="#"
+            onClick={() => onEdit(row.original.id)}
             titleText={row.original.title}
-            to={`/work-plan?work_id=${row.original.id}`}
           >
             {row.original.title}
           </ETGridTitle>
@@ -163,12 +167,11 @@ const WorkList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={() => handleDelete(row.original.id)}>
-                  <DeleteIcon />
-                </IconButton>
+                <Link to={`/work-plan?work_id=${row.original.id}`}>
+                  <VisibilityOutlinedIcon sx={{ color: Palette.black }}>
+                    <EditIcon />
+                  </VisibilityOutlinedIcon>
+                </Link>
               </Box>
             )}
             renderTopToolbarCustomActions={() => (
