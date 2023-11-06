@@ -5,16 +5,16 @@ from datetime import timedelta
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event_configuration import EventConfiguration
-from api.models.event_template import EventTemplate
 from api.models.phase_code import PhaseCode
 from api.models.work_phase import WorkPhase
+from api.schemas.response.event_configuration_response import EventConfigurationResponseSchema
 from api.schemas.response.event_template_response import EventTemplateResponseSchema
 
 
 # pylint: disable=import-outside-toplevel
 
 
-class AddEvent(ActionFactory):  # pylint: disable=too-few-public-methods
+class AddEvent(ActionFactory):
     """Add a new event"""
 
     def run(self, source_event, params) -> None:
@@ -49,32 +49,22 @@ class AddEvent(ActionFactory):  # pylint: disable=too-few-public-methods
             .filter(WorkPhase.is_active.is_(True))
             .first()
         )
-        event_template = (
-            db.session.query(EventTemplate)
+        old_event_config = (
+            db.session.query(EventConfiguration)
             .filter(
-                EventTemplate.phase_id == phase_query.c.id,
-                EventTemplate.name == params.pop("event_name"),
-                EventTemplate.is_active.is_(True),
+                EventConfiguration.work_phase_id == work_phase.id,
+                EventConfiguration.name == params.pop("event_name"),
+                EventConfiguration.is_active.is_(True),
             )
             .first()
         )
-        event_configuration = {
-            "name": event_template.name,
-            "parent_id": event_template.parent_id,
-            "event_type_id": event_template.event_type_id,
-            "event_category_id": event_template.event_category_id,
-            "start_at": params["start_at"],
-            "number_of_days": event_template.number_of_days,
-            "mandatory": event_template.mandatory,
-            "event_position": event_template.event_position,
-            "multiple_days": event_template.multiple_days,
-            "sort_order": event_template.sort_order,
-            "template_id": event_template.id,
-            "work_phase_id": work_phase.id,
-        }
+
+        event_configuration = EventConfigurationResponseSchema().dump(old_event_config)
+        event_configuration["start_at"] = params["start_at"]
+        del event_configuration["id"]
         event_configuration = EventConfiguration(**event_configuration)
         event_configuration.flush()
-        template_json = EventTemplateResponseSchema().dump(event_template)
+        template_json = EventTemplateResponseSchema().dump(old_event_config.event_template)
         WorkService.copy_outcome_and_actions(template_json, event_configuration)
         event_data = {
             "event_configuration_id": event_configuration.id,
