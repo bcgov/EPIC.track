@@ -70,9 +70,6 @@ const IssuesForm = () => {
   const descriptionCharacterLimit = 250;
 
   const onSubmitHandler = async (data: IssueForm) => {
-    console.log(data);
-    // const validatedData = schema.validate(data);
-    // console.log(validatedData);
     setShowIssuesForm(false);
   };
 

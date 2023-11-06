@@ -4,7 +4,7 @@ import { WorkIssue } from "../../models/Issue";
 
 class IssueService {
   async getAll(workId: string) {
-    const query = `${Endpoints.Issues.ISSUES.replace(
+    const query = `${Endpoints.WorkIssues.ISSUES.replace(
       ":work_id",
       workId.toString()
     )}`;

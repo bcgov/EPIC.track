@@ -2,7 +2,7 @@ import { SxProps, TabTypeMap } from "@mui/material";
 
 type ETTabProps = {
   sx?: SxProps;
-  identifier?: string | React.ReactNode;
+  identifier?: string;
   label: string | React.ReactNode;
   value?: any;
   icon?: undefined | React.ReactNode;

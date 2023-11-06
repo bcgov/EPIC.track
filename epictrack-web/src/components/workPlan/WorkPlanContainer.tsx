@@ -1,7 +1,6 @@
 import React, { useContext } from "react";
 import { ETHeading2, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
-import { CircularProgress, Tab } from "@mui/material";
 import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
 import TabPanel from "../shared/tab/TabPanel";
@@ -14,8 +13,6 @@ import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
 import Status from "./status";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
-const NotificationError: React.FC<IconProps> = Icons["NotificationError"];
-import ErrorIcon from "@mui/icons-material/Error";
 import Issues from "./issues";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];

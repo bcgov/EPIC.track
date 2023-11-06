@@ -38,17 +38,14 @@ export const IssuesProvider = ({
   const workId = query.get("work_id");
 
   const loadIssues = async () => {
-    console.log("A");
     if (!workId) return;
 
     try {
-      // const response = await issueService.getAll(workId);
-      // setIssues(response.data);
-      console.log("B");
+      const response = await issueService.getAll(workId);
+      setIssues(response.data);
       setIsIssuesLoading(false);
     } catch (error) {
       setIsIssuesLoading(false);
-      console.log(error);
     }
   };
 

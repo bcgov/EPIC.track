@@ -18,7 +18,6 @@ import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
-import issueService from "../../services/issueService";
 import dateUtils from "../../utils/dateUtils";
 
 interface WorkplanContextProps {
