@@ -185,3 +185,22 @@ class WorkFirstNationImportBodyParamSchema(RequestBodyParameterSchema):
         required=True,
         validate=validate.Length(min=1),
     )
+
+
+class WorkStatusParameterSchema(RequestBodyParameterSchema):
+    """Work status request body schema"""
+
+    description = fields.Str(
+        metadata={"description": "description of status"},
+        validate=validate.Length(max=500),
+        required=True,
+    )
+
+    notes = fields.Str(
+        metadata={"description": "Notes for the work status "},
+        allow_none=True
+    )
+
+    posted_date = fields.DateTime(
+        metadata={"description": "posted date for the work status"}, required=False
+    )
