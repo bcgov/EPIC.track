@@ -1,5 +1,5 @@
 import React from "react";
-import { Chip, Grid, Stack, SxProps } from "@mui/material";
+import { Grid } from "@mui/material";
 import ETAccordion from "../../../shared/accordion/Accordion";
 import ETAccordionSummary from "../../../shared/accordion/components/AccordionSummary";
 import { Palette } from "../../../../styles/theme";
@@ -7,27 +7,25 @@ import ETAccordionDetails from "../../../shared/accordion/components/AccordionDe
 import Icons from "../../../icons/index";
 import { IconProps } from "../../../icons/type";
 import { WorkIssue } from "../../../../models/Issue";
-import { AccordionSummaryItem } from "../../../shared/accordion/components/AccordionSummaryItem";
-import {
-  ActiveChip,
-  HighPriorityChip,
-  InactiveChip,
-} from "../../../shared/chip/ETChip";
-import { ETParagraph } from "../../../shared";
-import moment from "moment";
 import IssueSummary from "./Summary";
 import IssueDetails from "./Details";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 
-const IssueAccordion = ({ issue }: { issue: WorkIssue }) => {
-  const [expanded, setExpanded] = React.useState<boolean>(true);
+const IssueAccordion = ({
+  issue,
+  defaultOpen = true,
+}: {
+  issue: WorkIssue;
+  defaultOpen?: boolean;
+}) => {
+  const [expanded, setExpanded] = React.useState<boolean>(defaultOpen);
 
   return (
     <ETAccordion
       expanded={expanded}
-      onChange={(e, expanded) => {
-        return;
+      onChange={() => {
+        setExpanded(!expanded);
       }}
     >
       <ETAccordionSummary

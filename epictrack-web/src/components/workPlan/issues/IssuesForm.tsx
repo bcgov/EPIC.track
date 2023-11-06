@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -31,14 +31,15 @@ interface IssueForm {
 }
 
 const IssuesForm = () => {
-  const { setShowIssuesForm } = React.useContext(IssuesContext);
+  const { setShowIssuesForm, issueToEdit, setIssueToEdit } =
+    React.useContext(IssuesContext);
 
   const methods = useForm<IssueForm>({
     resolver: yupResolver(schema),
     defaultValues: {
       title: "",
       description: "",
-      is_active: false,
+      is_active: true,
       is_high_priority: false,
       start_date: "",
       expected_resolution_date: "",
@@ -46,7 +47,22 @@ const IssuesForm = () => {
     mode: "onSubmit",
   });
 
-  const { handleSubmit, watch } = methods;
+  const { handleSubmit, watch, reset } = methods;
+
+  useEffect(() => {
+    if (issueToEdit) {
+      const latestUpdate =
+        issueToEdit.updates?.[issueToEdit.updates.length - 1];
+      reset({
+        title: issueToEdit.title,
+        description: latestUpdate?.description,
+        is_active: issueToEdit.is_active,
+        is_high_priority: issueToEdit.is_high_priority,
+        start_date: issueToEdit.start_date,
+        expected_resolution_date: issueToEdit.expected_resolution_date,
+      });
+    }
+  }, [issueToEdit]);
 
   const watchedTitle = watch("title");
   const titleCharacterLimit = 50;
@@ -141,6 +157,9 @@ const IssuesForm = () => {
             fullWidth
             size="small"
             type="date"
+            onChange={(e) => {
+              console.log(e.target.value);
+            }}
           />
         </Grid>
         <Grid item xs={6}>

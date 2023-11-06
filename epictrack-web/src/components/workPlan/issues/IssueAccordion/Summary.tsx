@@ -22,9 +22,9 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
       }}
       alignItems={"flex-start"}
     >
-      <Grid item xs={"auto"}>
+      <Grid item xs lg="auto">
         <AccordionSummaryItem title="Issue" enableTooltip={true}>
-          <Stack spacing={2} direction={"row"} width="100%">
+          <Stack spacing={2} direction={"row"}>
             <ETParagraph>{issue.title}</ETParagraph>
             {issue.is_high_priority && (
               <HighPriorityChip label="High Priority" />

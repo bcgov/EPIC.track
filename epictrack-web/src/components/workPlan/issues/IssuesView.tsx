@@ -24,10 +24,10 @@ const IssuesView = () => {
   const mockIssue: WorkIssue = {
     id: 1,
     title: "Union in opposition to the project",
-    start_date: "",
-    expected_resolution_date: "",
+    start_date: "2023-11-07",
+    expected_resolution_date: "2023-11-07",
     is_active: true,
-    is_high_priority: false,
+    is_high_priority: true,
     is_deleted: false,
     work_id: 1,
     approved_by: "somebody",
@@ -38,9 +38,10 @@ const IssuesView = () => {
     updates: [mockIssueUpdate],
   };
 
-  const issues = [mockIssue];
+  //TODO: remove mock data
+  const issues = [mockIssue, { ...mockIssue, id: 2 }];
 
-  const { showIssuesForm, setShowIssuesForm, isIssuesLoading } =
+  const { showIssuesForm, setShowIssuesForm, isIssuesLoading, setIssueToEdit } =
     React.useContext(IssuesContext);
 
   const onAddButtonClickHandler = () => {
@@ -49,6 +50,7 @@ const IssuesView = () => {
 
   const onCancelHandler = () => {
     setShowIssuesForm(false);
+    setIssueToEdit(null);
   };
 
   if (isIssuesLoading) {
@@ -77,9 +79,9 @@ const IssuesView = () => {
                 Issue
               </Button>
             </Grid>
-            {issues.map((issue) => (
+            {issues.map((issue, index) => (
               <Grid item xs={12}>
-                <IssueAccordion issue={issue} />
+                <IssueAccordion issue={issue} defaultOpen={index === 0} />
               </Grid>
             ))}
           </Grid>
@@ -91,9 +93,10 @@ const IssuesView = () => {
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
-        okButtonText="Add"
+        okButtonText="Save"
         formId="issue-form"
         onCancel={() => onCancelHandler()}
+        onClose={() => onCancelHandler()}
         isActionsRequired
       >
         <IssuesForm />

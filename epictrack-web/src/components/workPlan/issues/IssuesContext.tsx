@@ -2,11 +2,14 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { WorkplanContext } from "../WorkPlanContext";
 import issueService from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/SearchParams";
+import { WorkIssue } from "../../../models/Issue";
 
 interface IssuesContextProps {
   showIssuesForm: boolean;
   setShowIssuesForm: React.Dispatch<React.SetStateAction<boolean>>;
   isIssuesLoading: boolean;
+  issueToEdit: WorkIssue | null;
+  setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
 }
 
 interface IssueContainerRouteParams extends URLSearchParams {
@@ -17,6 +20,8 @@ export const IssuesContext = createContext<IssuesContextProps>({
   showIssuesForm: false,
   setShowIssuesForm: () => ({}),
   isIssuesLoading: true,
+  issueToEdit: null,
+  setIssueToEdit: () => ({}),
 });
 
 export const IssuesProvider = ({
@@ -26,6 +31,7 @@ export const IssuesProvider = ({
 }) => {
   const [showIssuesForm, setShowIssuesForm] = useState(false);
   const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(true);
+  const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
 
   const { issues, setIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
@@ -58,6 +64,8 @@ export const IssuesProvider = ({
         showIssuesForm,
         setShowIssuesForm,
         isIssuesLoading,
+        issueToEdit,
+        setIssueToEdit,
       }}
     >
       {children}

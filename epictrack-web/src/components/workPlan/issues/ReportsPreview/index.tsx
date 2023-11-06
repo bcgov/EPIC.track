@@ -16,7 +16,7 @@ export const ReportsPreview = () => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Stack direction="row" spacing={2}>
+        <Stack direction={{ lg: "row", xs: "column" }} spacing={2}>
           <Button
             variant={
               selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
