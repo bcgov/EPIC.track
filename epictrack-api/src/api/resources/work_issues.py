@@ -60,7 +60,6 @@ class IssueUpdateEdits(Resource):
     @profiletime
     def put(work_id, issue_id):
         """Create a new update for the specified issue."""
-
         request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
         work_issues = WorkIssuesService.edit_issue_update(work_id, issue_id, request_dict)
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
@@ -76,7 +75,6 @@ class WorkIssueUpdate(Resource):
     @profiletime
     def post(work_id, issue_id):
         """Create a new update for the specified issue."""
-
         description_data = API.payload.get('description_data', None)
         if not description_data:
             return jsonify({'error': 'description_data is required'}), HTTPStatus.BAD_REQUEST

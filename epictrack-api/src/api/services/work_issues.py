@@ -57,7 +57,6 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     @classmethod
     def add_work_issue_update(cls, work_id, issue_id, description_data: List[str]):
         """Add a new description to the existing Issue."""
-
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
 
