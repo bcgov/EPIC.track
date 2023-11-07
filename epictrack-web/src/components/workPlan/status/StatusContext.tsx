@@ -6,7 +6,6 @@ import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import statusService from "../../../services/statusService";
 import workService from "../../../services/workService/workService";
 
 interface StatusContextProps {
@@ -25,16 +24,6 @@ export const StatusContext = createContext<StatusContextProps>({
   onSave: (data: any, callback: () => any) => ({}),
 });
 
-// const testStatus: Status = {
-//   id: 1,
-//   title: "Toms Status",
-//   description: "this is the description for toms status",
-//   active: true,
-//   high_priority: false,
-//   start_date: "2023-19-26",
-//   approved: true,
-// };
-
 export const StatusProvider = ({
   children,
 }: {
@@ -45,10 +34,6 @@ export const StatusProvider = ({
     React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
 
-  // React.useEffect(() => {
-  //   setStatus(testStatus);
-  // }, []);
-
   const onDialogClose = () => {
     setShowStatusForm(false);
   };
@@ -56,7 +41,8 @@ export const StatusProvider = ({
   const onSave = async (data: any, callback: () => any) => {
     try {
       if (status) {
-        const result = await statusService?.update(data, status.id.toString());
+        // TODO update or create a status
+        // const result = await statusService?.update(data, status.id.toString());
         // if (result && result.status === 200) {
         //   showNotification(`${status.title} details updated`, {
         //     type: "success",
@@ -66,7 +52,7 @@ export const StatusProvider = ({
         //   callback();
         // }
       } else {
-        const result = await statusService?.create(data);
+        // const result = await statusService?.create(data);
         // if (result && result.status === 201) {
         //   showNotification(`Status Created`, {
         //     type: "success",
@@ -94,6 +80,7 @@ export const StatusProvider = ({
   }, []);
 
   const approveStatus = async (id?: string) => {
+    // TODO update status to be approved
     // const result = await workService?.delete(id);
     // if (result && result.status === 200) {
     setShowApproveStatusDialog(false);
