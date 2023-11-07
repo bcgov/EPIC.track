@@ -10,8 +10,11 @@ import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import { Palette } from "../../styles/theme";
+import { IconProps } from "../icons/type";
+import Icons from "../icons";
+
+const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -137,6 +140,16 @@ const WorkList = () => {
           </span>
         ),
       },
+      {
+        header: "Go to Workplan",
+        Cell: ({ row }) => (
+          <Box>
+            <Link to={`/work-plan?work_id=${row.original.id}`}>
+              <GoToIcon />
+            </Link>
+          </Box>
+        ),
+      },
     ],
     [projects, phases, teams, ministries, workTypes, eaActs]
   );
@@ -164,16 +177,6 @@ const WorkList = () => {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            enableRowActions={true}
-            renderRowActions={({ row }: any) => (
-              <Box>
-                <Link to={`/work-plan?work_id=${row.original.id}`}>
-                  <VisibilityOutlinedIcon sx={{ color: Palette.black }}>
-                    <EditIcon />
-                  </VisibilityOutlinedIcon>
-                </Link>
-              </Box>
-            )}
             renderTopToolbarCustomActions={() => (
               <Box
                 sx={{
