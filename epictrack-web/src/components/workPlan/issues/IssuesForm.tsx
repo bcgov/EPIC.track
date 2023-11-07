@@ -9,6 +9,8 @@ import ControlledSwitch from "../../shared/controlledInputComponents/ControlledS
 import { IssuesContext } from "./IssuesContext";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
+import { IssueForm } from "./types";
+import { is } from "immutable";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
@@ -20,18 +22,8 @@ const schema = yup.object().shape({
 });
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
-interface IssueForm {
-  id: number;
-  title: string;
-  description: string;
-  start_date: string;
-  expected_resolution_date: string;
-  is_active: boolean;
-  is_high_priority: boolean;
-}
-
 const IssuesForm = () => {
-  const { setShowIssuesForm, issueToEdit, setIssueToEdit } =
+  const { setShowIssuesForm, issueToEdit, addIssue } =
     React.useContext(IssuesContext);
 
   const methods = useForm<IssueForm>({
@@ -71,6 +63,23 @@ const IssuesForm = () => {
 
   const onSubmitHandler = async (data: IssueForm) => {
     setShowIssuesForm(false);
+    const {
+      title,
+      description,
+      start_date,
+      expected_resolution_date,
+      is_active,
+      is_high_priority,
+    } = await schema.validate(data);
+
+    addIssue({
+      title,
+      description,
+      start_date,
+      expected_resolution_date: expected_resolution_date || "",
+      is_active: Boolean(is_active),
+      is_high_priority: Boolean(is_high_priority),
+    });
   };
 
   return (

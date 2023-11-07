@@ -7,39 +7,11 @@ import { IssuesContext } from "./IssuesContext";
 import IssuesViewSkeleton from "./IssuesViewSkeleton";
 import { Else, If, Then } from "react-if";
 import IssueAccordion from "./IssueAccordion";
-import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { Button, Grid } from "@mui/material";
+import { WorkplanContext } from "../WorkPlanContext";
 
 const IssuesView = () => {
-  // const { issues } = React.useContext(WorkplanContext);
-
-  const mockIssueUpdate: WorkIssueUpdate = {
-    id: 1,
-    description:
-      "The project has been the subject of media attention due to opposition to the project from the union representing the terminal workers and environmental non-profits.",
-    work_issue_id: 1,
-    is_active: false,
-    is_deleted: false,
-  };
-  const mockIssue: WorkIssue = {
-    id: 1,
-    title: "Union in opposition to the project",
-    start_date: "2023-11-07",
-    expected_resolution_date: "2023-11-07",
-    is_active: true,
-    is_high_priority: true,
-    is_deleted: false,
-    work_id: 1,
-    approved_by: "somebody",
-    created_by: "somebody",
-    created_at: new Date().toISOString(),
-    updated_by: "somebody",
-    updated_at: new Date().toISOString(),
-    updates: [mockIssueUpdate],
-  };
-
-  //TODO: remove mock data
-  const issues = [mockIssue, { ...mockIssue, id: 2 }];
+  const { issues } = React.useContext(WorkplanContext);
 
   const { showIssuesForm, setShowIssuesForm, isIssuesLoading, setIssueToEdit } =
     React.useContext(IssuesContext);
@@ -97,6 +69,7 @@ const IssuesView = () => {
         formId="issue-form"
         onCancel={() => onCancelHandler()}
         onClose={() => onCancelHandler()}
+        onOk={() => onCancelHandler()}
         isActionsRequired
       >
         <IssuesForm />
