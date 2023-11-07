@@ -48,5 +48,5 @@ from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSche
 from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkFirstNationImportBodyParamSchema,
     WorkFirstNationNotesBodySchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
-    WorkPlanDownloadQueryParamSchema, WorkTypeIdQueryParamSchema, WorkStatusParameterSchema)
+    WorkPlanDownloadQueryParamSchema, WorkTypeIdQueryParamSchema, WorkStatusParameterSchema, WorkIssuesParameterSchema, WorkIssuesUpdateSchema)
 from .act_section_request import ActSectionQueryParameterSchema

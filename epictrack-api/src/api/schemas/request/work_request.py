@@ -204,3 +204,64 @@ class WorkStatusParameterSchema(RequestBodyParameterSchema):
     posted_date = fields.DateTime(
         metadata={"description": "posted date for the work status"}, required=False
     )
+
+
+class WorkIssuesParameterSchema(RequestBodyParameterSchema):
+    """Work status request body schema"""
+
+    title = fields.Str(
+        metadata={"description": "Title Of the issue"},
+        validate=validate.Length(max=50),
+        required=True,
+    )
+
+    is_active: bool = fields.Bool(
+        default=True,
+        description="Flag indicating whether the issue is active",
+    )
+
+    is_high_priority: bool = fields.Bool(
+        default=False,
+        description="Flag indicating whether the issue is of high priority",
+    )
+
+    start_date = fields.DateTime(
+        metadata={"description": "Start date for the issue"}, required=False
+    )
+
+    expected_resolution_date = fields.DateTime(
+        metadata={"description": "Expected Resolution date for the issue"}, required=False
+    )
+
+    updates = fields.List(
+        fields.Str,
+        metadata={"description": "List of updates for the issue"},
+        required=False,
+    )
+
+
+class WorkIssuesUpdateSchema(WorkIssuesParameterSchema):
+    """Work status update request body schema for PUT requests"""
+
+    title = fields.Str(
+        metadata={"description": "Title Of the issue"},
+        validate=validate.Length(max=50),
+        required=False,
+    )
+
+    updates = fields.List(
+        fields.Dict(
+            description=fields.Str(
+                metadata={"description": "Description of the update"},
+                required=True
+            ),
+            id=fields.Int(
+                metadata={"description": "ID of the update"},
+                required=True
+            ),
+            metadata={"description": "List of updates for the issue with IDs"},
+            required=True
+        ),
+        metadata={"description": "List of updates for the issue with IDs"},
+        required=False,
+    )
