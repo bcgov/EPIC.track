@@ -76,12 +76,16 @@ const EventListTable = ({
   const startDateFilterOptions = getSelectFilterOptions(
     events,
     "start_date",
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
+    true
   );
   const endDateFilterOptions = getSelectFilterOptions(
     events,
     "end_date",
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
+    true
   );
   const numberOfDaysFilterOptions = getSelectFilterOptions(
     events,
@@ -282,6 +286,9 @@ const EventListTable = ({
           }
 
           const value: string = row.getValue(id) || "";
+
+          console.log(value);
+          console.log(filterValue);
 
           return filterValue.includes(value);
         },

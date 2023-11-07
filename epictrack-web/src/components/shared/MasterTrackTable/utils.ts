@@ -2,7 +2,9 @@ export const BLANK_OPTION = "(Blanks)";
 export function getSelectFilterOptions<T>(
   data: T[],
   key: keyof T,
-  formatLabel: (value: any) => string = (value) => String(value)
+  formatLabel: (value: any) => string = (value) => String(value),
+  formatValue: (value: any) => string = (value) => String(value),
+  is_date = false
 ) {
   // Step 1: Create a Map to store unique values and their formatted labels
   const optionsMap = new Map();
@@ -16,13 +18,16 @@ export function getSelectFilterOptions<T>(
     }
 
     // Step 4: Populate the Map with unique values and their formatted labels
-    if (["start_date", "end_date"].includes(key as string)) {
+    if (is_date) {
       optionsMap.set(
-        formatLabel(dataObject[key]),
+        formatValue(dataObject[key]),
         formatLabel(dataObject[key])
       );
     } else {
-      optionsMap.set(dataObject[key], formatLabel(dataObject[key]));
+      optionsMap.set(
+        formatValue(dataObject[key]),
+        formatLabel(dataObject[key])
+      );
     }
   });
 
