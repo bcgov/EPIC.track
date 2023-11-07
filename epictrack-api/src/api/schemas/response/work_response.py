@@ -15,7 +15,6 @@ from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
-from api.services.event import EventService
 
 
 class WorkResponseSchema(
@@ -120,42 +119,28 @@ class WorkResourceResponseSchema(
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
 
 
-class WorkPhaseSkeletonResponseSchema(AutoSchemaBase):  # pylint: disable=too-many-ancestors,too-few-public-methods
-    """Schema for work phase skeleton details"""
+class WorkPhaseAdditionalInfoResponseSchema(Schema):
+    """Schema for additional work phase details"""
 
-    class Meta(
-        AutoSchemaBase.Meta
-    ):  # pylint: disable=too-many-ancestors,too-few-public-methods
-        """Meta information"""
-
-        model = WorkPhase
-        include_fk = False
-        unknown = EXCLUDE
-
-    phase = fields.Nested(PhaseSchema, dump_only=True)
-    next_milestone = fields.Method("get_next_milestone")
-    milestone_progress = fields.Method("get_milestone_progress")
-
-    def get_next_milestone(self, instance: WorkPhase) -> str:
-        """Returns the next milestone event name"""
-        event = EventService.find_next_milestone_event_by_work_phase_id(instance.id)
-        return event.name if event else None
-
-    def get_milestone_progress(self, instance: WorkPhase) -> float:
-        """Returns the percentage of milestones completed"""
-        return EventService.find_milestone_progress_by_work_phase_id(instance.id)
+    work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
+    total_number_of_days = fields.Number(
+        metadata={"description": "Total number of days in the phase"}, required=True
+    )
+    next_milestone = fields.Str(metadata={"description": "Next milestone in the phase"})
+    milestone_progress = fields.Number(metadata={"description": "Milestone progress"})
+    days_left = fields.Number(
+        metadata={"description": "Number of days left in the phase"}
+    )
 
 
 class WorkPhaseTemplateAvailableResponse(Schema):
     """Schema for work phase template available response"""
 
     template_available = fields.Boolean(
-        metadata={"description": "Is template available"},
-        required=True
+        metadata={"description": "Is template available"}, required=True
     )
     task_added = fields.Boolean(
-        metadata={"description": "Is task added already"},
-        required=True
+        metadata={"description": "Is task added already"}, required=True
     )
 
 

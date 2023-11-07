@@ -5,23 +5,20 @@ import { WorkplanContext } from "../WorkPlanContext";
 import { ETCaption1, ETHeading4 } from "../../shared";
 import { CustomSwitch } from "../../shared/CustomSwitch";
 import { Palette } from "../../../styles/theme";
-import { WorkPhase } from "../../../models/work";
+import { WorkPhase, WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
   const [showCompletedPhases, setShowCompletedPhases] =
     useState<boolean>(false);
-  const [allPhases, setAllPhases] = useState<WorkPhase[]>([]);
+  const [allPhases, setAllPhases] = useState<WorkPhaseAdditionalInfo[]>([]);
 
   useEffect(() => {
-    if (
-      ctx.work?.current_phase_id &&
-      ctx.workPhases.length > 0 &&
-      !ctx.selectedWorkPhase
-    ) {
+    if (ctx.work?.current_phase_id && ctx.workPhases.length > 0) {
       const phase = ctx.workPhases.find(
-        (workPhase) => workPhase.phase.id === ctx.work?.current_phase_id
+        (workPhase) =>
+          workPhase.work_phase.phase.id === ctx.work?.current_phase_id
       );
       ctx.setSelectedWorkPhase(phase);
     }
@@ -30,7 +27,7 @@ const PhaseContainer = () => {
   useEffect(() => {
     let filteredPhases = ctx.workPhases;
     if (showCompletedPhases) {
-      filteredPhases = ctx.workPhases.filter((p) => p.is_completed);
+      filteredPhases = ctx.workPhases.filter((p) => p.work_phase.is_completed);
     }
     setAllPhases(filteredPhases);
   }, [showCompletedPhases, ctx.workPhases]);
@@ -77,7 +74,7 @@ const PhaseContainer = () => {
       {allPhases.map((phase) => (
         <Grid item xs={12}>
           <PhaseAccordion
-            key={`phase-accordion-${phase.phase.id}`}
+            key={`phase-accordion-${phase.work_phase.id}`}
             phase={phase}
           />
         </Grid>

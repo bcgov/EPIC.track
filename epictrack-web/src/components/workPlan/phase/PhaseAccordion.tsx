@@ -1,7 +1,6 @@
-import { Box, Grid, LinearProgress, SxProps, Tooltip } from "@mui/material";
+import { Box, Grid, SxProps, Tooltip } from "@mui/material";
 import React, { useContext } from "react";
 import Moment from "moment";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ETAccordion from "../../shared/accordion/Accordion";
 import { PhaseAccordionProps } from "./type";
 import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
@@ -14,8 +13,11 @@ import BorderLinearProgress from "../../shared/progress/Progress";
 import Icons from "../../icons/index";
 import { makeStyles } from "@mui/styles";
 import { IconProps } from "../../icons/type";
+import { When } from "react-if";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
+const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
+const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
 const useStyles = makeStyles({
   summaryBox: {
     display: "flex",
@@ -83,12 +85,17 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
   const classes = useStyles();
+  const clasess = useStyles();
   const isSelectedPhase = React.useMemo<boolean>(
-    () => phase.phase.id === ctx.selectedWorkPhase?.phase.id,
+    () =>
+      phase.work_phase.phase.id === ctx.selectedWorkPhase?.work_phase.phase.id,
     [ctx.selectedWorkPhase]
   );
   React.useEffect(
-    () => setExpanded(phase.phase.id === ctx.selectedWorkPhase?.phase.id),
+    () =>
+      setExpanded(
+        phase.work_phase.phase.id === ctx.selectedWorkPhase?.work_phase.phase.id
+      ),
     [phase, ctx.selectedWorkPhase]
   );
   const onExpandHandler = (expand: boolean) => {
@@ -97,12 +104,11 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   };
   const fromDate = React.useMemo(
     () =>
-      Moment(phase.start_date).isSameOrAfter(Moment())
-        ? Moment(phase.start_date)
+      Moment(phase.work_phase.start_date).isSameOrAfter(Moment())
+        ? Moment(phase.work_phase.start_date)
         : Moment(),
     [phase]
   );
-  console.log("selected phase", ctx.selectedWorkPhase?.id);
   return (
     <>
       <Box
@@ -132,7 +138,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={3}>
                 <SummaryItem
                   title="Phase"
-                  content={phase.name}
+                  content={phase.work_phase.name}
                   enableTooltip={true}
                   isTitleBold={isSelectedPhase}
                   sx={{
@@ -143,22 +149,62 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               <Grid item xs={2}>
                 <SummaryItem
                   title="Start date"
-                  content={Moment(phase.start_date).format("MMM.DD YYYY")}
+                  content={Moment(phase.work_phase.start_date).format(
+                    "MMM.DD YYYY"
+                  )}
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
-              <Grid item xs={1}>
+              <Grid item xs={2}>
                 <SummaryItem
-                  title="Days left"
-                  content={Math.ceil(
-                    Moment.duration(
-                      Moment(phase.end_date).diff(fromDate)
-                    ).asDays()
-                  ).toString()}
+                  title="Days left / Total"
+                  children={
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                      }}
+                    >
+                      <ETParagraph
+                        className={clasess.content}
+                        bold={isSelectedPhase}
+                        sx={{
+                          color:
+                            phase.days_left < 0
+                              ? Palette.secondary.dark
+                              : Palette.neutral.dark,
+                        }}
+                      >
+                        {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
+                        {phase.total_number_of_days.toString()}
+                        {phase.days_left < 0
+                          ? ` (${Math.abs(phase.days_left)} over)`
+                          : ""}
+                      </ETParagraph>
+                      <When condition={phase.days_left < 0}>
+                        <Box
+                          sx={{
+                            ml: "4px",
+                          }}
+                        >
+                          <ExclamationIcon />
+                        </Box>
+                      </When>
+                      <When condition={phase.work_phase.is_suspended}>
+                        <Box
+                          sx={{
+                            ml: "4px",
+                          }}
+                        >
+                          <PauseIcon />
+                        </Box>
+                      </When>
+                    </Box>
+                  }
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
-              <Grid item xs={2}></Grid>
+              <Grid item xs={1}></Grid>
               <Grid item xs={2}>
                 <SummaryItem
                   title="Next milestone"

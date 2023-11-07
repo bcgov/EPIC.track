@@ -381,7 +381,7 @@ const FirstNationList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
 
   const onTemplateFormSaveHandler = async (firstNationIds: number[]) => {
     setShowImportNationForm(false);

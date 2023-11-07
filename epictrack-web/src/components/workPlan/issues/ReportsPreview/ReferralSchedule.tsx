@@ -14,7 +14,7 @@ export const ReferralSchedule = () => {
   const { work, workPhases } = React.useContext(WorkplanContext);
 
   const currentWorkPhase = workPhases.find(
-    (workPhase) => workPhase.phase.id === work?.current_phase_id
+    (workPhase) => workPhase.work_phase.phase.id === work?.current_phase_id
   );
   return (
     <GrayBox>
@@ -40,7 +40,7 @@ export const ReferralSchedule = () => {
         <Grid item xs={12}></Grid>
         <Grid item xs={12}>
           <ETPreviewText>
-            {work?.project.name} is in {currentWorkPhase?.phase.name}
+            {work?.project.name} is in {currentWorkPhase?.work_phase.name}
           </ETPreviewText>
         </Grid>
 
