@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all the response validation schemas"""
+from .act_section_response import ActSectionResponseSchema
 from .action_template_response import ActionTemplateResponseSchema
 from .event import EventResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_template_response import EventTemplateResponseSchema
 from .indigenous_nation_response import IndigenousResponseNationSchema, WorkIndigenousNationResponseSchema
+from .outcome_configuration_response import OutcomeConfigurationResponseSchema
 from .outcome_template_response import OutcomeTemplateResponseSchema
 from .phase_response import PhaseResponseSchema
 from .project_response import ProjectResponseSchema
@@ -34,5 +36,3 @@ from .work_response import (
     WorkPhaseAdditionalInfoResponseSchema,
     WorkResourceResponseSchema, WorkResponseSchema, WorkStaffRoleReponseSchema,
     WorkStatusResponseSchema, WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema)
-from .outcome_configuration_response import OutcomeConfigurationResponseSchema
-from .act_section_response import ActSectionResponseSchema

@@ -13,14 +13,17 @@
 # limitations under the License.
 """Resource for Outcome Configuration endpoints."""
 from http import HTTPStatus
+
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
+
+from api.schemas import request as req
+from api.schemas import response as res
+from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.util import cors_preflight
-from api.services.outcome_configuration import OutcomeConfigurationService
-from api.schemas import request as req
-from api.schemas import response as res
+
 
 API = Namespace('outcome_configurations', description='Outcome Configurations')
 
@@ -33,7 +36,7 @@ class OutcomeConfigurations(Resource):
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     @profiletime
     def get():
         """Return all outcomes based on milestone_id."""
