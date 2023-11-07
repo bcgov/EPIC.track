@@ -244,7 +244,7 @@ const EventListTable = ({
           const value: string = row.getValue(id) || "";
 
           return filterValue.includes(
-            value == ""
+            value === ""
               ? value
               : dateUtils.formatDate(String(value), "MMM.DD YYYY")
           );
