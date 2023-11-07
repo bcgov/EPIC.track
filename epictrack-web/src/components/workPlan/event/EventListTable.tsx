@@ -77,20 +77,19 @@ const EventListTable = ({
     events,
     "start_date",
     (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
-    true
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
   );
   const endDateFilterOptions = getSelectFilterOptions(
     events,
     "end_date",
     (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
-    true
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
   );
   const numberOfDaysFilterOptions = getSelectFilterOptions(
     events,
     "number_of_days",
-    (value) => String(value)
+    (value) => String(value),
+    (value) => Number(value)
   );
   const assigneeOptions = Array.from(
     new Set(
@@ -285,10 +284,7 @@ const EventListTable = ({
             return true;
           }
 
-          const value: string = row.getValue(id) || "";
-
-          console.log(value);
-          console.log(filterValue);
+          const value: string = row.getValue(id);
 
           return filterValue.includes(value);
         },

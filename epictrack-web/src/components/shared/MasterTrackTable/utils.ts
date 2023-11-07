@@ -3,8 +3,7 @@ export function getSelectFilterOptions<T>(
   data: T[],
   key: keyof T,
   formatLabel: (value: any) => string = (value) => String(value),
-  formatValue: (value: any) => string = (value) => String(value),
-  is_date = false
+  formatValue: (value: any) => any = (value) => String(value)
 ) {
   // Step 1: Create a Map to store unique values and their formatted labels
   const optionsMap = new Map();
@@ -18,17 +17,7 @@ export function getSelectFilterOptions<T>(
     }
 
     // Step 4: Populate the Map with unique values and their formatted labels
-    if (is_date) {
-      optionsMap.set(
-        formatValue(dataObject[key]),
-        formatLabel(dataObject[key])
-      );
-    } else {
-      optionsMap.set(
-        formatValue(dataObject[key]),
-        formatLabel(dataObject[key])
-      );
-    }
+    optionsMap.set(formatValue(dataObject[key]), formatLabel(dataObject[key]));
   });
 
   // Step 5: Convert the Map to an array of objects with 'text' and 'value' properties
