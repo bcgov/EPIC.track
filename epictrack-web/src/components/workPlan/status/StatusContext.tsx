@@ -7,6 +7,8 @@ import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import workService from "../../../services/workService/workService";
+import statusService from "../../../services/statusService/statusService";
+import { useSearchParams } from "../../../hooks/SearchParams";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -14,6 +16,10 @@ interface StatusContextProps {
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
   onSave(data: any, callback: () => any): any;
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
+}
+
+interface StatusContainerRouteParams extends URLSearchParams {
+  work_id: string;
 }
 
 export const StatusContext = createContext<StatusContextProps>({
@@ -33,36 +39,41 @@ export const StatusProvider = ({
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
     React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
+  const query = useSearchParams<StatusContainerRouteParams>();
+  const workId = React.useMemo(() => query.get("work_id"), [query]);
+
+  console.log(workId);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
   };
 
   const onSave = async (data: any, callback: () => any) => {
+    console.log(data);
     try {
       if (status) {
-        // TODO update or create a status
-        // const result = await statusService?.update(data, status.id.toString());
-        // if (result && result.status === 200) {
-        //   showNotification(`${status.title} details updated`, {
-        //     type: "success",
-        //   });
-        //   setStatus(undefined);
-        //   setBackdrop(false);
-        //   callback();
-        // }
+        const result = await statusService?.update(
+          Number(workId),
+          data,
+          Number(status.id)
+        );
+        if (result && result.status === 200) {
+          showNotification(`Status details updated`, {
+            type: "success",
+          });
+          setStatus(undefined);
+          callback();
+        }
       } else {
-        // const result = await statusService?.create(data);
-        // if (result && result.status === 201) {
-        //   showNotification(`Status Created`, {
-        //     type: "success",
-        //   });
-        //   setBackdrop(false);
-        //   callback();
-        // }
+        const result = await statusService?.create(Number(workId), data);
+        if (result && result.status === 201) {
+          showNotification(`Status Created`, {
+            type: "success",
+          });
+          callback();
+        }
       }
       setShowStatusForm(false);
-      // getData();
     } catch (e) {
       const error = getAxiosError(e);
       const message =

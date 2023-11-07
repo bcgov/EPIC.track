@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to WorkStatus."""
 
-from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text, Boolean
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, Boolean
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned

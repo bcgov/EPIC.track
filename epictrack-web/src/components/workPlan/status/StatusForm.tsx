@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import { DATE_FORMAT } from "../../../constants/application-constant";
 import Moment from "moment";
 import { StatusContext } from "./StatusContext";
+import { WorkplanContext } from "../WorkPlanContext";
 
 const schema = yup.object().shape({});
 const CHARACTER_LIMIT = 500;
@@ -18,6 +19,7 @@ const StatusForm = () => {
   const [notes, setNotes] = React.useState<string>("");
   const startDateRef = useRef();
   const { status, onSave } = useContext(StatusContext);
+  const { getWorkStatuses } = useContext(WorkplanContext);
 
   React.useEffect(() => {
     if (status) {
@@ -46,6 +48,7 @@ const StatusForm = () => {
   const onSubmitHandler = async (data: any) => {
     onSave(data, () => {
       reset();
+      getWorkStatuses();
     });
   };
 
