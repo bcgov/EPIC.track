@@ -41,3 +41,17 @@ class TokenInfo:
             'groups': [group[1:len(group)] for group in token_info.get('groups')]
         }
         return user_data
+
+    @staticmethod
+    def get_username():
+        """Return the user name."""
+        username = g.token_info.get("preferred_username", None)
+        if username is None:
+            username = g.jwt_oidc_token_info.get("email")
+        return username
+
+    @staticmethod
+    def is_super_user() -> bool:
+        """Return True if the user is staff user."""
+        # TODO Implement this method
+        return True
