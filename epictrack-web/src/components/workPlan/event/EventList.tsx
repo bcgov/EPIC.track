@@ -236,7 +236,7 @@ const EventList = () => {
   const getMilestoneEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
-      const milestoneResult = await eventService.GetMilestoneEvents(
+      const milestoneResult = await eventService.getMilestoneEvents(
         Number(ctx.selectedWorkPhase?.work_phase.id)
       );
       if (milestoneResult.status === 200) {

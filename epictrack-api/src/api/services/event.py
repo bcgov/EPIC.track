@@ -97,6 +97,120 @@ class EventService:
         return event
 
     @classmethod
+    def check_event(cls, data: dict, event_id: int = None):
+        """Check to see if the event goes beyond the existing phase end dates"""
+        event_old = None
+        if event_id:
+            event = Event.find_by_id(event_id)
+            event_old = copy.copy(event)
+        data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
+        data["actual_date"] = get_start_of_day(data.get("actual_date"))
+        event_to_check = Event(**data)
+        result = {
+            "subsequent_event_push_required": False,
+            "phase_end_will_be_pushed": False
+        }
+        if event:
+            event_to_check.event_configuration = event.event_configuration
+        else:
+            event_configuration = EventConfiguration.find_by_id(
+                event_to_check.event_configuration_id
+            )
+            event_to_check.event_configuration = event_configuration
+        current_work_phase = WorkPhase.find_by_id(
+            event_to_check.event_configuration.work_phase_id
+        )
+        number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
+            event_to_check, event_old, current_work_phase
+        )
+        if number_of_days_to_be_pushed > 0:
+            all_work_events = cls.find_events(
+                current_work_phase.work_id, None, PRIMARY_CATEGORIES
+            )
+            result = cls._validate_event_effect_on_dates(
+                current_work_phase, event_to_check, all_work_events, event_old
+            )
+            result["subsequent_event_push_required"] = True
+        return result
+
+    @classmethod
+    def _validate_event_effect_on_dates(
+        cls,
+        current_work_phase: WorkPhase,
+        event: Event,
+        all_work_events: [Event],
+        event_old: Event,
+    ):
+        """Validate the existing event to see which phase end date does it cause this event or any other event to go"""
+        result = {"phase_end_will_be_pushed": False}
+        legislated_phase_end_push_can_happen = (
+            event.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+            or event.event_configuration.event_category_id
+            in [
+                EventCategoryEnum.EXTENSION.value,
+                EventCategoryEnum.SUSPENSION.value,
+            ]
+        )
+        if current_work_phase.legislated and not legislated_phase_end_push_can_happen:
+            return result
+        all_work_phases = WorkPhase.find_by_params(
+            {"work_id": current_work_phase.work_id}
+        )
+        current_work_phase_index = util.find_index_in_array(
+            all_work_phases, current_work_phase
+        )
+        current_event_index = cls._find_event_index(
+            all_work_events, event_old if event_old else event, current_work_phase
+        )
+
+        work_phases_to_be_checked = all_work_phases[current_work_phase_index]
+        if current_work_phase.legislated:
+            phase_events = cls._find_work_phase_events(
+                all_work_events, current_work_phase.id
+            )
+            if legislated_phase_end_push_can_happen:
+                if cls._find_event_date(event) >= current_work_phase.end_date:
+                    end_event = next(
+                        filter(
+                            lambda x: x.event_configuration.event_position.value
+                            == EventPositionEnum.END.value,
+                            phase_events,
+                        )
+                    )
+                    current_event_index = util.find_index_in_array(
+                        phase_events, end_event
+                    )
+            # else:
+            #     work_phases_to_be_checked = all_work_phases[current_work_phase_index]
+            #     phase_events = list(
+            #         filter(
+            #             lambda x: x.event_configuration.event_position.value
+            #             != EventPositionEnum.END.value,
+            #             phase_events,
+            #         )
+            #     )
+            #     all_work_events = phase_events
+            #     result["phase_end_will_be_pushed"] = False
+        for work_phase in work_phases_to_be_checked:
+            phase_events_to_be_checked = cls._find_work_phase_events(
+                all_work_events, work_phase.id
+            )
+            if current_work_phase.id == work_phase.id:
+                phase_events_to_be_checked = phase_events_to_be_checked[
+                    current_event_index
+                ]
+                for each_event in phase_events_to_be_checked:
+                    days_diff = (
+                        work_phase.end_date.date()
+                        - cls._find_event_date(each_event).date()
+                    ).days
+                    if days_diff < 0:
+                        result["phase_end_will_be_pushed"] = True
+                        result["work_phase_to_be_exceeded"] = work_phase
+                        return result
+
+    @classmethod
     def find_milestone_event(cls, event_id: int) -> Event:
         """Get the milestone event"""
         m_event = Event.find_by_id(event_id)
@@ -184,12 +298,8 @@ class EventService:
             cls._handle_child_events(all_work_event_configurations, event)
             current_future_work_phases = all_work_phases[current_work_phase_index:]
             if current_work_phase.legislated:
-                phase_events = list(
-                    filter(
-                        lambda x, _work_phase_id=current_work_phase.id: x.event_configuration.work_phase_id
-                        == _work_phase_id,
-                        all_work_events,
-                    )
+                phase_events = cls._find_work_phase_events(
+                    all_work_events, current_work_phase.id
                 )
                 if (
                     event.event_configuration.event_position.value
@@ -370,13 +480,6 @@ class EventService:
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
             return 0
-
-        # if event.event_configuration.event_position.value in [
-        #     EventPositionEnum.START.value,
-        #     EventPositionEnum.END.value,
-        # ]:
-        #     return (cls._find_event_date(event) - cls._find_event_date(event_old)).days
-
         if event.event_configuration.multiple_days and event_old:
             number_of_days = (
                 (event.number_of_days - event_old.number_of_days)
@@ -426,29 +529,20 @@ class EventService:
         # pylint: disable=too-many-arguments
         """Push all the events and work phases"""
         for each_work_phase in work_phases:
-            phase_events = list(
-                filter(
-                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id
-                    == _work_phase_id,
-                    all_work_events,
-                )
+            phase_events = cls._find_work_phase_events(
+                all_work_events, each_work_phase.id
             )
-            # if updating: get the old event index if we are in the current phase
-            # if inserting: get the event index when we are in the current phase
-            _current_event_index = -1 if each_work_phase.id != current_work_phase.id else current_event_index
+            _current_event_index = (
+                -1
+                if each_work_phase.id != current_work_phase.id
+                else current_event_index
+            )
             cls._push_events(
-                phase_events[_current_event_index + 1:],
+                phase_events[_current_event_index + 1 :],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
             )
-            # if (
-            #     event.event_configuration.event_category_id
-            #     not in [
-            #         EventCategoryEnum.EXTENSION.value,
-            #         EventCategoryEnum.SUSPENSION.value,
-            #     ] or each_work_phase.id != current_work_phase.id
-            # ):
             if each_work_phase.id != current_work_phase.id:
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
@@ -459,6 +553,18 @@ class EventService:
             each_work_phase.update(
                 each_work_phase.as_dict(recursive=False), commit=False
             )
+
+    @classmethod
+    def _find_work_phase_events(
+        cls, all_work_events: [Event], work_phase_id: int
+    ) -> [Event]:
+        """Filter the work events to find the phase event"""
+        return list(
+            filter(
+                lambda x: x.event_configuration.work_phase_id == work_phase_id,
+                all_work_events,
+            )
+        )
 
     @classmethod
     def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
@@ -503,12 +609,8 @@ class EventService:
                 event_old if event_old else event,
                 all_work_phases[current_work_phase_index],
             )
-            phase_events = list(
-                filter(
-                    lambda x, _work_phase_id=event.event_configuration.work_phase_id:
-                    x.event_configuration.work_phase_id == _work_phase_id,
-                    all_work_events,
-                )
+            phase_events = cls._find_work_phase_events(
+                all_work_events, event.event_configuration.work_phase_id
             )
             phase_events = sorted(
                 phase_events, key=functools.cmp_to_key(cls.event_compare_func)
@@ -662,12 +764,6 @@ class EventService:
             "source_event_id": source_e_id,
             "work_id": work_id,
         }
-
-    @classmethod
-    def _validate_date(cls, work_phase: WorkPhase, event: Event) -> bool:
-        """Validate the event date against the phase"""
-        event_date = event.actual_date if event.actual_date else event.anticipated_date
-        return work_phase.start_date < event_date < work_phase.end_date
 
     @classmethod
     def find_next_milestone_event_by_work_phase_id(cls, work_phase_id: int) -> Event:

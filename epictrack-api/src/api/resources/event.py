@@ -107,3 +107,21 @@ class MilestoneEvents(Resource):
         request_json = req.MilestoneEventBulkDeleteQueryParamSchema().load(request.args)
         result = EventService.bulk_delete_milestones(request_json["milestone_ids"])
         return result, HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/check-events", methods=["GET", "OPTIONS"])
+class ValidateWork(Resource):
+    """Endpoint resource to check the given event go past the phase end date"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Check for existing works."""
+        args = req.MilestoneEventCheckQueryParameterSchema().load(request.args)
+        request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        event_id = args.get("event_id")
+        result = EventService.check_event(request_json, event_id)
+        return res.EventDateChangePosibilityCheckResponseSchema().dump(result), HTTPStatus.OK

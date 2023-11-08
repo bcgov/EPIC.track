@@ -14,7 +14,7 @@
 """Exposes all the response validation schemas"""
 from .act_section_response import ActSectionResponseSchema
 from .action_template_response import ActionTemplateResponseSchema
-from .event import EventResponseSchema
+from .event_response import EventResponseSchema, EventDateChangePosibilityCheckResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_template_response import EventTemplateResponseSchema
 from .indigenous_nation_response import IndigenousResponseNationSchema, WorkIndigenousNationResponseSchema

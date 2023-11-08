@@ -361,6 +361,10 @@ const EventForm = ({
     setTitleCharacterCount(Number(configuration.name.length));
     (titleRef?.current as any).focus();
     unregisterOptionalFields();
+    const result = eventService.check_event_for_date_push(
+      getValues(),
+      event?.id
+    );
   };
   const unregisterOptionalFields = () => {
     unregister("decision_maker_id");
