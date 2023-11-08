@@ -45,12 +45,9 @@ class WorkStatus(Resource):
     @profiletime
     def post(work_id):
         """Create new work status"""
-        try:
-            request_dict = req.WorkIssuesParameterSchema().load(API.payload)
-            work_issues = WorkIssuesService.create_work_issue_and_updates(work_id, request_dict)
-            return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
-        except Exception as e:
-            return jsonify({'error': str(e)}), HTTPStatus.BAD_REQUEST
+        request_dict = req.WorkIssuesParameterSchema().load(API.payload)
+        work_issues = WorkIssuesService.create_work_issue_and_updates(work_id, request_dict)
+        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
 @API.route("/<int:issue_id>", methods=["PUT"])
