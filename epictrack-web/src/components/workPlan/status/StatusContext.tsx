@@ -18,6 +18,7 @@ interface StatusContextProps {
   onSave(data: any, callback: () => any): any;
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
   setIsCloning: Dispatch<SetStateAction<boolean>>;
+  workId: string | null;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -31,6 +32,7 @@ export const StatusContext = createContext<StatusContextProps>({
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
   setIsCloning: () => ({}),
+  workId: null,
 });
 
 export const StatusProvider = ({
@@ -113,6 +115,7 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        workId,
         setIsCloning,
         setShowStatusForm,
         setShowApproveStatusDialog,
