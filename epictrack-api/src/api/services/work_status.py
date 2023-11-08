@@ -28,7 +28,7 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
     @classmethod
     def find_all_work_status(cls, work_id):
         """Find all status related to a work"""
-        return WorkStatusModel.find_by_params({"work_id": work_id})
+        return WorkStatusModel.list_statuses_for_work_id(work_id)
 
     @classmethod
     def find_work_status_by_id(cls, work_id, status_id):
