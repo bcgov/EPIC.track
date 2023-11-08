@@ -17,9 +17,8 @@ from __future__ import annotations
 from typing import List
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import joinedload, relationship
+from sqlalchemy.orm import relationship
 
-from api.models.work_issue_updates import WorkIssueUpdates
 from .base_model import BaseModelVersioned
 
 
