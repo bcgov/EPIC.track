@@ -1,3 +1,5 @@
 {
     "makefile.extensionOutputFolder": "./.vscode",
+    "editor.autoClosingBrackets": "always",
+    "editor.wordBasedSuggestions": true,
 }
