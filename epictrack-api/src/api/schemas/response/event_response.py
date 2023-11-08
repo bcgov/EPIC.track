@@ -47,3 +47,7 @@ class EventDateChangePosibilityCheckResponseSchema(Schema):
     subsequent_event_push_required = fields.Boolean(
         metadata={"description": "Indicate if the subsequent events needs to be pushed"}
     )
+
+    days_pushed = fields.Number(
+        metadata={"description": "Number of days to be pushed/pulled"}
+    )

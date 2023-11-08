@@ -108,9 +108,10 @@ class EventService:
         event_to_check = Event(**data)
         result = {
             "subsequent_event_push_required": False,
-            "phase_end_will_be_pushed": False
+            "phase_end_will_be_pushed": False,
+            "days_pushed": 0
         }
-        if event:
+        if event_id:
             event_to_check.event_configuration = event.event_configuration
         else:
             event_configuration = EventConfiguration.find_by_id(
@@ -123,7 +124,7 @@ class EventService:
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event_to_check, event_old, current_work_phase
         )
-        if number_of_days_to_be_pushed > 0:
+        if number_of_days_to_be_pushed != 0:
             all_work_events = cls.find_events(
                 current_work_phase.work_id, None, PRIMARY_CATEGORIES
             )
@@ -131,6 +132,7 @@ class EventService:
                 current_work_phase, event_to_check, all_work_events, event_old
             )
             result["subsequent_event_push_required"] = True
+            result["days_pushed"] = number_of_days_to_be_pushed
         return result
 
     @classmethod

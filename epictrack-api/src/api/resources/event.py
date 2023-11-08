@@ -110,7 +110,7 @@ class MilestoneEvents(Resource):
 
 
 @cors_preflight("GET")
-@API.route("/check-events", methods=["GET", "OPTIONS"])
+@API.route("/check-events", methods=["POST", "OPTIONS"])
 class ValidateWork(Resource):
     """Endpoint resource to check the given event go past the phase end date"""
 
@@ -118,7 +118,7 @@ class ValidateWork(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get():
+    def post():
         """Check for existing works."""
         args = req.MilestoneEventCheckQueryParameterSchema().load(request.args)
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
