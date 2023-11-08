@@ -9,7 +9,7 @@ from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
 from api.schemas.federal_involvement import FederalInvolvementSchema
 from api.schemas.ministry import MinistrySchema
-from api.schemas.phase import PhaseSchema
+from api.schemas.response.phase_response import PhaseResponseSchema
 from api.schemas.project import ProjectSchema
 from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
@@ -41,7 +41,7 @@ class WorkResponseSchema(
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_type = fields.Nested(WorkTypeSchema, dump_only=True)
     current_phase = fields.Nested(
-        PhaseSchema, exclude=("ea_act", "work_type"), dump_only=True
+        PhaseResponseSchema, exclude=("ea_act", "work_type"), dump_only=True
     )
     substitution_act = fields.Nested(SubstitutionActSchema, dump_only=True)
     eac_decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
@@ -64,6 +64,7 @@ class WorkPhaseResponseSchema(
         model = WorkPhase
         include_fk = True
         unknown = EXCLUDE
+    phase = fields.Nested(PhaseResponseSchema)
 
 
 class WorkStaffRoleReponseSchema(
