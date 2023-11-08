@@ -21,7 +21,7 @@ const IssuesContainer = () => {
   };
 
   return (
-    <Grid container columnSpacing={1.5}>
+    <Grid container columnSpacing={1.5} marginBottom={"2em"}>
       <Grid item xs={8}>
         <ETHeading3 className={classes.title} color={Palette.primary.main}>
           Issues
