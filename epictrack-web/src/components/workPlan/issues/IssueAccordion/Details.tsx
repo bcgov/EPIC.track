@@ -21,7 +21,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[issue.updates.length - 1];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
-  const DeleteIcon: React.FC<IconProps> = icons["DeleteIcon"];
+  const CloneIcon: React.FC<IconProps> = icons["CloneIcon"];
 
   const {
     setIssueToEdit,
@@ -76,23 +76,42 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 </ETParagraph>
               </Grid>
 
-              <When condition={!issue.is_approved}>
-                <Grid item>
-                  <Button
-                    variant="text"
-                    startIcon={<CheckCircleIcon />}
-                    sx={{
-                      backgroundColor: "inherit",
-                      borderColor: "transparent",
-                    }}
-                    onClick={() => {
-                      setIssueToApproveId(issue.id);
-                    }}
-                  >
-                    Approve
-                  </Button>
-                </Grid>
-              </When>
+              <If condition={!issue.is_approved}>
+                <Then>
+                  <Grid item>
+                    <Button
+                      variant="text"
+                      startIcon={<CheckCircleIcon />}
+                      sx={{
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
+                      onClick={() => {
+                        setIssueToApproveId(issue.id);
+                      }}
+                    >
+                      Approve
+                    </Button>
+                  </Grid>
+                </Then>
+                <Else>
+                  <Grid item>
+                    <Button
+                      variant="text"
+                      startIcon={<CloneIcon />}
+                      sx={{
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
+                      onClick={() => {
+                        return;
+                      }}
+                    >
+                      Clone
+                    </Button>
+                  </Grid>
+                </Else>
+              </If>
 
               <Grid item>
                 <Button

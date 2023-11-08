@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { FormProvider, useForm, Controller } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, FormControlLabel, Grid, Stack, Tooltip } from "@mui/material";
@@ -10,13 +10,7 @@ import { IssuesContext } from "./IssuesContext";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 import { IssueForm } from "./types";
-import { is } from "immutable";
 import moment from "moment";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DATE_FORMAT } from "../../../constants/application-constant";
-import dayjs from "dayjs";
-import { dateUtils } from "../../../utils";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 
 const schema = yup.object().shape({
@@ -25,12 +19,13 @@ const schema = yup.object().shape({
   is_active: yup.boolean(),
   is_high_priority: yup.boolean(),
   start_date: yup.string().required("Start date is required"),
-  expected_resolution_date: yup.string(),
+  expected_resolution_date: yup.string().nullable(),
 });
+
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
 const IssuesForm = () => {
-  const { setShowIssuesForm, issueToEdit, addIssue } =
+  const { setShowIssuesForm, issueToEdit, addIssue, setIssueToEdit } =
     React.useContext(IssuesContext);
 
   const methods = useForm<IssueForm>({
@@ -46,7 +41,7 @@ const IssuesForm = () => {
     mode: "onSubmit",
   });
 
-  const { handleSubmit, watch, reset, control, register } = methods;
+  const { handleSubmit, watch, reset } = methods;
 
   useEffect(() => {
     if (issueToEdit) {
@@ -70,6 +65,12 @@ const IssuesForm = () => {
 
   const onSubmitHandler = async (data: IssueForm) => {
     setShowIssuesForm(false);
+    setIssueToEdit(null);
+
+    //Todo: implement edit flow
+    if (issueToEdit) {
+      return;
+    }
     const {
       title,
       description,

@@ -54,38 +54,6 @@ export const IssuesProvider = ({
   const query = useSearchParams<IssueContainerRouteParams>();
   const workId = query.get("work_id");
 
-  // // TODO: Remove mock data
-  // const mockIssueUpdate: WorkIssueUpdate = {
-  //   id: 1,
-  //   description:
-  //     "The project has been the subject of media attention due to opposition to the project from the union representing the terminal workers and environmental non-profits.",
-  //   work_issue_id: 1,
-  //   is_active: true,
-  //   is_deleted: false,
-  // };
-  // const mockIssue: WorkIssue = {
-  //   id: 1,
-  //   title: "Union in opposition to the project",
-  //   start_date: "2023-11-07",
-  //   expected_resolution_date: "2023-11-07",
-  //   is_active: true,
-  //   is_high_priority: true,
-  //   is_deleted: false,
-  //   work_id: 1,
-  //   approved_by: "somebody",
-  //   created_by: "somebody",
-  //   created_at: new Date().toISOString(),
-  //   updated_by: "somebody",
-  //   updated_at: "2023-11-07",
-  //   updates: [mockIssueUpdate],
-  // };
-
-  // //TODO: remove mock data
-  // const mockIssues = [
-  //   mockIssue,
-  //   { ...mockIssue, id: 2, is_high_priority: false, is_active: true },
-  // ];
-
   const loadIssues = async () => {
     if (!workId) return;
     try {

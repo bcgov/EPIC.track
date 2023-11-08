@@ -68,7 +68,6 @@ const IssuesView = () => {
         formId="issue-form"
         onCancel={() => onCancelHandler()}
         onClose={() => onCancelHandler()}
-        onOk={() => onCancelHandler()}
         isActionsRequired
       >
         <IssuesForm />
