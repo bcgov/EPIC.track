@@ -17,6 +17,7 @@ interface StatusContextProps {
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
   onSave(data: any, callback: () => any): any;
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
+  setIsCloning: Dispatch<SetStateAction<boolean>>;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -29,6 +30,7 @@ export const StatusContext = createContext<StatusContextProps>({
   status: null,
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
+  setIsCloning: () => ({}),
 });
 
 export const StatusProvider = ({
@@ -39,6 +41,7 @@ export const StatusProvider = ({
   const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
     React.useState<boolean>(false);
+  const [isCloning, setIsCloning] = React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
   const query = useSearchParams<StatusContainerRouteParams>();
   const workId = React.useMemo(() => query.get("work_id"), [query]);
@@ -51,7 +54,7 @@ export const StatusProvider = ({
   const onSave = async (data: any, callback: () => any) => {
     const { description, posted_date } = data;
     try {
-      if (status) {
+      if (status && !isCloning) {
         const result = await statusService?.update(
           Number(workId),
           Number(status.id),
@@ -76,6 +79,7 @@ export const StatusProvider = ({
           callback();
         }
       }
+      setIsCloning(false);
       getWorkStatuses();
       setShowStatusForm(false);
     } catch (e) {
@@ -109,6 +113,7 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        setIsCloning,
         setShowStatusForm,
         setShowApproveStatusDialog,
         setStatus,

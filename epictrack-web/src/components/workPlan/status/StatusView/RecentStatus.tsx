@@ -16,8 +16,12 @@ const CloneIcon: React.FC<IconProps> = Icons["CloneIcon"];
 
 const RecentStatus = () => {
   const { statuses } = React.useContext(WorkplanContext);
-  const { setShowStatusForm, setStatus, setShowApproveStatusDialog } =
-    React.useContext(StatusContext);
+  const {
+    setIsCloning,
+    setShowStatusForm,
+    setStatus,
+    setShowApproveStatusDialog,
+  } = React.useContext(StatusContext);
   // const { position } = useAppSelector((state) => state.user.userDetail);
 
   return (
@@ -104,6 +108,11 @@ const RecentStatus = () => {
           </Then>
           <Else>
             <Button
+              onClick={() => {
+                setStatus(statuses[0]);
+                setIsCloning(true);
+                setShowStatusForm(true);
+              }}
               sx={{
                 display: "flex",
                 gap: "8px",
@@ -121,25 +130,27 @@ const RecentStatus = () => {
           </Else>
         </If>
         <If condition={!statuses[0].is_approved}>
-          <Button
-            onClick={() => {
-              setShowStatusForm(true);
-              setStatus(statuses[0]);
-            }}
-            sx={{
-              display: "flex",
-              gap: "8px",
-              backgroundColor: Palette.neutral.bg.light,
-              borderColor: Palette.neutral.bg.light,
-              ":hover": {
+          <Then>
+            <Button
+              onClick={() => {
+                setShowStatusForm(true);
+                setStatus(statuses[0]);
+              }}
+              sx={{
+                display: "flex",
+                gap: "8px",
                 backgroundColor: Palette.neutral.bg.light,
                 borderColor: Palette.neutral.bg.light,
-              },
-            }}
-          >
-            <PencilEditIcon />
-            Edit
-          </Button>
+                ":hover": {
+                  backgroundColor: Palette.neutral.bg.light,
+                  borderColor: Palette.neutral.bg.light,
+                },
+              }}
+            >
+              <PencilEditIcon />
+              Edit
+            </Button>
+          </Then>
         </If>
       </Box>
     </GrayBox>
