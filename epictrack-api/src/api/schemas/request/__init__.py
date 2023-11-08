@@ -49,5 +49,5 @@ from .work_request import (
     WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkFirstNationImportBodyParamSchema,
     WorkFirstNationNotesBodySchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
     WorkPlanDownloadQueryParamSchema, WorkTypeIdQueryParamSchema, WorkStatusParameterSchema,
-    WorkIssuesParameterSchema, WorkIssuesUpdateSchema)
+    WorkIssuesParameterSchema, WorkIssuesUpdateSchema, WorkStatusNotesBodySchema)
 from .act_section_request import ActSectionQueryParameterSchema

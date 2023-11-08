@@ -14,7 +14,7 @@
 """Service to manage Work status."""
 from http import HTTPStatus
 from typing import Dict
-
+from api.exceptions import ResourceNotFoundError
 from api.exceptions import BusinessError
 from api.models import WorkStatus as WorkStatusModel
 from api.utils import TokenInfo
@@ -58,6 +58,17 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
 
         work_status.update(work_status_data)
 
+        work_status.save()
+
+        return work_status
+
+    @classmethod
+    def save_notes(cls, work_id, status_id, notes: str) -> WorkStatusModel:
+        """Save a work status note."""
+        work_status: WorkStatusModel = WorkStatusService.find_work_status_by_id(work_id, status_id)
+        if not work_status:
+            raise ResourceNotFoundError("Work status not found")
+        work_status.notes = notes
         work_status.save()
 
         return work_status
