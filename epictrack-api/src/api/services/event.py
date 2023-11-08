@@ -435,15 +435,9 @@ class EventService:
             )
             # if updating: get the old event index if we are in the current phase
             # if inserting: get the event index when we are in the current phase
-            # _current_event_index = -1
-            # if each_work_phase.id == current_work_phase.id:
-            #     _current_event_index = (
-            #         current_event_index
-            #         if current_event_index
-            #         else util.find_index_in_array(phase_events, event)
-            #     )
+            _current_event_index = -1 if each_work_phase.id != current_work_phase.id else current_event_index
             cls._push_events(
-                phase_events[current_event_index + 1:],
+                phase_events[_current_event_index + 1:],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
