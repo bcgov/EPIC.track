@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, IconButton, Stack } from "@mui/material";
+import { Button, Grid, IconButton, Stack } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
 import {
   ETCaption1,
@@ -21,6 +21,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[issue.updates.length - 1];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
+  const DeleteIcon: React.FC<IconProps> = icons["DeleteIcon"];
 
   const {
     setIssueToEdit,
@@ -49,8 +50,10 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 justifyContent={"space-between"}
               >
                 <Grid item xs={"auto"}>
-                  <ETCaption1 bold>
-                    {moment(issue.created_at).format("MMM.DD YYYY")}
+                  <ETCaption1 bold color={Palette.neutral.dark}>
+                    {moment(issue.created_at)
+                      .format("MMM.DD YYYY")
+                      .toUpperCase()}
                   </ETCaption1>
                 </Grid>
                 <If condition={issue.is_approved}>
@@ -68,42 +71,44 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               </Grid>
 
               <Grid item xs={12}>
-                <ETParagraph>{latestUpdate?.description}</ETParagraph>
+                <ETParagraph color={Palette.neutral.dark}>
+                  {latestUpdate?.description}
+                </ETParagraph>
               </Grid>
 
               <When condition={!issue.is_approved}>
                 <Grid item>
-                  <IconButton
-                    disableRipple
+                  <Button
+                    variant="text"
+                    startIcon={<CheckCircleIcon />}
+                    sx={{
+                      backgroundColor: "inherit",
+                      borderColor: "transparent",
+                    }}
                     onClick={() => {
                       setIssueToApproveId(issue.id);
                     }}
                   >
-                    <Stack direction={"row"} alignItems={"center"} spacing={1}>
-                      <CheckCircleIcon />
-                      <ETCaption2 color={Palette.primary.accent.main}>
-                        Approve
-                      </ETCaption2>
-                    </Stack>
-                  </IconButton>
+                    Approve
+                  </Button>
                 </Grid>
               </When>
 
               <Grid item>
-                <IconButton
-                  disableRipple
+                <Button
+                  variant="text"
+                  startIcon={<PencilEditIcon />}
+                  sx={{
+                    backgroundColor: "inherit",
+                    borderColor: "transparent",
+                  }}
                   onClick={() => {
                     setIssueToEdit(issue);
                     setShowIssuesForm(true);
                   }}
                 >
-                  <Stack direction={"row"} alignItems={"center"} spacing={1}>
-                    <PencilEditIcon />
-                    <ETCaption2 color={Palette.primary.accent.main}>
-                      Edit
-                    </ETCaption2>
-                  </Stack>
-                </IconButton>
+                  Edit
+                </Button>
               </Grid>
             </Grid>
           </GrayBox>
