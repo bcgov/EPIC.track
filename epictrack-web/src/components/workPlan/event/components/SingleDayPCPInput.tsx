@@ -14,7 +14,7 @@ const SingleDayPCPInput = ({ isFormFieldsLocked }: SingleDayPCPInputProps) => {
   } = useFormContext();
   React.useEffect(() => {
     return () => {
-      unregister("number_of_attendees");
+      // unregister("number_of_attendees");
     };
   }, []);
   return (

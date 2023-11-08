@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Issues."""
+from __future__ import annotations
+
+from typing import List
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -36,5 +39,14 @@ class WorkIssues(BaseModelVersioned):
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
 
-    # Define a relationship to WorkIssueUpdates
     updates = relationship('WorkIssueUpdates', back_populates='work_issue', lazy='joined')
+
+    @classmethod
+    def list_issues_for_work_id(cls, work_id) -> List[WorkIssues]:
+        """List all WorkIssues sorted by start_date, with approved issues first."""
+        query = (
+            WorkIssues.query
+            .filter(cls.work_id == work_id)
+            .order_by(cls.is_approved.desc(), cls.start_date)
+        )
+        return query.all()
