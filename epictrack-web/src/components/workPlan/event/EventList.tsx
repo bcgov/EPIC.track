@@ -33,7 +33,11 @@ import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import { TemplateStatus, WorkPhaseAdditionalInfo } from "../../../models/work";
+import {
+  TemplateStatus,
+  Work,
+  WorkPhaseAdditionalInfo,
+} from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
@@ -269,6 +273,12 @@ const EventList = () => {
       setLoading(false);
     }
   }, []);
+  const getWorkById = async () => {
+    if (ctx?.work?.id) {
+      const work = await workService.getById(String(ctx.work.id));
+      ctx.setWork(work.data as Work);
+    }
+  };
 
   const onDialogClose = () => {
     setShowTaskForm(false);
@@ -277,6 +287,7 @@ const EventList = () => {
     getCombinedEvents();
     getTemplateUploadStatus();
     getWorkPhases();
+    getWorkById();
     // setEventId(undefined);
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
