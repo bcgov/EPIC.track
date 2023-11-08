@@ -17,9 +17,10 @@ from http import HTTPStatus
 from flask import jsonify
 from flask_restx import Namespace, Resource, cors
 
+from api.schemas import request as req
 from api.schemas import response as res
 from api.services import WorkIssuesService
-from api.utils import auth
+from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
 API = Namespace("work-issues", description="Work Issues")
@@ -37,3 +38,65 @@ class WorkStatus(Resource):
         """Return all active works."""
         works = WorkIssuesService.find_all_work_issues(work_id)
         return jsonify(res.WorkIssuesResponseSchema(many=True).dump(works)), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id):
+        """Create new work status"""
+        request_dict = req.WorkIssuesParameterSchema().load(API.payload)
+        work_issues = WorkIssuesService.create_work_issue_and_updates(work_id, request_dict)
+        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
+
+
+@API.route("/<int:issue_id>", methods=["PUT"])
+class IssueUpdateEdits(Resource):
+    """Endpoint resource to manage updates/edits for a specific issue and its description."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def put(work_id, issue_id):
+        """Create a new update for the specified issue."""
+        request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
+        work_issues = WorkIssuesService.edit_issue_update(work_id, issue_id, request_dict)
+        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
+
+
+@API.route("/<int:issue_id>/issue_update", methods=["POST"])
+class WorkIssueUpdate(Resource):
+    """Endpoint resource to manage updates for a specific issue."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id, issue_id):
+        """Create a new update for the specified issue."""
+        description_data = API.payload.get('description_data', None)
+        if not description_data:
+            return jsonify({'error': 'description_data is required'}), HTTPStatus.BAD_REQUEST
+        work_issues = WorkIssuesService.add_work_issue_update(work_id, issue_id, description_data)
+        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
+
+
+@cors_preflight("PATCH")
+@API.route("/<int:issue_id>/approve", methods=["PATCH", "OPTIONS"])
+class ApproveIssues(Resource):
+    """Endpoint resource to manage approving of work status."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_id, issue_id):
+        """Approve a work status."""
+        existing_work_issues = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
+        if existing_work_issues is None:
+            return {"message": "Work issues not found"}, HTTPStatus.NOT_FOUND
+
+        approved_work_issues = WorkIssuesService.approve_work_issues(existing_work_issues)
+
+        return res.WorkIssuesResponseSchema().dump(approved_work_issues), HTTPStatus.OK
