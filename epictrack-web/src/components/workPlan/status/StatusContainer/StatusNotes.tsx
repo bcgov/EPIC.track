@@ -45,7 +45,8 @@ const StatusNotes = () => {
     <>
       {statuses.length > 0 && (
         <RichTextEditor
-          handleEditorStateChange={handleNotesChange}
+          // TODO re work so notes save on a work level not a status level
+          // handleEditorStateChange={handleNotesChange}
           initialRawEditorState={statuses[0]?.notes}
         />
       )}
