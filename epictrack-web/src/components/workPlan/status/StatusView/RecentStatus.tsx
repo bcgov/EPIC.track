@@ -24,6 +24,8 @@ const RecentStatus = () => {
   } = React.useContext(StatusContext);
   // const { position } = useAppSelector((state) => state.user.userDetail);
 
+  console.log(statuses);
+
   return (
     <GrayBox
       sx={{

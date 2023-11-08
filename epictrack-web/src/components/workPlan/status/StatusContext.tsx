@@ -19,6 +19,7 @@ interface StatusContextProps {
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
+  isCloning: boolean;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -32,6 +33,7 @@ export const StatusContext = createContext<StatusContextProps>({
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
   setIsCloning: () => ({}),
+  isCloning: false,
   workId: null,
 });
 
@@ -51,10 +53,13 @@ export const StatusProvider = ({
 
   const onDialogClose = () => {
     setShowStatusForm(false);
+    setIsCloning(false);
   };
 
   const onSave = async (data: any, callback: () => any) => {
     const { description, posted_date } = data;
+    console.log(description);
+    console.log(posted_date);
     try {
       if (status && !isCloning) {
         const result = await statusService?.update(
@@ -115,6 +120,7 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        isCloning,
         workId,
         setIsCloning,
         setShowStatusForm,
