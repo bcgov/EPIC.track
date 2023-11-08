@@ -252,12 +252,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
-            control={
-              <ControlledSwitch
-                {...register("is_active")}
-                defaultChecked={workFirstNation?.is_active}
-              />
-            }
+            control={<ControlledSwitch {...register("is_active")} />}
             label="Active"
           />
         </Grid>

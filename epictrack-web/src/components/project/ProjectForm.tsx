@@ -437,7 +437,6 @@ export default function ProjectForm({ ...props }) {
             >
               <ControlledSwitch
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
-                defaultChecked={(ctx.item as Project)?.is_active}
                 {...register("is_active")}
               />
               <ETFormLabel id="active">Active</ETFormLabel>

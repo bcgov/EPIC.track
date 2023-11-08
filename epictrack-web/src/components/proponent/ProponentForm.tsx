@@ -140,7 +140,6 @@ export default function ProponentForm({ ...props }) {
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              defaultChecked={(ctx.item as Proponent)?.is_active}
               {...register("is_active")}
             />
             <ETFormLabel id="active">Active</ETFormLabel>

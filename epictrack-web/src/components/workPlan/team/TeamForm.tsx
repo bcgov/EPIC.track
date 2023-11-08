@@ -246,12 +246,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
-            control={
-              <ControlledSwitch
-                {...register("is_active")}
-                defaultChecked={staffWorkRole?.is_active}
-              />
-            }
+            control={<ControlledSwitch {...register("is_active")} />}
             label="Active"
           />
         </Grid>
