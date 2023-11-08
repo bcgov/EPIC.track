@@ -23,7 +23,7 @@ const MultiDaysInput = ({
   React.useEffect(() => {
     onChangeDay();
     return () => {
-      unregister("number_of_days");
+      // unregister("number_of_days");
     };
   }, []);
   return (

@@ -13,8 +13,6 @@ import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
 import Status from "./status";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
-const NotificationError: React.FC<IconProps> = Icons["NotificationError"];
-import ErrorIcon from "@mui/icons-material/Error";
 import Issues from "./issues";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
@@ -77,10 +75,7 @@ const WorkPlanContainer = () => {
                 ctx.statuses[0].is_approved === false) && <IndicatorIcon />
             }
           />
-          <ETTab
-            label="Issues"
-            icon={ctx.issues.length === 0 && <IndicatorIcon />}
-          />
+          <ETTab label="Issues" />
           <ETTab label="About Project" />
           <ETTab
             label="Teams"

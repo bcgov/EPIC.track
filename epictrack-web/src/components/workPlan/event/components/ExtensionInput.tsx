@@ -27,7 +27,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
   const ctx = React.useContext(WorkplanContext);
   React.useEffect(() => {
     return () => {
-      unregister("number_of_days");
+      // unregister("number_of_days");
       unregister("phase_end_date");
     };
   }, []);
@@ -39,7 +39,9 @@ const ExtensionInput = (props: ExtensionInputProps) => {
     }
     setValue(
       "phase_end_date",
-      Moment(ctx.selectedWorkPhase?.end_date).add(numberOfDays, "days").format()
+      Moment(ctx.selectedWorkPhase?.work_phase.end_date)
+        .add(numberOfDays, "days")
+        .format()
     );
   }, []);
   const numberOfDaysRef = React.useRef();
@@ -48,7 +50,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
     if (endDateRef.current as any) {
       setValue(
         "phase_end_date",
-        Moment(ctx.selectedWorkPhase?.end_date)
+        Moment(ctx.selectedWorkPhase?.work_phase.end_date)
           .add(Number((event.target as any)["value"]), "days")
           .format(DATE_FORMAT)
       );
@@ -58,7 +60,10 @@ const ExtensionInput = (props: ExtensionInputProps) => {
     if (numberOfDaysRef.current as any) {
       setValue(
         "number_of_days",
-        Moment(endDate).diff(Moment(ctx.selectedWorkPhase?.end_date), "days")
+        Moment(endDate).diff(
+          Moment(ctx.selectedWorkPhase?.work_phase.end_date),
+          "days"
+        )
       );
     }
   };
@@ -71,7 +76,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           disabled
           placeholder="MM-DD-YYYY"
           defaultValue={dateUtils.formatDate(
-            String(ctx.selectedWorkPhase?.end_date)
+            String(ctx.selectedWorkPhase?.work_phase.end_date)
           )}
         />
       </Grid>
