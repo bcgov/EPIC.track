@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
-import { EventsGridModel } from "../../../models/event";
+import { EventPosition, EventsGridModel } from "../../../models/event";
 import { MRT_ColumnDef, MRT_RowSelectionState } from "material-react-table";
 import { ETGridTitle, ETParagraph } from "../../shared";
 import { dateUtils } from "../../../utils";
@@ -459,7 +459,7 @@ const EventListTable = ({
     ],
     [events]
   );
-
+  console.log("EVENTS ", events);
   return (
     <MasterTrackTable
       enableSorting={false}
@@ -480,6 +480,25 @@ const EventListTable = ({
           return {
             style: {
               background: highlightedRowBGColor,
+            },
+          };
+        }
+        if (
+          row.original.event_configuration?.event_position ===
+          EventPosition.START
+        ) {
+          return {
+            style: {
+              background: "#E2EFDA",
+            },
+          };
+        }
+        if (
+          row.original.event_configuration?.event_position === EventPosition.END
+        ) {
+          return {
+            style: {
+              background: "#FFCCCC",
             },
           };
         }

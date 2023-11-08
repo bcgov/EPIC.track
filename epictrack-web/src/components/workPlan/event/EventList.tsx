@@ -33,7 +33,7 @@ import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import { TemplateStatus, WorkPhase } from "../../../models/work";
+import { TemplateStatus, WorkPhaseAdditionalInfo } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
 import { OptionType } from "../../shared/filterSelect/type";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
@@ -42,10 +42,14 @@ import responsibilityService from "../../../services/responsibilityService/respo
 import EventListTable from "./EventListTable";
 import EventForm from "./EventForm";
 import { EventContext } from "./EventContext";
+import { ETHeading4, ETParagraph } from "../../shared";
+import { When } from "react-if";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
+const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationMediumIcon"];
+const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
 
 const useStyle = makeStyles({
   textEllipsis: {
@@ -72,6 +76,49 @@ const IButton = styled(IconButton)({
     },
   },
 });
+const WarningBox = (props?: WarningBoxProps) => {
+  return (
+    <Grid
+      sx={{
+        backgroundColor: Palette.secondary.bg.light,
+        padding: "16px 24px 16px 24px",
+        display: "flex",
+        flexDirection: "column",
+        color: Palette.secondary.dark,
+        borderRadius: "4px",
+      }}
+      container
+    >
+      <Grid
+        sx={{
+          display: "flex",
+          flexDirection: "row",
+          gap: "1rem",
+        }}
+        item
+      >
+        <Box>
+          <ExclamationIcon width="26" height="24" />
+        </Box>
+        <Box sx={{ flex: "1 0 0" }}>
+          <ETHeading4 bold>{props?.title}</ETHeading4>
+        </Box>
+        <Box>
+          <IconButton
+            onClick={props?.onCloseHandler}
+            sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
+            disableRipple
+          >
+            <CloseIconComponent />
+          </IconButton>
+        </Box>
+      </Grid>
+      <Grid item>
+        <ETParagraph>{props?.subTitle}</ETParagraph>
+      </Grid>
+    </Grid>
+  );
+};
 
 const EventList = () => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
@@ -108,15 +155,22 @@ const EventList = () => {
     React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
+  const [showExtensionWarningBox, setShowExtensionWarningBox] =
+    React.useState(true);
+  const [showSuspendedWarningBox, setShowSuspendedWarningBox] =
+    React.useState(true);
 
   const isEventFormFieldLocked = React.useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
 
-  React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.phase.id]);
+  React.useEffect(
+    () => setEvents([]),
+    [ctx.selectedWorkPhase?.work_phase.phase.id]
+  );
   React.useEffect(() => {
     getCombinedEvents();
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
 
   React.useEffect(() => {
     const options: OptionType[] = ctx.team
@@ -136,7 +190,7 @@ const EventList = () => {
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
-    if (ctx.work?.id && ctx.selectedWorkPhase?.phase.id) {
+    if (ctx.work?.id && ctx.selectedWorkPhase?.work_phase.phase.id) {
       setLoading(true);
       Promise.all([getMilestoneEvents(), getTaskEvents()]).then(
         (data: Array<EventsGridModel[]>) => {
@@ -153,12 +207,12 @@ const EventList = () => {
       );
     }
     setRowSelection({});
-  }, [ctx.work, ctx.selectedWorkPhase?.id]);
+  }, [ctx.work, ctx.selectedWorkPhase?.work_phase.id]);
   const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
       const taskResult = await taskEventService.getAll(
-        Number(ctx.selectedWorkPhase?.id)
+        Number(ctx.selectedWorkPhase?.work_phase.id)
       );
 
       if (taskResult.status === 200) {
@@ -179,7 +233,7 @@ const EventList = () => {
     let result: EventsGridModel[] = [];
     try {
       const milestoneResult = await eventService.GetMilestoneEvents(
-        Number(ctx.selectedWorkPhase?.id)
+        Number(ctx.selectedWorkPhase?.work_phase.id)
       );
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
@@ -211,7 +265,7 @@ const EventList = () => {
       const workPhasesResult = await workService.getWorkPhases(
         String(ctx.work?.id)
       );
-      ctx.setWorkPhases(workPhasesResult.data as WorkPhase[]);
+      ctx.setWorkPhases(workPhasesResult.data as WorkPhaseAdditionalInfo[]);
       setLoading(false);
     }
   }, []);
@@ -238,7 +292,7 @@ const EventList = () => {
     try {
       const result = await taskEventService.importTasksFromTemplate(
         {
-          work_phase_id: ctx.selectedWorkPhase?.id,
+          work_phase_id: ctx.selectedWorkPhase?.work_phase.id,
         },
         Number(selectedTemplateId)
       );
@@ -265,14 +319,14 @@ const EventList = () => {
   const downloadPDFReport = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        Number(ctx.selectedWorkPhase?.id)
+        Number(ctx.selectedWorkPhase?.work_phase.id)
       );
       const url = window.URL.createObjectURL(
         new Blob([(binaryReponse as any).data])
       );
       const link = document.createElement("a");
       link.href = url;
-      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_${ctx.selectedWorkPhase?.phase.name}`;
+      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_${ctx.selectedWorkPhase?.work_phase.phase.name}`;
       link.setAttribute("download", `${fileName}.xlsx`);
       document.body.appendChild(link);
       link.click();
@@ -280,7 +334,7 @@ const EventList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.phase.id]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
 
   const onRowClick = (event: any, row: EventsGridModel) => {
     event.preventDefault();
@@ -350,7 +404,7 @@ const EventList = () => {
         notificationId.current = null;
       }
       const response = await workService.checkTemplateUploadStatus(
-        Number(ctx.selectedWorkPhase.id)
+        Number(ctx.selectedWorkPhase.work_phase.id)
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
@@ -367,7 +421,7 @@ const EventList = () => {
             <Typography>
               Do you want to preview available Templates for{" "}
               <Typography style={{ fontWeight: "bold" }} component="span">
-                {ctx.selectedWorkPhase.phase.name}
+                {ctx.selectedWorkPhase.work_phase.phase.name}
               </Typography>{" "}
               with lists of tasks?
             </Typography>
@@ -379,12 +433,12 @@ const EventList = () => {
               callback: () => setShowTemplateForm(true),
             },
           ],
-          key: `template-available-${ctx.selectedWorkPhase.phase.name}`,
+          key: `template-available-${ctx.selectedWorkPhase.work_phase.name}`,
         });
         notificationId.current = notification;
       }
     }
-  }, [ctx.selectedWorkPhase?.phase.id]);
+  }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
 
   React.useEffect(() => {
     getTemplateUploadStatus();
@@ -596,6 +650,32 @@ const EventList = () => {
 
   return (
     <Grid container rowSpacing={1}>
+      <Grid container>
+        <When
+          condition={
+            Number(ctx.selectedWorkPhase?.days_left) < 0 &&
+            showExtensionWarningBox
+          }
+        >
+          <WarningBox
+            onCloseHandler={() => setShowExtensionWarningBox(false)}
+            title="This phase is over the legislated time limit"
+            subTitle="You will need to add an Extension Milestone to finish this Phase"
+          />
+        </When>
+        <When
+          condition={
+            ctx.selectedWorkPhase?.work_phase.is_suspended &&
+            showSuspendedWarningBox
+          }
+        >
+          <WarningBox
+            onCloseHandler={() => setShowSuspendedWarningBox(false)}
+            title="The Work is suspended"
+            subTitle="You will need to add a Resumption Milestone to resume this Work"
+          />
+        </When>
+      </Grid>
       <Grid container item columnSpacing={2}>
         <Grid item xs="auto">
           <Button variant="contained" onClick={() => setShowTaskForm(true)}>

@@ -1,4 +1,5 @@
 import { ListType } from "./code";
+import { MilestoneEvent } from "./event";
 import { Ministry } from "./ministry";
 import { Staff } from "./staff";
 import { MasterBase } from "./type";
@@ -59,6 +60,14 @@ export interface WorkPhase extends MasterBase {
   suspended_date: string;
   id: number;
   number_of_days: string;
+}
+
+export interface WorkPhaseAdditionalInfo {
+  work_phase: WorkPhase;
+  total_number_of_days: number;
+  next_milestone: string;
+  milestone_progress: number;
+  days_left: number;
 }
 
 export interface TemplateStatus extends MasterBase {

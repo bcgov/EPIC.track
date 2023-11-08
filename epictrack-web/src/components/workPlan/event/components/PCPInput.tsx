@@ -24,8 +24,8 @@ const PCPInput = ({ isFormFieldsLocked }: PCPInputProps) => {
   };
   React.useEffect(() => {
     return () => {
-      unregister("number_of_responses");
-      unregister("topic");
+      // unregister("number_of_responses");
+      // unregister("topic");
     };
   }, []);
   return (

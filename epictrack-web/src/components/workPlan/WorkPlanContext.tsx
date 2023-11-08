@@ -1,4 +1,4 @@
-import React, {
+import {
   Dispatch,
   SetStateAction,
   createContext,
@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { useSearchParams } from "../../hooks/SearchParams";
 import workService from "../../services/workService/workService";
-import { Work, WorkPhase } from "../../models/work";
+import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
 import {
   ACTIVE_STATUS,
@@ -21,13 +21,15 @@ import { WorkIssue } from "../../models/Issue";
 import dateUtils from "../../utils/dateUtils";
 
 interface WorkplanContextProps {
-  selectedWorkPhase?: WorkPhase;
-  setSelectedWorkPhase: Dispatch<SetStateAction<WorkPhase | undefined>>;
+  selectedWorkPhase?: WorkPhaseAdditionalInfo;
+  setSelectedWorkPhase: Dispatch<
+    SetStateAction<WorkPhaseAdditionalInfo | undefined>
+  >;
   loading: boolean;
   team: StaffWorkRole[];
-  workPhases: WorkPhase[];
+  workPhases: WorkPhaseAdditionalInfo[];
   setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
-  setWorkPhases: Dispatch<SetStateAction<WorkPhase[]>>;
+  setWorkPhases: Dispatch<SetStateAction<WorkPhaseAdditionalInfo[]>>;
   work: Work | undefined;
   setWork: Dispatch<SetStateAction<Work | undefined>>;
   firstNations: WorkFirstNation[];
@@ -62,13 +64,14 @@ export const WorkplanProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [selectedWorkPhase, setSelectedWorkPhase] = useState<WorkPhase>();
+  const [selectedWorkPhase, setSelectedWorkPhase] =
+    useState<WorkPhaseAdditionalInfo>();
   const [work, setWork] = useState<Work>();
   const [team, setTeam] = useState<StaffWorkRole[]>([]);
-  const [statuses, setStatuses] = React.useState<Status[]>([]);
+  const [statuses, setStatuses] = useState<Status[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const query = useSearchParams<WorkPlanContainerRouteParams>();
-  const [workPhases, setWorkPhases] = useState<WorkPhase[]>([]);
+  const [workPhases, setWorkPhases] = useState<WorkPhaseAdditionalInfo[]>([]);
   const [firstNations, setFirstNations] = useState<WorkFirstNation[]>([]);
   const workId = useMemo(() => query.get("work_id"), [query]);
 
@@ -125,7 +128,7 @@ export const WorkplanProvider = ({
   const getWorkPhases = async () => {
     if (workId) {
       const workPhasesResult = await workService.getWorkPhases(String(workId));
-      setWorkPhases(workPhasesResult.data as WorkPhase[]);
+      setWorkPhases(workPhasesResult.data as WorkPhaseAdditionalInfo[]);
     }
     return Promise.resolve();
   };

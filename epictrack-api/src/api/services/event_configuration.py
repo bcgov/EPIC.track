@@ -15,7 +15,7 @@
 from typing import Iterable
 from sqlalchemy import or_
 
-from api.models import EventConfiguration, db
+from api.models import EventConfiguration, WorkPhase, db
 from api.models.event_category import EventCategoryEnum
 
 
@@ -29,14 +29,19 @@ class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-
         db.session.flush()
 
     @classmethod
-    def find_configurations(cls,
-                            work_phase_id: int,
-                            mandatory=None,
-                            event_categories: [EventCategoryEnum] = [],
-                            _all: bool = False) -> [EventConfiguration]:
+    def find_configurations(
+        cls,
+        work_phase_id: int,
+        mandatory=None,
+        event_categories: [EventCategoryEnum] = [],
+        _all: bool = False,
+    ) -> [EventConfiguration]:
         """Get all the mandatory configurations for a given phase"""
-        query = db.session.query(EventConfiguration).filter(EventConfiguration.work_phase_id == work_phase_id,
-                                                            EventConfiguration.is_active.is_(True))
+        query = db.session.query(EventConfiguration).filter(
+            EventConfiguration.work_phase_id == work_phase_id,
+            EventConfiguration.is_active.is_(True),
+            EventConfiguration.is_deleted.is_(False),
+        )
         if len(event_categories) > 0:
             category_ids = list(map(lambda x: x.value, event_categories))
             query = query.filter(EventConfiguration.event_category_id.in_(category_ids))
@@ -48,21 +53,47 @@ class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-
         return configurations
 
     @classmethod
-    def find_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
-        """Get all the child configurations for a given phase"""
-        query = db.session.query(EventConfiguration).filter(EventConfiguration.parent_id == configuration_id,
-                                                            EventConfiguration.is_active.is_(True))
+    def find_all_configurations_by_work(
+        cls, work_id: int, event_categories: [EventCategoryEnum] = []
+    ) -> [EventConfiguration]:
+        """Find all the configurations based on the work"""
+        query = db.session.query(EventConfiguration).join(
+            WorkPhase, WorkPhase.id == EventConfiguration.work_phase_id
+        ).filter(
+            EventConfiguration.is_active.is_(True),
+            EventConfiguration.is_deleted.is_(False),
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            WorkPhase.work_id == work_id
+        )
+        if len(event_categories) > 0:
+            category_ids = list(map(lambda x: x.value, event_categories))
+            query = query.filter(EventConfiguration.event_category_id.in_(category_ids))
         configurations = query.all()
         return configurations
 
     @classmethod
-    def find_parent_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
+    def find_child_configurations(cls, configuration_id: int) -> [EventConfiguration]:
+        """Get all the child configurations for a given phase"""
+        query = db.session.query(EventConfiguration).filter(
+            EventConfiguration.parent_id == configuration_id,
+            EventConfiguration.is_active.is_(True),
+            EventConfiguration.is_deleted.is_(False),
+        )
+        configurations = query.all()
+        return configurations
+
+    @classmethod
+    def find_parent_child_configurations(
+        cls, configuration_id: int
+    ) -> [EventConfiguration]:
         """Get both parent and child configurations"""
-        query = db.session.query(EventConfiguration)\
-            .filter(or_(
+        query = db.session.query(EventConfiguration).filter(
+            or_(
                 EventConfiguration.id == configuration_id,
-                EventConfiguration.parent_id == configuration_id),
-                EventConfiguration.is_active.is_(True)
-                   )
+                EventConfiguration.parent_id == configuration_id,
+            ),
+            EventConfiguration.is_active.is_(True),
+        )
         configurations = query.all()
         return configurations

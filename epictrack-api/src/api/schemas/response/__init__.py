@@ -32,6 +32,7 @@ from .types_response import SubTypeResponseSchema, TypeResponseSchema
 from .user_group_response import UserGroupResponseSchema
 from .user_response import UserResponseSchema
 from .work_response import (
-    WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema, WorkPhaseResponseSchema, WorkPhaseSkeletonResponseSchema,
-    WorkPhaseTemplateAvailableResponse, WorkResourceResponseSchema, WorkResponseSchema, WorkStaffRoleReponseSchema,
-    WorkStatusResponseSchema)
+    WorkPhaseResponseSchema, WorkPhaseTemplateAvailableResponse,
+    WorkPhaseAdditionalInfoResponseSchema,
+    WorkResourceResponseSchema, WorkResponseSchema, WorkStaffRoleReponseSchema,
+    WorkStatusResponseSchema, WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema)

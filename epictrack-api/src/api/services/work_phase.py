@@ -12,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work phases."""
+import functools
+import datetime
+from datetime import timezone
 from api.models import PhaseCode, WorkPhase, db
 from api.schemas.work_v2 import WorkPhaseSchema
 from api.services.task_template import TaskTemplateService
+from api.services.event import EventService
+from api.models.event_type import EventTypeEnum
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -63,7 +68,69 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         work_phase = WorkPhase.find_by_id(work_phase_id)
         result["task_added"] = work_phase.task_added
         template_available = TaskTemplateService.check_template_exists(
-            work_type_id=work_phase.work.work_type_id, phase_id=work_phase.phase_id, ea_act_id=work_phase.work.ea_act_id
+            work_type_id=work_phase.work.work_type_id,
+            phase_id=work_phase.phase_id,
+            ea_act_id=work_phase.work.ea_act_id,
         )
         result["template_available"] = template_available
+        return result
+
+    @classmethod
+    def find_work_phases_status(cls, work_id: int):
+        """Return the work phases with additional information"""
+        work_phases = (
+            db.session.query(WorkPhase)
+            .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
+            .filter(
+                WorkPhase.work_id == work_id,
+                WorkPhase.is_active.is_(True),
+                WorkPhase.is_deleted.is_(False),
+            )
+            .order_by(PhaseCode.sort_order, WorkPhase.id)
+            .all()
+        )
+        result = []
+        events = EventService.find_events(work_id)
+        for work_phase in work_phases:
+            result_item = {}
+            result_item["work_phase"] = work_phase
+            total_days = (
+                work_phase.end_date.date() - work_phase.start_date.date()
+            ).days
+            work_phase_events = list(
+                filter(
+                    lambda x, _work_phase_id=work_phase.id: x.event_configuration.work_phase_id == _work_phase_id,
+                    events,
+                )
+            )
+            work_phase_events = sorted(work_phase_events, key=functools.cmp_to_key(EventService.event_compare_func))
+            suspended_days = functools.reduce(
+                lambda x, y: x + y,
+                map(
+                    lambda x: x.number_of_days
+                    if x.event_configuration.event_type_id
+                    == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and x.actual_date is not None
+                    else 0,
+                    work_phase_events,
+                ),
+            )
+            result_item["total_number_of_days"] = total_days - suspended_days
+            next_milestone_event = next((x for x in work_phase_events if x.actual_date is None), None)
+            if next_milestone_event:
+                result_item["next_milestone"] = next_milestone_event.name
+            total_number_of_milestones = len(work_phase_events)
+            completed_ones = len(list(filter(lambda x: x.actual_date is not None, work_phase_events)))
+            result_item["milestone_progress"] = (completed_ones / total_number_of_milestones) * 100
+            days_passed = 0
+            if work_phase.work.current_phase_id == work_phase.phase_id:
+                if work_phase.is_suspended:
+                    days_passed = (work_phase.suspended_date.date() - work_phase.start_date.date()).days
+                else:
+                    days_passed = (datetime.datetime.now(timezone.utc).date() - work_phase.start_date.date()).days
+                    days_passed = 0 if days_passed < 0 else days_passed
+                days_left = (total_days - suspended_days) - days_passed
+            else:
+                days_left = total_days - suspended_days
+            result_item["days_left"] = days_left
+            result.append(result_item)
         return result
