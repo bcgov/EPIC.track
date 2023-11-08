@@ -21,10 +21,8 @@ const RecentStatus = () => {
     setShowStatusForm,
     setStatus,
     setShowApproveStatusDialog,
+    groups,
   } = React.useContext(StatusContext);
-  // const { position } = useAppSelector((state) => state.user.userDetail);
-
-  console.log(statuses);
 
   return (
     <GrayBox
@@ -131,7 +129,9 @@ const RecentStatus = () => {
             </Button>
           </Else>
         </If>
-        <If condition={!statuses[0].is_approved}>
+        <If
+          condition={!statuses[0].is_approved || groups.includes("Super User")}
+        >
           <Then>
             <Button
               onClick={() => {

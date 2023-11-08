@@ -10,6 +10,7 @@ import workService from "../../../services/workService/workService";
 import statusService from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/SearchParams";
 import { WorkplanContext } from "../WorkPlanContext";
+import { useAppSelector } from "../../../hooks";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -20,6 +21,7 @@ interface StatusContextProps {
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
   isCloning: boolean;
+  groups: Array<string>;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -35,6 +37,7 @@ export const StatusContext = createContext<StatusContextProps>({
   setIsCloning: () => ({}),
   isCloning: false,
   workId: null,
+  groups: [],
 });
 
 export const StatusProvider = ({
@@ -50,18 +53,21 @@ export const StatusProvider = ({
   const query = useSearchParams<StatusContainerRouteParams>();
   const workId = React.useMemo(() => query.get("work_id"), [query]);
   const { getWorkStatuses } = useContext(WorkplanContext);
+  const { groups } = useAppSelector((state) => state.user.userDetail);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
     setIsCloning(false);
   };
 
+  const isEditable = (is_approved: boolean) => {
+    return !is_approved || groups.includes("Super User");
+  };
+
   const onSave = async (data: any, callback: () => any) => {
-    const { description, posted_date } = data;
-    console.log(description);
-    console.log(posted_date);
+    const { description, posted_date, is_approved } = data;
     try {
-      if (status && !isCloning) {
+      if (status && !isCloning && isEditable(is_approved)) {
         const result = await statusService?.update(
           Number(workId),
           Number(status.id),
@@ -120,6 +126,7 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        groups,
         isCloning,
         workId,
         setIsCloning,

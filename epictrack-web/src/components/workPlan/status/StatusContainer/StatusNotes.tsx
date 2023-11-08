@@ -16,12 +16,10 @@ const StatusNotes = () => {
   }, [statuses]);
 
   const saveStatusNotes = React.useCallback(async (value: string) => {
-    console.log("HERE");
-    console.log(value);
     const result = await statusService.update(
       Number(workId),
       Number(statuses[0]?.id),
-      value
+      { notes: value, description: statuses[0]?.description }
     );
     if (result.status === 200) {
       getWorkStatuses();
@@ -37,7 +35,7 @@ const StatusNotes = () => {
   }, [saveStatusNotes]);
 
   const handleNotesChange = (value: string) => {
-    if (value !== statuses[0]?.notes) {
+    if (value !== notes) {
       setNotes(value);
       debounceSave(value);
     }
@@ -47,8 +45,7 @@ const StatusNotes = () => {
     <>
       {statuses.length > 0 && (
         <RichTextEditor
-          // TODO handle notes save
-          // handleEditorStateChange={handleNotesChange}
+          handleEditorStateChange={handleNotesChange}
           initialRawEditorState={statuses[0]?.notes}
         />
       )}

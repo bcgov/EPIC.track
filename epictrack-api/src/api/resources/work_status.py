@@ -61,10 +61,15 @@ class Status(Resource):
     @profiletime
     def put(work_id, status_id):
         """Update work status"""
+        print("\n\n\nHERE\n\n\n")
+        print(API.payload)
         request_dict = req.WorkStatusParameterSchema().load(API.payload)
+        print("RIGHT HERE")
         existing_work_status = WorkStatusService.find_work_status_by_id(work_id, status_id)
         if existing_work_status is None:
             return {"message": "Work status not found"}, HTTPStatus.NOT_FOUND
+        
+        print(request_dict)
 
         updated_work_status = WorkStatusService.update_work_status(existing_work_status, request_dict)
 
