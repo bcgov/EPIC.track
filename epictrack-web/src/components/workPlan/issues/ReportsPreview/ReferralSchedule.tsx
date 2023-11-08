@@ -20,7 +20,7 @@ export const ReferralSchedule = () => {
   );
 
   const activeApprovedIssues = issues.filter(
-    (issue) => Boolean(issue.approved_by) && issue.is_active
+    (issue) => Boolean(issue.is_approved) && issue.is_active
   );
 
   const latestIssue = activeApprovedIssues?.[0];

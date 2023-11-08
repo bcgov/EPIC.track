@@ -18,8 +18,8 @@ class IssueService {
       workId.toString()
     )}`;
     // TODO: uncomment this line
-    // return await http.PostRequest(query, JSON.stringify(data));
-    return Promise.resolve();
+    return await http.PostRequest(query, JSON.stringify(data));
+    // return Promise.resolve();
   }
 
   async approve(work_id: string, issue_id: string) {

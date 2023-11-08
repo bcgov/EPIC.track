@@ -21,7 +21,7 @@ export const ThirtySixtyNinety = () => {
 
   const activeApprovedHighprioIssues = issues.filter(
     (issue) =>
-      Boolean(issue.approved_by) && issue.is_active && issue.is_high_priority
+      Boolean(issue.is_approved) && issue.is_active && issue.is_high_priority
   );
 
   const latestIssue = activeApprovedHighprioIssues?.[0];

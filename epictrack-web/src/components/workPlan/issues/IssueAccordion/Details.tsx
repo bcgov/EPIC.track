@@ -53,7 +53,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                     {moment(issue.created_at).format("MMM.DD YYYY")}
                   </ETCaption1>
                 </Grid>
-                <If condition={issue.approved_by}>
+                <If condition={issue.is_approved}>
                   <Then>
                     <Grid item xs="auto">
                       <ActiveChip label="Approved" />
@@ -71,7 +71,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <ETParagraph>{latestUpdate?.description}</ETParagraph>
               </Grid>
 
-              <When condition={!issue.approved_by}>
+              <When condition={!issue.is_approved}>
                 <Grid item>
                   <IconButton
                     disableRipple
