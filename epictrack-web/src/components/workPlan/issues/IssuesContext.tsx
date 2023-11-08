@@ -4,7 +4,7 @@ import issueService from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/SearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { IssueForm } from "./types";
-import { set } from "lodash";
+import { is } from "immutable";
 
 interface IssuesContextProps {
   showIssuesForm: boolean;
@@ -13,6 +13,9 @@ interface IssuesContextProps {
   issueToEdit: WorkIssue | null;
   setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
   addIssue: (issueForm: IssueForm) => Promise<void>;
+  approveIssue: (issueId: number) => Promise<void>;
+  issueToApproveId: number | null;
+  setIssueToApproveId: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 interface IssueContainerRouteParams extends URLSearchParams {
@@ -28,6 +31,13 @@ export const IssuesContext = createContext<IssuesContextProps>({
   addIssue: (_: IssueForm) => {
     return Promise.resolve();
   },
+  issueToApproveId: null,
+  setIssueToApproveId: () => {
+    return;
+  },
+  approveIssue: (_: number) => {
+    return Promise.resolve();
+  },
 });
 
 export const IssuesProvider = ({
@@ -39,6 +49,8 @@ export const IssuesProvider = ({
   const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(true);
   const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
 
+  const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
+
   const { issues, setIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
   const workId = query.get("work_id");
@@ -49,7 +61,7 @@ export const IssuesProvider = ({
     description:
       "The project has been the subject of media attention due to opposition to the project from the union representing the terminal workers and environmental non-profits.",
     work_issue_id: 1,
-    is_active: false,
+    is_active: true,
     is_deleted: false,
   };
   const mockIssue: WorkIssue = {
@@ -65,12 +77,15 @@ export const IssuesProvider = ({
     created_by: "somebody",
     created_at: new Date().toISOString(),
     updated_by: "somebody",
-    updated_at: new Date().toISOString(),
+    updated_at: "2023-11-07",
     updates: [mockIssueUpdate],
   };
 
   //TODO: remove mock data
-  const mockIssues = [mockIssue, { ...mockIssue, id: 2 }];
+  const mockIssues = [
+    mockIssue,
+    { ...mockIssue, id: 2, is_high_priority: false, is_active: true },
+  ];
 
   const loadIssues = async () => {
     if (!workId) return;
@@ -103,6 +118,17 @@ export const IssuesProvider = ({
     }
   };
 
+  const approveIssue = async (issueId: number) => {
+    if (!workId) return;
+    setIsIssuesLoading(true);
+    try {
+      await issueService.approve(workId, String(issueId));
+      loadIssues();
+    } catch (error) {
+      setIsIssuesLoading(false);
+    }
+  };
+
   return (
     <IssuesContext.Provider
       value={{
@@ -112,6 +138,9 @@ export const IssuesProvider = ({
         issueToEdit,
         setIssueToEdit,
         addIssue,
+        issueToApproveId,
+        setIssueToApproveId,
+        approveIssue,
       }}
     >
       {children}

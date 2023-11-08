@@ -12,7 +12,6 @@ import { WorkplanContext } from "../WorkPlanContext";
 
 const IssuesView = () => {
   const { issues } = React.useContext(WorkplanContext);
-
   const { showIssuesForm, setShowIssuesForm, isIssuesLoading, setIssueToEdit } =
     React.useContext(IssuesContext);
 

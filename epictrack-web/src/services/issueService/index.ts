@@ -21,6 +21,17 @@ class IssueService {
     // return await http.PostRequest(query, JSON.stringify(data));
     return Promise.resolve();
   }
+
+  async approve(work_id: string, issue_id: string) {
+    let query = `${Endpoints.WorkIssues.APPROVE_ISSUE.replace(
+      ":work_id",
+      work_id.toString()
+    )}`;
+    query = query.replace(":issue_id", issue_id.toString());
+    // TODO: uncomment this line
+    // return await http.PutRequest(query);
+    return Promise.resolve();
+  }
 }
 
 export default new IssueService();
