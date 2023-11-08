@@ -33,8 +33,8 @@ const DecisionInput = ({
       getOutcomes();
     }
     return () => {
-      unregister("decision_maker_id");
-      unregister("outcome_id");
+      // unregister("decision_maker_id");
+      // unregister("outcome_id");
     };
   }, []);
   const getOutcomes = async () => {

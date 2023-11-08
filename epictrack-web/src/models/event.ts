@@ -1,10 +1,12 @@
 import { EVENT_TYPE } from "../components/workPlan/phase/type";
+import EventConfiguration from "./eventConfiguration";
 import { Staff } from "./staff";
 import { EVENT_STATUS } from "./taskEvent";
 
 export interface EventsGridModel {
   start_date: string;
   event_configuration_id: number;
+  event_configuration: EventConfiguration;
   id: number;
   is_active: boolean;
   type: EVENT_TYPE;
@@ -34,6 +36,7 @@ export interface MilestoneEvent {
   outcome_id?: number;
   high_priority: boolean;
   number_of_responses: number;
+  number_of_attendees: number;
   topic: string;
   act_section_id: number;
   reason: string;
@@ -62,4 +65,10 @@ export enum EventType {
   VIRTUAL_OPEN_HOUSE = 24,
   TIME_LIMIT_SUSPENSION = 12,
   TIME_LIMIT_RESUMPTION = 38,
+}
+
+export enum EventPosition {
+  START = "START",
+  INTERMEDIATE = "INTERMEDIATE",
+  END = "END",
 }

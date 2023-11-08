@@ -141,12 +141,20 @@ const EventForm = ({
   }, [selectedConfiguration, event]);
 
   const isMilestoneTypeDisabled = React.useMemo(
-    () => !!event || isFormFieldsLocked || ctx.selectedWorkPhase?.is_suspended,
+    () =>
+      !!event ||
+      isFormFieldsLocked ||
+      ctx.selectedWorkPhase?.work_phase.is_suspended,
     [event]
   );
   const isTitleDisabled = React.useMemo(
-    () => isFormFieldsLocked || ctx.selectedWorkPhase?.is_suspended,
+    () => isFormFieldsLocked || ctx.selectedWorkPhase?.work_phase.is_suspended,
     []
+  );
+
+  const anticipatedMinDate = React.useMemo(
+    () => dayjs(ctx.work?.start_date),
+    [ctx.work]
   );
 
   const methods = useForm({
@@ -158,6 +166,7 @@ const EventForm = ({
   const {
     register,
     handleSubmit,
+    unregister,
     formState: { errors },
     reset,
     control,
@@ -210,7 +219,7 @@ const EventForm = ({
 
   React.useEffect(() => {
     if (
-      ctx.selectedWorkPhase?.is_suspended &&
+      ctx.selectedWorkPhase?.work_phase.is_suspended &&
       configurations.length > 0 &&
       !event
     ) {
@@ -238,7 +247,7 @@ const EventForm = ({
   const getConfigurations = async () => {
     try {
       const result = await configurationService.getAll(
-        Number(ctx.selectedWorkPhase?.id),
+        Number(ctx.selectedWorkPhase?.work_phase.id),
         event === undefined ? false : undefined
       );
       if (result.status === 200) {
@@ -277,7 +286,7 @@ const EventForm = ({
   const createEvent = async (data: MilestoneEvent) => {
     const createdResult = await eventService.create(
       data,
-      Number(ctx.selectedWorkPhase?.id)
+      Number(ctx.selectedWorkPhase?.work_phase.id)
     );
     showNotification("Milestone details inserted", {
       type: "success",
@@ -351,8 +360,19 @@ const EventForm = ({
     (titleRef?.current as any)["value"] = configuration.name;
     setTitleCharacterCount(Number(configuration.name.length));
     (titleRef?.current as any).focus();
+    unregisterOptionalFields();
   };
-
+  const unregisterOptionalFields = () => {
+    unregister("decision_maker_id");
+    unregister("outcome_id");
+    unregister("number_of_days");
+    unregister("act_section_id");
+    unregister("reason");
+    unregister("number_of_days");
+    unregister("number_of_responses");
+    unregister("topic");
+    unregister("number_of_attendees");
+  };
   const onChangeTitle = (event: any) => {
     setTitleCharacterCount(Number(event.target.value.length));
   };
@@ -484,6 +504,7 @@ const EventForm = ({
                     <DatePicker
                       disabled={isFormFieldsLocked}
                       format={DATE_FORMAT}
+                      minDate={anticipatedMinDate}
                       slotProps={{
                         textField: {
                           id: "anticipated_date",

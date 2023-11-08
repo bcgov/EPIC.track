@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
-import { EventsGridModel } from "../../../models/event";
+import { EventPosition, EventsGridModel } from "../../../models/event";
 import { MRT_ColumnDef, MRT_RowSelectionState } from "material-react-table";
 import { ETGridTitle, ETParagraph } from "../../shared";
 import { dateUtils } from "../../../utils";
@@ -76,17 +76,20 @@ const EventListTable = ({
   const startDateFilterOptions = getSelectFilterOptions(
     events,
     "start_date",
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
     (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
   );
   const endDateFilterOptions = getSelectFilterOptions(
     events,
     "end_date",
+    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
     (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
   );
   const numberOfDaysFilterOptions = getSelectFilterOptions(
     events,
     "number_of_days",
-    (value) => String(value)
+    (value) => String(value),
+    (value) => Number(value)
   );
   const assigneeOptions = Array.from(
     new Set(
@@ -198,7 +201,9 @@ const EventListTable = ({
 
           const value: string = row.getValue(id) || "";
 
-          return filterValue.includes(value);
+          return filterValue.includes(
+            dateUtils.formatDate(String(value), "MMM.DD YYYY")
+          );
         },
         filterSelectOptions: startDateFilterOptions,
         size: 140,
@@ -238,7 +243,11 @@ const EventListTable = ({
 
           const value: string = row.getValue(id) || "";
 
-          return filterValue.includes(value);
+          return filterValue.includes(
+            value === ""
+              ? value
+              : dateUtils.formatDate(String(value), "MMM.DD YYYY")
+          );
         },
         Cell: ({ cell, row }) => (
           <ETParagraph
@@ -275,7 +284,7 @@ const EventListTable = ({
             return true;
           }
 
-          const value: string = row.getValue(id) || "";
+          const value: string = row.getValue(id);
 
           return filterValue.includes(value);
         },
@@ -450,7 +459,7 @@ const EventListTable = ({
     ],
     [events]
   );
-
+  console.log("EVENTS ", events);
   return (
     <MasterTrackTable
       enableSorting={false}
@@ -471,6 +480,25 @@ const EventListTable = ({
           return {
             style: {
               background: highlightedRowBGColor,
+            },
+          };
+        }
+        if (
+          row.original.event_configuration?.event_position ===
+          EventPosition.START
+        ) {
+          return {
+            style: {
+              background: "#E2EFDA",
+            },
+          };
+        }
+        if (
+          row.original.event_configuration?.event_position === EventPosition.END
+        ) {
+          return {
+            style: {
+              background: "#FFCCCC",
             },
           };
         }

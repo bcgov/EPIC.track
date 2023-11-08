@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage Event."""
 import copy
+import functools
 from datetime import datetime, timedelta
 from typing import List
 
@@ -21,8 +22,18 @@ from sqlalchemy import and_, or_
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, Work,
-    WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
+    PRIMARY_CATEGORIES,
+    CalendarEvent,
+    Event,
+    EventCategoryEnum,
+    EventConfiguration,
+    EventTypeEnum,
+    Work,
+    WorkCalendarEvent,
+    WorkPhase,
+    WorkStateEnum,
+    db,
+)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
@@ -40,13 +51,15 @@ class EventService:
     def create_event(cls, data: dict, work_phase_id: int, commit: bool = True) -> Event:
         """Create milestone event"""
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
-
+        all_work_events = cls.find_events(
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES
+        )
         data["work_id"] = current_work_phase.work_id
         data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = Event(**data)
         event = event.flush()
-        cls._process_events(current_work_phase, event, None)
+        cls._process_events(current_work_phase, event, all_work_events, None)
         cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
@@ -60,16 +73,9 @@ class EventService:
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
-        # all_work_events = cls._find_events(
-        #         current_work_phase.work_id, None, PRIMARY_CATEGORIES
-        # )
-        # all_work_events = sorted(
-        #         all_work_events, key=lambda x: x.actual_date or x.anticipated_date
-        # )
-        all_work_phase_events = cls._find_events(
-            current_work_phase.work_id, current_work_phase.id, PRIMARY_CATEGORIES
+        all_work_events = cls.find_events(
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES
         )
-        current_event_old_index = util.find_index_in_array(all_work_phase_events, event)
         if not event:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
@@ -80,7 +86,10 @@ class EventService:
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
             cls._process_events(
-                current_work_phase, event, event_old, current_event_old_index
+                current_work_phase,
+                event,
+                all_work_events,
+                event_old,
             )
             cls._process_actions(event, data.get("outcome_id", None))
         if commit:
@@ -107,7 +116,7 @@ class EventService:
             ),
         )
         events_total = events_query.count()
-        events_completed = events_query.filter(Event.actual_date is not None).count()
+        events_completed = events_query.filter(Event.actual_date.is_not(None)).count()
         return (events_completed / events_total) * 100
 
     @classmethod
@@ -120,69 +129,73 @@ class EventService:
         cls,
         current_work_phase: WorkPhase,
         event: Event,
+        all_work_events: [Event],
         event_old: Event = None,
-        current_event_old_index: int = None,
     ) -> None:
         """Process the event date logic"""
         cls._end_event_anticipated_change_rule(event, event_old)
-        all_work_events = cls._find_events(
-                current_work_phase.work_id, None, PRIMARY_CATEGORIES
+        all_work_phases = WorkPhase.find_by_params(
+            {"work_id": current_work_phase.work_id}
         )
-        all_work_events = sorted(
-                all_work_events, key=lambda x: x.actual_date or x.anticipated_date
-               )
-        cls._previous_event_acutal_date_rule(all_work_events, event)
-        all_work_event_configurations = EventConfigurationService.find_configurations(
-            event.work_id, _all=True
+        current_work_phase_index = util.find_index_in_array(
+            all_work_phases, current_work_phase
         )
-        cls._handle_child_events(all_work_event_configurations, event)
+        cls._previous_event_acutal_date_rule(
+            all_work_events, all_work_phases, current_work_phase_index, event, event_old
+        )
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, event_old, current_work_phase
         )
-        if event.actual_date and event.event_configuration.event_position == EventPositionEnum.END:
+        if (
+            event.actual_date
+            and event.event_configuration.event_position.value
+            == EventPositionEnum.END.value
+        ):
             cls._complete_work_phase(current_work_phase)
         if (
-            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value and
-            event.actual_date
+            event.event_configuration.event_type_id
+            == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            and event.actual_date
         ):
             current_work_phase.suspended_date = event.actual_date
             current_work_phase.is_suspended = True
-            current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
         if (
-                event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and
-                event.actual_date
+            event.event_configuration.event_type_id
+            == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+            and event.actual_date
         ):
-            event.number_of_days = (event.actual_date - current_work_phase.suspended_date).days
+            event.number_of_days = number_of_days_to_be_pushed
             event.update(event.as_dict(recursive=False), commit=False)
             current_work_phase.is_suspended = False
-            current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
 
+        current_event_index = cls._find_event_index(
+            all_work_events, event_old if event_old else event, current_work_phase
+        )
         if number_of_days_to_be_pushed != 0:
-
-            all_work_phases = WorkPhase.find_by_params(
-                {"work_id": current_work_phase.work_id}
+            all_work_event_configurations = (
+                EventConfigurationService.find_all_configurations_by_work(event.work_id)
             )
-
-            current_work_phase_index = util.find_index_in_array(
-                all_work_phases, current_work_phase
-            )
+            cls._handle_child_events(all_work_event_configurations, event)
             current_future_work_phases = all_work_phases[current_work_phase_index:]
             if current_work_phase.legislated:
                 phase_events = list(
                     filter(
-                        lambda x, _work_phase_id=current_work_phase.id:
-                            x.event_configuration.work_phase_id == _work_phase_id,
+                        lambda x, _work_phase_id=current_work_phase.id: x.event_configuration.work_phase_id
+                        == _work_phase_id,
                         all_work_events,
                     )
                 )
-                current_event_index = (
-                    current_event_old_index
-                    if current_event_old_index
-                    else util.find_index_in_array(phase_events, event)
-                )
                 if (
-                    event.event_configuration.event_position == EventPositionEnum.START.value or
-                    event.event_configuration.event_category_id in [
+                    event.event_configuration.event_position.value
+                    == EventPositionEnum.START.value
+                    or event.event_configuration.event_category_id
+                    in [
                         EventCategoryEnum.EXTENSION.value,
                         EventCategoryEnum.SUSPENSION.value,
                     ]
@@ -191,7 +204,8 @@ class EventService:
                     if cls._find_event_date(event) >= current_work_phase.end_date:
                         end_event = next(
                             filter(
-                                lambda x: x.event_configuration.event_position == EventPositionEnum.END.value,
+                                lambda x: x.event_configuration.event_position.value
+                                == EventPositionEnum.END.value,
                                 phase_events,
                             )
                         )
@@ -205,14 +219,13 @@ class EventService:
                         number_of_days_to_be_pushed,
                         event,
                         current_work_phase,
-                        (end_event_index - 1)
-                        if end_event_index
-                        else current_event_old_index,
+                        end_event_index if end_event_index else current_event_index,
                     )
                 else:
                     phase_events = list(
                         filter(
-                            lambda x: x.event_configuration.event_position != EventPositionEnum.END.value,
+                            lambda x: x.event_configuration.event_position.value
+                            != EventPositionEnum.END.value,
                             phase_events,
                         )
                     )
@@ -230,63 +243,139 @@ class EventService:
                     number_of_days_to_be_pushed,
                     event,
                     current_work_phase,
-                    current_event_old_index,
+                    current_event_index,
                 )
+
+    @classmethod
+    def event_compare_func(cls, event_x, event_y):
+        """Compare function for event sort"""
+        if (
+            event_x.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+            or event_y.event_configuration.event_position.value
+            == EventPositionEnum.END.value
+        ):
+            return -1
+        if (
+            event_y.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+            or event_x.event_configuration.event_position.value
+            == EventPositionEnum.END.value
+        ):
+            return 1
+        if (
+            cls._find_event_date(event_x).date() - cls._find_event_date(event_y).date()
+        ).days < 0:
+            return -1
+        if (
+            cls._find_event_date(event_x).date() - cls._find_event_date(event_y).date()
+        ).days > 0:
+            return 1
+        return 0
+
+    @classmethod
+    def _find_event_index(
+        cls, all_work_events: [Event], event: Event, current_work_phase: WorkPhase
+    ):
+        """Find the index of given event in the list of existing events"""
+        all_phase_events = list(
+            filter(
+                lambda x: x.event_configuration.work_phase_id == current_work_phase.id,
+                all_work_events,
+            )
+        )
+        all_phase_events = sorted(
+            all_phase_events, key=functools.cmp_to_key(cls.event_compare_func)
+        )
+        event_index_if_existing = cls._find_event_index_in_array(
+            all_phase_events, event
+        )
+        if event_index_if_existing != -1:
+            return event_index_if_existing
+        copy_of_all_phase_events: [Event] = copy.copy(all_phase_events)
+        copy_of_all_phase_events.append(event)
+        copy_of_all_phase_events = sorted(
+            copy_of_all_phase_events, key=functools.cmp_to_key(cls.event_compare_func)
+        )
+        return cls._find_event_index_in_array(copy_of_all_phase_events, event)
+
+    @classmethod
+    def _find_event_index_in_array(cls, events: [Event], event_to_find: Event):
+        """Find the index of the event in the given array"""
+        index = -1
+        for i, event in enumerate(events):
+            if event.id == event_to_find.id:
+                index = i
+                break
+        return index
 
     @classmethod
     def _complete_work_phase(cls, current_work_phase: WorkPhase) -> None:
         """Mark the current work phase complete and set the next work phase as the current one in the work"""
         all_work_phases = WorkPhase.find_by_params(
-                {"work_id": current_work_phase.work_id}
+            {"work_id": current_work_phase.work_id}
         )
         current_work_phase.is_completed = True
-        current_work_phase.update(current_work_phase.as_dict(recursive=False), commit=False)
+        current_work_phase.update(
+            current_work_phase.as_dict(recursive=False), commit=False
+        )
 
         current_work_phase_index = util.find_index_in_array(
-                all_work_phases, current_work_phase
+            all_work_phases, current_work_phase
         )
         work: Work = Work.find_by_id(current_work_phase.work_id)
         if current_work_phase_index == len(all_work_phases) - 1:
             work.work_state = WorkStateEnum.COMPLETED
         else:
-            work.current_phase_id = all_work_phases[current_work_phase_index + 1].phase.id
+            work.current_phase_id = all_work_phases[
+                current_work_phase_index + 1
+            ].phase.id
         work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
-    def _get_number_of_days_to_be_pushed(cls,
-                                         event: Event,
-                                         event_old: Event,
-                                         current_work_phase: WorkPhase) -> int:
+    def _get_number_of_days_to_be_pushed(
+        cls, event: Event, event_old: Event, current_work_phase: WorkPhase
+    ) -> int:
         # pylint: disable=too-many-return-statements
         """Returns the number of days to be pushed"""
         delta = (
-            (cls._find_event_date(event) - cls._find_event_date(event_old)).days
+            (
+                cls._find_event_date(event).date()
+                - cls._find_event_date(event_old).date()
+            ).days
             if event_old
             else 0
         )  # used to have the difference
         number_of_days = event.number_of_days
-        if event.event_configuration.event_category_id == EventCategoryEnum.EXTENSION.value:
+        if (
+            event.event_configuration.event_category_id
+            == EventCategoryEnum.EXTENSION.value
+        ):
             # return 0 days to be pushed unless actual date is entered
             return 0 if not event.actual_date else event.number_of_days
         if (
-            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value and
-            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            event.event_configuration.event_category_id
+            == EventCategoryEnum.SUSPENSION.value
+            and event.event_configuration.event_type_id
+            == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
         ):
             # always return 0 as suspension does not push the number of days
             return 0
         if (
-            event.event_configuration.event_category_id == EventCategoryEnum.SUSPENSION.value and
-            event.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+            event.event_configuration.event_category_id
+            == EventCategoryEnum.SUSPENSION.value
+            and event.event_configuration.event_type_id
+            == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
         ):
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
             return 0
 
-        if event.event_configuration.event_position in [
-            EventPositionEnum.START.value,
-            EventPositionEnum.END.value,
-        ]:
-            return (cls._find_event_date(event) - cls._find_event_date(event_old)).days
+        # if event.event_configuration.event_position.value in [
+        #     EventPositionEnum.START.value,
+        #     EventPositionEnum.END.value,
+        # ]:
+        #     return (cls._find_event_date(event) - cls._find_event_date(event_old)).days
 
         if event.event_configuration.multiple_days and event_old:
             number_of_days = (
@@ -310,11 +399,13 @@ class EventService:
             if event_to_update.id != event.id:
                 if event_to_update.actual_date:
                     event_to_update.actual_date = (
-                        event_to_update.actual_date + timedelta(days=number_of_days_to_be_pushed)
+                        event_to_update.actual_date
+                        + timedelta(days=number_of_days_to_be_pushed)
                     )
                 elif event_to_update.anticipated_date:
                     event_to_update.anticipated_date = (
-                        event_to_update.anticipated_date + timedelta(days=number_of_days_to_be_pushed)
+                        event_to_update.anticipated_date
+                        + timedelta(days=number_of_days_to_be_pushed)
                     )
                 event_to_update.update(
                     event_to_update.as_dict(recursive=False), commit=False
@@ -337,33 +428,28 @@ class EventService:
         for each_work_phase in work_phases:
             phase_events = list(
                 filter(
-                    lambda x, _work_phase_id=each_work_phase.id:
-                        x.event_configuration.work_phase_id == _work_phase_id,
+                    lambda x, _work_phase_id=each_work_phase.id: x.event_configuration.work_phase_id
+                    == _work_phase_id,
                     all_work_events,
                 )
             )
             # if updating: get the old event index if we are in the current phase
             # if inserting: get the event index when we are in the current phase
-            _current_event_index = -1
-            if each_work_phase.id == current_work_phase.id:
-                _current_event_index = (
-                    current_event_index
-                    if current_event_index
-                    else util.find_index_in_array(phase_events, event)
-                )
+            _current_event_index = -1 if each_work_phase.id != current_work_phase.id else current_event_index
             cls._push_events(
                 phase_events[_current_event_index + 1:],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
             )
-            if (
-                event.event_configuration.event_category_id
-                not in [
-                    EventCategoryEnum.EXTENSION.value,
-                    EventCategoryEnum.SUSPENSION.value,
-                ] or each_work_phase.id != current_work_phase.id
-            ):
+            # if (
+            #     event.event_configuration.event_category_id
+            #     not in [
+            #         EventCategoryEnum.EXTENSION.value,
+            #         EventCategoryEnum.SUSPENSION.value,
+            #     ] or each_work_phase.id != current_work_phase.id
+            # ):
+            if each_work_phase.id != current_work_phase.id:
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
@@ -378,16 +464,23 @@ class EventService:
     def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
         """Anticipated date of end event cannot be changed"""
         if (
-            event.event_configuration.event_position == EventPositionEnum.END.value and
-            (event_old.anticipated_date - event.anticipated_date).days != 0
+            event.event_configuration.event_position.value
+            == EventPositionEnum.END.value
+            and (event_old.anticipated_date.date() - event.anticipated_date.date()).days
+            != 0
         ):
             raise UnprocessableEntityError(
                 "Anticipated date of the phase end event should not be changed"
             )
 
     @classmethod
-    def _previous_event_acutal_date_rule(
-        cls, all_work_events: [Event], event: Event
+    def _previous_event_acutal_date_rule(  # pylint: disable=too-many-arguments
+        cls,
+        all_work_events: [Event],
+        all_work_phases: [WorkPhase],
+        current_work_phase_index: int,
+        event: Event,
+        event_old,
     ) -> None:
         """Check to see if the previous event has actual date present
 
@@ -395,27 +488,38 @@ class EventService:
         have actual dates in all the previous events.
         """
         if event.actual_date:
+            if (
+                event.event_configuration.event_position.value
+                == EventPositionEnum.START.value
+                and current_work_phase_index > 0
+            ):
+                previous_work_phase = all_work_phases[current_work_phase_index - 1]
+                if not previous_work_phase.is_completed:
+                    raise UnprocessableEntityError(
+                        "Previous event should be completed to proceed"
+                    )
+            event_index = cls._find_event_index(
+                all_work_events,
+                event_old if event_old else event,
+                all_work_phases[current_work_phase_index],
+            )
             phase_events = list(
                 filter(
                     lambda x, _work_phase_id=event.event_configuration.work_phase_id:
-                        x.event_configuration.work_phase_id == _work_phase_id,
+                    x.event_configuration.work_phase_id == _work_phase_id,
                     all_work_events,
                 )
             )
             phase_events = sorted(
-                phase_events, key=lambda x: x.actual_date or x.anticipated_date
+                phase_events, key=functools.cmp_to_key(cls.event_compare_func)
             )
-            event_index = -1
-            for index, item in enumerate(phase_events):
-                if item.id == event.id:
-                    event_index = index
-                    break
             if (
-                event_index > 0 and event.actual_date and (
-                    not phase_events[event_index - 1].actual_date and not phase_events[
-                        event_index - 1
-                    ].event_configuration.event_position == EventPositionEnum.END.value
-                )
+                event_index > 0
+                and not phase_events[event_index - 1].actual_date
+                and not phase_events[
+                    event_index - 1
+                ].event_configuration.event_position.value
+                == EventPositionEnum.END.value
             ):
                 raise UnprocessableEntityError(
                     "Previous event should be completed to proceed"
@@ -495,10 +599,10 @@ class EventService:
                     )
 
     @classmethod
-    def _find_events(
+    def find_events(
         cls,
         work_id: int,
-        work_phase_id: int,
+        work_phase_id: int = None,
         event_categories: [EventCategoryEnum] = [],
     ) -> [Event]:
         # pylint: disable=dangerous-default-value
