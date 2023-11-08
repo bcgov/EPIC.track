@@ -26,7 +26,7 @@ export const ReferralSchedule = () => {
             }}
             bold
           >
-            30-60-90 Preview
+            Referral Schedule
           </ETSubhead>
         </Grid>
         <Grid item xs={12}>
