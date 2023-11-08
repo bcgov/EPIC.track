@@ -308,6 +308,17 @@ const ExclamationMediumIcon = (props: IconProps) => {
   );
 };
 
+const PauseIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
+      <path
+        d="M8 -0.00195312C12.4062 -0.00195312 16 3.5918 16 7.99805C16 12.4355 12.4062 15.998 8 15.998C3.5625 15.998 0 12.4355 0 7.99805C0 3.5918 3.5625 -0.00195312 8 -0.00195312ZM7 5.99805C7 5.4668 6.46875 4.99805 5.96875 4.99805C5.4375 4.99805 5 5.4668 5 5.99805V9.99805C5 10.5605 5.4375 10.998 6 10.998C6.53125 10.998 7 10.5605 7 9.99805V5.99805ZM11 5.99805C11 5.4668 10.4688 4.99805 9.96875 4.99805C9.4375 4.99805 9 5.4668 9 5.99805V9.99805C9 10.5605 9.4375 10.998 10 10.998C10.5312 10.998 11 10.5605 11 9.99805V5.99805Z"
+        fill="#858A8C"
+      />
+    </svg>
+  );
+};
+
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   DashboardIcon,
@@ -340,6 +351,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   GoToIcon,
   ExclamationMediumIcon,
   ExclamationSmallIcon,
+  PauseIcon,
 };
 
 export default icons;
