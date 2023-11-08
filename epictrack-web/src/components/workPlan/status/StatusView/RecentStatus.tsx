@@ -18,7 +18,7 @@ const RecentStatus = () => {
   const { statuses } = React.useContext(WorkplanContext);
   const { setShowStatusForm, setStatus, setShowApproveStatusDialog } =
     React.useContext(StatusContext);
-  const { position } = useAppSelector((state) => state.user.userDetail);
+  // const { position } = useAppSelector((state) => state.user.userDetail);
 
   return (
     <GrayBox
@@ -83,7 +83,10 @@ const RecentStatus = () => {
         <If condition={!statuses[0].is_approved}>
           <Then>
             <Button
-              onClick={() => setShowApproveStatusDialog(true)}
+              onClick={() => {
+                setStatus(statuses[0]);
+                setShowApproveStatusDialog(true);
+              }}
               sx={{
                 display: "flex",
                 gap: "8px",

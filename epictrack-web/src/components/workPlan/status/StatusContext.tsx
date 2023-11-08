@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, createContext } from "react";
+import { Dispatch, SetStateAction, createContext, useContext } from "react";
 import React from "react";
 import TrackDialog from "../../shared/TrackDialog";
 import StatusForm from "./StatusForm";
@@ -9,6 +9,7 @@ import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import workService from "../../../services/workService/workService";
 import statusService from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/SearchParams";
+import { WorkplanContext } from "../WorkPlanContext";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -41,21 +42,20 @@ export const StatusProvider = ({
   const [status, setStatus] = React.useState<Status>();
   const query = useSearchParams<StatusContainerRouteParams>();
   const workId = React.useMemo(() => query.get("work_id"), [query]);
-
-  console.log(workId);
+  const { getWorkStatuses } = useContext(WorkplanContext);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
   };
 
   const onSave = async (data: any, callback: () => any) => {
-    console.log(data);
+    const { description, posted_date } = data;
     try {
       if (status) {
         const result = await statusService?.update(
           Number(workId),
-          data,
-          Number(status.id)
+          Number(status.id),
+          { description, posted_date }
         );
         if (result && result.status === 200) {
           showNotification(`Status details updated`, {
@@ -65,7 +65,10 @@ export const StatusProvider = ({
           callback();
         }
       } else {
-        const result = await statusService?.create(Number(workId), data);
+        const result = await statusService?.create(Number(workId), {
+          description,
+          posted_date,
+        });
         if (result && result.status === 201) {
           showNotification(`Status Created`, {
             type: "success",
@@ -73,6 +76,7 @@ export const StatusProvider = ({
           callback();
         }
       }
+      getWorkStatuses();
       setShowStatusForm(false);
     } catch (e) {
       const error = getAxiosError(e);
@@ -90,13 +94,16 @@ export const StatusProvider = ({
     setShowApproveStatusDialog(false);
   }, []);
 
-  const approveStatus = async (id?: string) => {
-    // TODO update status to be approved
-    // const result = await workService?.delete(id);
-    // if (result && result.status === 200) {
-    setShowApproveStatusDialog(false);
-    // getData();
-    // setId(undefined);
+  const approveStatus = async () => {
+    const result = await statusService.approve(
+      Number(workId),
+      Number(status?.id)
+    );
+    if (result && result.status === 200) {
+      setShowApproveStatusDialog(false);
+      setStatus(undefined);
+      getWorkStatuses();
+    }
   };
 
   return (
@@ -131,7 +138,7 @@ export const StatusProvider = ({
         cancelButtonText="Cancel"
         isActionsRequired
         onCancel={closeApproveDialog}
-        onOk={() => approveStatus(status?.id.toString())}
+        onOk={approveStatus}
       />
     </StatusContext.Provider>
   );
