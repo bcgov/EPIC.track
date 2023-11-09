@@ -65,7 +65,7 @@ class Status(Resource):
         existing_work_status = WorkStatusService.find_work_status_by_id(work_id, status_id)
         if existing_work_status is None:
             return {"message": "Work status not found"}, HTTPStatus.NOT_FOUND
-        
+
         updated_work_status = WorkStatusService.update_work_status(existing_work_status, request_dict)
 
         return res.WorkStatusResponseSchema().dump(updated_work_status), HTTPStatus.OK

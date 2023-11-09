@@ -73,8 +73,6 @@ const WorkList = () => {
     });
   }, [works]);
 
-  console.log(works);
-
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
