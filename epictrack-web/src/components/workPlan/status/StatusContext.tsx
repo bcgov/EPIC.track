@@ -64,33 +64,40 @@ export const StatusProvider = ({
     return !is_approved || groups.includes("Super User");
   };
 
+  const updateStatus = async (data: any, callback: () => any) => {
+    const { description, posted_date } = data;
+    await statusService?.update(Number(workId), Number(status?.id), {
+      description,
+      posted_date,
+    });
+    showNotification(`Status details updated`, {
+      type: "success",
+    });
+    setStatus(undefined);
+    callback();
+  };
+
+  const createStatus = async (data: any, callback: () => any) => {
+    const { description, posted_date } = data;
+    const result = await statusService?.create(Number(workId), {
+      description,
+      posted_date,
+    });
+    if (result && result.status === 201) {
+      showNotification(`Status Created`, {
+        type: "success",
+      });
+      callback();
+    }
+  };
+
   const onSave = async (data: any, callback: () => any) => {
-    const { description, posted_date, is_approved } = data;
+    const { is_approved } = data;
     try {
       if (status && !isCloning && isEditable(is_approved)) {
-        const result = await statusService?.update(
-          Number(workId),
-          Number(status.id),
-          { description, posted_date }
-        );
-        if (result && result.status === 200) {
-          showNotification(`Status details updated`, {
-            type: "success",
-          });
-          setStatus(undefined);
-          callback();
-        }
+        updateStatus(data, callback);
       } else {
-        const result = await statusService?.create(Number(workId), {
-          description,
-          posted_date,
-        });
-        if (result && result.status === 201) {
-          showNotification(`Status Created`, {
-            type: "success",
-          });
-          callback();
-        }
+        createStatus(data, callback);
       }
       setIsCloning(false);
       getWorkStatuses();
@@ -112,14 +119,20 @@ export const StatusProvider = ({
   }, []);
 
   const approveStatus = async () => {
-    const result = await statusService.approve(
-      Number(workId),
-      Number(status?.id)
-    );
-    if (result && result.status === 200) {
+    try {
+      await statusService.approve(Number(workId), Number(status?.id));
       setShowApproveStatusDialog(false);
       setStatus(undefined);
       getWorkStatuses();
+    } catch (e) {
+      const error = getAxiosError(e);
+      const message =
+        error?.response?.status === 422
+          ? error.response.data?.toString()
+          : COMMON_ERROR_MESSAGE;
+      showNotification(message, {
+        type: "error",
+      });
     }
   };
 

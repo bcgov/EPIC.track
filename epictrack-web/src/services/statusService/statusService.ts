@@ -1,5 +1,6 @@
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
+import { Status } from "../../models/status";
 
 class StatusService {
   async create(workId: number, data: any) {
@@ -22,7 +23,7 @@ class StatusService {
       ":work_id",
       workId.toString()
     )}`;
-    return await http.GetRequest(query);
+    return await http.GetRequest<Status[]>(query);
   }
   async approve(workId: number, statusId: number) {
     const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(

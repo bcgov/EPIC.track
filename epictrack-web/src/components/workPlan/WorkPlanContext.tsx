@@ -161,7 +161,7 @@ export const WorkplanProvider = ({
     if (workId) {
       const statusResult = await statusService.getAll(Number(workId));
       if (statusResult.status === 200) {
-        setStatuses(statusResult.data as Status[]);
+        setStatuses(statusResult.data);
         return Promise.resolve();
       }
     }
