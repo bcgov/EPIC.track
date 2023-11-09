@@ -1,19 +1,13 @@
 import React from "react";
-import { Button, Grid, IconButton, Stack } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
-import {
-  ETCaption1,
-  ETCaption2,
-  ETHeading4,
-  ETParagraph,
-  GrayBox,
-} from "../../../shared";
+import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
 import { ActiveChip, ErrorChip } from "../../../shared/chip/ETChip";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { Palette } from "../../../../styles/theme";
-import { Else, If, Then, When } from "react-if";
+import { Else, If, Then } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
 

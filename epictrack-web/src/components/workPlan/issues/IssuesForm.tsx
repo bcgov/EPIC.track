@@ -6,7 +6,7 @@ import { Box, FormControlLabel, Grid, Stack, Tooltip } from "@mui/material";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 import { ETFormLabelWithCharacterLimit, ETParagraph } from "../../shared";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { IssuesContext } from "./IssuesContext";
+import { IssuesContext, LASTEST_ISSUE_UPDATE_INDEX } from "./IssuesContext";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 import { IssueForm } from "./types";
@@ -16,6 +16,7 @@ import ControlledDatePicker from "../../shared/controlledInputComponents/Control
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
   description: yup.string().required("Description is required"),
+  description_id: yup.number().nullable(),
   is_active: yup.boolean(),
   is_high_priority: yup.boolean(),
   start_date: yup.string().required("Start date is required"),
@@ -25,14 +26,20 @@ const schema = yup.object().shape({
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
 const IssuesForm = () => {
-  const { setShowIssuesForm, issueToEdit, addIssue, setIssueToEdit } =
-    React.useContext(IssuesContext);
+  const {
+    setShowIssuesForm,
+    issueToEdit,
+    addIssue,
+    setIssueToEdit,
+    updateIssue,
+  } = React.useContext(IssuesContext);
 
   const methods = useForm<IssueForm>({
     resolver: yupResolver(schema),
     defaultValues: {
       title: "",
       description: "",
+      description_id: null,
       is_active: true,
       is_high_priority: false,
       start_date: "",
@@ -45,11 +52,11 @@ const IssuesForm = () => {
 
   useEffect(() => {
     if (issueToEdit) {
-      const latestUpdate =
-        issueToEdit.updates?.[issueToEdit.updates.length - 1];
+      const latestUpdate = issueToEdit.updates?.[LASTEST_ISSUE_UPDATE_INDEX];
       reset({
         title: issueToEdit.title,
         description: latestUpdate?.description,
+        description_id: latestUpdate?.id,
         is_active: issueToEdit.is_active,
         is_high_priority: issueToEdit.is_high_priority,
         start_date: issueToEdit.start_date,
@@ -63,17 +70,21 @@ const IssuesForm = () => {
   const watchedDescription = watch("description");
   const descriptionCharacterLimit = 250;
 
+  const saveIssue = (issueForm: IssueForm) => {
+    if (issueToEdit) {
+      return updateIssue(issueForm);
+    }
+    return addIssue(issueForm);
+  };
+
   const onSubmitHandler = async (data: IssueForm) => {
     setShowIssuesForm(false);
     setIssueToEdit(null);
 
-    //Todo: implement edit flow
-    if (issueToEdit) {
-      return;
-    }
     const {
       title,
       description,
+      description_id,
       start_date,
       expected_resolution_date,
       is_active,
@@ -83,6 +94,7 @@ const IssuesForm = () => {
     const dataToBeSubmitted = {
       title,
       description,
+      description_id: description_id || undefined,
       start_date: moment(start_date).format(),
       expected_resolution_date: expected_resolution_date
         ? moment(expected_resolution_date).format()
@@ -91,7 +103,7 @@ const IssuesForm = () => {
       is_high_priority: Boolean(is_high_priority),
     };
 
-    addIssue(dataToBeSubmitted);
+    saveIssue(dataToBeSubmitted);
   };
 
   return (
