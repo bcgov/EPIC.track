@@ -61,12 +61,9 @@ class IssueUpdateEdits(Resource):
     @profiletime
     def put(work_id, issue_id):
         """Create a new update for the specified issue."""
-        try:
-            request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
-            work_issues = WorkIssuesService.edit_issue_update(work_id, issue_id, request_dict)
-            return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
-        except Exception as e:
-            return jsonify({'error': str(e)}), HTTPStatus.BAD_REQUEST
+        request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
+        work_issues = WorkIssuesService.edit_issue_update(work_id, issue_id, request_dict)
+        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
 @API.route("/<int:issue_id>/issue_update", methods=["POST"])
