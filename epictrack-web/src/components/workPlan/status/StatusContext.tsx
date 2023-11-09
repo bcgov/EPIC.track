@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, createContext } from "react";
+import { Dispatch, SetStateAction, createContext, useContext } from "react";
 import React from "react";
 import TrackDialog from "../../shared/TrackDialog";
 import StatusForm from "./StatusForm";
@@ -7,6 +7,10 @@ import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import workService from "../../../services/workService/workService";
+import statusService from "../../../services/statusService/statusService";
+import { useSearchParams } from "../../../hooks/SearchParams";
+import { WorkplanContext } from "../WorkPlanContext";
+import { useAppSelector } from "../../../hooks";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -14,6 +18,14 @@ interface StatusContextProps {
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
   onSave(data: any, callback: () => any): any;
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
+  setIsCloning: Dispatch<SetStateAction<boolean>>;
+  workId: string | null;
+  isCloning: boolean;
+  groups: Array<string>;
+}
+
+interface StatusContainerRouteParams extends URLSearchParams {
+  work_id: string;
 }
 
 export const StatusContext = createContext<StatusContextProps>({
@@ -22,6 +34,10 @@ export const StatusContext = createContext<StatusContextProps>({
   status: null,
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
+  setIsCloning: () => ({}),
+  isCloning: false,
+  workId: null,
+  groups: [],
 });
 
 export const StatusProvider = ({
@@ -32,37 +48,60 @@ export const StatusProvider = ({
   const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
     React.useState<boolean>(false);
+  const [isCloning, setIsCloning] = React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
+  const query = useSearchParams<StatusContainerRouteParams>();
+  const workId = React.useMemo(() => query.get("work_id"), [query]);
+  const { getWorkStatuses } = useContext(WorkplanContext);
+  const { groups } = useAppSelector((state) => state.user.userDetail);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
+    setIsCloning(false);
+  };
+
+  const isEditable = (is_approved: boolean) => {
+    return !is_approved || groups.includes("Super User");
+  };
+
+  const updateStatus = async (data: any, callback: () => any) => {
+    const { description, posted_date } = data;
+    await statusService?.update(Number(workId), Number(status?.id), {
+      description,
+      posted_date,
+    });
+    showNotification(`Status details updated`, {
+      type: "success",
+    });
+    setStatus(undefined);
+    callback();
+  };
+
+  const createStatus = async (data: any, callback: () => any) => {
+    const { description, posted_date } = data;
+    const result = await statusService?.create(Number(workId), {
+      description,
+      posted_date,
+    });
+    if (result && result.status === 201) {
+      showNotification(`Status Created`, {
+        type: "success",
+      });
+      callback();
+    }
   };
 
   const onSave = async (data: any, callback: () => any) => {
+    const { is_approved } = data;
     try {
-      if (status) {
-        // TODO update or create a status
-        // const result = await statusService?.update(data, status.id.toString());
-        // if (result && result.status === 200) {
-        //   showNotification(`${status.title} details updated`, {
-        //     type: "success",
-        //   });
-        //   setStatus(undefined);
-        //   setBackdrop(false);
-        //   callback();
-        // }
+      if (status && !isCloning && isEditable(is_approved)) {
+        updateStatus(data, callback);
       } else {
-        // const result = await statusService?.create(data);
-        // if (result && result.status === 201) {
-        //   showNotification(`Status Created`, {
-        //     type: "success",
-        //   });
-        //   setBackdrop(false);
-        //   callback();
-        // }
+        createStatus(data, callback);
       }
+      setIsCloning(false);
+      getWorkStatuses();
       setShowStatusForm(false);
-      // getData();
     } catch (e) {
       const error = getAxiosError(e);
       const message =
@@ -79,18 +118,31 @@ export const StatusProvider = ({
     setShowApproveStatusDialog(false);
   }, []);
 
-  const approveStatus = async (id?: string) => {
-    // TODO update status to be approved
-    // const result = await workService?.delete(id);
-    // if (result && result.status === 200) {
-    setShowApproveStatusDialog(false);
-    // getData();
-    // setId(undefined);
+  const approveStatus = async () => {
+    try {
+      await statusService.approve(Number(workId), Number(status?.id));
+      setShowApproveStatusDialog(false);
+      setStatus(undefined);
+      getWorkStatuses();
+    } catch (e) {
+      const error = getAxiosError(e);
+      const message =
+        error?.response?.status === 422
+          ? error.response.data?.toString()
+          : COMMON_ERROR_MESSAGE;
+      showNotification(message, {
+        type: "error",
+      });
+    }
   };
 
   return (
     <StatusContext.Provider
       value={{
+        groups,
+        isCloning,
+        workId,
+        setIsCloning,
         setShowStatusForm,
         setShowApproveStatusDialog,
         setStatus,
@@ -120,7 +172,7 @@ export const StatusProvider = ({
         cancelButtonText="Cancel"
         isActionsRequired
         onCancel={closeApproveDialog}
-        onOk={() => approveStatus(status?.id.toString())}
+        onOk={approveStatus}
       />
     </StatusContext.Provider>
   );

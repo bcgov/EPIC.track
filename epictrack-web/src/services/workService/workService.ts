@@ -194,12 +194,5 @@ class WorkService implements ServiceBase {
       work_indigenous_nation_id,
     });
   }
-  async getWorkStatuses(workId: number) {
-    const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
-      ":work_id",
-      workId.toString()
-    )}`;
-    return await http.GetRequest(query);
-  }
 }
 export default new WorkService();
