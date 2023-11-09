@@ -246,7 +246,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         </Grid>
         <Grid item xs={12}>
           <FormControlLabel
-            control={<ControlledSwitch {...register("is_active")} />}
+            control={<ControlledSwitch name="is_active" />}
             label="Active"
           />
         </Grid>

@@ -14,12 +14,12 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
   const {
     control,
     formState: { defaultValues },
+    register,
   } = useFormContext();
-
-  console.log(name);
 
   return (
     <Controller
+      {...register(name)}
       control={control}
       name={name}
       defaultValue={defaultValues?.[name] || ""}

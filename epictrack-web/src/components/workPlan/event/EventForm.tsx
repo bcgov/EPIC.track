@@ -455,12 +455,7 @@ const EventForm = ({
                     mr: "2px",
                   }}
                   disabled={isFormFieldsLocked}
-                  control={
-                    <ControlledSwitch
-                      {...register("high_priority")}
-                      defaultChecked={isHighPriorityActive}
-                    />
-                  }
+                  control={<ControlledSwitch name="high_priority" />}
                   label="High Priority"
                 />
                 <Tooltip title="High Priority Milestones will appear on reports">

@@ -163,7 +163,7 @@ export default function IndigenousNationForm({ ...props }) {
             <TextField fullWidth {...register("pip_link")} />
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-            <ControlledSwitch {...register("is_active")} />
+            <ControlledSwitch name="is_active" />
             <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
           <Grid item xs={12}>
