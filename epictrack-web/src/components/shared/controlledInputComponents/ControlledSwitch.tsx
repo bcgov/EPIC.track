@@ -16,6 +16,8 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
     formState: { defaultValues },
   } = useFormContext();
 
+  console.log(name);
+
   return (
     <Controller
       control={control}
