@@ -14,17 +14,22 @@ import { IconProps } from "../../../../icons/type";
 import Icons from "../../../../icons";
 import { StatusContext } from "../../StatusContext";
 import { WorkplanContext } from "../../../WorkPlanContext";
+import { If, Then } from "react-if";
 
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
 type HistoryItemProps = {
   status: Status;
-  index: number;
 };
 
-const HistoryItem = ({ status, index }: HistoryItemProps) => {
-  const { selectedHistoryIndex, setSelectedHistoryIndex } =
-    useContext(StatusContext);
+const HistoryItem = ({ status }: HistoryItemProps) => {
+  const {
+    selectedHistoryIndex,
+    setSelectedHistoryIndex,
+    setShowStatusForm,
+    setStatus,
+    groups,
+  } = useContext(StatusContext);
   const { statuses } = useContext(WorkplanContext);
   const [statusHighlight, setStatusHighlight] = useState<number>(0);
 
@@ -34,8 +39,6 @@ const HistoryItem = ({ status, index }: HistoryItemProps) => {
     }
     setSelectedHistoryIndex(statuses[1].id);
   }, [statuses]);
-
-  console.log(selectedHistoryIndex);
 
   return (
     <Box sx={{ display: "flex", paddingTop: "16px" }}>
@@ -95,9 +98,19 @@ const HistoryItem = ({ status, index }: HistoryItemProps) => {
           </ETPreviewText>
         </Box>
         {statusHighlight === status.id && (
-          <Box sx={{ padding: "12px 8px" }}>
-            <PencilEditIcon />
-          </Box>
+          <If condition={groups.includes("Super User")}>
+            <Then>
+              <Box
+                onClick={() => {
+                  setShowStatusForm(true);
+                  setStatus(status);
+                }}
+                sx={{ padding: "12px 8px" }}
+              >
+                <PencilEditIcon />
+              </Box>
+            </Then>
+          </If>
         )}
       </Box>
     </Box>

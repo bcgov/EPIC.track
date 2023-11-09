@@ -124,12 +124,13 @@ export const StatusProvider = ({
     setShowApproveStatusDialog(false);
   }, []);
 
-  const approveStatus = async () => {
+  const approveStatus = async (callback: () => any) => {
     try {
       await statusService.approve(Number(workId), Number(status?.id));
       setShowApproveStatusDialog(false);
       setStatus(undefined);
       getWorkStatuses();
+      callback();
     } catch (e) {
       const error = getAxiosError(e);
       const message =
