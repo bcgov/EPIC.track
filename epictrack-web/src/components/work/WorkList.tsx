@@ -78,6 +78,16 @@ const WorkList = () => {
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
+        header: "Go to Workplan",
+        Cell: ({ row }) => (
+          <Box>
+            <Link to={`/work-plan?work_id=${row.original.id}`}>
+              <GoToIcon />
+            </Link>
+          </Box>
+        ),
+      },
+      {
         accessorKey: "title",
         header: "Name",
         Cell: ({ row }) => (
@@ -140,16 +150,6 @@ const WorkList = () => {
               <InactiveChip label="Inactive" color="error" />
             )}
           </span>
-        ),
-      },
-      {
-        header: "Go to Workplan",
-        Cell: ({ row }) => (
-          <Box>
-            <Link to={`/work-plan?work_id=${row.original.id}`}>
-              <GoToIcon />
-            </Link>
-          </Box>
         ),
       },
     ],

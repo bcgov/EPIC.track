@@ -40,11 +40,6 @@ const StaffList = () => {
     }
   }, [staff]);
 
-  const handleDelete = (id: string) => {
-    ctx.setShowDeleteDialog(true);
-    ctx.setId(id);
-  };
-
   const columns = React.useMemo<MRT_ColumnDef<Staff>[]>(
     () => [
       {
@@ -125,17 +120,6 @@ const StaffList = () => {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            enableRowActions={true}
-            renderRowActions={({ row }: any) => (
-              <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={() => handleDelete(row.original.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            )}
             renderTopToolbarCustomActions={() => (
               <Box
                 sx={{
