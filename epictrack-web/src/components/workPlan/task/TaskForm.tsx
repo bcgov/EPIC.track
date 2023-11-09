@@ -151,7 +151,7 @@ const TaskForm = ({
     try {
       const dataToSave = {
         ...data,
-        work_phase_id: Number(ctx.selectedWorkPhase?.id),
+        work_phase_id: Number(ctx.selectedWorkPhase?.work_phase.id),
         start_date: Moment(data.start_date).format(),
         number_of_days:
           data.number_of_days.toString() === "" ? 0 : data.number_of_days,

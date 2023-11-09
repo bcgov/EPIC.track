@@ -9,6 +9,12 @@ import { MasterContext } from "../shared/MasterContext";
 import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { Link } from "react-router-dom";
+import { Palette } from "../../styles/theme";
+import { IconProps } from "../icons/type";
+import Icons from "../icons";
+
+const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -70,12 +76,23 @@ const WorkList = () => {
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
+        header: "Go to Workplan",
+        Cell: ({ row }) => (
+          <Box>
+            <Link to={`/work-plan?work_id=${row.original.id}`}>
+              <GoToIcon />
+            </Link>
+          </Box>
+        ),
+      },
+      {
         accessorKey: "title",
         header: "Name",
         Cell: ({ row }) => (
           <ETGridTitle
+            to="#"
+            onClick={() => onEdit(row.original.id)}
             titleText={row.original.title}
-            to={`/work-plan?work_id=${row.original.id}`}
           >
             {row.original.title}
           </ETGridTitle>
@@ -160,17 +177,6 @@ const WorkList = () => {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            enableRowActions={true}
-            renderRowActions={({ row }: any) => (
-              <Box>
-                <IconButton onClick={() => onEdit(row.original.id)}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={() => handleDelete(row.original.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            )}
             renderTopToolbarCustomActions={() => (
               <Box
                 sx={{

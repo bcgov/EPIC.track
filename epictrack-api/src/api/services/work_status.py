@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
-
+from http import HTTPStatus
+from typing import Dict
+from api.exceptions import ResourceNotFoundError
+from api.exceptions import BusinessError
 from api.models import WorkStatus as WorkStatusModel
+from api.utils import TokenInfo
 
 
 class WorkStatusService:  # pylint: disable=too-many-public-methods
@@ -22,6 +26,62 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
     # pylint: disable=too-few-public-methods,
 
     @classmethod
-    def find_all_works_tatus(cls, work_id):
+    def find_all_work_status(cls, work_id):
         """Find all status related to a work"""
-        return WorkStatusModel.find_by_params({"work_id": work_id})
+        return WorkStatusModel.list_statuses_for_work_id(work_id)
+
+    @classmethod
+    def find_work_status_by_id(cls, work_id, status_id):
+        """Find all status related to a work"""
+        results = WorkStatusModel.find_by_params({"work_id": work_id, "id": status_id})
+        return results[0] if results else None
+
+    @classmethod
+    def create_work_status(cls, work_id, work_status: Dict):
+        """Creates a work status."""
+        work_status = WorkStatusModel(
+            **work_status,
+            posted_by=TokenInfo.get_username(),
+            work_id=work_id
+        )
+        work_status.save()
+
+        return work_status
+
+    @classmethod
+    def update_work_status(cls, work_status: WorkStatusModel, work_status_data: dict):
+        """Update an existing work status."""
+        # TODO Add Super user check
+        if work_status.is_approved:
+            if not TokenInfo.is_super_user():
+                raise BusinessError("Access Denied", HTTPStatus.UNAUTHORIZED)
+
+        work_status.update(work_status_data)
+
+        work_status.save()
+
+        return work_status
+
+    @classmethod
+    def save_notes(cls, work_id, status_id, notes: str) -> WorkStatusModel:
+        """Save a work status note."""
+        work_status: WorkStatusModel = WorkStatusService.find_work_status_by_id(work_id, status_id)
+        if not work_status:
+            raise ResourceNotFoundError("Work status not found")
+        work_status.notes = notes
+        work_status.save()
+
+        return work_status
+
+    @classmethod
+    def approve_work_status(cls, work_status):
+        """Approve a work status."""
+        if work_status.is_approved:
+            return work_status
+
+        work_status.is_approved = True
+        work_status.approved_by = TokenInfo.get_username()
+
+        work_status.save()
+
+        return work_status

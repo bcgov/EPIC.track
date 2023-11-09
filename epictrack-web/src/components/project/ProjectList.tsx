@@ -56,10 +56,6 @@ const ProjectList = () => {
     setEnvRegions(envRegions);
   }, [projects]);
 
-  const handleDelete = (id: string) => {
-    ctx.setShowDeleteDialog(true);
-    ctx.setId(id);
-  };
   const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
@@ -132,14 +128,6 @@ const ProjectList = () => {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            enableRowActions={true}
-            renderRowActions={({ row }: any) => (
-              <Box>
-                <IconButton onClick={() => handleDelete(row.original.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            )}
             renderTopToolbarCustomActions={() => (
               <Box
                 sx={{

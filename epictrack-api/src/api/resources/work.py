@@ -142,11 +142,9 @@ class WorkPhases(Resource):
     def get(work_id):
         """Return a phase details based on id."""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        work_phases = WorkPhaseService.find_by_work_id(work_id)
+        work_phases = WorkPhaseService.find_work_phases_status(work_id)
         return (
-            res.WorkPhaseSkeletonResponseSchema(many=True).dump(work_phases),
-            HTTPStatus.OK,
-        )
+            res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phases), HTTPStatus.OK)
 
 
 @cors_preflight("GET, POST")

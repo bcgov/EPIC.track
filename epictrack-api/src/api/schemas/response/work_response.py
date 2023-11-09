@@ -2,20 +2,19 @@
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from api.models import Staff, Work, WorkPhase, WorkStatus, WorkIssues, WorkIssueUpdates
+from api.models import Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
 from api.schemas import PositionSchema, RoleSchema
 from api.schemas.base import AutoSchemaBase
 from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
 from api.schemas.federal_involvement import FederalInvolvementSchema
 from api.schemas.ministry import MinistrySchema
-from api.schemas.phase import PhaseSchema
+from api.schemas.response.phase_response import PhaseResponseSchema
 from api.schemas.project import ProjectSchema
 from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
-from api.services.event import EventService
 
 
 class WorkResponseSchema(
@@ -42,7 +41,7 @@ class WorkResponseSchema(
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_type = fields.Nested(WorkTypeSchema, dump_only=True)
     current_phase = fields.Nested(
-        PhaseSchema, exclude=("ea_act", "work_type"), dump_only=True
+        PhaseResponseSchema, exclude=("ea_act", "work_type"), dump_only=True
     )
     substitution_act = fields.Nested(SubstitutionActSchema, dump_only=True)
     eac_decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
@@ -65,6 +64,7 @@ class WorkPhaseResponseSchema(
         model = WorkPhase
         include_fk = True
         unknown = EXCLUDE
+    phase = fields.Nested(PhaseResponseSchema)
 
 
 class WorkStaffRoleReponseSchema(
@@ -120,42 +120,28 @@ class WorkResourceResponseSchema(
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
 
 
-class WorkPhaseSkeletonResponseSchema(AutoSchemaBase):  # pylint: disable=too-many-ancestors,too-few-public-methods
-    """Schema for work phase skeleton details"""
+class WorkPhaseAdditionalInfoResponseSchema(Schema):
+    """Schema for additional work phase details"""
 
-    class Meta(
-        AutoSchemaBase.Meta
-    ):  # pylint: disable=too-many-ancestors,too-few-public-methods
-        """Meta information"""
-
-        model = WorkPhase
-        include_fk = False
-        unknown = EXCLUDE
-
-    phase = fields.Nested(PhaseSchema, dump_only=True)
-    next_milestone = fields.Method("get_next_milestone")
-    milestone_progress = fields.Method("get_milestone_progress")
-
-    def get_next_milestone(self, instance: WorkPhase) -> str:
-        """Returns the next milestone event name"""
-        event = EventService.find_next_milestone_event_by_work_phase_id(instance.id)
-        return event.name if event else None
-
-    def get_milestone_progress(self, instance: WorkPhase) -> float:
-        """Returns the percentage of milestones completed"""
-        return EventService.find_milestone_progress_by_work_phase_id(instance.id)
+    work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
+    total_number_of_days = fields.Number(
+        metadata={"description": "Total number of days in the phase"}, required=True
+    )
+    next_milestone = fields.Str(metadata={"description": "Next milestone in the phase"})
+    milestone_progress = fields.Number(metadata={"description": "Milestone progress"})
+    days_left = fields.Number(
+        metadata={"description": "Number of days left in the phase"}
+    )
 
 
 class WorkPhaseTemplateAvailableResponse(Schema):
     """Schema for work phase template available response"""
 
     template_available = fields.Boolean(
-        metadata={"description": "Is template available"},
-        required=True
+        metadata={"description": "Is template available"}, required=True
     )
     task_added = fields.Boolean(
-        metadata={"description": "Is task added already"},
-        required=True
+        metadata={"description": "Is task added already"}, required=True
     )
 
 

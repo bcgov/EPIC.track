@@ -17,9 +17,10 @@ from http import HTTPStatus
 from flask import jsonify
 from flask_restx import Namespace, Resource, cors
 
+from api.schemas import request as req
 from api.schemas import response as res
 from api.services import WorkStatusService
-from api.utils import auth
+from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
 API = Namespace("work-statuses", description="Work Statuses")
@@ -35,5 +36,72 @@ class WorkStatus(Resource):
     @auth.require
     def get(work_id):
         """Return all active works."""
-        works = WorkStatusService.find_all_works_tatus(work_id)
+        works = WorkStatusService.find_all_work_status(work_id)
         return jsonify(res.WorkStatusResponseSchema(many=True).dump(works)), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_id):
+        """Create new work status"""
+        request_dict = req.WorkStatusParameterSchema().load(API.payload)
+        work_status = WorkStatusService.create_work_status(work_id, request_dict)
+        return res.WorkStatusResponseSchema().dump(work_status), HTTPStatus.CREATED
+
+
+@cors_preflight("GET, PUT")
+@API.route("/<int:status_id>", methods=["GET", "PUT", "OPTIONS"])
+class Status(Resource):
+    """Endpoint resource to manage a work status."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def put(work_id, status_id):
+        """Update work status"""
+        request_dict = req.WorkStatusParameterSchema().load(API.payload)
+        existing_work_status = WorkStatusService.find_work_status_by_id(work_id, status_id)
+        if existing_work_status is None:
+            return {"message": "Work status not found"}, HTTPStatus.NOT_FOUND
+
+        updated_work_status = WorkStatusService.update_work_status(existing_work_status, request_dict)
+
+        return res.WorkStatusResponseSchema().dump(updated_work_status), HTTPStatus.OK
+
+
+@cors_preflight("PATCH")
+@API.route("/<int:status_id>/approve", methods=["PATCH", "OPTIONS"])
+class ApproveStatus(Resource):
+    """Endpoint resource to manage approving of work status."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_id, status_id):
+        """Approve a work status."""
+        existing_work_status = WorkStatusService.find_work_status_by_id(work_id, status_id)
+        if existing_work_status is None:
+            return {"message": "Work status not found"}, HTTPStatus.NOT_FOUND
+
+        approved_work_status = WorkStatusService.approve_work_status(existing_work_status)
+
+        return res.WorkStatusResponseSchema().dump(approved_work_status), HTTPStatus.OK
+
+
+@cors_preflight("PATCH")
+@API.route("/<int:status_id>/notes", methods=["PATCH", "OPTIONS"])
+class StatusNotes(Resource):
+    """Endpoints to handle status notes"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_id, status_id):
+        """Save the notes to corresponding work"""
+        notes = req.WorkStatusNotesBodySchema().load(API.payload)["notes"]
+        work_status = WorkStatusService.save_notes(work_id, status_id, notes)
+        return res.WorkStatusResponseSchema().dump(work_status), HTTPStatus.OK

@@ -84,7 +84,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
       const result = await templateService.getTemplatesByParams(
         Number(ctx.work?.ea_act_id),
         Number(ctx.work?.work_type_id),
-        Number(ctx.selectedWorkPhase?.phase.id)
+        Number(ctx.selectedWorkPhase?.work_phase.phase.id)
       );
       if (result.status === 200) {
         const templatesData = (result.data as any[]).filter(
