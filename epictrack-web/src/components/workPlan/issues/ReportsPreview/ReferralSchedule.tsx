@@ -24,6 +24,7 @@ export const ReferralSchedule = () => {
   );
 
   const latestIssue = activeApprovedIssues?.[0];
+
   return (
     <GrayBox>
       <Grid container spacing={1}>

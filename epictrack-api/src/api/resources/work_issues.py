@@ -50,7 +50,8 @@ class WorkStatus(Resource):
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
-@API.route("/<int:issue_id>", methods=["PUT"])
+@cors_preflight("PUT")
+@API.route("/<int:issue_id>", methods=["PUT", "OPTIONS"])
 class IssueUpdateEdits(Resource):
     """Endpoint resource to manage updates/edits for a specific issue and its description."""
 

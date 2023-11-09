@@ -12,8 +12,13 @@ import { WorkplanContext } from "../WorkPlanContext";
 
 const IssuesView = () => {
   const { issues } = React.useContext(WorkplanContext);
-  const { showIssuesForm, setShowIssuesForm, isIssuesLoading, setIssueToEdit } =
-    React.useContext(IssuesContext);
+  const {
+    showIssuesForm,
+    setShowIssuesForm,
+    isIssuesLoading,
+    setIssueToEdit,
+    issueToEdit,
+  } = React.useContext(IssuesContext);
 
   const onAddButtonClickHandler = () => {
     setShowIssuesForm(true);
@@ -60,7 +65,7 @@ const IssuesView = () => {
       </If>
       <TrackDialog
         open={showIssuesForm}
-        dialogTitle="Add Issue"
+        dialogTitle={issueToEdit ? "Edit Issue" : "Add Issue"}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"

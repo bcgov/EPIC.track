@@ -36,6 +36,7 @@ const Endpoints = {
   },
   WorkIssues: {
     ISSUES: "work/:work_id/issues",
+    UPDATE_ISSUE: "work/:work_id/issues/:issue_id",
     APPROVE_ISSUE: "work/:work_id/issues/:issue_id/approve",
   },
   WorkStatuses: {

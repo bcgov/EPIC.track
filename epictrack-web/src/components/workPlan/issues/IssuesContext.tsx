@@ -12,6 +12,7 @@ interface IssuesContextProps {
   issueToEdit: WorkIssue | null;
   setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
   addIssue: (issueForm: IssueForm) => Promise<void>;
+  updateIssue: (issueForm: IssueForm) => Promise<void>;
   approveIssue: (issueId: number) => Promise<void>;
   issueToApproveId: number | null;
   setIssueToApproveId: React.Dispatch<React.SetStateAction<number | null>>;
@@ -30,6 +31,9 @@ export const IssuesContext = createContext<IssuesContextProps>({
   addIssue: (_: IssueForm) => {
     return Promise.resolve();
   },
+  updateIssue: (_: IssueForm) => {
+    return Promise.resolve();
+  },
   issueToApproveId: null,
   setIssueToApproveId: () => {
     return;
@@ -38,6 +42,8 @@ export const IssuesContext = createContext<IssuesContextProps>({
     return Promise.resolve();
   },
 });
+
+export const LASTEST_ISSUE_UPDATE_INDEX = 0;
 
 export const IssuesProvider = ({
   children,
@@ -88,6 +94,54 @@ export const IssuesProvider = ({
     }
   };
 
+  const getDescriptionUpdates = (issueForm: IssueForm) => {
+    if (!issueToEdit || !issueForm.description_id) return [];
+
+    return (
+      issueToEdit.updates
+        ?.filter(
+          (update) =>
+            update.id === issueForm.description_id &&
+            update.description !== issueForm.description
+        )
+        .map((update) => ({
+          ...update,
+          description: issueForm.description,
+        })) ?? []
+    );
+  };
+
+  const updateIssue = async (issueForm: IssueForm) => {
+    if (!workId || !issueToEdit) return;
+    setIsIssuesLoading(true);
+    try {
+      const descriptionUpdates = getDescriptionUpdates(issueForm);
+
+      const {
+        title,
+        description,
+        start_date,
+        expected_resolution_date,
+        is_active,
+        is_high_priority,
+      } = issueForm;
+
+      const request = {
+        title,
+        description,
+        start_date,
+        expected_resolution_date,
+        is_active,
+        is_high_priority,
+        updates: descriptionUpdates,
+      };
+      await issueService.update(workId, String(issueToEdit.id), request);
+      loadIssues();
+    } catch (error) {
+      setIsIssuesLoading(false);
+    }
+  };
+
   const approveIssue = async (issueId: number) => {
     if (!workId) return;
     setIsIssuesLoading(true);
@@ -111,6 +165,7 @@ export const IssuesProvider = ({
         issueToApproveId,
         setIssueToApproveId,
         approveIssue,
+        updateIssue,
       }}
     >
       {children}
