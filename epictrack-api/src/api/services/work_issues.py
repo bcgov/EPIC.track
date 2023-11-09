@@ -28,7 +28,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     @classmethod
     def find_all_work_issues(cls, work_id):
         """Find all issues related to a work"""
-        work_issues = WorkIssuesModel.find_by_params({"work_id": work_id})
+        work_issues = WorkIssuesModel.list_issues_for_work_id(work_id)
         return work_issues
 
     @classmethod
