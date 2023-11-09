@@ -18,6 +18,7 @@ import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
+import statusService from "../../services/statusService/statusService";
 import dateUtils from "../../utils/dateUtils";
 
 interface WorkplanContextProps {
@@ -35,6 +36,7 @@ interface WorkplanContextProps {
   firstNations: WorkFirstNation[];
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
   statuses: Status[];
+  getWorkStatuses: () => Promise<void>;
   issues: WorkIssue[];
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
 }
@@ -57,6 +59,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   statuses: [],
   issues: [],
   setIssues: () => ({}),
+  getWorkStatuses: () => new Promise((resolve) => resolve),
 });
 
 export const WorkplanProvider = ({
@@ -156,13 +159,9 @@ export const WorkplanProvider = ({
 
   const getWorkStatuses = async () => {
     if (workId) {
-      const statusResult = await workService.getWorkStatuses(Number(workId));
+      const statusResult = await statusService.getAll(Number(workId));
       if (statusResult.status === 200) {
-        setStatuses(
-          (statusResult.data as Status[]).sort((a, b) => {
-            return dateUtils.diff(b.posted_date, a.posted_date, "days");
-          })
-        );
+        setStatuses(statusResult.data);
         return Promise.resolve();
       }
     }
@@ -171,6 +170,7 @@ export const WorkplanProvider = ({
   return (
     <WorkplanContext.Provider
       value={{
+        getWorkStatuses,
         selectedWorkPhase,
         setSelectedWorkPhase,
         workPhases,
