@@ -89,5 +89,6 @@ from .work_request import (
     WorkStatusParameterSchema,
     WorkIssuesParameterSchema,
     WorkIssuesUpdateSchema,
+    WorkStatusNotesBodySchema
 )
 from .act_section_request import ActSectionQueryParameterSchema

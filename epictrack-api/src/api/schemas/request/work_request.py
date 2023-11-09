@@ -265,3 +265,13 @@ class WorkIssuesUpdateSchema(WorkIssuesParameterSchema):
         metadata={"description": "List of updates for the issue with IDs"},
         required=False,
     )
+
+
+class WorkStatusNotesBodySchema(RequestBodyParameterSchema):
+    """Work status notes body parameter schema"""
+
+    notes = fields.Str(
+        metadata={"description": "Work status notes"},
+        validate=validate.Length(min=1),
+        required=True,
+    )

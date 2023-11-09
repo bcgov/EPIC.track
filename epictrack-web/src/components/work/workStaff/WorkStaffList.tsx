@@ -117,9 +117,6 @@ const WorkStaffList = () => {
         header: "Project",
         enableHiding: false,
         filterVariant: "multi-select",
-        Cell: ({ cell }) => (
-          <ETGridTitle to={"#"}>{cell.getValue<string>()}</ETGridTitle>
-        ),
         filterSelectOptions: projectFilter,
       },
       {
@@ -186,15 +183,6 @@ const WorkStaffList = () => {
               isLoading: loading,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={() => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
-              ></Box>
-            )}
           />
         </Grid>
       </ETPageContainer>
