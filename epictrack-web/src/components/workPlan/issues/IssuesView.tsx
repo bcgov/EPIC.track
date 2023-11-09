@@ -12,7 +12,6 @@ import { WorkplanContext } from "../WorkPlanContext";
 
 const IssuesView = () => {
   const { issues } = React.useContext(WorkplanContext);
-
   const { showIssuesForm, setShowIssuesForm, isIssuesLoading, setIssueToEdit } =
     React.useContext(IssuesContext);
 
@@ -69,7 +68,6 @@ const IssuesView = () => {
         formId="issue-form"
         onCancel={() => onCancelHandler()}
         onClose={() => onCancelHandler()}
-        onOk={() => onCancelHandler()}
         isActionsRequired
       >
         <IssuesForm />
