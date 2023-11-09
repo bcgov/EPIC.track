@@ -10,7 +10,8 @@ import { IssuesContext } from "./IssuesContext";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 import { IssueForm } from "./types";
-import { is } from "immutable";
+import moment from "moment";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
@@ -18,12 +19,13 @@ const schema = yup.object().shape({
   is_active: yup.boolean(),
   is_high_priority: yup.boolean(),
   start_date: yup.string().required("Start date is required"),
-  expected_resolution_date: yup.string(),
+  expected_resolution_date: yup.string().nullable(),
 });
+
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
 const IssuesForm = () => {
-  const { setShowIssuesForm, issueToEdit, addIssue } =
+  const { setShowIssuesForm, issueToEdit, addIssue, setIssueToEdit } =
     React.useContext(IssuesContext);
 
   const methods = useForm<IssueForm>({
@@ -63,6 +65,12 @@ const IssuesForm = () => {
 
   const onSubmitHandler = async (data: IssueForm) => {
     setShowIssuesForm(false);
+    setIssueToEdit(null);
+
+    //Todo: implement edit flow
+    if (issueToEdit) {
+      return;
+    }
     const {
       title,
       description,
@@ -72,14 +80,18 @@ const IssuesForm = () => {
       is_high_priority,
     } = await schema.validate(data);
 
-    addIssue({
+    const dataToBeSubmitted = {
       title,
       description,
-      start_date,
-      expected_resolution_date: expected_resolution_date || "",
+      start_date: moment(start_date).format(),
+      expected_resolution_date: expected_resolution_date
+        ? moment(expected_resolution_date).format()
+        : undefined,
       is_active: Boolean(is_active),
       is_high_priority: Boolean(is_high_priority),
-    });
+    };
+
+    addIssue(dataToBeSubmitted);
   };
 
   return (
@@ -124,6 +136,8 @@ const IssuesForm = () => {
             inputProps={{
               maxLength: descriptionCharacterLimit,
             }}
+            multiline
+            rows={4}
           />
         </Grid>
         <Grid item xs={12}>
@@ -158,24 +172,11 @@ const IssuesForm = () => {
         </Grid>
         <Grid item xs={6}>
           <ETParagraph bold>Start Date</ETParagraph>
-          <ControlledTextField
-            name="start_date"
-            fullWidth
-            size="small"
-            type="date"
-            onChange={(e) => {
-              console.log(e.target.value);
-            }}
-          />
+          <ControlledDatePicker name="start_date" />
         </Grid>
         <Grid item xs={6}>
           <ETParagraph bold>Expected Resolution Date</ETParagraph>
-          <ControlledTextField
-            name="expected_resolution_date"
-            fullWidth
-            size="small"
-            type="date"
-          />
+          <ControlledDatePicker name="expected_resolution_date" />
         </Grid>
       </Grid>
     </FormProvider>
