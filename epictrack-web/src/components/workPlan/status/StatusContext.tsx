@@ -14,6 +14,8 @@ interface StatusContextProps {
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
   onSave(data: any, callback: () => any): any;
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
+  selectedHistoryIndex?: number;
+  setSelectedHistoryIndex: Dispatch<SetStateAction<number>>;
 }
 
 export const StatusContext = createContext<StatusContextProps>({
@@ -22,6 +24,8 @@ export const StatusContext = createContext<StatusContextProps>({
   status: null,
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
+  selectedHistoryIndex: 0,
+  setSelectedHistoryIndex: () => ({}),
 });
 
 export const StatusProvider = ({
@@ -33,6 +37,8 @@ export const StatusProvider = ({
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
     React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
+  const [selectedHistoryIndex, setSelectedHistoryIndex] =
+    React.useState<number>(0);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
@@ -91,6 +97,8 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        setSelectedHistoryIndex,
+        selectedHistoryIndex,
         setShowStatusForm,
         setShowApproveStatusDialog,
         setStatus,
