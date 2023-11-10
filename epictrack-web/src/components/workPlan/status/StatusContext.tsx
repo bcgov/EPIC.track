@@ -66,8 +66,16 @@ export const StatusProvider = ({
     setIsCloning(false);
   };
 
+  const hasPermission = () => {
+    const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
+    const allowed = groups.filter((group) => {
+      return groupsWithPermission.includes(group);
+    });
+    console.log(groups);
+  };
+
   const isEditable = (is_approved: boolean) => {
-    return !is_approved || groups.includes("Super User");
+    return !is_approved || hasPermission();
   };
 
   const updateStatus = async (data: any, callback: () => any) => {

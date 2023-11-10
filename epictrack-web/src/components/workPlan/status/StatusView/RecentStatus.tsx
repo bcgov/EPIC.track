@@ -24,6 +24,14 @@ const RecentStatus = () => {
     groups,
   } = React.useContext(StatusContext);
 
+  const hasPermission = () => {
+    const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
+    const allowed = groups.filter((group) => {
+      return groupsWithPermission.includes(group);
+    });
+    return allowed.length;
+  };
+
   return (
     <GrayBox
       sx={{
@@ -122,9 +130,7 @@ const RecentStatus = () => {
             </Button>
           </Else>
         </If>
-        <If
-          condition={!statuses[0].is_approved || groups.includes("Super User")}
-        >
+        <If condition={!statuses[0].is_approved || hasPermission()}>
           <Then>
             <Button
               onClick={() => {
