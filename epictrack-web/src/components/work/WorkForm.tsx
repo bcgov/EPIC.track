@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import { TextField, Grid, Divider, Tooltip, Box } from "@mui/material";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -19,14 +19,10 @@ import dayjs from "dayjs";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import workService from "../../services/workService/workService";
 import { MasterContext } from "../shared/MasterContext";
-import { dateUtils } from "../../utils";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { IconProps } from "../icons/type";
 import Icons from "../icons/index";
 import LockClosed from "../../assets/images/lock-closed.svg";
-import projectService from "../../services/projectService/projectService";
-import { showNotification } from "../shared/notificationProvider";
-import { Project } from "../../models/project";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -112,7 +108,6 @@ export default function WorkForm({ ...props }) {
     reset,
     setValue,
     control,
-    getValues,
   } = methods;
 
   React.useEffect(() => {
