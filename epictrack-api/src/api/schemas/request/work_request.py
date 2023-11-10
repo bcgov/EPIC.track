@@ -267,11 +267,17 @@ class WorkIssuesUpdateSchema(WorkIssuesParameterSchema):
     )
 
 
-class WorkStatusNotesBodySchema(RequestBodyParameterSchema):
-    """Work status notes body parameter schema"""
+class WorkNotesBodySchema(RequestBodyParameterSchema):
+    """Work notes body parameter schema"""
 
     notes = fields.Str(
         metadata={"description": "Work status notes"},
         validate=validate.Length(min=1),
+        required=True,
+    )
+
+    note_type = fields.Str(
+        metadata={"description": "Type of work status notes"},
+        validate=validate.OneOf(['status_notes', 'issue_notes']),  # Add your predefined types
         required=True,
     )
