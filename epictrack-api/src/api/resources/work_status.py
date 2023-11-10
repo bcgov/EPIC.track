@@ -89,19 +89,3 @@ class ApproveStatus(Resource):
         approved_work_status = WorkStatusService.approve_work_status(existing_work_status)
 
         return res.WorkStatusResponseSchema().dump(approved_work_status), HTTPStatus.OK
-
-
-@cors_preflight("PATCH")
-@API.route("/<int:status_id>/notes", methods=["PATCH", "OPTIONS"])
-class StatusNotes(Resource):
-    """Endpoints to handle status notes"""
-
-    @staticmethod
-    @cors.crossdomain(origin="*")
-    @auth.require
-    @profiletime
-    def patch(work_id, status_id):
-        """Save the notes to corresponding work"""
-        notes = req.WorkStatusNotesBodySchema().load(API.payload)["notes"]
-        work_status = WorkStatusService.save_notes(work_id, status_id, notes)
-        return res.WorkStatusResponseSchema().dump(work_status), HTTPStatus.OK
