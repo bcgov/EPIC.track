@@ -29,6 +29,7 @@ const Endpoints = {
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
     CHECK_TEMPLATE_UPLOAD_STATUS: "works/work-phases/:work_phase_id",
     WORK_FIRST_NATION_NOTES: "works/:work_id/first-nation-notes",
+    WORK_NOTES: "works/:work_id/notes",
     WORK_FIRST_NATIONS: "works/:work_id/first-nations",
     DOWNLOAD_WORK_FIRST_NATIONS: "works/:work_id/first-nations/download",
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
