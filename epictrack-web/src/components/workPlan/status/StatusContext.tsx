@@ -58,7 +58,7 @@ export const StatusProvider = ({
     React.useState<number>(0);
   const query = useSearchParams<StatusContainerRouteParams>();
   const workId = React.useMemo(() => query.get("work_id"), [query]);
-  const { getWorkStatuses } = useContext(WorkplanContext);
+  const { getWorkStatuses, setStatuses } = useContext(WorkplanContext);
   const { groups } = useAppSelector((state) => state.user.userDetail);
 
   const onDialogClose = () => {
@@ -124,13 +124,15 @@ export const StatusProvider = ({
     setShowApproveStatusDialog(false);
   }, []);
 
-  const approveStatus = async (callback: () => any) => {
+  const approveStatus = async () => {
     try {
       await statusService.approve(Number(workId), Number(status?.id));
       setShowApproveStatusDialog(false);
+      showNotification(`Status approved`, {
+        type: "success",
+      });
       setStatus(undefined);
       getWorkStatuses();
-      callback();
     } catch (e) {
       const error = getAxiosError(e);
       const message =
@@ -181,7 +183,11 @@ export const StatusProvider = ({
         cancelButtonText="Cancel"
         isActionsRequired
         onCancel={closeApproveDialog}
-        onOk={approveStatus}
+        onOk={() => {
+          setStatuses([]); // Status history was not being updated so manually doing this
+          approveStatus();
+          getWorkStatuses(); // Status history was not being updated so manually doing this
+        }}
       />
     </StatusContext.Provider>
   );

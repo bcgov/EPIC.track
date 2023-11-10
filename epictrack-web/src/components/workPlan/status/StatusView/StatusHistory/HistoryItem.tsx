@@ -77,7 +77,27 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
             }
           >
             {status.id === selectedHistoryIndex ? (
-              <Box>{status.description}</Box>
+              <>
+                <Box>{status.description}</Box>
+                <If
+                  condition={
+                    groups.includes("Super User") &&
+                    statusHighlight === selectedHistoryIndex
+                  }
+                >
+                  <Then>
+                    <Box
+                      onClick={() => {
+                        setShowStatusForm(true);
+                        setStatus(status);
+                      }}
+                      sx={{ padding: "12px 8px" }}
+                    >
+                      <PencilEditIcon />
+                    </Box>
+                  </Then>
+                </If>
+              </>
             ) : (
               <Box>
                 {status.description.slice(0, 50)}...
@@ -97,21 +117,6 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
             )}
           </ETPreviewText>
         </Box>
-        {statusHighlight === status.id && (
-          <If condition={groups.includes("Super User")}>
-            <Then>
-              <Box
-                onClick={() => {
-                  setShowStatusForm(true);
-                  setStatus(status);
-                }}
-                sx={{ padding: "12px 8px" }}
-              >
-                <PencilEditIcon />
-              </Box>
-            </Then>
-          </If>
-        )}
       </Box>
     </Box>
   );
