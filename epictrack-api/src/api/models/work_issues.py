@@ -33,8 +33,6 @@ class WorkIssues(BaseModelVersioned):
     is_high_priority = Column(Boolean(), default=False, nullable=False)
     start_date = Column(DateTime(timezone=True), nullable=False)
     expected_resolution_date = Column(DateTime(timezone=True), nullable=True)
-    is_approved = Column(Boolean(), default=False, nullable=False)
-    approved_by = Column(String(255), default=None, nullable=True)
 
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
