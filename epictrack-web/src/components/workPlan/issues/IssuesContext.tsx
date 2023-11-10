@@ -2,8 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { WorkplanContext } from "../WorkPlanContext";
 import issueService from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/SearchParams";
-import { WorkIssue } from "../../../models/Issue";
-import { IssueForm } from "./types";
+import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
+import { CloneForm, IssueForm } from "./types";
 
 interface IssuesContextProps {
   showIssuesForm: boolean;
@@ -16,6 +16,13 @@ interface IssuesContextProps {
   approveIssue: (issueId: number) => Promise<void>;
   issueToApproveId: number | null;
   setIssueToApproveId: React.Dispatch<React.SetStateAction<number | null>>;
+  updateToClone: WorkIssueUpdate | null;
+  setUpdateToClone: React.Dispatch<
+    React.SetStateAction<WorkIssueUpdate | null>
+  >;
+  showCloneForm: boolean;
+  setShowCloneForm: React.Dispatch<React.SetStateAction<boolean>>;
+  cloneIssueUpdate: (cloneForm: { description: string }) => Promise<void>;
 }
 
 interface IssueContainerRouteParams extends URLSearchParams {
@@ -41,6 +48,13 @@ export const IssuesContext = createContext<IssuesContextProps>({
   approveIssue: (_: number) => {
     return Promise.resolve();
   },
+  updateToClone: null,
+  setUpdateToClone: () => ({}),
+  showCloneForm: false,
+  setShowCloneForm: () => ({}),
+  cloneIssueUpdate: (_: { description: string }) => {
+    return Promise.resolve();
+  },
 });
 
 export const LASTEST_ISSUE_UPDATE_INDEX = 0;
@@ -53,6 +67,11 @@ export const IssuesProvider = ({
   const [showIssuesForm, setShowIssuesForm] = useState(false);
   const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(true);
   const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
+
+  const [showCloneForm, setShowCloneForm] = useState<boolean>(false);
+  const [updateToClone, setUpdateToClone] = useState<WorkIssueUpdate | null>(
+    null
+  );
 
   const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
 
@@ -153,6 +172,19 @@ export const IssuesProvider = ({
     }
   };
 
+  const cloneIssueUpdate = async (cloneForm: CloneForm) => {
+    if (!workId || !updateToClone) return;
+    setIsIssuesLoading(true);
+    try {
+      await issueService.clone(workId, String(updateToClone.work_issue_id), {
+        description_data: [cloneForm.description],
+      });
+      loadIssues();
+    } catch (error) {
+      setIsIssuesLoading(false);
+    }
+  };
+
   return (
     <IssuesContext.Provider
       value={{
@@ -166,6 +198,11 @@ export const IssuesProvider = ({
         setIssueToApproveId,
         approveIssue,
         updateIssue,
+        updateToClone,
+        setUpdateToClone,
+        showCloneForm,
+        setShowCloneForm,
+        cloneIssueUpdate,
       }}
     >
       {children}

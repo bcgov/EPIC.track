@@ -38,6 +38,7 @@ const Endpoints = {
     ISSUES: "work/:work_id/issues",
     UPDATE_ISSUE: "work/:work_id/issues/:issue_id",
     APPROVE_ISSUE: "work/:work_id/issues/:issue_id/approve",
+    CLONE_UPDATE: "work/:work_id/issues/:issue_id/issue_update",
   },
   WorkStatuses: {
     WORK_STATUSES: "work/:work_id/statuses",

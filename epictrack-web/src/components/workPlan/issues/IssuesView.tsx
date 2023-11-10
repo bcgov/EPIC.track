@@ -9,6 +9,7 @@ import { Else, If, Then } from "react-if";
 import IssueAccordion from "./IssueAccordion";
 import { Button, Grid } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
+import CloneUpdateForm from "./CloneForm";
 
 const IssuesView = () => {
   const { issues } = React.useContext(WorkplanContext);
@@ -18,15 +19,25 @@ const IssuesView = () => {
     isIssuesLoading,
     setIssueToEdit,
     issueToEdit,
+    showCloneForm,
+    setShowCloneForm,
+    setUpdateToClone,
   } = React.useContext(IssuesContext);
 
   const onAddButtonClickHandler = () => {
     setShowIssuesForm(true);
   };
 
-  const onCancelHandler = () => {
+  const handleIssueFormClose = () => {
     setShowIssuesForm(false);
     setIssueToEdit(null);
+  };
+
+  const getDialogTitle = () => {
+    if (issueToEdit) {
+      return "Edit Issue";
+    }
+    return "Add Issue";
   };
 
   if (isIssuesLoading) {
@@ -65,17 +76,37 @@ const IssuesView = () => {
       </If>
       <TrackDialog
         open={showIssuesForm}
-        dialogTitle={issueToEdit ? "Edit Issue" : "Add Issue"}
+        dialogTitle={getDialogTitle()}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
         okButtonText="Save"
         formId="issue-form"
-        onCancel={() => onCancelHandler()}
-        onClose={() => onCancelHandler()}
+        onClose={() => handleIssueFormClose()}
+        onCancel={() => handleIssueFormClose()}
         isActionsRequired
       >
         <IssuesForm />
+      </TrackDialog>
+      <TrackDialog
+        open={showCloneForm}
+        dialogTitle={getDialogTitle()}
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="sm"
+        okButtonText="Save"
+        formId="issue-form"
+        onClose={() => {
+          setShowCloneForm(false);
+          setUpdateToClone(null);
+        }}
+        onCancel={() => {
+          setShowCloneForm(false);
+          setUpdateToClone(null);
+        }}
+        isActionsRequired
+      >
+        <CloneUpdateForm />
       </TrackDialog>
     </>
   );

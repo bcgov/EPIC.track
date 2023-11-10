@@ -23,6 +23,8 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     approveIssue,
     issueToApproveId,
     setIssueToApproveId,
+    setUpdateToClone,
+    setShowCloneForm,
   } = React.useContext(IssuesContext);
 
   const handleApproveIssue = () => {
@@ -98,7 +100,8 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                         borderColor: "transparent",
                       }}
                       onClick={() => {
-                        return;
+                        setUpdateToClone(latestUpdate);
+                        setShowCloneForm(true);
                       }}
                     >
                       Clone

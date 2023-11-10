@@ -66,7 +66,8 @@ class IssueUpdateEdits(Resource):
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
-@API.route("/<int:issue_id>/update", methods=["POST"])
+@cors_preflight("POST")
+@API.route("/<int:issue_id>/issue_update", methods=["POST", "OPTIONS"])
 class WorkIssueUpdate(Resource):
     """Endpoint resource to manage updates for a specific issue."""
 
@@ -76,11 +77,17 @@ class WorkIssueUpdate(Resource):
     @profiletime
     def post(work_id, issue_id):
         """Create a new update for the specified issue."""
-        description_data = API.payload.get('description_data', None)
-        if not description_data:
-            return jsonify({'error': 'description_data is required'}), HTTPStatus.BAD_REQUEST
-        work_issues = WorkIssuesService.add_work_issue_update(work_id, issue_id, description_data)
-        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
+        try:
+            print("A")
+            description_data = API.payload.get('description_data', None)
+            if not description_data:
+                return jsonify({'error': 'description_data is required'}), HTTPStatus.BAD_REQUEST
+            print("B")
+            work_issues = WorkIssuesService.add_work_issue_update(work_id, issue_id, description_data)
+            print("C")
+            return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
+        except Exception as e:
+            return jsonify({'error': str(e)}), HTTPStatus.BAD_REQUEST
 
 
 @cors_preflight("PATCH")
