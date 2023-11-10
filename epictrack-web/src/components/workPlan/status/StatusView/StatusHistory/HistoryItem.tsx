@@ -5,10 +5,10 @@ import TimelineItem from "@mui/lab/TimelineItem";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
 import { Box } from "@mui/system";
 import moment from "moment";
-import { ETStatusHistoryDate, ETPreviewText } from "../../../../shared";
+import { ETPreviewText } from "../../../../shared";
 import { Status } from "../../../../../models/status";
 import { Palette } from "../../../../../styles/theme";
-import { Button } from "@mui/material";
+import { Button, Typography, styled } from "@mui/material";
 import React, { useContext, useState } from "react";
 import { IconProps } from "../../../../icons/type";
 import Icons from "../../../../icons";
@@ -21,6 +21,13 @@ const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 type HistoryItemProps = {
   status: Status;
 };
+
+const ETStatusHistoryDate = styled(Typography)(() => ({
+  fontSize: "12px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "16px",
+}));
 
 const HistoryItem = ({ status }: HistoryItemProps) => {
   const {

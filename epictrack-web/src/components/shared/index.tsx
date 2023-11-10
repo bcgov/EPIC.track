@@ -438,13 +438,6 @@ export const ETPreviewText = styled(Typography)(() => ({
   lineHeight: "21px",
 }));
 
-export const ETStatusHistoryDate = styled(Typography)(() => ({
-  fontSize: "12px",
-  fontStyle: "normal",
-  fontWeight: "400",
-  lineHeight: "16px",
-}));
-
 export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
   return (
     <Box
