@@ -43,7 +43,7 @@ const RecentStatus = () => {
         }}
       >
         <ETCaption1 bold sx={{ letterSpacing: "0.39px" }}>
-          {moment(statuses[0]?.posted_date).format("ll")}
+          {moment(statuses[0]?.posted_date).format("MMM.DD YYYY").toUpperCase()}
         </ETCaption1>
         <If condition={!statuses[0].is_approved}>
           <Then>
@@ -92,14 +92,9 @@ const RecentStatus = () => {
                 setShowApproveStatusDialog(true);
               }}
               sx={{
-                display: "flex",
+                backgroundColor: "inherit",
+                borderColor: "transparent",
                 gap: "8px",
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-                ":hover": {
-                  backgroundColor: Palette.neutral.bg.light,
-                  borderColor: Palette.neutral.bg.light,
-                },
               }}
             >
               <CheckCircleIcon />
@@ -114,14 +109,9 @@ const RecentStatus = () => {
                 setShowStatusForm(true);
               }}
               sx={{
-                display: "flex",
                 gap: "8px",
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-                ":hover": {
-                  backgroundColor: Palette.neutral.bg.light,
-                  borderColor: Palette.neutral.bg.light,
-                },
+                backgroundColor: "inherit",
+                borderColor: "transparent",
               }}
             >
               <CloneIcon />
@@ -139,14 +129,9 @@ const RecentStatus = () => {
                 setStatus(statuses[0]);
               }}
               sx={{
-                display: "flex",
                 gap: "8px",
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-                ":hover": {
-                  backgroundColor: Palette.neutral.bg.light,
-                  borderColor: Palette.neutral.bg.light,
-                },
+                backgroundColor: "inherit",
+                borderColor: "transparent",
               }}
             >
               <PencilEditIcon />

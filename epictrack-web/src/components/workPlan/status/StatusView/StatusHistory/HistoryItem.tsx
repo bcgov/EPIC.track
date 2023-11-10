@@ -93,15 +93,21 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
                   }
                 >
                   <Then>
-                    <Box
+                    <Button
                       onClick={() => {
                         setShowStatusForm(true);
                         setStatus(status);
                       }}
-                      sx={{ padding: "12px 8px" }}
+                      sx={{
+                        padding: "12px 8px",
+                        gap: "8px",
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
                     >
                       <PencilEditIcon />
-                    </Box>
+                      Edit
+                    </Button>
                   </Then>
                 </If>
               </>
