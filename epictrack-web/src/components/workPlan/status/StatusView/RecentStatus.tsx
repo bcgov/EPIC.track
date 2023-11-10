@@ -76,7 +76,10 @@ const RecentStatus = () => {
           </Else>
         </If>
       </Box>
-      <ETPreviewText color={Palette.neutral.dark} sx={{ paddingTop: "16px" }}>
+      <ETPreviewText
+        color={Palette.neutral.dark}
+        sx={{ paddingTop: "16px", whiteSpace: "pre-wrap" }}
+      >
         {statuses[0].description}
       </ETPreviewText>
       <Box

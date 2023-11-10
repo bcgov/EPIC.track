@@ -85,7 +85,7 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
           >
             {status.id === selectedHistoryIndex ? (
               <>
-                <Box>{status.description}</Box>
+                <Box sx={{ whiteSpace: "pre-wrap" }}>{status.description}</Box>
                 <If
                   condition={
                     groups.includes("Super User") &&
