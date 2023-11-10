@@ -1,8 +1,8 @@
 import { Box } from "@mui/material";
-import { ETHeading4, ETParagraph } from "../../shared";
-import { Palette } from "../../../styles/theme";
-import Icons from "../../icons";
-import { IconProps } from "../../icons/type";
+import { ETHeading4, ETParagraph } from "../../../shared";
+import { Palette } from "../../../../styles/theme";
+import Icons from "../../../icons";
+import { IconProps } from "../../../icons/type";
 
 const NotificationWarning: React.FC<IconProps> = Icons["NotificationWarning"];
 

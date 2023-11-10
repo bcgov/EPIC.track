@@ -36,6 +36,7 @@ interface WorkplanContextProps {
   firstNations: WorkFirstNation[];
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
   statuses: Status[];
+  setStatuses: Dispatch<SetStateAction<Status[]>>;
   getWorkStatuses: () => Promise<void>;
   issues: WorkIssue[];
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
@@ -57,6 +58,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   firstNations: [],
   setFirstNations: () => ({}),
   statuses: [],
+  setStatuses: () => ({}),
   issues: [],
   setIssues: () => ({}),
   getWorkStatuses: () => new Promise((resolve) => resolve),
@@ -170,6 +172,7 @@ export const WorkplanProvider = ({
   return (
     <WorkplanContext.Provider
       value={{
+        setStatuses,
         getWorkStatuses,
         selectedWorkPhase,
         setSelectedWorkPhase,

@@ -18,6 +18,8 @@ interface StatusContextProps {
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
   onSave(data: any, callback: () => any): any;
   setShowApproveStatusDialog: Dispatch<SetStateAction<boolean>>;
+  selectedHistoryIndex?: number;
+  setSelectedHistoryIndex: Dispatch<SetStateAction<number>>;
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
   isCloning: boolean;
@@ -34,6 +36,8 @@ export const StatusContext = createContext<StatusContextProps>({
   status: null,
   setStatus: () => ({}),
   onSave: (data: any, callback: () => any) => ({}),
+  selectedHistoryIndex: 0,
+  setSelectedHistoryIndex: () => ({}),
   setIsCloning: () => ({}),
   isCloning: false,
   workId: null,
@@ -50,9 +54,11 @@ export const StatusProvider = ({
     React.useState<boolean>(false);
   const [isCloning, setIsCloning] = React.useState<boolean>(false);
   const [status, setStatus] = React.useState<Status>();
+  const [selectedHistoryIndex, setSelectedHistoryIndex] =
+    React.useState<number>(0);
   const query = useSearchParams<StatusContainerRouteParams>();
   const workId = React.useMemo(() => query.get("work_id"), [query]);
-  const { getWorkStatuses } = useContext(WorkplanContext);
+  const { getWorkStatuses, setStatuses } = useContext(WorkplanContext);
   const { groups } = useAppSelector((state) => state.user.userDetail);
 
   const onDialogClose = () => {
@@ -122,6 +128,9 @@ export const StatusProvider = ({
     try {
       await statusService.approve(Number(workId), Number(status?.id));
       setShowApproveStatusDialog(false);
+      showNotification(`Status approved`, {
+        type: "success",
+      });
       setStatus(undefined);
       getWorkStatuses();
     } catch (e) {
@@ -139,6 +148,8 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        setSelectedHistoryIndex,
+        selectedHistoryIndex,
         groups,
         isCloning,
         workId,
@@ -172,7 +183,11 @@ export const StatusProvider = ({
         cancelButtonText="Cancel"
         isActionsRequired
         onCancel={closeApproveDialog}
-        onOk={approveStatus}
+        onOk={() => {
+          setStatuses([]); // Status history was not being updated so manually doing this
+          approveStatus();
+          getWorkStatuses(); // Status history was not being updated so manually doing this
+        }}
       />
     </StatusContext.Provider>
   );
