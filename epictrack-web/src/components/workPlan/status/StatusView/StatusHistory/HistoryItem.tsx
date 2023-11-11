@@ -35,7 +35,7 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
     setSelectedHistoryIndex,
     setShowStatusForm,
     setStatus,
-    groups,
+    hasPermission,
   } = useContext(StatusContext);
   const { statuses } = useContext(WorkplanContext);
   const [statusHighlight, setStatusHighlight] = useState<number>(0);
@@ -88,8 +88,7 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
                 <Box sx={{ whiteSpace: "pre-wrap" }}>{status.description}</Box>
                 <If
                   condition={
-                    groups.includes("Super User") &&
-                    statusHighlight === selectedHistoryIndex
+                    hasPermission() && statusHighlight === selectedHistoryIndex
                   }
                 >
                   <Then>

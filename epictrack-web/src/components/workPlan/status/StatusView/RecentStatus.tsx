@@ -21,16 +21,8 @@ const RecentStatus = () => {
     setShowStatusForm,
     setStatus,
     setShowApproveStatusDialog,
-    groups,
+    hasPermission,
   } = React.useContext(StatusContext);
-
-  const hasPermission = () => {
-    const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
-    const allowed = groups.filter((group) => {
-      return groupsWithPermission.includes(group);
-    });
-    return allowed.length;
-  };
 
   return (
     <GrayBox
