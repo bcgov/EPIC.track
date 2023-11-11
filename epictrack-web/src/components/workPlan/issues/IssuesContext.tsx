@@ -13,7 +13,7 @@ interface IssuesContextProps {
   setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
   addIssue: (issueForm: IssueForm) => Promise<void>;
   updateIssue: (issueForm: IssueForm) => Promise<void>;
-  approveIssue: (issueId: number) => Promise<void>;
+  approveIssue: (issueId: number, issueUpdateId: number) => Promise<void>;
   issueToApproveId: number | null;
   setIssueToApproveId: React.Dispatch<React.SetStateAction<number | null>>;
   updateToClone: WorkIssueUpdate | null;
@@ -45,7 +45,7 @@ export const IssuesContext = createContext<IssuesContextProps>({
   setIssueToApproveId: () => {
     return;
   },
-  approveIssue: (_: number) => {
+  approveIssue: (_issueId: number, _issueUpdateId: number) => {
     return Promise.resolve();
   },
   updateToClone: null,
@@ -161,11 +161,15 @@ export const IssuesProvider = ({
     }
   };
 
-  const approveIssue = async (issueId: number) => {
+  const approveIssue = async (issueId: number, issueUpdateId: number) => {
     if (!workId) return;
     setIsIssuesLoading(true);
     try {
-      await issueService.approve(workId, String(issueId));
+      await issueService.approve(
+        workId,
+        String(issueId),
+        String(issueUpdateId)
+      );
       loadIssues();
     } catch (error) {
       setIsIssuesLoading(false);

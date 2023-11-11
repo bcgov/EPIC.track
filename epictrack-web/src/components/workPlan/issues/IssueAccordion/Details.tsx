@@ -10,9 +10,10 @@ import { Palette } from "../../../../styles/theme";
 import { Else, If, Then } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
+import IssueHistory from "./IssueHistory";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
-  const latestUpdate = issue.updates[issue.updates.length - 1];
+  const latestUpdate = issue.updates[0];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const CloneIcon: React.FC<IconProps> = icons["CloneIcon"];
@@ -28,7 +29,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   } = React.useContext(IssuesContext);
 
   const handleApproveIssue = () => {
-    approveIssue(issue.id);
+    approveIssue(issue.id, latestUpdate.id);
     setIssueToApproveId(null);
   };
 
@@ -52,7 +53,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       .toUpperCase()}
                   </ETCaption1>
                 </Grid>
-                <If condition={issue.is_approved}>
+                <If condition={latestUpdate.is_approved}>
                   <Then>
                     <Grid item xs="auto">
                       <ActiveChip label="Approved" />
@@ -72,7 +73,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 </ETParagraph>
               </Grid>
 
-              <If condition={!issue.is_approved}>
+              <If condition={!latestUpdate.is_approved}>
                 <Then>
                   <Grid item>
                     <Button
@@ -128,6 +129,25 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               </Grid>
             </Grid>
           </GrayBox>
+        </Grid>
+
+        <Grid
+          item
+          lg={6}
+          sm={12}
+          container
+          spacing={0}
+          justifyContent={"flex-start"}
+          alignItems={"flex-start"}
+        >
+          <Grid item xs={12}>
+            <ETCaption1 bold color={Palette.neutral.dark}>
+              ISSUE HISTORY
+            </ETCaption1>
+          </Grid>
+          <Grid item xs={12}>
+            <IssueHistory issue={issue} />
+          </Grid>
         </Grid>
       </Grid>
 
