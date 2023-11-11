@@ -36,11 +36,8 @@ class WorkStatus(Resource):
     @auth.require
     def get(work_id):
         """Return all active works."""
-        try:
-            works = WorkIssuesService.find_all_work_issues(work_id)
-            return jsonify(res.WorkIssuesResponseSchema(many=True).dump(works)), HTTPStatus.OK
-        except Exception as e:
-            return jsonify({'error': str(e)}), HTTPStatus.BAD_REQUEST
+        works = WorkIssuesService.find_all_work_issues(work_id)
+        return jsonify(res.WorkIssuesResponseSchema(many=True).dump(works)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
