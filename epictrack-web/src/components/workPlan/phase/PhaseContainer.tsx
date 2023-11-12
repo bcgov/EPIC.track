@@ -12,7 +12,12 @@ const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
   const [showCompletedPhases, setShowCompletedPhases] =
     useState<boolean>(false);
-  const [allPhases, setAllPhases] = useState<WorkPhaseAdditionalInfo[]>([]);
+  const [currentAndFuturePhases, setCurrentAndFuturePhases] = useState<
+    WorkPhaseAdditionalInfo[]
+  >([]);
+  const [completedPhases, setCompletedPhases] = useState<
+    WorkPhaseAdditionalInfo[]
+  >([]);
 
   useEffect(() => {
     if (ctx.work?.current_phase_id && ctx.workPhases.length > 0) {
@@ -25,13 +30,15 @@ const PhaseContainer = () => {
   }, [ctx.workPhases, ctx.work]);
 
   useEffect(() => {
-    let filteredPhases = ctx.workPhases;
-    if (showCompletedPhases) {
-      filteredPhases = ctx.workPhases.filter((p) => p.work_phase.is_completed);
-    }
-    setAllPhases(filteredPhases);
+    const currentAndFuturePhases = ctx.workPhases.filter(
+      (p) => !p.work_phase.is_completed
+    );
+    const completedPhases = ctx.workPhases.filter(
+      (p) => p.work_phase.is_completed
+    );
+    setCompletedPhases(completedPhases);
+    setCurrentAndFuturePhases(currentAndFuturePhases);
   }, [showCompletedPhases, ctx.workPhases]);
-  console.log(showCompletedPhases);
   if (ctx.workPhases.length === 0) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -42,25 +49,37 @@ const PhaseContainer = () => {
 
   return (
     <Grid container spacing={1}>
-      <Grid item xs={12}>
-        <FormControlLabel
-          sx={{
-            ml: "2px",
-          }}
-          control={
-            <CustomSwitch
-              onChange={(e, checked) => setShowCompletedPhases(checked)}
-              sx={{
-                marginRight: "8px",
-                color: Palette.neutral.dark,
-              }}
-              defaultChecked={false}
+      <When condition={completedPhases.length > 0}>
+        <Grid item xs={12}>
+          <FormControlLabel
+            sx={{
+              ml: "2px",
+            }}
+            control={
+              <CustomSwitch
+                onChange={(e, checked) => setShowCompletedPhases(checked)}
+                sx={{
+                  marginRight: "8px",
+                  color: Palette.neutral.dark,
+                }}
+                defaultChecked={false}
+              />
+            }
+            label="Completed Phases"
+          />
+        </Grid>
+      </When>
+      <When condition={showCompletedPhases}>
+        {completedPhases.map((phase) => (
+          <Grid item xs={12}>
+            <PhaseAccordion
+              key={`phase-accordion-${phase.work_phase.id}`}
+              phase={phase}
             />
-          }
-          label="Completed Phases"
-        />
-      </Grid>
-      <When condition={!showCompletedPhases}>
+          </Grid>
+        ))}
+      </When>
+      <When condition={currentAndFuturePhases.length > 0}>
         <Grid item xs={12}>
           <ETCaption1
             sx={{
@@ -71,7 +90,7 @@ const PhaseContainer = () => {
           </ETCaption1>
         </Grid>
       </When>
-      {allPhases.map((phase) => (
+      {currentAndFuturePhases.map((phase) => (
         <Grid item xs={12}>
           <PhaseAccordion
             key={`phase-accordion-${phase.work_phase.id}`}

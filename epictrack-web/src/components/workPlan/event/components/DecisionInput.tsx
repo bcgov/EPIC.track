@@ -32,10 +32,6 @@ const DecisionInput = ({
     if (configurationId) {
       getOutcomes();
     }
-    return () => {
-      // unregister("decision_maker_id");
-      // unregister("outcome_id");
-    };
   }, []);
   const getOutcomes = async () => {
     try {

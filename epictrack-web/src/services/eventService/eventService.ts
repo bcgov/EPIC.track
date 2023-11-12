@@ -1,14 +1,15 @@
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
-import { MilestoneEvent } from "../../models/event";
+import { MilestoneEvent, MilestoneEventDateCheck } from "../../models/event";
 
 class EventService {
   async create(
     milestoneEvent: MilestoneEvent | undefined,
-    workPhaseId: number
+    workPhaseId: number,
+    pushEvents: boolean
   ) {
     return await http.PostRequest<MilestoneEvent>(
-      `${Endpoints.Events.MILESTONE_EVENTS}/workphases/:work_phase_id/events`.replace(
+      `${Endpoints.Events.MILESTONE_EVENTS}/workphases/:work_phase_id/events?push_events=${pushEvents}`.replace(
         ":work_phase_id",
         workPhaseId.toString()
       ),
@@ -30,9 +31,13 @@ class EventService {
     );
   }
 
-  async update(event: MilestoneEvent | undefined, eventId: number) {
+  async update(
+    event: MilestoneEvent | undefined,
+    eventId: number,
+    pushEvents: boolean
+  ) {
     return await http.PutRequest<MilestoneEvent>(
-      `${Endpoints.Events.MILESTONE_EVENTS}/events/${eventId}`,
+      `${Endpoints.Events.MILESTONE_EVENTS}/events/${eventId}?push_events=${pushEvents}`,
       JSON.stringify(event)
     );
   }
@@ -54,7 +59,7 @@ class EventService {
     milestoneEvent: MilestoneEvent | undefined,
     event_id: number | undefined
   ) {
-    return await http.PostRequest<MilestoneEvent>(
+    return await http.PostRequest<MilestoneEventDateCheck>(
       `${Endpoints.Events.MILESTONE_EVENTS}/check-events${
         event_id ? "?event_id=" + event_id : ""
       }`,

@@ -38,9 +38,9 @@ class EventDateChangePosibilityCheckResponseSchema(Schema):
     """Schema to response the date check posibilty with the given event details"""
 
     work_phase_to_be_exceeded = fields.Nested(WorkPhaseResponseSchema)
-    event_caused = fields.Nested(EventResponseSchema)
+    event = fields.Nested(EventResponseSchema)
 
-    phase_end_will_be_pushed = fields.Boolean(
+    phase_end_push_required = fields.Boolean(
         metadata={"description": "Indicate if the end date of the phase will be pushed or not"}
     )
 

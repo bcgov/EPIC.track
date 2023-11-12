@@ -9,7 +9,6 @@ import { dateUtils } from "../../../utils";
 import { Box } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
-import { makeStyles } from "@mui/styles";
 import { EVENT_STATUS, statusOptions } from "../../../models/taskEvent";
 import {
   CompletedIcon,
@@ -28,17 +27,6 @@ import { EventContext } from "./EventContext";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
-const useStyle = makeStyles({
-  textEllipsis: {
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  },
-  deleteIcon: {
-    fill: "currentcolor",
-  },
-});
-
 const highlightedRowBGColor = "rgb(249, 249, 251)";
 
 interface EventListTable {
@@ -55,8 +43,6 @@ const EventListTable = ({
   rowSelection,
   setRowSelection,
 }: EventListTable) => {
-  const classes = useStyle();
-
   const { highlightedRows } = useContext(EventContext);
 
   const [pagination, setPagination] = useState({
@@ -131,7 +117,9 @@ const EventListTable = ({
         Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle
             to="#"
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
+            bold={[EventPosition.START, EventPosition.END].includes(
+              row.original.event_configuration.event_position
+            )}
             enableEllipsis
             onClick={(event: any) => onRowClick(event, row.original)}
             enableTooltip={true}
@@ -210,7 +198,7 @@ const EventListTable = ({
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
-            className={classes.textEllipsis}
+            enableEllipsis={true}
           >
             {dateUtils.formatDate(cell.getValue<string>(), "MMM.DD YYYY")}
           </ETParagraph>
@@ -252,7 +240,7 @@ const EventListTable = ({
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
-            className={classes.textEllipsis}
+            enableEllipsis={true}
           >
             {cell.getValue<string>() &&
               dateUtils.formatDate(
@@ -459,7 +447,6 @@ const EventListTable = ({
     ],
     [events]
   );
-  console.log("EVENTS ", events);
   return (
     <MasterTrackTable
       enableSorting={false}
@@ -483,25 +470,25 @@ const EventListTable = ({
             },
           };
         }
-        if (
-          row.original.event_configuration?.event_position ===
-          EventPosition.START
-        ) {
-          return {
-            style: {
-              background: "#E2EFDA",
-            },
-          };
-        }
-        if (
-          row.original.event_configuration?.event_position === EventPosition.END
-        ) {
-          return {
-            style: {
-              background: "#FFCCCC",
-            },
-          };
-        }
+        // if (
+        //   row.original.event_configuration?.event_position ===
+        //   EventPosition.START
+        // ) {
+        //   return {
+        //     style: {
+        //       background: "#E2EFDA",
+        //     },
+        //   };
+        // }
+        // if (
+        //   row.original.event_configuration?.event_position === EventPosition.END
+        // ) {
+        //   return {
+        //     style: {
+        //       background: "#FFCCCC",
+        //     },
+        //   };
+        // }
 
         return {};
       }}

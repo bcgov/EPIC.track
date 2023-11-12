@@ -225,6 +225,18 @@ export const BaseTheme = createTheme({
         disableRipple: true,
       },
     },
+    MuiRadio: {
+      defaultProps: {
+        disableRipple: true,
+      },
+      styleOverrides: {
+        root: {
+          "&.Mui-checked": {
+            color: Palette.primary.accent.main,
+          },
+        },
+      },
+    },
     MuiInputBase: {
       styleOverrides: {
         root: {

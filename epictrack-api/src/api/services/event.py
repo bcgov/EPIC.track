@@ -15,9 +15,11 @@
 import copy
 import functools
 from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
 from typing import List
 
 from sqlalchemy import and_, or_
+from sqlalchemy.orm import joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
@@ -42,31 +44,33 @@ from api.utils import util
 from api.utils.datetime_helper import get_start_of_day
 
 from .event_configuration import EventConfigurationService
+from api.schemas import response as res
+from api.models.db import session_scope
 
 
 class EventService:
     """Service to manage event related operations."""
 
     @classmethod
-    def create_event(cls, data: dict, work_phase_id: int, commit: bool = True) -> Event:
+    def create_event(cls, data: dict, work_phase_id: int, push_events: bool, commit: bool = True) -> Event:
         """Create milestone event"""
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         data["work_id"] = current_work_phase.work_id
         data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = Event(**data)
         event = event.flush()
-        cls._process_events(current_work_phase, event, all_work_events, None)
+        cls._process_events(current_work_phase, event, all_work_events, push_events, None)
         cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
 
     @classmethod
-    def update_event(cls, data: dict, event_id: int, commit: bool = True) -> Event:
+    def update_event(cls, data: dict, event_id: int, push_events: bool, commit: bool = True) -> Event:
         """Update the event"""
         event = Event.find_by_id(event_id)
         event_old = copy.copy(event)
@@ -74,7 +78,7 @@ class EventService:
             event.event_configuration.work_phase_id
         )
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         if not event:
             raise ResourceNotFoundError("Event not found")
@@ -89,6 +93,7 @@ class EventService:
                 current_work_phase,
                 event,
                 all_work_events,
+                push_events,
                 event_old,
             )
             cls._process_actions(event, data.get("outcome_id", None))
@@ -108,7 +113,7 @@ class EventService:
         event_to_check = Event(**data)
         result = {
             "subsequent_event_push_required": False,
-            "phase_end_will_be_pushed": False,
+            "phase_end_push_required": False,
             "days_pushed": 0
         }
         if event_id:
@@ -129,7 +134,7 @@ class EventService:
                 current_work_phase.work_id, None, PRIMARY_CATEGORIES
             )
             result = cls._validate_event_effect_on_dates(
-                current_work_phase, event_to_check, all_work_events, event_old
+                current_work_phase, event_to_check, all_work_events, event_old, number_of_days_to_be_pushed
             )
             result["subsequent_event_push_required"] = True
             result["days_pushed"] = number_of_days_to_be_pushed
@@ -142,9 +147,10 @@ class EventService:
         event: Event,
         all_work_events: [Event],
         event_old: Event,
+        number_of_days_to_be_pushed: int,
     ):
         """Validate the existing event to see which phase end date does it cause this event or any other event to go"""
-        result = {"phase_end_will_be_pushed": False}
+        result = {"phase_end_push_required": False}
         legislated_phase_end_push_can_happen = (
             event.event_configuration.event_position.value
             == EventPositionEnum.START.value
@@ -165,8 +171,7 @@ class EventService:
         current_event_index = cls._find_event_index(
             all_work_events, event_old if event_old else event, current_work_phase
         )
-
-        work_phases_to_be_checked = all_work_phases[current_work_phase_index]
+        work_phases_to_be_checked = [all_work_phases[current_work_phase_index]]
         if current_work_phase.legislated:
             phase_events = cls._find_work_phase_events(
                 all_work_events, current_work_phase.id
@@ -200,17 +205,30 @@ class EventService:
             )
             if current_work_phase.id == work_phase.id:
                 phase_events_to_be_checked = phase_events_to_be_checked[
-                    current_event_index
+                    current_event_index:
                 ]
                 for each_event in phase_events_to_be_checked:
+                    if each_event.id:
+                        if each_event.actual_date:
+                            each_event.actual_date = (
+                                each_event.actual_date
+                                + timedelta(days=number_of_days_to_be_pushed)
+                            )
+                        elif each_event.anticipated_date:
+                            each_event.anticipated_date = (
+                                each_event.anticipated_date
+                                + timedelta(days=number_of_days_to_be_pushed)
+                            )
                     days_diff = (
                         work_phase.end_date.date()
                         - cls._find_event_date(each_event).date()
                     ).days
                     if days_diff < 0:
-                        result["phase_end_will_be_pushed"] = True
+                        result["phase_end_push_required"] = True
                         result["work_phase_to_be_exceeded"] = work_phase
+                        result["event"] = each_event
                         return result
+        return result
 
     @classmethod
     def find_milestone_event(cls, event_id: int) -> Event:
@@ -246,6 +264,7 @@ class EventService:
         current_work_phase: WorkPhase,
         event: Event,
         all_work_events: [Event],
+        push_events: bool,
         event_old: Event = None,
     ) -> None:
         """Process the event date logic"""
@@ -293,7 +312,7 @@ class EventService:
         current_event_index = cls._find_event_index(
             all_work_events, event_old if event_old else event, current_work_phase
         )
-        if number_of_days_to_be_pushed != 0:
+        if number_of_days_to_be_pushed != 0 and push_events:
             all_work_event_configurations = (
                 EventConfigurationService.find_all_configurations_by_work(event.work_id)
             )
@@ -502,20 +521,21 @@ class EventService:
         """Push events the given number of days"""
         for event_to_update in phase_events:
             if event_to_update.id != event.id:
-                if event_to_update.actual_date:
-                    event_to_update.actual_date = (
-                        event_to_update.actual_date
+                event_from_db = Event.find_by_id(event_to_update.id)
+                if event_from_db.actual_date:
+                    event_from_db.actual_date = (
+                        event_from_db.actual_date
                         + timedelta(days=number_of_days_to_be_pushed)
                     )
-                elif event_to_update.anticipated_date:
-                    event_to_update.anticipated_date = (
-                        event_to_update.anticipated_date
+                elif event_from_db.anticipated_date:
+                    event_from_db.anticipated_date = (
+                        event_from_db.anticipated_date
                         + timedelta(days=number_of_days_to_be_pushed)
                     )
-                event_to_update.update(
-                    event_to_update.as_dict(recursive=False), commit=False
+                event_from_db.update(
+                    event_from_db.as_dict(recursive=False), commit=False
                 )
-                cls._handle_child_events(all_work_event_configurations, event)
+                cls._handle_child_events(all_work_event_configurations, event_from_db)
 
     @classmethod
     def _push_work_phases(
@@ -708,28 +728,30 @@ class EventService:
         work_id: int,
         work_phase_id: int = None,
         event_categories: [EventCategoryEnum] = [],
+        scoped: bool = False
     ) -> [Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
-        events_query = (
-            db.session.query(Event)
-            .join(
-                EventConfiguration,
-                Event.event_configuration_id == EventConfiguration.id,
+        with Session(db.engine) as session:
+            events_query = (
+            (session if scoped else db.session).query(Event)
+                .join(
+                    EventConfiguration,
+                    Event.event_configuration_id == EventConfiguration.id,
+                )
+                .filter(Event.is_active.is_(True), Event.work_id == work_id)
+                .order_by(Event.actual_date, Event.anticipated_date)
             )
-            .filter(Event.is_active.is_(True), Event.work_id == work_id)
-            .order_by(Event.actual_date, Event.anticipated_date)
-        )
-        if len(event_categories) > 0:
-            category_ids = list(map(lambda x: x.value, event_categories))
-            events_query = events_query.filter(
-                EventConfiguration.event_category_id.in_(category_ids)
-            )
-        if work_phase_id:
-            events_query = events_query.filter(
-                EventConfiguration.work_phase_id == work_phase_id
-            )
-        return events_query.all()
+            if len(event_categories) > 0:
+                category_ids = list(map(lambda x: x.value, event_categories))
+                events_query = events_query.filter(
+                    EventConfiguration.event_category_id.in_(category_ids)
+                )
+            if work_phase_id:
+                events_query = events_query.filter(
+                    EventConfiguration.work_phase_id == work_phase_id
+                )
+            return events_query.options(joinedload(Event.event_configuration)).all()
 
     @classmethod
     def _find_event_date(cls, event) -> datetime:

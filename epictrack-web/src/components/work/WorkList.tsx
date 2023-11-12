@@ -76,7 +76,8 @@ const WorkList = () => {
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
-        header: "Go to Workplan",
+        header: " ",
+        size: 40,
         Cell: ({ row }) => (
           <Box>
             <Link to={`/work-plan?work_id=${row.original.id}`}>
@@ -88,6 +89,7 @@ const WorkList = () => {
       {
         accessorKey: "title",
         header: "Name",
+        size: 300,
         Cell: ({ row }) => (
           <ETGridTitle
             to="#"
@@ -108,6 +110,7 @@ const WorkList = () => {
       {
         accessorKey: "ea_act.name",
         header: "EA Act",
+        size: 100,
         filterVariant: "multi-select",
         filterSelectOptions: eaActs,
       },
@@ -117,15 +120,16 @@ const WorkList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: workTypes,
       },
-      {
-        accessorKey: "ministry.abbreviation",
-        header: "Ministry",
-        filterVariant: "multi-select",
-        filterSelectOptions: ministries,
-      },
+      // {
+      //   accessorKey: "ministry.abbreviation",
+      //   header: "Ministry",
+      //   filterVariant: "multi-select",
+      //   filterSelectOptions: ministries,
+      // },
       {
         accessorKey: "eao_team.name",
         header: "Team",
+        size: 80,
         filterVariant: "multi-select",
         filterSelectOptions: teams,
       },
@@ -138,6 +142,7 @@ const WorkList = () => {
       {
         accessorKey: "is_active",
         header: "Active",
+        size: 80,
         filterVariant: "checkbox",
         Cell: ({ cell }) => (
           <span>

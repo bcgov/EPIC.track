@@ -206,6 +206,7 @@ export default function WorkForm({ ...props }) {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     format={DATE_FORMAT}
+                    minDate={dayjs(new Date(1995, 5, 30))}
                     disabled={(ctx.item as Work)?.start_date_locked}
                     slotProps={{
                       textField: {

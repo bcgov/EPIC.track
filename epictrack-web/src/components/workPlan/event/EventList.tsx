@@ -20,7 +20,6 @@ import { styled } from "@mui/system";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
 import workService from "../../../services/workService/workService";
-import { makeStyles } from "@mui/styles";
 import TrackDialog from "../../shared/TrackDialog";
 import TaskForm from "../task/TaskForm";
 import {
@@ -46,16 +45,14 @@ import responsibilityService from "../../../services/responsibilityService/respo
 import EventListTable from "./EventListTable";
 import EventForm from "./EventForm";
 import { EventContext } from "./EventContext";
-import { ETHeading4, ETParagraph } from "../../shared";
 import { When } from "react-if";
+import WarningBox from "../../shared/warningBox";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
-const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationMediumIcon"];
-const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
 
-const useStyle = makeStyles({
+const classes = {
   textEllipsis: {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
@@ -64,7 +61,7 @@ const useStyle = makeStyles({
   deleteIcon: {
     fill: "currentcolor",
   },
-});
+};
 const IButton = styled(IconButton)({
   "& .icon": {
     fill: Palette.primary.accent.main,
@@ -80,49 +77,6 @@ const IButton = styled(IconButton)({
     },
   },
 });
-const WarningBox = (props?: WarningBoxProps) => {
-  return (
-    <Grid
-      sx={{
-        backgroundColor: Palette.secondary.bg.light,
-        padding: "16px 24px 16px 24px",
-        display: "flex",
-        flexDirection: "column",
-        color: Palette.secondary.dark,
-        borderRadius: "4px",
-      }}
-      container
-    >
-      <Grid
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: "1rem",
-        }}
-        item
-      >
-        <Box>
-          <ExclamationIcon width="26" height="24" />
-        </Box>
-        <Box sx={{ flex: "1 0 0" }}>
-          <ETHeading4 bold>{props?.title}</ETHeading4>
-        </Box>
-        <Box>
-          <IconButton
-            onClick={props?.onCloseHandler}
-            sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
-            disableRipple
-          >
-            <CloseIconComponent />
-          </IconButton>
-        </Box>
-      </Grid>
-      <Grid item>
-        <ETParagraph>{props?.subTitle}</ETParagraph>
-      </Grid>
-    </Grid>
-  );
-};
 
 const EventList = () => {
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
@@ -142,7 +96,6 @@ const EventList = () => {
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
     {}
   );
-  const classes = useStyle();
   const notificationId = React.useRef<SnackbarKey | null>(null);
   const [templateAvailable, setTemplateAvailable] =
     React.useState<TemplateStatus>();
@@ -563,7 +516,6 @@ const EventList = () => {
         task_ids: Object.keys(rowSelection),
         status,
       };
-      console.log(`Update progress to ${JSON.stringify(data)}`);
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
@@ -645,7 +597,7 @@ const EventList = () => {
         >
           <Button
             variant="text"
-            startIcon={<DeleteIcon className={classes.deleteIcon} />}
+            startIcon={<DeleteIcon fill="currentcolor" />}
             sx={{
               border: `2px solid ${Palette.white}`,
             }}
@@ -670,8 +622,8 @@ const EventList = () => {
         >
           <WarningBox
             onCloseHandler={() => setShowExtensionWarningBox(false)}
-            title="This phase is over the legislated time limit"
-            subTitle="You will need to add an Extension Milestone to finish this Phase"
+            title="The time limit for this Phase has been exceeded"
+            isTitleBold={true}
           />
         </When>
         <When
@@ -683,6 +635,7 @@ const EventList = () => {
           <WarningBox
             onCloseHandler={() => setShowSuspendedWarningBox(false)}
             title="The Work is suspended"
+            isTitleBold={true}
             subTitle="You will need to add a Resumption Milestone to resume this Work"
           />
         </When>
@@ -747,7 +700,7 @@ const EventList = () => {
               />
               <Button
                 variant="text"
-                startIcon={<DeleteIcon className={classes.deleteIcon} />}
+                startIcon={<DeleteIcon fill="currentcolor" />}
                 sx={{
                   color: Palette.primary.accent.main,
                   border: "none",
@@ -807,7 +760,6 @@ const EventList = () => {
       <TrackDialog
         open={showTaskForm}
         dialogTitle={taskEvent ? taskEvent?.name : "Add Task"}
-        //onClose={(event, reason) => onDialogClose(event, reason)}
         disableEscapeKeyDown
         fullWidth
         maxWidth="md"
@@ -853,7 +805,7 @@ const EventList = () => {
         dialogTitle="Task Template"
         disableEscapeKeyDown
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
         okButtonText="Get Template"
         formId="import-tasks-form"
         isCancelRequired={false}

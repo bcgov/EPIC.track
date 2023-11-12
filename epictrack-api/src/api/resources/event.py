@@ -53,7 +53,8 @@ class Events(Resource):
     def post(work_phase_id):
         """Create a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-        event_response = EventService.create_event(request_json, work_phase_id)
+        args = req.MilestoneEventPushEventQueryParameterSchema().load(request.args)
+        event_response = EventService.create_event(request_json, work_phase_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
 
 
@@ -69,7 +70,8 @@ class Event(Resource):
     def put(event_id):
         """Endpoint to update a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-        event_response = EventService.update_event(request_json, event_id)
+        args = req.MilestoneEventPushEventQueryParameterSchema().load(request.args)
+        event_response = EventService.update_event(request_json, event_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.OK
 
     @staticmethod

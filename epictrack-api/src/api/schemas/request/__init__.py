@@ -21,6 +21,7 @@ from .event_request import (
     MilestoneEventBulkDeleteQueryParamSchema,
     MilestoneEventPathParameterSchema,
     MilestoneEventCheckQueryParameterSchema,
+    MilestoneEventPushEventQueryParameterSchema,
 )
 from .event_template_request import EventTemplateBodyParameterSchema
 from .indigenous_nation_request import (

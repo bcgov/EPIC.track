@@ -118,3 +118,10 @@ class MilestoneEventBulkDeleteQueryParamSchema(RequestQueryParameterSchema):
     milestone_ids = IntegerList(
         metadata={"description": "comma separated milestone ids"}
     )
+
+class MilestoneEventPushEventQueryParameterSchema(RequestQueryParameterSchema):
+    """Milestone event push event query parameter schema"""
+
+    push_events = fields.Bool(
+        metadata={"description": "Flag indicate whether to push the subsequent events or not"}
+    )

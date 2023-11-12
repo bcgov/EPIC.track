@@ -239,7 +239,7 @@ export const MasterProvider = ({
         onClose={(event, reason) => onDialogClose(event, reason)}
         disableEscapeKeyDown
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
         okButtonText="Save"
         cancelButtonText="Cancel"
         isActionsRequired
