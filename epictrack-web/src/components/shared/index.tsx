@@ -374,6 +374,7 @@ export const ETFormLabelWithCharacterLimit = (
 export const ETLink = (props: LinkProps) => (
   <Link
     style={{
+      ...props.style,
       color: Palette.primary.accent.main,
       textDecoration: "none",
     }}

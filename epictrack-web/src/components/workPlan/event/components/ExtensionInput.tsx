@@ -110,7 +110,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           name="phase_end_date"
           control={control}
           render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <LocalizationProvider dateAdapter={AdapterDayjs} for>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 disabled={props.isFormFieldsLocked}
                 format={DATE_FORMAT}

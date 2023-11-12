@@ -3,11 +3,11 @@ import { ETHeading2, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
+import { SxProps } from "@mui/material";
 import TabPanel from "../shared/tab/TabPanel";
 import PhaseContainer from "./phase/PhaseContainer";
 import { WorkplanContext } from "./WorkPlanContext";
 import TeamContainer from "./team/TeamContainer";
-import { makeStyles } from "@mui/styles";
 import FirstNationContainer from "./firstNations/FirstNationContainer";
 import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
 import Status from "./status";
@@ -17,15 +17,12 @@ import Issues from "./issues";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
-const useStyle = makeStyles({
-  tabPanel: {
-    paddingTop: "2rem",
-  },
-});
+const tabPanel: SxProps = {
+  paddingTop: "2rem",
+};
 const WorkPlanContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
   const ctx = useContext(WorkplanContext);
-  const classes = useStyle();
 
   const activeStaff = ctx.team.filter(
     (staffWorkRole) => staffWorkRole.is_active
@@ -88,19 +85,49 @@ const WorkPlanContainer = () => {
           />
         </ETTabs>
       </Box>
-      <TabPanel index={0} value={selectedTabIndex} className={classes.tabPanel}>
+      <TabPanel
+        index={0}
+        value={selectedTabIndex}
+        sx={{
+          ...tabPanel,
+        }}
+      >
         <PhaseContainer />
       </TabPanel>
-      <TabPanel index={1} value={selectedTabIndex} className={classes.tabPanel}>
+      <TabPanel
+        index={1}
+        value={selectedTabIndex}
+        sx={{
+          ...tabPanel,
+        }}
+      >
         <Status />
       </TabPanel>
-      <TabPanel index={2} value={selectedTabIndex} className={classes.tabPanel}>
+      <TabPanel
+        index={2}
+        value={selectedTabIndex}
+        sx={{
+          ...tabPanel,
+        }}
+      >
         <Issues />
       </TabPanel>
-      <TabPanel index={4} value={selectedTabIndex} className={classes.tabPanel}>
+      <TabPanel
+        index={4}
+        value={selectedTabIndex}
+        sx={{
+          ...tabPanel,
+        }}
+      >
         <TeamContainer />
       </TabPanel>
-      <TabPanel index={5} value={selectedTabIndex} className={classes.tabPanel}>
+      <TabPanel
+        index={5}
+        value={selectedTabIndex}
+        sx={{
+          ...tabPanel,
+        }}
+      >
         <FirstNationContainer />
       </TabPanel>
     </ETPageContainer>

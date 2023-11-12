@@ -1,9 +1,7 @@
 import React from "react";
-import { Box, Grid } from "@mui/material";
-import Icon from "@mui/material/Icon";
+import { Box, Grid, SxProps } from "@mui/material";
 import { ETHeading3, ETLink, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import { makeStyles } from "@mui/styles";
 import FirstNationList from "./FirstNationList";
 import { ETTab, ETTabs } from "../../shared/tab/Tab";
 import TabPanel from "../../shared/tab/TabPanel";
@@ -19,37 +17,22 @@ import { showNotification } from "../../shared/notificationProvider";
 
 const LinkIcon: React.FC<IconProps> = Icons["LinkIcon"];
 
-const useStyle = makeStyles({
-  title: {
-    borderBottom: `2px solid ${Palette.primary.main}`,
-    paddingBottom: "0.5rem",
-  },
-  tabPanel: {
-    padding: "1.5rem 0px 1rem 1rem",
-    minHeight: "0px",
-  },
-  tab: {
-    paddingBottom: "0.5rem !important",
-    fontSize: "1.5rem !important",
+const tab: SxProps = {
+  paddingBottom: "0.5rem !important",
+  fontSize: "1.5rem !important",
+  fontWeight: 400,
+  lineHeight: "1.3rem",
+  "&.Mui-selected": {
     fontWeight: 400,
-    lineHeight: "1.3rem",
-    "&.Mui-selected": {
-      fontWeight: 400,
-    },
-    minHeight: "0px",
   },
-  resoureLink: {
-    fontSize: "1rem",
-    fontWeight: 700,
-    lineHeight: "1.5rem",
-  },
-  linkIcon: {
-    fill: Palette.primary.accent.main,
-  },
-});
+  minHeight: "0px",
+};
+const tabPanel: SxProps = {
+  padding: "1.5rem 0px 1rem 1rem",
+  minHeight: "0px",
+};
 
 const FirstNationContainer = () => {
-  const classes = useStyle();
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
   const [notes, setNotes] = React.useState("");
 
@@ -91,7 +74,13 @@ const FirstNationContainer = () => {
   return (
     <Grid container columnSpacing={1.5}>
       <Grid item xs={8}>
-        <ETHeading3 className={classes.title} color={Palette.primary.main}>
+        <ETHeading3
+          sx={{
+            borderBottom: `2px solid ${Palette.primary.main}`,
+            paddingBottom: "0.5rem",
+          }}
+          color={Palette.primary.main}
+        >
           First Nations
         </ETHeading3>
       </Grid>
@@ -107,12 +96,17 @@ const FirstNationContainer = () => {
         >
           <ETTab
             sx={{
+              ...tab,
               paddingLeft: 0,
             }}
             label="Notes"
-            className={classes.tab}
           />
-          <ETTab label="Resources" className={classes.tab} />
+          <ETTab
+            label="Resources"
+            sx={{
+              ...tab,
+            }}
+          />
         </ETTabs>
       </Grid>
       <Grid
@@ -134,7 +128,9 @@ const FirstNationContainer = () => {
         <TabPanel
           index={0}
           value={selectedTabIndex}
-          className={classes.tabPanel}
+          sx={{
+            ...tabPanel,
+          }}
         >
           <RichTextEditor
             handleEditorStateChange={handleNotesChange}
@@ -144,7 +140,9 @@ const FirstNationContainer = () => {
         <TabPanel
           index={1}
           value={selectedTabIndex}
-          className={classes.tabPanel}
+          sx={{
+            ...tabPanel,
+          }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {FN_RESOURCES.map((resource) => {
@@ -169,12 +167,16 @@ const FirstNationContainer = () => {
                         alignItems: "center",
                       }}
                     >
-                      <LinkIcon className={classes.linkIcon} />
+                      <LinkIcon fill={`${Palette.primary.accent.main}`} />
                       <ETLink
                         to={`${resource.url}`}
                         target="_blank"
                         rel="noopener"
-                        className={classes.resoureLink}
+                        style={{
+                          fontSize: "1rem",
+                          fontWeight: 700,
+                          lineHeight: "1.5rem",
+                        }}
                       >
                         {resource.title}
                       </ETLink>

@@ -1,4 +1,4 @@
-interface WarningBoxProps {
+export interface WarningBoxProps {
   title?: string;
   isTitleBold: boolean;
   subTitle?: string;

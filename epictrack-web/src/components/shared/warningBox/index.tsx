@@ -4,6 +4,7 @@ import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { ETHeading4, ETParagraph } from "..";
 import { When } from "react-if";
+import { WarningBoxProps } from "./type";
 
 const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationMediumIcon"];
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];

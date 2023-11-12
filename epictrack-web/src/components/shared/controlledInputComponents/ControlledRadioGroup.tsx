@@ -9,7 +9,6 @@ import {
 import { Controller, useFormContext } from "react-hook-form";
 import React, { useCallback, useState } from "react";
 import { RadioOptions } from "../../../models/type";
-import { makeStyles } from "@mui/styles";
 import { Palette } from "../../../styles/theme";
 
 type IFormRadioGroupProps = {
@@ -17,14 +16,6 @@ type IFormRadioGroupProps = {
   options: RadioOptions[];
 } & RadioGroupProps;
 
-const useStyle = makeStyles({
-  NoSelect: {
-    color: "red",
-  },
-  RadioSelectedLabel: {
-    color: Palette.primary.accent.main,
-  },
-});
 const ControlledRadioGroup: React.ForwardRefRenderFunction<
   HTMLButtonElement,
   IFormRadioGroupProps
@@ -34,17 +25,14 @@ const ControlledRadioGroup: React.ForwardRefRenderFunction<
     formState: { errors, defaultValues },
   } = useFormContext();
   const [selectedVal, setSelectedVal] = useState("");
-  const classes = useStyle();
   const generateRadioOptions = useCallback(() => {
     return options.map((singleOption) => (
       <FormControlLabel
-        className={
-          singleOption.value === Number(selectedVal)
-            ? classes.RadioSelectedLabel
-            : ""
-        }
         sx={{
           padding: "0.5rem 1rem 0.5rem 1rem ",
+          ...(singleOption.value === Number(selectedVal) && {
+            color: Palette.primary.accent.main,
+          }),
         }}
         value={singleOption.value}
         label={singleOption.label}
