@@ -16,6 +16,7 @@ export interface WorkIssue {
   work_id: number;
   is_deleted: boolean;
   approved_by: string;
+  is_approved: boolean;
   created_by: string;
   created_at: string;
   updated_by: string;

@@ -429,6 +429,29 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return work
 
     @classmethod
+    def save_notes(cls, work_id: int, notes_payload: dict) -> Work:
+        """Save notes to the given column in the work."""
+        # if column name cant map the type in the UI , add it here..
+        note_type_mapping = {
+            'first_nation': 'first_nation_notes',
+        }
+
+        work = cls.find_by_id(work_id)
+        notes = notes_payload.get("notes")
+        note_type = notes_payload.get("note_type")
+
+        if hasattr(work, note_type):
+            setattr(work, note_type, notes)
+        else:
+            mapped_column = note_type_mapping.get(note_type)
+            if mapped_column is None:
+                raise ResourceExistsError(f"No work note type {note_type}  nation association found")
+            setattr(work, mapped_column, notes)
+
+        work.save()
+        return work
+
+    @classmethod
     def find_work_first_nation(cls, work_nation_id: int) -> IndigenousWork:
         """Find work indigenous nation by id"""
         work_indigenous_nation = (

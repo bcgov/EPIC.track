@@ -437,16 +437,14 @@ export default function ProjectForm({ ...props }) {
             >
               <ControlledSwitch
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
-                defaultChecked={(ctx.item as Project)?.is_active}
-                {...register("is_active")}
+                name={"is_active"}
               />
               <ETFormLabel id="active">Active</ETFormLabel>
             </Grid>
             <Grid item xs={3}>
               <ControlledSwitch
+                name={"is_project_closed"}
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
-                defaultChecked={(ctx.item as Project)?.is_project_closed}
-                {...register("is_project_closed")}
               />
               <ETFormLabel id="active">Closed</ETFormLabel>
             </Grid>

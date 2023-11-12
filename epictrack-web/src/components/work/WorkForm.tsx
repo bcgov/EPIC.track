@@ -315,7 +315,7 @@ export default function WorkForm({ ...props }) {
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Work)?.is_cac_recommended}
-              {...register("is_cac_recommended")}
+              name="is_cac_recommended"
             />
             <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
             <Tooltip
@@ -426,8 +426,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              defaultChecked={(ctx.item as Work)?.is_active}
-              {...register("is_active")}
+              name="is_active"
             />
             <ETFormLabel id="is_active">Active</ETFormLabel>
           </Grid>
@@ -435,7 +434,7 @@ export default function WorkForm({ ...props }) {
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Work)?.is_high_priority}
-              {...register("is_high_priority")}
+              name="is_high_priority"
             />
             <ETFormLabel id="is_watched">High Priority</ETFormLabel>
             <Tooltip

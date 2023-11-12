@@ -2,8 +2,11 @@ import React from "react";
 import NoDataEver from "../../../shared/NoDataEver";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
-import StatusOutOfDateBanner from "../StatusOutOfDateBanner";
+import StatusOutOfDateBanner from "./StatusOutOfDateBanner";
 import RecentStatus from "./RecentStatus";
+import { Box } from "@mui/material";
+import StatusHistory from "./StatusHistory";
+import { Status } from "../../../../models/status";
 
 const StatusView = () => {
   const { statuses } = React.useContext(WorkplanContext);
@@ -11,6 +14,13 @@ const StatusView = () => {
 
   const onAddButtonClickHandler = () => {
     setShowStatusForm(true);
+  };
+
+  const hasHistory = () => {
+    const approvedStatuses: Status[] = statuses.filter((status: Status) => {
+      return status.is_approved;
+    });
+    return approvedStatuses?.length > 1; // No history if only 1 status is approved
   };
 
   return (
@@ -26,7 +36,10 @@ const StatusView = () => {
       {statuses.length > 0 && !statuses[0].is_approved && (
         <StatusOutOfDateBanner />
       )}
-      {statuses.length > 0 && <RecentStatus />}
+      <Box sx={{ display: "flex", gap: "24px" }}>
+        {statuses.length > 0 && <RecentStatus />}
+        {hasHistory() && <StatusHistory />}
+      </Box>
     </>
   );
 };
