@@ -25,7 +25,6 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
-
 API = Namespace("works", description="Works")
 
 
@@ -314,6 +313,23 @@ class WorkFirstNationNotes(Resource):
         req.WorkIdPathParameterSchema().load(request.view_args)
         notes = req.WorkFirstNationNotesBodySchema().load(API.payload)["notes"]
         work = WorkService.save_first_nation_notes(work_id, notes)
+        return res.WorkResourceResponseSchema().dump(work), HTTPStatus.OK
+
+
+@cors_preflight("PATCH")
+@API.route("/<int:work_id>/notes", methods=["PATCH", "OPTIONS"])
+class WorkNotes(Resource):
+    """Endpoints to handle work related notes"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_id):
+        """Save the notes to corresponding work"""
+        req.WorkIdPathParameterSchema().load(request.view_args)
+        notes = req.WorkNotesBodySchema().load(API.payload)
+        work = WorkService.save_notes(work_id, notes)
         return res.WorkResourceResponseSchema().dump(work), HTTPStatus.OK
 
 

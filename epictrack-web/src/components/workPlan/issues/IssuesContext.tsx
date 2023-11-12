@@ -2,9 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { WorkplanContext } from "../WorkPlanContext";
 import issueService from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/SearchParams";
-import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
+import { WorkIssue } from "../../../models/Issue";
 import { IssueForm } from "./types";
-import { set } from "lodash";
 
 interface IssuesContextProps {
   showIssuesForm: boolean;
@@ -13,6 +12,10 @@ interface IssuesContextProps {
   issueToEdit: WorkIssue | null;
   setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
   addIssue: (issueForm: IssueForm) => Promise<void>;
+  updateIssue: (issueForm: IssueForm) => Promise<void>;
+  approveIssue: (issueId: number) => Promise<void>;
+  issueToApproveId: number | null;
+  setIssueToApproveId: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 interface IssueContainerRouteParams extends URLSearchParams {
@@ -28,7 +31,19 @@ export const IssuesContext = createContext<IssuesContextProps>({
   addIssue: (_: IssueForm) => {
     return Promise.resolve();
   },
+  updateIssue: (_: IssueForm) => {
+    return Promise.resolve();
+  },
+  issueToApproveId: null,
+  setIssueToApproveId: () => {
+    return;
+  },
+  approveIssue: (_: number) => {
+    return Promise.resolve();
+  },
 });
+
+export const LASTEST_ISSUE_UPDATE_INDEX = 0;
 
 export const IssuesProvider = ({
   children,
@@ -39,45 +54,17 @@ export const IssuesProvider = ({
   const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(true);
   const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
 
+  const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
+
   const { issues, setIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
   const workId = query.get("work_id");
 
-  // TODO: Remove mock data
-  const mockIssueUpdate: WorkIssueUpdate = {
-    id: 1,
-    description:
-      "The project has been the subject of media attention due to opposition to the project from the union representing the terminal workers and environmental non-profits.",
-    work_issue_id: 1,
-    is_active: false,
-    is_deleted: false,
-  };
-  const mockIssue: WorkIssue = {
-    id: 1,
-    title: "Union in opposition to the project",
-    start_date: "2023-11-07",
-    expected_resolution_date: "2023-11-07",
-    is_active: true,
-    is_high_priority: true,
-    is_deleted: false,
-    work_id: 1,
-    approved_by: "somebody",
-    created_by: "somebody",
-    created_at: new Date().toISOString(),
-    updated_by: "somebody",
-    updated_at: new Date().toISOString(),
-    updates: [mockIssueUpdate],
-  };
-
-  //TODO: remove mock data
-  const mockIssues = [mockIssue, { ...mockIssue, id: 2 }];
-
   const loadIssues = async () => {
     if (!workId) return;
     try {
-      // const response = await issueService.getAll(workId);
-      // setIssues(response.data);
-      setIssues(mockIssues);
+      const response = await issueService.getAll(workId);
+      setIssues(response.data);
       setIsIssuesLoading(false);
     } catch (error) {
       setIsIssuesLoading(false);
@@ -96,7 +83,70 @@ export const IssuesProvider = ({
     if (!workId) return;
     setIsIssuesLoading(true);
     try {
-      await issueService.create(workId, issueForm);
+      const request = {
+        ...issueForm,
+        updates: [issueForm.description],
+      };
+      await issueService.create(workId, request);
+      loadIssues();
+    } catch (error) {
+      setIsIssuesLoading(false);
+    }
+  };
+
+  const getDescriptionUpdates = (issueForm: IssueForm) => {
+    if (!issueToEdit || !issueForm.description_id) return [];
+
+    return (
+      issueToEdit.updates
+        ?.filter(
+          (update) =>
+            update.id === issueForm.description_id &&
+            update.description !== issueForm.description
+        )
+        .map((update) => ({
+          ...update,
+          description: issueForm.description,
+        })) ?? []
+    );
+  };
+
+  const updateIssue = async (issueForm: IssueForm) => {
+    if (!workId || !issueToEdit) return;
+    setIsIssuesLoading(true);
+    try {
+      const descriptionUpdates = getDescriptionUpdates(issueForm);
+
+      const {
+        title,
+        description,
+        start_date,
+        expected_resolution_date,
+        is_active,
+        is_high_priority,
+      } = issueForm;
+
+      const request = {
+        title,
+        description,
+        start_date,
+        expected_resolution_date,
+        is_active,
+        is_high_priority,
+        updates: descriptionUpdates,
+      };
+      await issueService.update(workId, String(issueToEdit.id), request);
+      loadIssues();
+    } catch (error) {
+      setIsIssuesLoading(false);
+    }
+  };
+
+  const approveIssue = async (issueId: number) => {
+    if (!workId) return;
+    setIsIssuesLoading(true);
+    try {
+      await issueService.approve(workId, String(issueId));
       loadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
@@ -112,6 +162,10 @@ export const IssuesProvider = ({
         issueToEdit,
         setIssueToEdit,
         addIssue,
+        issueToApproveId,
+        setIssueToApproveId,
+        approveIssue,
+        updateIssue,
       }}
     >
       {children}

@@ -90,6 +90,7 @@ from .work_request import (
     WorkStatusParameterSchema,
     WorkIssuesParameterSchema,
     WorkIssuesUpdateSchema,
-    WorkStatusNotesBodySchema
+    WorkStatusNotesBodySchema,
+    WorkNotesBodySchema
 )
 from .act_section_request import ActSectionQueryParameterSchema

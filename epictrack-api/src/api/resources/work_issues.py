@@ -50,7 +50,8 @@ class WorkStatus(Resource):
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
-@API.route("/<int:issue_id>", methods=["PUT"])
+@cors_preflight("PUT")
+@API.route("/<int:issue_id>", methods=["PUT", "OPTIONS"])
 class IssueUpdateEdits(Resource):
     """Endpoint resource to manage updates/edits for a specific issue and its description."""
 
@@ -65,7 +66,7 @@ class IssueUpdateEdits(Resource):
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
-@API.route("/<int:issue_id>/issue_update", methods=["POST"])
+@API.route("/<int:issue_id>/update", methods=["POST"])
 class WorkIssueUpdate(Resource):
     """Endpoint resource to manage updates for a specific issue."""
 
@@ -83,7 +84,7 @@ class WorkIssueUpdate(Resource):
 
 
 @cors_preflight("PATCH")
-@API.route("/<int:issue_id>/approve", methods=["PATCH", "OPTIONS"])
+@API.route("/<int:issue_id>/update/<int:update_id>/approve", methods=["PATCH", "OPTIONS"])
 class ApproveIssues(Resource):
     """Endpoint resource to manage approving of work status."""
 
@@ -91,12 +92,9 @@ class ApproveIssues(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def patch(work_id, issue_id):
+    # pylint: disable=unused-argument
+    def patch(work_id, issue_id, update_id):
         """Approve a work status."""
-        existing_work_issues = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
-        if existing_work_issues is None:
-            return {"message": "Work issues not found"}, HTTPStatus.NOT_FOUND
+        approved_work_issues = WorkIssuesService.approve_work_issues(issue_id, update_id)
 
-        approved_work_issues = WorkIssuesService.approve_work_issues(existing_work_issues)
-
-        return res.WorkIssuesResponseSchema().dump(approved_work_issues), HTTPStatus.OK
+        return res.WorkIssueUpdatesResponseSchema().dump(approved_work_issues), HTTPStatus.OK

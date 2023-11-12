@@ -10,18 +10,23 @@ import dayjs from "dayjs";
 import { DATE_FORMAT } from "../../../constants/application-constant";
 import Moment from "moment";
 import { StatusContext } from "./StatusContext";
+import { WorkplanContext } from "../WorkPlanContext";
 
 const schema = yup.object().shape({});
 const CHARACTER_LIMIT = 500;
 
 const StatusForm = () => {
-  const [notes, setNotes] = React.useState<string>("");
+  const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
-  const { status, onSave } = useContext(StatusContext);
+  const { status, onSave, isCloning } = useContext(StatusContext);
+  const { getWorkStatuses } = useContext(WorkplanContext);
 
   React.useEffect(() => {
     if (status) {
-      setNotes(status?.description);
+      setDescription(status?.description);
+      if (isCloning) {
+        reset({ posted_date: Moment().format() });
+      }
     }
   }, []);
 
@@ -40,12 +45,13 @@ const StatusForm = () => {
   } = methods;
 
   const handleDescriptionChange = (event: any) => {
-    setNotes(event.target.value);
+    setDescription(event.target.value);
   };
 
   const onSubmitHandler = async (data: any) => {
     onSave(data, () => {
       reset();
+      getWorkStatuses();
     });
   };
 
@@ -97,7 +103,7 @@ const StatusForm = () => {
         </Grid>
         <Grid item xs={12}>
           <ETFormLabelWithCharacterLimit
-            characterCount={notes.length}
+            characterCount={description.length}
             maxCharacterLength={CHARACTER_LIMIT}
             required
           >
