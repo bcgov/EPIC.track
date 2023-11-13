@@ -13,6 +13,10 @@ export const REPORT_TYPES = [
     Text: "30-60-90",
     Value: "30-60-90",
   },
+  {
+    Text: "Event Calendar",
+    Value: "event_calendar",
+  },
 ];
 export const RESULT_STATUS = {
   LOADING: "loading",
@@ -24,6 +28,7 @@ export const REPORT_TYPE = {
   EA_REFERRAL: "ea_anticipated_schedule",
   RESOURCE_FORECAST: "ea_resource_forecast",
   REPORT_30_60_90: "30-60-90",
+  EVENT_CALENDAR: "event_calendar",
 };
 export const PAGINATION_DEFAULT = {
   PAGE_SIZE: 10,

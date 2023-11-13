@@ -18,8 +18,13 @@ const downloadPDF = async (reportType: string, reportParams: any) => {
   );
 };
 
+const getEventCalendar = async () => {
+  return await http.GetRequest(Endpoints.Reports.GET_EVENT_CALENDAR);
+};
+
 const ReportService = {
   fetchReportData,
   downloadPDF,
+  getEventCalendar,
 };
 export default ReportService;
