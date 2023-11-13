@@ -25,7 +25,7 @@ from .base_model import BaseModelVersioned
 class WorkIssues(BaseModelVersioned):
     """Model class for Issue Connected to a Work."""
 
-    __tablename__ = 'work_issues'
+    __tablename__ = "work_issues"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(500), nullable=False)
@@ -34,17 +34,20 @@ class WorkIssues(BaseModelVersioned):
     start_date = Column(DateTime(timezone=True), nullable=False)
     expected_resolution_date = Column(DateTime(timezone=True), nullable=True)
 
-    work_id = Column(ForeignKey('works.id'), nullable=False)
-    work = relationship('Work', foreign_keys=[work_id], lazy='select')
+    work_id = Column(ForeignKey("works.id"), nullable=False)
+    work = relationship("Work", foreign_keys=[work_id], lazy="select")
 
-    updates = relationship('WorkIssueUpdates', back_populates='work_issue', lazy='joined', order_by='desc(WorkIssueUpdates.id)')
+    updates = relationship(
+        "WorkIssueUpdates",
+        back_populates="work_issue",
+        lazy="joined",
+        order_by="desc(WorkIssueUpdates.id)",
+    )
 
     @classmethod
     def list_issues_for_work_id(cls, work_id) -> List[WorkIssues]:
         """List all WorkIssues sorted by start_date."""
-        query = (
-            WorkIssues.query
-            .filter(cls.work_id == work_id)
-            .order_by(cls.start_date.desc())
+        query = WorkIssues.query.filter(cls.work_id == work_id).order_by(
+            cls.start_date.desc()
         )
         return query.all()

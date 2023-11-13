@@ -18,9 +18,8 @@ from datetime import datetime, timedelta
 from typing import List
 from sqlalchemy.orm import Session
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, or_, extract, func
 from sqlalchemy.orm import joinedload
-from sqlalchemy import and_, extract, func, or_
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
