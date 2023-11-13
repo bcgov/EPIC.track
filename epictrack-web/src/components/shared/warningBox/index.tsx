@@ -8,11 +8,6 @@ import { WarningBoxProps } from "./type";
 
 const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationMediumIcon"];
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
-const classes = {
-  smallSize: {
-    fontSize: "0.875rem",
-  },
-};
 const WarningBox = (props?: WarningBoxProps) => {
   return (
     <Grid
@@ -45,7 +40,11 @@ const WarningBox = (props?: WarningBoxProps) => {
         <Box sx={{ flex: "1 0 0" }}>
           <ETHeading4
             bold={props?.isTitleBold}
-            className={!props?.isTitleBold ? classes.smallSize : ""}
+            sx={{
+              ...(!props?.isTitleBold && {
+                fontSize: "0.875rem",
+              }),
+            }}
           >
             {props?.title}
           </ETHeading4>
