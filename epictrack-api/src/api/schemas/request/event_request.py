@@ -119,6 +119,7 @@ class MilestoneEventBulkDeleteQueryParamSchema(RequestQueryParameterSchema):
         metadata={"description": "comma separated milestone ids"}
     )
 
+
 class MilestoneEventPushEventQueryParameterSchema(RequestQueryParameterSchema):
     """Milestone event push event query parameter schema"""
 

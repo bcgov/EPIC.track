@@ -118,7 +118,7 @@ const EventListTable = ({
           <ETGridTitle
             to="#"
             bold={[EventPosition.START, EventPosition.END].includes(
-              row.original.event_configuration.event_position
+              row.original.event_configuration?.event_position
             )}
             enableEllipsis
             onClick={(event: any) => onRowClick(event, row.original)}

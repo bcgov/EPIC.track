@@ -15,13 +15,8 @@
 
 These will get initialized by the application using the models
 """
-import os
-from contextlib import contextmanager
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
-from sqlalchemy import create_engine
-from api.config import get_named_config
-from sqlalchemy.orm import scoped_session, sessionmaker
 
 from api.models.history import versioned_session
 
@@ -31,17 +26,4 @@ from api.models.history import versioned_session
 db = SQLAlchemy()  # pylint: disable=invalid-name
 ma = Marshmallow()
 
-@contextmanager
-def session_scope():
-    """Provide a transactional scope around a series of operations."""
-    # Using the default session for the scope
-    session = sessionmaker(autocommit=False, autoflush=False, bind=db.engine)
-    # try:
-    #     yield session
-    #     session.commit()
-    # except Exception as e:  # noqa: B901, E722
-    #     print(str(e))
-    #     # session.rollback()
-    #     raise
-    return session
 versioned_session(db.session)

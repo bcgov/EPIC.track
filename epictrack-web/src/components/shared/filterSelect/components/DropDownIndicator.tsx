@@ -7,19 +7,9 @@ import Icons from "../../../icons";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 
-// const useStyles = makeStyles({
-//   menuOpen: {
-//     transform: "rotate(180deg)",
-//   },
-// });
 const DropdownIndicator = (props: DropdownIndicatorProps) => {
   return (
-    <components.DropdownIndicator
-      {...props}
-      // className={clsx({
-      //   [classes.menuOpen]: props.selectProps.menuIsOpen,
-      // })}
-    >
+    <components.DropdownIndicator {...props}>
       <ExpandIcon
         fill={
           props.hasValue ? Palette.primary.accent.light : Palette.neutral.dark

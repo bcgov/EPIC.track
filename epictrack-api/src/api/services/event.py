@@ -15,8 +15,8 @@
 import copy
 import functools
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session
 from typing import List
+from sqlalchemy.orm import Session
 
 from sqlalchemy import and_, or_
 from sqlalchemy.orm import joinedload
@@ -44,15 +44,15 @@ from api.utils import util
 from api.utils.datetime_helper import get_start_of_day
 
 from .event_configuration import EventConfigurationService
-from api.schemas import response as res
-from api.models.db import session_scope
 
 
 class EventService:
     """Service to manage event related operations."""
 
     @classmethod
-    def create_event(cls, data: dict, work_phase_id: int, push_events: bool, commit: bool = True) -> Event:
+    def create_event(
+        cls, data: dict, work_phase_id: int, push_events: bool, commit: bool = True
+    ) -> Event:
         """Create milestone event"""
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
         all_work_events = cls.find_events(
@@ -63,14 +63,18 @@ class EventService:
         data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = Event(**data)
         event = event.flush()
-        cls._process_events(current_work_phase, event, all_work_events, push_events, None)
+        cls._process_events(
+            current_work_phase, event, all_work_events, push_events, None
+        )
         cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
         return event
 
     @classmethod
-    def update_event(cls, data: dict, event_id: int, push_events: bool, commit: bool = True) -> Event:
+    def update_event(
+        cls, data: dict, event_id: int, push_events: bool, commit: bool = True
+    ) -> Event:
         """Update the event"""
         event = Event.find_by_id(event_id)
         event_old = copy.copy(event)
@@ -114,7 +118,7 @@ class EventService:
         result = {
             "subsequent_event_push_required": False,
             "phase_end_push_required": False,
-            "days_pushed": 0
+            "days_pushed": 0,
         }
         if event_id:
             event_to_check.event_configuration = event.event_configuration
@@ -134,7 +138,11 @@ class EventService:
                 current_work_phase.work_id, None, PRIMARY_CATEGORIES
             )
             result = cls._validate_event_effect_on_dates(
-                current_work_phase, event_to_check, all_work_events, event_old, number_of_days_to_be_pushed
+                current_work_phase,
+                event_to_check,
+                all_work_events,
+                event_old,
+                number_of_days_to_be_pushed,
             )
             result["subsequent_event_push_required"] = True
             result["days_pushed"] = number_of_days_to_be_pushed
@@ -149,6 +157,7 @@ class EventService:
         event_old: Event,
         number_of_days_to_be_pushed: int,
     ):
+        # pylint: disable=too-many-arguments,too-many-locals
         """Validate the existing event to see which phase end date does it cause this event or any other event to go"""
         result = {"phase_end_push_required": False}
         legislated_phase_end_push_can_happen = (
@@ -188,17 +197,6 @@ class EventService:
                     current_event_index = util.find_index_in_array(
                         phase_events, end_event
                     )
-            # else:
-            #     work_phases_to_be_checked = all_work_phases[current_work_phase_index]
-            #     phase_events = list(
-            #         filter(
-            #             lambda x: x.event_configuration.event_position.value
-            #             != EventPositionEnum.END.value,
-            #             phase_events,
-            #         )
-            #     )
-            #     all_work_events = phase_events
-            #     result["phase_end_will_be_pushed"] = False
         for work_phase in work_phases_to_be_checked:
             phase_events_to_be_checked = cls._find_work_phase_events(
                 all_work_events, work_phase.id
@@ -210,9 +208,8 @@ class EventService:
                 for each_event in phase_events_to_be_checked:
                     if each_event.id:
                         if each_event.actual_date:
-                            each_event.actual_date = (
-                                each_event.actual_date
-                                + timedelta(days=number_of_days_to_be_pushed)
+                            each_event.actual_date = each_event.actual_date + timedelta(
+                                days=number_of_days_to_be_pushed
                             )
                         elif each_event.anticipated_date:
                             each_event.anticipated_date = (
@@ -267,6 +264,7 @@ class EventService:
         push_events: bool,
         event_old: Event = None,
     ) -> None:
+        # pylint: disable=too-many-arguments
         """Process the event date logic"""
         cls._end_event_anticipated_change_rule(event, event_old)
         all_work_phases = WorkPhase.find_by_params(
@@ -523,9 +521,8 @@ class EventService:
             if event_to_update.id != event.id:
                 event_from_db = Event.find_by_id(event_to_update.id)
                 if event_from_db.actual_date:
-                    event_from_db.actual_date = (
-                        event_from_db.actual_date
-                        + timedelta(days=number_of_days_to_be_pushed)
+                    event_from_db.actual_date = event_from_db.actual_date + timedelta(
+                        days=number_of_days_to_be_pushed
                     )
                 elif event_from_db.anticipated_date:
                     event_from_db.anticipated_date = (
@@ -560,7 +557,7 @@ class EventService:
                 else current_event_index
             )
             cls._push_events(
-                phase_events[_current_event_index + 1 :],
+                phase_events[_current_event_index + 1:],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
@@ -728,13 +725,14 @@ class EventService:
         work_id: int,
         work_phase_id: int = None,
         event_categories: [EventCategoryEnum] = [],
-        scoped: bool = False
+        scoped: bool = False,
     ) -> [Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
         with Session(db.engine) as session:
             events_query = (
-            (session if scoped else db.session).query(Event)
+                (session if scoped else db.session)
+                .query(Event)
                 .join(
                     EventConfiguration,
                     Event.event_configuration_id == EventConfiguration.id,
