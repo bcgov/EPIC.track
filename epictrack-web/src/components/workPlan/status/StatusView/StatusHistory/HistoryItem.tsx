@@ -35,7 +35,7 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
     setSelectedHistoryIndex,
     setShowStatusForm,
     setStatus,
-    groups,
+    hasPermission,
   } = useContext(StatusContext);
   const { statuses } = useContext(WorkplanContext);
   const [statusHighlight, setStatusHighlight] = useState<number>(0);
@@ -85,23 +85,28 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
           >
             {status.id === selectedHistoryIndex ? (
               <>
-                <Box>{status.description}</Box>
+                <Box sx={{ whiteSpace: "pre-wrap" }}>{status.description}</Box>
                 <If
                   condition={
-                    groups.includes("Super User") &&
-                    statusHighlight === selectedHistoryIndex
+                    hasPermission() && statusHighlight === selectedHistoryIndex
                   }
                 >
                   <Then>
-                    <Box
+                    <Button
                       onClick={() => {
                         setShowStatusForm(true);
                         setStatus(status);
                       }}
-                      sx={{ padding: "12px 8px" }}
+                      sx={{
+                        padding: "12px 8px",
+                        gap: "8px",
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
                     >
                       <PencilEditIcon />
-                    </Box>
+                      Edit
+                    </Button>
                   </Then>
                 </If>
               </>

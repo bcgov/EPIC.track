@@ -7,3 +7,7 @@ export interface IssueForm {
   is_active: boolean;
   is_high_priority: boolean;
 }
+
+export interface CloneForm {
+  description: string;
+}

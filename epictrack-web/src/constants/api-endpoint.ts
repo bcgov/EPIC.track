@@ -30,6 +30,7 @@ const Endpoints = {
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
     CHECK_TEMPLATE_UPLOAD_STATUS: "works/work-phases/:work_phase_id",
     WORK_FIRST_NATION_NOTES: "works/:work_id/first-nation-notes",
+    WORK_NOTES: "works/:work_id/notes",
     WORK_FIRST_NATIONS: "works/:work_id/first-nations",
     DOWNLOAD_WORK_FIRST_NATIONS: "works/:work_id/first-nations/download",
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
@@ -38,7 +39,9 @@ const Endpoints = {
   WorkIssues: {
     ISSUES: "work/:work_id/issues",
     UPDATE_ISSUE: "work/:work_id/issues/:issue_id",
-    APPROVE_ISSUE: "work/:work_id/issues/:issue_id/approve",
+    APPROVE_ISSUE_UPDATE:
+      "work/:work_id/issues/:issue_id/update/:issue_update_id/approve",
+    CLONE_UPDATE: "work/:work_id/issues/:issue_id/issue_update",
   },
   WorkStatuses: {
     WORK_STATUSES: "work/:work_id/statuses",
