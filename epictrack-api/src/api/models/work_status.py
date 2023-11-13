@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import List
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, desc
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, desc
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned

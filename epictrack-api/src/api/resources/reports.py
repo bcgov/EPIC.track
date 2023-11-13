@@ -47,7 +47,6 @@ class EventCalendarReport(Resource):
         )
 
 
-
 @cors_preflight("GET")
 @API.route("/<string:report_type>", methods=["POST", "OPTIONS"])
 class Report(Resource):

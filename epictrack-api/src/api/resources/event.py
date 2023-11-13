@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Resource for Event endpoints."""
-from datetime import datetime
 from http import HTTPStatus
 
 from flask import jsonify, request
@@ -20,7 +19,6 @@ from flask_restx import Namespace, Resource, cors
 
 from api.schemas import request as req
 from api.schemas import response as res
-from api.schemas.event_calendar import EventCalendarSchema
 from api.services.event import EventService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
