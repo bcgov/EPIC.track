@@ -31,6 +31,10 @@ export const Routes: RouteType[] = [
         name: "30-60-90",
         path: "/reports/30-60-90",
       },
+      {
+        name: "Event Calendar",
+        path: "/reports/event-calendar",
+      },
     ],
   },
   {

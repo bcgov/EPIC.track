@@ -17,26 +17,19 @@ import functools
 from datetime import datetime, timedelta
 from typing import List
 
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, extract, func, or_
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    PRIMARY_CATEGORIES,
-    CalendarEvent,
-    Event,
-    EventCategoryEnum,
-    EventConfiguration,
-    EventTypeEnum,
-    Work,
-    WorkCalendarEvent,
-    WorkPhase,
-    WorkStateEnum,
-    db,
-)
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, Work,
+    WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
+from api.models.phase_code import PhaseCode
+from api.models.project import Project
+from api.models.work_type import WorkType
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.utils.datetime_helper import get_start_of_day
@@ -147,9 +140,7 @@ class EventService:
             event, event_old, current_work_phase
         )
         if (
-            event.actual_date
-            and event.event_configuration.event_position.value
-            == EventPositionEnum.END.value
+            event.actual_date and event.event_configuration.event_position.value == EventPositionEnum.END.value
         ):
             cls._complete_work_phase(current_work_phase)
         if (
@@ -204,8 +195,7 @@ class EventService:
                     if cls._find_event_date(event) >= current_work_phase.end_date:
                         end_event = next(
                             filter(
-                                lambda x: x.event_configuration.event_position.value
-                                == EventPositionEnum.END.value,
+                                lambda x: x.event_configuration.event_position.value == EventPositionEnum.END.value,
                                 phase_events,
                             )
                         )
@@ -437,7 +427,7 @@ class EventService:
             # if inserting: get the event index when we are in the current phase
             _current_event_index = -1 if each_work_phase.id != current_work_phase.id else current_event_index
             cls._push_events(
-                phase_events[_current_event_index + 1:],
+                phase_events[_current_event_index + 1 :],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
@@ -464,9 +454,8 @@ class EventService:
     def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
         """Anticipated date of end event cannot be changed"""
         if (
-            event.event_configuration.event_position.value
-            == EventPositionEnum.END.value
-            and (event_old.anticipated_date.date() - event.anticipated_date.date()).days
+            event.event_configuration.event_position.value == EventPositionEnum.END.value and
+            (event_old.anticipated_date.date() - event.anticipated_date.date()).days
             != 0
         ):
             raise UnprocessableEntityError(
@@ -514,12 +503,8 @@ class EventService:
                 phase_events, key=functools.cmp_to_key(cls.event_compare_func)
             )
             if (
-                event_index > 0
-                and not phase_events[event_index - 1].actual_date
-                and not phase_events[
-                    event_index - 1
-                ].event_configuration.event_position.value
-                == EventPositionEnum.END.value
+                event_index > 0 and not phase_events[event_index - 1].actual_date and
+                not phase_events[event_index - 1].event_configuration.event_position.value == EventPositionEnum.END.value
             ):
                 raise UnprocessableEntityError(
                     "Previous event should be completed to proceed"
@@ -730,3 +715,41 @@ class EventService:
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
             action_handler.apply(event, action_configuration.additional_params)
+
+    @classmethod
+    def find_events_by_date(cls, from_date: datetime) -> [Event]:
+        """Returns the future events based on given date.
+
+        To be used for event calendar.
+        """
+        events = (
+            db.session.query(CalendarEvent)
+            .filter(
+                extract(
+                    "YEAR", func.coalesce(CalendarEvent.actual_date, CalendarEvent.anticipated_date)
+                )
+                == from_date.year
+            )
+            .outerjoin(WorkCalendarEvent, WorkCalendarEvent.calendar_event_id == CalendarEvent.id)
+            .outerjoin(EventConfiguration, EventConfiguration.id == WorkCalendarEvent.event_configuration_id)
+            .outerjoin(WorkPhase, WorkPhase.id == EventConfiguration.work_phase_id)
+            .outerjoin(Work, Work.id == WorkPhase.work_id)
+            .outerjoin(Project, Project.id == Work.project_id)
+            .outerjoin(WorkType, WorkType.id == Work.work_type_id)
+            .outerjoin(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
+            .add_columns(
+                Project.name.label("project"),
+                Project.description.label("project_description"),
+                Project.address.label("project_address"),
+                Project.abbreviation.label("project_short_code"),
+                WorkPhase.name.label("phase"),
+                PhaseCode.color.label("color"),
+                WorkType.name.label("work_type"),
+                func.coalesce(CalendarEvent.actual_date, CalendarEvent.anticipated_date).label("start_date"),
+                CalendarEvent.number_of_days.label("duration"),
+                CalendarEvent.name.label("name"),
+                CalendarEvent.id.label("id")
+            )
+            .all()
+        )
+        return events

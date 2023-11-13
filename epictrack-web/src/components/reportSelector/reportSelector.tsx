@@ -9,6 +9,7 @@ import AnticipatedEAOSchedule from "../reports/eaReferral/AnticipatedEAOSchedule
 import ResourceForecast from "../reports/resourceForecast/ResourceForecast";
 import ThirtySixtyNinety from "../reports/30-60-90Report/ThirtySixtyNinety";
 import { ETPageContainer } from "../shared";
+import EventCalendar from "../eventCalendar/EventCalendar";
 
 export default function ReportSelector() {
   const [selectedReport, setSelectedReport] = useState<string>("none");
@@ -51,6 +52,7 @@ export default function ReportSelector() {
           {selectedReport === REPORT_TYPE.REPORT_30_60_90 && (
             <ThirtySixtyNinety />
           )}
+          {selectedReport === REPORT_TYPE.EVENT_CALENDAR && <EventCalendar />}
         </Grid>
       </ETPageContainer>
     </>

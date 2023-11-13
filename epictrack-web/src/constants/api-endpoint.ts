@@ -2,6 +2,7 @@ const Endpoints = {
   Reports: {
     GET_REPORT: "reports",
     GET_PDF_REPORT: "reports/file",
+    GET_EVENT_CALENDAR: "reports/event-calendar",
   },
   Staffs: {
     STAFFS: "staffs",

@@ -19,12 +19,33 @@ from io import BytesIO
 from flask import jsonify, send_file
 from flask_restx import Namespace, Resource, cors
 
+from api.schemas.event_calendar import EventCalendarSchema
 from api.services import ReportService
+from api.services.event import EventService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
 
 API = Namespace("reports", description="Reports")
+
+
+@cors_preflight("GET")
+@API.route("/event-calendar", methods=["GET", "OPTIONS"])
+class EventCalendarReport(Resource):
+    """Endpoint resource to return calendar events for event calendar"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return all calendar events."""
+        calendar_events = EventService.find_events_by_date(datetime.now())
+        return (
+            jsonify(EventCalendarSchema(many=True).dump(calendar_events)),
+            HTTPStatus.OK,
+        )
+
 
 
 @cors_preflight("GET")
