@@ -59,15 +59,12 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
-
         if not work_issues:
             raise ResourceNotFoundError("Work Issues not found")
-
         for description in description_data:
             new_update = WorkIssueUpdatesModel(description=description)
             new_update.work_issue_id = work_issues[0].id
             new_update.save()
-
         return WorkIssuesModel.find_by_id(issue_id)
 
     @classmethod

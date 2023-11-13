@@ -66,7 +66,8 @@ class IssueUpdateEdits(Resource):
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
-@API.route("/<int:issue_id>/update", methods=["POST"])
+@cors_preflight("POST")
+@API.route("/<int:issue_id>/issue_update", methods=["POST", "OPTIONS"])
 class WorkIssueUpdate(Resource):
     """Endpoint resource to manage updates for a specific issue."""
 
