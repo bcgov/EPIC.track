@@ -53,7 +53,8 @@ class Events(Resource):
     def post(work_phase_id):
         """Create a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-        event_response = EventService.create_event(request_json, work_phase_id)
+        args = req.MilestoneEventPushEventQueryParameterSchema().load(request.args)
+        event_response = EventService.create_event(request_json, work_phase_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
 
 
@@ -69,7 +70,8 @@ class Event(Resource):
     def put(event_id):
         """Endpoint to update a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
-        event_response = EventService.update_event(request_json, event_id)
+        args = req.MilestoneEventPushEventQueryParameterSchema().load(request.args)
+        event_response = EventService.update_event(request_json, event_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.OK
 
     @staticmethod
@@ -107,3 +109,21 @@ class MilestoneEvents(Resource):
         request_json = req.MilestoneEventBulkDeleteQueryParamSchema().load(request.args)
         result = EventService.bulk_delete_milestones(request_json["milestone_ids"])
         return result, HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/check-events", methods=["POST", "OPTIONS"])
+class ValidateWork(Resource):
+    """Endpoint resource to check the given event go past the phase end date"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Check for existing works."""
+        args = req.MilestoneEventCheckQueryParameterSchema().load(request.args)
+        request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        event_id = args.get("event_id")
+        result = EventService.check_event(request_json, event_id)
+        return res.EventDateChangePosibilityCheckResponseSchema().dump(result), HTTPStatus.OK

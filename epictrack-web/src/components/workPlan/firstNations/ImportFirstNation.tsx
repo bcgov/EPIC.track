@@ -10,10 +10,8 @@ import {
   FormControlLabel,
   Button,
 } from "@mui/material";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import { makeStyles } from "@mui/styles";
+import { FormProvider, useForm } from "react-hook-form";
 import { ListType } from "../../../models/code";
-import templateService from "../../../services/taskService/templateService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { showNotification } from "../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
@@ -22,32 +20,6 @@ import { Palette } from "../../../styles/theme";
 import projectService from "../../../services/projectService/projectService";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
-
-const useStyle = makeStyles({
-  templateContainer: {
-    padding: "1.5rem 1.5rem 1.5rem 2rem",
-    borderRight: `1px solid ${Palette.neutral.bg.dark}`,
-    height: "100%",
-    overflowY: "scroll",
-    "& ul": {
-      padding: 0,
-    },
-  },
-  templateItem: {
-    padding: "0.5rem 1rem",
-    color: Palette.neutral.dark,
-    cursor: "pointer",
-  },
-  taskContainer: {
-    padding: "1.5rem 2rem 1rem 1.5rem",
-    backgroundColor: Palette.neutral.bg.light,
-    height: "100%",
-    overflowY: "scroll",
-  },
-  deleteIcon: {
-    fill: "currentcolor",
-  },
-});
 
 interface ImportFirstNationsProps {
   onSave: (firstNationIds: number[]) => void;
@@ -67,7 +39,6 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
 
   const ctx = React.useContext(WorkplanContext);
   const taskContainerRef = React.useRef(null);
-  const classes = useStyle();
   React.useEffect(() => {
     getWorkTypes();
   }, [ctx.work, ctx.selectedWorkPhase]);
@@ -182,7 +153,19 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
           }}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
-          <Grid item xs={6} className={classes.templateContainer}>
+          <Grid
+            item
+            xs={6}
+            sx={{
+              padding: "1.5rem 1.5rem 1.5rem 2rem",
+              borderRight: `1px solid ${Palette.neutral.bg.dark}`,
+              height: "100%",
+              overflowY: "scroll",
+              "& ul": {
+                padding: 0,
+              },
+            }}
+          >
             <List>
               {workTypes.map((item, index) => (
                 <ListItemButton
@@ -217,7 +200,16 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
               ))}
             </List>
           </Grid>
-          <Grid item xs={6} className={classes.taskContainer}>
+          <Grid
+            item
+            xs={6}
+            sx={{
+              padding: "1.5rem 2rem 1rem 1.5rem",
+              backgroundColor: Palette.neutral.bg.light,
+              height: "100%",
+              overflowY: "scroll",
+            }}
+          >
             <Box
               sx={{ display: "flex", flexDirection: "column", height: "100%" }}
             >
@@ -300,7 +292,7 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
               >
                 <Button
                   variant="text"
-                  startIcon={<DeleteIcon className={classes.deleteIcon} />}
+                  startIcon={<DeleteIcon fill="currentcolor" />}
                   sx={{
                     color: Palette.primary.accent.main,
                     border: "2px solid transparent",

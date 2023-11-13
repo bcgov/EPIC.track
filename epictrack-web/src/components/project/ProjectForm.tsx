@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Button, Divider, Box } from "@mui/material";
+import { TextField, Grid, Box } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,7 +18,7 @@ import LockClosed from "../../assets/images/lock-closed.svg";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { Palette } from "../../styles/theme";
 
-const schema = yup.object<Project>().shape({
+const schema = yup.object().shape({
   name: yup
     .string()
     .required("Project Name is required")

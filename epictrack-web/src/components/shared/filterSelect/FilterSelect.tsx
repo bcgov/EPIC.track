@@ -8,24 +8,23 @@ import { Palette } from "../../../styles/theme";
 import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
-import { makeStyles } from "@mui/styles";
 import clsx from "clsx";
 
-const useStyle = makeStyles({
-  infoSelect: {
-    pointerEvents: "auto",
-    borderRadius: "4px",
-    "& > div:first-child": {
-      paddingRight: 0,
-    },
-    "&:hover": {
-      backgroundColor: Palette.neutral.bg.main,
-    },
-  },
-});
+// const useStyle = makeStyles({
+//   infoSelect: {
+//     pointerEvents: "auto",
+//     borderRadius: "4px",
+//     "& > div:first-child": {
+//       paddingRight: 0,
+//     },
+//     "&:hover": {
+//       backgroundColor: Palette.neutral.bg.main,
+//     },
+//   },
+// });
 
 const FilterSelect = (props: SelectProps) => {
-  const classes = useStyle();
+  // const classes = useStyle();
   const { name, isMulti } = props;
   const [options, setOptions] = React.useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = React.useState<any>();
@@ -242,12 +241,12 @@ const FilterSelect = (props: SelectProps) => {
       isClearable={false}
       menuPortalTarget={document.body}
       controlShouldRenderValue={props.controlShouldRenderValue}
-      className={clsx({
-        [classes.infoSelect]: props.info,
-      })}
-      classNames={{
-        control: () => (props.info ? classes.infoSelect : ""),
-      }}
+      // className={clsx({
+      //   [classes.infoSelect]: props.info,
+      // })}
+      // classNames={{
+      //   control: () => (props.info ? classes.infoSelect : ""),
+      // }}
     />
   );
 };

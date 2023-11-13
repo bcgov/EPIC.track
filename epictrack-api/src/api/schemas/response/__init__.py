@@ -14,7 +14,7 @@
 """Exposes all the response validation schemas"""
 from .act_section_response import ActSectionResponseSchema
 from .action_template_response import ActionTemplateResponseSchema
-from .event import EventResponseSchema
+from .event_response import EventResponseSchema, EventDateChangePosibilityCheckResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_template_response import EventTemplateResponseSchema
 from .indigenous_nation_response import IndigenousResponseNationSchema, WorkIndigenousNationResponseSchema
@@ -32,7 +32,6 @@ from .types_response import SubTypeResponseSchema, TypeResponseSchema
 from .user_group_response import UserGroupResponseSchema
 from .user_response import UserResponseSchema
 from .work_response import (
-    WorkPhaseResponseSchema, WorkPhaseTemplateAvailableResponse,
-    WorkPhaseAdditionalInfoResponseSchema,
-    WorkResourceResponseSchema, WorkResponseSchema, WorkStaffRoleReponseSchema,
-    WorkStatusResponseSchema, WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema)
+    WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema, WorkPhaseAdditionalInfoResponseSchema,
+    WorkPhaseResponseSchema, WorkPhaseTemplateAvailableResponse, WorkResourceResponseSchema, WorkResponseSchema,
+    WorkStaffRoleReponseSchema, WorkStatusResponseSchema)

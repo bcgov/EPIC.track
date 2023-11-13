@@ -1,8 +1,8 @@
 import React from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormControlLabel, Grid, Switch, TextField } from "@mui/material";
+import { FormControlLabel, Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Staff, StaffWorkRole } from "../../../models/staff";

@@ -12,11 +12,6 @@ const SingleDayPCPInput = ({ isFormFieldsLocked }: SingleDayPCPInputProps) => {
     unregister,
     formState: { errors },
   } = useFormContext();
-  React.useEffect(() => {
-    return () => {
-      // unregister("number_of_attendees");
-    };
-  }, []);
   return (
     <>
       <Grid item xs={12}>

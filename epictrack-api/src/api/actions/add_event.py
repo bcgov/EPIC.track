@@ -29,7 +29,7 @@ class AddEvent(ActionFactory):
                 "anticipated_date": source_event.actual_date + timedelta(days=params["start_at"]),
             }
         )
-        EventService.create_event(event_data, work_phase_id=work_phase_id)
+        EventService.create_event(event_data, work_phase_id=work_phase_id, push_events=True)
 
     def get_additional_params(self, params):
         """Returns additional parameter"""

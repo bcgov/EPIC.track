@@ -7,8 +7,7 @@ import {
   ListItemButton,
   ListItemText,
 } from "@mui/material";
-import { Controller, FormProvider, useForm } from "react-hook-form";
-import { makeStyles } from "@mui/styles";
+import { FormProvider, useForm } from "react-hook-form";
 import { ListType } from "../../../models/code";
 import templateService from "../../../services/taskService/templateService";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -16,29 +15,6 @@ import { showNotification } from "../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { ETCaption2, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-
-const useStyle = makeStyles({
-  templateContainer: {
-    padding: "1.5rem 1.5rem 1.5rem 2rem",
-    borderRight: `1px solid ${Palette.neutral.bg.dark}`,
-    height: "100%",
-    overflowY: "scroll",
-    "& ul": {
-      padding: 0,
-    },
-  },
-  templateItem: {
-    padding: "0.5rem 1rem",
-    color: Palette.neutral.dark,
-    cursor: "pointer",
-  },
-  taskContainer: {
-    padding: "1.5rem 2rem 1rem 1.5rem",
-    backgroundColor: Palette.neutral.bg.light,
-    height: "100%",
-    overflowY: "scroll",
-  },
-});
 
 interface ImportTaskEventsProps {
   onSave: (templateId: number) => void;
@@ -50,7 +26,6 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
   const [templateIndex, setTemplateIndex] = React.useState<number>(0);
   const ctx = React.useContext(WorkplanContext);
   const taskContainerRef = React.useRef(null);
-  const classes = useStyle();
   React.useEffect(() => {
     getTemplates();
   }, [ctx.work, ctx.selectedWorkPhase]);
@@ -128,7 +103,19 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
           }}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
-          <Grid item xs={6} className={classes.templateContainer}>
+          <Grid
+            item
+            xs={6}
+            sx={{
+              padding: "1.5rem 1.5rem 1.5rem 2rem",
+              borderRight: `1px solid ${Palette.neutral.bg.dark}`,
+              height: "100%",
+              overflowY: "scroll",
+              "& ul": {
+                padding: 0,
+              },
+            }}
+          >
             <List>
               {templates.map((item, index) => (
                 <ListItemButton
@@ -159,7 +146,16 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
               ))}
             </List>
           </Grid>
-          <Grid item xs={6} className={classes.taskContainer}>
+          <Grid
+            item
+            xs={6}
+            sx={{
+              padding: "1.5rem 2rem 1rem 1.5rem",
+              backgroundColor: Palette.neutral.bg.light,
+              height: "100%",
+              overflowY: "scroll",
+            }}
+          >
             {templates.length > 0 && tasks.length > 0 && (
               <>
                 <ETParagraph

@@ -22,12 +22,6 @@ const PCPInput = ({ isFormFieldsLocked }: PCPInputProps) => {
   const topicChangeHandler = (event: any) => {
     setTopicCount(event.target.value.length);
   };
-  React.useEffect(() => {
-    return () => {
-      // unregister("number_of_responses");
-      // unregister("topic");
-    };
-  }, []);
   return (
     <>
       <Grid item xs={6}>

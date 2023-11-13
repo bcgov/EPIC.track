@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Event Response response schema"""
-from marshmallow import EXCLUDE, fields
+from marshmallow import EXCLUDE, fields, Schema
 
 from api.models import Event
 from api.schemas.base import AutoSchemaBase
 from .event_configuration_response import EventConfigurationResponseSchema
+from .work_response import WorkPhaseResponseSchema
 
 
 class EventResponseSchema(
@@ -31,3 +32,22 @@ class EventResponseSchema(
         include_fk = True
         unknown = EXCLUDE
     event_configuration = fields.Nested(EventConfigurationResponseSchema(), dump_only=True)
+
+
+class EventDateChangePosibilityCheckResponseSchema(Schema):
+    """Schema to response the date check posibilty with the given event details"""
+
+    work_phase_to_be_exceeded = fields.Nested(WorkPhaseResponseSchema)
+    event = fields.Nested(EventResponseSchema)
+
+    phase_end_push_required = fields.Boolean(
+        metadata={"description": "Indicate if the end date of the phase will be pushed or not"}
+    )
+
+    subsequent_event_push_required = fields.Boolean(
+        metadata={"description": "Indicate if the subsequent events needs to be pushed"}
+    )
+
+    days_pushed = fields.Number(
+        metadata={"description": "Number of days to be pushed/pulled"}
+    )

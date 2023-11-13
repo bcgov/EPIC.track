@@ -29,12 +29,6 @@ const ExtensionSuspensionInput = (props: ExtensionSuspensionInputProps) => {
   React.useEffect(() => {
     getActSections();
   }, []);
-  React.useEffect(() => {
-    return () => {
-      // unregister("act_section_id");
-      // unregister("reason");
-    };
-  }, []);
   const getActSections = async () => {
     try {
       const result = await actSectionService.getActSectionsByEaAct(

@@ -11,38 +11,19 @@ import EventGrid from "../event";
 import { WorkplanContext } from "../WorkPlanContext";
 import BorderLinearProgress from "../../shared/progress/Progress";
 import Icons from "../../icons/index";
-import { makeStyles } from "@mui/styles";
 import { IconProps } from "../../icons/type";
 import { When } from "react-if";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
 const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
-const useStyles = makeStyles({
-  summaryBox: {
-    display: "flex",
-    gap: "0.5rem",
-    flexDirection: "column",
-    minHeight: "48px",
-  },
-  title: {
-    textTransform: "uppercase",
-    color: `${Palette.neutral.main}`,
-    letterSpacing: "0.39px !important",
-  },
-  content: {
-    minHeight: "1.5rem",
-    color: `${Palette.neutral.dark}`,
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  },
-  accordionIcon: {
-    fill: Palette.primary.main,
-    cursor: "pointer",
-  },
-});
-
+const summaryContentStyle: SxProps = {
+  minHeight: "1.5rem",
+  color: `${Palette.neutral.dark}`,
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+};
 interface SummaryItemProps {
   isTitleBold?: boolean;
   title: string;
@@ -53,15 +34,25 @@ interface SummaryItemProps {
   sx?: SxProps;
 }
 const SummaryItem = (props: SummaryItemProps) => {
-  const clasess = useStyles();
   return (
     <Box
-      className={clasess.summaryBox}
       sx={{
         ...props.sx,
+        display: "flex",
+        gap: "0.5rem",
+        flexDirection: "column",
+        minHeight: "48px",
       }}
     >
-      <ETCaption1 className={clasess.title}>{props.title}</ETCaption1>
+      <ETCaption1
+        sx={{
+          textTransform: "uppercase",
+          color: `${Palette.neutral.main}`,
+          letterSpacing: "0.39px !important",
+        }}
+      >
+        {props.title}
+      </ETCaption1>
       {props.children && props.children}
       {props.content && (
         <Tooltip
@@ -69,9 +60,12 @@ const SummaryItem = (props: SummaryItemProps) => {
           disableHoverListener={!props.enableTooltip}
         >
           <ETParagraph
-            className={clasess.content}
             bold={props.isTitleBold}
-            sx={{ color: `${Palette.neutral.dark}` }}
+            enableEllipsis={true}
+            sx={{
+              ...summaryContentStyle,
+              color: `${Palette.neutral.dark}`,
+            }}
           >
             {props.content}
           </ETParagraph>
@@ -84,8 +78,6 @@ const SummaryItem = (props: SummaryItemProps) => {
 const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
-  const classes = useStyles();
-  const clasess = useStyles();
   const isSelectedPhase = React.useMemo<boolean>(
     () =>
       phase.work_phase.phase.id === ctx.selectedWorkPhase?.work_phase.phase.id,
@@ -125,7 +117,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
         >
           <ETAccordionSummary
             expanded={expanded}
-            expandIcon={<ExpandIcon className={classes.accordionIcon} />}
+            expandIcon={<ExpandIcon fill={`${Palette.primary.main}`} />}
           >
             <Grid
               container
@@ -166,9 +158,9 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                       }}
                     >
                       <ETParagraph
-                        className={clasess.content}
                         bold={isSelectedPhase}
                         sx={{
+                          ...summaryContentStyle,
                           color:
                             phase.days_left < 0
                               ? Palette.secondary.dark

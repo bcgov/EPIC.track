@@ -1,7 +1,6 @@
 import React from "react";
 import { WorkplanContext } from "../WorkPlanContext";
-import { Box, Grid } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETSubhead } from "../../shared";
 import Icons from "../../icons/index";
@@ -9,56 +8,62 @@ import { IconProps } from "../../icons/type";
 
 const EditIcon: React.FC<IconProps> = Icons["EditIcon"];
 
-const useStyle = makeStyles({
-  infoBox: {
-    backgroundColor: Palette.neutral.bg.light,
-    padding: "1rem 1rem 1rem 1.5rem",
-  },
-  title: {
-    textTransform: "uppercase",
-    lineHeight: "1rem",
-    color: Palette.neutral.main,
-  },
-  value: {
-    lineHeight: "1.5rem",
-    color: Palette.neutral.dark,
-  },
-  iconBox: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-evenly",
-    cursor: "pointer",
-  },
-  icon: {
-    fill: Palette.primary.accent.main,
-  },
-  iconText: {
-    color: Palette.primary.accent.main,
-  },
-});
-
 export interface TeamInfoBoxProps {
   title: string;
   value: string | undefined;
   onEdit?: () => void;
 }
 const TeamInfoBox = (props: TeamInfoBoxProps) => {
-  const classes = useStyle();
   return (
     <Grid container sx={{ marginBottom: "1rem" }}>
-      <Grid item xs={12} className={classes.infoBox}>
+      <Grid
+        item
+        xs={12}
+        sx={{
+          backgroundColor: Palette.neutral.bg.light,
+          padding: "1rem 1rem 1rem 1.5rem",
+        }}
+      >
         <Grid container rowSpacing={1}>
           <Grid item xs={12}>
-            <ETCaption1 bold className={classes.title}>
+            <ETCaption1
+              bold
+              sx={{
+                textTransform: "uppercase",
+                lineHeight: "1rem",
+                color: Palette.neutral.main,
+              }}
+            >
               {props.title}
             </ETCaption1>
           </Grid>
           <Grid item xs={10}>
-            <ETSubhead className={classes.value}>{props.value}</ETSubhead>
+            <ETSubhead
+              sx={{
+                lineHeight: "1.5rem",
+                color: Palette.neutral.dark,
+              }}
+            >
+              {props.value}
+            </ETSubhead>
           </Grid>
-          <Grid item xs={2} className={classes.iconBox}>
-            <EditIcon className={classes.icon} />
-            <ETCaption2 bold className={classes.iconText}>
+          <Grid
+            item
+            xs={2}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-evenly",
+              cursor: "pointer",
+            }}
+          >
+            <EditIcon fill={Palette.primary.accent.main} />
+            <ETCaption2
+              bold
+              sx={{
+                color: Palette.primary.accent.main,
+              }}
+            >
               Edit
             </ETCaption2>
           </Grid>

@@ -14,6 +14,7 @@ import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
 import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlan from "../components/workPlan";
+import EventCalendar from "../components/eventCalendar/EventCalendar";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -41,6 +42,7 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/reports/resource-forecast" element={<ResourceForecast />} />
       <Route path="/reports/30-60-90" element={<ThirtySixtyNinety />} />
+      <Route path="/reports/event-calendar" element={<EventCalendar />} />
       <Route path="/templates" element={<TemplateList />} />
       <Route
         path="/list-management/first-nations"
