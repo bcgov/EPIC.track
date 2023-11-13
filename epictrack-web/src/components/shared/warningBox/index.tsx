@@ -8,7 +8,6 @@ import { WarningBoxProps } from "./type";
 
 const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationMediumIcon"];
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
-
 const WarningBox = (props?: WarningBoxProps) => {
   return (
     <Grid
