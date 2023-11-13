@@ -37,14 +37,14 @@ class WorkIssues(BaseModelVersioned):
     work_id = Column(ForeignKey('works.id'), nullable=False)
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
 
-    updates = relationship('WorkIssueUpdates', back_populates='work_issue', lazy='joined')
+    updates = relationship('WorkIssueUpdates', back_populates='work_issue', lazy='joined', order_by='desc(WorkIssueUpdates.id)')
 
     @classmethod
     def list_issues_for_work_id(cls, work_id) -> List[WorkIssues]:
-        """List all WorkIssues sorted by start_date, with approved issues first."""
+        """List all WorkIssues sorted by start_date."""
         query = (
             WorkIssues.query
             .filter(cls.work_id == work_id)
-            .order_by(cls.is_approved.desc(), cls.start_date)
+            .order_by(cls.start_date.desc())
         )
         return query.all()

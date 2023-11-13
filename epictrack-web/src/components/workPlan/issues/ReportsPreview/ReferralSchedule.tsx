@@ -20,8 +20,13 @@ export const ReferralSchedule = () => {
   );
 
   const activeApprovedIssues = issues.filter(
-    (issue) => Boolean(issue.is_approved) && issue.is_active
+    (issue) =>
+      issue.is_active && issue.updates.find((update) => update.is_approved)
   );
+
+  const issueUpdates = activeApprovedIssues
+    .map((issue) => issue.updates.find((update) => update.is_approved))
+    .filter((update) => Boolean(update));
 
   const latestIssue = activeApprovedIssues?.[0];
 
@@ -64,9 +69,9 @@ export const ReferralSchedule = () => {
             <If condition={activeApprovedIssues.length > 0}>
               <Then>
                 <Stack spacing={2} direction="column">
-                  {activeApprovedIssues.map((issue) => (
+                  {issueUpdates.map((issueUpdate) => (
                     <ETPreviewText color={Palette.neutral.dark}>
-                      {issue?.updates?.[issue.updates.length - 1]?.description}
+                      {issueUpdate?.description}
                     </ETPreviewText>
                   ))}
                 </Stack>

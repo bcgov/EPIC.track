@@ -78,9 +78,6 @@ const IssuesForm = () => {
   };
 
   const onSubmitHandler = async (data: IssueForm) => {
-    setShowIssuesForm(false);
-    setIssueToEdit(null);
-
     const {
       title,
       description,
@@ -104,6 +101,8 @@ const IssuesForm = () => {
     };
 
     saveIssue(dataToBeSubmitted);
+    setShowIssuesForm(false);
+    setIssueToEdit(null);
   };
 
   return (

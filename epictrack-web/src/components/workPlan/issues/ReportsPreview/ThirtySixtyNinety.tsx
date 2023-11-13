@@ -21,8 +21,14 @@ export const ThirtySixtyNinety = () => {
 
   const activeApprovedHighprioIssues = issues.filter(
     (issue) =>
-      Boolean(issue.is_approved) && issue.is_active && issue.is_high_priority
+      issue.is_active &&
+      issue.is_high_priority &&
+      issue.updates.find((update) => update.is_approved)
   );
+
+  const issueUpdates = activeApprovedHighprioIssues
+    .map((issue) => issue.updates.find((update) => update.is_approved))
+    .filter((update) => Boolean(update));
 
   const latestIssue = activeApprovedHighprioIssues?.[0];
 
@@ -62,12 +68,12 @@ export const ThirtySixtyNinety = () => {
               : ""}
           </ETCaption2>
           <ETPreviewBox>
-            <If condition={activeApprovedHighprioIssues.length > 0}>
+            <If condition={issueUpdates.length > 0}>
               <Then>
                 <Stack spacing={2} direction="column">
-                  {activeApprovedHighprioIssues.map((issue) => (
+                  {issueUpdates.map((issueUpdate) => (
                     <ETPreviewText color={Palette.neutral.dark}>
-                      {issue?.updates?.[issue.updates.length - 1]?.description}
+                      {issueUpdate?.description}
                     </ETPreviewText>
                   ))}
                 </Stack>

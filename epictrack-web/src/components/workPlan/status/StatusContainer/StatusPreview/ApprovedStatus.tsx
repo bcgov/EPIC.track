@@ -19,7 +19,10 @@ const ApprovedStatus = ({ statusForPreview }: StatusPreview) => {
         </ETCaption1>
       </Box>
       <ETPreviewBox>
-        <ETPreviewText color={Palette.neutral.dark}>
+        <ETPreviewText
+          color={Palette.neutral.dark}
+          sx={{ whiteSpace: "pre-wrap" }}
+        >
           {statusForPreview?.description}
         </ETPreviewText>
       </ETPreviewBox>

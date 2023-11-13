@@ -4,6 +4,7 @@ import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
+import { Work } from "../../models/work";
 
 class WorkService implements ServiceBase {
   async getAll() {
@@ -123,6 +124,14 @@ class WorkService implements ServiceBase {
       workId.toString()
     );
     return await http.PatchRequest(url, { notes });
+  }
+
+  async saveNotes(workId: number, notes: string, note_type: string) {
+    const url = Endpoints.Works.WORK_NOTES.replace(
+      ":work_id",
+      workId.toString()
+    );
+    return await http.PatchRequest<Work>(url, { notes, note_type });
   }
 
   async getWorkFirstNations(workId: number) {
