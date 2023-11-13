@@ -23,7 +23,7 @@ interface StatusContextProps {
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
   isCloning: boolean;
-  groups: Array<string>;
+  hasPermission: () => boolean;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -41,7 +41,7 @@ export const StatusContext = createContext<StatusContextProps>({
   setIsCloning: () => ({}),
   isCloning: false,
   workId: null,
-  groups: [],
+  hasPermission: () => false,
 });
 
 export const StatusProvider = ({
@@ -66,8 +66,16 @@ export const StatusProvider = ({
     setIsCloning(false);
   };
 
+  const hasPermission = () => {
+    const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
+    const allowed = groups.filter((group) => {
+      return groupsWithPermission.includes(group);
+    });
+    return Boolean(allowed.length);
+  };
+
   const isEditable = (is_approved: boolean) => {
-    return !is_approved || groups.includes("Super User");
+    return !is_approved || hasPermission();
   };
 
   const updateStatus = async (data: any, callback: () => any) => {
@@ -148,9 +156,9 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        hasPermission,
         setSelectedHistoryIndex,
         selectedHistoryIndex,
-        groups,
         isCloning,
         workId,
         setIsCloning,
