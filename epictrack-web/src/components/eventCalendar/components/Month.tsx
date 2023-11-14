@@ -13,6 +13,7 @@ const Month = ({
   hoveredEvent,
   setHoveredEvent,
   handleEventClick,
+  key,
 }: any) => {
   const start = month;
   const end = extendedMoment(month).endOf("month");
@@ -75,13 +76,16 @@ const Month = ({
     <ETParagraph
       style={{ gridColumn: "8 / 15", textAlign: "center" }}
     ></ETParagraph>,
-    monthDates.map((date: any) => (
-      <ETParagraph
+    monthDates.map((date: any, i: number) => (
+      <Box
         sx={{
-          ...(Boolean(date) && {
-            textAlign: "center",
-            "&:nth-child(1 of $day)": {
-              borderLeft: "1px solid #ccd6eb",
+          ...(!date && {
+            gridRow: `span ${numTasks + 1}`,
+            height: "100%",
+            backgroundColor: "#d2d8e5",
+          }),
+          ...(date && {
+            [`&:nth-child(${3 + i})`]: {
               "&::after": {
                 content: '" "',
                 height: "1px",
@@ -95,16 +99,19 @@ const Month = ({
               },
             },
           }),
-          ...(!Boolean(date) && {
-            height: "100%",
-            backgroundColor: "#d2d8e5",
-          }),
         }}
-        style={!date ? { gridRow: `span ${numTasks + 1}` } : {}}
-        key={date}
       >
-        {date && date.format("D")}
-      </ETParagraph>
+        <ETParagraph
+          sx={{
+            ...(Boolean(date) && {
+              textAlign: "center",
+            }),
+          }}
+          key={`day-${i}`}
+        >
+          {date && date.format("D")}
+        </ETParagraph>
+      </Box>
     )),
   ];
 
@@ -113,7 +120,7 @@ const Month = ({
       <ETParagraph
         sx={{
           fontWeight: "bold",
-          fontSize: "1.5rem",
+          fontSize: "1rem",
           "&::after": {
             content: '" "',
             height: "1px",
@@ -151,13 +158,19 @@ const Month = ({
       };
       return (
         <Box
-          key={event.id}
+          key={`event-${event.id}`}
           sx={{
+            overflow: "hidden",
+            borderRadius: "5px",
+            cursor: "pointer",
+            transition: "opacity 250ms ease-in-out",
+            border: "1px solid #ccd6eb",
+            wordWrap: "normal",
+            maxHeight: "100%",
             ...(hoveredEvent === event.id && {
               zIndex: "1000 !important",
-              textIndent: "0",
+              // textIndent: "0",
               boxShadow: "3px 3px #6863632b",
-              overflow: "hidden",
             }),
           }}
           style={style}
@@ -194,7 +207,7 @@ const Month = ({
 
         return (
           <>
-            <Box style={style} key={projectName}>
+            <Box style={style} key={`${projectName}-grid`}>
               {renderEvents(projectData, projectStart)}
             </Box>
           </>
@@ -243,9 +256,9 @@ const Month = ({
         justifyContent: "center",
         alignItems: "center",
         "&:not(:last-child)": { borderBottom: "none" },
-        "& $day:nth-child(1 of $day)": { borderLeft: "1px solid #ccd6eb" },
       }}
       style={style}
+      key={key}
     >
       <Box
         style={style}
