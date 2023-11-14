@@ -16,7 +16,7 @@ export const ThirtySixtyNinety = () => {
   const { work, workPhases, issues } = React.useContext(WorkplanContext);
 
   const currentWorkPhase = workPhases.find(
-    (workPhase) => workPhase.work_phase.phase.id === work?.current_phase_id
+    (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id
   );
 
   const activeApprovedHighprioIssues = issues.filter(

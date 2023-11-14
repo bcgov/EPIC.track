@@ -439,9 +439,9 @@ class EventService:
         if current_work_phase_index == len(all_work_phases) - 1:
             work.work_state = WorkStateEnum.COMPLETED
         else:
-            work.current_phase_id = all_work_phases[
+            work.current_work_phase_id = all_work_phases[
                 current_work_phase_index + 1
-            ].phase.id
+            ].id
         work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
@@ -814,6 +814,7 @@ class EventService:
             db.session.query(ActionConfiguration)
             .join(Action, Action.id == ActionConfiguration.action_id)
             .filter(ActionConfiguration.outcome_configuration_id == outcome_id)
+            .order_by(ActionConfiguration.sort_order)
             .all()
         )
         for action_configuration in action_configurations:
