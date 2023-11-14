@@ -16,13 +16,6 @@ const StatusView = () => {
     setShowStatusForm(true);
   };
 
-  const hasHistory = () => {
-    const approvedStatuses: Status[] = statuses.filter((status: Status) => {
-      return status.is_approved;
-    });
-    return approvedStatuses?.length > 1; // No history if only 1 status is approved
-  };
-
   return (
     <>
       {statuses.length === 0 && (
@@ -38,7 +31,7 @@ const StatusView = () => {
       )}
       <Box sx={{ display: "flex", gap: "24px" }}>
         {statuses.length > 0 && <RecentStatus />}
-        {hasHistory() && <StatusHistory />}
+        {statuses.length > 1 && <StatusHistory />}
       </Box>
     </>
   );
