@@ -16,10 +16,9 @@ import copy
 import functools
 from datetime import datetime, timedelta
 from typing import List
-from sqlalchemy.orm import Session
 
-from sqlalchemy import and_, or_, extract, func
-from sqlalchemy.orm import joinedload
+from sqlalchemy import and_, extract, func, or_
+from sqlalchemy.orm import Session, joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
@@ -156,10 +155,8 @@ class EventService:
         """Validate the existing event to see which phase end date does it cause this event or any other event to go"""
         result = {"phase_end_push_required": False}
         legislated_phase_end_push_can_happen = (
-            event.event_configuration.event_position.value
-            == EventPositionEnum.START.value
-            or event.event_configuration.event_category_id
-            in [
+            event.event_configuration.event_position.value == EventPositionEnum.START.value or
+            event.event_configuration.event_category_id in [
                 EventCategoryEnum.EXTENSION.value,
                 EventCategoryEnum.SUSPENSION.value,
             ]
@@ -184,8 +181,7 @@ class EventService:
                 if cls._find_event_date(event) >= current_work_phase.end_date:
                     end_event = next(
                         filter(
-                            lambda x: x.event_configuration.event_position.value
-                            == EventPositionEnum.END.value,
+                            lambda x: x.event_configuration.event_position.value == EventPositionEnum.END.value,
                             phase_events,
                         )
                     )
@@ -208,12 +204,10 @@ class EventService:
                             )
                         elif each_event.anticipated_date:
                             each_event.anticipated_date = (
-                                each_event.anticipated_date
-                                + timedelta(days=number_of_days_to_be_pushed)
+                                each_event.anticipated_date + timedelta(days=number_of_days_to_be_pushed)
                             )
                     days_diff = (
-                        work_phase.end_date.date()
-                        - cls._find_event_date(each_event).date()
+                        work_phase.end_date.date() - cls._find_event_date(each_event).date()
                     ).days
                     if days_diff < 0:
                         result["phase_end_push_required"] = True
@@ -503,8 +497,7 @@ class EventService:
                     )
                 elif event_from_db.anticipated_date:
                     event_from_db.anticipated_date = (
-                        event_from_db.anticipated_date
-                        + timedelta(days=number_of_days_to_be_pushed)
+                        event_from_db.anticipated_date + timedelta(days=number_of_days_to_be_pushed)
                     )
                 event_from_db.update(
                     event_from_db.as_dict(recursive=False), commit=False
