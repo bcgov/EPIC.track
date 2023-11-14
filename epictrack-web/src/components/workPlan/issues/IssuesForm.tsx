@@ -6,31 +6,40 @@ import { Box, FormControlLabel, Grid, Stack, Tooltip } from "@mui/material";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 import { ETFormLabelWithCharacterLimit, ETParagraph } from "../../shared";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { IssuesContext } from "./IssuesContext";
+import { IssuesContext, LASTEST_ISSUE_UPDATE_INDEX } from "./IssuesContext";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 import { IssueForm } from "./types";
-import { is } from "immutable";
+import moment from "moment";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
   description: yup.string().required("Description is required"),
+  description_id: yup.number().nullable(),
   is_active: yup.boolean(),
   is_high_priority: yup.boolean(),
   start_date: yup.string().required("Start date is required"),
-  expected_resolution_date: yup.string(),
+  expected_resolution_date: yup.string().nullable(),
 });
+
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
 const IssuesForm = () => {
-  const { setShowIssuesForm, issueToEdit, addIssue } =
-    React.useContext(IssuesContext);
+  const {
+    setShowIssuesForm,
+    issueToEdit,
+    addIssue,
+    setIssueToEdit,
+    updateIssue,
+  } = React.useContext(IssuesContext);
 
   const methods = useForm<IssueForm>({
     resolver: yupResolver(schema),
     defaultValues: {
       title: "",
       description: "",
+      description_id: null,
       is_active: true,
       is_high_priority: false,
       start_date: "",
@@ -43,11 +52,11 @@ const IssuesForm = () => {
 
   useEffect(() => {
     if (issueToEdit) {
-      const latestUpdate =
-        issueToEdit.updates?.[issueToEdit.updates.length - 1];
+      const latestUpdate = issueToEdit.updates?.[LASTEST_ISSUE_UPDATE_INDEX];
       reset({
         title: issueToEdit.title,
         description: latestUpdate?.description,
+        description_id: latestUpdate?.id,
         is_active: issueToEdit.is_active,
         is_high_priority: issueToEdit.is_high_priority,
         start_date: issueToEdit.start_date,
@@ -61,25 +70,39 @@ const IssuesForm = () => {
   const watchedDescription = watch("description");
   const descriptionCharacterLimit = 250;
 
+  const saveIssue = (issueForm: IssueForm) => {
+    if (issueToEdit) {
+      return updateIssue(issueForm);
+    }
+    return addIssue(issueForm);
+  };
+
   const onSubmitHandler = async (data: IssueForm) => {
-    setShowIssuesForm(false);
     const {
       title,
       description,
+      description_id,
       start_date,
       expected_resolution_date,
       is_active,
       is_high_priority,
     } = await schema.validate(data);
 
-    addIssue({
+    const dataToBeSubmitted = {
       title,
       description,
-      start_date,
-      expected_resolution_date: expected_resolution_date || "",
+      description_id: description_id || undefined,
+      start_date: moment(start_date).format(),
+      expected_resolution_date: expected_resolution_date
+        ? moment(expected_resolution_date).format()
+        : undefined,
       is_active: Boolean(is_active),
       is_high_priority: Boolean(is_high_priority),
-    });
+    };
+
+    saveIssue(dataToBeSubmitted);
+    setShowIssuesForm(false);
+    setIssueToEdit(null);
   };
 
   return (
@@ -124,6 +147,8 @@ const IssuesForm = () => {
             inputProps={{
               maxLength: descriptionCharacterLimit,
             }}
+            multiline
+            rows={4}
           />
         </Grid>
         <Grid item xs={12}>
@@ -158,24 +183,11 @@ const IssuesForm = () => {
         </Grid>
         <Grid item xs={6}>
           <ETParagraph bold>Start Date</ETParagraph>
-          <ControlledTextField
-            name="start_date"
-            fullWidth
-            size="small"
-            type="date"
-            onChange={(e) => {
-              console.log(e.target.value);
-            }}
-          />
+          <ControlledDatePicker name="start_date" />
         </Grid>
         <Grid item xs={6}>
           <ETParagraph bold>Expected Resolution Date</ETParagraph>
-          <ControlledTextField
-            name="expected_resolution_date"
-            fullWidth
-            size="small"
-            type="date"
-          />
+          <ControlledDatePicker name="expected_resolution_date" />
         </Grid>
       </Grid>
     </FormProvider>

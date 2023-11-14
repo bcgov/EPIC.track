@@ -2,6 +2,7 @@ import { EVENT_TYPE } from "../components/workPlan/phase/type";
 import EventConfiguration from "./eventConfiguration";
 import { Staff } from "./staff";
 import { EVENT_STATUS } from "./taskEvent";
+import { WorkPhase } from "./work";
 
 export interface EventsGridModel {
   start_date: string;
@@ -49,6 +50,13 @@ export interface Assignee {
   task_event_id: number;
   assignee_id: number;
   assignee: Staff;
+}
+export interface MilestoneEventDateCheck {
+  work_phase_to_be_exceeded: WorkPhase;
+  event: MilestoneEvent;
+  phase_end_push_required: boolean;
+  subsequent_event_push_required: boolean;
+  days_pushed: number;
 }
 export enum EventCategory {
   MILESTONE = 1,

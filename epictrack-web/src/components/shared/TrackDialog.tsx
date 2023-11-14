@@ -8,7 +8,6 @@ import {
   DialogContentText,
   DialogProps,
   IconButton,
-  SxProps,
 } from "@mui/material";
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";

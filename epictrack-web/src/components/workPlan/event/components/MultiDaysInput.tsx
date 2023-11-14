@@ -16,15 +16,11 @@ const MultiDaysInput = ({
   isFormFieldsLocked,
 }: MultiDaysInputProps) => {
   const {
-    unregister,
     register,
     formState: { errors },
   } = useFormContext();
   React.useEffect(() => {
     onChangeDay();
-    return () => {
-      // unregister("number_of_days");
-    };
   }, []);
   return (
     <>

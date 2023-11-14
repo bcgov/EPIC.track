@@ -49,6 +49,8 @@ class Work(BaseModelVersioned):
     project_tracking_number = Column(String(255), nullable=True, default=None)
     work_tracking_number = Column(String(255), nullable=True, default=None)
     first_nation_notes = Column(String)
+    status_notes = Column(Text)
+    issue_notes = Column(Text)
 
     start_date = Column(DateTime(timezone=True))
     anticipated_decision_date = Column(DateTime(timezone=True))

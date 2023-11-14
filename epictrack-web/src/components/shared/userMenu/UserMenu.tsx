@@ -1,37 +1,33 @@
 import React from "react";
-import { Avatar, Box, Menu, PopoverOrigin, Tooltip } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import {
+  Avatar,
+  Box,
+  Menu,
+  PopoverOrigin,
+  SxProps,
+  Tooltip,
+} from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption2 } from "..";
 import { UserMenuProps } from "./type";
 import CopyButton from "../CopyButton";
 
-const useStyles = makeStyles({
-  menuItemWrapper: {
-    display: "flex",
-    gap: "8px",
-    padding: "1rem",
-  },
-  menuItem: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  contactInfo: {
-    display: "flex",
-    gap: "1.5rem",
-    alignItems: "center",
-  },
-  avatar: {
-    fontSize: "1rem",
-    lineHeight: "1.3rem",
-    fontWeight: 700,
-    width: "2rem",
-    height: "2rem",
-  },
-});
+const menuItemWrapper: SxProps = {
+  display: "flex",
+  gap: "8px",
+  padding: "1rem",
+};
+const menuItem: SxProps = {
+  display: "flex",
+  flexDirection: "column",
+};
+const contactInfo: SxProps = {
+  display: "flex",
+  gap: "1.5rem",
+  alignItems: "center",
+};
 
 const UserMenu = (props: UserMenuProps) => {
-  const classes = useStyles();
   const {
     anchorEl,
     onClose,
@@ -84,33 +80,52 @@ const UserMenu = (props: UserMenuProps) => {
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box
           sx={{
+            ...menuItemWrapper,
             bgcolor: Palette.neutral.bg.light,
             borderBottom: `1px solid ${Palette.neutral.bg.dark}`,
             alignItems: "center",
           }}
-          className={classes.menuItemWrapper}
         >
           <Avatar
             sx={{
               bgcolor: Palette.primary.main,
               color: Palette.white,
+              fontSize: "1rem",
+              lineHeight: "1.3rem",
+              fontWeight: 700,
+              width: "2rem",
+              height: "2rem",
             }}
-            className={classes.avatar}
           >
             <ETCaption2 bold>{`${firstName[0]}${lastName[0]}`}</ETCaption2>
           </Avatar>
-          <Box sx={{ gap: "8px" }} className={classes.menuItem}>
+          <Box
+            sx={{
+              ...menuItem,
+              gap: "8px",
+            }}
+          >
             <ETCaption2 bold>{`${firstName} ${lastName}`}</ETCaption2>
             <ETCaption2>{position}</ETCaption2>
           </Box>
         </Box>
         <Box
-          sx={{ flexDirection: "column" }}
-          className={classes.menuItemWrapper}
+          sx={{
+            ...menuItemWrapper,
+            flexDirection: "column",
+          }}
         >
           <ETCaption2 bold>Contact</ETCaption2>
-          <Box className={classes.menuItem}>
-            <Box className={classes.contactInfo}>
+          <Box
+            sx={{
+              ...menuItem,
+            }}
+          >
+            <Box
+              sx={{
+                ...contactInfo,
+              }}
+            >
               <ETCaption2
                 color={Palette.primary.accent.main}
                 sx={{ flexGrow: 1 }}
@@ -121,7 +136,11 @@ const UserMenu = (props: UserMenuProps) => {
               <CopyButton copyText={email} />
             </Box>
             {phone && (
-              <Box className={classes.contactInfo}>
+              <Box
+                sx={{
+                  ...contactInfo,
+                }}
+              >
                 <ETCaption2
                   color={Palette.primary.accent.main}
                   sx={{ flexGrow: 1 }}

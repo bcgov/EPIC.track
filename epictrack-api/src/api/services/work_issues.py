@@ -14,8 +14,8 @@
 """Service to manage Work status."""
 from typing import Dict, List
 
-from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
 from api.exceptions import ResourceNotFoundError
+from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
 from api.models import WorkIssues as WorkIssuesModel
 from api.utils import TokenInfo
 
@@ -28,7 +28,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     @classmethod
     def find_all_work_issues(cls, work_id):
         """Find all issues related to a work"""
-        work_issues = WorkIssuesModel.find_by_params({"work_id": work_id})
+        work_issues = WorkIssuesModel.list_issues_for_work_id(work_id)
         return work_issues
 
     @classmethod
@@ -59,29 +59,29 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
-
         if not work_issues:
             raise ResourceNotFoundError("Work Issues not found")
-
         for description in description_data:
             new_update = WorkIssueUpdatesModel(description=description)
             new_update.work_issue_id = work_issues[0].id
             new_update.save()
-
         return WorkIssuesModel.find_by_id(issue_id)
 
     @classmethod
-    def approve_work_issues(cls, work_issues):
+    def approve_work_issues(cls, issue_id, update_id):
         """Approve a work status."""
-        if work_issues.is_approved:
-            return work_issues
+        results = WorkIssueUpdatesModel.find_by_params({"id": update_id, "work_issue_id": issue_id})
+        if not results:
+            raise ResourceNotFoundError("Work issue Description doesnt exist")
 
-        work_issues.is_approved = True
-        work_issues.approved_by = TokenInfo.get_username()
+        work_issue_update: WorkIssueUpdatesModel = results[0]
 
-        work_issues.save()
+        work_issue_update.is_approved = True
+        work_issue_update.approved_by = TokenInfo.get_username()
 
-        return work_issues
+        work_issue_update.save()
+
+        return work_issue_update
 
     @classmethod
     def edit_issue_update(cls, work_id, issue_id, issue_data):

@@ -4,6 +4,8 @@ export interface WorkIssueUpdate {
   work_issue_id: number;
   is_active: boolean;
   is_deleted: boolean;
+  approved_by: string;
+  is_approved: boolean;
 }
 
 export interface WorkIssue {
@@ -15,7 +17,6 @@ export interface WorkIssue {
   is_high_priority: boolean;
   work_id: number;
   is_deleted: boolean;
-  approved_by: string;
   created_by: string;
   created_at: string;
   updated_by: string;

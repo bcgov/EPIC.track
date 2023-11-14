@@ -7,7 +7,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { makeStyles } from "@mui/styles";
 
 import React from "react";
 import { styled } from "@mui/system";
@@ -55,35 +54,7 @@ const IButton = styled(IconButton)({
     },
   },
 });
-
-const useStyles = makeStyles({
-  userProfileWrapper: {
-    display: "flex",
-    alignItems: "center",
-    gap: ".5rem",
-    flex: "1 0 0",
-    "&:hover": {
-      "& $avatar": {
-        backgroundColor: Palette.primary.main,
-        color: Palette.white,
-      },
-    },
-  },
-  avatar: {
-    backgroundColor: Palette.neutral.bg.main,
-    color: Palette.neutral.accent.dark,
-    fontSize: "1rem",
-    lineHeight: "1.3rem",
-    fontWeight: 700,
-    width: "2rem",
-    height: "2rem",
-  },
-  menu: {
-    marginTop: ".5rem",
-  },
-});
 const FirstNationList = () => {
-  const classes = useStyles();
   const [workFirstNationId, setWorkFirstNationId] = React.useState<
     number | undefined
   >();
@@ -215,9 +186,31 @@ const FirstNationList = () => {
           const user = row.original.indigenous_nation.relationship_holder;
           if (user === undefined || user === null) return <></>;
           return (
-            <Box className={classes.userProfileWrapper} sx={{ height: "100%" }}>
+            <Box
+              sx={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: ".5rem",
+                flex: "1 0 0",
+                "&:hover": {
+                  "& $avatar": {
+                    backgroundColor: Palette.primary.main,
+                    color: Palette.white,
+                  },
+                },
+              }}
+            >
               <Avatar
-                className={classes.avatar}
+                sx={{
+                  backgroundColor: Palette.neutral.bg.main,
+                  color: Palette.neutral.accent.dark,
+                  fontSize: "1rem",
+                  lineHeight: "1.3rem",
+                  fontWeight: 700,
+                  width: "2rem",
+                  height: "2rem",
+                }}
                 onMouseEnter={(event) => {
                   event.stopPropagation();
                   event.preventDefault();

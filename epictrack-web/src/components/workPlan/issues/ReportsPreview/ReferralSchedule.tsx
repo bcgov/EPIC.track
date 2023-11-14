@@ -9,13 +9,27 @@ import {
 import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
 import { WorkplanContext } from "../../WorkPlanContext";
+import { Else, If, Then } from "react-if";
+import moment from "moment";
 
 export const ReferralSchedule = () => {
-  const { work, workPhases } = React.useContext(WorkplanContext);
+  const { work, workPhases, issues } = React.useContext(WorkplanContext);
 
   const currentWorkPhase = workPhases.find(
     (workPhase) => workPhase.work_phase.phase.id === work?.current_phase_id
   );
+
+  const activeApprovedIssues = issues.filter(
+    (issue) =>
+      issue.is_active && issue.updates.find((update) => update.is_approved)
+  );
+
+  const issueUpdates = activeApprovedIssues
+    .map((issue) => issue.updates.find((update) => update.is_approved))
+    .filter((update) => Boolean(update));
+
+  const latestIssue = activeApprovedIssues?.[0];
+
   return (
     <GrayBox>
       <Grid container spacing={1}>
@@ -46,12 +60,28 @@ export const ReferralSchedule = () => {
 
         <Grid item xs={12}>
           <ETCaption2 bold mb={"0.5em"}>
-            Issues
+            Issues{" "}
+            {latestIssue?.updated_at
+              ? `(${moment(latestIssue?.updated_at).format("MMM.DD YYYY")})`
+              : ""}
           </ETCaption2>
           <ETPreviewBox>
-            <ETPreviewText color={Palette.neutral.light}>
-              Your Issues will appear here.
-            </ETPreviewText>
+            <If condition={activeApprovedIssues.length > 0}>
+              <Then>
+                <Stack spacing={2} direction="column">
+                  {issueUpdates.map((issueUpdate) => (
+                    <ETPreviewText color={Palette.neutral.dark}>
+                      {issueUpdate?.description}
+                    </ETPreviewText>
+                  ))}
+                </Stack>
+              </Then>
+              <Else>
+                <ETPreviewText color={Palette.neutral.light}>
+                  Your Issues will appear here.
+                </ETPreviewText>
+              </Else>
+            </If>
           </ETPreviewBox>
         </Grid>
       </Grid>

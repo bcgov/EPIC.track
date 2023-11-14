@@ -6,10 +6,10 @@ import {
   Grid,
   SxProps,
   Tooltip,
-  FormLabelTypeMap,
   FormLabelOwnProps,
   FormLabelBaseProps,
   Box,
+  styled,
 } from "@mui/material";
 import {
   MET_Header_Font_Family,
@@ -17,23 +17,21 @@ import {
   MET_Header_Font_Weight_Regular,
 } from "../../styles/constants";
 import { useAppSelector } from "../../hooks";
-import clsx from "clsx";
 import { Link, LinkProps, Path } from "react-router-dom";
 import { Palette } from "../../styles/theme";
-import { makeStyles, styled } from "@mui/styles";
 
 interface HeaderProps {
-  sx?: SxProps;
+  sx?: any;
   color?: string;
   bold?: boolean;
   children?: React.ReactNode | string;
   [prop: string]: unknown;
+  enableTooltip?: boolean;
+  enableEllipsis?: boolean;
 }
 
 interface LinkHeaderProps extends HeaderProps {
   to: string | Partial<Path>;
-  enableTooltip?: boolean;
-  enableEllipsis?: boolean;
   onClick?: (eventArg?: any) => void;
 }
 
@@ -49,13 +47,13 @@ type FormLabelWithCharacterCountProps = {
 } & FormLabelBaseProps &
   FormLabelOwnProps;
 
-const useStyle = makeStyles({
+const useStyle = {
   textEllipsis: {
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     overflow: "hidden",
   },
-});
+};
 export const ETPageContainer = (props: PageContainerProps) => {
   const state = useAppSelector((state) => state.uiState);
   return (
@@ -178,7 +176,7 @@ export const ETParagraph = React.forwardRef(
     { bold, color, children, sx, ...rest }: HeaderProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
-    const classes = useStyle();
+    // const classes = useStyle();
     return (
       <div ref={ref} {...rest}>
         <Tooltip
@@ -188,18 +186,19 @@ export const ETParagraph = React.forwardRef(
           <Typography
             color={color}
             sx={{
-              ...sx,
               fontSize: "1rem",
               lineHeight: "1.5rem",
               fontWeight: bold
                 ? MET_Header_Font_Weight_Bold
                 : MET_Header_Font_Weight_Regular,
               fontFamily: MET_Header_Font_Family,
+              ...sx,
+              ...(rest.enableEllipsis && useStyle.textEllipsis),
             }}
             variant="body1"
-            className={clsx({
-              [classes.textEllipsis]: rest.enableEllipsis,
-            })}
+            // className={clsx({
+            //   [classes.textEllipsis]: rest.enableEllipsis,
+            // })}
           >
             {children}
           </Typography>
@@ -268,7 +267,6 @@ export const ETGridTitle = ({
   sx,
   ...rest
 }: LinkHeaderProps) => {
-  const classes = useStyle();
   return (
     <ETLink onClick={rest.onClick} {...rest}>
       <Tooltip
@@ -278,9 +276,9 @@ export const ETGridTitle = ({
         <ETParagraph
           bold={bold}
           {...rest}
-          className={clsx({
-            [classes.textEllipsis]: rest.enableEllipsis,
-          })}
+          sx={{
+            ...(rest.enableEllipsis && useStyle.textEllipsis),
+          }}
           color={Palette.primary.accent.main}
         >
           {children}
@@ -376,6 +374,7 @@ export const ETFormLabelWithCharacterLimit = (
 export const ETLink = (props: LinkProps) => (
   <Link
     style={{
+      ...props.style,
       color: Palette.primary.accent.main,
       textDecoration: "none",
     }}

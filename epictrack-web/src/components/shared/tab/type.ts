@@ -14,6 +14,7 @@ export interface TabPanelProps {
   index: number;
   className?: string;
   value?: any;
+  sx?: SxProps;
 }
 
 export default ETTabProps;

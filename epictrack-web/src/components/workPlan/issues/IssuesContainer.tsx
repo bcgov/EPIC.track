@@ -2,18 +2,14 @@ import React from "react";
 import { Grid } from "@mui/material";
 import { ETHeading3 } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import { makeStyles } from "@mui/styles";
 import { ETTab, ETTabs } from "../../shared/tab/Tab";
 import TabPanel from "../../shared/tab/TabPanel";
 import IssuesView from "./IssuesView";
 import { ReportsPreview } from "./ReportsPreview";
 import { Notes } from "./Notes";
-import { WorkplanTabStyle } from "../common/styles";
-
-const useStyle = makeStyles(WorkplanTabStyle);
+import { titleStyle, tabStyle, tabPanelStyle } from "../common/styles";
 
 const IssuesContainer = () => {
-  const classes = useStyle();
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
 
   const handleTabSelected = (_: React.SyntheticEvent, index: number) => {
@@ -23,7 +19,12 @@ const IssuesContainer = () => {
   return (
     <Grid container columnSpacing={1.5} marginBottom={"2em"}>
       <Grid item xs={8}>
-        <ETHeading3 className={classes.title} color={Palette.primary.main}>
+        <ETHeading3
+          sx={{
+            ...titleStyle,
+          }}
+          color={Palette.primary.main}
+        >
           Issues
         </ETHeading3>
       </Grid>
@@ -40,11 +41,16 @@ const IssuesContainer = () => {
           <ETTab
             sx={{
               paddingLeft: 0,
+              ...tabStyle,
             }}
             label="Reports Preview"
-            className={classes.tab}
           />
-          <ETTab label="Notes" className={classes.tab} />
+          <ETTab
+            label="Notes"
+            sx={{
+              ...tabStyle,
+            }}
+          />
         </ETTabs>
       </Grid>
       <Grid
@@ -66,14 +72,18 @@ const IssuesContainer = () => {
         <TabPanel
           index={0}
           value={selectedTabIndex}
-          className={classes.tabPanel}
+          sx={{
+            ...tabPanelStyle,
+          }}
         >
           <ReportsPreview />
         </TabPanel>
         <TabPanel
           index={1}
           value={selectedTabIndex}
-          className={classes.tabPanel}
+          sx={{
+            ...tabPanelStyle,
+          }}
         >
           <Notes />
         </TabPanel>

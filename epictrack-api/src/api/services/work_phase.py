@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work phases."""
-import functools
 import datetime
+import functools
 from datetime import timezone
+
 from api.models import PhaseCode, WorkPhase, db
-from api.schemas.work_v2 import WorkPhaseSchema
-from api.services.task_template import TaskTemplateService
-from api.services.event import EventService
 from api.models.event_type import EventTypeEnum
+from api.schemas.work_v2 import WorkPhaseSchema
+from api.services.event import EventService
+from api.services.task_template import TaskTemplateService
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -108,9 +109,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 lambda x, y: x + y,
                 map(
                     lambda x: x.number_of_days
-                    if x.event_configuration.event_type_id
-                    == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and x.actual_date is not None
-                    else 0,
+                    if x.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and
+                    x.actual_date is not None else 0,
                     work_phase_events,
                 ),
             )

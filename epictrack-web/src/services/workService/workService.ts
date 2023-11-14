@@ -4,6 +4,7 @@ import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
+import { Work } from "../../models/work";
 
 class WorkService implements ServiceBase {
   async getAll() {
@@ -125,6 +126,14 @@ class WorkService implements ServiceBase {
     return await http.PatchRequest(url, { notes });
   }
 
+  async saveNotes(workId: number, notes: string, note_type: string) {
+    const url = Endpoints.Works.WORK_NOTES.replace(
+      ":work_id",
+      workId.toString()
+    );
+    return await http.PatchRequest<Work>(url, { notes, note_type });
+  }
+
   async getWorkFirstNations(workId: number) {
     const url = Endpoints.Works.WORK_FIRST_NATIONS.replace(
       ":work_id",
@@ -193,13 +202,6 @@ class WorkService implements ServiceBase {
       indigenous_nation_id,
       work_indigenous_nation_id,
     });
-  }
-  async getWorkStatuses(workId: number) {
-    const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
-      ":work_id",
-      workId.toString()
-    )}`;
-    return await http.GetRequest(query);
   }
 }
 export default new WorkService();

@@ -16,9 +16,13 @@ const CloneIcon: React.FC<IconProps> = Icons["CloneIcon"];
 
 const RecentStatus = () => {
   const { statuses } = React.useContext(WorkplanContext);
-  const { setShowStatusForm, setStatus, setShowApproveStatusDialog } =
-    React.useContext(StatusContext);
-  const { position } = useAppSelector((state) => state.user.userDetail);
+  const {
+    setIsCloning,
+    setShowStatusForm,
+    setStatus,
+    setShowApproveStatusDialog,
+    hasPermission,
+  } = React.useContext(StatusContext);
 
   return (
     <GrayBox
@@ -39,7 +43,7 @@ const RecentStatus = () => {
         }}
       >
         <ETCaption1 bold sx={{ letterSpacing: "0.39px" }}>
-          {moment(statuses[0]?.posted_date).format("ll")}
+          {moment(statuses[0]?.posted_date).format("MMM.DD YYYY").toUpperCase()}
         </ETCaption1>
         <If condition={!statuses[0].is_approved}>
           <Then>
@@ -72,7 +76,10 @@ const RecentStatus = () => {
           </Else>
         </If>
       </Box>
-      <ETPreviewText color={Palette.neutral.dark} sx={{ paddingTop: "16px" }}>
+      <ETPreviewText
+        color={Palette.neutral.dark}
+        sx={{ paddingTop: "16px", whiteSpace: "pre-wrap" }}
+      >
         {statuses[0].description}
       </ETPreviewText>
       <Box
@@ -83,16 +90,14 @@ const RecentStatus = () => {
         <If condition={!statuses[0].is_approved}>
           <Then>
             <Button
-              onClick={() => setShowApproveStatusDialog(true)}
+              onClick={() => {
+                setStatus(statuses[0]);
+                setShowApproveStatusDialog(true);
+              }}
               sx={{
-                display: "flex",
+                backgroundColor: "inherit",
+                borderColor: "transparent",
                 gap: "8px",
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-                ":hover": {
-                  backgroundColor: Palette.neutral.bg.light,
-                  borderColor: Palette.neutral.bg.light,
-                },
               }}
             >
               <CheckCircleIcon />
@@ -101,15 +106,15 @@ const RecentStatus = () => {
           </Then>
           <Else>
             <Button
+              onClick={() => {
+                setStatus(statuses[0]);
+                setIsCloning(true);
+                setShowStatusForm(true);
+              }}
               sx={{
-                display: "flex",
                 gap: "8px",
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-                ":hover": {
-                  backgroundColor: Palette.neutral.bg.light,
-                  borderColor: Palette.neutral.bg.light,
-                },
+                backgroundColor: "inherit",
+                borderColor: "transparent",
               }}
             >
               <CloneIcon />
@@ -117,26 +122,23 @@ const RecentStatus = () => {
             </Button>
           </Else>
         </If>
-        <If condition={!statuses[0].is_approved}>
-          <Button
-            onClick={() => {
-              setShowStatusForm(true);
-              setStatus(statuses[0]);
-            }}
-            sx={{
-              display: "flex",
-              gap: "8px",
-              backgroundColor: Palette.neutral.bg.light,
-              borderColor: Palette.neutral.bg.light,
-              ":hover": {
-                backgroundColor: Palette.neutral.bg.light,
-                borderColor: Palette.neutral.bg.light,
-              },
-            }}
-          >
-            <PencilEditIcon />
-            Edit
-          </Button>
+        <If condition={!statuses[0].is_approved || hasPermission()}>
+          <Then>
+            <Button
+              onClick={() => {
+                setShowStatusForm(true);
+                setStatus(statuses[0]);
+              }}
+              sx={{
+                gap: "8px",
+                backgroundColor: "inherit",
+                borderColor: "transparent",
+              }}
+            >
+              <PencilEditIcon />
+              Edit
+            </Button>
+          </Then>
         </If>
       </Box>
     </GrayBox>

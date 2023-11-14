@@ -1,36 +1,13 @@
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Container } from "@mui/material";
 import { ETHeading2, ETHeading3 } from ".";
 import FolderIcon from "../../assets/images/folder.svg";
-import { makeStyles } from "@mui/styles";
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
-
-const useStyle = makeStyles({
-  folderIcon: {
-    padding: "0.5rem",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: "4px",
-    backgroundColor: Palette.neutral.bg.light,
-    width: "64px",
-  },
-  title: {
-    color: Palette.neutral.accent.dark,
-    lineHeight: "2.25rem",
-  },
-  subTitle: {
-    color: Palette.neutral.main,
-    lineHeight: "2rem",
-  },
-  importIcon: {
-    fill: "currentColor",
-  },
-});
 
 interface NoDataEverProps {
   title: string;
@@ -53,7 +30,6 @@ const NoDataEver = ({
   onImportClickHandler,
   isImportDisabled,
 }: NoDataEverProps) => {
-  const classes = useStyle();
   return (
     <>
       <Container
@@ -73,7 +49,14 @@ const NoDataEver = ({
           }}
         >
           <Box
-            className={classes.folderIcon}
+            sx={{
+              padding: "0.5rem",
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: "4px",
+              backgroundColor: Palette.neutral.bg.light,
+              width: "64px",
+            }}
             component="img"
             src={FolderIcon}
             alt="Search"
@@ -87,10 +70,23 @@ const NoDataEver = ({
               alignItems: "center",
             }}
           >
-            <ETHeading2 bold className={classes.title}>
+            <ETHeading2
+              bold
+              sx={{
+                color: Palette.neutral.accent.dark,
+                lineHeight: "2.25rem",
+              }}
+            >
               {title}
             </ETHeading2>
-            <ETHeading3 className={classes.subTitle}>{subTitle}</ETHeading3>
+            <ETHeading3
+              sx={{
+                color: Palette.neutral.main,
+                lineHeight: "2rem",
+              }}
+            >
+              {subTitle}
+            </ETHeading3>
             <Box sx={{ display: "flex", gap: "1.5rem" }}>
               <Button
                 sx={{
@@ -108,7 +104,7 @@ const NoDataEver = ({
                     mt: "3rem",
                   }}
                   variant="outlined"
-                  startIcon={<ImportFileIcon className={classes.importIcon} />}
+                  startIcon={<ImportFileIcon fill="currentcolor" />}
                   onClick={onImportClickHandler}
                   disabled={isImportDisabled}
                 >

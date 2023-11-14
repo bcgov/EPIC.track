@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useContext } from "react";
+import {
+  useState,
+  useEffect,
+  useContext,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,7 +18,11 @@ import {
   DATE_FORMAT,
 } from "../../../constants/application-constant";
 import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import {
+  ETFormLabel,
+  ETFormLabelWithCharacterLimit,
+  ETSubhead,
+} from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -24,6 +35,7 @@ import {
   EventCategory,
   EventType,
   MilestoneEvent,
+  MilestoneEventDateCheck,
 } from "../../../models/event";
 import configurationService from "../../../services/configurationService/configurationService";
 import TrackDialog from "../../shared/TrackDialog";
@@ -42,6 +54,8 @@ import ExtensionInput from "./components/ExtensionInput";
 import { EventContext } from "./EventContext";
 import { EVENT_TYPE } from "../phase/type";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
+import WarningBox from "../../shared/warningBox";
+import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 
 interface EventFormProps {
   onSave: () => void;
@@ -54,7 +68,6 @@ interface NumberOfDaysChangeProps {
   actualDate?: string | undefined;
 }
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
-
 const EventForm = ({
   onSave = () => {
     return;
@@ -62,32 +75,34 @@ const EventForm = ({
   event,
   isFormFieldsLocked,
 }: EventFormProps) => {
-  const [configurations, setConfigurations] = React.useState<
-    EventConfiguration[]
-  >([]);
-  const [notes, setNotes] = React.useState("");
-  const [titleCharacterCount, setTitleCharacterCount] =
-    React.useState<number>(0);
+  const [configurations, setConfigurations] = useState<EventConfiguration[]>(
+    []
+  );
+  const [notes, setNotes] = useState("");
+  const [titleCharacterCount, setTitleCharacterCount] = useState<number>(0);
   const [showEventLockDialog, setShowEventLockDialog] =
-    React.useState<boolean>(false);
+    useState<boolean>(false);
   const [selectedConfiguration, setSelectedConfiguration] =
-    React.useState<EventConfiguration>();
-  const anticipatedDateRef = React.useRef();
-  const numberOfDaysRef = React.useRef();
-  const endDateRef = React.useRef();
+    useState<EventConfiguration>();
+  const anticipatedDateRef = useRef();
+  const numberOfDaysRef = useRef();
+  const endDateRef = useRef();
+  const [showEventPushConfirmation, setShowEventPushConfirmation] =
+    useState(false);
+  const [pushEvents, setPushEvents] = useState<boolean>(false);
 
-  const ctx = React.useContext(WorkplanContext);
+  const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
-
-  const [actualAdded, setActualAdded] = React.useState<boolean>(false);
-  const [anticipatedLabel, setAnticipatedLabel] =
-    React.useState("Anticipated Date");
-  const [actualDateLabel, setActualDateLabel] = React.useState("Actual Date");
-  const isCreateMode = React.useMemo(() => !event, [event]);
-  const titleRef = React.useRef();
+  const [dateCheckStatus, setDateCheckStatus] =
+    useState<MilestoneEventDateCheck>();
+  const [actualAdded, setActualAdded] = useState<boolean>(false);
+  const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
+  const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
+  const isCreateMode = useMemo(() => !event, [event]);
+  const titleRef = useRef();
   const MISSING_RESUMPTION_ERROR =
     "No resumption milestone configuration found to resume the phase";
-  const schema = React.useMemo(
+  const schema = useMemo(
     () =>
       yup.object().shape({
         name: yup.string().required("Name is required"),
@@ -126,7 +141,7 @@ const EventForm = ({
       }),
     [selectedConfiguration, actualAdded]
   );
-  const isHighPriorityActive = React.useMemo(() => {
+  const isHighPriorityActive = useMemo(() => {
     if (event) {
       return event.high_priority;
     }
@@ -140,22 +155,29 @@ const EventForm = ({
     }
   }, [selectedConfiguration, event]);
 
-  const isMilestoneTypeDisabled = React.useMemo(
+  const isMilestoneTypeDisabled = useMemo(
     () =>
       !!event ||
       isFormFieldsLocked ||
       ctx.selectedWorkPhase?.work_phase.is_suspended,
     [event]
   );
-  const isTitleDisabled = React.useMemo(
+  const isTitleDisabled = useMemo(
     () => isFormFieldsLocked || ctx.selectedWorkPhase?.work_phase.is_suspended,
     []
   );
 
-  const anticipatedMinDate = React.useMemo(
+  const anticipatedMinDate = useMemo(
     () => dayjs(ctx.work?.start_date),
     [ctx.work]
   );
+
+  const actualDateMin = useMemo(
+    () => dayjs(ctx.selectedWorkPhase?.work_phase.start_date),
+    [ctx.selectedWorkPhase]
+  );
+
+  const actualDateMax = useMemo(() => dayjs(new Date()), []);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -173,7 +195,7 @@ const EventForm = ({
     getValues,
   } = methods;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       selectedConfiguration &&
       selectedConfiguration.event_category_id === EventCategory.EXTENSION
@@ -188,7 +210,8 @@ const EventForm = ({
       setActualDateLabel("Actual Date");
     }
   }, [selectedConfiguration]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     if (event) {
       reset(event);
       daysOnChangeHandler({
@@ -208,7 +231,7 @@ const EventForm = ({
     anticipatedDateRef?.current,
   ]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (configurations && event) {
       const config = configurations.filter(
         (p) => p.id == event.event_configuration_id
@@ -217,7 +240,7 @@ const EventForm = ({
     }
   }, [event, configurations]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       ctx.selectedWorkPhase?.work_phase.is_suspended &&
       configurations.length > 0 &&
@@ -240,7 +263,7 @@ const EventForm = ({
     }
   }, [configurations, event]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getConfigurations();
   }, [event]);
 
@@ -260,17 +283,43 @@ const EventForm = ({
     }
   };
 
+  /**
+   * Check if the selected event configuration cause date to exceed the phase
+   * or push susequent events
+   */
+  const eventDateCheck = async () => {
+    try {
+      const result = await eventService.check_event_for_date_push(
+        getValues(),
+        event?.id
+      );
+      if (result.status === 200) {
+        setDateCheckStatus(result.data as MilestoneEventDateCheck);
+      }
+    } catch (e) {}
+  };
+
+  /**
+   * Check if it is required to show the Lock confirmation
+   * @param submittedData Submitted event data from the form
+   * @returns true if DateLock Confirm dialog to be shown
+   */
+  const showLockConfirmDialog = (submittedData: MilestoneEvent) =>
+    (isCreateMode && !!submittedData.actual_date) ||
+    (!isCreateMode && !event?.actual_date && !!submittedData.actual_date);
+
   const onSubmitHandler = async (submittedData: MilestoneEvent) => {
     try {
       submittedData.notes = notes;
-      // setSubmittedEvent(data);
-      const showConfirmDialog =
-        (isCreateMode && !!submittedData.actual_date) ||
-        (!isCreateMode && !event?.actual_date && !!submittedData.actual_date);
-      if (!showConfirmDialog) {
+      const pushRequired = dateCheckStatus?.subsequent_event_push_required;
+      if (pushRequired) {
+        setShowEventPushConfirmation(pushRequired);
+      } else if (showLockConfirmDialog(submittedData)) {
+        setShowEventLockDialog(showLockConfirmDialog(submittedData));
+        setShowEventPushConfirmation(false);
+      } else {
         handleSaveEvent(submittedData);
       }
-      setShowEventLockDialog(showConfirmDialog);
     } catch (e: any) {
       const error = getAxiosError(e);
       const message =
@@ -283,74 +332,99 @@ const EventForm = ({
     }
   };
 
-  const createEvent = async (data: MilestoneEvent) => {
-    const createdResult = await eventService.create(
-      data,
-      Number(ctx.selectedWorkPhase?.work_phase.id)
-    );
-    showNotification("Milestone details inserted", {
-      type: "success",
-    });
-    handleHighlightRows([
-      {
-        type: EVENT_TYPE.MILESTONE,
-        id: createdResult.data.id,
-      },
-    ]);
-
-    return createdResult;
-  };
-
-  const updateEvent = async (data: MilestoneEvent) => {
-    if (!event) {
-      return;
-    }
-
-    const updatedResult = await eventService.update(data, Number(event.id));
-    showNotification("Milestone details updated", {
-      type: "success",
-    });
-    handleHighlightRows([
-      {
-        type: EVENT_TYPE.MILESTONE,
-        id: event.id,
-      },
-    ]);
-    return updatedResult;
-  };
-
-  const saveEvent = (data: MilestoneEvent) => {
-    if (event) {
-      return updateEvent(data);
-    }
-
-    return createEvent(data);
-  };
-
-  const handleSaveEvent = async (data?: MilestoneEvent) => {
-    try {
-      const dataToBeSubmitted = data ?? getValues();
-      dataToBeSubmitted.anticipated_date = Moment(
-        dataToBeSubmitted.anticipated_date
-      ).format();
-      if (!!dataToBeSubmitted.actual_date) {
-        dataToBeSubmitted.actual_date = Moment(
-          dataToBeSubmitted.actual_date
-        ).format();
-      }
-      await saveEvent(dataToBeSubmitted);
-      onSave();
-    } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
-      showNotification(message, {
-        type: "error",
+  const createEvent = useCallback(
+    async (data: MilestoneEvent, pushEventConfirmed: boolean) => {
+      const createdResult = await eventService.create(
+        data,
+        Number(ctx.selectedWorkPhase?.work_phase.id),
+        pushEvents || pushEventConfirmed
+      );
+      showNotification("Milestone details inserted", {
+        type: "success",
       });
-    }
-  };
+      handleHighlightRows([
+        {
+          type: EVENT_TYPE.MILESTONE,
+          id: createdResult.data.id,
+        },
+      ]);
+
+      return createdResult;
+    },
+    [pushEvents]
+  );
+
+  const updateEvent = useCallback(
+    async (data: MilestoneEvent, pushEventConfirmed: boolean) => {
+      if (!event) {
+        return;
+      }
+
+      const updatedResult = await eventService.update(
+        data,
+        Number(event.id),
+        pushEvents || pushEventConfirmed
+      );
+      showNotification("Milestone details updated", {
+        type: "success",
+      });
+      handleHighlightRows([
+        {
+          type: EVENT_TYPE.MILESTONE,
+          id: event.id,
+        },
+      ]);
+      return updatedResult;
+    },
+    [event, pushEvents]
+  );
+
+  const saveEvent = useCallback(
+    (data: MilestoneEvent, pushEventConfirmed: boolean) => {
+      if (event) {
+        return updateEvent(data, pushEventConfirmed);
+      }
+
+      return createEvent(data, pushEventConfirmed);
+    },
+    [event, pushEvents]
+  );
+  const handleSaveEvent = useCallback(
+    async (
+      data?: MilestoneEvent,
+      pushEventConfirmed = false,
+      confirmSaveInLocked = false
+    ) => {
+      try {
+        const dataToBeSubmitted = data ?? getValues();
+        if (showLockConfirmDialog(dataToBeSubmitted) && !confirmSaveInLocked) {
+          setShowEventLockDialog(true);
+        } else {
+          dataToBeSubmitted.anticipated_date = Moment(
+            dataToBeSubmitted.anticipated_date
+          ).format();
+          if (!!dataToBeSubmitted.actual_date) {
+            dataToBeSubmitted.actual_date = Moment(
+              dataToBeSubmitted.actual_date
+            ).format();
+          }
+          await saveEvent(dataToBeSubmitted, pushEventConfirmed);
+          onSave();
+          setDateCheckStatus(undefined);
+        }
+      } catch (e) {
+        const error = getAxiosError(e);
+        const message =
+          error?.response?.status === 422
+            ? error.response.data?.toString()
+            : COMMON_ERROR_MESSAGE;
+        showNotification(message, {
+          type: "error",
+        });
+      }
+    },
+    [pushEvents, event]
+  );
 
   const onChangeMilestoneType = (configuration_id: number) => {
     const configuration = configurations.filter(
@@ -361,7 +435,14 @@ const EventForm = ({
     setTitleCharacterCount(Number(configuration.name.length));
     (titleRef?.current as any).focus();
     unregisterOptionalFields();
+    return Promise.resolve();
   };
+
+  /**
+   * Unregister various fields which might have already loaded
+   * based on diffrent milestone type. This is required or else
+   * such hidden fields would be submitted to the server
+   */
   const unregisterOptionalFields = () => {
     unregister("decision_maker_id");
     unregister("outcome_id");
@@ -398,6 +479,11 @@ const EventForm = ({
           .toISOString()
       );
     }
+    return Promise.resolve();
+  };
+  const changeHandler = async (params?: NumberOfDaysChangeProps) => {
+    await daysOnChangeHandler(params);
+    eventDateCheck();
   };
   return (
     <>
@@ -429,9 +515,10 @@ const EventForm = ({
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
                 disabled={isMilestoneTypeDisabled}
-                onHandleChange={(configuration_id) =>
-                  onChangeMilestoneType(configuration_id)
-                }
+                onHandleChange={async (configuration_id) => {
+                  await onChangeMilestoneType(configuration_id);
+                  eventDateCheck();
+                }}
                 {...register("event_configuration_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -475,12 +562,7 @@ const EventForm = ({
                     mr: "2px",
                   }}
                   disabled={isFormFieldsLocked}
-                  control={
-                    <ControlledSwitch
-                      {...register("high_priority")}
-                      defaultChecked={isHighPriorityActive}
-                    />
-                  }
+                  control={<ControlledSwitch name="high_priority" />}
                   label="High Priority"
                 />
                 <Tooltip title="High Priority Milestones will appear on reports">
@@ -517,16 +599,13 @@ const EventForm = ({
                         ...register("anticipated_date"),
                       }}
                       value={dayjs(value)}
-                      onChange={(event: any) => {
+                      onChange={async (event: any) => {
                         const d = event ? event["$d"] : null;
                         onChange(d);
-                        daysOnChangeHandler({
+                        changeHandler({
                           anticipatedDate: d,
                         });
                       }}
-                      // defaultValue={dayjs(
-                      //   event?.anticipated_date ? event?.anticipated_date : ""
-                      // )}
                       sx={{ display: "block" }}
                     />
                   </LocalizationProvider>
@@ -549,6 +628,8 @@ const EventForm = ({
                     <DatePicker
                       disabled={isFormFieldsLocked}
                       format={DATE_FORMAT}
+                      minDate={actualDateMin}
+                      maxDate={actualDateMax}
                       slotProps={{
                         textField: {
                           id: "actual_date",
@@ -560,10 +641,10 @@ const EventForm = ({
                         ...register("actual_date"),
                       }}
                       value={value ? dayjs(value) : value}
-                      onChange={(event: any) => {
+                      onChange={async (event: any) => {
                         const d = event ? event["$d"] : null;
                         onChange(d);
-                        daysOnChangeHandler({
+                        changeHandler({
                           actualDate: d,
                         });
                       }}
@@ -573,6 +654,14 @@ const EventForm = ({
                 )}
               />
             </Grid>
+            <When condition={dateCheckStatus?.phase_end_push_required}>
+              <Grid item xs={12}>
+                <WarningBox
+                  title="Selecting this date will extend subsequent Milestones beyond the legislated time limit. You might need to add an Extension Milestone to complete the Phase."
+                  isTitleBold={false}
+                />
+              </Grid>
+            </When>
           </Grid>
           <Grid
             container
@@ -592,7 +681,10 @@ const EventForm = ({
               }
             >
               <Then>
-                <ExtensionInput isFormFieldsLocked={isFormFieldsLocked} />
+                <ExtensionInput
+                  isFormFieldsLocked={isFormFieldsLocked}
+                  onChangeDay={eventDateCheck}
+                />
               </Then>
               <Else>
                 <When condition={selectedConfiguration?.multiple_days}>
@@ -600,7 +692,7 @@ const EventForm = ({
                     endDateRef={endDateRef}
                     isFormFieldsLocked={isFormFieldsLocked}
                     numberOfDaysRef={numberOfDaysRef}
-                    onChangeDay={daysOnChangeHandler}
+                    onChangeDay={changeHandler}
                   />
                 </When>
               </Else>
@@ -661,17 +753,41 @@ const EventForm = ({
         </Grid>
         <TrackDialog
           open={showEventLockDialog}
-          dialogTitle="Lock Milestone?"
-          dialogContentText="The event will be locked. Do you want to continue?"
+          dialogTitle="Lock this Milestone?"
+          dialogContentText="Entering an actual date will lock this Milestone. Once locked, you will only be able to edit the description and notes field."
           disableEscapeKeyDown
           fullWidth
-          okButtonText="Save"
-          onOk={() => handleSaveEvent()}
+          okButtonText="Yes"
+          cancelButtonText="No"
+          onOk={() => handleSaveEvent(undefined, pushEvents, true)}
           onCancel={() => {
             setShowEventLockDialog(false);
           }}
           isActionsRequired
         />
+        <TrackDialog
+          open={showEventPushConfirmation}
+          dialogTitle={"Update this Milestone  Only?"}
+          disableEscapeKeyDown
+          fullWidth
+          maxWidth="sm"
+          okButtonText="Save"
+          cancelButtonText="Cancel"
+          isActionsRequired
+          onCancel={() => setShowEventPushConfirmation(false)}
+          formId="confirm-form"
+        >
+          <EventDatePushConfirmForm
+            onSave={(option: number) => {
+              setPushEvents((prevState) => {
+                prevState = option === 1;
+                handleSaveEvent(undefined, prevState);
+                setShowEventPushConfirmation(false);
+                return prevState;
+              });
+            }}
+          />
+        </TrackDialog>
       </FormProvider>
     </>
   );

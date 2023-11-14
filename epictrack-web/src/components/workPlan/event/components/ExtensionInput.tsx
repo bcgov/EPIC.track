@@ -14,6 +14,7 @@ import ExtensionSuspensionInput from "./ExtensionSuspensionInput";
 
 interface ExtensionInputProps {
   isFormFieldsLocked: boolean;
+  onChangeDay: () => void;
 }
 const ExtensionInput = (props: ExtensionInputProps) => {
   const {
@@ -27,7 +28,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
   const ctx = React.useContext(WorkplanContext);
   React.useEffect(() => {
     return () => {
-      // unregister("number_of_days");
       unregister("phase_end_date");
     };
   }, []);
@@ -54,7 +54,9 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           .add(Number((event.target as any)["value"]), "days")
           .format(DATE_FORMAT)
       );
+      setValue("number_of_days", Number((event.target as any)["value"]));
     }
+    return Promise.resolve();
   };
   const onEndDateChange = (endDate: any) => {
     if (numberOfDaysRef.current as any) {
@@ -65,6 +67,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           "days"
         )
       );
+      props.onChangeDay();
     }
   };
   return (
@@ -95,7 +98,10 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           }}
           type="number"
           {...register("number_of_days")}
-          onChange={onDayChange}
+          onChange={async (e) => {
+            await onDayChange(e);
+            props.onChangeDay();
+          }}
         />
       </Grid>
       <Grid item xs={6}>
@@ -104,7 +110,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           name="phase_end_date"
           control={control}
           render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <LocalizationProvider dateAdapter={AdapterDayjs} for>
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DatePicker
                 disabled={props.isFormFieldsLocked}
                 format={DATE_FORMAT}
@@ -131,41 +137,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
         />
       </Grid>
       <ExtensionSuspensionInput isFormFieldsLocked={props.isFormFieldsLocked} />
-
-      {/* <Grid item xs={12}>
-        <ETFormLabel required>Act Section</ETFormLabel>
-        <ControlledSelectV2
-          disabled={props.isFormFieldsLocked}
-          helperText={errors?.act_section_id?.message?.toString()}
-          options={actSections || []}
-          getOptionValue={(o: ListType) => o?.id.toString()}
-          getOptionLabel={(o: ListType) => o?.name}
-          {...register("act_section_id")}
-        ></ControlledSelectV2>
-      </Grid>
-      <Grid item xs={12}>
-        <ETFormLabelWithCharacterLimit
-          characterCount={reasonCount}
-          maxCharacterLength={60}
-        >
-          Reason
-        </ETFormLabelWithCharacterLimit>
-        <TextField
-          fullWidth
-          multiline
-          disabled={props.isFormFieldsLocked}
-          rows={3}
-          InputProps={{
-            inputProps: {
-              maxLength: 60,
-            },
-          }}
-          error={!!errors?.reason?.message}
-          helperText={errors?.reason?.message?.toString()}
-          {...register("reason")}
-          onChange={changeReasonTextHandler}
-        />
-      </Grid> */}
     </>
   );
 };

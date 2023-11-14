@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Button, Divider, Box } from "@mui/material";
+import { TextField, Grid, Box } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,7 +18,7 @@ import LockClosed from "../../assets/images/lock-closed.svg";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { Palette } from "../../styles/theme";
 
-const schema = yup.object<Project>().shape({
+const schema = yup.object().shape({
   name: yup
     .string()
     .required("Project Name is required")
@@ -437,16 +437,14 @@ export default function ProjectForm({ ...props }) {
             >
               <ControlledSwitch
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
-                defaultChecked={(ctx.item as Project)?.is_active}
-                {...register("is_active")}
+                name={"is_active"}
               />
               <ETFormLabel id="active">Active</ETFormLabel>
             </Grid>
             <Grid item xs={3}>
               <ControlledSwitch
+                name={"is_project_closed"}
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
-                defaultChecked={(ctx.item as Project)?.is_project_closed}
-                {...register("is_project_closed")}
               />
               <ETFormLabel id="active">Closed</ETFormLabel>
             </Grid>

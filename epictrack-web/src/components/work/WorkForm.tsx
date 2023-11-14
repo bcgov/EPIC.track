@@ -19,7 +19,6 @@ import dayjs from "dayjs";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import workService from "../../services/workService/workService";
 import { MasterContext } from "../shared/MasterContext";
-import { dateUtils } from "../../utils";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { IconProps } from "../icons/type";
 import Icons from "../icons/index";
@@ -75,6 +74,8 @@ export default function WorkForm({ ...props }) {
   const [leads, setLeads] = React.useState<Staff[]>([]);
   const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
   const ctx = React.useContext(MasterContext);
+  const [selectedWorktype, setSelectedWorkType] = React.useState<any>();
+  const [selectedProject, setSelectedProject] = React.useState<any>();
 
   React.useEffect(() => {
     ctx.setFormId("work-form");
@@ -105,6 +106,7 @@ export default function WorkForm({ ...props }) {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
     control,
   } = methods;
 
@@ -158,6 +160,28 @@ export default function WorkForm({ ...props }) {
       reset();
     });
   };
+
+  React.useEffect(() => {
+    if (selectedProject && selectedWorktype) {
+      setValue("title", `${selectedProject?.name} - ${selectedWorktype?.name}`);
+    }
+  }, [selectedProject, selectedWorktype]);
+
+  const handleProjectChange = async (id: string) => {
+    const selectedProject: any = projects.filter((project) => {
+      return project.id.toString() === id;
+    });
+    setSelectedProject(selectedProject[0]);
+    setValue("epic_description", selectedProject[0]?.description);
+  };
+
+  const handleWorktypeChange = async (id: string) => {
+    const selectedWorktype: any = workTypes.filter((worktype) => {
+      return worktype.id.toString() === id;
+    });
+    setSelectedWorkType(selectedWorktype[0]);
+  };
+
   return (
     <>
       <FormProvider {...methods}>
@@ -183,6 +207,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={4}>
             <ETFormLabel required>Worktype</ETFormLabel>
             <ControlledSelectV2
+              onHandleChange={handleWorktypeChange}
               placeholder="Select Worktype"
               helperText={errors?.ea_act_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.ea_act_id}
@@ -206,6 +231,7 @@ export default function WorkForm({ ...props }) {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker
                     format={DATE_FORMAT}
+                    minDate={dayjs(new Date(1995, 5, 30))}
                     disabled={(ctx.item as Work)?.start_date_locked}
                     slotProps={{
                       textField: {
@@ -230,6 +256,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Project</ETFormLabel>
             <ControlledSelectV2
+              onHandleChange={handleProjectChange}
               placeholder="Select"
               helperText={errors?.project_id?.message?.toString()}
               defaultValue={(ctx.item as Work)?.project_id}
@@ -287,7 +314,7 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel required>Report Description</ETFormLabel>
+            <ETFormLabel required>Work Description</ETFormLabel>
             <TextField
               placeholder="Description will be shown on all reports"
               fullWidth
@@ -299,8 +326,9 @@ export default function WorkForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={12}>
-            <ETFormLabel>EPIC Description</ETFormLabel>
+            <ETFormLabel>Project Description</ETFormLabel>
             <TextField
+              disabled
               placeholder="Provide the description if differs from the report"
               fullWidth
               multiline
@@ -314,7 +342,7 @@ export default function WorkForm({ ...props }) {
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Work)?.is_cac_recommended}
-              {...register("is_cac_recommended")}
+              name="is_cac_recommended"
             />
             <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
             <Tooltip
@@ -425,8 +453,7 @@ export default function WorkForm({ ...props }) {
           <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              defaultChecked={(ctx.item as Work)?.is_active}
-              {...register("is_active")}
+              name="is_active"
             />
             <ETFormLabel id="is_active">Active</ETFormLabel>
           </Grid>
@@ -434,7 +461,7 @@ export default function WorkForm({ ...props }) {
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               defaultChecked={(ctx.item as Work)?.is_high_priority}
-              {...register("is_high_priority")}
+              name="is_high_priority"
             />
             <ETFormLabel id="is_watched">High Priority</ETFormLabel>
             <Tooltip

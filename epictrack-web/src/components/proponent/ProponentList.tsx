@@ -67,11 +67,6 @@ export default function ProponentList() {
     [staffs]
   );
 
-  const handleDelete = (id: string) => {
-    ctx.setShowDeleteDialog(true);
-    ctx.setId(id);
-  };
-
   const getStaffs = async () => {
     const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
@@ -106,14 +101,6 @@ export default function ProponentList() {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            enableRowActions={true}
-            renderRowActions={({ row }: any) => (
-              <Box>
-                <IconButton onClick={() => handleDelete(row.original.id)}>
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            )}
             renderTopToolbarCustomActions={() => (
               <Box
                 sx={{

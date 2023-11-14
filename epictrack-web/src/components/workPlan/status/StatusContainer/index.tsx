@@ -2,36 +2,14 @@ import React from "react";
 import { Grid } from "@mui/material";
 import { ETHeading3 } from "../../../shared";
 import { Palette } from "../../../../styles/theme";
-import { makeStyles } from "@mui/styles";
 import StatusView from "../StatusView";
 import { ETTab, ETTabs } from "../../../shared/tab/Tab";
 import TabPanel from "../../../shared/tab/TabPanel";
 import StatusPreview from "./StatusPreview";
 import StatusNotes from "./StatusNotes";
-
-const useStyle = makeStyles({
-  title: {
-    borderBottom: `2px solid ${Palette.primary.main}`,
-    paddingBottom: "0.5rem",
-  },
-  tab: {
-    paddingBottom: "0.5rem !important",
-    fontSize: "1.5rem !important",
-    fontWeight: 400,
-    lineHeight: "1.3rem",
-    "&.Mui-selected": {
-      fontWeight: 400,
-    },
-    minHeight: "0px",
-  },
-  tabPanel: {
-    padding: "1.5rem 0px 1rem 1rem",
-    minHeight: "0px",
-  },
-});
+import { tabPanelStyle, tabStyle, titleStyle } from "../../common/styles";
 
 const StatusContainer = () => {
-  const classes = useStyle();
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
 
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
@@ -41,7 +19,12 @@ const StatusContainer = () => {
   return (
     <Grid container columnSpacing={1.5}>
       <Grid item xs={8}>
-        <ETHeading3 className={classes.title} color={Palette.primary.main}>
+        <ETHeading3
+          sx={{
+            ...titleStyle,
+          }}
+          color={Palette.primary.main}
+        >
           Status
         </ETHeading3>
       </Grid>
@@ -58,11 +41,16 @@ const StatusContainer = () => {
           <ETTab
             sx={{
               paddingLeft: 0,
+              ...tabStyle,
             }}
             label="Status Preview"
-            className={classes.tab}
           />
-          <ETTab label="Notes" className={classes.tab} />
+          <ETTab
+            label="Notes"
+            sx={{
+              ...tabStyle,
+            }}
+          />
         </ETTabs>
       </Grid>
       <Grid
@@ -78,14 +66,18 @@ const StatusContainer = () => {
         <TabPanel
           index={0}
           value={selectedTabIndex}
-          className={classes.tabPanel}
+          sx={{
+            ...tabPanelStyle,
+          }}
         >
           <StatusPreview />
         </TabPanel>
         <TabPanel
           index={1}
           value={selectedTabIndex}
-          className={classes.tabPanel}
+          sx={{
+            ...tabPanelStyle,
+          }}
         >
           <StatusNotes />
         </TabPanel>
