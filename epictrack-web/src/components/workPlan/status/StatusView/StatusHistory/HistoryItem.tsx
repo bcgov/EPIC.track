@@ -15,6 +15,7 @@ import Icons from "../../../../icons";
 import { StatusContext } from "../../StatusContext";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import { If, Then } from "react-if";
+import ReadMoreText from "../../../../shared/ReadMoreText";
 
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
@@ -33,9 +34,9 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
   const {
     selectedHistoryIndex,
     setSelectedHistoryIndex,
+    hasPermission,
     setShowStatusForm,
     setStatus,
-    hasPermission,
   } = useContext(StatusContext);
   const { statuses } = useContext(WorkplanContext);
   const [statusHighlight, setStatusHighlight] = useState<number>(0);
@@ -68,7 +69,7 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
           <TimelineContent>
             <Box>
               <ETStatusHistoryDate>
-                {moment(status.posted_date).format("L")}
+                {moment(status.posted_date).format("MMM.DD YYYY")}
               </ETStatusHistoryDate>
             </Box>
           </TimelineContent>
@@ -83,50 +84,26 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
                 : Palette.neutral.main
             }
           >
-            {status.id === selectedHistoryIndex ? (
-              <>
-                <Box sx={{ whiteSpace: "pre-wrap" }}>{status.description}</Box>
-                <If
-                  condition={
-                    hasPermission() && statusHighlight === selectedHistoryIndex
-                  }
-                >
-                  <Then>
-                    <Button
-                      onClick={() => {
-                        setShowStatusForm(true);
-                        setStatus(status);
-                      }}
-                      sx={{
-                        padding: "12px 8px",
-                        gap: "8px",
-                        backgroundColor: "inherit",
-                        borderColor: "transparent",
-                      }}
-                    >
-                      <PencilEditIcon />
-                      Edit
-                    </Button>
-                  </Then>
-                </If>
-              </>
-            ) : (
-              <Box>
-                {status.description.slice(0, 50)}...
+            <ReadMoreText>{status?.description}</ReadMoreText>
+            <If condition={hasPermission() && statusHighlight === status.id}>
+              <Then>
                 <Button
-                  onClick={() => setSelectedHistoryIndex(status.id)}
+                  onClick={() => {
+                    setShowStatusForm(true);
+                    setStatus(status);
+                  }}
                   sx={{
-                    paddingBottom: 2,
-                    ":hover": {
-                      backgroundColor: Palette.white,
-                      borderColor: Palette.white,
-                    },
+                    padding: "12px 8px",
+                    gap: "8px",
+                    backgroundColor: "inherit",
+                    borderColor: "transparent",
                   }}
                 >
-                  Read More
+                  <PencilEditIcon />
+                  Edit
                 </Button>
-              </Box>
-            )}
+              </Then>
+            </If>
           </ETPreviewText>
         </Box>
       </Box>
