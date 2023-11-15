@@ -79,15 +79,12 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
   const ctx = useContext(WorkplanContext);
   const isSelectedPhase = React.useMemo<boolean>(
-    () =>
-      phase.work_phase.phase.id === ctx.selectedWorkPhase?.work_phase.phase.id,
+    () => phase.work_phase.id === ctx.selectedWorkPhase?.work_phase.id,
     [ctx.selectedWorkPhase]
   );
   React.useEffect(
     () =>
-      setExpanded(
-        phase.work_phase.phase.id === ctx.selectedWorkPhase?.work_phase.phase.id
-      ),
+      setExpanded(phase.work_phase.id === ctx.selectedWorkPhase?.work_phase.id),
     [phase, ctx.selectedWorkPhase]
   );
   const onExpandHandler = (expand: boolean) => {

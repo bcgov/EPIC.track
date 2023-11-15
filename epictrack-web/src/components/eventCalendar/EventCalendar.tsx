@@ -23,7 +23,7 @@ const titleStyle: SxProps = {
   justifyContent: "center",
   // position: "relative",
   "&:first-of-type": { gridColumn: "15/22" },
-  "&::before, &:nth-last-child(1 of $title)::after": {
+  "&::before, &:nth-child(7)::after": {
     content: '" "',
     width: "2px",
     backgroundColor: "#a7bce8",
@@ -35,25 +35,25 @@ const titleStyle: SxProps = {
     gridRowStart: 1,
     zIndex: 1,
   },
-  "&:nth-child(1 of $title)::before": {
+  "&:nth-child(2)::before": {
     gridColumnStart: 15,
   },
-  "&:nth-child(2 of $title)::before": {
+  "&:nth-child(3)::before": {
     gridColumnStart: 22,
   },
-  "&:nth-child(3 of $title)::before": {
+  "&:nth-child(4)::before": {
     gridColumnStart: 29,
   },
-  "&:nth-child(4 of $title)::before": {
+  "&:nth-child(5)::before": {
     gridColumnStart: 36,
   },
-  "&:nth-child(5 of $title)::before": {
+  "&:nth-child(6)::before": {
     gridColumnStart: 43,
   },
-  "&:nth-child(6 of $title)::before": {
+  "&:nth-child(7)::before": {
     gridColumnStart: 50,
   },
-  "&:nth-last-child(1 of $title)::after": {
+  "&:nth-child(7)::after": {
     right: 0,
     left: "auto",
     gridColumnEnd: "-1",
@@ -231,7 +231,7 @@ const EventCalendar = () => {
                 <Box
                   sx={{
                     textAlign: "center",
-                    "&:nth-child(1 of $weekDay)": { gridColumnStart: "15" },
+                    "&:nth-child(8)": { gridColumnStart: "15" },
                     "&::after": {
                       content: '" "',
                       width: "1px",
