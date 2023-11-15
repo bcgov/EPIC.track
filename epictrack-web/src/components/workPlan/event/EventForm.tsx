@@ -92,6 +92,7 @@ const EventForm = ({
   const [pushEvents, setPushEvents] = useState<boolean>(false);
 
   const ctx = useContext(WorkplanContext);
+  const initialNotes = useMemo(() => event?.notes, [event]);
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
@@ -746,7 +747,7 @@ const EventForm = ({
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor
                 handleEditorStateChange={setNotes}
-                initialRawEditorState={event?.notes}
+                initialRawEditorState={initialNotes}
               />
             </Grid>
           </Grid>

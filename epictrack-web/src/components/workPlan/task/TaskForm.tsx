@@ -56,6 +56,7 @@ const TaskForm = ({
   const numberOfDaysRef = useRef();
   const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
+  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent]);
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -383,7 +384,7 @@ const TaskForm = ({
               <ETFormLabel>Notes</ETFormLabel>
               <RichTextEditor
                 handleEditorStateChange={setNotes}
-                initialRawEditorState={taskEvent?.notes}
+                initialRawEditorState={initialNotes}
               />
             </Grid>
           </Grid>

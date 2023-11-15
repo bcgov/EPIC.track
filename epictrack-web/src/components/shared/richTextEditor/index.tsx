@@ -15,6 +15,7 @@ const styles = {
     borderRadius: "4px",
     background: "#f9f9fb",
     marginBottom: "8px",
+    fontSize: "16px",
   },
   editorUnfocused: {
     height: "485px",
@@ -23,6 +24,7 @@ const styles = {
     borderRadius: "4px",
     background: "#f9f9fb",
     marginBottom: "8px",
+    fontSize: "16px",
   },
   toolbar: {
     background: "#f9f9fb",
