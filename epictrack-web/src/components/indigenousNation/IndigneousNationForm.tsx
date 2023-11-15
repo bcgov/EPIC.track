@@ -49,7 +49,7 @@ export default function IndigenousNationForm({ ...props }) {
 
   const initialNotes = React.useMemo(
     () => (ctx.item as FirstNation)?.notes,
-    [ctx?.item?.id]
+    [(ctx?.item as FirstNation)?.id]
   );
 
   React.useEffect(() => {

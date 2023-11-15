@@ -8,24 +8,6 @@ import { getEditorStateFromHtml, getEditorStateFromRaw } from "./utils";
 import { Palette } from "../../../styles/theme";
 
 const styles = {
-  editorFocused: {
-    height: "485px",
-    padding: "8px 8px 8px",
-    border: `1px solid #0070E0`,
-    borderRadius: "4px",
-    background: "#f9f9fb",
-    marginBottom: "8px",
-    fontSize: "16px",
-  },
-  editorUnfocused: {
-    height: "485px",
-    padding: "8px 8px 8px",
-    border: `1px solid rgb(224,224,224)`,
-    borderRadius: "4px",
-    background: "#f9f9fb",
-    marginBottom: "8px",
-    fontSize: "16px",
-  },
   toolbar: {
     background: "#f9f9fb",
     marginBottom: "8px",
@@ -86,9 +68,15 @@ const RichTextEditor = ({
             editorState={editorState}
             onEditorStateChange={handleChange}
             handlePastedText={() => false}
-            editorStyle={
-              focused ? styles.editorFocused : styles.editorUnfocused
-            }
+            editorStyle={{
+              height: "485px",
+              padding: "8px 8px 8px",
+              border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
+              borderRadius: "4px",
+              background: "#f9f9fb",
+              marginBottom: "8px",
+              fontSize: "16px",
+            }}
             toolbarStyle={styles.toolbar}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
