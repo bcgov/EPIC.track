@@ -56,7 +56,7 @@ const TaskForm = ({
   const numberOfDaysRef = useRef();
   const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
-  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent]);
+  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.id]);
 
   const methods = useForm({
     resolver: yupResolver(schema),

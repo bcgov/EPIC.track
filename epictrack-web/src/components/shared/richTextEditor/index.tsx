@@ -77,8 +77,6 @@ const RichTextEditor = ({
     getStateFromInitialValue();
   }, [initialRawEditorState, initialHTMLText]);
 
-  console.log(focused);
-
   return (
     <FormControl fullWidth>
       <Box style={{ borderColor: `${error ? Palette.error.main : ""}` }}>
