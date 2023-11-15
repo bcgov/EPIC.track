@@ -4,13 +4,10 @@ import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
 import { WorkplanContext } from "./WorkPlanContext";
 import { Case, Switch } from "react-if";
+import { capitalizeFirstLetterOfWord } from "../../utils";
 
 const WorkState = () => {
   const { work } = useContext(WorkplanContext);
-
-  const capitalizeFirstLetter = (s: string) => {
-    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-  };
 
   const formatWorkStateString = () => {
     let workState = "";
@@ -18,7 +15,7 @@ const WorkState = () => {
       if (workState) {
         workState += " ";
       }
-      workState += capitalizeFirstLetter(word);
+      workState += capitalizeFirstLetterOfWord(word);
     });
 
     return workState;
