@@ -1,6 +1,6 @@
 """Schema representing validation rules for work form"""
-from datetime import datetime, timedelta
 from dataclasses import InitVar, dataclass, fields
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from api.models import Event, Work
@@ -14,7 +14,7 @@ class WorkSchema(BaseSchema):  # pylint: disable=too-many-instance-attributes
     id: Optional[int]
     project_id: int
     ministry_id: int
-    current_phase_id: int
+    current_work_phase_id: int
     federal_involvement_id: int
     eao_team_id: int
     responsible_epd_id: int

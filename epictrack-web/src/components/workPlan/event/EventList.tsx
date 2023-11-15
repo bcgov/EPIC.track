@@ -121,13 +121,10 @@ const EventList = () => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
 
-  React.useEffect(
-    () => setEvents([]),
-    [ctx.selectedWorkPhase?.work_phase.phase.id]
-  );
+  React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.work_phase.id]);
   React.useEffect(() => {
     getCombinedEvents();
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
+  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.id]);
 
   React.useEffect(() => {
     const options: OptionType[] = ctx.team
@@ -147,7 +144,7 @@ const EventList = () => {
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
-    if (ctx.work?.id && ctx.selectedWorkPhase?.work_phase.phase.id) {
+    if (ctx.work?.id && ctx.selectedWorkPhase?.work_phase.id) {
       setLoading(true);
       Promise.all([getMilestoneEvents(), getTaskEvents()]).then(
         (data: Array<EventsGridModel[]>) => {

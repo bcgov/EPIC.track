@@ -28,7 +28,7 @@ export interface Work extends MasterBase {
   responsible_epd_id: number;
   work_lead_id: number;
   work_type_id?: number;
-  current_phase_id: number;
+  current_work_phase_id: number;
   substitution_act_id: number;
   eac_decision_by_id: number;
   decision_by_id: number;
@@ -43,7 +43,7 @@ export interface Work extends MasterBase {
   responsible_epd: Staff;
   work_lead: Staff;
   work_type: ListType;
-  current_phase: ListType;
+  current_work_phase: ListType;
   substitution_act: ListType;
   eac_decision_by: Staff;
   decision_by: Staff;

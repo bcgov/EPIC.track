@@ -9,12 +9,26 @@ from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
 from api.schemas.federal_involvement import FederalInvolvementSchema
 from api.schemas.ministry import MinistrySchema
-from api.schemas.response.phase_response import PhaseResponseSchema
 from api.schemas.project import ProjectSchema
+from api.schemas.response.phase_response import PhaseResponseSchema
 from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
+
+
+class WorkPhaseResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work phase model schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = WorkPhase
+        include_fk = True
+        unknown = EXCLUDE
+    phase = fields.Nested(PhaseResponseSchema)
 
 
 class WorkResponseSchema(
@@ -40,8 +54,8 @@ class WorkResponseSchema(
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_type = fields.Nested(WorkTypeSchema, dump_only=True)
-    current_phase = fields.Nested(
-        PhaseResponseSchema, exclude=("ea_act", "work_type"), dump_only=True
+    current_work_phase = fields.Nested(
+        WorkPhaseResponseSchema, dump_only=True
     )
     substitution_act = fields.Nested(SubstitutionActSchema, dump_only=True)
     eac_decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
@@ -51,20 +65,6 @@ class WorkResponseSchema(
     def get_work_state(self, obj: Work) -> str:
         """Return the work state"""
         return obj.work_state.value if obj.work_state else None
-
-
-class WorkPhaseResponseSchema(
-    AutoSchemaBase
-):  # pylint: disable=too-many-ancestors,too-few-public-methods
-    """Work phase model schema class"""
-
-    class Meta(AutoSchemaBase.Meta):
-        """Meta information"""
-
-        model = WorkPhase
-        include_fk = True
-        unknown = EXCLUDE
-    phase = fields.Nested(PhaseResponseSchema)
 
 
 class WorkStaffRoleReponseSchema(
@@ -118,11 +118,6 @@ class WorkResourceResponseSchema(
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
-    work_state = fields.Method("get_work_state")
-
-    def get_work_state(self, obj: Work) -> str:
-        """Return the work state"""
-        return obj.work_state.value if obj.work_state else None
 
 
 class WorkPhaseAdditionalInfoResponseSchema(Schema):

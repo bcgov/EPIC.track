@@ -87,7 +87,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 WorkPhase.is_active.is_(True),
                 WorkPhase.is_deleted.is_(False),
             )
-            .order_by(PhaseCode.sort_order, WorkPhase.id)
+            .order_by(WorkPhase.id, PhaseCode.sort_order)
             .all()
         )
         result = []
@@ -122,7 +122,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             completed_ones = len(list(filter(lambda x: x.actual_date is not None, work_phase_events)))
             result_item["milestone_progress"] = (completed_ones / total_number_of_milestones) * 100
             days_passed = 0
-            if work_phase.work.current_phase_id == work_phase.phase_id:
+            if work_phase.work.current_work_phase_id == work_phase.id:
                 if work_phase.is_suspended:
                     days_passed = (work_phase.suspended_date.date() - work_phase.start_date.date()).days
                 else:
