@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { ETHeading2, ETPageContainer } from "../shared";
+import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
 import { ETTab, ETTabs } from "../shared/tab/Tab";
@@ -14,6 +14,7 @@ import Status from "./status";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
 import Issues from "./issues";
+import WorkState from "./WorkState";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -42,10 +43,11 @@ const WorkPlanContainer = () => {
         paddingBottom: "0rem !important",
       }}
     >
-      <Box>
+      <Box sx={{ display: "flex", gap: "16px" }}>
         <ETHeading2 bold color={Palette.primary.main}>
           {ctx.work?.title}
         </ETHeading2>
+        <WorkState />
       </Box>
       <Box
         sx={{
