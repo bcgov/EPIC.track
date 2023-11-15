@@ -48,7 +48,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
       {subsequentUpdates.slice(0, SHOW_MORE_THRESHOLD).map((update, index) => {
         const isSuccess = highlightFirstInTimeLineApproved && index === 0;
         return (
-          <TimelineItem>
+          <TimelineItem key={update.id}>
             <TimelineOppositeContent>
               <ETPreviewText
                 color={isSuccess ? Palette.neutral.dark : Palette.neutral.main}
@@ -99,7 +99,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
       <When condition={subsequentUpdates.length > SHOW_MORE_THRESHOLD}>
         <Collapse in={expand}>
           {subsequentUpdates.slice(SHOW_MORE_THRESHOLD).map((update) => (
-            <TimelineItem>
+            <TimelineItem key={update.id}>
               <TimelineOppositeContent>
                 <ETPreviewText color={Palette.neutral.main}>
                   <ReadMoreText>{update.description}</ReadMoreText>
@@ -117,7 +117,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
             </TimelineItem>
           ))}
         </Collapse>
-        <TimelineItem>
+        <TimelineItem key="expand-button">
           <Grid container>
             <Grid item>
               <Button
