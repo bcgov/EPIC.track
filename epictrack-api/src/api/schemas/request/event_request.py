@@ -3,11 +3,7 @@ from marshmallow import fields, pre_load, validate
 
 from api.schemas.request.custom_fields import IntegerList
 
-from .base import (
-    RequestBodyParameterSchema,
-    RequestPathParameterSchema,
-    RequestQueryParameterSchema,
-)
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
 class MilestoneEventBodyParameterSchema(RequestBodyParameterSchema):

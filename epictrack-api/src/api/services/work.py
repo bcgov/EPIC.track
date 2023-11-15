@@ -119,9 +119,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
             event_template_json = EventTemplateResponseSchema(many=True).dump(
                 event_templates
             )
-            work.current_phase_id = phases[0].id
+            # TODO: CHANGE TO CURRENT WORK PHASE ID
             work = work.flush()
             phase_start_date = work.start_date
+            first_phase = True
             for phase in phases:
                 end_date = phase_start_date + timedelta(days=phase.number_of_days)
                 work_phase = {
@@ -139,10 +140,14 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         event_template_json,
                     )
                 )
-                cls.handle_phase(
+                work_phase_id = cls.handle_phase(
                     work_phase, phase_event_templates
                 )
                 phase_start_date = end_date + timedelta(days=1)
+                if first_phase:
+                    work.current_work_phase_id = work_phase_id
+                    first_phase = False
+
             db.session.commit()
         except exc.IntegrityError as exception:
             db.session.rollback()
@@ -608,7 +613,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return False
 
     @classmethod
-    def handle_phase(cls, work_phase, phase_event_templates):  # pylint: disable=too-many-locals
+    def handle_phase(cls, work_phase, phase_event_templates) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))
         event_configurations = []
@@ -699,3 +704,4 @@ class WorkService:  # pylint: disable=too-many-public-methods
                             )
                         )
                     )
+        return work_phase.id

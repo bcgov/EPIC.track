@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Event Response response schema"""
-from marshmallow import EXCLUDE, fields, Schema
+from marshmallow import EXCLUDE, Schema, fields
 
 from api.models import Event
 from api.schemas.base import AutoSchemaBase
+
 from .event_configuration_response import EventConfigurationResponseSchema
 from .work_response import WorkPhaseResponseSchema
 
