@@ -1,6 +1,5 @@
 import React from "react";
 import { IconProps } from "./type";
-import { SvgIcon } from "@mui/material";
 
 const commonProps = {
   className: "sidebar-item",
@@ -163,22 +162,6 @@ const CollapseIcon = (props: IconProps) => {
     <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
       <path d="M1.46875 9.46875L7.4375 3.75C7.625 3.59375 7.8125 3.5 8 3.5C8.1875 3.5 8.34375 3.5625 8.5 3.6875L14.4688 9.40625C14.7812 9.71875 14.7812 10.1875 14.5 10.4688C14.2188 10.7812 13.75 10.7812 13.4375 10.5L8 5.3125L2.5 10.5625C2.21875 10.8438 1.71875 10.8438 1.4375 10.5312C1.15625 10.2188 1.15625 9.75 1.46875 9.46875Z" />
     </svg>
-  );
-};
-
-const ExpandMoreIcon = (props: IconProps) => {
-  return (
-    <SvgIcon fontSize="small">
-      <svg
-        {...commonProps}
-        {...props}
-        width="16"
-        height="16"
-        viewBox="0 0 16 16"
-      >
-        <path d="M1.46875 9.46875L7.4375 3.75C7.625 3.59375 7.8125 3.5 8 3.5C8.1875 3.5 8.34375 3.5625 8.5 3.6875L14.4688 9.40625C14.7812 9.71875 14.7812 10.1875 14.5 10.4688C14.2188 10.7812 13.75 10.7812 13.4375 10.5L8 5.3125L2.5 10.5625C2.21875 10.8438 1.71875 10.8438 1.4375 10.5312C1.15625 10.2188 1.15625 9.75 1.46875 9.46875Z" />
-      </svg>
-    </SvgIcon>
   );
 };
 
@@ -369,7 +352,6 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   ExclamationMediumIcon,
   ExclamationSmallIcon,
   PauseIcon,
-  ExpandMoreIcon,
 };
 
 export default icons;
