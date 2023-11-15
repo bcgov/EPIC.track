@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Grid } from "@mui/material";
+import { Button, Grid, Stack } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
 import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
@@ -7,7 +7,7 @@ import { ActiveChip, ErrorChip } from "../../../shared/chip/ETChip";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { Palette } from "../../../../styles/theme";
-import { Else, If, Then } from "react-if";
+import { Else, If, Then, When } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
 import IssueHistory from "./IssueHistory";
@@ -19,13 +19,13 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const CloneIcon: React.FC<IconProps> = icons["CloneIcon"];
 
   const {
-    setIssueToEdit,
     setShowIssuesForm,
     approveIssue,
     issueToApproveId,
     setIssueToApproveId,
     setUpdateToClone,
     setShowCloneForm,
+    setUpdateToEdit,
   } = React.useContext(IssuesContext);
 
   const handleApproveIssue = () => {
@@ -36,7 +36,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   return (
     <>
       <Grid container spacing={2}>
-        <Grid item lg={6} sm={12}>
+        <Grid item lg={6} xs={12}>
           <GrayBox>
             <Grid container spacing={2}>
               <Grid
@@ -120,7 +120,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                     borderColor: "transparent",
                   }}
                   onClick={() => {
-                    setIssueToEdit(issue);
+                    setUpdateToEdit(latestUpdate);
                     setShowIssuesForm(true);
                   }}
                 >
@@ -131,23 +131,20 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
           </GrayBox>
         </Grid>
 
-        <Grid
-          item
-          lg={6}
-          sm={12}
-          container
-          spacing={0}
-          justifyContent={"flex-start"}
-          alignItems={"flex-start"}
-        >
-          <Grid item xs={12}>
-            <ETCaption1 bold color={Palette.neutral.dark}>
-              ISSUE HISTORY
-            </ETCaption1>
-          </Grid>
-          <Grid item xs={12}>
-            <IssueHistory issue={issue} />
-          </Grid>
+        <Grid item lg={6} xs={12}>
+          <When condition={issue.updates.length > 1}>
+            <Stack
+              sx={{
+                padding: "16px",
+              }}
+              direction="column"
+            >
+              <ETCaption1 bold color={Palette.neutral.dark}>
+                ISSUE HISTORY
+              </ETCaption1>
+              <IssueHistory issue={issue} />
+            </Stack>
+          </When>
         </Grid>
       </Grid>
 
