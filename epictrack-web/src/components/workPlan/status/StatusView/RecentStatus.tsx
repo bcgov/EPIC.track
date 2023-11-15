@@ -15,8 +15,7 @@ const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 const CloneIcon: React.FC<IconProps> = Icons["CloneIcon"];
 
 const RecentStatus = () => {
-  const { statuses, setStatuses, getWorkStatuses } =
-    React.useContext(WorkplanContext);
+  const { statuses } = React.useContext(WorkplanContext);
   const {
     setIsCloning,
     setShowStatusForm,

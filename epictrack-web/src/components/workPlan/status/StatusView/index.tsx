@@ -3,7 +3,7 @@ import NoDataEver from "../../../shared/NoDataEver";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
 import RecentStatus from "./RecentStatus";
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import StatusHistory from "./StatusHistory";
 import WarningBox from "../../../shared/warningBox";
 
@@ -25,12 +25,14 @@ const StatusView = () => {
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       )}
-      {statuses.length && !statuses[0].is_approved && (
-        <WarningBox
-          title="The Work status is out of date"
-          subTitle="Please provide an updated status"
-          isTitleBold={true}
-        />
+      {statuses.length != 0 && !statuses[0].is_approved && (
+        <Box sx={{ paddingBottom: "16px" }}>
+          <WarningBox
+            title="The Work status is out of date"
+            subTitle="Please provide an updated status"
+            isTitleBold={true}
+          />
+        </Box>
       )}
       <Grid container spacing={2}>
         <Grid item xs={6}>
