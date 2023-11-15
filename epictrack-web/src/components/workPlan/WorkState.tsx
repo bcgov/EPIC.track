@@ -1,19 +1,8 @@
-import React, { useContext } from "react";
-import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
+import { useContext } from "react";
+import { ETCaption3 } from "../shared";
 import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
-import { ETTab, ETTabs } from "../shared/tab/Tab";
-import { SxProps } from "@mui/material";
-import TabPanel from "../shared/tab/TabPanel";
-import PhaseContainer from "./phase/PhaseContainer";
 import { WorkplanContext } from "./WorkPlanContext";
-import TeamContainer from "./team/TeamContainer";
-import FirstNationContainer from "./firstNations/FirstNationContainer";
-import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
-import Status from "./status";
-import Icons from "../icons";
-import { IconProps } from "../icons/type";
-import Issues from "./issues";
 import { Case, Switch } from "react-if";
 
 const WorkState = () => {
