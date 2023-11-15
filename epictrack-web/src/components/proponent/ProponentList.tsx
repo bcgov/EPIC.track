@@ -31,7 +31,6 @@ export default function ProponentList() {
   }, []);
 
   const proponents = React.useMemo(() => ctx.data as Proponent[], [ctx.data]);
-  console.log(proponents);
   const columns = React.useMemo<MRT_ColumnDef<Proponent>[]>(
     () => [
       {
