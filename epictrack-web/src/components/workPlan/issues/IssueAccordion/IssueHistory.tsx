@@ -13,14 +13,14 @@ import ReadMoreText from "../../../shared/ReadMoreText";
 import TimelineContent, {
   timelineContentClasses,
 } from "@mui/lab/TimelineContent";
-import { Button, Collapse, Grid } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Button, Collapse, Grid, useTheme } from "@mui/material";
 import { When } from "react-if";
 import { IconProps } from "../../../icons/type";
 import icons from "../../../icons";
 import { IssuesContext } from "../IssuesContext";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
+  const theme = useTheme();
   const { setUpdateToEdit, setShowIssuesForm } = useContext(IssuesContext);
 
   const [expand, setExpand] = useState(false);
@@ -29,6 +29,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const subsequentUpdates = issue.updates.slice(1);
   const highlightFirstInTimeLineApproved = !latestUpdate.is_approved;
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
+  const ExpandIcon: React.FC<IconProps> = icons["ExpandIcon"];
 
   const SHOW_MORE_THRESHOLD = 3;
 
@@ -117,18 +118,18 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
           ))}
         </Collapse>
         <TimelineItem>
-          <Grid container alignItems={"center"} justifyContent={"center"}>
+          <Grid container>
             <Grid item>
               <Button
                 variant="text"
                 startIcon={
-                  <ExpandMoreIcon
-                    sx={{
-                      transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
-                      transition: (theme: any) =>
-                        theme.transitions.create("transform", {
-                          duration: theme.transitions.duration.shortest,
-                        }),
+                  <ExpandIcon
+                    style={{
+                      transform: !expand ? "rotate(0deg)" : "rotate(-180deg)",
+                      transition: theme.transitions.create("transform", {
+                        duration: theme.transitions.duration.shortest,
+                      }),
+                      fill: Palette.primary.accent.main,
                     }}
                   />
                 }
