@@ -53,7 +53,7 @@ const WorkList = () => {
     project: setProjects,
     ministry: setMinistries,
     eao_team: setTeams,
-    current_phase: setPhases,
+    current_work_phase: setPhases,
   };
 
   React.useEffect(() => {
@@ -134,7 +134,7 @@ const WorkList = () => {
         filterSelectOptions: teams,
       },
       {
-        accessorKey: "current_phase.name",
+        accessorKey: "current_work_phase.name",
         header: "Current Phase",
         filterVariant: "multi-select",
         filterSelectOptions: phases,
