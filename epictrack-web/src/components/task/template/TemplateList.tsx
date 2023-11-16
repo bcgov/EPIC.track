@@ -14,6 +14,8 @@ import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 import templateService from "../../../services/taskService/templateService";
+import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
+import TableFilter from "../../shared/filterSelect/TableFilter";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -75,6 +77,13 @@ const TemplateList = () => {
     setWorkTypes(workTypes);
   }, [templates]);
 
+  const statuses = getSelectFilterOptions(
+    templates,
+    "is_active",
+    (value) => (value ? "Active" : "Inactive"),
+    (value) => value
+  );
+
   const handleDelete = (id: number) => {
     setShowDeleteDialog(true);
     setDeleteTemplateId(id);
@@ -106,23 +115,81 @@ const TemplateList = () => {
         filterVariant: "multi-select",
         header: "EA Act",
         filterSelectOptions: eaActs,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="eaActFilter"
+            />
+          );
+        },
       },
       {
         accessorKey: "work_type.name",
         filterVariant: "multi-select",
         header: "Work Type",
         filterSelectOptions: workTypes,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="workTypeFilter"
+            />
+          );
+        },
       },
       {
         accessorKey: "phase.name",
         header: "Phase",
         filterVariant: "multi-select",
         filterSelectOptions: phases,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="phaseFilter"
+            />
+          );
+        },
       },
       {
         accessorKey: "is_active",
-        header: "Active",
-        filterVariant: "checkbox",
+        size: 80,
+        header: "Status",
+        filterVariant: "multi-select",
+        filterSelectOptions: statuses,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="statusFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statuses.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id);
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
