@@ -71,7 +71,7 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
 
         work_status.is_approved = True
         work_status.approved_by = TokenInfo.get_username()
-        work_status.approved_date = datetime.now()
+        work_status.approved_date = datetime.utcnow()
 
         work_status.save()
 
