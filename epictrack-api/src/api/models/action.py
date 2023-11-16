@@ -33,6 +33,8 @@ class ActionEnum(enum.Enum):
     SET_WORK_DECISION_MAKER = 8
     ADD_PHASE = 9
     CREATE_WORK = 10
+    CHANGE_PHASE_END_EVENT = 11
+    SET_FEDERAL_INVOLVEMENT = 12
 
 
 class Action(db.Model, CodeTableVersioned):

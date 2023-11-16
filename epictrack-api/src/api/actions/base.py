@@ -27,5 +27,7 @@ ACTION_HANDLER_CLASS_MAPS = {
     ActionEnum.SET_EVENTS_STATUS: "SetEventsStatus",
     ActionEnum.SET_PHASES_STATUS: "SetPhasesStatus",
     ActionEnum.SET_WORK_DECISION_MAKER: "SetWorkDecisionMaker",
-    ActionEnum.SET_WORK_STATE: "SetWorkState"
+    ActionEnum.SET_WORK_STATE: "SetWorkState",
+    ActionEnum.CHANGE_PHASE_END_EVENT: "ChangePhaseEndEvent",
+    ActionEnum.SET_FEDERAL_INVOLVEMENT: "SetFederalInvolvement"
 }

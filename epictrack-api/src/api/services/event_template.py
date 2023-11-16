@@ -286,6 +286,8 @@ class EventTemplateService:
                 )
             )
             for action in actions_list:
+                if type(action["action_id"]) is str:
+                    print("i")
                 selected_action = next(
                     (
                         e
