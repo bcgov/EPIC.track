@@ -11,6 +11,7 @@ import { Else, If, Then } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
 import IssueHistory from "./IssueHistory";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
@@ -49,7 +50,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Grid item xs={"auto"}>
                   <ETCaption1 bold color={Palette.neutral.dark}>
                     {moment(issue.created_at)
-                      .format("MMM.DD YYYY")
+                      .format(MONTH_DAY_YEAR)
                       .toUpperCase()}
                   </ETCaption1>
                 </Grid>

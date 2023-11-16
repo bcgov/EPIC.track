@@ -13,6 +13,7 @@ import ReadMoreText from "../../../shared/ReadMoreText";
 import TimelineContent, {
   timelineContentClasses,
 } from "@mui/lab/TimelineContent";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
@@ -60,7 +61,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
             </TimelineSeparator>
             <TimelineContent>
               <ETCaption3 color={Palette.neutral.main}>
-                {moment(issue.created_at).format("MMM.DD YYYY")}
+                {moment(issue.created_at).format(MONTH_DAY_YEAR)}
               </ETCaption3>
             </TimelineContent>
           </TimelineItem>

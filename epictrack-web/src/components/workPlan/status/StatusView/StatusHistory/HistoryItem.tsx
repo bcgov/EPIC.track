@@ -16,6 +16,7 @@ import { StatusContext } from "../../StatusContext";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import { If, Then } from "react-if";
 import ReadMoreText from "../../../../shared/ReadMoreText";
+import { MONTH_DAY_YEAR } from "../../../../../constants/application-constant";
 
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
@@ -69,7 +70,7 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
           <TimelineContent>
             <Box>
               <ETStatusHistoryDate>
-                {moment(status.posted_date).format("MMM.DD YYYY")}
+                {moment(status.posted_date).format(MONTH_DAY_YEAR)}
               </ETStatusHistoryDate>
             </Box>
           </TimelineContent>
