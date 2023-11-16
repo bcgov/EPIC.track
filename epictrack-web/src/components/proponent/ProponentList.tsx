@@ -1,6 +1,5 @@
-import React from "react";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
@@ -11,13 +10,15 @@ import { Proponent } from "../../models/proponent";
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import TableFilter from "../shared/filterSelect/TableFilter";
 
 export default function ProponentList() {
-  const [proponentId, setProponentId] = React.useState<number>();
-  const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  const ctx = React.useContext(MasterContext);
+  const [proponentId, setProponentId] = useState<number>();
+  const [staffs, setStaffs] = useState<Staff[]>([]);
+  const ctx = useContext(MasterContext);
 
-  React.useEffect(() => {
+  useEffect(() => {
     ctx.setForm(<ProponentForm proponentId={proponentId} />);
   }, [proponentId]);
 
@@ -26,12 +27,22 @@ export default function ProponentList() {
     ctx.setShowModalForm(true);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     ctx.setService(proponentService);
   }, []);
 
-  const proponents = React.useMemo(() => ctx.data as Proponent[], [ctx.data]);
-  const columns = React.useMemo<MRT_ColumnDef<Proponent>[]>(
+  const proponents = useMemo(() => ctx.data as Proponent[], [ctx.data]);
+  const statusesOptions = getSelectFilterOptions(
+    proponents,
+    "is_active",
+    (value) => (value ? "Active" : "Inactive"),
+    (value) => value
+  );
+
+  console.log("proponents", proponents);
+  console.log("statusesOptions", statusesOptions);
+
+  const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
     () => [
       {
         accessorKey: "name",
@@ -50,8 +61,32 @@ export default function ProponentList() {
       },
       {
         accessorKey: "is_active",
-        header: "Active",
-        filterVariant: "checkbox",
+        header: "Status",
+        filterVariant: "multi-select",
+        filterSelectOptions: statusesOptions,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statusesOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id);
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
@@ -64,7 +99,7 @@ export default function ProponentList() {
         ),
       },
     ],
-    [staffs]
+    [staffs, proponents]
   );
 
   const getStaffs = async () => {
@@ -73,7 +108,7 @@ export default function ProponentList() {
       setStaffs(staffsResult.data as never);
     }
   };
-  React.useEffect(() => {
+  useEffect(() => {
     getStaffs();
   }, []);
 
