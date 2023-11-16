@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
@@ -9,6 +9,8 @@ import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import TableFilter from "../shared/filterSelect/TableFilter";
+import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
@@ -56,6 +58,22 @@ const ProjectList = () => {
     setEnvRegions(envRegions);
   }, [projects]);
 
+  const statusesOptions = useMemo(
+    () =>
+      getSelectFilterOptions(
+        projects,
+        "is_active",
+        (value) => (value ? "Active" : "Inactive"),
+        (value) => value
+      ),
+    [projects]
+  );
+
+  const envRegionsOptions = getSelectFilterOptions(
+    projects.map((project) => project.region_env),
+    "name"
+  );
+
   const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
@@ -73,23 +91,116 @@ const ProjectList = () => {
         header: "Type",
         filterVariant: "multi-select",
         filterSelectOptions: types,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > types.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "sub_type.name",
         header: "Sub Type",
-        filterVariant: "multi-select",
         filterSelectOptions: subTypes,
+        filterVariant: "multi-select",
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > subTypes.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "region_env.name",
         header: "ENV Region",
+        filterSelectOptions: envRegionsOptions,
         filterVariant: "multi-select",
-        filterSelectOptions: envRegions,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > envRegionsOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "is_active",
-        header: "Active",
-        filterVariant: "checkbox",
+        header: "Status",
+        filterVariant: "multi-select",
+        filterSelectOptions: statusesOptions,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statusesOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id);
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
