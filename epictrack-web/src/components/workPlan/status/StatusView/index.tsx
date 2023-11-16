@@ -26,11 +26,11 @@ const StatusView = () => {
     if (!lastApprovedStatus) {
       return false;
     }
-    console.log(lastApprovedStatus.posted_date);
+
     const daysAgo = moment().subtract(STATUS_DATE_THRESHOLD, "days");
     const NDaysAgo = dateUtils.diff(
       daysAgo.toLocaleString(),
-      lastApprovedStatus.posted_date,
+      lastApprovedStatus?.approved_date,
       "days"
     );
 
