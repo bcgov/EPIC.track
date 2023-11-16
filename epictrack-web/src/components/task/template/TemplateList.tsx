@@ -122,7 +122,7 @@ const TemplateList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="eaActFilter"
             />
           );
         },
@@ -139,7 +139,7 @@ const TemplateList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="workTypeFilter"
             />
           );
         },
@@ -156,7 +156,7 @@ const TemplateList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="phaseFilter"
             />
           );
         },
@@ -174,7 +174,7 @@ const TemplateList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="statusFilter"
             />
           );
         },
