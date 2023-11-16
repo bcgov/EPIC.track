@@ -10,6 +10,7 @@ import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
+import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -30,6 +31,17 @@ const StaffList = () => {
   }, []);
 
   const staff = React.useMemo(() => ctx.data as Staff[], [ctx.data]);
+
+  const statusesOptions = React.useMemo(
+    () =>
+      getSelectFilterOptions(
+        staff,
+        "is_active",
+        (value) => (value ? "Active" : "Inactive"),
+        (value) => value
+      ),
+    [staff]
+  );
 
   React.useEffect(() => {
     if (staff) {
@@ -80,8 +92,32 @@ const StaffList = () => {
       },
       {
         accessorKey: "is_active",
-        header: "Active",
-        filterVariant: "checkbox",
+        header: "Status",
+        filterVariant: "multi-select",
+        filterSelectOptions: statusesOptions,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statusesOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id);
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
