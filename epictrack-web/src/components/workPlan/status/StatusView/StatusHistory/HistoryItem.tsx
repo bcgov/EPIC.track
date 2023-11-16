@@ -14,7 +14,7 @@ import { IconProps } from "../../../../icons/type";
 import Icons from "../../../../icons";
 import { StatusContext } from "../../StatusContext";
 import { WorkplanContext } from "../../../WorkPlanContext";
-import { If, Then } from "react-if";
+import { If, Then, When } from "react-if";
 import ReadMoreText from "../../../../shared/ReadMoreText";
 import { MONTH_DAY_YEAR } from "../../../../../constants/application-constant";
 
@@ -86,25 +86,23 @@ const HistoryItem = ({ status }: HistoryItemProps) => {
             }
           >
             <ReadMoreText>{status?.description}</ReadMoreText>
-            <If condition={hasPermission() && statusHighlight === status.id}>
-              <Then>
-                <Button
-                  onClick={() => {
-                    setShowStatusForm(true);
-                    setStatus(status);
-                  }}
-                  sx={{
-                    padding: "12px 8px",
-                    gap: "8px",
-                    backgroundColor: "inherit",
-                    borderColor: "transparent",
-                  }}
-                >
-                  <PencilEditIcon />
-                  Edit
-                </Button>
-              </Then>
-            </If>
+            <When condition={hasPermission() && statusHighlight === status.id}>
+              <Button
+                onClick={() => {
+                  setShowStatusForm(true);
+                  setStatus(status);
+                }}
+                sx={{
+                  padding: "12px 8px",
+                  gap: "8px",
+                  backgroundColor: "inherit",
+                  borderColor: "transparent",
+                }}
+              >
+                <PencilEditIcon />
+                Edit
+              </Button>
+            </When>
           </ETPreviewText>
         </Box>
       </Box>
