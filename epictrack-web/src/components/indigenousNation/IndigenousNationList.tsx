@@ -1,6 +1,5 @@
-import React from "react";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, IconButton, Grid, Chip } from "@mui/material";
+import React, { useMemo } from "react";
+import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
@@ -11,6 +10,8 @@ import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { MasterContext } from "../shared/MasterContext";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import TableFilter from "../shared/filterSelect/TableFilter";
+import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
@@ -40,6 +41,17 @@ export default function IndigenousNationList() {
     [ctx.data]
   );
 
+  const statusesOptions = useMemo(
+    () =>
+      getSelectFilterOptions(
+        indigenousNations,
+        "is_active",
+        (value) => (value ? "Active" : "Inactive"),
+        (value) => value
+      ),
+    [indigenousNations]
+  );
+
   const columns = React.useMemo<MRT_ColumnDef<FirstNation>[]>(
     () => [
       {
@@ -59,8 +71,32 @@ export default function IndigenousNationList() {
       },
       {
         accessorKey: "is_active",
-        header: "Active",
-        filterVariant: "checkbox",
+        header: "Status",
+        filterVariant: "multi-select",
+        filterSelectOptions: statusesOptions,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statusesOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id);
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (
@@ -73,7 +109,7 @@ export default function IndigenousNationList() {
         ),
       },
     ],
-    [staffs]
+    [staffs, indigenousNations]
   );
 
   const getStaffs = async () => {
