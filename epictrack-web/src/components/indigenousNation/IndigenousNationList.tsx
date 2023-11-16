@@ -52,8 +52,6 @@ export default function IndigenousNationList() {
     [indigenousNations]
   );
 
-  console.log(indigenousNations);
-
   const columns = React.useMemo<MRT_ColumnDef<FirstNation>[]>(
     () => [
       {
