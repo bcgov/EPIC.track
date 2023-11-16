@@ -53,7 +53,6 @@ export default function TemplateForm({ ...props }) {
   const codeTypes: { [x: string]: any } = {
     ea_acts: setEAActs,
     work_types: setWorkTypes,
-    phases: setPhases,
   };
   const getCodes = async (code: Code) => {
     const codeResult = await codeService.getCodes(code);
