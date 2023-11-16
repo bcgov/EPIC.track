@@ -92,13 +92,13 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: ({ row }) => (
+        Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle
             to="#"
             onClick={() => onEdit(row.original.id)}
             titleText={row.original.title}
           >
-            {row.original.title}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
