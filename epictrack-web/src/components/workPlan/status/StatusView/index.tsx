@@ -6,6 +6,9 @@ import RecentStatus from "./RecentStatus";
 import { Box, Grid } from "@mui/material";
 import StatusHistory from "./StatusHistory";
 import WarningBox from "../../../shared/warningBox";
+import { dateUtils } from "../../../../utils";
+import moment from "moment";
+import { When } from "react-if";
 
 const StatusView = () => {
   const { statuses } = React.useContext(WorkplanContext);
@@ -15,17 +18,36 @@ const StatusView = () => {
     setShowStatusForm(true);
   };
 
+  const STATUS_DATE_THRESHOLD = 7;
+
+  const isStatusOutOfDate = () => {
+    const lastApprovedStatus = statuses.find((status) => status.is_approved);
+
+    if (!lastApprovedStatus) {
+      return false;
+    }
+    console.log(lastApprovedStatus.posted_date);
+    const daysAgo = moment().subtract(STATUS_DATE_THRESHOLD, "days");
+    const NDaysAgo = dateUtils.diff(
+      daysAgo.toLocaleString(),
+      lastApprovedStatus.posted_date,
+      "days"
+    );
+
+    return NDaysAgo > 0;
+  };
+
   return (
     <>
-      {statuses.length === 0 && (
+      <When condition={statuses.length === 0}>
         <NoDataEver
           title="You don't have any Statuses yet"
           subTitle="Create your first Status"
           addNewButtonText="Add Status"
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
-      )}
-      {statuses.length != 0 && !statuses[0].is_approved && (
+      </When>
+      <When condition={isStatusOutOfDate()}>
         <Box sx={{ paddingBottom: "16px" }}>
           <WarningBox
             title="The Work status is out of date"
@@ -33,14 +55,18 @@ const StatusView = () => {
             isTitleBold={true}
           />
         </Box>
-      )}
+      </When>
       <Grid container spacing={2}>
-        <Grid item xs={6}>
-          {statuses.length > 0 && <RecentStatus />}
-        </Grid>
-        <Grid item xs={6}>
-          {statuses.length > 1 && <StatusHistory />}
-        </Grid>
+        <When condition={statuses.length > 0}>
+          <Grid item xs={6}>
+            <RecentStatus />
+          </Grid>
+        </When>
+        <When condition={statuses.length > 1}>
+          <Grid item xs={6}>
+            <StatusHistory />
+          </Grid>
+        </When>
       </Grid>
     </>
   );
