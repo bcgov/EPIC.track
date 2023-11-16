@@ -79,9 +79,9 @@ const ProjectList = () => {
       {
         accessorKey: "name",
         header: "Project Name",
-        Cell: ({ cell, row }) => (
+        Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
-            {cell.getValue<string>()}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
