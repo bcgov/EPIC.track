@@ -9,8 +9,6 @@ interface IssuesContextProps {
   showIssuesForm: boolean;
   setShowIssuesForm: React.Dispatch<React.SetStateAction<boolean>>;
   isIssuesLoading: boolean;
-  issueToEdit: WorkIssue | null;
-  setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
   addIssue: (issueForm: IssueForm) => Promise<void>;
   updateIssue: (issueForm: IssueForm) => Promise<void>;
   approveIssue: (issueId: number, issueUpdateId: number) => Promise<void>;
@@ -23,6 +21,8 @@ interface IssuesContextProps {
   showCloneForm: boolean;
   setShowCloneForm: React.Dispatch<React.SetStateAction<boolean>>;
   cloneIssueUpdate: (cloneForm: { description: string }) => Promise<void>;
+  updateToEdit: WorkIssueUpdate | null;
+  setUpdateToEdit: React.Dispatch<React.SetStateAction<WorkIssueUpdate | null>>;
 }
 
 interface IssueContainerRouteParams extends URLSearchParams {
@@ -33,8 +33,6 @@ export const IssuesContext = createContext<IssuesContextProps>({
   showIssuesForm: false,
   setShowIssuesForm: () => ({}),
   isIssuesLoading: true,
-  issueToEdit: null,
-  setIssueToEdit: () => ({}),
   addIssue: (_: IssueForm) => {
     return Promise.resolve();
   },
@@ -55,6 +53,8 @@ export const IssuesContext = createContext<IssuesContextProps>({
   cloneIssueUpdate: (_: { description: string }) => {
     return Promise.resolve();
   },
+  updateToEdit: null,
+  setUpdateToEdit: () => ({}),
 });
 
 export const LASTEST_ISSUE_UPDATE_INDEX = 0;
@@ -66,7 +66,10 @@ export const IssuesProvider = ({
 }) => {
   const [showIssuesForm, setShowIssuesForm] = useState(false);
   const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(true);
-  const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
+
+  const [updateToEdit, setUpdateToEdit] = useState<WorkIssueUpdate | null>(
+    null
+  );
 
   const [showCloneForm, setShowCloneForm] = useState<boolean>(false);
   const [updateToClone, setUpdateToClone] = useState<WorkIssueUpdate | null>(
@@ -113,29 +116,10 @@ export const IssuesProvider = ({
     }
   };
 
-  const getDescriptionUpdates = (issueForm: IssueForm) => {
-    if (!issueToEdit || !issueForm.description_id) return [];
-
-    return (
-      issueToEdit.updates
-        ?.filter(
-          (update) =>
-            update.id === issueForm.description_id &&
-            update.description !== issueForm.description
-        )
-        .map((update) => ({
-          ...update,
-          description: issueForm.description,
-        })) ?? []
-    );
-  };
-
   const updateIssue = async (issueForm: IssueForm) => {
-    if (!workId || !issueToEdit) return;
+    if (!workId || !updateToEdit) return;
     setIsIssuesLoading(true);
     try {
-      const descriptionUpdates = getDescriptionUpdates(issueForm);
-
       const {
         title,
         description,
@@ -152,9 +136,13 @@ export const IssuesProvider = ({
         expected_resolution_date,
         is_active,
         is_high_priority,
-        updates: descriptionUpdates,
+        updates: [{ ...updateToEdit, description: issueForm.description }],
       };
-      await issueService.update(workId, String(issueToEdit.id), request);
+      await issueService.update(
+        workId,
+        String(updateToEdit.work_issue_id),
+        request
+      );
       loadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
@@ -195,8 +183,6 @@ export const IssuesProvider = ({
         showIssuesForm,
         setShowIssuesForm,
         isIssuesLoading,
-        issueToEdit,
-        setIssueToEdit,
         addIssue,
         issueToApproveId,
         setIssueToApproveId,
@@ -207,6 +193,8 @@ export const IssuesProvider = ({
         showCloneForm,
         setShowCloneForm,
         cloneIssueUpdate,
+        updateToEdit,
+        setUpdateToEdit,
       }}
     >
       {children}
