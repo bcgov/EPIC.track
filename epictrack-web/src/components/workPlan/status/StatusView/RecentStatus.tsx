@@ -9,6 +9,7 @@ import { StatusContext } from "../StatusContext";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { useAppSelector } from "../../../../hooks";
 import { Else, If, Then, When } from "react-if";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -27,7 +28,6 @@ const RecentStatus = () => {
   return (
     <GrayBox
       sx={{
-        width: "50%",
         gap: "16px",
         display: "flex",
         flexDirection: "column",
@@ -43,7 +43,9 @@ const RecentStatus = () => {
         }}
       >
         <ETCaption1 bold sx={{ letterSpacing: "0.39px" }}>
-          {moment(statuses[0]?.posted_date).format("MMM.DD YYYY").toUpperCase()}
+          {moment(statuses[0]?.posted_date)
+            .format(MONTH_DAY_YEAR)
+            .toUpperCase()}
         </ETCaption1>
         <If condition={!statuses[0].is_approved}>
           <Then>

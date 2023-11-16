@@ -9,6 +9,7 @@ import {
 } from "../../../shared/chip/ETChip";
 import { ETParagraph } from "../../../shared";
 import moment from "moment";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
   return (
@@ -36,7 +37,7 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
         <Grid item xs={"auto"} container justifyContent={"flex-end"}>
           <AccordionSummaryItem
             title="Last Update"
-            content={moment(issue.updated_at).format("MMM.DD YYYY")}
+            content={moment(issue.updated_at).format(MONTH_DAY_YEAR)}
             enableTooltip={true}
             sx={{
               ml: "12px",

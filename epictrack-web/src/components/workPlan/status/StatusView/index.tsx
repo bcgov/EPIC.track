@@ -2,11 +2,10 @@ import React from "react";
 import NoDataEver from "../../../shared/NoDataEver";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
-import StatusOutOfDateBanner from "./StatusOutOfDateBanner";
 import RecentStatus from "./RecentStatus";
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import StatusHistory from "./StatusHistory";
-import { Status } from "../../../../models/status";
+import WarningBox from "../../../shared/warningBox";
 
 const StatusView = () => {
   const { statuses } = React.useContext(WorkplanContext);
@@ -26,13 +25,23 @@ const StatusView = () => {
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       )}
-      {statuses.length > 0 && !statuses[0].is_approved && (
-        <StatusOutOfDateBanner />
+      {statuses.length != 0 && !statuses[0].is_approved && (
+        <Box sx={{ paddingBottom: "16px" }}>
+          <WarningBox
+            title="The Work status is out of date"
+            subTitle="Please provide an updated status"
+            isTitleBold={true}
+          />
+        </Box>
       )}
-      <Box sx={{ display: "flex", gap: "24px" }}>
-        {statuses.length > 0 && <RecentStatus />}
-        {statuses.length > 1 && <StatusHistory />}
-      </Box>
+      <Grid container spacing={2}>
+        <Grid item xs={6}>
+          {statuses.length > 0 && <RecentStatus />}
+        </Grid>
+        <Grid item xs={6}>
+          {statuses.length > 1 && <StatusHistory />}
+        </Grid>
+      </Grid>
     </>
   );
 };

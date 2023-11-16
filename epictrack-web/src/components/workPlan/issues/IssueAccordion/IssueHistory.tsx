@@ -18,6 +18,7 @@ import { When } from "react-if";
 import { IconProps } from "../../../icons/type";
 import icons from "../../../icons";
 import { IssuesContext } from "../IssuesContext";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
@@ -90,7 +91,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
             </TimelineSeparator>
             <TimelineContent>
               <ETCaption3 color={Palette.neutral.main}>
-                {moment(issue.created_at).format("MMM.DD YYYY")}
+                {moment(issue.created_at).format(MONTH_DAY_YEAR)}
               </ETCaption3>
             </TimelineContent>
           </TimelineItem>

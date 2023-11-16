@@ -11,6 +11,7 @@ import { Palette } from "../../../../styles/theme";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { Else, If, Then, When } from "react-if";
 import moment from "moment";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 export const ThirtySixtyNinety = () => {
   const { work, workPhases, issues, statuses } =
@@ -78,7 +79,7 @@ export const ThirtySixtyNinety = () => {
           <ETCaption2 bold mb={"0.5em"}>
             Issues{" "}
             {latestIssue?.updated_at
-              ? `(${moment(latestIssue?.updated_at).format("MMM.DD YYYY")})`
+              ? `(${moment(latestIssue?.updated_at).format(MONTH_DAY_YEAR)})`
               : ""}
           </ETCaption2>
           <ETPreviewBox>
