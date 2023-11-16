@@ -103,9 +103,9 @@ const TemplateList = () => {
       {
         accessorKey: "name",
         header: "Name",
-        Cell: ({ cell, row }) => (
+        Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle to={"#"} onClick={() => onViewDetails(row.original.id)}>
-            {cell.getValue<string>()}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
