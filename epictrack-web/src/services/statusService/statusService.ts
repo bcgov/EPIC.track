@@ -11,7 +11,6 @@ class StatusService {
     return await http.PostRequest(query, JSON.stringify(data));
   }
   async update(workId: number, statusId: number, data: any) {
-    console.log("HERE");
     const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
       ":work_id",
       workId.toString()

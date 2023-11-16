@@ -18,6 +18,7 @@ import { When } from "react-if";
 import { IconProps } from "../../../icons/type";
 import icons from "../../../icons";
 import { IssuesContext } from "../IssuesContext";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
@@ -48,7 +49,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
       {subsequentUpdates.slice(0, SHOW_MORE_THRESHOLD).map((update, index) => {
         const isSuccess = highlightFirstInTimeLineApproved && index === 0;
         return (
-          <TimelineItem>
+          <TimelineItem key={update.id}>
             <TimelineOppositeContent>
               <ETPreviewText
                 color={isSuccess ? Palette.neutral.dark : Palette.neutral.main}
@@ -90,7 +91,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
             </TimelineSeparator>
             <TimelineContent>
               <ETCaption3 color={Palette.neutral.main}>
-                {moment(issue.created_at).format("MMM.DD YYYY")}
+                {moment(issue.created_at).format(MONTH_DAY_YEAR)}
               </ETCaption3>
             </TimelineContent>
           </TimelineItem>
@@ -99,7 +100,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
       <When condition={subsequentUpdates.length > SHOW_MORE_THRESHOLD}>
         <Collapse in={expand}>
           {subsequentUpdates.slice(SHOW_MORE_THRESHOLD).map((update) => (
-            <TimelineItem>
+            <TimelineItem key={update.id}>
               <TimelineOppositeContent>
                 <ETPreviewText color={Palette.neutral.main}>
                   <ReadMoreText>{update.description}</ReadMoreText>
@@ -117,7 +118,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
             </TimelineItem>
           ))}
         </Collapse>
-        <TimelineItem>
+        <TimelineItem key="expand-button">
           <Grid container>
             <Grid item>
               <Button

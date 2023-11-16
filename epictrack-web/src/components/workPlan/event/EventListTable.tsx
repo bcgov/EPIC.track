@@ -24,6 +24,7 @@ import {
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
 import { EventContext } from "./EventContext";
+import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -62,14 +63,14 @@ const EventListTable = ({
   const startDateFilterOptions = getSelectFilterOptions(
     events,
     "start_date",
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
   );
   const endDateFilterOptions = getSelectFilterOptions(
     events,
     "end_date",
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY"),
-    (value) => dateUtils.formatDate(String(value), "MMM.DD YYYY")
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
   );
   const numberOfDaysFilterOptions = getSelectFilterOptions(
     events,
@@ -190,7 +191,7 @@ const EventListTable = ({
           const value: string = row.getValue(id) || "";
 
           return filterValue.includes(
-            dateUtils.formatDate(String(value), "MMM.DD YYYY")
+            dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
           );
         },
         filterSelectOptions: startDateFilterOptions,
@@ -200,7 +201,7 @@ const EventListTable = ({
             bold={row.original.type === EVENT_TYPE.MILESTONE}
             enableEllipsis={true}
           >
-            {dateUtils.formatDate(cell.getValue<string>(), "MMM.DD YYYY")}
+            {dateUtils.formatDate(cell.getValue<string>(), MONTH_DAY_YEAR)}
           </ETParagraph>
         ),
       },
@@ -234,7 +235,7 @@ const EventListTable = ({
           return filterValue.includes(
             value === ""
               ? value
-              : dateUtils.formatDate(String(value), "MMM.DD YYYY")
+              : dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
           );
         },
         Cell: ({ cell, row }) => (
@@ -245,7 +246,7 @@ const EventListTable = ({
             {cell.getValue<string>() &&
               dateUtils.formatDate(
                 String(cell.getValue<string>()),
-                "MMM.DD YYYY"
+                MONTH_DAY_YEAR
               )}
           </ETParagraph>
         ),

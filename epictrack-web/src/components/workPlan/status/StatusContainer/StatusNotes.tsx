@@ -1,7 +1,6 @@
 import React from "react";
 import RichTextEditor from "../../../shared/richTextEditor";
 import { WorkplanContext } from "../../WorkPlanContext";
-import statusService from "../../../../services/statusService/statusService";
 import { StatusContext } from "../StatusContext";
 import { showNotification } from "../../../shared/notificationProvider";
 import debounce from "lodash/debounce";
@@ -11,6 +10,7 @@ const StatusNotes = () => {
   const { work, setWork } = React.useContext(WorkplanContext);
   const { workId } = React.useContext(StatusContext);
   const [notes, setNotes] = React.useState("");
+  const initialNotes = React.useMemo(() => work?.status_notes, [work?.id]);
 
   React.useEffect(() => {
     setNotes(work?.status_notes || "");
@@ -45,7 +45,7 @@ const StatusNotes = () => {
   return (
     <RichTextEditor
       handleEditorStateChange={handleNotesChange}
-      initialRawEditorState={work?.status_notes}
+      initialRawEditorState={initialNotes}
     />
   );
 };

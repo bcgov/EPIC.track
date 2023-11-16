@@ -13,6 +13,7 @@ import BorderLinearProgress from "../../shared/progress/Progress";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import { When } from "react-if";
+import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
@@ -139,7 +140,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                 <SummaryItem
                   title="Start date"
                   content={Moment(phase.work_phase.start_date).format(
-                    "MMM.DD YYYY"
+                    MONTH_DAY_YEAR
                   )}
                   isTitleBold={isSelectedPhase}
                 />

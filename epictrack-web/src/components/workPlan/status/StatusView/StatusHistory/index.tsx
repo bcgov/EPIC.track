@@ -27,7 +27,7 @@ const StatusHistory = () => {
   };
 
   return (
-    <Box sx={{ width: "50%" }}>
+    <Box>
       <ETCaption1 bold sx={{ letterSpacing: "0.39px", paddingBottom: "16px" }}>
         STATUS HISTORY
       </ETCaption1>
@@ -53,15 +53,31 @@ const StatusHistory = () => {
             marginLeft: 12,
           }}
         >
-          <If condition={indexLimit}>
+          <If
+            condition={
+              indexLimit &&
+              statuses.filter((status: Status) => {
+                return status.is_approved;
+              }).length > 4
+            }
+          >
             <Then>
               <ExpandIcon />
               <ETCaption2 bold> Show More</ETCaption2>
             </Then>
-            <Else>
-              <CollapseIcon />
+          </If>
+          <If
+            condition={
+              !indexLimit &&
+              statuses.filter((status: Status) => {
+                return status.is_approved;
+              }).length > 4
+            }
+          >
+            <Then>
+              <ExpandIcon />
               <ETCaption2 bold> Show Less</ETCaption2>
-            </Else>
+            </Then>
           </If>
         </Button>
       </Timeline>

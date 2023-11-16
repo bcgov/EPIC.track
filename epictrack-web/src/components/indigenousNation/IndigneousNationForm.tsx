@@ -47,6 +47,11 @@ export default function IndigenousNationForm({ ...props }) {
   const [notes, setNotes] = React.useState("");
   const ctx = React.useContext(MasterContext);
 
+  const initialNotes = React.useMemo(
+    () => (ctx.item as FirstNation)?.notes,
+    [(ctx?.item as FirstNation)?.id]
+  );
+
   React.useEffect(() => {
     ctx.setFormId("indigenous-nation-form");
   }, []);
@@ -170,7 +175,7 @@ export default function IndigenousNationForm({ ...props }) {
             <ETFormLabel>Notes</ETFormLabel>
             <RichTextEditor
               handleEditorStateChange={setNotes}
-              initialRawEditorState={(ctx.item as FirstNation)?.notes}
+              initialRawEditorState={initialNotes}
             />
           </Grid>
         </Grid>
