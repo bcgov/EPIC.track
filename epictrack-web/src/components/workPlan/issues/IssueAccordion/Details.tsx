@@ -69,7 +69,10 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               </Grid>
 
               <Grid item xs={12}>
-                <ETParagraph color={Palette.neutral.dark}>
+                <ETParagraph
+                  color={Palette.neutral.dark}
+                  sx={{ whiteSpace: "pre-wrap" }}
+                >
                   {latestUpdate?.description}
                 </ETParagraph>
               </Grid>
