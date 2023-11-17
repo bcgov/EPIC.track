@@ -119,7 +119,7 @@ export default function StaffForm({ ...props }) {
               placeholder="(xxx) xxx-xxxx"
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <ETFormLabel>Position</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.position_id?.message?.toString()}
