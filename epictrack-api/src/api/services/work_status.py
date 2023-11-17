@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
+from datetime import datetime
 from http import HTTPStatus
 from typing import Dict
 
@@ -70,6 +71,7 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
 
         work_status.is_approved = True
         work_status.approved_by = TokenInfo.get_username()
+        work_status.approved_date = datetime.utcnow()
 
         work_status.save()
 
