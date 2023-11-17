@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import codeService from "../../services/codeService";
 import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
-import { DefaultStaff, Staff } from "../../models/staff";
+import { Staff } from "../../models/staff";
 import { ListType } from "../../models/code";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
