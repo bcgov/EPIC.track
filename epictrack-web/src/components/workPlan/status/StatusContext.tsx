@@ -68,7 +68,7 @@ export const StatusProvider = ({
 
   const hasPermission = () => {
     const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
-    const allowed = groups.filter((group) => {
+    const allowed = groups.filter((group: any) => {
       return groupsWithPermission.includes(group);
     });
     return Boolean(allowed.length);
@@ -79,6 +79,7 @@ export const StatusProvider = ({
   };
 
   const updateStatus = async (data: any, callback: () => any) => {
+    if (!hasPermission()) return;
     const { description, posted_date } = data;
     await statusService?.update(Number(workId), Number(status?.id), {
       description,
