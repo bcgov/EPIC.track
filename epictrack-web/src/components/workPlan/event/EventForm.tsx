@@ -161,16 +161,16 @@ const EventForm = ({
       !!event ||
       isFormFieldsLocked ||
       ctx.selectedWorkPhase?.work_phase.is_suspended,
-    [event]
+    [event, ctx.selectedWorkPhase?.work_phase.is_suspended]
   );
   const isTitleDisabled = useMemo(
     () => isFormFieldsLocked || ctx.selectedWorkPhase?.work_phase.is_suspended,
-    []
+    [isFormFieldsLocked, ctx.selectedWorkPhase?.work_phase.is_suspended]
   );
 
   const anticipatedMinDate = useMemo(
     () => dayjs(ctx.work?.start_date),
-    [ctx.work]
+    [ctx.work?.start_date]
   );
 
   const actualDateMin = useMemo(
@@ -563,7 +563,12 @@ const EventForm = ({
                     mr: "2px",
                   }}
                   disabled={isFormFieldsLocked}
-                  control={<ControlledSwitch name="high_priority" />}
+                  control={
+                    <ControlledSwitch
+                      disabled={isFormFieldsLocked}
+                      name="high_priority"
+                    />
+                  }
                   label="High Priority"
                 />
                 <Tooltip title="High Priority Milestones will appear on reports">
