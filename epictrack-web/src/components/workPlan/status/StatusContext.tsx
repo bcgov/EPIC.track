@@ -79,7 +79,6 @@ export const StatusProvider = ({
   };
 
   const updateStatus = async (data: any, callback: () => any) => {
-    if (!hasPermission()) return;
     const { description, posted_date } = data;
     await statusService?.update(Number(workId), Number(status?.id), {
       description,
