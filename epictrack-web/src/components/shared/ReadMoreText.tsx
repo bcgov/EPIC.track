@@ -26,13 +26,13 @@ const ReadMoreText: React.FC<ReadMoreTextProps> = ({
       {!isExpanded && children.length > maxLength && (
         <Link onClick={toggleExpansion} sx={{ cursor: "pointer" }}>
           {" "}
-          read more
+          Read More
         </Link>
       )}
       {isExpanded && children.length > maxLength && (
         <Link onClick={toggleExpansion} sx={{ cursor: "pointer" }}>
           {" "}
-          read less
+          Read Less
         </Link>
       )}
     </>

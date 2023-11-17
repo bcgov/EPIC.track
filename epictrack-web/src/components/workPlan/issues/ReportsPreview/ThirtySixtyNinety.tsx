@@ -9,11 +9,15 @@ import {
 import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
 import { WorkplanContext } from "../../WorkPlanContext";
-import { Else, If, Then } from "react-if";
+import { Else, If, Then, When } from "react-if";
 import moment from "moment";
+import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 
 export const ThirtySixtyNinety = () => {
-  const { work, workPhases, issues } = React.useContext(WorkplanContext);
+  const { work, workPhases, issues, statuses } =
+    React.useContext(WorkplanContext);
+
+  const currentStatus = statuses.find((status) => status.is_approved);
 
   const currentWorkPhase = workPhases.find(
     (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id
@@ -60,11 +64,22 @@ export const ThirtySixtyNinety = () => {
           </ETPreviewText>
         </Grid>
 
+        <When condition={Boolean(currentStatus)}>
+          <Grid item xs={12}>
+            <ETCaption2 bold color={Palette.neutral.light}>
+              {`Status (${moment(currentStatus?.posted_date)
+                .format("MMM.DD YYYY")
+                .toUpperCase()})`}
+            </ETCaption2>
+            <ETPreviewText>{currentStatus?.description}</ETPreviewText>
+          </Grid>
+        </When>
+
         <Grid item xs={12}>
           <ETCaption2 bold mb={"0.5em"}>
             Issues{" "}
             {latestIssue?.updated_at
-              ? `(${moment(latestIssue?.updated_at).format("MMM.DD YYYY")})`
+              ? `(${moment(latestIssue?.updated_at).format(MONTH_DAY_YEAR)})`
               : ""}
           </ETCaption2>
           <ETPreviewBox>

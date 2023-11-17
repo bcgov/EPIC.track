@@ -32,6 +32,7 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
           {...otherProps}
           {...field}
           ref={ref}
+          disabled={otherProps.disabled}
           checked={!!field.value || otherProps.defaultChecked}
         />
       )}

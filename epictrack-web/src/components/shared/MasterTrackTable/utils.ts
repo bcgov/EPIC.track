@@ -11,7 +11,11 @@ export function getSelectFilterOptions<T>(
   // Step 2: Iterate through the data array to populate the Map
   data.forEach((dataObject) => {
     // Step 3: Skip undefined or null values
-    if (dataObject[key] === undefined || dataObject[key] === null) {
+    if (
+      !dataObject ||
+      dataObject[key] === undefined ||
+      dataObject[key] === null
+    ) {
       optionsMap.set("", BLANK_OPTION);
       return;
     }

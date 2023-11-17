@@ -19,4 +19,8 @@ const groupBy = <T>(arr: T[], fn: (item: T) => any) => {
   }, {});
 };
 
-export { dateUtils, sort, groupBy };
+const capitalizeFirstLetterOfWord = (word: string) => {
+  return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+};
+
+export { dateUtils, sort, groupBy, capitalizeFirstLetterOfWord };

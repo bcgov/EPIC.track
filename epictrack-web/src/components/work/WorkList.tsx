@@ -1,7 +1,6 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Grid, IconButton } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
@@ -10,9 +9,10 @@ import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
-import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
+import TableFilter from "../shared/filterSelect/TableFilter";
+import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -36,11 +36,6 @@ const WorkList = () => {
   const onEdit = (id: number) => {
     setWorkId(id);
     ctx.setShowModalForm(true);
-  };
-
-  const handleDelete = (id: string) => {
-    ctx.setShowDeleteDialog(true);
-    ctx.setId(id);
   };
 
   React.useEffect(() => {
@@ -73,6 +68,13 @@ const WorkList = () => {
     });
   }, [works]);
 
+  const statuses = getSelectFilterOptions(
+    works,
+    "is_active",
+    (value) => (value ? "Active" : "Inactive"),
+    (value) => value
+  );
+
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
@@ -90,13 +92,13 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: ({ row }) => (
+        Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle
             to="#"
             onClick={() => onEdit(row.original.id)}
             titleText={row.original.title}
           >
-            {row.original.title}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
@@ -106,6 +108,29 @@ const WorkList = () => {
         header: "Project",
         filterVariant: "multi-select",
         filterSelectOptions: projects,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > projects.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "ea_act.name",
@@ -113,37 +138,146 @@ const WorkList = () => {
         size: 100,
         filterVariant: "multi-select",
         filterSelectOptions: eaActs,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > eaActs.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "work_type.name",
         header: "Work type",
         filterVariant: "multi-select",
         filterSelectOptions: workTypes,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > workTypes.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
-      // {
-      //   accessorKey: "ministry.abbreviation",
-      //   header: "Ministry",
-      //   filterVariant: "multi-select",
-      //   filterSelectOptions: ministries,
-      // },
       {
         accessorKey: "eao_team.name",
         header: "Team",
         size: 80,
         filterVariant: "multi-select",
         filterSelectOptions: teams,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > teams.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "current_work_phase.name",
         header: "Current Phase",
         filterVariant: "multi-select",
         filterSelectOptions: phases,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > phases.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
       },
       {
         accessorKey: "is_active",
-        header: "Active",
-        size: 80,
-        filterVariant: "checkbox",
+        header: "Status",
+        filterVariant: "multi-select",
+        filterSelectOptions: statuses,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > statuses.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id);
+
+          return filterValue.includes(value);
+        },
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && (

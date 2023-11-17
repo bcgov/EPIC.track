@@ -35,8 +35,11 @@ const tabPanel: SxProps = {
 const FirstNationContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
   const [notes, setNotes] = React.useState("");
-
   const ctx = React.useContext(WorkplanContext);
+  const initialNotes = React.useMemo(
+    () => ctx?.work?.first_nation_notes,
+    [ctx?.work?.id]
+  );
 
   React.useEffect(() => {
     setNotes(ctx.work?.first_nation_notes || "");
@@ -134,7 +137,7 @@ const FirstNationContainer = () => {
         >
           <RichTextEditor
             handleEditorStateChange={handleNotesChange}
-            initialRawEditorState={ctx.work?.first_nation_notes}
+            initialRawEditorState={initialNotes}
           />
         </TabPanel>
         <TabPanel

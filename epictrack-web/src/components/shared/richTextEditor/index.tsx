@@ -7,6 +7,15 @@ import "./RichEditorStyles.css";
 import { getEditorStateFromHtml, getEditorStateFromRaw } from "./utils";
 import { Palette } from "../../../styles/theme";
 
+const styles = {
+  toolbar: {
+    background: "#f9f9fb",
+    marginBottom: "8px",
+    padding: "8px 8px 8px",
+    borderBottom: `1px solid rgb(224,224,224)`,
+  },
+};
+
 const RichTextEditor = ({
   setRawText = (_rawText: string) => {
     /* empty default method  */
@@ -34,6 +43,7 @@ const RichTextEditor = ({
   const [editorState, setEditorState] = React.useState(
     getEditorStateFromRaw(initialRawEditorState)
   );
+  const [focused, setFocused] = React.useState<boolean>(false);
 
   const handleChange = (newEditorState: EditorState) => {
     const plainText = newEditorState.getCurrentContent().getPlainText();
@@ -59,31 +69,29 @@ const RichTextEditor = ({
             onEditorStateChange={handleChange}
             handlePastedText={() => false}
             editorStyle={{
-              height: "10em",
-              padding: "1em",
-              resize: "vertical",
+              height: "485px",
+              padding: "8px 8px 8px",
+              border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
+              borderRadius: "4px",
+              background: "#f9f9fb",
+              marginBottom: "8px",
+              fontSize: "16px",
             }}
+            toolbarStyle={styles.toolbar}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setFocused(false)}
             toolbar={{
               options: [
                 "inline",
-                "blockType",
                 "fontSize",
                 "list",
                 "colorPicker",
                 "link",
-                "embedded",
                 "emoji",
-                "image",
                 "history",
               ],
               inline: {
-                options: [
-                  "bold",
-                  "italic",
-                  "underline",
-                  "superscript",
-                  "subscript",
-                ],
+                options: ["bold", "italic", "underline"],
               },
               list: { options: ["unordered", "ordered"] },
             }}

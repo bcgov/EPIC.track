@@ -17,4 +17,5 @@ export interface IconProps {
   viewBox?: string;
   fill?: string;
   sx?: SxProps;
+  style?: React.CSSProperties;
 }

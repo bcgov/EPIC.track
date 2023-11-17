@@ -17,11 +17,11 @@ const IssuesView = () => {
     showIssuesForm,
     setShowIssuesForm,
     isIssuesLoading,
-    setIssueToEdit,
-    issueToEdit,
     showCloneForm,
     setShowCloneForm,
     setUpdateToClone,
+    updateToEdit,
+    setUpdateToEdit,
   } = React.useContext(IssuesContext);
 
   const onAddButtonClickHandler = () => {
@@ -30,11 +30,11 @@ const IssuesView = () => {
 
   const handleIssueFormClose = () => {
     setShowIssuesForm(false);
-    setIssueToEdit(null);
+    setUpdateToEdit(null);
   };
 
   const getDialogTitle = () => {
-    if (issueToEdit) {
+    if (updateToEdit) {
       return "Edit Issue";
     }
     return "Add Issue";
