@@ -11,6 +11,8 @@ import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { Restricted } from "../shared/restricted";
+import { GROUPS } from "../../constants/application-constant";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -164,15 +166,20 @@ const StaffList = () => {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setStaffId(undefined);
-                  }}
+                <Restricted
+                  allowed={[GROUPS.SUPER_USER, GROUPS.DEVELOPER]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create Staff
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setStaffId(undefined);
+                    }}
+                  >
+                    Create Staff
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

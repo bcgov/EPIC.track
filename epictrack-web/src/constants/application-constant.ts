@@ -73,3 +73,9 @@ export const FN_RESOURCES = [
       "Information, guidance and tools regarding the government's section 35 consultation obligations.",
   },
 ];
+
+export const GROUPS = {
+  SUPER_USER: "Super User",
+  DEVELOPER: "Developer",
+  INSTANCE_ADMIN: "Instance Admin",
+};
