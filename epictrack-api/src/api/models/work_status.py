@@ -37,7 +37,6 @@ class WorkStatus(BaseModelVersioned):
     approved_by = Column(String(255), default=None, nullable=True)
     approved_date = Column(DateTime(timezone=True), nullable=True)
 
-
     @classmethod
     def list_statuses_for_work_id(cls, work_id) -> List[WorkStatus]:
         """Return all WorkStatus records for a specific work_id"""
