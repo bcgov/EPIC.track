@@ -38,8 +38,6 @@ const StatusHistory = () => {
     ? false
     : true;
 
-  console.log(highlightFirstInTimeLineApproved);
-
   const SHOW_MORE_THRESHOLD = 3;
 
   return (
