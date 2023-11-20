@@ -48,7 +48,12 @@ export default function ProponentList() {
         accessorKey: "name",
         header: "Name",
         Cell: ({ cell, row }) => (
-          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+          <ETGridTitle
+            to={"#"}
+            onClick={() => onEdit(row.original.id)}
+            enableTooltip={true}
+            tooltip={cell.getValue<string>()}
+          >
             {cell.getValue<string>()}
           </ETGridTitle>
         ),
@@ -64,15 +69,18 @@ export default function ProponentList() {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
+        size: 60,
         Filter: ({ header, column }) => {
           return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
+            <Box sx={{ width: "100px" }}>
+              <TableFilter
+                isMulti
+                header={header}
+                column={column}
+                variant="inline"
+                name="rolesFilter"
+              />
+            </Box>
           );
         },
         filterFn: (row, id, filterValue) => {
