@@ -13,4 +13,3 @@ class LockWorkStartDate(ActionFactory):  # pylint: disable=too-few-public-method
         db.session.query(Work).filter(Work.id == source_event.work_id).update(
             params
         )
-        db.session.commit()

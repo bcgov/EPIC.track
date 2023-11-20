@@ -1,6 +1,8 @@
 """Disable work start date action handler"""
 from datetime import timedelta
 
+from pytz import timezone
+
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event import Event
@@ -18,13 +20,19 @@ class AddPhase(ActionFactory):
         from api.services.event_template import EventTemplateService
         from api.services.work import WorkService
 
-        phase_start_date = source_event.actual_date + timedelta(days=1)
         work_phase_data = self.get_additional_params(params)
+        phase_start_date = source_event.actual_date + timedelta(days=1)
+        end_date = phase_start_date + timedelta(days=work_phase_data['number_of_days'])
+
+        # Convert to PST so that correct date time will be taken after 'get_start_of_day' method
+        phase_start_date = phase_start_date.astimezone(timezone('US/Pacific'))
+        end_date = end_date.astimezone(timezone('US/Pacific'))
+
         work_phase_data.update(
             {
                 "work_id": source_event.work.id,
                 "start_date": f"{phase_start_date}",
-                "end_date": f"{phase_start_date + timedelta(days=work_phase_data['number_of_days'])}",
+                "end_date": f"{end_date}",
             }
         )
         event_templates = EventTemplateService.find_by_phase_id(

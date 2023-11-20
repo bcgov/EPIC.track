@@ -13,4 +13,3 @@ class SetEventsStatus(ActionFactory):
             Event.work_id == source_event.work_id,
             Event.anticipated_date >= source_event.actual_date
         ).update(params)
-        db.session.commit()

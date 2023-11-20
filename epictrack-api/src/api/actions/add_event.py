@@ -2,6 +2,8 @@
 
 from datetime import timedelta
 
+from pytz import timezone
+
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event_configuration import EventConfiguration
@@ -22,11 +24,14 @@ class AddEvent(ActionFactory):
         from api.services.event import EventService
 
         event_data, work_phase_id = self.get_additional_params(params)
+        # Convert to PST so that correct date time will be taken after 'get_start_of_day' method
+        anticipated_date = source_event.actual_date + timedelta(days=params["start_at"])
+        anticipated_date = anticipated_date.astimezone(timezone('US/Pacific'))
         event_data.update(
             {
                 "is_active": True,
                 "work_id": source_event.work_id,
-                "anticipated_date": source_event.actual_date + timedelta(days=params["start_at"]),
+                "anticipated_date": anticipated_date,
             }
         )
         EventService.create_event(event_data, work_phase_id=work_phase_id, push_events=True)

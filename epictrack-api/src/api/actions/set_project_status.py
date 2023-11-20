@@ -13,4 +13,3 @@ class SetProjectStatus(ActionFactory):  # pylint: disable=too-few-public-methods
         db.session.query(Project).filter(
             Project.id == source_event.work.project_id
         ).update(params)
-        db.session.commit()

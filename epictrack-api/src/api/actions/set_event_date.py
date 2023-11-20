@@ -2,6 +2,8 @@
 
 from datetime import timedelta
 
+from pytz import timezone
+
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event import Event
@@ -16,14 +18,15 @@ class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
     def run(self, source_event, params: dict) -> None:
         """Performs the required operations"""
         event_configuration_id = self.get_additional_params(params)
+        anticipated_date = source_event.actual_date + timedelta(days=1)
+        anticipated_date = anticipated_date.astimezone(timezone('US/Pacific'))
         db.session.query(Event).filter(
             Event.work_id == source_event.work_id,
             Event.is_active.is_(True),
             Event.event_configuration_id == event_configuration_id,
         ).update({
-            "anticipated_date": source_event.actual_date + timedelta(days=1)
+            "anticipated_date": anticipated_date
         })
-        db.session.commit()
 
     def get_additional_params(self, params):
         """Returns additional parameter"""
