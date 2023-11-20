@@ -12,6 +12,7 @@ import { MasterContext } from "../shared/MasterContext";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
@@ -63,6 +64,7 @@ export default function IndigenousNationList() {
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "relationship_holder.full_name",
