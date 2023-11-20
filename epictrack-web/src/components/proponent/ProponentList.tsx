@@ -47,14 +47,14 @@ export default function ProponentList() {
       {
         accessorKey: "name",
         header: "Name",
-        Cell: ({ cell, row }) => (
+        Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle
             to={"#"}
             onClick={() => onEdit(row.original.id)}
             enableTooltip={true}
             tooltip={cell.getValue<string>()}
           >
-            {cell.getValue<string>()}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
@@ -63,6 +63,7 @@ export default function ProponentList() {
         accessorKey: "relationship_holder.full_name",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
+        Cell: ({ renderedCellValue }) => <Box>{renderedCellValue}</Box>,
       },
       {
         accessorKey: "is_active",

@@ -11,6 +11,12 @@ import { ListType } from "../../models/code";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
+import {
+  ControlledMaskTextField,
+  MaskTextField,
+} from "../shared/maskTextField";
+import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
+import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 
 const schema = yup.object().shape({
   email: yup
@@ -29,16 +35,11 @@ const schema = yup.object().shape({
         return true;
       },
     }),
-  phone: yup
-    .string()
-    .matches(
-      /^(\+\d{1,2}\s)?\(?\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}$/,
-      "Invalid phone number"
-    )
-    .required("Phone number is required"),
+  phone: yup.string().required("Phone number is required"),
   first_name: yup.string().required("First name is required"),
   last_name: yup.string().required("Last name is required"),
   position_id: yup.string().required("Select position"),
+  is_active: yup.boolean(),
 });
 
 export default function StaffForm({ ...props }) {
@@ -56,9 +57,9 @@ export default function StaffForm({ ...props }) {
     ctx.setId(props.staffId);
   }, [ctx.id]);
 
-  const methods = useForm({
+  const methods = useForm<Staff>({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as Staff,
+    defaultValues: ctx.item || { is_active: true },
     mode: "onBlur",
   });
 
@@ -99,41 +100,26 @@ export default function StaffForm({ ...props }) {
         >
           <Grid item xs={6}>
             <ETFormLabel>First Name</ETFormLabel>
-            <TextField
-              fullWidth
-              error={!!errors?.first_name?.message}
-              helperText={errors?.first_name?.message?.toString()}
-              {...register("first_name")}
-            />
+            <ControlledTextField name="first_name" fullWidth />
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>Last Name</ETFormLabel>
-            <TextField
-              fullWidth
-              {...register("last_name")}
-              error={!!errors?.last_name?.message}
-              helperText={errors?.last_name?.message?.toString()}
-            />
+            <ControlledTextField name="last_name" fullWidth />
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>Email</ETFormLabel>
-            <TextField
-              fullWidth
-              {...register("email")}
-              error={!!errors?.email?.message}
-              helperText={errors?.email?.message?.toString()}
-            />
+            <ControlledTextField name="email" fullWidth />
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>Phone</ETFormLabel>
-            <TextField
+            <ControlledMaskTextField
+              name="phone"
               fullWidth
-              {...register("phone")}
-              error={!!errors?.phone?.message}
-              helperText={errors?.phone?.message?.toString()}
+              mask={"(000) 000-0000"}
+              placeholder="(xxx) xxx-xxxx"
             />
           </Grid>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <ETFormLabel>Position</ETFormLabel>
             <ControlledSelectV2
               helperText={errors?.position_id?.message?.toString()}
@@ -145,10 +131,7 @@ export default function StaffForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-            <ControlledCheckbox
-              defaultChecked={(ctx.item as Staff)?.is_active}
-              {...register("is_active")}
-            />
+            <ControlledSwitch name="is_active" />
             <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
         </Grid>

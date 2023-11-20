@@ -57,14 +57,14 @@ const StaffList = () => {
       {
         accessorKey: "full_name",
         header: "Name",
-        Cell: ({ cell, row }) => (
+        Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle
             to={"#"}
             onClick={() => onEdit(row.original.id)}
             enableTooltip={true}
             tooltip={cell.getValue<string>()}
           >
-            {cell.getValue<string>()}
+            {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
