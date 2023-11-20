@@ -11,6 +11,8 @@ import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { Restricted } from "../shared/restricted";
+import { GROUPS } from "../../constants/application-constant";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
@@ -247,15 +249,20 @@ const ProjectList = () => {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setProjectId(undefined);
-                  }}
-                  variant="contained"
+                <Restricted
+                  allowed={[GROUPS.SUPER_USER, GROUPS.DEVELOPER]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create Project
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setProjectId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Project
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

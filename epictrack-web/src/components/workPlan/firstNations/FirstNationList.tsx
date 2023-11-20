@@ -19,6 +19,7 @@ import { showNotification } from "../../shared/notificationProvider";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
+  GROUPS,
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
@@ -35,6 +36,7 @@ import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import projectService from "../../../services/projectService/projectService";
+import { Restricted } from "../../shared/restricted";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -406,13 +408,18 @@ const FirstNationList = () => {
       {firstNations.length > 0 && (
         <Grid container rowSpacing={1}>
           <Grid item xs={6}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setShowNationForm(true)}
+            <Restricted
+              allowed={[GROUPS.SUPER_USER, GROUPS.DEVELOPER]}
+              errorProps={{ disabled: true }}
             >
-              Add Nation
-            </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setShowNationForm(true)}
+              >
+                Add Nation
+              </Button>
+            </Restricted>
           </Grid>
           <Grid
             item
