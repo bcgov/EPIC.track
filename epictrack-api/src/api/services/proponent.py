@@ -16,7 +16,6 @@ from typing import IO, List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import text
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Proponent, db
@@ -82,7 +81,6 @@ class ProponentService:
     def import_proponents(cls, file: IO):
         """Import proponents"""
         data = cls._read_excel(file)
-        db.session.execute(text("TRUNCATE proponents RESTART IDENTITY CASCADE"))
         data["relationship_holder_id"] = data.apply(
             lambda x: x["relationship_holder_id"].lower()
             if x["relationship_holder_id"]

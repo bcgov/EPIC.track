@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 from api.actions.base import ActionFactory
-from api.models import db, WorkPhase, Event, EventConfiguration
+from api.models import Event, EventConfiguration, WorkPhase, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.schemas import response as res
 
@@ -23,15 +23,13 @@ class AddPhase(ActionFactory):
                 "work_id": source_event.work.id,
                 "start_date": f"{phase_start_date}",
                 "end_date": f"{phase_start_date + timedelta(days=work_phase_data['number_of_days'])}",
-                "sort_order": source_event.event_configuration.work_phase.sort_order
-                + 1,
+                "sort_order": source_event.event_configuration.work_phase.sort_order + 1,
             }
         )
         work_phases = (
             db.session.query(WorkPhase)
             .filter(
-                WorkPhase.sort_order
-                > source_event.event_configuration.work_phase.sort_order,
+                WorkPhase.sort_order > source_event.event_configuration.work_phase.sort_order,
                 WorkPhase.work_id == source_event.work_id,
             )
             .all()

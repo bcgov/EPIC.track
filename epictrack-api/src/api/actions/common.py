@@ -1,6 +1,6 @@
 """Common methods for the actions"""
 
-from api.models import Event, db, WorkPhase, EventConfiguration
+from api.models import Event, EventConfiguration, WorkPhase, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 
 

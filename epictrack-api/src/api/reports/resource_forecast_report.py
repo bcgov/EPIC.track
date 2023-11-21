@@ -18,22 +18,8 @@ from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
 from api.models import (
-    EAAct,
-    EAOTeam,
-    Event,
-    FederalInvolvement,
-    PhaseCode,
-    Project,
-    Region,
-    Staff,
-    StaffWorkRole,
-    SubType,
-    Type,
-    Work,
-    WorkPhase,
-    WorkType,
-    db,
-)
+    EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
+    WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventTemplateVisibilityEnum
 
@@ -86,10 +72,9 @@ class EAResourceForeCastReport(ReportFactory):
                 EventConfiguration.work_phase_id,
             )
             .filter(
-                EventConfiguration.visibility
-                == EventTemplateVisibilityEnum.MANDATORY.value,
+                EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY.value,
                 EventConfiguration.start_at == "0",
-            )  # Is 0 needed?
+            )
             .group_by(EventConfiguration.work_phase_id)
             .all()
         )
@@ -368,8 +353,7 @@ class EAResourceForeCastReport(ReportFactory):
             Event.query.filter(
                 Event.work_id.in_(work_ids),
                 Event.event_configuration_id.in_(self.start_event_configurations),
-                func.coalesce(Event.actual_date, Event.anticipated_date)
-                <= self.end_date,
+                func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
             )
             .join(
                 EventConfiguration,
@@ -496,8 +480,7 @@ class EAResourceForeCastReport(ReportFactory):
                 referral_timing_obj = referral_timing_query.first()
             referral_timing = (
                 Event.query.filter(
-                    Event.event_configuration_id
-                    == referral_timing_obj.event_configuration_id
+                    Event.event_configuration_id == referral_timing_obj.event_configuration_id
                 )
                 .add_column(
                     func.coalesce(Event.actual_date, Event.anticipated_date).label(
@@ -580,8 +563,7 @@ class EAResourceForeCastReport(ReportFactory):
                     Paragraph(
                         f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style
                     )
-                ]
-                + [""] * (len(table_headers[1]) - 1)
+                ] + [""] * (len(table_headers[1]) - 1)
             )
             normal_style.textColor = colors.black
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
@@ -633,8 +615,7 @@ class EAResourceForeCastReport(ReportFactory):
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ]
-                + styles
+                ] + styles
             )
         )
 

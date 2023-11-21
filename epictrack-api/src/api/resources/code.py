@@ -13,8 +13,8 @@
 # limitations under the License.
 """Resource for code endpoints."""
 from http import HTTPStatus
-from flask import request
 
+from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from api.services.code import CodeService

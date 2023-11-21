@@ -5,6 +5,7 @@ from datetime import timedelta
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event import Event
+
 from .common import find_configuration
 
 
@@ -13,9 +14,7 @@ class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
 
     def run(self, source_event: Event, params: dict) -> None:
         """Performs the required operations"""
-        from api.services.event import (  # pylint: disable=import-outside-toplevel
-            EventService,
-        )
+        from api.services.event import EventService  # pylint: disable=import-outside-toplevel
 
         number_of_days_to_be_added = params.get("start_at")
         event_configuration = find_configuration(source_event, params)

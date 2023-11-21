@@ -16,7 +16,6 @@ from typing import IO, List
 
 import numpy as np
 import pandas as pd
-from sqlalchemy import text
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import IndigenousNation, db
@@ -85,7 +84,6 @@ class IndigenousNationService:
     def import_indigenous_nations(cls, file: IO):
         """Import indigenous nations"""
         data = cls._read_excel(file)
-        db.session.execute(text("TRUNCATE indigenous_nations RESTART IDENTITY CASCADE"))
         data["relationship_holder_id"] = data.apply(lambda x: x["relationship_holder_id"].lower(), axis=1)
         relationship_holders = data["relationship_holder_id"].to_list()
         pip_org_types = data["pip_org_type_id"].to_list()
