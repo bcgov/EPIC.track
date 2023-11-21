@@ -72,3 +72,7 @@ class EventTemplateBodyParameterSchema(RequestBodyParameterSchema):
     multiple_days = fields.Bool(
         metadata={"description": "Indicate if it is a multi day event"}
     )
+
+    visibility = fields.Str(
+        metadata={"description": "Indicate whether the event to be shown in the workplan or not"}
+    )

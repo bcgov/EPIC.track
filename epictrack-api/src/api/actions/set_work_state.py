@@ -10,10 +10,6 @@ class SetWorkState(ActionFactory):
 
     def run(self, source_event, params) -> None:
         """Sets the work as per action configuration"""
-        work_state = self.get_additional_params(params)
-        db.session.query(Work).filter(Work.id == source_event.work_id).update(work_state)
-        db.session.commit()
-
-    def get_additional_params(self, params) -> dict:
-        """Returns the derived additional parameters required to perform action from templates"""
-        return {"work_state": params["work_state"]}
+        db.session.query(Work).filter(Work.id == source_event.work_id).update(
+            {Work.work_state: params.get("work_state")}
+        )

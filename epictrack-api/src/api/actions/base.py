@@ -12,7 +12,9 @@ class ActionFactory(ABC):  # pylint: disable=too-few-public-methods
     def run(self, source_event: Event, params: dict) -> None:
         """Perform the action"""
 
-    def get_additional_params(self, params: dict) -> dict:
+    def get_additional_params(
+        self, source_event: Event, params: dict  # pylint: disable=unused-argument
+    ) -> dict:
         """Returns the derived additional parameters required to perform action from templates"""
         return params
 
@@ -29,5 +31,5 @@ ACTION_HANDLER_CLASS_MAPS = {
     ActionEnum.SET_WORK_DECISION_MAKER: "SetWorkDecisionMaker",
     ActionEnum.SET_WORK_STATE: "SetWorkState",
     ActionEnum.CHANGE_PHASE_END_EVENT: "ChangePhaseEndEvent",
-    ActionEnum.SET_FEDERAL_INVOLVEMENT: "SetFederalInvolvement"
+    ActionEnum.SET_FEDERAL_INVOLVEMENT: "SetFederalInvolvement",
 }

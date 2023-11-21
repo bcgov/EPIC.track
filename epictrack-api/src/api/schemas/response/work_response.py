@@ -30,6 +30,12 @@ class WorkPhaseResponseSchema(
         unknown = EXCLUDE
     phase = fields.Nested(PhaseResponseSchema)
 
+    visibility = fields.Method("get_visibility")
+
+    def get_visibility(self, obj: WorkPhase) -> str:
+        """Return value for the visibility"""
+        return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value
+
 
 class WorkResponseSchema(
     AutoSchemaBase

@@ -12,5 +12,4 @@ class SetProjectStatus(ActionFactory):  # pylint: disable=too-few-public-methods
         """Sets the project's is_active status to False"""
         db.session.query(Project).filter(
             Project.id == source_event.work.project_id
-        ).update(params)
-        db.session.commit()
+        ).update({Project.is_active: params.get("is_active")})

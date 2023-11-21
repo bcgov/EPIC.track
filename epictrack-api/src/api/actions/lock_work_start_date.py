@@ -11,6 +11,5 @@ class LockWorkStartDate(ActionFactory):  # pylint: disable=too-few-public-method
     def run(self, source_event, params) -> None:
         """Set the work start date and mark start date as locked for changes"""
         db.session.query(Work).filter(Work.id == source_event.work_id).update(
-            params
+            {Work.start_date_locked: params.get("start_date_locked")}
         )
-        db.session.commit()

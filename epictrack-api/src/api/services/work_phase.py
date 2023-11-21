@@ -19,6 +19,7 @@ from datetime import timezone
 from api.models import PhaseCode, WorkPhase, db
 from api.models.event_type import EventTypeEnum
 from api.schemas.work_v2 import WorkPhaseSchema
+from api.models.phase_code import PhaseVisibilityEnum
 from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
 
@@ -86,8 +87,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 WorkPhase.work_id == work_id,
                 WorkPhase.is_active.is_(True),
                 WorkPhase.is_deleted.is_(False),
+                WorkPhase.visibility != PhaseVisibilityEnum.HIDDEN.value
             )
-            .order_by(WorkPhase.id, PhaseCode.sort_order)
+            .order_by(WorkPhase.sort_order)
             .all()
         )
         result = []

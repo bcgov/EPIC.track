@@ -30,7 +30,7 @@ class ActionConfigurationBodyParameterSchema(RequestBodyParameterSchema):
         required=True
     )
 
-    additional_params = fields.Dict(
+    additional_params = fields.Raw(
         metadata={"description": "Additional parameters for the action"}
     )
 

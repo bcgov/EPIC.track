@@ -28,12 +28,11 @@ from api.models import (
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
-from api.models.phase_code import PhaseCode
+from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.project import Project
 from api.models.work_type import WorkType
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
-from api.utils.datetime_helper import get_start_of_day
 
 from .event_configuration import EventConfigurationService
 
@@ -53,8 +52,6 @@ class EventService:
             current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         data["work_id"] = current_work_phase.work_id
-        data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
-        data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = Event(**data)
         event = event.flush()
         cls._process_events(
@@ -82,8 +79,6 @@ class EventService:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
-        data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
@@ -106,8 +101,6 @@ class EventService:
         if event_id:
             event = Event.find_by_id(event_id)
             event_old = copy.copy(event)
-        data["anticipated_date"] = get_start_of_day(data.get("anticipated_date"))
-        data["actual_date"] = get_start_of_day(data.get("actual_date"))
         event_to_check = Event(**data)
         result = {
             "subsequent_event_push_required": False,
@@ -169,7 +162,7 @@ class EventService:
         current_work_phase_index = util.find_index_in_array(
             all_work_phases, current_work_phase
         )
-        current_event_index = cls._find_event_index(
+        current_event_index = cls.find_event_index(
             all_work_events, event_old if event_old else event, current_work_phase
         )
         work_phases_to_be_checked = [all_work_phases[current_work_phase_index]]
@@ -257,8 +250,9 @@ class EventService:
         """Process the event date logic"""
         cls._end_event_anticipated_change_rule(event, event_old)
         all_work_phases = WorkPhase.find_by_params(
-            {"work_id": current_work_phase.work_id}
+            {"work_id": current_work_phase.work_id, "visibility": PhaseVisibilityEnum.REGULAR.value}
         )
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
         current_work_phase_index = util.find_index_in_array(
             all_work_phases, current_work_phase
         )
@@ -292,7 +286,7 @@ class EventService:
                 current_work_phase.as_dict(recursive=False), commit=False
             )
 
-        current_event_index = cls._find_event_index(
+        current_event_index = cls.find_event_index(
             all_work_events, event_old if event_old else event, current_work_phase
         )
         if number_of_days_to_be_pushed != 0 and push_events:
@@ -380,7 +374,7 @@ class EventService:
         return 0
 
     @classmethod
-    def _find_event_index(
+    def find_event_index(
         cls, all_work_events: [Event], event: Event, current_work_phase: WorkPhase
     ):
         """Find the index of given event in the list of existing events"""
@@ -590,7 +584,7 @@ class EventService:
                     raise UnprocessableEntityError(
                         "Previous event should be completed to proceed"
                     )
-            event_index = cls._find_event_index(
+            event_index = cls.find_event_index(
                 all_work_events,
                 event_old if event_old else event,
                 all_work_phases[current_work_phase_index],

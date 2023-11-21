@@ -31,6 +31,12 @@ class EventConfigurationResponseSchema(
         unknown = EXCLUDE
     event_position = fields.Method("get_event_position")
 
+    visibility = fields.Method("get_visibility")
+
+    def get_visibility(self, obj: EventConfiguration) -> str:
+        """Return value for the visibility"""
+        return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value
+
     def get_event_position(self, obj: EventConfiguration) -> str:
         """Return the work state"""
         return obj.event_position.value if obj.event_position else None
