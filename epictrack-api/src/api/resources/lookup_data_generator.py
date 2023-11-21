@@ -25,7 +25,7 @@ from api.utils.util import cors_preflight
 API = Namespace('lookups', description='Lookups')
 
 
-@cors_preflight('POST')
+@cors_preflight('GET')
 @API.route('', methods=['GET', 'OPTIONS'])
 class Inspections(Resource):
     """Endpoint resource to return number of inspections."""
