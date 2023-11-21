@@ -38,6 +38,9 @@ from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
 from api.utils.datetime_helper import get_start_of_day
+from api.services import authorisation
+from api.utils.roles import Membership
+from api.utils.roles import Role as KeycloakRole
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -234,7 +237,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
         if cls.check_work_staff_existence(
-            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
+                work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
         ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff.is_active = data.get("is_active")
@@ -337,6 +340,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work = Work.find_by_id(work_id)
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT_ENTITIES.value
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work.id)
         work = work.update(payload)
         return work
 
@@ -598,7 +606,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_nation_existence(
-        cls, work_id: int, nation_id: int, work_nation_id: int = None
+            cls, work_id: int, nation_id: int, work_nation_id: int = None
     ) -> bool:
         """Check the existence of first nation in work"""
         query = db.session.query(IndigenousWork).filter(
