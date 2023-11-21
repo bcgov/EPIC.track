@@ -35,7 +35,7 @@ class Codes(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
+    # @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get(code_type):
         """Return all codes based on code_type."""
         filters = dict(request.args)
@@ -51,7 +51,7 @@ class Code(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
+    # @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT)
     def get(code_type, code):
         """Return all codes based on code_type."""
         return CodeService.find_code_value_by_type_and_code(code_type, code), HTTPStatus.OK
