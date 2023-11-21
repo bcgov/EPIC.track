@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Federal Involvement."""
-
+import enum
 from sqlalchemy import Column, Integer
 
 from .code_table import CodeTableVersioned
 from .db import db
+
+
+class FederalInvolvementEnum(enum.Enum):
+    """Enum for federal involvement"""
+
+    NONE = 2
 
 
 class FederalInvolvement(db.Model, CodeTableVersioned):

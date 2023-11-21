@@ -144,8 +144,13 @@ class ProjectFirstNations(Resource):
         args = req.ProjectFirstNationsQueryParamSchema().load(request.args)
         work_type_id = args["work_type_id"]
         work_id = args["work_id"]
-        first_nations = ProjectService.find_first_nations(project_id, work_id, work_type_id)
-        return res.IndigenousResponseNationSchema(many=True).dump(first_nations), HTTPStatus.OK
+        first_nations = ProjectService.find_first_nations(
+            project_id, work_id, work_type_id
+        )
+        return (
+            res.IndigenousResponseNationSchema(many=True).dump(first_nations),
+            HTTPStatus.OK,
+        )
 
 
 @cors_preflight("GET")
@@ -162,5 +167,23 @@ class ProjectFirstNationAvailableStatus(Resource):
         req.ProjectIdPathParameterSchema().load(request.view_args)
         args = req.ProjectFirstNationsQueryParamSchema().load(request.args)
         work_id = args["work_id"]
-        first_nation_availability = ProjectService.check_first_nation_available(project_id, work_id)
+        first_nation_availability = ProjectService.check_first_nation_available(
+            project_id, work_id
+        )
         return first_nation_availability, HTTPStatus.OK
+
+
+@cors_preflight("POST")
+@API.route("/import", methods=["POST", "OPTIONS"])
+class ImportProjects(Resource):
+    """Endpoint resource to import projects."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Import projects"""
+        file = request.files["file"]
+        response = ProjectService.import_projects(file)
+        return response, HTTPStatus.CREATED

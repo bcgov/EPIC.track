@@ -13,8 +13,8 @@
 # limitations under the License.
 """Service to manage Event Template."""
 import copy
-from typing import IO, Dict
 import json
+from typing import IO, Dict
 
 import pandas as pd
 
@@ -120,8 +120,8 @@ class EventTemplateService:
                 child_events = copy.deepcopy(
                     list(
                         filter(
-                            lambda x, _parent_id=event["no"]: "parent_id" in x and x["parent_id"] == _parent_id,
-                            event_dict,
+                            lambda x, _parent_id=event["no"]: "parent_id" in x and
+                            x["parent_id"] == _parent_id, event_dict,
                         )
                     )
                 )
@@ -290,7 +290,8 @@ class EventTemplateService:
                     (
                         e
                         for e in existing_actions
-                        if e.action_id == action["action_id"] and e.outcome_id == action["outcome_id"]
+                        if e.action_id == action["action_id"] and
+                        e.outcome_id == action["outcome_id"] and e.sort_order == action["sort_order"]
                     ),
                     None,
                 )
@@ -343,6 +344,7 @@ class EventTemplateService:
                 "Color": "color",
                 "SortOrder": "sort_order",
                 "Legislated": "legislated",
+                "Visibility": "visibility",
             },
             "events": {
                 "No": "no",
@@ -356,7 +358,7 @@ class EventTemplateService:
                 "MultipleDays": "multiple_days",
                 "NumberOfDays": "number_of_days",
                 "StartAt": "start_at",
-                "Mandatory": "mandatory",
+                "Visibility": "visibility",
                 "SortOrder": "sort_order",
             },
             "outcomes": {

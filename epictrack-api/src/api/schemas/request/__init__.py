@@ -16,7 +16,7 @@ from .act_section_request import ActSectionQueryParameterSchema
 from .action_configuration_request import ActionConfigurationBodyParameterSchema
 from .action_template_request import ActionTemplateBodyParameterSchema
 from .base import BasicRequestQueryParameterSchema
-from .event_configuration_request import EventConfigurationQueryParamSchema
+from .event_configuration_request import EventConfigurationBodyParamSchema, EventConfigurationQueryParamSchema
 from .event_request import (
     MilestoneEventBodyParameterSchema, MilestoneEventBulkDeleteQueryParamSchema,
     MilestoneEventCheckQueryParameterSchema, MilestoneEventPathParameterSchema,

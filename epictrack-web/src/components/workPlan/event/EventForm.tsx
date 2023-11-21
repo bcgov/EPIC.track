@@ -272,7 +272,7 @@ const EventForm = ({
     try {
       const result = await configurationService.getAll(
         Number(ctx.selectedWorkPhase?.work_phase.id),
-        event === undefined ? false : undefined
+        event === undefined ? false : true
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);

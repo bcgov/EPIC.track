@@ -16,7 +16,7 @@
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
-from api.models.event_template import EventPositionEnum
+from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from .base_model import BaseModelVersioned
 from .db import db
 
@@ -36,9 +36,10 @@ class EventConfiguration(BaseModelVersioned):
     event_category_id = sa.Column(sa.ForeignKey('event_categories.id'), nullable=False)
     start_at = sa.Column(sa.String, nullable=True)
     number_of_days = sa.Column(sa.Integer, default=0, nullable=False)
-    mandatory = sa.Column(sa.Boolean, default=False)
     sort_order = sa.Column(sa.Integer, nullable=False)
     work_phase_id = sa.Column(sa.ForeignKey('work_phases.id'), nullable=True)
+    visibility = sa.Column(sa.Enum(EventTemplateVisibilityEnum), nullable=False)
+    repeat_count = sa.Column(sa.Integer, nullable=False, default=0)
 
     event_type = relationship('EventType', foreign_keys=[event_type_id], lazy='select')
     event_category = relationship('EventCategory', foreign_keys=[event_category_id], lazy='select')

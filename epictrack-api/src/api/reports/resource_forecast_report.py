@@ -21,6 +21,7 @@ from api.models import (
     EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
     WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
+from api.models.event_template import EventTemplateVisibilityEnum
 
 from .report_factory import ReportFactory
 
@@ -67,13 +68,19 @@ class EAResourceForeCastReport(ReportFactory):
         self.report_title = "EAO Resource Forecast"
         start_event_configurations = (
             db.session.query(
-                func.min(EventConfiguration.id).label("event_configuration_id"), EventConfiguration.work_phase_id
+                func.min(EventConfiguration.id).label("event_configuration_id"),
+                EventConfiguration.work_phase_id,
             )
-            .filter(EventConfiguration.mandatory.is_(True), EventConfiguration.start_at == '0')  # Is 0 needed?
+            .filter(
+                EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY.value,
+                EventConfiguration.start_at == "0",
+            )
             .group_by(EventConfiguration.work_phase_id)
             .all()
         )
-        self.start_event_configurations = [x.event_configuration_id for x in start_event_configurations]
+        self.start_event_configurations = [
+            x.event_configuration_id for x in start_event_configurations
+        ]
         self.months = []
         self.month_labels = []
         self.report_cells = {
@@ -281,7 +288,10 @@ class EAResourceForeCastReport(ReportFactory):
                     # Event.event_configuration_id.in_(self.start_event_configurations),
                 ),
             )
-            .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+            .join(
+                EventConfiguration,
+                Event.event_configuration_id == EventConfiguration.id,
+            )
             .join(work_phase, EventConfiguration.work_phase_id == work_phase.id)
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
@@ -332,7 +342,7 @@ class EAResourceForeCastReport(ReportFactory):
                     "sector(sub)"
                 ),
                 Project.fte_positions_operation.label("fte_positions_operation"),
-                Project.fte_positions_construction.label("fte_positions_construction")
+                Project.fte_positions_construction.label("fte_positions_construction"),
             )
             .all()
         )
@@ -345,7 +355,10 @@ class EAResourceForeCastReport(ReportFactory):
                 Event.event_configuration_id.in_(self.start_event_configurations),
                 func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
             )
-            .join(EventConfiguration, Event.event_configuration_id == EventConfiguration.id)
+            .join(
+                EventConfiguration,
+                Event.event_configuration_id == EventConfiguration.id,
+            )
             .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .order_by(func.coalesce(Event.actual_date, Event.anticipated_date))
@@ -366,7 +379,8 @@ class EAResourceForeCastReport(ReportFactory):
             for index, month in enumerate(self.months[1:]):
                 month_events = list(
                     filter(
-                        lambda x: x.start_date.date() <= month, events[work_id])  # pylint:disable=cell-var-from-loop
+                        lambda x: x.start_date.date() <= month, events[work_id]  # pylint:disable=cell-var-from-loop
+                    )
                 )
                 month_events = sorted(month_events, key=lambda x: x.start_date)
                 latest_event = month_events[-1]
@@ -441,8 +455,13 @@ class EAResourceForeCastReport(ReportFactory):
                     ),
                 )
                 .join(WorkType, PhaseCode.work_type_id == WorkType.id)
-                .join(EventConfiguration, and_(EventConfiguration.work_phase_id == WorkPhase.id,
-                                               EventConfiguration.mandatory.is_(True)))
+                .join(
+                    EventConfiguration,
+                    and_(
+                        EventConfiguration.work_phase_id == WorkPhase.id,
+                        EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY,
+                    ),
+                )
                 .join(Event, EventConfiguration.id == Event.event_configuration_id)
                 .filter(
                     and_(
@@ -450,7 +469,7 @@ class EAResourceForeCastReport(ReportFactory):
                         Event.work_id == work_data["work_id"],
                     )
                 )
-                .add_columns(EventConfiguration.id.label('event_configuration_id'))
+                .add_columns(EventConfiguration.id.label("event_configuration_id"))
                 .group_by(PhaseCode.id, EventConfiguration.id)
                 .order_by(PhaseCode.id.desc())
             )
@@ -460,7 +479,9 @@ class EAResourceForeCastReport(ReportFactory):
             else:
                 referral_timing_obj = referral_timing_query.first()
             referral_timing = (
-                Event.query.filter(Event.event_configuration_id == referral_timing_obj.event_configuration_id)
+                Event.query.filter(
+                    Event.event_configuration_id == referral_timing_obj.event_configuration_id
+                )
                 .add_column(
                     func.coalesce(Event.actual_date, Event.anticipated_date).label(
                         "event_start_date"
@@ -492,7 +513,7 @@ class EAResourceForeCastReport(ReportFactory):
                 month_data = work_data.pop(month)
                 color = work_data.pop(f"{month}_color")
                 months.append({"label": month, "phase": month_data, "color": color})
-            months = sorted(months, key=lambda x: self.month_labels.index(x['label']))
+            months = sorted(months, key=lambda x: self.month_labels.index(x["label"]))
             work_data["months"] = months
             response.append(work_data)
 
@@ -506,7 +527,7 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._format_data(data)
         if not data:
             return {}, None
-        data = sorted(data, key=lambda k: (k['ea_type_sort_order'], k['project_name']))
+        data = sorted(data, key=lambda k: (k["ea_type_sort_order"], k["project_name"]))
         if return_type == "json" and data:
             return data, None
         formatted_data = defaultdict(list)
@@ -557,7 +578,9 @@ class EAResourceForeCastReport(ReportFactory):
                     table_cells.remove("referral_timing")
                 for cell in table_cells:
                     row.append(
-                        Paragraph(project[cell] if project[cell] else "", body_text_style)
+                        Paragraph(
+                            project[cell] if project[cell] else "", body_text_style
+                        )
                     )
                 month_cell_start = len(table_cells)
                 for month_index, month in enumerate(self.month_labels):
@@ -567,7 +590,7 @@ class EAResourceForeCastReport(ReportFactory):
                     row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
                     color = month_data["color"][1:]
-                    bg_color = [int(color[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+                    bg_color = [int(color[i: i + 2], 16) / 255 for i in (0, 2, 4)]
                     styles.append(
                         (
                             "BACKGROUND",
@@ -627,16 +650,14 @@ class EAResourceForeCastReport(ReportFactory):
         pdf_stream.seek(0)
         return pdf_stream.getvalue(), f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
 
-    def _add_months(self, start: datetime, months: int, set_to_last: bool = True) -> datetime:
+    def _add_months(
+        self, start: datetime, months: int, set_to_last: bool = True
+    ) -> datetime:
         """Adds x months to given date"""
         year_offset, month = divmod(start.month + months, 13)
         if year_offset > 0:
             month += 1
-        result = start.replace(
-            year=start.year + year_offset,
-            month=month,
-            day=1
-        )
+        result = start.replace(year=start.year + year_offset, month=month, day=1)
         if set_to_last:
             result = result.replace(day=monthrange(start.year + year_offset, month)[1])
         return result

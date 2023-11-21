@@ -37,3 +37,4 @@ from .action_template import ActionTemplateService
 from .act_section import ActSectionService
 from .work_status import WorkStatusService
 from .work_issues import WorkIssuesService
+from .event import EventService

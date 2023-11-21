@@ -1,85 +1,163 @@
-import React from "react";
-import { Box, Button } from "@mui/material";
+import React, { useContext, useState } from "react";
 import { WorkplanContext } from "../../../WorkPlanContext";
-import { Status } from "../../../../../models/status";
-import { ETCaption1, ETCaption2 } from "../../../../shared";
+import { ETCaption1, ETCaption3, ETPreviewText } from "../../../../shared";
 import Timeline from "@mui/lab/Timeline";
-import HistoryItem from "./HistoryItem";
-import { Else, If, Then } from "react-if";
 import { IconProps } from "../../../../icons/type";
 import Icons from "../../../../icons";
 import { Palette } from "../../../../../styles/theme";
+import {
+  TimelineConnector,
+  TimelineContent,
+  TimelineDot,
+  TimelineItem,
+  TimelineOppositeContent,
+  TimelineSeparator,
+  timelineContentClasses,
+} from "@mui/lab";
+import ReadMoreText from "../../../../shared/ReadMoreText";
+import { MONTH_DAY_YEAR } from "../../../../../constants/application-constant";
+import moment from "moment";
+import { When } from "react-if";
+import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
+import { StatusContext } from "../../StatusContext";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
-const CollapseIcon: React.FC<IconProps> = Icons["CollapseIcon"];
-
-const HISTORY_DISPLAY_LIMIT = 3;
+const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
 const StatusHistory = () => {
   const { statuses } = React.useContext(WorkplanContext);
-  const [indexLimit, setIndexLimit] = React.useState<boolean>(true);
+  const { setShowStatusForm, setStatus, hasPermission } =
+    useContext(StatusContext);
+  const [expand, setExpand] = useState(false);
+  const theme = useTheme();
 
-  const displayLimit = (index: number) => {
-    if (indexLimit && index > HISTORY_DISPLAY_LIMIT) {
-      return false;
-    }
-    return true;
-  };
+  const approvedStatuses = statuses.filter(
+    (status) => status.is_approved && status.id != statuses[0].id
+  );
+  const highlightFirstInTimeLineApproved = statuses[0].is_approved
+    ? false
+    : true;
+
+  const SHOW_MORE_THRESHOLD = 3;
 
   return (
-    <Box>
-      <ETCaption1 bold sx={{ letterSpacing: "0.39px", paddingBottom: "16px" }}>
+    <Box sx={{ paddingTop: "8px" }}>
+      <ETCaption1 bold color={Palette.neutral.dark}>
         STATUS HISTORY
       </ETCaption1>
-      <Timeline position="left" sx={{ overflowY: "scroll", flex: 1 }}>
-        {statuses.map((status: Status, index: number) => (
-          <If
-            condition={
-              status.is_approved &&
-              statuses[0].id !== status.id &&
-              displayLimit(index)
-            }
-          >
-            <Then>
-              <HistoryItem status={status} />
-            </Then>
-          </If>
-        ))}
-        <Button
-          onClick={() => setIndexLimit(!indexLimit)}
-          sx={{
-            gap: "8px",
-            width: "150px",
-            marginLeft: 12,
-          }}
-        >
-          <If
-            condition={
-              indexLimit &&
-              statuses.filter((status: Status) => {
-                return status.is_approved;
-              }).length > 4
-            }
-          >
-            <Then>
-              <ExpandIcon />
-              <ETCaption2 bold> Show More</ETCaption2>
-            </Then>
-          </If>
-          <If
-            condition={
-              !indexLimit &&
-              statuses.filter((status: Status) => {
-                return status.is_approved;
-              }).length > 4
-            }
-          >
-            <Then>
-              <ExpandIcon />
-              <ETCaption2 bold> Show Less</ETCaption2>
-            </Then>
-          </If>
-        </Button>
+      <Timeline
+        position="left"
+        sx={{
+          [`& .${timelineContentClasses.root}`]: {
+            flex: "initial",
+            paddingLeft: 0,
+          },
+          margin: 0,
+          paddingLeft: 0,
+        }}
+      >
+        {approvedStatuses.slice(0, SHOW_MORE_THRESHOLD).map((status, index) => {
+          const isSuccess = highlightFirstInTimeLineApproved && index === 0;
+          return (
+            <TimelineItem key={status.id}>
+              <TimelineOppositeContent>
+                <ETPreviewText
+                  color={
+                    isSuccess ? Palette.neutral.dark : Palette.neutral.main
+                  }
+                >
+                  <ReadMoreText>{status.description}</ReadMoreText>
+                </ETPreviewText>
+                <When condition={isSuccess && hasPermission()}>
+                  <Button
+                    variant="text"
+                    startIcon={<PencilEditIcon />}
+                    sx={{
+                      backgroundColor: "inherit",
+                      borderColor: "transparent",
+                    }}
+                    onClick={() => {
+                      setShowStatusForm(true);
+                      setStatus(status);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </When>
+              </TimelineOppositeContent>
+              <TimelineSeparator>
+                <TimelineDot
+                  sx={[
+                    isSuccess && {
+                      bgcolor: Palette.success.light,
+                    },
+                  ]}
+                />
+                <TimelineConnector
+                  sx={[
+                    isSuccess && {
+                      bgcolor: Palette.success.light,
+                    },
+                  ]}
+                />
+              </TimelineSeparator>
+              <TimelineContent>
+                <ETCaption3 color={Palette.neutral.main}>
+                  {moment(status.posted_date).format(MONTH_DAY_YEAR)}
+                </ETCaption3>
+              </TimelineContent>
+            </TimelineItem>
+          );
+        })}
+        <When condition={approvedStatuses.length > SHOW_MORE_THRESHOLD}>
+          <Collapse in={expand}>
+            {approvedStatuses.slice(SHOW_MORE_THRESHOLD).map((status) => (
+              <TimelineItem key={status.id}>
+                <TimelineOppositeContent>
+                  <ETPreviewText color={Palette.neutral.main}>
+                    <ReadMoreText>{status.description}</ReadMoreText>
+                  </ETPreviewText>
+                </TimelineOppositeContent>
+                <TimelineSeparator>
+                  <TimelineDot />
+                  <TimelineConnector />
+                </TimelineSeparator>
+                <TimelineContent>
+                  <ETCaption3 color={Palette.neutral.main}>
+                    {moment(status.posted_date).format(MONTH_DAY_YEAR)}
+                  </ETCaption3>
+                </TimelineContent>
+              </TimelineItem>
+            ))}
+          </Collapse>
+          <TimelineItem sx={{ paddingLeft: "86px" }} key="expand-button">
+            <Grid container>
+              <Grid item>
+                <Button
+                  variant="text"
+                  startIcon={
+                    <ExpandIcon
+                      style={{
+                        transform: !expand ? "rotate(0deg)" : "rotate(-180deg)",
+                        transition: theme.transitions.create("transform", {
+                          duration: theme.transitions.duration.shortest,
+                        }),
+                        fill: Palette.primary.accent.main,
+                      }}
+                    />
+                  }
+                  sx={{
+                    backgroundColor: "inherit",
+                    borderColor: "transparent",
+                  }}
+                  onClick={() => setExpand(!expand)}
+                >
+                  {expand ? "Show less" : "Show more"}
+                </Button>
+              </Grid>
+            </Grid>
+          </TimelineItem>
+        </When>
       </Timeline>
     </Box>
   );

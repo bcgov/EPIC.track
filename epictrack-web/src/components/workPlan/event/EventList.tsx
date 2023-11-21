@@ -2,7 +2,11 @@ import React, { useContext, useEffect } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
-import { EventsGridModel, MilestoneEvent } from "../../../models/event";
+import {
+  EventTemplateVisibility,
+  EventsGridModel,
+  MilestoneEvent,
+} from "../../../models/event";
 import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_RowSelectionState } from "material-react-table";
@@ -203,7 +207,7 @@ const EventList = () => {
             : actualToTodayDiff <= 0
             ? EVENT_STATUS.INPROGRESS
             : EVENT_STATUS.NOT_STARTED;
-          element.mandatory = element.event_configuration.mandatory;
+          element.visibility = element.event_configuration.visibility;
           return element;
         });
       }
@@ -308,7 +312,8 @@ const EventList = () => {
       setShowTaskForm(row.type === EVENT_TYPE.TASK);
     }
     setShowDeleteMilestoneButton(
-      row.type === EVENT_TYPE.MILESTONE && !row.mandatory
+      row.type === EVENT_TYPE.MILESTONE &&
+        !(row.visibility === EventTemplateVisibility.MANDATORY)
     );
   };
   const onCancelHandler = () => {
