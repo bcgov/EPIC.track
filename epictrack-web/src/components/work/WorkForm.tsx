@@ -23,6 +23,7 @@ import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwit
 import { IconProps } from "../icons/type";
 import Icons from "../icons/index";
 import LockClosed from "../../assets/images/lock-closed.svg";
+import projectService from "../../services/projectService/projectService";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -117,7 +118,6 @@ export default function WorkForm({ ...props }) {
   const codeTypes: { [x: string]: any } = {
     ea_acts: setEAActs,
     work_types: setWorkTypes,
-    projects: setProjects,
     ministries: setMinistries,
     federal_involvements: setFederalInvolvements,
     substitution_acts: setSubtitutionActs,
@@ -143,6 +143,13 @@ export default function WorkForm({ ...props }) {
     }
   };
 
+  const getProjects = async () => {
+    const projectResult = await projectService.getAll();
+    if (projectResult.status === 200) {
+      setProjects(projectResult.data as ListType[]);
+    }
+  };
+
   React.useEffect(() => {
     const promises: any[] = [];
     Object.keys(codeTypes).forEach(async (key) => {
@@ -152,6 +159,7 @@ export default function WorkForm({ ...props }) {
       promises.push(getStaffByPosition(key));
     });
     Promise.all(promises);
+    getProjects();
   }, []);
 
   const onSubmitHandler = async (data: any) => {
