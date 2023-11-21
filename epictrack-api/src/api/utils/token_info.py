@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Helper for token decoding"""
-from flask import g
+from flask import g, current_app
 
 
 class TokenInfo:
@@ -55,3 +55,15 @@ class TokenInfo:
         """Return True if the user is staff user."""
         # TODO Implement this method
         return True
+
+    @staticmethod
+    def get_roles():
+        """Return roles of a user from the token."""
+        token_info = g.token_info
+        realm_access = token_info.get('realm_access', {})
+        realm_roles = realm_access.get('roles', [])
+        client_name = current_app.config.get('JWT_OIDC_AUDIENCE')
+        resource_access = token_info.get('resource_access', {})
+        client_roles = resource_access.get(client_name, {}).get('roles', [])
+
+        return realm_roles + client_roles
