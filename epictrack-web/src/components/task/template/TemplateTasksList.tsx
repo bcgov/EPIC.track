@@ -70,7 +70,7 @@ const TemplateTaskList = ({ ...props }) => {
       },
       {
         accessorKey: "tips",
-        header: "Tips",
+        header: "Notes",
       },
     ],
     []
