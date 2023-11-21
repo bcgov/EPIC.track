@@ -29,7 +29,7 @@ class Event(BaseModelVersioned):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    description = Column(String(2000), nullable=True)
+    # description = Column(String(2000), nullable=True)
     anticipated_date = Column(DateTime(timezone=True), nullable=True)
     actual_date = Column(DateTime(timezone=True), nullable=True)
     number_of_days = Column(Integer, default=0, nullable=False)

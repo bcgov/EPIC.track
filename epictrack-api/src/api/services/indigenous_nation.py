@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage IndigenousNation."""
 from typing import IO, List
+from sqlalchemy import func
 
 import numpy as np
 import pandas as pd
@@ -89,7 +90,7 @@ class IndigenousNationService:
         pip_org_types = data["pip_org_type_id"].to_list()
         staffs = (
             db.session.query(Staff)
-            .filter(Staff.email.in_(relationship_holders), Staff.is_active.is_(True))
+            .filter(func.lower(Staff.email).in_(relationship_holders), Staff.is_active.is_(True))
             .all()
         )
         org_types = (
@@ -127,7 +128,7 @@ class IndigenousNationService:
     @classmethod
     def _find_staff_id(cls, email: str, staffs: List[Staff]) -> int:
         """Find and return the id of staff from given list"""
-        staff = next((x for x in staffs if x.email == email), None)
+        staff = next((x for x in staffs if x.email.lower() == email), None)
         if staff is None:
             raise ResourceNotFoundError(f"Staff with email {email} does not exist")
         return staff.id
