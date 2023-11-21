@@ -34,6 +34,8 @@ class ProjectStateEnum(enum.Enum):
     CARE_AND_MAINTENANCE = "CARE_AND_MAINTENANCE"
     DECOMMISSION = "DECOMMISSION"
     UNKNOWN = "UNKNOWN"
+    CLOSED = "CLOSED"
+    UNDER_DESIGNATION = "UNDER_DESIGNATION"
 
 
 class Project(BaseModelVersioned):

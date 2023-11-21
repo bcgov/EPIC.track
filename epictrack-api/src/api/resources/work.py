@@ -25,6 +25,7 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
 from api.utils.roles import Role
 from api.utils.util import cors_preflight
+from api.utils.datetime_helper import get_start_of_day
 
 
 API = Namespace("works", description="Works")
@@ -72,6 +73,7 @@ class Works(Resource):
     def post():
         """Create new work"""
         request_json = req.WorkBodyParameterSchema().load(API.payload)
+        request_json["start_date"] = get_start_of_day(request_json["start_date"])
         work = WorkService.create_work(request_json)
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 

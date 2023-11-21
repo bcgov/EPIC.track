@@ -13,18 +13,20 @@
 # limitations under the License.
 """Resource for Event Template endpoints."""
 from http import HTTPStatus
-from flask_restx import Namespace, Resource, cors
+
 from flask import jsonify, request
+from flask_restx import Namespace, Resource, cors
+
+from api.services import EventTemplateService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
-from api.services import EventTemplateService
 
 
 API = Namespace("tasks", description="Tasks")
 
 
-@cors_preflight("GET,POST")
-@API.route("", methods=["GET", "POST", "OPTIONS"])
+@cors_preflight("POST")
+@API.route("", methods=["POST", "OPTIONS"])
 class EventTemplates(Resource):
     """Endpoints for EventTemplates"""
 

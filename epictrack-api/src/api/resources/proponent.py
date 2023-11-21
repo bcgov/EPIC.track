@@ -104,7 +104,23 @@ class Proponents(Resource):
     @auth.require
     @profiletime
     def post():
-        """Create new staff"""
+        """Create new proponent"""
         request_json = req.ProponentBodyParameterSchema().load(API.payload)
         proponent = ProponentService.create_proponent(request_json)
         return res.ProponentResponseSchema().dump(proponent), HTTPStatus.CREATED
+
+
+@cors_preflight("POST")
+@API.route("/import", methods=["POST", "OPTIONS"])
+class ImportProponents(Resource):
+    """Endpoint resource to import proponents."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Import proponents"""
+        file = request.files["file"]
+        response = ProponentService.import_proponents(file)
+        return response, HTTPStatus.CREATED

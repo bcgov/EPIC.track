@@ -68,7 +68,7 @@ export const StatusProvider = ({
 
   const hasPermission = () => {
     const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
-    const allowed = groups.filter((group) => {
+    const allowed = groups.filter((group: any) => {
       return groupsWithPermission.includes(group);
     });
     return Boolean(allowed.length);
