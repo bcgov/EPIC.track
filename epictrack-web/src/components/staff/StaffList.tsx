@@ -58,8 +58,13 @@ const StaffList = () => {
       {
         accessorKey: "full_name",
         header: "Name",
-        Cell: ({ row, renderedCellValue }) => (
-          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+        Cell: ({ cell, row, renderedCellValue }) => (
+          <ETGridTitle
+            to={"#"}
+            onClick={() => onEdit(row.original.id)}
+            enableTooltip={true}
+            tooltip={cell.getValue<string>()}
+          >
             {renderedCellValue}
           </ETGridTitle>
         ),
@@ -97,15 +102,18 @@ const StaffList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
+        size: 115,
         Filter: ({ header, column }) => {
           return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
+            <Box sx={{ width: "100px" }}>
+              <TableFilter
+                isMulti
+                header={header}
+                column={column}
+                variant="inline"
+                name="rolesFilter"
+              />
+            </Box>
           );
         },
         filterFn: (row, id, filterValue) => {

@@ -8,6 +8,7 @@ const ActiveChip = styled(Chip)({
   borderRadius: "4px",
   padding: "4px 8px",
   gap: "8px",
+  width: "100px",
 });
 
 const InactiveChip = styled(Chip)({
@@ -17,6 +18,7 @@ const InactiveChip = styled(Chip)({
   borderRadius: "4px",
   padding: "4px 8px",
   gap: "8px",
+  width: "100px",
 });
 
 const HighPriorityChip = styled(Chip)({
