@@ -11,6 +11,7 @@ import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -63,6 +64,7 @@ const StaffList = () => {
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "phone",

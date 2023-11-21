@@ -11,6 +11,7 @@ import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
@@ -85,6 +86,7 @@ const ProjectList = () => {
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "type.name",

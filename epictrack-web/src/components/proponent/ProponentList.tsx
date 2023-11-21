@@ -12,6 +12,7 @@ import proponentService from "../../services/proponentService/proponentService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import TableFilter from "../shared/filterSelect/TableFilter";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 export default function ProponentList() {
   const [proponentId, setProponentId] = useState<number>();
@@ -39,9 +40,6 @@ export default function ProponentList() {
     (value) => value
   );
 
-  console.log("proponents", proponents);
-  console.log("statusesOptions", statusesOptions);
-
   const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
     () => [
       {
@@ -53,6 +51,7 @@ export default function ProponentList() {
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "relationship_holder.full_name",
