@@ -13,9 +13,8 @@
 # limitations under the License.
 """Resource for inspection endpoints."""
 import os
-from http import HTTPStatus
 
-from flask import request, send_file
+from flask import send_file
 from flask_restx import Namespace, Resource, cors
 
 from api.services import CodeService, LookupService, ProjectService
@@ -26,8 +25,8 @@ from api.utils.util import cors_preflight
 API = Namespace('lookups', description='Lookups')
 
 
-@cors_preflight('GET,POST')
-@API.route('', methods=['GET', 'POST', 'OPTIONS'])
+@cors_preflight('POST')
+@API.route('', methods=['GET', 'OPTIONS'])
 class Inspections(Resource):
     """Endpoint resource to return number of inspections."""
 
@@ -94,13 +93,3 @@ class Inspections(Resource):
 
         return send_file(lookup_data, as_attachment=True,
                          download_name=f'Lookups_{os.getenv("FLASK_ENV", "production")}.xlsx')
-
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    @auth.require
-    @profiletime
-    def post():  # pylint: disable=too-many-locals
-        """Return total number of inspections."""
-        file = request.files["file"]
-        event_template = LookupService.import_lookups(file)
-        return event_template, HTTPStatus.OK
