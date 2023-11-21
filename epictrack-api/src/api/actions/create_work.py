@@ -1,6 +1,8 @@
 """Create work action handler"""
 from datetime import timedelta
 
+from pytz import timezone
+
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.work_type import WorkType
@@ -20,10 +22,13 @@ class CreateWork(ActionFactory):
             )
             .first()
         )
+
+        start_date = source_event.actual_date + timedelta(days=1)
+        start_date = start_date.astimezone(timezone('US/Pacific'))
         new_work = {
             "ea_act_id": source_event.work.ea_act_id,
             "work_type_id": work_type.id,
-            "start_date": source_event.actual_date + timedelta(days=1),
+            "start_date": start_date,
             "project_id": source_event.work.project_id,
             "ministry_id": source_event.work.ministry_id,
             "federal_involvement_id": source_event.work.federal_involvement_id,

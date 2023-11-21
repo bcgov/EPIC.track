@@ -12,8 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Proponent."""
+from typing import IO, List
+
+import numpy as np
+import pandas as pd
+from sqlalchemy import text
+
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
-from api.models import Proponent
+from api.models import Proponent, db
+from api.models.staff import Staff
+from api.utils.token_info import TokenInfo
 
 
 class ProponentService:
@@ -56,7 +64,9 @@ class ProponentService:
             raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent.find_by_id(proponent_id)
         if not proponent:
-            raise ResourceNotFoundError(f"Proponent with id '{proponent_id}' not found.")
+            raise ResourceNotFoundError(
+                f"Proponent with id '{proponent_id}' not found."
+            )
         proponent = proponent.update(payload)
         return proponent
 
@@ -67,3 +77,53 @@ class ProponentService:
         proponent.is_deleted = True
         proponent.save()
         return True
+
+    @classmethod
+    def import_proponents(cls, file: IO):
+        """Import proponents"""
+        data = cls._read_excel(file)
+        db.session.execute(text("TRUNCATE proponents RESTART IDENTITY CASCADE"))
+        data["relationship_holder_id"] = data.apply(
+            lambda x: x["relationship_holder_id"].lower()
+            if x["relationship_holder_id"]
+            else None,
+            axis=1,
+        )
+        relationship_holders = data["relationship_holder_id"].to_list()
+        staffs = (
+            db.session.query(Staff)
+            .filter(Staff.email.in_(relationship_holders), Staff.is_active.is_(True))
+            .all()
+        )
+
+        data["relationship_holder_id"] = data.apply(
+            lambda x: cls._find_staff_id(x["relationship_holder_id"], staffs), axis=1
+        )
+        username = TokenInfo.get_username()
+        data["created_by"] = username
+        data = data.to_dict("records")
+        db.session.bulk_insert_mappings(Proponent, data)
+        db.session.commit()
+        return "Created successfully"
+
+    @classmethod
+    def _read_excel(cls, file: IO) -> pd.DataFrame:
+        """Read the template excel file"""
+        column_map = {
+            "Name": "name",
+            "Relationship Holder": "relationship_holder_id",
+        }
+        data_frame = pd.read_excel(file)
+        data_frame = data_frame.replace({np.nan: None})
+        data_frame.rename(column_map, axis="columns", inplace=True)
+        return data_frame
+
+    @classmethod
+    def _find_staff_id(cls, email: str, staffs: List[Staff]) -> int:
+        """Find and return the id of staff from given list"""
+        if email is None:
+            return None
+        staff = next((x for x in staffs if x.email == email), None)
+        if staff is None:
+            raise ResourceNotFoundError(f"Staff with email {email} does not exist")
+        return staff.id

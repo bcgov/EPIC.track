@@ -12,15 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Project."""
+from typing import IO, List
+
+import numpy as np
+import pandas as pd
 from flask import current_app
-from sqlalchemy import and_
+from sqlalchemy import and_, text
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Project, db
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
+from api.models.proponent import Proponent
+from api.models.region import Region
+from api.models.sub_types import SubType
+from api.models.types import Type
 from api.models.work import Work
 from api.models.work_type import WorkType
+from api.utils.constants import PROJECT_STATE_ENUM_MAPS
+from api.utils.token_info import TokenInfo
 
 
 class ProjectService:
@@ -144,3 +154,133 @@ class ProjectService:
         )
         result = result.count() > 0
         return {"first_nation_available": result}
+
+    @classmethod
+    def import_projects(cls, file: IO):
+        """Import proponents"""
+        data = cls._read_excel(file)
+        db.session.execute(text("TRUNCATE projects RESTART IDENTITY CASCADE"))
+
+        proponent_names = set(data["proponent_id"].to_list())
+        type_names = set(data["type_id"].to_list())
+        sub_type_names = set(data["sub_type_id"].to_list())
+        env_region_names = set(data["region_id_env"].to_list())
+        flnro_region_names = set(data["region_id_flnro"].to_list())
+        proponents = (
+            db.session.query(Proponent)
+            .filter(Proponent.name.in_(proponent_names), Proponent.is_active.is_(True))
+            .all()
+        )
+        types = (
+            db.session.query(Type)
+            .filter(Type.name.in_(type_names), Type.is_active.is_(True))
+            .all()
+        )
+        sub_types = (
+            db.session.query(SubType)
+            .filter(SubType.name.in_(sub_type_names), SubType.is_active.is_(True))
+            .all()
+        )
+        regions = (
+            db.session.query(Region)
+            .filter(Region.name.in_(env_region_names.union(flnro_region_names)), Region.is_active.is_(True))
+            .all()
+        )
+
+        data["proponent_id"] = data.apply(
+            lambda x: cls._find_proponent_id(x["proponent_id"], proponents), axis=1
+        )
+        data["type_id"] = data.apply(
+            lambda x: cls._find_type_id(x["type_id"], types), axis=1
+        )
+        data["sub_type_id"] = data.apply(
+            lambda x: cls._find_sub_type_id(x["sub_type_id"], sub_types), axis=1
+        )
+        data["region_id_env"] = data.apply(
+            lambda x: cls._find_region_id(x["region_id_env"], regions, "ENV"), axis=1
+        )
+        data["region_id_flnro"] = data.apply(
+            lambda x: cls._find_region_id(x["region_id_flnro"], regions, "FLNR"), axis=1
+        )
+        data["project_state"] = data.apply(
+            lambda x: PROJECT_STATE_ENUM_MAPS[x["project_state"]], axis=1
+        )
+
+        username = TokenInfo.get_username()
+        data["created_by"] = username
+        data = data.to_dict("records")
+        db.session.bulk_insert_mappings(Project, data)
+        db.session.commit()
+        return "Created successfully"
+
+    @classmethod
+    def _read_excel(cls, file: IO) -> pd.DataFrame:
+        """Read the template excel file"""
+        column_map = {
+            "Name": "name",
+            "Proponent": "proponent_id",
+            "Type": "type_id",
+            "SubType": "sub_type_id",
+            "Description": "description",
+            "Address": "address",
+            "Latitude": "latitude",
+            "Longitude": "longitude",
+            "ENVRegion": "region_id_env",
+            "FLNRORegion": "region_id_flnro",
+            "Capital Investment": "capital_investment",
+            "EPIC Guid": "epic_guid",
+            "Abbreviation": "abbreviation",
+            "EACertificate": "ea_certificate",
+            "Project Closed": "is_project_closed",
+            "FTE Positions Construction": "fte_positions_construction",
+            "FTE Positions Operation": "fte_positions_operation",
+            "Project State": "project_state"
+        }
+        data_frame = pd.read_excel(file)
+        data_frame.rename(column_map, axis="columns", inplace=True)
+        data_frame = data_frame.infer_objects()
+        data_frame = data_frame.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+        data_frame = data_frame.replace({np.nan: None})
+        data_frame = data_frame.replace({np.NaN: None})
+        return data_frame
+
+    @classmethod
+    def _find_proponent_id(cls, name: str, proponents: List[Proponent]) -> int:
+        """Find and return the id of proponent from given list"""
+        if name is None:
+            return None
+        proponent = next((x for x in proponents if x.name == name), None)
+        if proponent is None:
+            print(f"Proponent with name {name} does not exist")
+            raise ResourceNotFoundError(f"Proponent with name {name} does not exist")
+        return proponent.id
+
+    @classmethod
+    def _find_type_id(cls, name: str, types: List[Type]) -> int:
+        """Find and return the id of type from given list"""
+        if name is None:
+            return None
+        type_obj = next((x for x in types if x.name == name), None)
+        if type_obj is None:
+            raise ResourceNotFoundError(f"Type with name {name} does not exist")
+        return type_obj.id
+
+    @classmethod
+    def _find_sub_type_id(cls, name: str, sub_types: List[SubType]) -> int:
+        """Find and return the id of SubType from given list"""
+        if name is None:
+            return None
+        sub_type = next((x for x in sub_types if x.name == name), None)
+        if sub_type is None:
+            raise ResourceNotFoundError(f"SubType with name {name} does not exist")
+        return sub_type.id
+
+    @classmethod
+    def _find_region_id(cls, name: str, regions: List[Region], entity: str) -> int:
+        """Find and return the id of region from given list"""
+        if name is None:
+            return None
+        region = next((x for x in regions if x.name == name and x.entity == entity), None)
+        if region is None:
+            raise ResourceNotFoundError(f"Region with name {name} does not exist")
+        return region.id

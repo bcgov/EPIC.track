@@ -13,11 +13,17 @@
 # limitations under the License.
 """Service to manage Staffs."""
 
+from typing import IO, List
+
+import pandas as pd
 from flask import current_app
+from sqlalchemy import text
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
-from api.models import Staff
+from api.models import Staff, db
+from api.models.position import Position
 from api.schemas.response import StaffResponseSchema
+from api.utils.token_info import TokenInfo
 
 
 class StaffService:
@@ -99,3 +105,53 @@ class StaffService:
     def find_by_email(cls, email):
         """Find staff by email address"""
         return Staff.find_by_email(email)
+
+    @classmethod
+    def import_staffs(cls, file: IO):
+        """Import proponents"""
+        data = cls._read_excel(file)
+        db.session.execute(text("TRUNCATE staffs RESTART IDENTITY CASCADE"))
+
+        position_names = set(data["position_id"].to_list())
+        positions = (
+            db.session.query(Position)
+            .filter(Position.name.in_(position_names), Position.is_active.is_(True))
+            .all()
+        )
+
+        data["position_id"] = data.apply(
+            lambda x: cls._find_position_id(x["position_id"], positions), axis=1
+        )
+
+        username = TokenInfo.get_username()
+        data["created_by"] = username
+        data = data.to_dict("records")
+        db.session.bulk_insert_mappings(Staff, data)
+        db.session.commit()
+        return "Inserted successfully"
+
+    @classmethod
+    def _read_excel(cls, file: IO) -> pd.DataFrame:
+        """Read the template excel file"""
+        column_map = {
+            "First Name": "first_name",
+            "Last Name": "last_name",
+            "Phone": "phone",
+            "Email": "email",
+            "Position": "position_id",
+        }
+        data_frame = pd.read_excel(file)
+        data_frame.rename(column_map, axis="columns", inplace=True)
+        data_frame = data_frame.infer_objects()
+        data_frame = data_frame.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+        return data_frame
+
+    @classmethod
+    def _find_position_id(cls, name: str, positions: List[Position]) -> int:
+        """Find and return the id of position from given list"""
+        if name is None:
+            return None
+        position = next((x for x in positions if x.name == name), None)
+        if position is None:
+            raise ResourceNotFoundError(f"position with name {name} does not exist")
+        return position.id
