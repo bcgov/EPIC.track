@@ -1,7 +1,7 @@
 """Disable work start date action handler"""
 
 from api.actions.base import ActionFactory
-from api.models import db, Work
+from api.models import Work, db
 
 
 class SetWorkDecisionMaker(ActionFactory):  # pylint: disable=too-few-public-methods

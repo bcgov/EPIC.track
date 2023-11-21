@@ -25,3 +25,8 @@ class ProjectResponseSchema(
     proponent = fields.Nested(ProponentSchema, dump_only=True, exclude=("relationship_holder",))
     region_env = fields.Nested(RegionSchema, dump_only=True)
     region_flnro = fields.Nested(RegionSchema, dump_only=True)
+    project_state = fields.Method("get_project_state", dump_only=True)
+
+    def get_project_state(self, obj: Project) -> str:
+        """Return project state enum value"""
+        return obj.project_state.value

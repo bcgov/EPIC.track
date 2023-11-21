@@ -17,7 +17,6 @@ from typing import IO, List
 
 import pandas as pd
 from flask import current_app
-from sqlalchemy import text
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Staff, db
@@ -110,8 +109,6 @@ class StaffService:
     def import_staffs(cls, file: IO):
         """Import proponents"""
         data = cls._read_excel(file)
-        db.session.execute(text("TRUNCATE staffs RESTART IDENTITY CASCADE"))
-
         position_names = set(data["position_id"].to_list())
         positions = (
             db.session.query(Position)

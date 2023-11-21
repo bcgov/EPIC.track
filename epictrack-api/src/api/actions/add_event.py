@@ -3,14 +3,12 @@
 from datetime import timedelta
 
 from api.actions.base import ActionFactory
-from api.models import db, Event
+from api.models import Event, db
 from api.models.event_configuration import EventConfiguration
+from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.phase_code import PhaseCode
 from api.models.work_phase import WorkPhase
-from api.models.event_template import EventTemplateVisibilityEnum
-from api.schemas.response.event_configuration_response import (
-    EventConfigurationResponseSchema,
-)
+from api.schemas.response.event_configuration_response import EventConfigurationResponseSchema
 from api.schemas.response.event_template_response import EventTemplateResponseSchema
 
 
@@ -29,8 +27,7 @@ class AddEvent(ActionFactory):
             {
                 "is_active": True,
                 "work_id": source_event.work_id,
-                "anticipated_date": source_event.actual_date
-                + timedelta(days=params["start_at"]),
+                "anticipated_date": source_event.actual_date + timedelta(days=params["start_at"]),
             }
         )
         EventService.create_event(

@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Payment Disbursement status code."""
 import enum
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Enum
+
+from sqlalchemy import Boolean, Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .code_table import CodeTableVersioned
