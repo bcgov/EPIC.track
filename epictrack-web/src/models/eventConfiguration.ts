@@ -1,4 +1,4 @@
-import { EventPosition } from "./event";
+import { EventPosition, EventTemplateVisibility } from "./event";
 
 export default interface EventConfiguration {
   id: number;
@@ -7,6 +7,6 @@ export default interface EventConfiguration {
   event_type_id: number;
   multiple_days: boolean;
   event_position: EventPosition;
-  mandatory: boolean;
+  visibilty_mode: EventTemplateVisibility;
   work_phase_id: number;
 }

@@ -55,6 +55,7 @@ class Work(BaseModelVersioned):
     start_date = Column(DateTime(timezone=True))
     anticipated_decision_date = Column(DateTime(timezone=True))
     decision_date = Column(DateTime(timezone=True))
+    work_decision_date = Column(DateTime(timezone=True))
 
     project_id = Column(ForeignKey('projects.id'), nullable=False)
     ministry_id = Column(ForeignKey('ministries.id'), nullable=False)

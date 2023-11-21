@@ -137,3 +137,19 @@ class StaffByEmail(Resource):
         if staff:
             return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
         raise ResourceNotFoundError(f'Staff with email "{email}" not found')
+
+
+@cors_preflight("POST")
+@API.route("/import", methods=["POST", "OPTIONS"])
+class ImportStaffs(Resource):
+    """Endpoint resource to import staffs."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Import staffs"""
+        file = request.files["file"]
+        response = StaffService.import_staffs(file)
+        return response, HTTPStatus.CREATED

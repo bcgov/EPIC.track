@@ -17,6 +17,7 @@ from sqlalchemy import or_
 
 from api.models import EventConfiguration, WorkPhase, db
 from api.models.event_category import EventCategoryEnum
+from api.models.event_template import EventTemplateVisibilityEnum
 
 
 class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-many-arguments
@@ -45,8 +46,10 @@ class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-
         if len(event_categories) > 0:
             category_ids = list(map(lambda x: x.value, event_categories))
             query = query.filter(EventConfiguration.event_category_id.in_(category_ids))
-        if mandatory is not None:
-            query = query.filter(EventConfiguration.mandatory.is_(mandatory))
+        if mandatory:
+            query = query.filter(EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY.value)
+        if not mandatory:
+            query = query.filter(EventConfiguration.visibility == EventTemplateVisibilityEnum.OPTIONAL.value)
         if not _all:
             query = query.filter(EventConfiguration.parent_id.is_(None))
         configurations = query.all()

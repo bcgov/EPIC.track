@@ -31,7 +31,18 @@ class EventTemplateResponseSchema(
         unknown = EXCLUDE
 
     event_position = fields.Method("get_event_position")
+    visibility = fields.Method("get_visibility")
 
     def get_event_position(self, obj: EventTemplate) -> str:
         """Return value for the event position"""
-        return obj.event_position if isinstance(obj.event_position, str) else obj.event_position.value
+        return (
+            obj.event_position
+            if isinstance(obj.event_position, str)
+            else obj.event_position.value
+        )
+
+    def get_visibility(self, obj: EventTemplate) -> str:
+        """Return value for the visibility"""
+        return (
+            obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value
+        )

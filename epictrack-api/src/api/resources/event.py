@@ -22,6 +22,7 @@ from api.schemas import response as res
 from api.services.event import EventService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
+from api.utils.datetime_helper import get_start_of_day
 
 
 API = Namespace("milestones", description="Milestones")
@@ -54,6 +55,8 @@ class Events(Resource):
         """Create a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
         args = req.MilestoneEventPushEventQueryParameterSchema().load(request.args)
+        request_json["anticipated_date"] = get_start_of_day(request_json.get("anticipated_date"))
+        request_json["actual_date"] = get_start_of_day(request_json.get("actual_date"))
         event_response = EventService.create_event(request_json, work_phase_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.CREATED
 
@@ -71,6 +74,8 @@ class Event(Resource):
         """Endpoint to update a milestone event"""
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
         args = req.MilestoneEventPushEventQueryParameterSchema().load(request.args)
+        request_json["anticipated_date"] = get_start_of_day(request_json.get("anticipated_date"))
+        request_json["actual_date"] = get_start_of_day(request_json.get("actual_date"))
         event_response = EventService.update_event(request_json, event_id, args.get("push_events"))
         return res.EventResponseSchema().dump(event_response), HTTPStatus.OK
 
@@ -124,6 +129,8 @@ class ValidateWork(Resource):
         """Check for existing works."""
         args = req.MilestoneEventCheckQueryParameterSchema().load(request.args)
         request_json = req.MilestoneEventBodyParameterSchema().load(API.payload)
+        request_json["anticipated_date"] = get_start_of_day(request_json.get("anticipated_date"))
+        request_json["actual_date"] = get_start_of_day(request_json.get("actual_date"))
         event_id = args.get("event_id")
         result = EventService.check_event(request_json, event_id)
         return res.EventDateChangePosibilityCheckResponseSchema().dump(result), HTTPStatus.OK

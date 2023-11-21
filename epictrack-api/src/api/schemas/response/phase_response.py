@@ -21,3 +21,8 @@ class PhaseResponseSchema(
 
     ea_act = fields.Nested(EAActSchema, dump_only=True)
     work_type = fields.Nested(WorkTypeSchema, dump_only=True)
+    visibility = fields.Method("get_visibility")
+
+    def get_visibility(self, obj: PhaseCode) -> str:
+        """Return value for the visibility"""
+        return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value

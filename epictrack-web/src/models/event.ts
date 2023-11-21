@@ -22,7 +22,7 @@ export interface EventsGridModel {
   responsibility: string;
   notes: string;
   status: EVENT_STATUS;
-  mandatory: boolean;
+  visibility: EventTemplateVisibility;
 }
 
 export interface MilestoneEvent {
@@ -79,4 +79,10 @@ export enum EventPosition {
   START = "START",
   INTERMEDIATE = "INTERMEDIATE",
   END = "END",
+}
+
+export enum EventTemplateVisibility {
+  MANDATORY = "MANDATORY",
+  OPTIONAL = "OPTIONAL",
+  HIDDEN = "HIDDEN",
 }

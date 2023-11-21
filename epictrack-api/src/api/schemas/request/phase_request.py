@@ -56,6 +56,11 @@ class PhaseBodyParameterSchema(RequestBodyParameterSchema):
         required=True
     )
 
+    visibility = fields.String(
+        metadata={"description": "Indicate if the phase is visible in the work plan"},
+        required=True,
+    )
+
     is_active = fields.Bool(
         metadata={"description": "Active state of the task"},
     )

@@ -18,26 +18,52 @@ from itertools import product
 
 import pandas as pd
 from flask import current_app
-from sqlalchemy import exc, tuple_
+from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
-from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
+from api.exceptions import (
+    ResourceExistsError,
+    ResourceNotFoundError,
+    UnprocessableEntityError,
+)
 from api.models import (
-    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
-    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
+    ActionConfiguration,
+    ActionTemplate,
+    CalendarEvent,
+    EAOTeam,
+    Event,
+    EventConfiguration,
+    OutcomeConfiguration,
+    Project,
+    Role,
+    Staff,
+    StaffWorkRole,
+    Work,
+    WorkCalendarEvent,
+    WorkPhase,
+    WorkStateEnum,
+    db,
+)
+from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.event_category import EventCategoryEnum
+from api.models.phase_code import PhaseVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
-from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
+from api.schemas.request import (
+    ActionConfigurationBodyParameterSchema,
+    OutcomeConfigurationBodyParameterSchema,
+)
 from api.schemas.response import (
-    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
+    ActionTemplateResponseSchema,
+    EventTemplateResponseSchema,
+    OutcomeTemplateResponseSchema,
+)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.services.event import EventService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
-from api.utils.datetime_helper import get_start_of_day
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -100,58 +126,55 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return works
 
     @classmethod
-    def create_work(cls, payload):
+    def create_work(cls, payload, commit: bool = True):
         # pylint: disable=too-many-locals
         """Create a new work"""
-        try:
-            payload["start_date"] = get_start_of_day(payload["start_date"])
-            if cls.check_existence(payload["title"]):
-                raise ResourceExistsError("Work with same title already exists")
-            work = Work(**payload)
-            work.work_state = WorkStateEnum.IN_PROGRESS
-            phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
-                work.ea_act_id, work.work_type_id
-            )
-            if not phases:
-                raise UnprocessableEntityError("No configuration found")
-            phase_ids = list(map(lambda x: x.id, phases))
-            event_templates = EventTemplateService.find_by_phase_ids(phase_ids)
-            event_template_json = EventTemplateResponseSchema(many=True).dump(
-                event_templates
-            )
-            # TODO: CHANGE TO CURRENT WORK PHASE ID
-            work = work.flush()
-            phase_start_date = work.start_date
-            first_phase = True
-            for phase in phases:
-                end_date = phase_start_date + timedelta(days=phase.number_of_days)
-                work_phase = {
-                    "work_id": work.id,
-                    "phase_id": phase.id,
-                    "name": phase.name,
-                    "start_date": f"{phase_start_date}",
-                    "end_date": f"{end_date}",
-                    "legislated": phase.legislated,
-                    "number_of_days": phase.number_of_days,
-                }
-                phase_event_templates = list(
-                    filter(
-                        lambda x, _phase_id=phase.id: x["phase_id"] == _phase_id,
-                        event_template_json,
-                    )
+        if cls.check_existence(payload["title"]):
+            raise ResourceExistsError("Work with same title already exists")
+        work = Work(**payload)
+        work.work_state = WorkStateEnum.IN_PROGRESS
+        phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
+            work.ea_act_id, work.work_type_id
+        )
+        if not phases:
+            raise UnprocessableEntityError("No configuration found")
+        phase_ids = list(map(lambda x: x.id, phases))
+        event_templates = EventTemplateService.find_by_phase_ids(phase_ids)
+        event_template_json = EventTemplateResponseSchema(many=True).dump(
+            event_templates
+        )
+        work = work.flush()
+        phase_start_date = work.start_date
+        sort_order = 1
+        for phase in phases:
+            end_date = phase_start_date + timedelta(days=phase.number_of_days)
+            work_phase = {
+                "work_id": work.id,
+                "phase_id": phase.id,
+                "name": phase.name,
+                "start_date": f"{phase_start_date}",
+                "end_date": f"{end_date}",
+                "legislated": phase.legislated,
+                "number_of_days": phase.number_of_days,
+                "sort_order": sort_order,
+                "visibility": phase.visibility,
+            }
+            phase_event_templates = list(
+                filter(
+                    lambda x, _phase_id=phase.id: x["phase_id"] == _phase_id,
+                    event_template_json,
                 )
-                work_phase_id = cls.handle_phase(
-                    work_phase, phase_event_templates
-                )
+            )
+            work_phase_id = cls.create_events_by_template(
+                work_phase, phase_event_templates
+            )
+            if phase.visibility != PhaseVisibilityEnum.HIDDEN.value:
                 phase_start_date = end_date + timedelta(days=1)
-                if first_phase:
-                    work.current_work_phase_id = work_phase_id
-                    first_phase = False
-
+            if sort_order == 1:
+                work.current_work_phase_id = work_phase_id
+            sort_order = sort_order + 1
+        if commit:
             db.session.commit()
-        except exc.IntegrityError as exception:
-            db.session.rollback()
-            raise exception
         return work
 
     @classmethod
@@ -303,7 +326,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @classmethod
-    def _prepare_configuration(cls, data) -> dict:
+    def _prepare_configuration(cls, data, from_template) -> dict:
         """Prepare the configuration object"""
         return {
             "name": data["name"],
@@ -312,12 +335,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
             "event_category_id": data["event_category_id"],
             "start_at": data["start_at"],
             "number_of_days": data["number_of_days"],
-            "mandatory": data["mandatory"],
             "event_position": data["event_position"],
             "multiple_days": data["multiple_days"],
             "sort_order": data["sort_order"],
-            "template_id": data["id"],
+            "template_id": data["id"] if from_template else data["template_id"],
             "work_phase_id": data["work_phase_id"],
+            "visibility": data["visibility"],
+            "repeat_count": 1,
         }
 
     @classmethod
@@ -438,7 +462,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Save notes to the given column in the work."""
         # if column name cant map the type in the UI , add it here..
         note_type_mapping = {
-            'first_nation': 'first_nation_notes',
+            "first_nation": "first_nation_notes",
         }
 
         work = cls.find_by_id(work_id)
@@ -450,7 +474,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         else:
             mapped_column = note_type_mapping.get(note_type)
             if mapped_column is None:
-                raise ResourceExistsError(f"No work note type {note_type}  nation association found")
+                raise ResourceExistsError(
+                    f"No work note type {note_type}  nation association found"
+                )
             setattr(work, mapped_column, notes)
 
         work.save()
@@ -613,95 +639,124 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return False
 
     @classmethod
-    def handle_phase(cls, work_phase, phase_event_templates) -> int:  # pylint: disable=too-many-locals
+    def create_events_by_template(
+        cls, work_phase: WorkPhase, phase_event_templates: [dict]
+    ) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))
-        event_configurations = []
-        for parent_config in list(
-            filter(lambda x: not x["parent_id"], phase_event_templates)
-        ):
+        event_configurations = cls.create_configurations(
+            work_phase, phase_event_templates
+        )
+        cls.create_events_by_configuration(work_phase, event_configurations)
+        return work_phase.id
+
+    @classmethod
+    def create_configurations(
+        cls, work_phase: WorkPhase, event_configs: [dict], from_template: bool = True
+    ) -> [EventConfiguration]:
+        """Create event configurations from existing configurations/templates"""
+        event_configurations: [EventConfiguration] = []
+        for parent_config in list(filter(lambda x: not x["parent_id"], event_configs)):
             parent_config["work_phase_id"] = work_phase.id
-            p_result = EventConfiguration(**cls._prepare_configuration(parent_config))
+            p_result = EventConfiguration(
+                **cls._prepare_configuration(parent_config, from_template)
+            )
             p_result.flush()
             event_configurations.append(p_result)
             cls.copy_outcome_and_actions(parent_config, p_result)
             for child in list(
                 filter(
-                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] == _parent_config_id,
-                    phase_event_templates,
+                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"]
+                    == _parent_config_id,
+                    event_configs,
                 )
             ):
                 child["parent_id"] = p_result.id
                 child["work_phase_id"] = work_phase.id
                 c_result = EventConfiguration.flush(
-                    EventConfiguration(**cls._prepare_configuration(child))
+                    EventConfiguration(
+                        **cls._prepare_configuration(child, from_template)
+                    )
                 )
                 event_configurations.append(c_result)
                 cls.copy_outcome_and_actions(child, c_result)
-        parent_event_configs = list(
-            filter(
-                lambda x, _work_phase_id=work_phase.id: not x.parent_id and
-                x.mandatory and x.work_phase_id == _work_phase_id,
-                event_configurations,
-            )
-        )
-        for p_event_conf in parent_event_configs:
-            days = cls._find_start_at_value(p_event_conf.start_at, 0)
-            p_event_start_date = datetime.fromisoformat(work_phase.start_date) + timedelta(
-                days=days
-            )
-            p_event = Event.flush(
-                Event(
-                    **cls._prepare_regular_event(
-                        p_event_conf.name,
-                        str(p_event_start_date),
-                        p_event_conf.number_of_days,
-                        p_event_conf.id,
-                        p_event_conf.work_phase.work.id,
-                    )
-                )
-            )
-            c_events = list(
+        return event_configurations
+
+    @classmethod
+    def create_events_by_configuration(
+        cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
+    ) -> None:
+        """Create events by given event configurations"""
+        if work_phase.visibility == PhaseVisibilityEnum.REGULAR:
+            parent_event_configs = list(
                 filter(
-                    lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id == _parent_id and
-                    x.mandatory and x.work_phase_id == _work_phase_id,  # noqa: W503
+                    lambda x, _work_phase_id=work_phase.id: not x.parent_id
+                    and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                    and x.work_phase_id == _work_phase_id,
                     event_configurations,
                 )
             )
-            for c_event_conf in c_events:
-                c_event_start_date = p_event_start_date + timedelta(
-                    days=cls._find_start_at_value(c_event_conf.start_at, 0)
+            for p_event_conf in parent_event_configs:
+                days = cls._find_start_at_value(p_event_conf.start_at, 0)
+                p_event_start_date = datetime.fromisoformat(
+                    work_phase.start_date
+                ) + timedelta(days=days)
+                p_event = Event.flush(
+                    Event(
+                        **cls._prepare_regular_event(
+                            p_event_conf.name,
+                            str(p_event_start_date),
+                            p_event_conf.number_of_days,
+                            p_event_conf.id,
+                            p_event_conf.work_phase.work.id,
+                        )
+                    )
                 )
-                if c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value:
-                    cal_event = CalendarEvent.flush(
-                        CalendarEvent(
-                            **{
-                                "name": c_event_conf.name,
-                                "anticipated_date": c_event_start_date,
-                                "number_of_days": c_event_conf.number_of_days,
-                            }
-                        )
+                c_events = list(
+                    filter(
+                        lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id
+                        == _parent_id
+                        and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                        and x.work_phase_id == _work_phase_id,  # noqa: W503
+                        event_configurations,
                     )
-                    WorkCalendarEvent.flush(
-                        WorkCalendarEvent(
-                            **{
-                                "calendar_event_id": cal_event.id,
-                                "source_event_id": p_event.id,
-                                "event_configuration_id": c_event_conf.id,
-                            }
-                        )
+                )
+                for c_event_conf in c_events:
+                    c_event_start_date = p_event_start_date + timedelta(
+                        days=cls._find_start_at_value(c_event_conf.start_at, 0)
                     )
-                else:
-                    Event.flush(
-                        Event(
-                            **cls._prepare_regular_event(
-                                c_event_conf.name,
-                                str(c_event_start_date),
-                                c_event_conf.number_of_days,
-                                c_event_conf.id,
-                                c_event_conf.work_phase.work.id,
-                                p_event.id,
+                    if (
+                        c_event_conf.event_category_id
+                        == EventCategoryEnum.CALENDAR.value
+                    ):
+                        cal_event = CalendarEvent.flush(
+                            CalendarEvent(
+                                **{
+                                    "name": c_event_conf.name,
+                                    "anticipated_date": c_event_start_date,
+                                    "number_of_days": c_event_conf.number_of_days,
+                                }
                             )
                         )
-                    )
-        return work_phase.id
+                        WorkCalendarEvent.flush(
+                            WorkCalendarEvent(
+                                **{
+                                    "calendar_event_id": cal_event.id,
+                                    "source_event_id": p_event.id,
+                                    "event_configuration_id": c_event_conf.id,
+                                }
+                            )
+                        )
+                    else:
+                        Event.flush(
+                            Event(
+                                **cls._prepare_regular_event(
+                                    c_event_conf.name,
+                                    str(c_event_start_date),
+                                    c_event_conf.number_of_days,
+                                    c_event_conf.id,
+                                    c_event_conf.work_phase.work.id,
+                                    p_event.id,
+                                )
+                            )
+                        )

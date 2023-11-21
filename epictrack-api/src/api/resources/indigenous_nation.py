@@ -63,7 +63,10 @@ class IndigenousNation(Resource):
         """Return details of an indigenous nation."""
         req.IndigenousNationIdPathParameterSchema().load(request.view_args)
         indigenous_nation = IndigenousNationService.find(indigenous_nation_id)
-        return res.IndigenousResponseNationSchema().dump(indigenous_nation), HTTPStatus.OK
+        return (
+            res.IndigenousResponseNationSchema().dump(indigenous_nation),
+            HTTPStatus.OK,
+        )
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -76,7 +79,10 @@ class IndigenousNation(Resource):
         indigenous_nation = IndigenousNationService.update_indigenous_nation(
             indigenous_nation_id, request_json
         )
-        return res.IndigenousResponseNationSchema().dump(indigenous_nation), HTTPStatus.OK
+        return (
+            res.IndigenousResponseNationSchema().dump(indigenous_nation),
+            HTTPStatus.OK,
+        )
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -101,8 +107,15 @@ class IndigenousNations(Resource):
     def get():
         """Return all indigenous nations."""
         args = req.BasicRequestQueryParameterSchema().load(request.args)
-        indigenous_nations = IndigenousNationService.find_all_indigenous_nations(args.get("is_active"))
-        return jsonify(res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)), HTTPStatus.OK
+        indigenous_nations = IndigenousNationService.find_all_indigenous_nations(
+            args.get("is_active")
+        )
+        return (
+            jsonify(
+                res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)
+            ),
+            HTTPStatus.OK,
+        )
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -114,4 +127,23 @@ class IndigenousNations(Resource):
         indigenous_nation = IndigenousNationService.create_indigenous_nation(
             request_json
         )
-        return res.IndigenousResponseNationSchema().dump(indigenous_nation), HTTPStatus.CREATED
+        return (
+            res.IndigenousResponseNationSchema().dump(indigenous_nation),
+            HTTPStatus.CREATED,
+        )
+
+
+@cors_preflight("POST")
+@API.route("/import", methods=["POST", "OPTIONS"])
+class ImportIndigenousNations(Resource):
+    """Endpoint resource to import indigenous nations."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Import indigenous nations"""
+        file = request.files["file"]
+        response = IndigenousNationService.import_indigenous_nations(file)
+        return response, HTTPStatus.CREATED
