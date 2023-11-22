@@ -73,6 +73,7 @@ const AuthenticatedRoutes = () => {
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route path="/admin/users" element={<UserList />} />
       <Route path="/" element={<ComingSoon />} />
+      <Route path="/insights" element={<ComingSoon />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
