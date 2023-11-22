@@ -26,6 +26,7 @@ type TrackDialogProps = {
   isCancelRequired?: boolean;
   additionalActions?: React.ReactNode;
   formId?: string;
+  externalSubmitButtonUsed?: boolean;
 } & DialogProps;
 
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
@@ -43,6 +44,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
   dialogContentText,
   formId,
   additionalActions,
+  externalSubmitButtonUsed = false,
   ...props
 }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -135,6 +137,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
               variant="outlined"
               sx={{
                 minWidth: "124px",
+                marginRight: externalSubmitButtonUsed ? "140px" : "",
               }}
             >
               {cancelButtonText || "Cancel"}
