@@ -96,6 +96,7 @@ const TemplateTaskList = ({ ...props }) => {
           <MasterTrackTable
             columns={columns}
             data={tasks}
+            enableTopToolbar={false}
             initialState={{
               sorting: [
                 {
