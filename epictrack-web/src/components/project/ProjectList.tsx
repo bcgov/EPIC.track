@@ -11,6 +11,8 @@ import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { Restricted } from "../shared/restricted";
+import { GROUPS, ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 const ProjectList = () => {
@@ -257,6 +259,9 @@ const ProjectList = () => {
                   justifyContent: "right",
                 }}
               >
+                <Restricted
+                  allowed={[ROLES.CREATE_ITEM]}
+                  errorProps={{ disabled: true }}
                 <Button
                   onClick={() => {
                     ctx.setShowModalForm(true);

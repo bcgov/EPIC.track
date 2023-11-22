@@ -57,6 +57,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     }
 
     const userInfo: any = await KeycloakData.loadUserInfo();
+
     let staffProfile;
     try {
       const staffResult = await staffService.getByEmail(userInfo["email"]);
@@ -66,6 +67,11 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     } catch (e) {
       console.log(e);
     }
+    const realmAccesRoles = KeycloakData.tokenParsed?.realm_access?.roles ?? [];
+    const clientLevelRoles =
+      KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]
+        .roles ?? [];
+    const roles = [...realmAccesRoles, ...clientLevelRoles];
     const userDetail = new UserDetail(
       userInfo["sub"],
       userInfo["preferred_username"],
@@ -73,8 +79,9 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       userInfo["given_name"],
       userInfo["family_name"],
       userInfo["email"],
-      staffProfile?.phone || "",
-      staffProfile?.position?.name || ""
+      staffProfile?.phone ?? "",
+      staffProfile?.position?.name ?? "",
+      roles
     );
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));

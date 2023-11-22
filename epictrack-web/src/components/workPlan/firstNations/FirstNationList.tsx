@@ -19,6 +19,8 @@ import { showNotification } from "../../shared/notificationProvider";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
+  GROUPS,
+  ROLES,
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
@@ -406,6 +408,9 @@ const FirstNationList = () => {
       {firstNations.length > 0 && (
         <Grid container rowSpacing={1}>
           <Grid item xs={6}>
+            <Restricted
+              allowed={[ROLES.CREATE_ITEM]}
+              errorProps={{ disabled: true }}
             <Button
               variant="contained"
               startIcon={<AddIcon />}
