@@ -1,17 +1,12 @@
 import { Box, Container } from "@mui/material";
-import {
-  ETHeading1,
-  ETHeading2,
-  ETHeading3,
-  ETPageContainer,
-} from "../components/shared";
+import { ETHeading1, ETHeading3, ETPageContainer } from "../components/shared";
 import { Palette } from "../styles/theme";
 import Icons from "../components/icons/index";
 import { IconProps } from "../components/icons/type";
 
 const PaintBrushIcon: React.FC<IconProps> = Icons["PaintBrushIcon"];
 
-const UnderConstruction = () => {
+const ComingSoon = () => {
   return (
     <ETPageContainer
       container
@@ -71,4 +66,4 @@ const UnderConstruction = () => {
   );
 };
 
-export default UnderConstruction;
+export default ComingSoon;
