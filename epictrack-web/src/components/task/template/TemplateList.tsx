@@ -277,10 +277,10 @@ const TemplateList = () => {
       <TrackDialog
         open={showDetailsDialog}
         dialogTitle="Template Tasks"
-        onClose={(event, reason) => onDialogClose(event, reason)}
+        onCancel={onDialogClose}
         disableEscapeKeyDown
         fullWidth
-        maxWidth="md"
+        maxWidth="lg"
       >
         <TemplateTaskList
           onCancel={onDialogClose}
