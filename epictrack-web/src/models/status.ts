@@ -5,4 +5,5 @@ export interface Status {
   is_active: boolean;
   is_approved: boolean;
   approved_by?: string;
+  approved_date: string;
 }

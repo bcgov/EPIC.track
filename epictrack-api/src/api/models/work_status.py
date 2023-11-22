@@ -35,6 +35,7 @@ class WorkStatus(BaseModelVersioned):
     work = relationship('Work', foreign_keys=[work_id], lazy='select')
     is_approved = Column(Boolean(), default=False, nullable=False)
     approved_by = Column(String(255), default=None, nullable=True)
+    approved_date = Column(DateTime(timezone=True), nullable=True)
 
     @classmethod
     def list_statuses_for_work_id(cls, work_id) -> List[WorkStatus]:
