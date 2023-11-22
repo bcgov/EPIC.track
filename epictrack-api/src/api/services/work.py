@@ -21,43 +21,18 @@ from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
-from api.exceptions import (
-    ResourceExistsError,
-    ResourceNotFoundError,
-    UnprocessableEntityError,
-)
+from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    ActionConfiguration,
-    ActionTemplate,
-    CalendarEvent,
-    EAOTeam,
-    Event,
-    EventConfiguration,
-    OutcomeConfiguration,
-    Project,
-    Role,
-    Staff,
-    StaffWorkRole,
-    Work,
-    WorkCalendarEvent,
-    WorkPhase,
-    WorkStateEnum,
-    db,
-)
-from api.models.event_template import EventTemplateVisibilityEnum
+    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
+    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.event_category import EventCategoryEnum
-from api.models.phase_code import PhaseVisibilityEnum
+from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
-from api.schemas.request import (
-    ActionConfigurationBodyParameterSchema,
-    OutcomeConfigurationBodyParameterSchema,
-)
+from api.models.phase_code import PhaseVisibilityEnum
+from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from api.schemas.response import (
-    ActionTemplateResponseSchema,
-    EventTemplateResponseSchema,
-    OutcomeTemplateResponseSchema,
-)
+    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.services.event import EventService
@@ -666,8 +641,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
             cls.copy_outcome_and_actions(parent_config, p_result)
             for child in list(
                 filter(
-                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"]
-                    == _parent_config_id,
+                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] ==
+                    _parent_config_id,
                     event_configs,
                 )
             ):
@@ -690,9 +665,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if work_phase.visibility == PhaseVisibilityEnum.REGULAR:
             parent_event_configs = list(
                 filter(
-                    lambda x, _work_phase_id=work_phase.id: not x.parent_id
-                    and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
-                    and x.work_phase_id == _work_phase_id,
+                    lambda x, _work_phase_id=work_phase.id: not x.parent_id and
+                    x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
+                    x.work_phase_id == _work_phase_id,
                     event_configurations,
                 )
             )
@@ -714,11 +689,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 )
                 c_events = list(
                     filter(
-                        lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id
-                        == _parent_id
-                        and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
-                        and x.work_phase_id == _work_phase_id,  # noqa: W503
-                        event_configurations,
+                        lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id ==
+                        _parent_id and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
+                        x.work_phase_id == _work_phase_id, event_configurations,
                     )
                 )
                 for c_event_conf in c_events:
@@ -726,8 +699,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         days=cls._find_start_at_value(c_event_conf.start_at, 0)
                     )
                     if (
-                        c_event_conf.event_category_id
-                        == EventCategoryEnum.CALENDAR.value
+                        c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value
                     ):
                         cal_event = CalendarEvent.flush(
                             CalendarEvent(

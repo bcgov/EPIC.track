@@ -13,11 +13,11 @@
 # limitations under the License.
 """Model to handle all operations related to WorkPhase."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Enum
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from .phase_code import PhaseVisibilityEnum
 from .base_model import BaseModelVersioned
+from .phase_code import PhaseVisibilityEnum
 
 
 class WorkPhase(BaseModelVersioned):

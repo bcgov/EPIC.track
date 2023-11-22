@@ -5,10 +5,11 @@ Revises: eacb66ae668b
 Create Date: 2023-11-20 22:13:05.217287
 
 """
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.sql import column, table, text
+
 
 # revision identifiers, used by Alembic.
 revision = '213ca6b67dcc'

@@ -1,7 +1,7 @@
 """Change the phase end event to another one"""
 
 from api.actions.base import ActionFactory
-from api.models import db, Event, PhaseCode, WorkPhase, EventConfiguration
+from api.models import Event, EventConfiguration, PhaseCode, WorkPhase, db
 from api.models.event_configuration import EventPositionEnum
 from api.models.phase_code import PhaseVisibilityEnum
 

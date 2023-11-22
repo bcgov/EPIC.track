@@ -44,7 +44,7 @@ export const Routes: RouteType[] = [
     group: "Group2",
   },
   {
-    name: "Templates",
+    name: "Task Templates",
     path: "/templates",
     group: "Group3",
     icon: "PenIcon",

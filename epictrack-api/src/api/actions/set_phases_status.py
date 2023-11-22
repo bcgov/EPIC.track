@@ -1,10 +1,10 @@
 """Set phases status action handler"""
 from api.actions.base import ActionFactory
-from api.models import db, PRIMARY_CATEGORIES
-from api.models.work_phase import WorkPhase
+from api.models import PRIMARY_CATEGORIES, db
 from api.models.event import Event
-from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.event_configuration import EventConfiguration
+from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
+from api.models.work_phase import WorkPhase
 
 
 class SetPhasesStatus(ActionFactory):
@@ -23,8 +23,7 @@ class SetPhasesStatus(ActionFactory):
             work_phases = (
                 db.session.query(WorkPhase)
                 .filter(
-                    WorkPhase.sort_order
-                    > source_event.event_configuration.work_phase.sort_order
+                    WorkPhase.sort_order > source_event.event_configuration.work_phase.sort_order
                 )
                 .all()
             )

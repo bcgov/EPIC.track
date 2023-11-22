@@ -11,6 +11,7 @@ import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
@@ -57,12 +58,18 @@ const StaffList = () => {
       {
         accessorKey: "full_name",
         header: "Name",
-        Cell: ({ row, renderedCellValue }) => (
-          <ETGridTitle to={"#"} onClick={() => onEdit(row.original.id)}>
+        Cell: ({ cell, row, renderedCellValue }) => (
+          <ETGridTitle
+            to={"#"}
+            onClick={() => onEdit(row.original.id)}
+            enableTooltip={true}
+            tooltip={cell.getValue<string>()}
+          >
             {renderedCellValue}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "phone",
@@ -95,15 +102,18 @@ const StaffList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
+        size: 115,
         Filter: ({ header, column }) => {
           return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
+            <Box sx={{ width: "100px" }}>
+              <TableFilter
+                isMulti
+                header={header}
+                column={column}
+                variant="inline"
+                name="rolesFilter"
+              />
+            </Box>
           );
         },
         filterFn: (row, id, filterValue) => {
