@@ -262,15 +262,17 @@ const ProjectList = () => {
                 <Restricted
                   allowed={[ROLES.CREATE_ITEM]}
                   errorProps={{ disabled: true }}
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setProjectId(undefined);
-                  }}
-                  variant="contained"
                 >
-                  Create Project
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setProjectId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Project
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

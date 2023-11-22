@@ -179,15 +179,17 @@ const StaffList = () => {
                 <Restricted
                   allowed={[ROLES.CREATE_ITEM]}
                   errorProps={{ disabled: true }}
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setStaffId(undefined);
-                  }}
                 >
-                  Create Staff
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setStaffId(undefined);
+                    }}
+                  >
+                    Create Staff
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

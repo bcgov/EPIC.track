@@ -37,6 +37,7 @@ import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import projectService from "../../../services/projectService/projectService";
+import { Restricted } from "../../shared/restricted";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -411,13 +412,15 @@ const FirstNationList = () => {
             <Restricted
               allowed={[ROLES.CREATE_ITEM]}
               errorProps={{ disabled: true }}
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setShowNationForm(true)}
             >
-              Add Nation
-            </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setShowNationForm(true)}
+              >
+                Add Nation
+              </Button>
+            </Restricted>
           </Grid>
           <Grid
             item

@@ -329,15 +329,17 @@ const WorkList = () => {
                 <Restricted
                   allowed={[ROLES.CREATE_ITEM]}
                   errorProps={{ disabled: true }}
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setWorkId(undefined);
-                  }}
-                  variant="contained"
                 >
-                  Create Work
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setWorkId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Work
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

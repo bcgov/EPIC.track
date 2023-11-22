@@ -157,15 +157,17 @@ export default function ProponentList() {
                 <Restricted
                   allowed={[ROLES.CREATE_ITEM]}
                   errorProps={{ disabled: true }}
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setProponentId(undefined);
-                  }}
-                  variant="contained"
                 >
-                  Create Proponent
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setProponentId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Proponent
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />
