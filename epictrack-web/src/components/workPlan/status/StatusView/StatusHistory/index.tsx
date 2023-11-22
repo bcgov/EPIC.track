@@ -67,7 +67,9 @@ const StatusHistory = () => {
                     isSuccess ? Palette.neutral.dark : Palette.neutral.main
                   }
                 >
-                  <ReadMoreText>{status.description}</ReadMoreText>
+                  <ReadMoreText defaultExpanded={isSuccess}>
+                    {status.description}
+                  </ReadMoreText>
                 </ETPreviewText>
                 <When condition={isSuccess && hasPermission()}>
                   <Button
