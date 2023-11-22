@@ -327,7 +327,7 @@ const WorkList = () => {
                 }}
               >
                 <Restricted
-                  allowed={[ROLES.CREATE_ITEM]}
+                  allowed={[ROLES.CREATE]}
                   errorProps={{ disabled: true }}
                 >
                   <Button

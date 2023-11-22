@@ -410,7 +410,7 @@ const FirstNationList = () => {
         <Grid container rowSpacing={1}>
           <Grid item xs={6}>
             <Restricted
-              allowed={[ROLES.CREATE_ITEM]}
+              allowed={[ROLES.CREATE]}
               errorProps={{ disabled: true }}
             >
               <Button

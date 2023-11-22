@@ -81,5 +81,7 @@ export const GROUPS = {
 };
 
 export const ROLES = {
-  CREATE_ITEM: "create_item",
+  CREATE: "create",
+  EDIT: "edit",
+  DELETE: "delete",
 };
