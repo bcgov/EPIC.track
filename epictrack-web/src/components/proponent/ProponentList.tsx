@@ -12,6 +12,8 @@ import proponentService from "../../services/proponentService/proponentService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import TableFilter from "../shared/filterSelect/TableFilter";
+import { Restricted } from "../shared/restricted";
+import { GROUPS, ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 export default function ProponentList() {
@@ -152,15 +154,20 @@ export default function ProponentList() {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setProponentId(undefined);
-                  }}
-                  variant="contained"
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create Proponent
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setProponentId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Proponent
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

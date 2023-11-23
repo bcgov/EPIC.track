@@ -21,6 +21,7 @@ export class UserDetail {
   email: string;
   position: string;
   phone: string;
+  roles: string[];
   constructor(
     sub: string,
     preferred_username: string,
@@ -29,7 +30,8 @@ export class UserDetail {
     lastName: string,
     email: string,
     phone: string,
-    position: string
+    position: string,
+    roles: string[]
   ) {
     this.sub = sub;
     this.preferred_username = preferred_username;
@@ -39,5 +41,6 @@ export class UserDetail {
     this.phone = phone;
     this.position = position;
     this.groups = groups.map((p) => p.substring(1, p.length));
+    this.roles = roles;
   }
 }

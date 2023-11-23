@@ -13,6 +13,8 @@ import { IconProps } from "../icons/type";
 import Icons from "../icons";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { Restricted } from "../shared/restricted";
+import { GROUPS, ROLES } from "../../constants/application-constant";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -324,15 +326,20 @@ const WorkList = () => {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setWorkId(undefined);
-                  }}
-                  variant="contained"
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create Work
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setWorkId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Work
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />
