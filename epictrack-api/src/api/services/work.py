@@ -336,6 +336,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work = Work.find_by_id(work_id)
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
+
         work = work.update(payload)
         return work
 
