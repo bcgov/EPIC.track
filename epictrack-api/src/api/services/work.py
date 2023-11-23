@@ -35,13 +35,10 @@ from api.schemas.response import (
     ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
-from api.services import authorisation
 from api.services.event import EventService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
-from api.utils.roles import Membership
-from api.utils.roles import Role as KeycloakRole
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -339,11 +336,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work = Work.find_by_id(work_id)
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
-        one_of_roles = (
-            Membership.TEAM_MEMBER.name,
-            KeycloakRole.EDIT_ENTITIES.value
-        )
-        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work.id)
+
         work = work.update(payload)
         return work
 

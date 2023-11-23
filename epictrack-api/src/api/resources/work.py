@@ -23,7 +23,6 @@ from api.schemas import response as res
 from api.services import WorkService
 from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
-from api.utils.roles import Role
 from api.utils.util import cors_preflight
 from api.utils.datetime_helper import get_start_of_day
 
@@ -68,7 +67,7 @@ class Works(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.has_one_of_roles([[Role.CREATE_ENTITIES.value]])
+    @auth.require
     @profiletime
     def post():
         """Create new work"""

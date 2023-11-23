@@ -14,7 +14,7 @@ from api.models import StaffWorkRole as StaffWorkRoleModel
 # pylint: disable=unused-argument,inconsistent-return-statements
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
-    token_roles = TokenInfo.get_username()
+    token_roles = set(TokenInfo.get_roles())
     permitted_roles = set(kwargs.get('one_of_roles', []))
     has_valid_roles = token_roles & permitted_roles
     if has_valid_roles:

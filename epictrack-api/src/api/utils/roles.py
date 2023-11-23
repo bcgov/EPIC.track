@@ -19,8 +19,8 @@ class Role(Enum):
     """User Role."""
 
     # Keycloak Based roles
-    CREATE_ENTITIES = 'CREATE_ENTITIES'
-    EDIT_ENTITIES = 'EDIT_ENTITIES'
+    CREATE = 'create'
+    EDIT = 'edit'
 
 
 class Membership(Enum):
