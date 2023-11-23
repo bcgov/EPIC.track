@@ -6,11 +6,9 @@ import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
 import { getAxiosError } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import workService from "../../../services/workService/workService";
 import statusService from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/SearchParams";
 import { WorkplanContext } from "../WorkPlanContext";
-import { useAppSelector } from "../../../hooks";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -57,7 +55,6 @@ export const StatusProvider = ({
   const query = useSearchParams<StatusContainerRouteParams>();
   const workId = React.useMemo(() => query.get("work_id"), [query]);
   const { getWorkStatuses, setStatuses } = useContext(WorkplanContext);
-  const { groups } = useAppSelector((state) => state.user.userDetail);
 
   const onDialogClose = () => {
     setShowStatusForm(false);
