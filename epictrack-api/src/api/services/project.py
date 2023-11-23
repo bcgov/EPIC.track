@@ -21,6 +21,7 @@ from sqlalchemy import and_
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Project, db
+from api.models.project import ProjectStateEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
 from api.models.proponent import Proponent
@@ -54,6 +55,7 @@ class ProjectService:
         if exists:
             raise ResourceExistsError("Project with same name exists")
         project = Project(**payload)
+        project.project_state = ProjectStateEnum.PRE_WORK
         current_app.logger.info(f"Project obj {dir(project)}")
         project.save()
         return project

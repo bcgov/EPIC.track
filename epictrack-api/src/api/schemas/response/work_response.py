@@ -9,7 +9,7 @@ from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
 from api.schemas.federal_involvement import FederalInvolvementSchema
 from api.schemas.ministry import MinistrySchema
-from api.schemas.project import ProjectSchema
+from api.schemas.response.project_response import ProjectResponseSchema
 from api.schemas.response.phase_response import PhaseResponseSchema
 from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
@@ -50,7 +50,7 @@ class WorkResponseSchema(
         unknown = EXCLUDE
 
     project = fields.Nested(
-        ProjectSchema(exclude=("region_env", "region_flnro", "sub_type")),
+        ProjectResponseSchema(exclude=("region_env", "region_flnro", "sub_type")),
         dump_only=True,
     )
     ministry = fields.Nested(MinistrySchema, dump_only=True)
@@ -119,7 +119,7 @@ class WorkResourceResponseSchema(
         include_fk = False
         unknown = EXCLUDE
 
-    project = fields.Nested(ProjectSchema(only=("id", "name")))
+    project = fields.Nested(ProjectResponseSchema(only=("id", "name")))
     eao_team = fields.Nested(EAOTeamSchema, dump_only=True)
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)

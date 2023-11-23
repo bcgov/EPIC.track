@@ -86,6 +86,7 @@ export default function ProjectForm({ ...props }) {
     control,
     formState: { errors },
     reset,
+    setValue,
   } = methods;
   const formValues = useWatch({ control });
 
@@ -146,6 +147,10 @@ export default function ProjectForm({ ...props }) {
     });
     Promise.all(promises);
   }, []);
+
+  const typeChange = () => {
+    setValue("sub_type_id", undefined);
+  };
 
   const onSubmitHandler = async (data: any) => {
     ctx.onSave(data, () => {
@@ -241,6 +246,7 @@ export default function ProjectForm({ ...props }) {
             <Grid item xs={6}>
               <ETFormLabel required>Type</ETFormLabel>
               <ControlledSelectV2
+                onHandleChange={typeChange}
                 placeholder="Select"
                 key={`type_select_${formValues.type_id}`}
                 helperText={errors?.type_id?.message?.toString()}

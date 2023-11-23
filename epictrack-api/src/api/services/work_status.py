@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
+from datetime import datetime
 from http import HTTPStatus
 from typing import Dict
 
 from api.exceptions import BusinessError
 from api.models import WorkStatus as WorkStatusModel
 from api.utils import TokenInfo
+from api.utils.roles import Membership
+from api.services import authorisation
+from api.utils.roles import Role as KeycloakRole
 
 
 class WorkStatusService:  # pylint: disable=too-many-public-methods
@@ -68,8 +72,15 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         if work_status.is_approved:
             return work_status
 
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_status.work_id)
+
         work_status.is_approved = True
         work_status.approved_by = TokenInfo.get_username()
+        work_status.approved_date = datetime.utcnow()
 
         work_status.save()
 

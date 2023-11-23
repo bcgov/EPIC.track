@@ -24,6 +24,7 @@ from .base_model import BaseModel, BaseModelVersioned
 class ProjectStateEnum(enum.Enum):
     """Enum for project state"""
 
+    PRE_WORK = "PRE_WORK"
     UNDER_EAC_ASSESSMENT = "UNDER_EAC_ASSESSMENT"
     UNDER_EXEMPTION_REQUEST = "UNDER_EXEMPTION_REQUEST"
     UNDER_AMENDMENT = "UNDER_AMENDMENT"

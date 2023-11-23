@@ -1,16 +1,18 @@
-import { Link } from "@mui/material";
+import { Box, Link } from "@mui/material";
 import React, { useState } from "react";
 
 interface ReadMoreTextProps {
   children: string | null | undefined;
   maxLength?: number;
+  defaultExpanded?: boolean;
 }
 
 const ReadMoreText: React.FC<ReadMoreTextProps> = ({
   children,
   maxLength = 100,
+  defaultExpanded = false,
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 
   const toggleExpansion = () => {
     setIsExpanded(!isExpanded);

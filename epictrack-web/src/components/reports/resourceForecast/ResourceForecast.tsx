@@ -208,11 +208,11 @@ export default function ResourceForecast() {
       },
       {
         accessorKey: "fte_positions_construction",
-        header: "Est. FTEs in constructions",
+        header: "Est. FTE in constructions",
       },
       {
         accessorKey: "fte_positions_operation",
-        header: "Est. FTEs in operations",
+        header: "Est. FTE in operations",
       },
       {
         accessorKey: "ea_type",

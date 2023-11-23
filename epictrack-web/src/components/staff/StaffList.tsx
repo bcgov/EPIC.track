@@ -11,6 +11,8 @@ import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { Restricted } from "../shared/restricted";
+import { GROUPS, ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 const StaffList = () => {
@@ -174,15 +176,20 @@ const StaffList = () => {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setStaffId(undefined);
-                  }}
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create Staff
-                </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setStaffId(undefined);
+                    }}
+                  >
+                    Create Staff
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

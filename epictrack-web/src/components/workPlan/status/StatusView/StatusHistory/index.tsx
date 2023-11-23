@@ -58,6 +58,7 @@ const StatusHistory = () => {
       >
         {approvedStatuses.slice(0, SHOW_MORE_THRESHOLD).map((status, index) => {
           const isSuccess = highlightFirstInTimeLineApproved && index === 0;
+          const finalItem = index + 1 === approvedStatuses?.length;
           return (
             <TimelineItem key={status.id}>
               <TimelineOppositeContent>
@@ -66,7 +67,9 @@ const StatusHistory = () => {
                     isSuccess ? Palette.neutral.dark : Palette.neutral.main
                   }
                 >
-                  <ReadMoreText>{status.description}</ReadMoreText>
+                  <ReadMoreText defaultExpanded={isSuccess}>
+                    {status.description}
+                  </ReadMoreText>
                 </ETPreviewText>
                 <When condition={isSuccess && hasPermission()}>
                   <Button
@@ -93,13 +96,15 @@ const StatusHistory = () => {
                     },
                   ]}
                 />
-                <TimelineConnector
-                  sx={[
-                    isSuccess && {
-                      bgcolor: Palette.success.light,
-                    },
-                  ]}
-                />
+                <When condition={!finalItem}>
+                  <TimelineConnector
+                    sx={[
+                      isSuccess && {
+                        bgcolor: Palette.success.light,
+                      },
+                    ]}
+                  />
+                </When>
               </TimelineSeparator>
               <TimelineContent>
                 <ETCaption3 color={Palette.neutral.main}>

@@ -307,6 +307,36 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
             </Box>
           </Grid>
         </Grid>
+        <Box
+          sx={{
+            display: "flex",
+            marginLeft: "auto",
+            marginRight: "164px",
+            zIndex: 1000,
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              marginTop: "16px",
+            }}
+          >
+            <Button
+              disabled={!selectedFirstNations.length}
+              sx={{
+                minWidth: "124px",
+              }}
+              onClick={undefined}
+              type={"submit"}
+              form={"import-nations-form"}
+              autoFocus
+              size="large"
+              variant="contained"
+            >
+              Import
+            </Button>
+          </Box>
+        </Box>
       </FormProvider>
     </>
   );

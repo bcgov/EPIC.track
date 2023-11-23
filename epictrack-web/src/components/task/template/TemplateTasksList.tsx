@@ -70,7 +70,7 @@ const TemplateTaskList = ({ ...props }) => {
       },
       {
         accessorKey: "tips",
-        header: "Tips",
+        header: "Notes",
       },
     ],
     []
@@ -96,6 +96,7 @@ const TemplateTaskList = ({ ...props }) => {
           <MasterTrackTable
             columns={columns}
             data={tasks}
+            enableTopToolbar={false}
             initialState={{
               sorting: [
                 {
