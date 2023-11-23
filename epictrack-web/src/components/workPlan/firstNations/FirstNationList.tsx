@@ -492,7 +492,8 @@ const FirstNationList = () => {
         disableEscapeKeyDown
         fullWidth
         maxWidth="md"
-        okButtonText="Import"
+        isOkRequired={false}
+        externalSubmitButtonUsed={true}
         formId="import-nations-form"
         isCancelRequired={true}
         onCancel={() => onCancelHandler()}
