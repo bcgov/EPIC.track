@@ -28,6 +28,7 @@ class UserService:
         for user in users:
             user['group'] = None
         groups = UserService.get_groups()
+        groups = sorted(groups, key=lambda x: x['attributes']['level'][0])
         for group in groups:
             members = KeycloakService.get_group_members(group['id'])
             member_ids = [member['id'] for member in members]
