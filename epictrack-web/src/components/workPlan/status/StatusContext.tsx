@@ -23,7 +23,6 @@ interface StatusContextProps {
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
   isCloning: boolean;
-  hasPermission: () => boolean;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -41,7 +40,6 @@ export const StatusContext = createContext<StatusContextProps>({
   setIsCloning: () => ({}),
   isCloning: false,
   workId: null,
-  hasPermission: () => false,
 });
 
 export const StatusProvider = ({
@@ -64,18 +62,6 @@ export const StatusProvider = ({
   const onDialogClose = () => {
     setShowStatusForm(false);
     setIsCloning(false);
-  };
-
-  const hasPermission = () => {
-    const groupsWithPermission = ["Super User", "Developer", "Instance Admin"];
-    const allowed = groups.filter((group: any) => {
-      return groupsWithPermission.includes(group);
-    });
-    return Boolean(allowed.length);
-  };
-
-  const isEditable = (is_approved: boolean) => {
-    return !is_approved || hasPermission();
   };
 
   const updateStatus = async (data: any, callback: () => any) => {
@@ -106,9 +92,8 @@ export const StatusProvider = ({
   };
 
   const onSave = async (data: any, callback: () => any) => {
-    const { is_approved } = data;
     try {
-      if (status && !isCloning && isEditable(is_approved)) {
+      if (status && !isCloning) {
         updateStatus(data, callback);
       } else {
         createStatus(data, callback);
@@ -156,7 +141,6 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
-        hasPermission,
         setSelectedHistoryIndex,
         selectedHistoryIndex,
         isCloning,

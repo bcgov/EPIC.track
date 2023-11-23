@@ -29,6 +29,7 @@ export function Restricted({
   allowed = [],
 }: RestrictedProps): React.ReactElement<any, any> {
   const { roles } = useAppSelector((state) => state.user.userDetail);
+  console.log(roles);
 
   const permissionGranted = hasPermission({ roles, allowed });
 
