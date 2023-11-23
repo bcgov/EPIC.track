@@ -1,3 +1,4 @@
+import { ROLES } from "../../../constants/application-constant";
 import { Icon } from "../../icons/type";
 
 export const Routes: RouteType[] = [
@@ -6,18 +7,21 @@ export const Routes: RouteType[] = [
     icon: "DashboardIcon",
     path: "/",
     group: "Group1",
+    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
   },
   {
     name: "All Works",
     icon: "AllIcon",
     path: "/works",
     group: "Group1",
+    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
   },
   {
     name: "Reports",
     icon: "ReportIcon",
     path: "/reports",
     group: "Group2",
+    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
     routes: [
       {
         name: "Referral Schedule",
@@ -42,18 +46,21 @@ export const Routes: RouteType[] = [
     icon: "InsightIcon",
     path: "/insights",
     group: "Group2",
+    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
   },
   {
     name: "Task Templates",
     path: "/templates",
     group: "Group3",
     icon: "PenIcon",
+    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
   },
   {
     name: "List Management",
     icon: "GridIcon",
     path: "/list-management",
     group: "Group3",
+    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
     routes: [
       {
         name: "Staff",
@@ -82,6 +89,7 @@ export const Routes: RouteType[] = [
     path: "/admin",
     icon: "GearIcon",
     group: "Group4",
+    roles: [ROLES.CREATE],
     routes: [
       {
         name: "Users",
@@ -97,4 +105,5 @@ export interface RouteType {
   group?: string;
   icon?: Icon;
   routes?: RouteType[];
+  roles?: string[];
 }

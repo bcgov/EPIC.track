@@ -22,6 +22,7 @@ import Icons from "../../icons";
 import { groupBy } from "../../../utils";
 import { IconProps } from "../../icons/type";
 import { ETSubhead } from "../../shared";
+import { Restricted } from "../../shared/restricted";
 
 const ListItemStyled = styled(ListItem)({
   padding: "0px 0px 0px 0px",
@@ -77,6 +78,9 @@ const DrawerBox = () => {
     []
   );
 
+  // console.log(Routes);
+  // console.log(groupedRoutes);
+
   return (
     <Box
       sx={{
@@ -91,85 +95,94 @@ const DrawerBox = () => {
           {Object.keys(groupedRoutes).map((groupKey) => {
             return (
               <>
-                {groupedRoutes[groupKey].map((route, i) => {
-                  return (
-                    <>
-                      <ListItemStyled key={`${groupKey}${i}`}>
-                        <ListItemButtonStyled
-                          key={`lstbutton-${groupKey}${i}`}
-                          data-testid={`SideNav/${route.name}-button`}
-                          onClick={() => handleClick(route)}
-                        >
-                          {route.icon && (
-                            <ListItemIconStyled key={`lsticon-${groupKey}${i}`}>
-                              {renderIcon(
-                                route.icon,
-                                location.pathname === route.path
-                              )}
-                            </ListItemIconStyled>
-                          )}
-                          <ListItemText key={`lsttext-${groupKey}${i}`}>
-                            <ETSubhead
-                              className={`sidebar-item ${
-                                location.pathname === route.path ? "active" : ""
-                              }`}
+                <Restricted allowed={groupedRoutes[groupKey][0]["roles"] ?? []}>
+                  <>
+                    {groupedRoutes[groupKey].map((route, i) => {
+                      return (
+                        <>
+                          <ListItemStyled key={`${groupKey}${i}`}>
+                            <ListItemButtonStyled
+                              key={`lstbutton-${groupKey}${i}`}
+                              data-testid={`SideNav/${route.name}-button`}
+                              onClick={() => handleClick(route)}
                             >
-                              {route.name}
-                            </ETSubhead>
-                          </ListItemText>
-                          {route?.routes &&
-                            (route?.routes?.length > 0 && !!open[route.name] ? (
-                              <ExpandLess className="sidebar-item" />
-                            ) : (
-                              <ExpandMore className="sidebar-item" />
-                            ))}
-                        </ListItemButtonStyled>
-                      </ListItemStyled>
-                      {route.routes && route.routes?.length > 0 && (
-                        <Collapse
-                          in={!!open[route.name]}
-                          timeout="auto"
-                          unmountOnExit
-                        >
-                          <List disablePadding key={`list-${route.name}`}>
-                            {route.routes?.map((subRoute, i) => (
-                              <ListItemStyled
-                                key={`sub-list-${subRoute?.name}`}
-                              >
-                                <ListItemButtonStyled
-                                  key={`sub-list-button-${subRoute?.name}`}
-                                  onClick={() => handleClick(subRoute)}
+                              {route.icon && (
+                                <ListItemIconStyled
+                                  key={`lsticon-${groupKey}${i}`}
                                 >
-                                  <ListItemText
-                                    key={`sub-list-text-${subRoute?.name}`}
-                                    sx={{
-                                      marginLeft: "40px",
-                                    }}
+                                  {renderIcon(
+                                    route.icon,
+                                    location.pathname === route.path
+                                  )}
+                                </ListItemIconStyled>
+                              )}
+                              <ListItemText key={`lsttext-${groupKey}${i}`}>
+                                <ETSubhead
+                                  className={`sidebar-item ${
+                                    location.pathname === route.path
+                                      ? "active"
+                                      : ""
+                                  }`}
+                                >
+                                  {route.name}
+                                </ETSubhead>
+                              </ListItemText>
+                              {route?.routes &&
+                                (route?.routes?.length > 0 &&
+                                !!open[route.name] ? (
+                                  <ExpandLess className="sidebar-item" />
+                                ) : (
+                                  <ExpandMore className="sidebar-item" />
+                                ))}
+                            </ListItemButtonStyled>
+                          </ListItemStyled>
+                          {route.routes && route.routes?.length > 0 && (
+                            <Collapse
+                              in={!!open[route.name]}
+                              timeout="auto"
+                              unmountOnExit
+                            >
+                              <List disablePadding key={`list-${route.name}`}>
+                                {route.routes?.map((subRoute, i) => (
+                                  <ListItemStyled
+                                    key={`sub-list-${subRoute?.name}`}
                                   >
-                                    <ETSubhead
-                                      className={`sidebar-item ${
-                                        location.pathname === subRoute.path
-                                          ? "active"
-                                          : ""
-                                      }`}
+                                    <ListItemButtonStyled
+                                      key={`sub-list-button-${subRoute?.name}`}
+                                      onClick={() => handleClick(subRoute)}
                                     >
-                                      {subRoute.name}
-                                    </ETSubhead>
-                                  </ListItemText>
-                                </ListItemButtonStyled>
-                              </ListItemStyled>
-                            ))}
-                          </List>
-                        </Collapse>
-                      )}
-                    </>
-                  );
-                })}
-                <ListItem
-                  sx={{
-                    height: "1.5rem",
-                  }}
-                ></ListItem>
+                                      <ListItemText
+                                        key={`sub-list-text-${subRoute?.name}`}
+                                        sx={{
+                                          marginLeft: "40px",
+                                        }}
+                                      >
+                                        <ETSubhead
+                                          className={`sidebar-item ${
+                                            location.pathname === subRoute.path
+                                              ? "active"
+                                              : ""
+                                          }`}
+                                        >
+                                          {subRoute.name}
+                                        </ETSubhead>
+                                      </ListItemText>
+                                    </ListItemButtonStyled>
+                                  </ListItemStyled>
+                                ))}
+                              </List>
+                            </Collapse>
+                          )}
+                        </>
+                      );
+                    })}
+                    <ListItem
+                      sx={{
+                        height: "1.5rem",
+                      }}
+                    ></ListItem>
+                  </>
+                </Restricted>
               </>
             );
           })}
