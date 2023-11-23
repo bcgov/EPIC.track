@@ -1,17 +1,16 @@
-"""approved_date
+"""Add approved date column to work_statuses
 
-Revision ID: 11c04609c1b4
-Revises: 74e3f8a6b3c2
-Create Date: 2023-11-16 14:50:22.513022
+Revision ID: 3e98650b385c
+Revises: 6a490ab27bd8
+Create Date: 2023-11-22 19:24:11.850442
 
 """
 from alembic import op
 import sqlalchemy as sa
 
-
 # revision identifiers, used by Alembic.
-revision = '11c04609c1b4'
-down_revision = '74e3f8a6b3c2'
+revision = '3e98650b385c'
+down_revision = '6a490ab27bd8'
 branch_labels = None
 depends_on = None
 
