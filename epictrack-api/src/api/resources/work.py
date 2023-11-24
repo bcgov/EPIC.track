@@ -25,6 +25,7 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 from api.utils.datetime_helper import get_start_of_day
+from api.services.code import CodeService
 
 
 API = Namespace("works", description="Works")
@@ -74,6 +75,12 @@ class Works(Resource):
         request_json = req.WorkBodyParameterSchema().load(API.payload)
         request_json["start_date"] = get_start_of_day(request_json["start_date"])
         work = WorkService.create_work(request_json)
+        role_id = CodeService.find_code_values_by_type("roles", { "name": "Team Lead" }).get("codes")[0].get("id")
+        WorkService.create_work_staff(work.id, { 
+            "staff_id": request_json["work_lead_id"], 
+            "role_id": role_id, 
+            "is_active": True 
+            })
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
 
@@ -170,7 +177,7 @@ class WorkStaffs(Resource):
     @auth.require
     @profiletime
     def post(work_id):
-        """Get all the active staff allocated to the work"""
+        """Add staff member to a work"""
         req.WorkIdPathParameterSchema().load(request.view_args)
         request_json = req.StaffWorkBodyParamSchema().load(API.payload)
         staff = WorkService.create_work_staff(work_id, request_json)
