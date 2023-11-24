@@ -15,6 +15,7 @@ import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { Restricted } from "../shared/restricted";
 import { GROUPS, ROLES } from "../../constants/application-constant";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -104,6 +105,7 @@ const WorkList = () => {
           </ETGridTitle>
         ),
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "project.name",
