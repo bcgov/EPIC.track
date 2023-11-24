@@ -80,7 +80,7 @@ class Works(Resource):
             "staff_id": request_json["work_lead_id"], 
             "role_id": role_id, 
             "is_active": True 
-            })
+        })
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
 
