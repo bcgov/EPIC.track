@@ -663,7 +663,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
     ) -> None:
         """Create events by given event configurations"""
-        if work_phase.visibility == PhaseVisibilityEnum.REGULAR:
+        if work_phase.visibility.value == PhaseVisibilityEnum.REGULAR.value:
             parent_event_configs = list(
                 filter(
                     lambda x, _work_phase_id=work_phase.id: not x.parent_id and

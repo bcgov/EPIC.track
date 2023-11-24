@@ -11,7 +11,7 @@ def find_configuration(source_event: Event, params) -> int:
         .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
         .filter(
             WorkPhase.work_id == source_event.work_id,
-            PhaseCode.name == params.get("phase_name"),
+            WorkPhase.name == params.get("phase_name"),
             PhaseCode.work_type_id == params.get("work_type_id"),
             PhaseCode.ea_act_id == params.get("ea_act_id"),
             WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
