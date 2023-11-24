@@ -2,7 +2,7 @@
 from datetime import timedelta
 
 from api.actions.base import ActionFactory
-from api.models import Event, EventConfiguration, WorkPhase, db
+from api.models import Event, EventConfiguration, WorkPhase, Work, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.schemas import response as res
 
@@ -11,41 +11,58 @@ from api.schemas import response as res
 class AddPhase(ActionFactory):
     """Add a new phase"""
 
-    def run(self, source_event: Event, params: dict) -> None:
+    def run(self, source_event: Event, params) -> None:
         """Adds a new phase based on params"""
         # Importing here to avoid circular imports
         from api.services.work import WorkService
+        from api.services.work_phase import WorkPhaseService
 
+        self.preset_sort_order(source_event, len(params))
         phase_start_date = source_event.actual_date + timedelta(days=1)
-        work_phase_data = self.get_additional_params(source_event, params)
-        work_phase_data.update(
-            {
-                "work_id": source_event.work.id,
-                "start_date": f"{phase_start_date}",
-                "end_date": f"{phase_start_date + timedelta(days=work_phase_data['number_of_days'])}",
-                "sort_order": source_event.event_configuration.work_phase.sort_order + 1,
-            }
-        )
-        work_phases = (
-            db.session.query(WorkPhase)
-            .filter(
-                WorkPhase.sort_order > source_event.event_configuration.work_phase.sort_order,
-                WorkPhase.work_id == source_event.work_id,
+        sort_order = source_event.event_configuration.work_phase.sort_order + 1
+        for param in params:
+            work_phase_data = self.get_additional_params(source_event, param)
+            end_date = phase_start_date + timedelta(
+                days=work_phase_data["number_of_days"]
             )
-            .all()
+            work_phase_data.update(
+                {
+                    "work_id": source_event.work.id,
+                    "start_date": f"{phase_start_date}",
+                    "end_date": end_date,
+                    "sort_order": sort_order,
+                }
+            )
+            work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
+            event_configurations = self.get_configurations(source_event, param)
+            event_configurations = res.EventConfigurationResponseSchema(many=True).dump(
+                event_configurations
+            )
+            new_event_configurations = WorkService.create_configurations(
+                work_phase, event_configurations, False
+            )
+            WorkService.create_events_by_configuration(
+                work_phase, new_event_configurations
+            )
+            sort_order = sort_order + 1
+            phase_start_date = end_date + timedelta(days=1)
+        # update the current work phase
+        current_work_phase = WorkPhaseService.find_current_work_phase(
+            source_event.work_id
         )
-        for work_phase in work_phases:
-            work_phase.sort_order = work_phase.sort_order + 1
-            work_phase.update(work_phase.as_dict(recursive=False), commit=False)
-        work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
-        event_configurations = self.get_configurations(source_event, params)
-        event_configurations = res.EventConfigurationResponseSchema(many=True).dump(
-            event_configurations
+        work = Work.find_by_id(source_event.work_id)
+        work.current_work_phase_id = current_work_phase.id
+        work.update(work.as_dict(recursive=False), commit=False)
+
+    def preset_sort_order(self, source_event, number_of_new_work_phases: int) -> None:
+        """Adjust the sort order of the existing work phases for the new ones"""
+        db.session.query(WorkPhase).filter(
+            WorkPhase.sort_order
+            > source_event.event_configuration.work_phase.sort_order,
+            WorkPhase.work_id == source_event.work_id,
+        ).update(
+            {WorkPhase.sort_order: WorkPhase.sort_order + number_of_new_work_phases}
         )
-        new_event_configurations = WorkService.create_configurations(
-            work_phase, event_configurations, False
-        )
-        WorkService.create_events_by_configuration(work_phase, new_event_configurations)
 
     def get_additional_params(self, source_event, params):
         """Returns additional parameter"""
@@ -65,7 +82,7 @@ class AddPhase(ActionFactory):
             "name": params.get("new_name"),
             "legislated": params.get("legislated"),
             "number_of_days": phase.number_of_days,
-            "visibility": PhaseVisibilityEnum.REGULAR.value,
+            "visibility": PhaseVisibilityEnum.REGULAR,
         }
         return work_phase_data
 
@@ -76,7 +93,7 @@ class AddPhase(ActionFactory):
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .filter(
                 WorkPhase.work_id == source_event.work_id,
-                PhaseCode.name == params.get("phase_name"),
+                WorkPhase.name == params.get("phase_name"),
                 PhaseCode.work_type_id == params.get("work_type_id"),
                 PhaseCode.ea_act_id == params.get("ea_act_id"),
                 WorkPhase.is_active.is_(True),

@@ -16,7 +16,7 @@ import datetime
 import functools
 from datetime import timezone
 
-from api.models import PhaseCode, WorkPhase, db
+from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
 from api.schemas.work_v2 import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
@@ -78,6 +78,21 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return result
 
     @classmethod
+    def find_current_work_phase(cls, work_id: int) -> WorkPhase:
+        """Find the current work phase which is in progress"""
+        work_phase = (
+            db.session.query(WorkPhase)
+            .filter(
+                WorkPhase.work_id == work_id,
+                WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                WorkPhase.is_completed.is_(False),
+            )
+            .order_by(WorkPhase.sort_order)
+            .first()
+        )
+        return work_phase
+
+    @classmethod
     def find_work_phases_status(cls, work_id: int):
         """Return the work phases with additional information"""
         work_phases = (
@@ -87,13 +102,13 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 WorkPhase.work_id == work_id,
                 WorkPhase.is_active.is_(True),
                 WorkPhase.is_deleted.is_(False),
-                WorkPhase.visibility != PhaseVisibilityEnum.HIDDEN.value
+                WorkPhase.visibility != PhaseVisibilityEnum.HIDDEN.value,
             )
             .order_by(WorkPhase.sort_order)
             .all()
         )
         result = []
-        events = EventService.find_events(work_id)
+        events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
         for work_phase in work_phases:
             result_item = {}
             result_item["work_phase"] = work_phase
@@ -102,33 +117,50 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             ).days
             work_phase_events = list(
                 filter(
-                    lambda x, _work_phase_id=work_phase.id: x.event_configuration.work_phase_id == _work_phase_id,
+                    lambda x, _work_phase_id=work_phase.id: x.event_configuration.work_phase_id
+                    == _work_phase_id,
                     events,
                 )
             )
-            work_phase_events = sorted(work_phase_events, key=functools.cmp_to_key(EventService.event_compare_func))
+            work_phase_events = sorted(
+                work_phase_events,
+                key=functools.cmp_to_key(EventService.event_compare_func),
+            )
             suspended_days = functools.reduce(
                 lambda x, y: x + y,
                 map(
                     lambda x: x.number_of_days
-                    if x.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value and
-                    x.actual_date is not None else 0,
+                    if x.event_configuration.event_type_id
+                    == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                    and x.actual_date is not None
+                    else 0,
                     work_phase_events,
                 ),
             )
             result_item["total_number_of_days"] = total_days - suspended_days
-            next_milestone_event = next((x for x in work_phase_events if x.actual_date is None), None)
+            next_milestone_event = next(
+                (x for x in work_phase_events if x.actual_date is None), None
+            )
             if next_milestone_event:
                 result_item["next_milestone"] = next_milestone_event.name
             total_number_of_milestones = len(work_phase_events)
-            completed_ones = len(list(filter(lambda x: x.actual_date is not None, work_phase_events)))
-            result_item["milestone_progress"] = (completed_ones / total_number_of_milestones) * 100
+            completed_ones = len(
+                list(filter(lambda x: x.actual_date is not None, work_phase_events))
+            )
+            result_item["milestone_progress"] = (
+                completed_ones / total_number_of_milestones
+            ) * 100
             days_passed = 0
             if work_phase.work.current_work_phase_id == work_phase.id:
                 if work_phase.is_suspended:
-                    days_passed = (work_phase.suspended_date.date() - work_phase.start_date.date()).days
+                    days_passed = (
+                        work_phase.suspended_date.date() - work_phase.start_date.date()
+                    ).days
                 else:
-                    days_passed = (datetime.datetime.now(timezone.utc).date() - work_phase.start_date.date()).days
+                    days_passed = (
+                        datetime.datetime.now(timezone.utc).date()
+                        - work_phase.start_date.date()
+                    ).days
                     days_passed = 0 if days_passed < 0 else days_passed
                 days_left = (total_days - suspended_days) - days_passed
             else:
