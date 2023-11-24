@@ -57,7 +57,7 @@ const ComingSoon = () => {
                 lineHeight: "32px",
               }}
             >
-              Our team is developing this feature and plans to launch it soon
+              Our team is developing this feature and will launch it soon
             </ETHeading3>
           </Box>
         </Box>
