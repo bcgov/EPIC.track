@@ -16,11 +16,14 @@ import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlan from "../components/workPlan";
 import EventCalendar from "../components/eventCalendar/EventCalendar";
 import ComingSoon from "./ComingSoon";
+import { ROLES } from "../constants/application-constant";
+import AuthGate from "./AuthGate";
+import Unauthorized from "./Unauthorized";
 
 const AuthenticatedRoutes = () => {
   return (
     <Routes>
-      {/* <Route path="/" element={<Dashboard />} /> */}
+      <Route path="/" element={<ComingSoon />} />
       <Route
         path="/list-management/staffs"
         element={
@@ -71,9 +74,11 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/list-management/work-staff" element={<WorkStaffList />} />
       <Route path="/work-plan" element={<WorkPlan />} />
-      <Route path="/admin/users" element={<UserList />} />
-      <Route path="/" element={<ComingSoon />} />
+      <Route element={<AuthGate allowed={[ROLES.CREATE]} />}>
+        <Route path="/admin/users" element={<UserList />} />
+      </Route>
       <Route path="/insights" element={<ComingSoon />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

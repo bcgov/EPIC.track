@@ -7,37 +7,49 @@ export const Routes: RouteType[] = [
     icon: "DashboardIcon",
     path: "/",
     group: "Group1",
-    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
+    allowedRoles: [],
+    isAuthenticated: false,
+    hasNested: false,
   },
   {
     name: "All Works",
     icon: "AllIcon",
     path: "/works",
     group: "Group1",
-    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
+    allowedRoles: [],
+    isAuthenticated: false,
+    hasNested: false,
   },
   {
     name: "Reports",
     icon: "ReportIcon",
     path: "/reports",
     group: "Group2",
-    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
+    hasNested: true,
     routes: [
       {
         name: "Referral Schedule",
         path: "/reports/referral-schedule",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "Resource Forecast",
         path: "/reports/resource-forecast",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "30-60-90",
         path: "/reports/30-60-90",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "Event Calendar",
         path: "/reports/event-calendar",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
     ],
   },
@@ -46,41 +58,55 @@ export const Routes: RouteType[] = [
     icon: "InsightIcon",
     path: "/insights",
     group: "Group2",
-    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
+    allowedRoles: [],
+    isAuthenticated: false,
+    hasNested: false,
   },
   {
     name: "Task Templates",
     path: "/templates",
     group: "Group3",
     icon: "PenIcon",
-    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
+    allowedRoles: [],
+    isAuthenticated: false,
+    hasNested: false,
   },
   {
     name: "List Management",
     icon: "GridIcon",
     path: "/list-management",
     group: "Group3",
-    roles: [ROLES.DEFAULT_ROLES_EAO_EPIC],
+    hasNested: true,
     routes: [
       {
         name: "Staff",
         path: "/list-management/staffs",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "First Nations",
         path: "/list-management/first-nations",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "Proponents",
         path: "/list-management/proponents",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "Projects",
         path: "/list-management/projects",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
       {
         name: "Work Staff",
         path: "/list-management/work-staff",
+        allowedRoles: [],
+        isAuthenticated: false,
       },
     ],
   },
@@ -89,11 +115,13 @@ export const Routes: RouteType[] = [
     path: "/admin",
     icon: "GearIcon",
     group: "Group4",
-    roles: [ROLES.CREATE],
+    hasNested: true,
     routes: [
       {
         name: "Users",
         path: "/admin/users",
+        allowedRoles: [ROLES.CREATE],
+        isAuthenticated: true,
       },
     ],
   },
@@ -105,5 +133,7 @@ export interface RouteType {
   group?: string;
   icon?: Icon;
   routes?: RouteType[];
-  roles?: string[];
+  allowedRoles?: string[];
+  isAuthenticated?: boolean;
+  hasNested?: boolean;
 }
