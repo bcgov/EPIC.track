@@ -308,6 +308,8 @@ class EAResourceForeCastReport(ReportFactory):
             .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
             .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
             .filter(
+                Work.is_active.is_(True),
+                Work.is_deleted.is_(False),
                 daterange(
                     Work.start_date.cast(Date),
                     func.coalesce(
@@ -353,7 +355,7 @@ class EAResourceForeCastReport(ReportFactory):
             Event.query.filter(
                 Event.work_id.in_(work_ids),
                 Event.event_configuration_id.in_(self.start_event_configurations),
-                func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
+                func.coalesce(Event.actual_date, Event.anticipated_date) >= first_month,
             )
             .join(
                 EventConfiguration,

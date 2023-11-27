@@ -21,6 +21,7 @@ import os
 from http import HTTPStatus
 
 from flask import Flask
+from flask import current_app
 from marshmallow import ValidationError
 
 from api import config
@@ -66,6 +67,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         @app.errorhandler(Exception)
         def handle_error(err):
+            current_app.logger.error(str(err))
             if isinstance(err, ValidationError):
                 return err.messages, HTTPStatus.BAD_REQUEST
             if isinstance(err, ResourceExistsError):
@@ -85,8 +87,17 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
 def setup_jwt_manager(app, jwt_manager):
     """Use flask app to configure the JWTManager to work for a particular Realm."""
+
     def get_roles(a_dict):
-        return a_dict['realm_access']['roles']  # pragma: no cover
+        realm_access = a_dict.get('realm_access', {})
+        realm_roles = realm_access.get('roles', [])
+
+        client_name = current_app.config.get('JWT_OIDC_AUDIENCE')
+
+        resource_access = a_dict.get('resource_access', {})
+        client_roles = resource_access.get(client_name, {}).get('roles', [])
+
+        return realm_roles + client_roles
 
     app.config['JWT_ROLE_CALLBACK'] = get_roles
 

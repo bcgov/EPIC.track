@@ -1,4 +1,4 @@
-import { Link } from "@mui/material";
+import { Box, Link } from "@mui/material";
 import React, { useState } from "react";
 
 interface ReadMoreTextProps {

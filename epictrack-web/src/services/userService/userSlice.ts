@@ -17,6 +17,7 @@ const initialState: UserState = {
     email: "",
     phone: "",
     position: "",
+    roles: [],
   },
 };
 
