@@ -75,8 +75,6 @@ class Works(Resource):
         request_json = req.WorkBodyParameterSchema().load(API.payload)
         request_json["start_date"] = get_start_of_day(request_json["start_date"])
         work = WorkService.create_work(request_json)
-        role_id = CodeService.find_code_values_by_type("roles", { "name": "Team Lead" }).get("codes")[0].get("id")
-        WorkService.create_work_staff(work.id, { "staff_id": request_json["work_lead_id"], "role_id": role_id, "is_active": True })
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
 

@@ -39,7 +39,7 @@ from api.services.event import EventService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
-
+from api.services.code import CodeService
 
 class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
@@ -148,6 +148,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
             if sort_order == 1:
                 work.current_work_phase_id = work_phase_id
             sort_order = sort_order + 1
+        
+        role_id = CodeService.find_code_values_by_type("roles", { "name": "Team Lead" }).get("codes")[0].get("id")
+        WorkService.create_work_staff(work.id, { "staff_id": payload["work_lead_id"], "role_id": role_id, "is_active": True })
+        
         if commit:
             db.session.commit()
         return work
