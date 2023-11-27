@@ -62,8 +62,8 @@ export const ETPageContainer = (props: PageContainerProps) => {
       sx={{
         ...props.sx,
         padding: `${state.showEnvBanner ? "9" : "7"}rem 2rem 1rem 2.5rem`,
-        // justifyContent: "flex-start",
-        // alignItems: "flex-start",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
       }}
     >
       {props.children}

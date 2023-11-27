@@ -12,37 +12,41 @@ const Unauthorized = () => {
   return (
     <ETPageContainer
       container
-      direction="column"
-      justifyContent="center"
-      alignItems="center"
-      spacing={2}
       sx={{
-        justifyContent: "center",
-        alignItems: "center",
         height: "800px",
       }}
     >
-      <Grid item>
-        <Button
-          onClick={() => {
-            navigate("/");
-          }}
-        >
-          Go to home page
-        </Button>
-      </Grid>
-      <Grid item>
-        <ETHeading1
-          bold
-          sx={{
-            color: Palette.neutral.dark,
-            lineHeight: "48px",
-          }}
-        >
-          Unauthorized
-        </ETHeading1>
-      </Grid>
-      <Grid item>
+      <Grid
+        container
+        direction="column"
+        justifyContent="center"
+        alignItems="center"
+        sx={{
+          height: "100%",
+        }}
+      >
+        <Grid item>
+          <Button
+            onClick={() => {
+              navigate("/");
+            }}
+          >
+            Go to home page
+          </Button>
+        </Grid>
+        <Grid item>
+          <ETHeading1
+            bold
+            sx={{
+              color: Palette.neutral.dark,
+              lineHeight: "48px",
+            }}
+          >
+            Unauthorized
+          </ETHeading1>
+        </Grid>
+        <Grid item></Grid>
+
         <ETHeading3
           sx={{
             color: Palette.neutral.main,
