@@ -1,4 +1,4 @@
-import { Box, Button, Container } from "@mui/material";
+import { Box, Button, Container, Grid } from "@mui/material";
 import {
   ETHeading1,
   ETHeading3,
@@ -12,64 +12,46 @@ const Unauthorized = () => {
   return (
     <ETPageContainer
       container
-      direction="row"
+      direction="column"
       justifyContent="center"
       alignItems="center"
-      spacing={1}
-      padding={"2em 2em 1em 2em"}
-      sx={{ height: "800px" }}
+      spacing={2}
+      sx={{
+        justifyContent: "center",
+        alignItems: "center",
+        height: "800px",
+      }}
     >
-      <Container
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100%",
-        }}
-      >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "2rem",
-            alignItems: "center",
+      <Grid item>
+        <Button
+          onClick={() => {
+            navigate("/");
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-              alignItems: "center",
-            }}
-          >
-            <Button
-              onClick={() => {
-                navigate("/");
-              }}
-            >
-              Go to home page
-            </Button>
-            <ETHeading1
-              bold
-              sx={{
-                color: Palette.neutral.dark,
-                lineHeight: "48px",
-              }}
-            >
-              Unauthorized
-            </ETHeading1>
-            <ETHeading3
-              sx={{
-                color: Palette.neutral.main,
-                lineHeight: "32px",
-              }}
-            >
-              You do not have the permission to view this page.
-            </ETHeading3>
-          </Box>
-        </Box>
-      </Container>
+          Go to home page
+        </Button>
+      </Grid>
+      <Grid item>
+        <ETHeading1
+          bold
+          sx={{
+            color: Palette.neutral.dark,
+            lineHeight: "48px",
+          }}
+        >
+          Unauthorized
+        </ETHeading1>
+      </Grid>
+      <Grid item>
+        <ETHeading3
+          sx={{
+            color: Palette.neutral.main,
+            lineHeight: "32px",
+          }}
+        >
+          You do not have the permission to view this page.
+        </ETHeading3>
+      </Grid>
     </ETPageContainer>
   );
 };
