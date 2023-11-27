@@ -145,12 +145,7 @@ const StatusHistory = () => {
                 );
               })}
           </Collapse>
-          <TimelineItem
-            sx={{
-              paddingLeft: "86px",
-            }}
-            key="expand-button"
-          >
+          <TimelineItem sx={{ paddingLeft: "86px" }} key="expand-button">
             <Grid container>
               <Grid item>
                 <Button
