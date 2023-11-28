@@ -9,7 +9,6 @@ export const Routes: RouteType[] = [
     group: "Group1",
     allowedRoles: [],
     isAuthenticated: false,
-    hasNested: false,
   },
   {
     name: "All Works",
@@ -18,14 +17,12 @@ export const Routes: RouteType[] = [
     group: "Group1",
     allowedRoles: [],
     isAuthenticated: false,
-    hasNested: false,
   },
   {
     name: "Reports",
     icon: "ReportIcon",
     path: "/reports",
     group: "Group2",
-    hasNested: true,
     routes: [
       {
         name: "Referral Schedule",
@@ -60,7 +57,6 @@ export const Routes: RouteType[] = [
     group: "Group2",
     allowedRoles: [],
     isAuthenticated: false,
-    hasNested: false,
   },
   {
     name: "Task Templates",
@@ -69,14 +65,12 @@ export const Routes: RouteType[] = [
     icon: "PenIcon",
     allowedRoles: [],
     isAuthenticated: false,
-    hasNested: false,
   },
   {
     name: "List Management",
     icon: "GridIcon",
     path: "/list-management",
     group: "Group3",
-    hasNested: true,
     routes: [
       {
         name: "Staff",
@@ -115,7 +109,6 @@ export const Routes: RouteType[] = [
     path: "/admin",
     icon: "GearIcon",
     group: "Group4",
-    hasNested: true,
     routes: [
       {
         name: "Users",
@@ -135,5 +128,4 @@ export interface RouteType {
   routes?: RouteType[];
   allowedRoles?: string[];
   isAuthenticated?: boolean;
-  hasNested?: boolean;
 }

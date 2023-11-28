@@ -59,7 +59,6 @@ const DrawerBox = () => {
   const uiState = useAppSelector((state) => state.uiState);
   const location = useLocation();
   const { roles } = useAppSelector((state) => state.user.userDetail);
-  const allowedRoutes: RouteType[] = [];
   const handleClick = (route: any) => {
     if (route.routes && route.routes.length > 0) {
       setOpen((prevState: any) => ({
@@ -75,33 +74,33 @@ const DrawerBox = () => {
     return <Icon className={`sidebar-item ${active ? "active" : ""}`} />;
   }, []);
 
-  const getAllowedRoutes = () => {
-    return Routes.map((route: RouteType, index) => {
-      if (!route["hasNested"]) {
-        const allowed = route["allowedRoles"] ?? [];
-        if (hasPermission({ roles, allowed }) || !route["isAuthenticated"]) {
-          allowedRoutes[index] = route;
-        }
-      }
-      if (route["hasNested"]) {
-        const routes = route["routes"] ?? [];
-        const filteredRoutes = routes.filter((route: RouteType) => {
-          const allowed = route["allowedRoles"] ?? [];
-          return hasPermission({ roles, allowed }) || !route["isAuthenticated"];
-        });
-        if (filteredRoutes.length > 0) {
-          allowedRoutes[index] = route;
-          allowedRoutes[index]["routes"] = filteredRoutes;
-        }
-      }
-    });
+  const isRouteAllowed = (route: RouteType, roles: Array<any>) => {
+    const allowed = route["allowedRoles"] ?? [];
+    return hasPermission({ roles, allowed }) || !route["isAuthenticated"];
   };
 
-  useMemo(() => {
-    getAllowedRoutes();
-  }, [roles]);
+  const filterRoutes = (routes: RouteType[], roles: Array<any>) => {
+    return routes.reduce((allowedRoutes: any, route) => {
+      if (isRouteAllowed(route, roles)) {
+        const newRoute: RouteType = { ...route };
+        if (newRoute["routes"]) {
+          newRoute["routes"] = filterRoutes(newRoute["routes"], roles);
+        }
 
-  getAllowedRoutes();
+        const addRoute =
+          (newRoute["routes"] && newRoute["routes"].length > 0) ||
+          !newRoute["routes"];
+
+        if (addRoute) {
+          allowedRoutes.push(newRoute);
+        }
+      }
+      return allowedRoutes;
+    }, []);
+  };
+
+  const allowedRoutes: RouteType[] = filterRoutes(Routes, roles);
+
   const groupedRoutes = useMemo(
     () => groupBy(allowedRoutes, (p) => p.group),
     [allowedRoutes]
