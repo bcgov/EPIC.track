@@ -17,7 +17,7 @@ import {
 import ReadMoreText from "../../../../shared/ReadMoreText";
 import { MONTH_DAY_YEAR } from "../../../../../constants/application-constant";
 import moment from "moment";
-import { When } from "react-if";
+import { Unless, When } from "react-if";
 import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
 import { StatusContext } from "../../StatusContext";
 
@@ -132,9 +132,9 @@ const StatusHistory = () => {
                     </TimelineOppositeContent>
                     <TimelineSeparator>
                       <TimelineDot />
-                      <When condition={!finalItem}>
+                      <Unless condition={finalItem}>
                         <TimelineConnector />
-                      </When>
+                      </Unless>
                     </TimelineSeparator>
                     <TimelineContent>
                       <ETCaption3 color={Palette.neutral.main}>
