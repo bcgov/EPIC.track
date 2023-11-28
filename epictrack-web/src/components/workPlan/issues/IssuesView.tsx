@@ -40,6 +40,8 @@ const IssuesView = () => {
     return "Add Issue";
   };
 
+  const lastInteractedIssue = React.useRef<number | null>(null);
+
   if (isIssuesLoading) {
     return <IssuesViewSkeleton />;
   }
@@ -68,7 +70,17 @@ const IssuesView = () => {
             </Grid>
             {issues.map((issue, index) => (
               <Grid item xs={12}>
-                <IssueAccordion issue={issue} defaultOpen={index === 0} />
+                <IssueAccordion
+                  issue={issue}
+                  defaultOpen={
+                    lastInteractedIssue.current
+                      ? issue.id === lastInteractedIssue.current
+                      : index === 0
+                  }
+                  onInteraction={() => {
+                    lastInteractedIssue.current = issue.id;
+                  }}
+                />
               </Grid>
             ))}
           </Grid>
