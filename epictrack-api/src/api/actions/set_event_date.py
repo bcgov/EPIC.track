@@ -6,7 +6,7 @@ from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event import Event
 
-from .common import find_configuration
+from .common import find_configuration, find_event_date
 
 
 class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
@@ -27,9 +27,8 @@ class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
             )
             .first()
         )
-        event.anticipated_date = source_event.actual_date + timedelta(
+        event_dict = event.as_dict(recursive=False)
+        event_dict["anticipated_date"] = find_event_date(source_event) + timedelta(
             days=number_of_days_to_be_added
         )
-        EventService.update_event(
-            event.as_dict(recursive=False), event.id, True, commit=False
-        )
+        EventService.update_event(event_dict, event.id, True, commit=False)

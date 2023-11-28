@@ -3,6 +3,7 @@ import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
 import {
+  EventPosition,
   EventTemplateVisibility,
   EventsGridModel,
   MilestoneEvent,
@@ -156,10 +157,37 @@ const EventList = () => {
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
           });
-          result = result.sort(
-            (a, b) =>
-              Moment(a.start_date).diff(b.start_date, "days") || a.id - b.id
-          );
+          result = result.sort((eventX, eventY) => {
+            if (
+              eventX.event_configuration.event_position ===
+                EventPosition.START ||
+              eventY.event_configuration.event_position === EventPosition.END
+            ) {
+              return -1;
+            }
+            if (
+              eventY.event_configuration.event_position ===
+                EventPosition.START ||
+              eventX.event_configuration.event_position === EventPosition.END
+            ) {
+              return 1;
+            }
+            if (Moment(eventX.start_date).diff(eventY.start_date, "days") < 0) {
+              return -1;
+            }
+            if (Moment(eventX.start_date).diff(eventY.start_date, "days") > 0) {
+              return 1;
+            }
+            if (
+              Moment(eventX.start_date).diff(eventY.start_date, "days") == 0
+            ) {
+              return eventX.id < eventY.id ? -1 : 1;
+            }
+            return (
+              Moment(eventX.start_date).diff(eventY.start_date, "days") ||
+              eventX.id - eventY.id
+            );
+          });
           setEvents(result);
         }
       );
