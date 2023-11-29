@@ -16,6 +16,7 @@ import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlan from "../components/workPlan";
 import EventCalendar from "../components/eventCalendar/EventCalendar";
 import ComingSoon from "./ComingSoon";
+import MyWorkPlans from "../components/myWorkplans";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -72,7 +73,7 @@ const AuthenticatedRoutes = () => {
       <Route path="/list-management/work-staff" element={<WorkStaffList />} />
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route path="/admin/users" element={<UserList />} />
-      <Route path="/" element={<ComingSoon />} />
+      <Route path="/" element={<MyWorkPlans />} />
       <Route path="/insights" element={<ComingSoon />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
