@@ -1,15 +1,17 @@
 """Disable work start date action handler"""
 
-from datetime import timedelta
-
 from api.actions.base import ActionFactory
 from api.models import Event, db
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.phase_code import PhaseCode
 from api.models.work_phase import WorkPhase
-from api.schemas.response.event_configuration_response import EventConfigurationResponseSchema
+from api.schemas.response.event_configuration_response import (
+    EventConfigurationResponseSchema,
+)
 from api.schemas.response.event_template_response import EventTemplateResponseSchema
+from .set_event_date import SetEventDate
+from .common import find_event_date
 
 
 # pylint: disable=import-outside-toplevel
@@ -21,18 +23,23 @@ class AddEvent(ActionFactory):
     def run(self, source_event: Event, params) -> None:
         """Adds a new event based on params"""
         from api.services.event import EventService
-
-        event_data, work_phase_id = self.get_additional_params(source_event, params)
-        event_data.update(
-            {
-                "is_active": True,
-                "work_id": source_event.work_id,
-                "anticipated_date": source_event.actual_date + timedelta(days=params["start_at"]),
-            }
-        )
-        EventService.create_event(
-            event_data, work_phase_id=work_phase_id, push_events=True
-        )
+        for param in params:
+            event_data, work_phase_id = self.get_additional_params(source_event, param)
+            event_data.update(
+                {
+                    "is_active": True,
+                    "work_id": source_event.work_id,
+                    "anticipated_date": find_event_date(source_event)
+                }
+            )
+            new_event = EventService.create_event(
+                event_data, work_phase_id=work_phase_id, push_events=True, commit=False
+            )
+            set_event_date: SetEventDate = SetEventDate()
+            # param["event_name"] = new_event.event_configuration.name
+            # Setting the event date from here cz, otherwise the event won't get pushed
+            set_event_date.run(source_event, param)
+            source_event = new_event
 
     def get_additional_params(self, source_event: Event, params):
         """Returns additional parameter"""
@@ -56,7 +63,7 @@ class AddEvent(ActionFactory):
             db.session.query(EventConfiguration)
             .filter(
                 EventConfiguration.work_phase_id == work_phase.id,
-                EventConfiguration.name == params.pop("event_name"),
+                EventConfiguration.name == params.get("event_name"),
                 EventConfiguration.is_active.is_(True),
             )
             .order_by(EventConfiguration.repeat_count.desc())

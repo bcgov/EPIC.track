@@ -70,8 +70,8 @@ const DecisionInput = ({
           disabled={isFormFieldsLocked}
           helperText={errors?.decision_maker_id?.message?.toString()}
           options={decisionMakers || []}
-          getOptionValue={(o: Staff) => o.id.toString()}
-          getOptionLabel={(o: Staff) => o.full_name}
+          getOptionValue={(o: Staff) => o?.id?.toString()}
+          getOptionLabel={(o: Staff) => o?.full_name}
           {...register("decision_maker_id")}
         ></ControlledSelectV2>
       </Grid>
@@ -81,8 +81,8 @@ const DecisionInput = ({
           disabled={isFormFieldsLocked}
           helperText={errors?.outcome_id?.message?.toString()}
           options={outcomes || []}
-          getOptionValue={(o: ListType) => o.id.toString()}
-          getOptionLabel={(o: ListType) => o.name}
+          getOptionValue={(o: ListType) => o?.id?.toString()}
+          getOptionLabel={(o: ListType) => o?.name}
           {...register("outcome_id")}
         ></ControlledSelectV2>
       </Grid>

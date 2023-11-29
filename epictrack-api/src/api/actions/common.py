@@ -1,5 +1,5 @@
 """Common methods for the actions"""
-
+from datetime import datetime
 from api.models import Event, EventConfiguration, WorkPhase, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 
@@ -33,3 +33,12 @@ def find_configuration(source_event: Event, params) -> int:
         .first()
     )
     return event_configuration
+
+
+def find_event_date(source_event: Event) -> datetime:
+    """Returns actual date if the event has one else anticipated"""
+    return (
+        source_event.actual_date
+        if source_event.actual_date
+        else source_event.anticipated_date
+    )
