@@ -15,19 +15,22 @@ import {
   timelineContentClasses,
 } from "@mui/lab";
 import ReadMoreText from "../../../../shared/ReadMoreText";
-import { MONTH_DAY_YEAR } from "../../../../../constants/application-constant";
+import {
+  MONTH_DAY_YEAR,
+  ROLES,
+} from "../../../../../constants/application-constant";
 import moment from "moment";
 import { When } from "react-if";
 import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
 import { StatusContext } from "../../StatusContext";
+import { Restricted } from "../../../../shared/restricted";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
 const StatusHistory = () => {
   const { statuses } = React.useContext(WorkplanContext);
-  const { setShowStatusForm, setStatus, hasPermission } =
-    useContext(StatusContext);
+  const { setShowStatusForm, setStatus } = useContext(StatusContext);
   const [expand, setExpand] = useState(false);
   const theme = useTheme();
 
@@ -71,21 +74,23 @@ const StatusHistory = () => {
                     {status.description}
                   </ReadMoreText>
                 </ETPreviewText>
-                <When condition={isSuccess && hasPermission()}>
-                  <Button
-                    variant="text"
-                    startIcon={<PencilEditIcon />}
-                    sx={{
-                      backgroundColor: "inherit",
-                      borderColor: "transparent",
-                    }}
-                    onClick={() => {
-                      setShowStatusForm(true);
-                      setStatus(status);
-                    }}
-                  >
-                    Edit
-                  </Button>
+                <When condition={isSuccess}>
+                  <Restricted allowed={[ROLES.EDIT]}>
+                    <Button
+                      variant="text"
+                      startIcon={<PencilEditIcon />}
+                      sx={{
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
+                      onClick={() => {
+                        setShowStatusForm(true);
+                        setStatus(status);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Restricted>
                 </When>
               </TimelineOppositeContent>
               <TimelineSeparator>

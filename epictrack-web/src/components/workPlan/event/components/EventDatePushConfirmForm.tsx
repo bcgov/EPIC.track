@@ -39,7 +39,7 @@ const EventDatePushConfirmForm = ({
         value: 2,
       },
       {
-        label: "Update all susequent Milestones",
+        label: "Update all subsequent  Milestones",
         value: 1,
       },
     ],

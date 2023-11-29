@@ -571,7 +571,7 @@ class EventService:
                 else current_event_index
             )
             cls._push_events(
-                phase_events[_current_event_index + 1 :],
+                phase_events[_current_event_index + 1:],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,

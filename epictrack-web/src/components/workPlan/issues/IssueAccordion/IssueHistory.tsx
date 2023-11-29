@@ -14,7 +14,7 @@ import TimelineContent, {
   timelineContentClasses,
 } from "@mui/lab/TimelineContent";
 import { Button, Collapse, Grid, useTheme } from "@mui/material";
-import { When } from "react-if";
+import { Else, If, Then, When } from "react-if";
 import { IconProps } from "../../../icons/type";
 import icons from "../../../icons";
 import { IssuesContext } from "../IssuesContext";
@@ -51,11 +51,18 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
         return (
           <TimelineItem key={update.id}>
             <TimelineOppositeContent>
-              <ETPreviewText
-                color={isSuccess ? Palette.neutral.dark : Palette.neutral.main}
-              >
-                <ReadMoreText>{update.description}</ReadMoreText>
-              </ETPreviewText>
+              <If condition={isSuccess}>
+                <Then>
+                  <ETPreviewText color={Palette.neutral.dark}>
+                    {update.description}
+                  </ETPreviewText>
+                </Then>
+                <Else>
+                  <ETPreviewText color={Palette.neutral.main}>
+                    <ReadMoreText>{update.description}</ReadMoreText>
+                  </ETPreviewText>
+                </Else>
+              </If>
               <When condition={isSuccess}>
                 <Button
                   variant="text"

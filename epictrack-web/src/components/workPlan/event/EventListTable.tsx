@@ -25,6 +25,7 @@ import {
 } from "../../shared/MasterTrackTable/utils";
 import { EventContext } from "./EventContext";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
+import { searchFilter } from "../../shared/MasterTrackTable/filters";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -114,6 +115,7 @@ const EventListTable = ({
         header: "Task / Milestone",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         sortingFn: "sortFn",
+        filterFn: searchFilter,
         size: 300,
         Cell: ({ cell, row, renderedCellValue }) => (
           <ETGridTitle

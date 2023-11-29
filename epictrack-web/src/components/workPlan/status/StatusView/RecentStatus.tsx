@@ -9,7 +9,11 @@ import { StatusContext } from "../StatusContext";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { useAppSelector } from "../../../../hooks";
 import { Else, If, Then, When } from "react-if";
-import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
+import {
+  MONTH_DAY_YEAR,
+  ROLES,
+} from "../../../../constants/application-constant";
+import { Restricted } from "../../../shared/restricted";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -22,7 +26,6 @@ const RecentStatus = () => {
     setShowStatusForm,
     setStatus,
     setShowApproveStatusDialog,
-    hasPermission,
   } = React.useContext(StatusContext);
 
   return (
@@ -124,24 +127,22 @@ const RecentStatus = () => {
             </Button>
           </Else>
         </If>
-        <If condition={!statuses[0].is_approved || hasPermission()}>
-          <Then>
-            <Button
-              onClick={() => {
-                setShowStatusForm(true);
-                setStatus(statuses[0]);
-              }}
-              sx={{
-                gap: "8px",
-                backgroundColor: "inherit",
-                borderColor: "transparent",
-              }}
-            >
-              <PencilEditIcon />
-              Edit
-            </Button>
-          </Then>
-        </If>
+        <Restricted allowed={[ROLES.EDIT]}>
+          <Button
+            onClick={() => {
+              setShowStatusForm(true);
+              setStatus(statuses[0]);
+            }}
+            sx={{
+              gap: "8px",
+              backgroundColor: "inherit",
+              borderColor: "transparent",
+            }}
+          >
+            <PencilEditIcon />
+            Edit
+          </Button>
+        </Restricted>
       </Box>
     </GrayBox>
   );
