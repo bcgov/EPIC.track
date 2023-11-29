@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { ETPageContainer } from "../shared";
 import { MyWorkplansContext } from "./MyWorkPlanContext";
+import CardList from "./Card/CardList";
 
 const WorkPlanContainer = () => {
   const {} = useContext(MyWorkplansContext);
@@ -10,7 +11,9 @@ const WorkPlanContainer = () => {
       sx={{
         paddingBottom: "0rem !important",
       }}
-    ></ETPageContainer>
+    >
+      <CardList />
+    </ETPageContainer>
   );
 };
 
