@@ -20,7 +20,7 @@ import {
   ROLES,
 } from "../../../../../constants/application-constant";
 import moment from "moment";
-import { When } from "react-if";
+import { Unless, When } from "react-if";
 import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
 import { StatusContext } from "../../StatusContext";
 import { Restricted } from "../../../../shared/restricted";
@@ -61,7 +61,9 @@ const StatusHistory = () => {
       >
         {approvedStatuses.slice(0, SHOW_MORE_THRESHOLD).map((status, index) => {
           const isSuccess = highlightFirstInTimeLineApproved && index === 0;
-          const finalItem = index + 1 === approvedStatuses?.length;
+          const finalItem = approvedStatuses.length === index + 1;
+          const lastItemHidden = index + 1 !== SHOW_MORE_THRESHOLD;
+          const showConnector = (!finalItem && lastItemHidden) || expand;
           return (
             <TimelineItem key={status.id}>
               <TimelineOppositeContent>
@@ -101,7 +103,7 @@ const StatusHistory = () => {
                     },
                   ]}
                 />
-                <When condition={!finalItem}>
+                <When condition={showConnector}>
                   <TimelineConnector
                     sx={[
                       isSuccess && {
@@ -121,24 +123,32 @@ const StatusHistory = () => {
         })}
         <When condition={approvedStatuses.length > SHOW_MORE_THRESHOLD}>
           <Collapse in={expand}>
-            {approvedStatuses.slice(SHOW_MORE_THRESHOLD).map((status) => (
-              <TimelineItem key={status.id}>
-                <TimelineOppositeContent>
-                  <ETPreviewText color={Palette.neutral.main}>
-                    <ReadMoreText>{status.description}</ReadMoreText>
-                  </ETPreviewText>
-                </TimelineOppositeContent>
-                <TimelineSeparator>
-                  <TimelineDot />
-                  <TimelineConnector />
-                </TimelineSeparator>
-                <TimelineContent>
-                  <ETCaption3 color={Palette.neutral.main}>
-                    {moment(status.posted_date).format(MONTH_DAY_YEAR)}
-                  </ETCaption3>
-                </TimelineContent>
-              </TimelineItem>
-            ))}
+            {approvedStatuses
+              .slice(SHOW_MORE_THRESHOLD)
+              .map((status, index) => {
+                const finalItem =
+                  approvedStatuses.length === index + 1 + SHOW_MORE_THRESHOLD;
+                return (
+                  <TimelineItem key={status.id}>
+                    <TimelineOppositeContent>
+                      <ETPreviewText color={Palette.neutral.main}>
+                        <ReadMoreText>{status.description}</ReadMoreText>
+                      </ETPreviewText>
+                    </TimelineOppositeContent>
+                    <TimelineSeparator>
+                      <TimelineDot />
+                      <Unless condition={finalItem}>
+                        <TimelineConnector />
+                      </Unless>
+                    </TimelineSeparator>
+                    <TimelineContent>
+                      <ETCaption3 color={Palette.neutral.main}>
+                        {moment(status.posted_date).format(MONTH_DAY_YEAR)}
+                      </ETCaption3>
+                    </TimelineContent>
+                  </TimelineItem>
+                );
+              })}
           </Collapse>
           <TimelineItem sx={{ paddingLeft: "86px" }} key="expand-button">
             <Grid container>
