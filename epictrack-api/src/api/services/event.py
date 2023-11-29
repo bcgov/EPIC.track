@@ -571,7 +571,7 @@ class EventService:
                 else current_event_index
             )
             cls._push_events(
-                phase_events[_current_event_index + 1:],
+                phase_events[_current_event_index + 1 :],
                 number_of_days_to_be_pushed,
                 event,
                 all_work_event_configurations,
@@ -592,12 +592,16 @@ class EventService:
         cls, all_work_events: [Event], work_phase_id: int
     ) -> [Event]:
         """Filter the work events to find the phase event"""
-        return list(
+        phase_events = list(
             filter(
                 lambda x: x.event_configuration.work_phase_id == work_phase_id,
                 all_work_events,
             )
         )
+        phase_events = sorted(
+            phase_events, key=functools.cmp_to_key(cls.event_compare_func)
+        )
+        return phase_events
 
     @classmethod
     def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
