@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { ETPageContainer } from "../shared";
 import { MyWorkplansContext } from "./MyWorkPlanContext";
-import CardList from "./Card/CardList";
+import CardList from "./CardList";
 
 const WorkPlanContainer = () => {
   const {} = useContext(MyWorkplansContext);
