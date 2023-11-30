@@ -355,7 +355,7 @@ class EAResourceForeCastReport(ReportFactory):
             Event.query.filter(
                 Event.work_id.in_(work_ids),
                 Event.event_configuration_id.in_(self.start_event_configurations),
-                func.coalesce(Event.actual_date, Event.anticipated_date) >= first_month,
+                func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
             )
             .join(
                 EventConfiguration,
