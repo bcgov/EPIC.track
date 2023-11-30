@@ -6,14 +6,14 @@ import { IconProps } from "../../icons/type";
 
 interface IProps {
   children: React.ReactNode;
-  childrenSx?: SxProps;
-  containerSx?: SxProps;
+  gap?: number;
+  sx?: SxProps;
 }
 
-const GridRowContainer = ({ children, containerSx, childrenSx }: IProps) => {
+const GridRowContainer = ({ children, sx, gap }: IProps) => {
   return (
-    <Grid item sx={{ ...containerSx }}>
-      <Grid container direction="row" sx={{ ...childrenSx }}>
+    <Grid item sx={{ ...sx }}>
+      <Grid container direction="row" gap={gap}>
         {children}
       </Grid>
     </Grid>
@@ -35,10 +35,10 @@ const CardBody = () => {
         backgroundColor: Palette.white,
         borderTop: `1px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "16px 24px",
-        gap: "8px",
       }}
+      gap={1}
     >
-      <GridRowContainer childrenSx={{ gap: "8px" }}>
+      <GridRowContainer gap={2}>
         <Grid item>
           <ETHeading4 bold color={Palette.neutral.dark}>
             EAC Assessment
@@ -58,10 +58,7 @@ const CardBody = () => {
           </ETCaption1>
         </Grid>
       </GridRowContainer>
-      <GridRowContainer
-        childrenSx={{ gap: "8px" }}
-        containerSx={{ paddingBottom: "8px" }}
-      >
+      <GridRowContainer gap={1} sx={{ paddingBottom: "8px" }}>
         <Grid item sx={{ marginTop: "2px" }}>
           <DotIcon />
         </Grid>
@@ -87,7 +84,7 @@ const CardBody = () => {
           </ETCaption2>
         </Grid>
       </GridRowContainer>
-      <GridRowContainer childrenSx={{ gap: "8px" }}>
+      <GridRowContainer gap={1}>
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
@@ -114,10 +111,7 @@ const CardBody = () => {
           PIN Notice of Intent
         </ETHeading4>
       </Grid>
-      <GridRowContainer
-        childrenSx={{ gap: "8px" }}
-        containerSx={{ paddingBottom: "16px" }}
-      >
+      <GridRowContainer gap={1} sx={{ paddingBottom: "16px" }}>
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
