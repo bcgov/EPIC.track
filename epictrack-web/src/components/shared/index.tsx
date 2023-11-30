@@ -447,6 +447,24 @@ export const ETCardTitle = styled(Typography)(() => ({
   color: Palette.primary.main,
 }));
 
+export const ETCardFooterTitle = styled(Typography)(() => ({
+  fontSize: "13px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "16px",
+  letterSpacing: "0.39px",
+  color: Palette.neutral.main,
+}));
+
+export const ETCardFooterContent = styled(Typography)(() => ({
+  fontSize: "16px",
+  fontStyle: "normal",
+  fontWeight: "400",
+  lineHeight: "24px",
+  letterSpacing: "-0.32px",
+  color: Palette.neutral.dark,
+}));
+
 export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
   return (
     <Box
