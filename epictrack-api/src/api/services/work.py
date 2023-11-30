@@ -147,11 +147,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 phase_start_date = end_date + timedelta(days=1)
             if sort_order == 1:
                 work.current_work_phase_id = work_phase_id
-            sort_order = sort_order + 1
-        
+            sort_order = sort_order + 1 
         role_id = CodeService.find_code_values_by_type("roles", { "name": "Team Lead" }).get("codes")[0].get("id")
         WorkService.create_work_staff(work.id, { "staff_id": payload["work_lead_id"], "role_id": role_id, "is_active": True })
-        
         if commit:
             db.session.commit()
         return work
