@@ -7,7 +7,6 @@ const CardHeader = () => {
     <Grid
       container
       sx={{
-        width: "516",
         backgroundColor: Palette.neutral.bg.light,
         borderBottom: `1px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "12px 24px",

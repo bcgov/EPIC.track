@@ -3,22 +3,14 @@ import Card from "./Card";
 
 const CardList = () => {
   return (
-    <Grid
-      container
-      direction="row"
-      justifyContent="space-evenly"
-      alignItems="flex-start"
-      spacing={2}
-    >
-      <Grid item>
-        <Card />
-      </Grid>
-      <Grid item>
-        <Card />
-      </Grid>
-      <Grid item>
-        <Card />
-      </Grid>
+    <Grid container direction="row" spacing={2}>
+      {[1, 2, 3, 4, 5].map(() => {
+        return (
+          <Grid item>
+            <Card />
+          </Grid>
+        );
+      })}
     </Grid>
   );
 };

@@ -17,7 +17,6 @@ const CardFooter = () => {
       direction="row"
       justifyContent="space-between"
       sx={{
-        width: "516",
         backgroundColor: Palette.white,
         borderTop: `1px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "16px 32px",
@@ -25,9 +24,9 @@ const CardFooter = () => {
       }}
     >
       <Grid item>
-        <Grid container gap={2}>
+        <Grid container spacing={2}>
           <Grid item>
-            <Grid container direction="column" gap={1}>
+            <Grid container direction="column" spacing={1}>
               <Grid item>
                 <ETCardFooterTitle>TEAM</ETCardFooterTitle>
               </Grid>
@@ -37,7 +36,7 @@ const CardFooter = () => {
             </Grid>
           </Grid>
           <Grid item>
-            <Grid container direction="column" gap={1}>
+            <Grid container direction="column" spacing={1}>
               <Grid item>
                 <ETCardFooterTitle>PROJECT LEAD</ETCardFooterTitle>
               </Grid>
@@ -47,7 +46,7 @@ const CardFooter = () => {
             </Grid>
           </Grid>
           <Grid item>
-            <Grid container direction="column" gap={1}>
+            <Grid container direction="column" spacing={1}>
               <Grid item>
                 <ETCardFooterTitle>STAFF</ETCardFooterTitle>
               </Grid>

@@ -4,22 +4,6 @@ import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 
-interface IProps {
-  children: React.ReactNode;
-  gap?: number;
-  sx?: SxProps;
-}
-
-const GridRowContainer = ({ children, sx, gap }: IProps) => {
-  return (
-    <Grid item sx={{ ...sx }}>
-      <Grid container direction="row" gap={gap}>
-        {children}
-      </Grid>
-    </Grid>
-  );
-};
-
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
@@ -31,14 +15,12 @@ const CardBody = () => {
       direction="column"
       justifyContent="flex-start"
       sx={{
-        width: "516",
         backgroundColor: Palette.white,
-        borderTop: `1px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "16px 24px",
       }}
       gap={1}
     >
-      <GridRowContainer gap={2}>
+      <Grid item container direction="row" spacing={1}>
         <Grid item>
           <ETHeading4 bold color={Palette.neutral.dark}>
             EAC Assessment
@@ -57,8 +39,14 @@ const CardBody = () => {
             In Progress
           </ETCaption1>
         </Grid>
-      </GridRowContainer>
-      <GridRowContainer gap={1} sx={{ paddingBottom: "8px" }}>
+      </Grid>
+      <Grid
+        item
+        container
+        direction="row"
+        spacing={1}
+        sx={{ paddingBottom: "8px" }}
+      >
         <Grid item sx={{ marginTop: "2px" }}>
           <DotIcon />
         </Grid>
@@ -83,8 +71,8 @@ const CardBody = () => {
             46/90 days left
           </ETCaption2>
         </Grid>
-      </GridRowContainer>
-      <GridRowContainer gap={1}>
+      </Grid>
+      <Grid item container direction="row" spacing={1}>
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
@@ -101,7 +89,7 @@ const CardBody = () => {
             NOV.10 2023
           </ETCaption1>
         </Grid>
-      </GridRowContainer>
+      </Grid>
       <Grid item sx={{ paddingBottom: "8px" }}>
         <ETHeading4
           bold
@@ -111,7 +99,13 @@ const CardBody = () => {
           PIN Notice of Intent
         </ETHeading4>
       </Grid>
-      <GridRowContainer gap={1} sx={{ paddingBottom: "16px" }}>
+      <Grid
+        item
+        container
+        direction="row"
+        spacing={1}
+        sx={{ paddingBottom: "16px" }}
+      >
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
@@ -131,7 +125,7 @@ const CardBody = () => {
         <Grid item sx={{ marginTop: "2px" }}>
           <IndicatorSmallIcon />
         </Grid>
-      </GridRowContainer>
+      </Grid>
       <Grid item>
         <ETCaption1
           color={Palette.neutral.main}
