@@ -79,5 +79,8 @@ const Endpoints = {
   ActSections: {
     ACT_SECTIONS: "/act-sections",
   },
+  Workplan: {
+    GET_ALL: "workplans",
+  },
 };
 export default Endpoints;

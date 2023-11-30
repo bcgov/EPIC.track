@@ -337,7 +337,8 @@ export default function AnticipatedEAOSchedule() {
                                         <TableCell>Next PECP Date</TableCell>
                                         <TableCell>
                                           {dateUtils.formatDate(
-                                            item["next_pecp_date"]
+                                            item["next_pecp_date"],
+                                            DISPLAY_DATE_FORMAT
                                           )}
                                         </TableCell>
                                       </TableRow>

@@ -1,5 +1,4 @@
-import { Box, Container, Grid } from "@mui/material";
-import React from "react";
+import { Grid } from "@mui/material";
 import Card from "./Card";
 
 const CardList = () => {

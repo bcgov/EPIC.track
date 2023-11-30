@@ -1,8 +1,30 @@
 """Classes for specific report types."""
+from datetime import timedelta
+
 from flask import jsonify
+from sqlalchemy import and_, func, or_
+from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.orm import aliased
+
+from api.models import db
+from api.models.ea_act import EAAct
+from api.models.event import Event
+from api.models.event_category import EventCategory
+from api.models.event_configuration import EventConfiguration
+from api.models.ministry import Ministry
+from api.models.phase_code import PhaseCode
+from api.models.project import Project
+from api.models.proponent import Proponent
+from api.models.region import Region
+from api.models.staff import Staff
+from api.models.substitution_acts import SubstitutionAct
+from api.models.work import Work
+from api.models.work_phase import WorkPhase
+from api.models.work_status import WorkStatus
 
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
+
 
 # pylint:disable=not-callable
 
@@ -40,156 +62,165 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
-        # start_date = report_date + timedelta(days=-7)
-        # eac_decision_by = aliased(Staff)
-        # decision_by = aliased(Staff)
-        # pecp_event = aliased(Event)
+        start_date = report_date + timedelta(days=-7)
+        eac_decision_by = aliased(Staff)
+        decision_by = aliased(Staff)
+        pecp_event = aliased(Event)
 
-        pecps = {}  # Milestone.query.filter(Milestone.milestone_type_id == 11).all()
-        pecps = [x.id for x in pecps]
+        pecp_category = EventCategory.query.filter(EventCategory.name == "PCP").first()
+        pecp_configuration_ids = EventConfiguration.query.filter(
+            EventConfiguration.event_category_id == pecp_category.id
+        ).all()
+        pecp_configuration_ids = [x.id for x in pecp_configuration_ids]
 
-        decision_miletones = {}
-        # Milestone.query.filter(
-        #     Milestone.milestone_type_id.in_((1, 4))
-        # ).all()
-        decision_miletones = [x.id for x in decision_miletones]
+        decision_category = EventCategory.query.filter(
+            EventCategory.name == "Decision"
+        ).first()
+        decision_configuration_ids = EventConfiguration.query.filter(
+            EventConfiguration.event_category_id == decision_category.id
+        ).all()
+        decision_configuration_ids = [x.id for x in decision_configuration_ids]
 
-        # next_decision_event_query = (
-        #     db.session.query(
-        #         Event.work_id,
-        #         func.min(Event.anticipated_start_date).label(
-        #             "min_anticipated_start_date"
-        #         ),
-        #     )
-        #     .filter(
-        #         Event.anticipated_start_date >= start_date,
-        #         Event.milestone_id.in_(decision_miletones),
-        #     )
-        #     .group_by(Event.work_id)
-        #     .subquery()
-        # )
+        next_decision_event_query = (
+            db.session.query(
+                Event.work_id,
+                func.min(Event.anticipated_date).label("min_anticipated_date"),
+            )
+            .filter(
+                Event.anticipated_date >= start_date,
+                Event.event_configuration_id.in_(decision_configuration_ids),
+            )
+            .group_by(Event.work_id)
+            .subquery()
+        )
 
-        # next_pecp_query = (
-        #     db.session.query(
-        #         Engagement.work_id,
-        #         func.min(Engagement.start_date).label("min_start_date"),
-        #     )
-        #     .join(WorkEngagement)
-        #     .filter(
-        #         Engagement.start_date >= start_date,
-        #         WorkEngagement.milestone_id.in_(pecps),
-        #     )
-        #     .group_by(Engagement.work_id)
-        #     .subquery()
-        # )
+        next_pecp_query = (
+            db.session.query(
+                Event.work_id,
+                func.min(Event.actual_date).label("min_start_date"),
+            )
+            .filter(
+                Event.actual_date >= start_date,
+                Event.event_configuration_id.in_(pecp_configuration_ids),
+            )
+            .group_by(Event.work_id)
+            .subquery()
+        )
 
-        # status_update_max_date_query = (
-        #     db.session.query(
-        #         WorkStatus.work_id,
-        #         func.max(WorkStatus.posted_date).label("max_posted_date"),
-        #     )
-        #     .group_by(WorkStatus.work_id)
-        #     .subquery()
-        # )
+        status_update_max_date_query = (
+            db.session.query(
+                WorkStatus.work_id,
+                func.max(WorkStatus.posted_date).label("max_posted_date"),
+            )
+            .group_by(WorkStatus.work_id)
+            .subquery()
+        )
 
-        # latest_status_updates = WorkStatus.query.filter(
-        #     WorkStatus.posted_date >= start_date
-        # ).join(
-        #     status_update_max_date_query,
-        #     and_(
-        #         WorkStatus.work_id == status_update_max_date_query.c.work_id,
-        #         WorkStatus.posted_date ==
-        #         status_update_max_date_query.c.max_posted_date,
-        #     ),
-        # )
+        latest_status_updates = WorkStatus.query.filter(
+            WorkStatus.posted_date >= start_date
+        ).join(
+            status_update_max_date_query,
+            and_(
+                WorkStatus.work_id == status_update_max_date_query.c.work_id,
+                WorkStatus.posted_date
+                == status_update_max_date_query.c.max_posted_date,
+            ),
+        )
 
-        # results_qry = (
-        #     latest_status_updates.join(Work)
-        #     .join(Event)
-        #     .join(
-        #         next_decision_event_query,
-        #         and_(
-        #             Event.work_id == next_decision_event_query.c.work_id,
-        #             Event.anticipated_start_date ==
-        #             next_decision_event_query.c.min_anticipated_start_date,
-        #         ),
-        #     )
-        #     .join(
-        #         Milestone,
-        #         and_(
-        #             Milestone.id == Event.milestone_id,
-        #             Milestone.id.in_(decision_miletones),
-        #         ),
-        #     )
-        #     .join(PhaseCode, Milestone.phase_id == PhaseCode.id)
-        #     .join(Project, Work.project_id == Project.id)
-        #     .join(Proponent)
-        #     .join(Region, Region.id == Project.region_id_env)
-        #     .join(EAAct, EAAct.id == Work.ea_act_id)
-        #     .join(Ministry)
-        #     .outerjoin(eac_decision_by, Work.eac_decision_by)
-        #     .outerjoin(decision_by, Work.decision_by)
-        #     .outerjoin(SubstitutionAct)
-        #     .outerjoin(
-        #         WorkEngagement,
-        #         and_(
-        #             WorkEngagement.project_id == Work.project_id,
-        #             WorkEngagement.milestone_id.in_(pecps),
-        #         ),
-        #     )
-        #     .outerjoin(Engagement, WorkEngagement.engagement)
-        #     .outerjoin(
-        #         next_pecp_query,
-        #         and_(
-        #             next_pecp_query.c.work_id == Work.id,
-        #             WorkEngagement.project_id == Work.project_id,
-        #         ),
-        #     )
-        #     # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
-        #     .filter(
-        #         or_(
-        #             next_pecp_query.c.min_start_date == Engagement.start_date,
-        #             WorkEngagement.id.is_(None),
-        #         )
-        #     )
-        #     .outerjoin(
-        #         pecp_event,
-        #         and_(
-        #             next_pecp_query.c.work_id == pecp_event.work_id,
-        #             next_pecp_query.c.min_start_date == pecp_event.start_date,
-        #             pecp_event.milestone_id.in_(pecps),
-        #         ),
-        #     )
-        #     .add_columns(
-        #         PhaseCode.name.label("phase_name"),
-        #         WorkStatus.posted_date.label("date_updated"),
-        #         Project.name.label("project_name"),
-        #         Proponent.name.label("proponent"),
-        #         Region.name.label("region"),
-        #         Project.address.label("location"),
-        #         EAAct.name.label("ea_act"),
-        #         SubstitutionAct.name.label("substitution_act"),
-        #         Project.description.label("project_description"),
-        #         Event.anticipated_end_date.label("anticipated_decision_date"),
-        #         WorkStatus.status_text.label("additional_info"),
-        #         Ministry.name.label("ministry_name"),
-        #         Event.anticipated_end_date.label("referral_date"),
-        #         eac_decision_by.full_name.label("eac_decision_by"),
-        #         decision_by.full_name.label("decision_by"),
-        #         Milestone.milestone_type_id.label("milestone_type"),
-        #         func.coalesce(pecp_event.title, Engagement.title).label(
-        #             "next_pecp_title"
-        #         ),
-        #         func.coalesce(
-        #             pecp_event.start_date,
-        #             pecp_event.anticipated_start_date,
-        #             Engagement.start_date,
-        #         ).label("next_pecp_date"),
-        #         pecp_event.short_description.label("next_pecp_short_description"),
-        #     )
-        # )
-        # return results_qry.all()
-        return {}
+        results_qry = (
+            latest_status_updates.join(Work)
+            .join(Event)
+            .join(
+                next_decision_event_query,
+                and_(
+                    Event.work_id == next_decision_event_query.c.work_id,
+                    Event.anticipated_date
+                    == next_decision_event_query.c.min_anticipated_date,
+                ),
+            )
+            .join(
+                EventConfiguration,
+                and_(
+                    EventConfiguration.id == Event.event_configuration_id,
+                    EventConfiguration.id.in_(decision_configuration_ids),
+                ),
+            )
+            .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+            .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
+            .join(Project, Work.project_id == Project.id)
+            .join(Proponent)
+            .join(Region, Region.id == Project.region_id_env)
+            .join(EAAct, EAAct.id == Work.ea_act_id)
+            .join(Ministry)
+            .outerjoin(eac_decision_by, Work.eac_decision_by)
+            .outerjoin(decision_by, Work.decision_by)
+            .outerjoin(SubstitutionAct)
+            # .outerjoin(
+            #     WorkEngagement,
+            #     and_(
+            #         WorkEngagement.project_id == Work.project_id,
+            #         WorkEngagement.milestone_id.in_(pecp_configuration_ids),
+            #     ),
+            # )
+            # .outerjoin(Engagement, WorkEngagement.engagement)
+            .outerjoin(
+                pecp_event,
+                and_(
+                    pecp_event.work_id == Work.id,
+                    # next_pecp_query.c.min_start_date == pecp_event.actual_date,
+                    pecp_event.event_configuration_id.in_(pecp_configuration_ids),
+                ),
+            )
+            .outerjoin(
+                next_pecp_query,
+                and_(
+                    next_pecp_query.c.work_id == pecp_event.work_id,
+                    next_pecp_query.c.min_start_date == pecp_event.actual_date,
+                    Work.project_id == Work.project_id,
+                ),
+            )
+            # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
+            .filter(
+                or_(
+                    next_pecp_query.c.min_start_date == pecp_event.actual_date,
+                    pecp_event.id.is_(None),
+                )
+            )
+            .add_columns(
+                PhaseCode.name.label("phase_name"),
+                WorkStatus.posted_date.label("date_updated"),
+                Project.name.label("project_name"),
+                Proponent.name.label("proponent"),
+                Region.name.label("region"),
+                Project.address.label("location"),
+                EAAct.name.label("ea_act"),
+                SubstitutionAct.name.label("substitution_act"),
+                Project.description.label("project_description"),
+                (
+                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"),
+                                                       INTERVAL)
+                ).label("anticipated_decision_date"),
+                # Event.anticipated_end_date.label("anticipated_decision_date"),
+                WorkStatus.description.label("additional_info"),
+                Ministry.name.label("ministry_name"),
+                (
+                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"),
+                                                       INTERVAL)
+                ).label("referral_date"),
+                # Event.anticipated_end_date.label("referral_date"),
+                eac_decision_by.full_name.label("eac_decision_by"),
+                decision_by.full_name.label("decision_by"),
+                EventConfiguration.event_type_id.label("milestone_type"),
+                func.coalesce(pecp_event.name, Event.name).label("next_pecp_title"),
+                func.coalesce(
+                    pecp_event.actual_date,
+                    pecp_event.anticipated_date,
+                    Event.actual_date,
+                ).label("next_pecp_date"),
+                pecp_event.notes.label("next_pecp_short_description"),
+            )
+        )
+        return results_qry.all()
 
     def generate_report(self, report_date, return_type):
         """Generates a report and returns it"""
