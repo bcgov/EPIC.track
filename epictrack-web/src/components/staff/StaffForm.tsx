@@ -1,23 +1,18 @@
 import React from "react";
-import { TextField, Grid, FormHelperText } from "@mui/material";
+import { Grid } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import codeService from "../../services/codeService";
-import ControlledCheckbox from "../shared/controlledInputComponents/ControlledCheckbox";
 import { Staff } from "../../models/staff";
 import { ListType } from "../../models/code";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
-import {
-  ControlledMaskTextField,
-  MaskTextField,
-} from "../shared/maskTextField";
 import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
-
+import { ControlledMaskTextField } from "../shared/maskTextField";
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -68,6 +63,7 @@ export default function StaffForm({ ...props }) {
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = methods;
 
   React.useEffect(() => {
@@ -89,53 +85,51 @@ export default function StaffForm({ ...props }) {
     });
   };
   return (
-    <>
-      <FormProvider {...methods}>
-        <Grid
-          component={"form"}
-          id="staff-form"
-          container
-          spacing={2}
-          onSubmit={handleSubmit(onSubmitHandler)}
-        >
-          <Grid item xs={6}>
-            <ETFormLabel>First Name</ETFormLabel>
-            <ControlledTextField name="first_name" fullWidth />
-          </Grid>
-          <Grid item xs={6}>
-            <ETFormLabel>Last Name</ETFormLabel>
-            <ControlledTextField name="last_name" fullWidth />
-          </Grid>
-          <Grid item xs={6}>
-            <ETFormLabel>Email</ETFormLabel>
-            <ControlledTextField name="email" fullWidth />
-          </Grid>
-          <Grid item xs={6}>
-            <ETFormLabel>Phone</ETFormLabel>
-            <ControlledMaskTextField
-              name="phone"
-              fullWidth
-              mask={"(000) 000-0000"}
-              placeholder="(xxx) xxx-xxxx"
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <ETFormLabel>Position</ETFormLabel>
-            <ControlledSelectV2
-              helperText={errors?.position_id?.message?.toString()}
-              getOptionValue={(o: ListType) => o.id.toString()}
-              getOptionLabel={(o: ListType) => o.name}
-              defaultValue={(ctx.item as Staff)?.position_id}
-              options={positions}
-              {...register("position_id")}
-            />
-          </Grid>
-          <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-            <ControlledSwitch name="is_active" />
-            <ETFormLabel id="active">Active</ETFormLabel>
-          </Grid>
+    <FormProvider {...methods}>
+      <Grid
+        component={"form"}
+        id="staff-form"
+        container
+        spacing={2}
+        onSubmit={handleSubmit(onSubmitHandler)}
+      >
+        <Grid item xs={6}>
+          <ETFormLabel>First Name</ETFormLabel>
+          <ControlledTextField name="first_name" fullWidth />
         </Grid>
-      </FormProvider>
-    </>
+        <Grid item xs={6}>
+          <ETFormLabel>Last Name</ETFormLabel>
+          <ControlledTextField name="last_name" fullWidth />
+        </Grid>
+        <Grid item xs={6}>
+          <ETFormLabel>Email</ETFormLabel>
+          <ControlledTextField name="email" fullWidth />
+        </Grid>
+        <Grid item xs={6}>
+          <ETFormLabel>Phone</ETFormLabel>
+          <ControlledMaskTextField
+            name="phone"
+            fullWidth
+            placeholder="(xxx) xxx-xxxx"
+            mask="(#00) 000-0000"
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <ETFormLabel>Position</ETFormLabel>
+          <ControlledSelectV2
+            helperText={errors?.position_id?.message?.toString()}
+            getOptionValue={(o: ListType) => o.id.toString()}
+            getOptionLabel={(o: ListType) => o.name}
+            defaultValue={(ctx.item as Staff)?.position_id}
+            options={positions}
+            {...register("position_id")}
+          />
+        </Grid>
+        <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
+          <ControlledSwitch name="is_active" />
+          <ETFormLabel id="active">Active</ETFormLabel>
+        </Grid>
+      </Grid>
+    </FormProvider>
   );
 }

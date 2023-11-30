@@ -308,6 +308,8 @@ class EAResourceForeCastReport(ReportFactory):
             .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
             .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
             .filter(
+                Work.is_active.is_(True),
+                Work.is_deleted.is_(False),
                 daterange(
                     Work.start_date.cast(Date),
                     func.coalesce(

@@ -19,6 +19,7 @@ import ComingSoon from "./ComingSoon";
 import { ROLES } from "../constants/application-constant";
 import AuthGate from "./AuthGate";
 import Unauthorized from "./Unauthorized";
+import MyWorkPlans from "../components/myWorkplans";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -77,6 +78,8 @@ const AuthenticatedRoutes = () => {
       <Route element={<AuthGate allowed={[ROLES.CREATE]} />}>
         <Route path="/admin/users" element={<UserList />} />
       </Route>
+      <Route path="/admin/users" element={<UserList />} />
+      <Route path="/" element={<MyWorkPlans />} />
       <Route path="/insights" element={<ComingSoon />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />

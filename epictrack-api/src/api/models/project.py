@@ -83,6 +83,12 @@ class Project(BaseModelVersioned):
             return True
         return False
 
+    def as_dict(self, recursive=True):
+        """Return JSON Representation."""
+        data = super().as_dict(recursive)
+        data["project_state"] = self.project_state.value
+        return data
+
 
 class ProjectSpecialFields(BaseModel):
     """Model class for tracking project special field values."""

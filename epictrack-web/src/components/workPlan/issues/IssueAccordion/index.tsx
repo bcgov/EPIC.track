@@ -15,9 +15,13 @@ const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const IssueAccordion = ({
   issue,
   defaultOpen = true,
+  onInteraction = () => {
+    return;
+  },
 }: {
   issue: WorkIssue;
   defaultOpen?: boolean;
+  onInteraction?: () => void;
 }) => {
   const [expanded, setExpanded] = React.useState<boolean>(defaultOpen);
 
@@ -26,6 +30,10 @@ const IssueAccordion = ({
       expanded={expanded}
       onChange={() => {
         setExpanded(!expanded);
+
+        if (!expanded) {
+          onInteraction();
+        }
       }}
     >
       <ETAccordionSummary
