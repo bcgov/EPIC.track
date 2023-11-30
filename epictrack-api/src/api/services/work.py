@@ -151,7 +151,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             sort_order = sort_order + 1
         role_id = CodeService.find_code_values_by_type(
             "roles",
-            { "name": "Team Lead" }
+            {
+                "name": "Team Lead"
+            }
             ).get("codes")[0].get("id")
         WorkService.create_work_staff(
             work.id,
