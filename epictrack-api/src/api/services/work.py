@@ -154,12 +154,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
             {
                 "name": "Team Lead"
             }
-            ).get("codes")[0].get("id")
+        ).get("codes")[0].get("id")
         WorkService.create_work_staff(
             work.id,
             {
-                "staff_id": payload["work_lead_id"], 
-                "role_id": role_id, "is_active": True 
+                "staff_id": payload["work_lead_id"],
+                "role_id": role_id, "is_active": True
             }
         )
         if commit:
