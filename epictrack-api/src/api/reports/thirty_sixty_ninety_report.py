@@ -1,8 +1,8 @@
 """Classes for specific report types."""
 from datetime import datetime, timedelta
 from io import BytesIO
-from pytz import utc
 
+from pytz import utc
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
@@ -11,14 +11,18 @@ from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_
+from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
 from api.models import Event, Project, Work, WorkStatus, WorkType, db
+from api.models.event_category import EventCategory
+from api.models.event_configuration import EventConfiguration
 
 from .report_factory import ReportFactory
 
 
 # pylint:disable=not-callable
+
 
 class ThirtySixtyNinetyReport(ReportFactory):
     """EA 30-60-90 Report Generator"""
@@ -38,15 +42,25 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "milestone_id",
             "event_id",
             "event_title",
-            "event_date"
+            "event_date",
         ]
         super().__init__(data_keys, filters=filters)
         self.report_date = None
         self.report_title = "30-60-90"
-        self.decision_miletones = {}  # Milestone.query.filter(Milestone.outcomes.any())
-        # self.decision_miletones = [x.id for x in self.decision_miletones]
-        # self.pecps = Milestone.query.filter(Milestone.milestone_type_id == 11).all()
-        self.pecps = [x.id for x in self.pecps]
+        # TODO: Is this correct? Previous was all milestones with outcomes
+        decision_category = EventCategory.query.filter(
+            EventCategory.name == "Decision"
+        ).first()
+        decision_configuration_ids = EventConfiguration.query.filter(
+            EventConfiguration.event_category_id == decision_category.id
+        ).all()
+        self.decision_configuration_ids = [x.id for x in decision_configuration_ids]
+
+        pecp_category = EventCategory.query.filter(EventCategory.name == "PCP").first()
+        pecp_configuration_ids = EventConfiguration.query.filter(
+            EventConfiguration.event_category_id == pecp_category.id
+        ).all()
+        self.pecp_configuration_ids = [x.id for x in pecp_configuration_ids]
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA 30-60-90 Report"""
@@ -65,14 +79,14 @@ class ThirtySixtyNinetyReport(ReportFactory):
             db.session.query(
                 Event.work_id,
                 func.min(
-                    func.coalesce(Event.start_date, Event.anticipated_start_date)
+                    func.coalesce(Event.actual_date, Event.anticipated_date)
                 ).label("min_start_date"),
             )
             .filter(
-                func.coalesce(Event.start_date, Event.anticipated_start_date).between(
+                func.coalesce(Event.actual_date, Event.anticipated_date).between(
                     report_date.date(), max_date.date()
                 ),
-                Event.milestone_id.in_(self.pecps),
+                Event.event_configuration_id.in_(self.pecp_configuration_ids),
             )
             .group_by(Event.work_id)
             .subquery()
@@ -88,21 +102,21 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     and_(
                         Event.work_id == Work.id,
                         func.coalesce(
-                            Event.start_date, Event.anticipated_start_date
+                            Event.actual_date, Event.anticipated_date
                         ).between(report_date.date(), max_date.date()),
-                        Event.milestone_id.in_(self.decision_miletones),
+                        Event.event_configuration_id.in_(self.decision_configuration_ids),
                     ),
                     and_(
                         Event.work_id == Work.id,
-                        Work.is_watched.is_(True),
-                        Event.is_reportable.is_(True),
+                        Work.is_high_priority.is_(True),
+                        Event.high_priority.is_(True),
                         func.coalesce(
-                            Event.start_date, Event.anticipated_start_date
+                            Event.actual_date, Event.anticipated_date
                         ).between(report_date.date(), max_date.date()),
                     ),
                 ),
             )
-            # .join(Milestone)
+            .join(EventConfiguration, EventConfiguration.id == Event.event_configuration_id)
             .outerjoin(
                 next_pecp_query,
                 and_(
@@ -113,8 +127,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 pecp_event,
                 and_(
                     next_pecp_query.c.work_id == pecp_event.work_id,
-                    next_pecp_query.c.min_start_date == pecp_event.start_date,
-                    pecp_event.milestone_id.in_(self.pecps),
+                    next_pecp_query.c.min_start_date == pecp_event.actual_date,
+                    pecp_event.event_configuration_id.in_(self.pecp_configuration_ids),
                 ),
             )
             .outerjoin(WorkStatus)
@@ -122,26 +136,29 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 status_update_max_date_query,
                 and_(
                     status_update_max_date_query.c.work_id == WorkStatus.work_id,
-                    status_update_max_date_query.c.max_posted_date ==
-                    WorkStatus.posted_date,
+                    status_update_max_date_query.c.max_posted_date == WorkStatus.posted_date,
                 ),
             )
             .add_columns(
                 Project.name.label("project_name"),
                 WorkType.report_title.label("work_report_title"),
-                Event.anticipated_end_date.label("anticipated_decision_date"),
-                Work.short_description.label("work_short_description"),
-                WorkStatus.status_text.label("work_status_text"),
-                Event.decision_information.label("decision_information"),
-                Event.long_description.label("event_description"),
-                pecp_event.explanation.label("pecp_explanation"),
+                (
+                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"),
+                                                       INTERVAL)
+                ).label("anticipated_decision_date"),
+                # Event.anticipated_end_date.label("anticipated_decision_date"),
+                Work.report_description.label("work_short_description"),
+                WorkStatus.description.label("work_status_text"),
+                Event.notes.label("decision_information"),
+                Event.description.label("event_description"),
+                pecp_event.topic.label("pecp_explanation"),
                 Work.id.label("work_id"),
                 Event.id.label("event_id"),
-                Event.title.label("event_title"),
-                func.coalesce(
-                            Event.start_date, Event.anticipated_start_date
-                        ).label("event_date"),
-                # Milestone.id.label("milestone_id"),
+                Event.name.label("event_title"),
+                func.coalesce(Event.actual_date, Event.anticipated_date).label(
+                    "event_date"
+                ),
+                EventConfiguration.event_category_id.label("milestone_id"),
             )
         )
 
@@ -150,10 +167,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _format_data(self, data):
         data = super()._format_data(data)
-        major_decision_miletones = []  # Milestone.query.filter(
+        # major_decision_miletones =  Milestone.query.filter(
         #     Milestone.milestone_type_id.in_((1, 4))
         # ).all()
-        major_decision_miletones = [x.id for x in major_decision_miletones]
+        # major_decision_miletones = [x.id for x in major_decision_miletones]
         response = {
             "30": [],
             "60": [],
@@ -163,13 +180,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
             next_major_decision_event_query = (
                 db.session.query(
                     Event.work_id,
-                    func.min(Event.anticipated_start_date).label(
+                    func.min(Event.anticipated_date).label(
                         "min_anticipated_start_date"
                     ),
                 )
                 .filter(
-                    Event.anticipated_start_date >= work["anticipated_decision_date"],
-                    Event.milestone_id.in_(major_decision_miletones),
+                    Event.anticipated_date >= work["anticipated_decision_date"],
+                    Event.event_configuration_id.in_(self.decision_configuration_ids),
                 )
                 .group_by(Event.work_id)
                 .subquery()
@@ -180,8 +197,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     next_major_decision_event_query,
                     and_(
                         Event.work_id == next_major_decision_event_query.c.work_id,
-                        Event.anticipated_start_date ==
-                        next_major_decision_event_query.c.min_anticipated_start_date,
+                        Event.anticipated_date == next_major_decision_event_query.c.min_anticipated_start_date,
                     ),
                 )
                 .first()
@@ -189,7 +205,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             event_decision_date = work["anticipated_decision_date"]
             work[
                 "anticipated_decision_date"
-            ] = next_major_decision_event.anticipated_end_date
+            ] = next_major_decision_event.anticipated_date
             work.update(
                 {
                     "is_decision_event": False,
@@ -197,9 +213,9 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     "is_reportable_event": False,
                 }
             )
-            if work["milestone_id"] in self.decision_miletones:
+            if work["milestone_id"] in self.decision_configuration_ids:
                 work["is_decision_event"] = True
-            elif work["milestone_id"] in self.pecps:
+            elif work["milestone_id"] in self.pecp_configuration_ids:
                 work["is_pecp_event"] = True
             else:
                 work["is_reportable_event"] = True
@@ -288,10 +304,22 @@ class ThirtySixtyNinetyReport(ReportFactory):
                             ),
                         ],
                         [
-                            Paragraph(work["work_short_description"] if work["work_short_description"]
-                                      else "", normal_style),
-                            Paragraph(work["work_status_text"] if work["work_status_text"] else "", normal_style),
-                            Paragraph(event_description if event_description else "", normal_style),
+                            Paragraph(
+                                work["work_short_description"]
+                                if work["work_short_description"]
+                                else "",
+                                normal_style,
+                            ),
+                            Paragraph(
+                                work["work_status_text"]
+                                if work["work_status_text"]
+                                else "",
+                                normal_style,
+                            ),
+                            Paragraph(
+                                event_description if event_description else "",
+                                normal_style,
+                            ),
                         ],
                     ]
                 )
@@ -307,8 +335,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ] +
-                styles
+                ]
+                + styles
             )
         )
         story.append(table)
