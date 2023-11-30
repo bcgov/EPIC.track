@@ -25,7 +25,6 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 from api.utils.datetime_helper import get_start_of_day
-from api.services.code import CodeService
 
 
 API = Namespace("works", description="Works")
