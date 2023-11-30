@@ -11,7 +11,9 @@ interface MyWorkplanContextProps {
 export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
   workplans: [],
   loadingWorkplans: false,
-  loadMoreWorkplans: () => {},
+  loadMoreWorkplans: () => {
+    return;
+  },
 });
 
 export const MyWorkplansProvider = ({
