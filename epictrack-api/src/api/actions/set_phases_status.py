@@ -25,8 +25,8 @@ class SetPhasesStatus(ActionFactory):
                 db.session.query(WorkPhase)
                 .filter(
                     WorkPhase.sort_order
-                    > source_event.event_configuration.work_phase.sort_order
-                    and WorkPhase.work_id == source_event.work_id
+                    > source_event.event_configuration.work_phase.sort_order,
+                    WorkPhase.work_id == source_event.work_id,
                 )
                 .all()
             )

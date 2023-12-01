@@ -15,7 +15,7 @@ const ComingSoon = () => {
       alignItems="center"
       spacing={1}
       padding={"2em 2em 1em 2em"}
-      sx={{ height: "800px" }}
+      sx={{ height: "600px" }}
     >
       <Container
         sx={{

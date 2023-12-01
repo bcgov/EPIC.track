@@ -170,7 +170,7 @@ class WorkStaffs(Resource):
     @auth.require
     @profiletime
     def post(work_id):
-        """Get all the active staff allocated to the work"""
+        """Add staff member to a work"""
         req.WorkIdPathParameterSchema().load(request.view_args)
         request_json = req.StaffWorkBodyParamSchema().load(API.payload)
         staff = WorkService.create_work_staff(work_id, request_json)

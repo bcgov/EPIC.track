@@ -84,4 +84,5 @@ export const ROLES = {
   CREATE: "create",
   EDIT: "edit",
   DELETE: "delete",
+  DEFAULT_ROLES_EAO_EPIC: "default-roles-eao-epic",
 };

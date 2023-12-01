@@ -15,6 +15,7 @@ import Icons from "../icons";
 import { IconProps } from "../icons/type";
 import Issues from "./issues";
 import WorkState from "./WorkState";
+import ComingSoon from "../../routes/ComingSoon";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -113,6 +114,15 @@ const WorkPlanContainer = () => {
         }}
       >
         <Issues />
+      </TabPanel>
+      <TabPanel
+        index={3}
+        value={selectedTabIndex}
+        sx={{
+          ...tabPanel,
+        }}
+      >
+        <ComingSoon />
       </TabPanel>
       <TabPanel
         index={4}

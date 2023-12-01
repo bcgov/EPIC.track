@@ -5,7 +5,7 @@ interface HasPermissionProps {
   roles: string[];
   allowed: string[];
 }
-const hasPermission = ({ roles, allowed }: HasPermissionProps) => {
+export const hasPermission = ({ roles, allowed }: HasPermissionProps) => {
   const allowedMap: { [scope: string]: boolean } = {};
 
   allowed.forEach((allowedGroup) => {
