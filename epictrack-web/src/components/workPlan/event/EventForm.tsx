@@ -179,7 +179,9 @@ const EventForm = ({
 
   const isStartEvent = useMemo(
     () =>
-      event && selectedConfiguration?.event_position === EventPosition.START,
+      event &&
+      selectedConfiguration &&
+      selectedConfiguration?.event_position === EventPosition.START,
     [event, selectedConfiguration]
   );
   console.log("IS START PHASE", isStartPhase);
