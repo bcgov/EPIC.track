@@ -34,8 +34,7 @@ class StaffService:
         current_app.logger.debug(f"Find staff by position : {position_id}")
         staffs_schema = StaffResponseSchema(many=True)
         staffs = Staff.find_active_staff_by_position(position_id)
-        response = {"staffs": staffs_schema.dump(staffs)}
-        return response
+        return staffs
 
     @classmethod
     def find_by_position_ids(cls, position_ids):
