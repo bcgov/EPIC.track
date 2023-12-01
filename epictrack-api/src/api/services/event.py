@@ -285,6 +285,7 @@ class EventService:
             and event.event_configuration.event_position.value
             == EventPositionEnum.END.value
         ):
+            # set the numebr of days to the work phase phasestartdate - actual date
             cls._complete_work_phase(current_work_phase)
         if (
             event.actual_date

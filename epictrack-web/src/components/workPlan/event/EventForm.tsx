@@ -33,6 +33,7 @@ import RichTextEditor from "../../shared/richTextEditor";
 import eventService from "../../../services/eventService/eventService";
 import {
   EventCategory,
+  EventPosition,
   EventType,
   MilestoneEvent,
   MilestoneEventDateCheck,
@@ -168,6 +169,21 @@ const EventForm = ({
     [isFormFieldsLocked, ctx.selectedWorkPhase?.work_phase.is_suspended]
   );
 
+  const isStartPhase = useMemo(
+    () =>
+      ctx.workPhases.findIndex(
+        (p) => p.work_phase.id === ctx.selectedWorkPhase?.work_phase.id
+      ) === 0,
+    [ctx.workPhases, ctx.selectedWorkPhase]
+  );
+
+  const isStartEvent = useMemo(
+    () =>
+      event && selectedConfiguration?.event_position === EventPosition.START,
+    [event, selectedConfiguration]
+  );
+  console.log("IS START PHASE", isStartPhase);
+  console.log("IS START EVENT", isStartEvent);
   const anticipatedMinDate = useMemo(
     () => dayjs(ctx.work?.start_date),
     [ctx.work?.start_date]
