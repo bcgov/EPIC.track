@@ -21,7 +21,7 @@ import MyWorkPlans from "../components/myWorkplans";
 const AuthenticatedRoutes = () => {
   return (
     <Routes>
-      {/* <Route path="/" element={<Dashboard />} /> */}
+      <Route path="/" element={<MyWorkPlans />} />
       <Route
         path="/list-management/staffs"
         element={
