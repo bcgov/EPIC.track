@@ -59,7 +59,7 @@ class EventService:
         """Create milestone event"""
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, False
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
@@ -83,7 +83,7 @@ class EventService:
             event.event_configuration.work_phase_id
         )
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, False
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         if not event:
             raise ResourceNotFoundError("Event not found")
