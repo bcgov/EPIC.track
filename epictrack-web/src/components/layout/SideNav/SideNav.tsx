@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import {
   ListItemButton,
   List,
@@ -14,7 +14,7 @@ import { styled } from "@mui/system";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import Collapse from "@mui/material/Collapse";
-import { Routes } from "./SideNavElements";
+import { RouteType, Routes } from "./SideNavElements";
 import { Palette } from "../../../styles/theme";
 import { SideNavProps } from "./types";
 import { useAppSelector } from "../../../hooks";
@@ -22,6 +22,7 @@ import Icons from "../../icons";
 import { groupBy } from "../../../utils";
 import { IconProps } from "../../icons/type";
 import { ETSubhead } from "../../shared";
+import { hasPermission } from "../../shared/restricted";
 
 const ListItemStyled = styled(ListItem)({
   padding: "0px 0px 0px 0px",
@@ -57,6 +58,7 @@ const DrawerBox = () => {
   const [open, setOpen] = React.useState<{ [x: string]: boolean }>({});
   const uiState = useAppSelector((state) => state.uiState);
   const location = useLocation();
+  const { roles } = useAppSelector((state) => state.user.userDetail);
   const handleClick = (route: any) => {
     if (route.routes && route.routes.length > 0) {
       setOpen((prevState: any) => ({
@@ -72,9 +74,36 @@ const DrawerBox = () => {
     return <Icon className={`sidebar-item ${active ? "active" : ""}`} />;
   }, []);
 
-  const groupedRoutes = React.useMemo(
-    () => groupBy(Routes, (p) => p.group),
-    []
+  const isRouteAllowed = (route: RouteType, roles: Array<any>) => {
+    const allowed = route["allowedRoles"] ?? [];
+    return hasPermission({ roles, allowed }) || !route["isAuthenticated"];
+  };
+
+  const filterRoutes = (routes: RouteType[], roles: Array<any>) => {
+    return routes.reduce((allowedRoutes: any, route) => {
+      if (isRouteAllowed(route, roles)) {
+        const newRoute: RouteType = { ...route };
+        if (newRoute["routes"]) {
+          newRoute["routes"] = filterRoutes(newRoute["routes"], roles);
+        }
+
+        const addRoute =
+          (newRoute["routes"] && newRoute["routes"].length > 0) ||
+          !newRoute["routes"];
+
+        if (addRoute) {
+          allowedRoutes.push(newRoute);
+        }
+      }
+      return allowedRoutes;
+    }, []);
+  };
+
+  const allowedRoutes: RouteType[] = filterRoutes(Routes, roles);
+
+  const groupedRoutes = useMemo(
+    () => groupBy(allowedRoutes, (p) => p.group),
+    [allowedRoutes]
   );
 
   return (

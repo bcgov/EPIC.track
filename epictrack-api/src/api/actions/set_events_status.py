@@ -16,4 +16,4 @@ class SetEventsStatus(ActionFactory):
                 event_configuration = find_configuration(source_event, event_params)
                 db.session.query(Event).filter(
                     Event.event_configuration_id == event_configuration.id
-                ).update({Event.is_active: params.get("is_active")})
+                ).update({Event.is_active: event_params.get("is_active")})
