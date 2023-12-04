@@ -93,7 +93,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phases_status(cls, work_id: int):
+    def find_work_phases_status(cls, work_id: int, work_phase_id: int = None):  # pylint: disable=too-many-locals,
         """Return the work phases with additional information"""
         work_phases = (
             db.session.query(WorkPhase)
@@ -109,16 +109,20 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         )
         result = []
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
+
+        if work_phase_id is not None:
+            work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
+
         for work_phase in work_phases:
             result_item = {}
             result_item["work_phase"] = work_phase
             total_days = (
-                work_phase.end_date.date() - work_phase.start_date.date()
+                    work_phase.end_date.date() - work_phase.start_date.date()
             ).days
             work_phase_events = list(
                 filter(
                     lambda x, _work_phase_id=work_phase.id: x.event_configuration.work_phase_id
-                    == _work_phase_id,
+                                                            == _work_phase_id,
                     events,
                 )
             )
@@ -131,8 +135,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 map(
                     lambda x: x.number_of_days
                     if x.event_configuration.event_type_id
-                    == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                    and x.actual_date is not None
+                       == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                       and x.actual_date is not None
                     else 0,
                     work_phase_events,
                 ),
@@ -148,18 +152,18 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 list(filter(lambda x: x.actual_date is not None, work_phase_events))
             )
             result_item["milestone_progress"] = (
-                completed_ones / total_number_of_milestones
-            ) * 100
+                                                        completed_ones / total_number_of_milestones
+                                                ) * 100
             days_passed = 0
             if work_phase.work.current_work_phase_id == work_phase.id:
                 if work_phase.is_suspended:
                     days_passed = (
-                        work_phase.suspended_date.date() - work_phase.start_date.date()
+                            work_phase.suspended_date.date() - work_phase.start_date.date()
                     ).days
                 else:
                     days_passed = (
-                        datetime.datetime.now(timezone.utc).date()
-                        - work_phase.start_date.date()
+                            datetime.datetime.now(timezone.utc).date()
+                            - work_phase.start_date.date()
                     ).days
                     days_passed = 0 if days_passed < 0 else days_passed
                 days_left = (total_days - suspended_days) - days_passed

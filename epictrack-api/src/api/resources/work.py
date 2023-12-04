@@ -18,6 +18,7 @@ from io import BytesIO
 from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
 
+from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services import WorkService
@@ -25,7 +26,6 @@ from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 from api.utils.datetime_helper import get_start_of_day
-
 
 API = Namespace("works", description="Works")
 
@@ -49,6 +49,29 @@ class ValidateWork(Resource):
             {"exists": exists},
             HTTPStatus.OK,
         )
+
+
+@cors_preflight("GET")
+@API.route("/dashboard", methods=["GET", "OPTIONS"])
+class WorkDashboard(Resource):
+    """Endpoint resource to manage works."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    def get():
+        """Return all active works."""
+        args = request.args
+
+        pagination_options = PaginationOptions(
+            page=args.get('page', None, int),
+            size=args.get('size', None, int),
+            sort_key=args.get('sort_key', 'name', str),
+            sort_order=args.get('sort_order', 'asc', str),
+        )
+
+        works = WorkService.fetch_all_work_plans(pagination_options)
+        return jsonify(works), HTTPStatus.OK
 
 
 @cors_preflight("GET, POST")

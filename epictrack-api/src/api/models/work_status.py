@@ -14,7 +14,7 @@
 """Model to handle all operations related to WorkStatus."""
 from __future__ import annotations
 
-from typing import List
+from typing import List, Dict
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, desc
 from sqlalchemy.orm import relationship
@@ -41,3 +41,28 @@ class WorkStatus(BaseModelVersioned):
     def list_statuses_for_work_id(cls, work_id) -> List[WorkStatus]:
         """Return all WorkStatus records for a specific work_id"""
         return WorkStatus.query.filter_by(work_id=work_id).order_by(desc(WorkStatus.posted_date)).all()
+
+    @classmethod
+    def list_latest_approved_statuses_for_work_ids(cls, work_ids: List[int]) -> Dict[int, WorkStatus]:
+        """Return a dictionary with work_id as key and the latest approved WorkStatus against it."""
+        work_statuses_dict = {}
+
+        # Query to fetch all approved WorkStatus for the given work_ids
+        work_statuses = (
+            cls.query
+            .filter(
+                cls.work_id.in_(work_ids),
+                cls.is_approved.is_(True)
+            )
+            .all()
+        )
+
+        # Sort the work_statuses by work_id and posted_date in descending order
+        work_statuses.sort(key=lambda x: (x.work_id, x.posted_date), reverse=True)
+
+        # Create the dictionary with only the latest approved status for each work_id
+        for status in work_statuses:
+            if status.work_id not in work_statuses_dict:
+                work_statuses_dict[status.work_id] = status
+
+        return work_statuses_dict
