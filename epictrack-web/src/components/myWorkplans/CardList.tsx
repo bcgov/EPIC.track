@@ -1,8 +1,18 @@
-import React from "react";
-import { Box } from "@mui/material";
+import { Grid } from "@mui/material";
+import Card from "./Card";
 
 const CardList = () => {
-  return <Box>This is a card list</Box>;
+  return (
+    <Grid container direction="row" spacing={2}>
+      {[1, 2, 3, 4, 5].map(() => {
+        return (
+          <Grid item>
+            <Card />
+          </Grid>
+        );
+      })}
+    </Grid>
+  );
 };
 
 export default CardList;
