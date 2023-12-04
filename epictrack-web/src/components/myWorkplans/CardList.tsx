@@ -1,14 +1,23 @@
-import React from "react";
 import { Box } from "@mui/material";
 import NoResultsFound from "../NoResultsFound";
+import Card from "./Card";
 
 const CardList = () => {
   const cards = [];
-
   if (cards.length === 0) {
     return <NoResultsFound />;
   }
-  return <Box>This is a card list</Box>;
+  return (
+    <Grid container direction="row" spacing={2}>
+      {[1, 2, 3, 4, 5].map(() => {
+        return (
+          <Grid item>
+            <Card />
+          </Grid>
+        );
+      })}
+    </Grid>
+  );
 };
 
 export default CardList;

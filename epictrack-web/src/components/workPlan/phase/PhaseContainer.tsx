@@ -10,8 +10,7 @@ import { When } from "react-if";
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
-  const [showCompletedPhases, setShowCompletedPhases] =
-    useState<boolean>(false);
+  const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
   const [currentAndFuturePhases, setCurrentAndFuturePhases] = useState<
     WorkPhaseAdditionalInfo[]
   >([]);
@@ -62,7 +61,7 @@ const PhaseContainer = () => {
                   marginRight: "8px",
                   color: Palette.neutral.dark,
                 }}
-                defaultChecked={false}
+                defaultChecked={showCompletedPhases}
               />
             }
             label="Completed Phases"

@@ -36,7 +36,6 @@ class AddEvent(ActionFactory):
                 event_data, work_phase_id=work_phase_id, push_events=True, commit=False
             )
             set_event_date: SetEventDate = SetEventDate()
-            # param["event_name"] = new_event.event_configuration.name
             # Setting the event date from here cz, otherwise the event won't get pushed
             set_event_date.run(source_event, param)
             source_event = new_event
