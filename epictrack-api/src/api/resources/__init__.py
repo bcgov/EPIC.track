@@ -42,6 +42,7 @@ from .proponent import API as PROPONENT_API
 from .reminder_configuration import API as REMINDER_CONFIGURATION_API
 from .reports import API as REPORTS_API
 from .responsibility import API as RESPONSIBILITY_API
+from .special_field import API as SPECIAL_FIELD_API
 from .staff import API as STAFF_API
 from .sub_types import API as SUB_TYPES_API
 from .sync_form_data import API as SYNC_FORM_DATA_API
@@ -51,6 +52,7 @@ from .user import API as USER_API
 from .work import API as WORK_API
 from .work_issues import API as WORK_ISSUES_API
 from .work_status import API as WORK_STATUS_API
+
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
 
@@ -107,3 +109,4 @@ API.add_namespace(OUTCOME_CONFIGURATION_API, path="/outcome-configurations")
 API.add_namespace(ACT_SECTION_API, path="/act-sections")
 API.add_namespace(WORK_STATUS_API, path='/work/<int:work_id>/statuses')
 API.add_namespace(WORK_ISSUES_API, path='/work/<int:work_id>/issues')
+API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')
