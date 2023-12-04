@@ -97,6 +97,7 @@ const TemplateTaskList = ({ ...props }) => {
             columns={columns}
             data={tasks}
             enableTopToolbar={false}
+            enableBottomToolbar={false}
             initialState={{
               sorting: [
                 {
