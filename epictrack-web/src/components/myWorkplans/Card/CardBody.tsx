@@ -51,11 +51,7 @@ const CardBody = () => {
           <DotIcon />
         </Grid>
         <Grid item>
-          <ETCaption2
-            bold
-            color={Palette.neutral.main}
-            sx={{ fontSize: "14px" }}
-          >
+          <ETCaption2 bold color={Palette.neutral.main}>
             Early Engagement
           </ETCaption2>
         </Grid>
@@ -63,11 +59,7 @@ const CardBody = () => {
           <ClockIcon />
         </Grid>
         <Grid item>
-          <ETCaption2
-            bold
-            color={Palette.neutral.main}
-            sx={{ fontSize: "14px" }}
-          >
+          <ETCaption2 bold color={Palette.neutral.main}>
             46/90 days left
           </ETCaption2>
         </Grid>
@@ -76,7 +68,7 @@ const CardBody = () => {
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
-            sx={{ fontSize: "13px", letterSpacing: "0.39px" }}
+            // sx={{ letterSpacing: "0.39px" }}
           >
             UPCOMING MILESTONE
           </ETCaption1>
@@ -84,20 +76,16 @@ const CardBody = () => {
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
-            sx={{ fontSize: "13px", letterSpacing: "0.39px" }}
+            // sx={{ letterSpacing: "0.39px" }}
           >
             NOV.10 2023
           </ETCaption1>
         </Grid>
       </Grid>
       <Grid item sx={{ paddingBottom: "8px" }}>
-        <ETHeading4
-          bold
-          color={Palette.neutral.dark}
-          sx={{ fontSize: 16, lineHeight: "24px" }}
-        >
+        <ETParagraph bold color={Palette.neutral.dark}>
           PIN Notice of Intent
-        </ETHeading4>
+        </ETParagraph>
       </Grid>
       <Grid
         item
@@ -109,7 +97,8 @@ const CardBody = () => {
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
-            sx={{ fontSize: "13px", letterSpacing: "0.39px" }}
+            // TODO: Discuss with Jad and Maria about new style for letter spacing
+            // sx={{ letterSpacing: "0.39px" }}
           >
             LAST STATUS UPDATE
           </ETCaption1>
@@ -117,7 +106,7 @@ const CardBody = () => {
         <Grid item>
           <ETCaption1
             color={Palette.neutral.main}
-            sx={{ fontSize: "13px", letterSpacing: "0.39px" }}
+            // sx={{ letterSpacing: "0.39px" }}
           >
             JUN.10 2023
           </ETCaption1>
@@ -129,18 +118,13 @@ const CardBody = () => {
       <Grid item>
         <ETCaption1
           color={Palette.neutral.main}
-          sx={{ fontSize: "13px", letterSpacing: "0.39px" }}
+          // sx={{ letterSpacing: "0.39px" }}
         >
           IAAC INVOLVEMENT
         </ETCaption1>
       </Grid>
       <Grid item>
-        <ETParagraph
-          color={Palette.neutral.dark}
-          sx={{ fontSize: "16px", lineHeight: "24px" }}
-        >
-          None
-        </ETParagraph>
+        <ETParagraph color={Palette.neutral.dark}>None</ETParagraph>
       </Grid>
     </Grid>
   );

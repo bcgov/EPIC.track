@@ -1,10 +1,6 @@
 import { Button, Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import {
-  ETCardFooterContent,
-  ETCardFooterTitle,
-  ETPreviewText,
-} from "../../shared";
+import { ETCaption1, ETCaption2, ETParagraph } from "../../shared";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 
@@ -28,27 +24,31 @@ const CardFooter = () => {
           <Grid item>
             <Grid container direction="column" spacing={1}>
               <Grid item>
-                <ETCardFooterTitle>TEAM</ETCardFooterTitle>
+                <ETCaption1 color={Palette.neutral.main}>TEAM</ETCaption1>
               </Grid>
               <Grid item>
-                <ETCardFooterContent>MMT</ETCardFooterContent>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item>
-            <Grid container direction="column" spacing={1}>
-              <Grid item>
-                <ETCardFooterTitle>PROJECT LEAD</ETCardFooterTitle>
-              </Grid>
-              <Grid item>
-                <ETCardFooterContent>Katherine St James</ETCardFooterContent>
+                <ETParagraph color={Palette.neutral.dark}>MMT</ETParagraph>
               </Grid>
             </Grid>
           </Grid>
           <Grid item>
             <Grid container direction="column" spacing={1}>
               <Grid item>
-                <ETCardFooterTitle>STAFF</ETCardFooterTitle>
+                <ETCaption1 color={Palette.neutral.main}>
+                  PROJECT LEAD
+                </ETCaption1>
+              </Grid>
+              <Grid item>
+                <ETParagraph color={Palette.neutral.dark}>
+                  Katherine St James
+                </ETParagraph>
+              </Grid>
+            </Grid>
+          </Grid>
+          <Grid item>
+            <Grid container direction="column" spacing={1}>
+              <Grid item>
+                <ETCaption1 color={Palette.neutral.main}>STAFF</ETCaption1>
               </Grid>
               <Grid item>{/* TODO: Staff icon display here */}</Grid>
             </Grid>
@@ -65,9 +65,7 @@ const CardFooter = () => {
           }}
           onClick={() => undefined}
         >
-          <ETPreviewText sx={{ fontWeight: "bold", lineHeight: "16px" }}>
-            View Only
-          </ETPreviewText>
+          <ETCaption2 bold>View Only</ETCaption2>
         </Button>
       </Grid>
     </Grid>

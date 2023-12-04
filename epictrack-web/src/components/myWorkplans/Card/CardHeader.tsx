@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import { ETCaption1, ETCardTitle } from "../../shared";
+import { ETCaption1 } from "../../shared";
 
 const CardHeader = () => {
   return (
@@ -15,7 +15,9 @@ const CardHeader = () => {
       justifyContent="space-between"
     >
       <Grid item>
-        <ETCardTitle>COYOTE HYDROGEN</ETCardTitle>
+        <ETCaption1 bold color={Palette.primary.main}>
+          COYOTE HYDROGEN
+        </ETCaption1>
       </Grid>
       <Grid item>
         <ETCaption1
