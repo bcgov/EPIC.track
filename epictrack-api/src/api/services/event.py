@@ -59,7 +59,7 @@ class EventService:
         """Create milestone event"""
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, False
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
@@ -83,7 +83,7 @@ class EventService:
             event.event_configuration.work_phase_id
         )
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, False
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
         if not event:
             raise ResourceNotFoundError("Event not found")
@@ -285,6 +285,7 @@ class EventService:
             and event.event_configuration.event_position.value
             == EventPositionEnum.END.value
         ):
+            # set the numebr of days to the work phase phasestartdate - actual date
             cls._complete_work_phase(current_work_phase)
         if (
             event.actual_date

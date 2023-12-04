@@ -13,6 +13,7 @@ class SetPhasesStatus(ActionFactory):
     def run(self, source_event: Event, params):
         """Sets all future phases to INACTIVE"""
         from api.services import EventService  # pylint: disable=import-outside-toplevel
+
         work_phase_ids = []
         if isinstance(params, list):
             for phase_des in params:
@@ -23,7 +24,9 @@ class SetPhasesStatus(ActionFactory):
             work_phases = (
                 db.session.query(WorkPhase)
                 .filter(
-                    WorkPhase.sort_order > source_event.event_configuration.work_phase.sort_order
+                    WorkPhase.sort_order
+                    > source_event.event_configuration.work_phase.sort_order,
+                    WorkPhase.work_id == source_event.work_id,
                 )
                 .all()
             )
