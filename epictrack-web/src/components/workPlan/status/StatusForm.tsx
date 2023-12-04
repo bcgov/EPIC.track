@@ -19,7 +19,23 @@ const StatusForm = () => {
   const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
   const { status, onSave, isCloning } = useContext(StatusContext);
-  const { getWorkStatuses } = useContext(WorkplanContext);
+  const { getWorkStatuses, statuses } = useContext(WorkplanContext);
+
+  const getPostedDateMin = () => {
+    if (isCloning) {
+      return dayjs(statuses[0].posted_date);
+    }
+    if (statuses.length === 1 && statuses[0]?.is_approved) {
+      return dayjs("1900-01-01");
+    }
+
+    return dayjs(statuses[1]?.posted_date || "1900-01-01");
+  };
+
+  const postedDateMin = getPostedDateMin();
+  const postedDateMax = dayjs(new Date()).add(7, "day");
+
+  console.log(postedDateMin);
 
   React.useEffect(() => {
     if (status) {
@@ -76,6 +92,8 @@ const StatusForm = () => {
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
+                  minDate={postedDateMin}
+                  maxDate={postedDateMax}
                   format={DATE_FORMAT}
                   slotProps={{
                     textField: {

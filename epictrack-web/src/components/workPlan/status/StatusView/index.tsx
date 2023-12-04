@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import NoDataEver from "../../../shared/NoDataEver";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
@@ -30,7 +30,7 @@ const StatusView = () => {
     const daysAgo = moment().subtract(STATUS_DATE_THRESHOLD, "days");
     const NDaysAgo = dateUtils.diff(
       daysAgo.toLocaleString(),
-      lastApprovedStatus?.approved_date,
+      lastApprovedStatus?.posted_date,
       "days"
     );
 
