@@ -19,8 +19,8 @@ const ControlledTextField: FC<IFormInputProps> = ({ name, ...otherProps }) => {
       defaultValue={defaultValues?.[name] || ""}
       render={({ field }) => (
         <TextField
-          {...otherProps}
           {...field}
+          {...otherProps}
           error={!!errors[name]}
           helperText={String(errors[name]?.message || "")}
         />

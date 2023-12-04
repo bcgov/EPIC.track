@@ -64,6 +64,15 @@ class ProjectService implements ServiceBase {
     );
     return await http.GetRequest(url, { work_id });
   }
+
+  async createProjectAbbreviation(project_name: string) {
+    return await http.PostRequest(
+      Endpoints.Projects.PROJECT_ABBREVIATION,
+      JSON.stringify({
+        project_name,
+      })
+    );
+  }
 }
 
 export default new ProjectService();

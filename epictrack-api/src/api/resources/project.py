@@ -187,3 +187,19 @@ class ImportProjects(Resource):
         file = request.files["file"]
         response = ProjectService.import_projects(file)
         return response, HTTPStatus.CREATED
+
+
+@cors_preflight("POST")
+@API.route("/abbreviation", methods=["POST", "OPTIONS"])
+class ImportProjects(Resource):
+    """Endpoint resource to import projects."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Create new project abbreviation"""
+        request_json = request.get_json()
+        project_abbreviation = ProjectService.create_project_abbreviation(request_json.get('project_name', ''))
+        return project_abbreviation, HTTPStatus.CREATED

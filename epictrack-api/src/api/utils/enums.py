@@ -23,3 +23,8 @@ class HttpMethod(Enum):
     POST = 'POST'
     PATCH = 'PATCH'
     DELETE = 'DELETE'
+
+class ProjectCodeMethod(Enum):
+    METHOD_1 = 1
+    METHOD_2 = 2
+    METHOD_3 = 3

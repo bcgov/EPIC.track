@@ -83,6 +83,11 @@ class Project(BaseModelVersioned):
             return True
         return False
 
+    @classmethod
+    def get_by_abbreviation(cls, abbreviation: str):
+        """Get project by abbreviation."""
+        return Project.query.filter_by(abbreviation=abbreviation).first()
+
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         data = super().as_dict(recursive)
