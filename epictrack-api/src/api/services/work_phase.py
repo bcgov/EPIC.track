@@ -94,7 +94,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def find_work_phases_status(cls, work_id: int, work_phase_id: int = None):  # pylint: disable=too-many-locals,
-        """Return the work phases with additional information"""
+        """Return the work phases with additional informations."""
         work_phases = (
             db.session.query(WorkPhase)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
