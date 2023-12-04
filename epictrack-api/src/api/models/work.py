@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Work."""
+
+from __future__ import annotations
 import enum
+from typing import Tuple, List
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
+from .pagination_options import PaginationOptions
 
 
 class WorkStateEnum(enum.Enum):
@@ -103,3 +107,16 @@ class Work(BaseModelVersioned):
         if query.count() > 0:
             return True
         return False
+
+    @classmethod
+    def fetch_all_works(cls, pagination_options: PaginationOptions ) -> Tuple[List[Work], int]:
+        """Fetch all active works."""
+        query = cls.query.filter_by(is_active=True, is_deleted=False)
+        no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
+        if no_pagination_options:
+            items = query.all()
+            return items, len(items)
+
+        page = query.paginate(page=pagination_options.page, per_page=pagination_options.size)
+
+        return page.items, page.total
