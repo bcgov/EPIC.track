@@ -38,8 +38,6 @@ const StatusForm = () => {
   const postedDateMin = getPostedDateMin();
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
-  console.log(postedDateMin);
-
   React.useEffect(() => {
     if (status) {
       setDescription(status?.description);
