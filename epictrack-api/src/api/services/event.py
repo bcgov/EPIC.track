@@ -288,11 +288,10 @@ class EventService:
             # set the numebr of days to the work phase phasestartdate - actual date
             cls._complete_work_phase(current_work_phase)
         if (
-            event.actual_date
-            and event.event_configuration.event_position.value
+            event.event_configuration.event_position.value
             == EventPositionEnum.START.value
         ):
-            current_work_phase.start_date = event.actual_date
+            current_work_phase.start_date = cls._find_event_date(event)
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
             )

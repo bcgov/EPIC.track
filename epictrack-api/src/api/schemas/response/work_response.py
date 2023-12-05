@@ -28,6 +28,7 @@ class WorkPhaseResponseSchema(
         model = WorkPhase
         include_fk = True
         unknown = EXCLUDE
+
     phase = fields.Nested(PhaseResponseSchema)
 
     visibility = fields.Method("get_visibility")

@@ -36,6 +36,9 @@ from .project_request import (
 from .proponent_request import (
     ProponentBodyParameterSchema, ProponentExistenceQueryParamSchema, ProponentIdPathParameterSchema)
 from .reminder_configuration_request import ReminderConfigurationExistenceQueryParamSchema
+from .special_field_request import (
+    SpecialFieldBodyParameterSchema, SpecialFieldExistanceQueryParamSchema, SpecialFieldIdPathParameterSchema,
+    SpecialFieldQueryParamSchema)
 from .staff_request import (
     StaffBodyParameterSchema, StaffByPositionsQueryParamSchema, StaffEmailPathParameterSchema,
     StaffExistanceQueryParamSchema, StaffIdPathParameterSchema)

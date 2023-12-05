@@ -15,10 +15,9 @@
 import enum
 
 from sqlalchemy import Boolean, Column, Enum, Float, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import TSTZRANGE
 from sqlalchemy.orm import relationship
 
-from .base_model import BaseModel, BaseModelVersioned
+from .base_model import BaseModelVersioned
 
 
 class ProjectStateEnum(enum.Enum):
@@ -93,17 +92,3 @@ class Project(BaseModelVersioned):
         data = super().as_dict(recursive)
         data["project_state"] = self.project_state.value
         return data
-
-
-class ProjectSpecialFields(BaseModel):
-    """Model class for tracking project special field values."""
-
-    __tablename__ = "project_special_fields"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    field_name = Column(String(100), nullable=False)
-    field_value = Column(String, nullable=False)
-    time_range = Column(TSTZRANGE, nullable=False)
-
-    project_id = Column(ForeignKey("projects.id"), nullable=False)
-    project = relationship("Project", foreign_keys=[project_id], lazy="select")

@@ -59,6 +59,7 @@ export interface WorkPhase extends MasterBase {
   next_milestone: string;
   is_completed: boolean;
   is_suspended: boolean;
+  legislated: boolean;
   suspended_date: string;
   id: number;
   number_of_days: string;

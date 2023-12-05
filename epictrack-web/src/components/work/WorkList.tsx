@@ -110,6 +110,7 @@ const WorkList = () => {
       {
         accessorKey: "project.name",
         header: "Project",
+        size: 200,
         filterVariant: "multi-select",
         filterSelectOptions: projects,
         Filter: ({ header, column }) => {
@@ -257,6 +258,7 @@ const WorkList = () => {
       {
         accessorKey: "is_active",
         header: "Status",
+        size: 80,
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
         Filter: ({ header, column }) => {

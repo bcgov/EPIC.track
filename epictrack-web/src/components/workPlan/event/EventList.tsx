@@ -168,6 +168,15 @@ const EventList = () => {
             ) {
               return -1;
             }
+            if (
+              eventY.event_configuration?.event_position ===
+                EventPosition.START ||
+              (eventX.event_configuration?.event_position ===
+                EventPosition.END &&
+                eventX.is_complete)
+            ) {
+              return 1;
+            }
             // Next priorit is for dates, lower dates comes first
             const diff = Moment(eventX.start_date).diff(
               eventY.start_date,
