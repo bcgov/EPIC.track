@@ -191,7 +191,7 @@ class ImportProjects(Resource):
 
 @cors_preflight("POST")
 @API.route("/abbreviation", methods=["POST", "OPTIONS"])
-class ImportProjects(Resource):
+class ProjectAbbreviation(Resource):
     """Endpoint resource to import projects."""
 
     @staticmethod

@@ -13,7 +13,6 @@
 # limitations under the License.
 """Service to manage Project."""
 from typing import IO, List
-from api.utils.enums import ProjectCodeMethod
 
 import numpy as np
 import pandas as pd
@@ -22,9 +21,9 @@ from sqlalchemy import and_
 
 from api.exceptions import BadRequestError, ResourceExistsError, ResourceNotFoundError
 from api.models import Project, db
-from api.models.project import ProjectStateEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
+from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.sub_types import SubType
@@ -32,6 +31,7 @@ from api.models.types import Type
 from api.models.work import Work
 from api.models.work_type import WorkType
 from api.utils.constants import PROJECT_STATE_ENUM_MAPS
+from api.utils.enums import ProjectCodeMethod
 from api.utils.token_info import TokenInfo
 
 
@@ -285,7 +285,7 @@ class ProjectService:
         if region is None:
             raise ResourceNotFoundError(f"Region with name {name} does not exist")
         return region.id
-    
+
     @classmethod
     def _generate_project_abbreviation(cls, project_name: str, method: ProjectCodeMethod):
         words = project_name.split()
