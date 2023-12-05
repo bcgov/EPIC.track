@@ -24,6 +24,7 @@ class HttpMethod(Enum):
     PATCH = 'PATCH'
     DELETE = 'DELETE'
 
+
 class ProjectCodeMethod(Enum):
     """Project abbreviation code generation methods"""
 
