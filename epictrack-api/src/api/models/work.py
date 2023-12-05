@@ -109,7 +109,7 @@ class Work(BaseModelVersioned):
         return False
 
     @classmethod
-    def fetch_all_works(cls, pagination_options: PaginationOptions ) -> Tuple[List[Work], int]:
+    def fetch_all_works(cls, pagination_options: PaginationOptions) -> Tuple[List[Work], int]:
         """Fetch all active works."""
         query = cls.query.filter_by(is_active=True, is_deleted=False)
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
