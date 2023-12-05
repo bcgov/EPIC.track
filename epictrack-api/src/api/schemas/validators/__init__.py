@@ -16,8 +16,8 @@ from marshmallow import ValidationError
 
 from .phone import Phone
 
+
 def is_uppercase(value):
     """Validates that the value is in uppercase"""
-
     if not value.isupper():
         raise ValidationError("Value must be in uppercase.")
