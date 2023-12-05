@@ -292,16 +292,16 @@ class ProjectService:
 
         # Method 1: 1st 3 LETTERS OF FIRST WORD IN NAME + FIRST 3 LETTERS OF 2nd WORD IN NAME
         if method == ProjectCodeMethod.METHOD_1 and len(words) >= 2:
-            return words[0][:3] + words[1][:3]
+            return f'{words[0][:3]}{words[1][:3]}'.upper()
 
         # Method 2: 1st LETTER OF FIRST WORD IN NAME
         # + 1st LETTER OF 2nd WORD IN NAME + 1st FOUR LETTERS OF THIRD WORD IN NAME
         if method == ProjectCodeMethod.METHOD_2 and len(words) >= 3:
-            return words[0][0] + words[1][0] + words[2][:4]
+            return f'{words[0][0]}{words[1][0]}{words[2][:4]}'.upper()
 
         # Method 3: 1st 6 LETTERS OF FIRST WORD IN NAME
         if method == ProjectCodeMethod.METHOD_3 and len(words[0]) >= 6:
-            return words[0][:6]
+            return words[0][:6].upper()
 
         return None
 

@@ -15,6 +15,7 @@
 from marshmallow import fields, validate
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
+from api.schemas.validators import is_uppercase
 
 
 class ProjectBodyParameterSchema(RequestBodyParameterSchema):
@@ -56,9 +57,8 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
     )
     abbreviation = fields.Str(
         metadata={"description": "Abbreviation of the project"},
-        validate=validate.Length(max=150),
-        allow_none=True,
-        load_default=None,
+        validate=[validate.Length(max=150), is_uppercase],
+        required=True,
     )
     description = fields.Str(
         metadata={"description": "Description of project"},

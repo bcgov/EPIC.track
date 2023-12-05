@@ -4,9 +4,16 @@ import { Controller, useFormContext } from "react-hook-form";
 
 type IFormInputProps = {
   name: string;
+  inputEffects?: (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => string;
 } & TextFieldProps;
 
-const ControlledTextField: FC<IFormInputProps> = ({ name, ...otherProps }) => {
+const ControlledTextField: FC<IFormInputProps> = ({
+  name,
+  inputEffects,
+  ...otherProps
+}) => {
   const {
     control,
     formState: { errors, defaultValues },
@@ -21,6 +28,12 @@ const ControlledTextField: FC<IFormInputProps> = ({ name, ...otherProps }) => {
         <TextField
           {...field}
           {...otherProps}
+          onChange={(e) => {
+            if (inputEffects) {
+              e.target.value = inputEffects(e);
+            }
+            field.onChange(e.target.value);
+          }}
           error={!!errors[name]}
           helperText={String(errors[name]?.message || "")}
         />

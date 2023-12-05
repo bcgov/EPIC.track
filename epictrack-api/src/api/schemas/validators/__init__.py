@@ -12,4 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes custom validators"""
+from marshmallow import ValidationError
+
 from .phone import Phone
+
+def is_uppercase(value):
+    if not value.isupper():
+        raise ValidationError("Value must be in uppercase.")

@@ -438,6 +438,7 @@ export default function ProjectForm({ ...props }) {
                 helperText
                 fullWidth
                 placeholder="EDRMS retrieval code"
+                inputEffects={(e) => e.target.value.toUpperCase()}
               />
             </Grid>
             <Grid
