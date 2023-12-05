@@ -93,6 +93,7 @@ const CardBody = ({ workplan }: CardProps) => {
           </ETCaption1>
         </Grid>
         <Grid item sx={{ marginTop: "2px" }}>
+          {}
           <IndicatorSmallIcon />
         </Grid>
       </Grid>

@@ -6,7 +6,7 @@ import { Palette } from "../../../styles/theme";
 import { CardProps } from "./type";
 
 const Card = ({ workplan }: CardProps) => {
-  console.log(workplan.title);
+  // console.log(workplan.title);
   console.log(workplan);
   return (
     <Box

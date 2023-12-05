@@ -9,7 +9,6 @@ const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
 
 const CardFooter = ({ workplan }: CardProps) => {
   const team_lead = workplan.staff_info.find((staff: any) => {
-    console.log(staff);
     if (staff.role.name === "Team Lead") {
       return staff.full_name;
     }
