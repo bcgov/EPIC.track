@@ -2,11 +2,13 @@ import { configureStore } from "@reduxjs/toolkit";
 import userSlice from "./services/userService/userSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import uiStateSlice from "./styles/uiStateSlice";
+import loadingSlice from "./services/loadingService";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
     uiState: uiStateSlice,
+    loadingState: loadingSlice,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

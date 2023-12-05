@@ -124,3 +124,5 @@ export default {
   OSSPutRequest,
   MultipartFormPostRequest,
 };
+
+export const AxiosInstance = instance;

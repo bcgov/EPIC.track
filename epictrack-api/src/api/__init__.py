@@ -22,6 +22,7 @@ from http import HTTPStatus
 
 from flask import Flask
 from flask import current_app
+from flask_restx import abort
 from marshmallow import ValidationError
 
 from api import config

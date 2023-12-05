@@ -192,7 +192,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_phase_id = cls.create_events_by_template(
                 work_phase, phase_event_templates
             )
-            if phase.visibility != PhaseVisibilityEnum.HIDDEN.value:
+            if phase.visibility.value != PhaseVisibilityEnum.HIDDEN.value:
                 phase_start_date = end_date + timedelta(days=1)
             if sort_order == 1:
                 work.current_work_phase_id = work_phase_id
@@ -234,7 +234,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def find_staff_for_works(cls, work_ids: List[int], is_active: Optional[bool] = None) -> Dict[
-        int, List[StaffWorkRole]]:
+            int, List[StaffWorkRole]]:
         """Active staff assigned on multiple works"""
         query = (
             db.session.query(StaffWorkRole, Work)
@@ -730,7 +730,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             for child in list(
                     filter(
                         lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] ==
-                                                                         _parent_config_id,
+                        _parent_config_id,
                         event_configs,
                     )
             ):
@@ -778,8 +778,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 c_events = list(
                     filter(
                         lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id ==
-                                                                                            _parent_id and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
-                                                                                            x.work_phase_id == _work_phase_id,
+                        _parent_id and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
+                        x.work_phase_id == _work_phase_id,
                         event_configurations,
                     )
                 )

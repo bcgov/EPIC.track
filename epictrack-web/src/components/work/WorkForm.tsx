@@ -24,6 +24,8 @@ import { IconProps } from "../icons/type";
 import Icons from "../icons/index";
 import LockClosed from "../../assets/images/lock-closed.svg";
 import projectService from "../../services/projectService/projectService";
+import ControlledDatePicker from "../shared/controlledInputComponents/ControlledDatePicker";
+import { MIN_WORK_START_DATE } from "./constant";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -229,35 +231,11 @@ export default function WorkForm({ ...props }) {
             <ETFormLabel className="start-date-label" required>
               Start date
             </ETFormLabel>
-            <Controller
+            <ControlledDatePicker
               name="start_date"
-              control={control}
-              render={({
-                field: { onChange, value },
-                fieldState: { error },
-              }) => (
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    format={DATE_FORMAT}
-                    minDate={dayjs(new Date(1995, 5, 30))}
-                    disabled={(ctx.item as Work)?.start_date_locked}
-                    slotProps={{
-                      textField: {
-                        id: "start_date",
-                        fullWidth: true,
-                        error: error ? true : false,
-                        helperText: error?.message,
-                      },
-                      ...register("start_date"),
-                    }}
-                    value={(ctx.item as Work)?.start_date ? dayjs(value) : null}
-                    onChange={(event) => {
-                      onChange(event);
-                    }}
-                    sx={{ display: "block" }}
-                  />
-                </LocalizationProvider>
-              )}
+              datePickerProps={{
+                minDate: dayjs(MIN_WORK_START_DATE),
+              }}
             />
           </Grid>
           <Divider style={{ width: "100%", marginTop: "10px" }} />
