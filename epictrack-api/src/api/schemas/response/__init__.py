@@ -25,6 +25,7 @@ from .project_response import ProjectResponseSchema
 from .proponent_response import ProponentResponseSchema
 from .responsibility_response import ResponsibilityResponseSchema
 from .role_response import RoleResponseSchema
+from .special_field_response import SpecialFieldResponseSchema
 from .staff_response import StaffResponseSchema
 from .staff_work_role_response import StaffWorkRoleResponseSchema
 from .task_response import TaskEventResponseSchema, TaskResponseSchema, TaskTemplateResponseSchema
