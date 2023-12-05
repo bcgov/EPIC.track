@@ -93,8 +93,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phases_status(cls, work_id: int):
-        """Return the work phases with additional information"""
+    def find_work_phases_status(cls, work_id: int, work_phase_id: int = None):  # pylint: disable=too-many-locals,
+        """Return the work phases with additional informations."""
         work_phases = (
             db.session.query(WorkPhase)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
@@ -109,6 +109,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         )
         result = []
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
+
+        if work_phase_id is not None:
+            work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
+
         for work_phase in work_phases:
             result_item = {}
             result_item["work_phase"] = work_phase

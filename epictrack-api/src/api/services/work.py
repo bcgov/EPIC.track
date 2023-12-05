@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Works."""
+from collections import defaultdict
 from datetime import datetime, timedelta
 from io import BytesIO
 from itertools import product
+from typing import List, Optional, Dict
 
 import pandas as pd
 from flask import current_app
@@ -29,16 +31,20 @@ from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
+from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
+from api.models.work_status import WorkStatus
 from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from api.schemas.response import (
-    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema)
+    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
+    WorkPhaseAdditionalInfoResponseSchema, WorkStaffRoleReponseSchema, WorkStatusResponseSchema, WorkResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.services.event import EventService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
+from api.services.work_phase import WorkPhaseService
 from api.services.code import CodeService
 
 
@@ -55,6 +61,48 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Find all non-deleted works"""
         works = Work.find_all(default_filters=False)
         return works
+
+    @classmethod
+    def fetch_all_work_plans(cls, pagination_options: PaginationOptions):
+        """Fetch all workplans"""
+        works, total = Work.fetch_all_works(pagination_options)
+        work_ids = [work.id for work in works]
+
+        serialized_works = []
+
+        work_staffs = WorkService.find_staff_for_works(work_ids)
+        works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
+
+        work: Work
+        for work in works:
+            serialized_work = WorkService._serialize_work(work, work_staffs, works_statuses)
+            serialized_works.append(serialized_work)
+
+        return {
+            'items': serialized_works,
+            'total': total
+        }
+
+    @staticmethod
+    def _serialize_work(work, work_staffs, works_statuses):
+        """Serialize a single work"""
+        phase_info = WorkPhaseService.find_work_phases_status(work.id, work.current_work_phase_id)
+        staff_info = work_staffs.get(work.id, [])
+        works_status = works_statuses.get(work.id, None)
+
+        serialized_work = WorkResponseSchema(
+            only=("id", "work_state", "work_type", "federal_involvement", "eao_team", "title", "is_active")).dump(work)
+        if phase_info[0]:
+            serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
+                only=("work_phase.name", "total_number_of_days", "next_milestone", "milestone_progress", "days_left")
+            ).dump(phase_info[0])
+
+            serialized_work["phase_info"] = serialised_phase
+
+        serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(works_status)
+        serialized_work["staff_info"] = WorkStaffRoleReponseSchema(many=True).dump(staff_info)
+
+        return serialized_work
 
     @classmethod
     def find_allocated_resources(cls):
@@ -185,6 +233,31 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return query.all()
 
     @classmethod
+    def find_staff_for_works(cls, work_ids: List[int], is_active: Optional[bool] = None) -> Dict[
+            int, List[StaffWorkRole]]:
+        """Active staff assigned on multiple works"""
+        query = (
+            db.session.query(StaffWorkRole, Work)
+            .join(Staff, StaffWorkRole.staff_id == Staff.id)
+            .join(Role, StaffWorkRole.role_id == Role.id)
+            .join(Work, StaffWorkRole.work_id == Work.id)
+            .filter(
+                StaffWorkRole.is_deleted.is_(False),
+                Staff.is_active.is_(True),
+                Staff.is_deleted.is_(False),
+                Work.id.in_(work_ids),
+            )
+        )
+        if is_active is not None:
+            query = query.filter(StaffWorkRole.is_active.is_(is_active))
+
+        staff_for_works = defaultdict(list)
+        for staff_work_role, work in query.all():
+            staff_for_works[work.id].append(staff_work_role)
+
+        return staff_for_works
+
+    @classmethod
     def find_work_staff(cls, work_staff_id: int) -> StaffWorkRole:
         """Get the staff Work"""
         work_staff = (
@@ -198,7 +271,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_staff_existence(
-        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+            cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ) -> bool:
         """Check the existence of staff in work"""
         query = db.session.query(StaffWorkRole).filter(
@@ -486,7 +559,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_work_indigenous_nation(
-        cls, work_id: int, data: dict, commit: bool = True
+            cls, work_id: int, data: dict, commit: bool = True
     ) -> IndigenousWork:
         """Create Indigenous Work"""
         if cls.check_work_nation_existence(work_id, data.get("indigenous_nation_id")):
@@ -507,7 +580,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def update_work_indigenous_nation(
-        cls, work_indigenous_nation_id: int, data: dict
+            cls, work_indigenous_nation_id: int, data: dict
     ) -> IndigenousWork:
         """Update work indigenous nation"""
         work_indigenous_nation = (
@@ -614,7 +687,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_nation_existence(
-        cls, work_id: int, nation_id: int, work_nation_id: int = None
+            cls, work_id: int, nation_id: int, work_nation_id: int = None
     ) -> bool:
         """Check the existence of first nation in work"""
         query = db.session.query(IndigenousWork).filter(
@@ -630,7 +703,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_template(
-        cls, work_phase: WorkPhase, phase_event_templates: [dict]
+            cls, work_phase: WorkPhase, phase_event_templates: [dict]
     ) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))
@@ -642,7 +715,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_configurations(
-        cls, work_phase: WorkPhase, event_configs: [dict], from_template: bool = True
+            cls, work_phase: WorkPhase, event_configs: [dict], from_template: bool = True
     ) -> [EventConfiguration]:
         """Create event configurations from existing configurations/templates"""
         event_configurations: [EventConfiguration] = []
@@ -655,11 +728,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
             event_configurations.append(p_result)
             cls.copy_outcome_and_actions(parent_config, p_result)
             for child in list(
-                filter(
-                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] ==
-                    _parent_config_id,
-                    event_configs,
-                )
+                    filter(
+                        lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] ==
+                        _parent_config_id,
+                        event_configs,
+                    )
             ):
                 child["parent_id"] = p_result.id
                 child["work_phase_id"] = work_phase.id
@@ -674,7 +747,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_configuration(
-        cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
+            cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
     ) -> None:
         """Create events by given event configurations"""
         if work_phase.visibility.value == PhaseVisibilityEnum.REGULAR.value:
@@ -706,7 +779,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     filter(
                         lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id ==
                         _parent_id and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
-                        x.work_phase_id == _work_phase_id, event_configurations,
+                        x.work_phase_id == _work_phase_id,
+                        event_configurations,
                     )
                 )
                 for c_event_conf in c_events:
@@ -714,7 +788,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         days=cls._find_start_at_value(c_event_conf.start_at, 0)
                     )
                     if (
-                        c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value
+                            c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value
                     ):
                         cal_event = CalendarEvent.flush(
                             CalendarEvent(
