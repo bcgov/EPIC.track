@@ -192,7 +192,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_phase_id = cls.create_events_by_template(
                 work_phase, phase_event_templates
             )
-            if phase.visibility != PhaseVisibilityEnum.HIDDEN.value:
+            if phase.visibility.value != PhaseVisibilityEnum.HIDDEN.value:
                 phase_start_date = end_date + timedelta(days=1)
             if sort_order == 1:
                 work.current_work_phase_id = work_phase_id
