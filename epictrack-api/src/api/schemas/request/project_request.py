@@ -14,8 +14,9 @@
 """Project resource's input validations"""
 from marshmallow import fields, validate
 
-from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 from api.schemas.validators import is_uppercase
+
+from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
 class ProjectBodyParameterSchema(RequestBodyParameterSchema):
