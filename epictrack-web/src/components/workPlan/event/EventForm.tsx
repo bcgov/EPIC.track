@@ -6,23 +6,14 @@ import {
   useMemo,
   useCallback,
 } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import dayjs from "dayjs";
 import Moment from "moment";
-import {
-  COMMON_ERROR_MESSAGE,
-  DATE_FORMAT,
-} from "../../../constants/application-constant";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import {
-  ETFormLabel,
-  ETFormLabelWithCharacterLimit,
-  ETSubhead,
-} from "../../shared";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -57,6 +48,7 @@ import { EVENT_TYPE } from "../phase/type";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
 import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 
 interface EventFormProps {
   onSave: () => void;
@@ -157,6 +149,12 @@ const EventForm = ({
     }
   }, [selectedConfiguration, event]);
 
+  const showDatePushWarning = useMemo(
+    () =>
+      dateCheckStatus?.phase_end_push_required &&
+      ctx.selectedWorkPhase?.work_phase.legislated,
+    [dateCheckStatus, ctx.selectedWorkPhase]
+  );
   const isMilestoneTypeDisabled = useMemo(
     () =>
       !!event ||
@@ -184,16 +182,18 @@ const EventForm = ({
       selectedConfiguration?.event_position === EventPosition.START,
     [event, selectedConfiguration]
   );
-  console.log("IS START PHASE", isStartPhase);
-  console.log("IS START EVENT", isStartEvent);
-  const anticipatedMinDate = useMemo(
-    () => dayjs(ctx.work?.start_date),
-    [ctx.work?.start_date]
-  );
 
+  const anticipatedMinDate = useMemo(
+    () =>
+      isStartEvent && isStartPhase ? undefined : dayjs(ctx.work?.start_date),
+    [ctx.work?.start_date, isStartEvent, isStartPhase]
+  );
   const actualDateMin = useMemo(
-    () => dayjs(ctx.selectedWorkPhase?.work_phase.start_date),
-    [ctx.selectedWorkPhase]
+    () =>
+      isStartEvent && isStartPhase
+        ? undefined
+        : dayjs(ctx.selectedWorkPhase?.work_phase.start_date),
+    [ctx.selectedWorkPhase, isStartEvent, isStartPhase]
   );
 
   const actualDateMax = useMemo(() => dayjs(new Date()), []);
@@ -598,87 +598,48 @@ const EventForm = ({
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
-              <Controller
+              <ControlledDatePicker
                 name="anticipated_date"
-                control={control}
                 defaultValue={dayjs(event?.anticipated_date).format()}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      disabled={isFormFieldsLocked}
-                      format={DATE_FORMAT}
-                      minDate={anticipatedMinDate}
-                      slotProps={{
-                        textField: {
-                          id: "anticipated_date",
-                          fullWidth: true,
-                          inputRef: anticipatedDateRef,
-                          error: error ? true : false,
-                          helperText: error?.message,
-                          placeholder: "MM-DD-YYYY",
-                        },
-                        ...register("anticipated_date"),
-                      }}
-                      value={dayjs(value)}
-                      onChange={async (event: any) => {
-                        const d = event ? event["$d"] : null;
-                        onChange(d);
-                        changeHandler({
-                          anticipatedDate: d,
-                        });
-                      }}
-                      sx={{ display: "block" }}
-                    />
-                  </LocalizationProvider>
-                )}
+                datePickerProps={{
+                  disabled: isFormFieldsLocked,
+                  minDate: anticipatedMinDate,
+                  onDateChange: (event: any, defaultOnChange: any) => {
+                    const d = event ? event["$d"] : null;
+                    defaultOnChange(d);
+                    changeHandler({
+                      anticipatedDate: d,
+                    });
+                  },
+                }}
+                datePickerSlotProps={{
+                  inputRef: anticipatedDateRef,
+                }}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>{actualDateLabel}</ETFormLabel>
-              <Controller
+              <ControlledDatePicker
                 name="actual_date"
-                control={control}
                 defaultValue={
                   event?.actual_date ? dayjs(event?.actual_date).format() : ""
                 }
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      disabled={isFormFieldsLocked}
-                      format={DATE_FORMAT}
-                      minDate={actualDateMin}
-                      maxDate={actualDateMax}
-                      slotProps={{
-                        textField: {
-                          id: "actual_date",
-                          fullWidth: true,
-                          error: error ? true : false,
-                          helperText: error?.message,
-                          placeholder: "MM-DD-YYYY",
-                        },
-                        ...register("actual_date"),
-                      }}
-                      value={value ? dayjs(value) : value}
-                      onChange={async (event: any) => {
-                        const d = event ? event["$d"] : null;
-                        onChange(d);
-                        changeHandler({
-                          actualDate: d,
-                        });
-                      }}
-                      sx={{ display: "block" }}
-                    />
-                  </LocalizationProvider>
-                )}
+                datePickerProps={{
+                  referenceDate: dayjs(event?.anticipated_date),
+                  disabled: isFormFieldsLocked,
+                  minDate: actualDateMin,
+                  maxDate: actualDateMax,
+                  onDateChange: (event: any, defaultOnChange: any) => {
+                    const d = event ? event["$d"] : null;
+                    defaultOnChange(d);
+                    changeHandler({
+                      actualDate: d,
+                    });
+                  },
+                }}
               />
             </Grid>
-            <When condition={dateCheckStatus?.phase_end_push_required}>
+            <When condition={showDatePushWarning}>
               <Grid item xs={12}>
                 <WarningBox
                   title="Selecting this date will extend subsequent Milestones beyond the legislated time limit. You might need to add an Extension Milestone to complete the Phase."

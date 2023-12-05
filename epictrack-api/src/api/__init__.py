@@ -22,6 +22,7 @@ from http import HTTPStatus
 
 from flask import Flask
 from flask import current_app
+from flask_restx import abort
 from marshmallow import ValidationError
 
 from api import config
@@ -77,7 +78,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             if isinstance(err, PermissionDeniedError):
                 return err.message, HTTPStatus.FORBIDDEN
             if isinstance(err, UnprocessableEntityError):
-                return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
+                abort(HTTPStatus.UNPROCESSABLE_ENTITY, err.message)
             return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)
