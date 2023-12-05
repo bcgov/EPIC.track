@@ -80,7 +80,7 @@ const Endpoints = {
     ACT_SECTIONS: "/act-sections",
   },
   Workplan: {
-    GET_ALL: "workplans",
+    GET_ALL: "/works/dashboard",
   },
 };
 export default Endpoints;

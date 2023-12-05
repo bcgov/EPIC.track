@@ -3,8 +3,11 @@ import CardBody from "./CardBody";
 import CardFooter from "./CardFooter";
 import CardHeader from "./CardHeader";
 import { Palette } from "../../../styles/theme";
+import { CardProps } from "./type";
 
-const Card = () => {
+const Card = ({ workplan }: CardProps) => {
+  console.log(workplan.title);
+  console.log(workplan);
   return (
     <Box
       sx={{
@@ -13,9 +16,9 @@ const Card = () => {
         borderRadius: "4px 4px 4px 4px",
       }}
     >
-      <CardHeader />
-      <CardBody />
-      <CardFooter />
+      <CardHeader workplan={workplan} />
+      <CardBody workplan={workplan} />
+      <CardFooter workplan={workplan} />
     </Box>
   );
 };

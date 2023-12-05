@@ -32,7 +32,10 @@ export const MyWorkplansProvider = ({
 
     try {
       const result = await workplanService.getAll(page);
-      setWorkplans((prevWorkplans) => [...prevWorkplans, ...result.data]);
+      setWorkplans((prevWorkplans) => [
+        ...prevWorkplans,
+        ...(result.data as any).items,
+      ]);
       setLoadingWorkplans(false);
     } catch (error) {
       console.log(error);

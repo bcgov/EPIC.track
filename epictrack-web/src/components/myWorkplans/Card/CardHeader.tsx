@@ -1,8 +1,9 @@
 import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1 } from "../../shared";
+import { CardProps } from "./type";
 
-const CardHeader = () => {
+const CardHeader = ({ workplan }: CardProps) => {
   return (
     <Grid
       container
@@ -16,7 +17,7 @@ const CardHeader = () => {
     >
       <Grid item>
         <ETCaption1 bold color={Palette.primary.main}>
-          COYOTE HYDROGEN
+          {workplan.title}
         </ETCaption1>
       </Grid>
       <Grid item>
@@ -29,7 +30,7 @@ const CardHeader = () => {
             borderRadius: "4px",
           }}
         >
-          Active
+          {workplan.is_active ? "Active" : "Inactive"}
         </ETCaption1>
       </Grid>
     </Grid>

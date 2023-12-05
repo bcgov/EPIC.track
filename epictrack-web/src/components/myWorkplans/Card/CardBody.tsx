@@ -3,12 +3,16 @@ import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
+import { CardProps } from "./type";
+import WorkState from "../../workPlan/WorkState";
+import dayjs from "dayjs";
+import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
-const CardBody = () => {
+const CardBody = ({ workplan }: CardProps) => {
   return (
     <Grid
       container
@@ -23,20 +27,12 @@ const CardBody = () => {
       <Grid item container direction="row" spacing={1}>
         <Grid item>
           <ETHeading4 bold color={Palette.neutral.dark}>
-            EAC Assessment
+            {workplan.work_type.name}
           </ETHeading4>
         </Grid>
         <Grid item>
-          <ETCaption1
-            bold
-            sx={{
-              color: Palette.success.dark,
-              backgroundColor: Palette.success.bg.light,
-              padding: "4px 8px",
-              borderRadius: "4px",
-            }}
-          >
-            In Progress
+          <ETCaption1 bold>
+            <WorkState work_state={workplan.work_state} />
           </ETCaption1>
         </Grid>
       </Grid>
@@ -52,79 +48,66 @@ const CardBody = () => {
         </Grid>
         <Grid item>
           <ETCaption2 bold color={Palette.neutral.main}>
-            Early Engagement
+            {workplan.phase_info.work_phase.name}
           </ETCaption2>
         </Grid>
-        <Grid item sx={{ marginTop: "2px" }}>
+        <Grid item sx={{ marginTop: "4px" }}>
           <ClockIcon />
         </Grid>
         <Grid item>
           <ETCaption2 bold color={Palette.neutral.main}>
-            46/90 days left
+            {workplan.phase_info.days_left}/
+            {workplan.phase_info.total_number_of_days} days left
           </ETCaption2>
         </Grid>
       </Grid>
       <Grid item container direction="row" spacing={1}>
         <Grid item>
-          <ETCaption1
-            color={Palette.neutral.main}
-            // sx={{ letterSpacing: "0.39px" }}
-          >
+          <ETCaption1 color={Palette.neutral.main}>
             UPCOMING MILESTONE
           </ETCaption1>
         </Grid>
         <Grid item>
-          <ETCaption1
-            color={Palette.neutral.main}
-            // sx={{ letterSpacing: "0.39px" }}
-          >
-            NOV.10 2023
+          <ETCaption1 color={Palette.neutral.main}>
+            {dayjs(new Date())
+              .add(workplan.phase_info.days_left, "days")
+              .format(MONTH_DAY_YEAR)
+              .toUpperCase()}
           </ETCaption1>
         </Grid>
       </Grid>
       <Grid item sx={{ paddingBottom: "8px" }}>
         <ETParagraph bold color={Palette.neutral.dark}>
-          PIN Notice of Intent
+          {workplan.phase_info.next_milestone}
         </ETParagraph>
       </Grid>
-      <Grid
-        item
-        container
-        direction="row"
-        spacing={1}
-        sx={{ paddingBottom: "16px" }}
-      >
+      <Grid item container direction="row" spacing={1}>
         <Grid item>
-          <ETCaption1
-            color={Palette.neutral.main}
-            // TODO: Discuss with Jad and Maria about new style for letter spacing
-            // sx={{ letterSpacing: "0.39px" }}
-          >
+          <ETCaption1 color={Palette.neutral.main}>
             LAST STATUS UPDATE
           </ETCaption1>
         </Grid>
         <Grid item>
-          <ETCaption1
-            color={Palette.neutral.main}
-            // sx={{ letterSpacing: "0.39px" }}
-          >
-            JUN.10 2023
+          <ETCaption1 color={Palette.neutral.main}>
+            {dayjs(workplan.status_info.posted_date).format(MONTH_DAY_YEAR)}
           </ETCaption1>
         </Grid>
         <Grid item sx={{ marginTop: "2px" }}>
           <IndicatorSmallIcon />
         </Grid>
       </Grid>
-      <Grid item>
-        <ETCaption1
-          color={Palette.neutral.main}
-          // sx={{ letterSpacing: "0.39px" }}
-        >
-          IAAC INVOLVEMENT
-        </ETCaption1>
+      <Grid item sx={{ height: "49px", width: "100%" }}>
+        <ETParagraph sx={{ height: "49px" }} enableEllipsis>
+          {workplan.status_info.description}
+        </ETParagraph>
       </Grid>
       <Grid item>
-        <ETParagraph color={Palette.neutral.dark}>None</ETParagraph>
+        <ETCaption1 color={Palette.neutral.main}>IAAC INVOLVEMENT</ETCaption1>
+      </Grid>
+      <Grid item>
+        <ETParagraph color={Palette.neutral.dark}>
+          {workplan.federal_involvement.name}
+        </ETParagraph>
       </Grid>
     </Grid>
   );
