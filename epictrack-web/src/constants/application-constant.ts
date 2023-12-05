@@ -1,6 +1,7 @@
 export const DATE_FORMAT = "MM-DD-YYYY";
 export const DISPLAY_DATE_FORMAT = "DD MMM YYYY";
 export const MONTH_DAY_YEAR = "MMM.DD YYYY";
+export const EARLIEST_WORK_DATE = "2019-12-16";
 export const REPORT_TYPES = [
   {
     Text: "Anticipated EA Referral Schedule",

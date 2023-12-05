@@ -7,7 +7,10 @@ import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { DATE_FORMAT } from "../../../constants/application-constant";
+import {
+  DATE_FORMAT,
+  EARLIEST_WORK_DATE,
+} from "../../../constants/application-constant";
 import Moment from "moment";
 import { StatusContext } from "./StatusContext";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -26,10 +29,10 @@ const StatusForm = () => {
       return dayjs(statuses[0].posted_date);
     }
     if (statuses.length === 1 && statuses[0]?.is_approved) {
-      return dayjs("1900-01-01");
+      return dayjs(EARLIEST_WORK_DATE);
     }
 
-    return dayjs(statuses[1]?.posted_date || "1900-01-01");
+    return dayjs(statuses[1]?.posted_date || EARLIEST_WORK_DATE);
   };
 
   const postedDateMin = getPostedDateMin();
