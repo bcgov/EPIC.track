@@ -100,9 +100,9 @@ class WorkStaffRoleReponseSchema(
     @pre_dump()
     def convert(self, instance, many):  # pylint: disable=unused-argument
         """Convert the incoming object in to json"""
-        staff = StaffResponseSchema().dump(instance.staff)
+        staff = StaffResponseSchema().dump(instance.Staff)
         if staff:
-            staff["role"] = instance.role
+            staff["role"] = instance.Role
         return staff
 
 
