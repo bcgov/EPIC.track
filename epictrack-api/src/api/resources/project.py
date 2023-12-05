@@ -200,6 +200,6 @@ class ProjectAbbreviation(Resource):
     @profiletime
     def post():
         """Create new project abbreviation"""
-        request_json = request.get_json()
+        request_json = req.ProjectAbbreviationParameterSchema().load(API.payload)
         project_abbreviation = ProjectService.create_project_abbreviation(request_json.get('project_name', ''))
         return project_abbreviation, HTTPStatus.CREATED

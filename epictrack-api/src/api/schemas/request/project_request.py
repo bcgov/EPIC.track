@@ -162,3 +162,13 @@ class ProjectFirstNationsQueryParamSchema(RequestQueryParameterSchema):
         allow_none=True,
         missing=None
     )
+
+
+class ProjectAbbreviationParameterSchema(RequestPathParameterSchema):
+    """project id path parameter schema"""
+
+    name = fields.Str(
+        metadata={"description": "Name of project"},
+        validate=validate.Length(max=150),
+        required=True,
+    )

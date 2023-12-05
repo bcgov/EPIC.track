@@ -31,8 +31,8 @@ from .outcome_configuration_request import (
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
 from .phase_request import PhaseBodyParameterSchema
 from .project_request import (
-    ProjectBodyParameterSchema, ProjectExistenceQueryParamSchema, ProjectFirstNationsQueryParamSchema,
-    ProjectIdPathParameterSchema)
+    ProjectAbbreviationParameterSchema, ProjectBodyParameterSchema, ProjectExistenceQueryParamSchema,
+    ProjectFirstNationsQueryParamSchema, ProjectIdPathParameterSchema)
 from .proponent_request import (
     ProponentBodyParameterSchema, ProponentExistenceQueryParamSchema, ProponentIdPathParameterSchema)
 from .reminder_configuration_request import ReminderConfigurationExistenceQueryParamSchema
