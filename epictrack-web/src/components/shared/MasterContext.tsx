@@ -2,13 +2,12 @@ import React, { Dispatch, SetStateAction, createContext } from "react";
 import { MasterBase } from "../../models/type";
 import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog from "./TrackDialog";
-import { Backdrop, CircularProgress, SxProps } from "@mui/material";
+import { SxProps } from "@mui/material";
 import { showNotification } from "./notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../constants/application-constant";
 import { getAxiosError } from "../../utils/axiosUtils";
 
 interface MasterContextProps {
-  backdrop: boolean;
   // error: string | undefined;
   title: string;
   data: MasterBase[];
@@ -31,7 +30,6 @@ interface MasterContextProps {
 }
 
 export const MasterContext = createContext<MasterContextProps>({
-  backdrop: false,
   // error: "",
   title: "Data",
   data: [],
@@ -62,7 +60,6 @@ export const MasterProvider = ({
   const [item, setItem] = React.useState<MasterBase>();
   const [id, setId] = React.useState<string | undefined>();
   const [service, setService] = React.useState<ServiceBase>();
-  const [backdrop, setBackdrop] = React.useState<boolean>(false);
   const [openAlertDialog, setOpenAlertDialog] = React.useState<boolean>(false);
   const [alertContentText, setAlertContentText] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
@@ -100,12 +97,10 @@ export const MasterProvider = ({
   }, [service]);
 
   const getById = async (id: string) => {
-    setBackdrop(true);
     try {
       const result = await service?.getById(id);
       if (result && result.status === 200) {
         setItem(result.data);
-        setBackdrop(false);
       }
     } catch (e) {
       showNotification(
@@ -114,7 +109,6 @@ export const MasterProvider = ({
           type: "error",
         }
       );
-      setBackdrop(false);
     }
   };
 
@@ -129,7 +123,6 @@ export const MasterProvider = ({
 
   const onSave = React.useCallback(
     async (data: any, callback: () => any) => {
-      setBackdrop(true);
       try {
         if (id) {
           const result = await service?.update(data, id);
@@ -139,7 +132,6 @@ export const MasterProvider = ({
             });
             setItem(undefined);
             setId(undefined);
-            setBackdrop(false);
             callback();
           }
         } else {
@@ -148,7 +140,6 @@ export const MasterProvider = ({
             showNotification(`${title} details inserted`, {
               type: "success",
             });
-            setBackdrop(false);
             callback();
           }
         }
@@ -163,7 +154,6 @@ export const MasterProvider = ({
         showNotification(message, {
           type: "error",
         });
-        setBackdrop(false);
       }
     },
     [id, service, title]
@@ -185,7 +175,6 @@ export const MasterProvider = ({
   return (
     <MasterContext.Provider
       value={{
-        backdrop,
         title,
         setTitle,
         data,
@@ -217,12 +206,6 @@ export const MasterProvider = ({
           onDialogClose();
         }}
       />
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.modal + 1 }}
-        open={backdrop}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
       <TrackDialog
         open={showDeleteDialog}
         dialogTitle="Delete Confirmation"

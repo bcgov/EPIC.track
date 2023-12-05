@@ -8,6 +8,7 @@ import { Box, Theme, useMediaQuery } from "@mui/material";
 import AxiosErrorHandler from "./components/axiosErrorHandler/AxiosErrorHandler";
 import ETNotificationProvider from "./components/shared/notificationProvider/ETNotificationProvider";
 import "./styles/App.scss";
+import { Loader } from "./components/shared/loader";
 
 export function App() {
   const dispatch = useAppDispatch();
@@ -40,6 +41,7 @@ export function App() {
                 <ETNotificationProvider preventDuplicate>
                   <React.StrictMode>
                     <AuthenticatedRoutes />
+                    <Loader />
                   </React.StrictMode>
                 </ETNotificationProvider>
               </Box>
