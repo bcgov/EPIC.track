@@ -78,7 +78,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
             if isinstance(err, PermissionDeniedError):
                 return err.message, HTTPStatus.FORBIDDEN
             if isinstance(err, UnprocessableEntityError):
-                abort(HTTPStatus.UNPROCESSABLE_ENTITY, err.message)
+                return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
             return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)
