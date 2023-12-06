@@ -752,7 +752,7 @@ const EventForm = ({
         />
         <TrackDialog
           open={showEventPushConfirmation}
-          dialogTitle={"Update this Milestone  Only?"}
+          dialogTitle={"Update this Milestone only?"}
           disableEscapeKeyDown
           fullWidth
           maxWidth="sm"
