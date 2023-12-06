@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -117,11 +117,18 @@ const EventList = () => {
     React.useState<boolean>(false);
   const [showDeleteDialog, setShowDeleteDialog] =
     React.useState<boolean>(false);
-  const [showExtensionWarningBox, setShowExtensionWarningBox] =
+  const [openExtensionWarningBox, setOpenExtensionWarningBox] =
     React.useState(true);
   const [showSuspendedWarningBox, setShowSuspendedWarningBox] =
     React.useState(true);
 
+  const showExtensionWarningBox = useMemo(
+    () =>
+      Number(ctx.selectedWorkPhase?.days_left) < 0 &&
+      ctx.selectedWorkPhase?.work_phase.legislated &&
+      openExtensionWarningBox,
+    [ctx.selectedWorkPhase, openExtensionWarningBox]
+  );
   const isEventFormFieldLocked = React.useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
@@ -327,7 +334,6 @@ const EventList = () => {
     getTemplateUploadStatus();
     getWorkPhases();
     getWorkById();
-    // setEventId(undefined);
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
   };
@@ -708,7 +714,7 @@ const EventList = () => {
           }
         >
           <WarningBox
-            onCloseHandler={() => setShowExtensionWarningBox(false)}
+            onCloseHandler={() => setOpenExtensionWarningBox(false)}
             title="The time limit for this Phase has been exceeded"
             isTitleBold={true}
           />
