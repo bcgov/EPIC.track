@@ -95,7 +95,12 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def find_work_phases_status(cls, work_params_dict: Dict[str, Union[int, None]]) -> Dict[
+    def find_work_phases_status(cls, work_id: int):
+        """Return the work phases with additional information"""
+        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}).get(work_id, [])
+
+    @classmethod
+    def find_multiple_works_phases_status(cls, work_params_dict: Dict[str, Union[int, None]]) -> Dict[
             int, List[Dict[str, Any]]]:
         """Return a dictionary with work_id and its work phases with additional information."""
         result_dict = {}
