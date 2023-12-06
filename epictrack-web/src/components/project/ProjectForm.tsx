@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Box } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -17,6 +17,7 @@ import projectService from "../../services/projectService/projectService";
 import LockClosed from "../../assets/images/lock-closed.svg";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { Palette } from "../../styles/theme";
+import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
 
 const schema = yup.object().shape({
   name: yup
@@ -87,6 +88,8 @@ export default function ProjectForm({ ...props }) {
     formState: { errors },
     reset,
     setValue,
+    setError,
+    resetField,
   } = methods;
   const formValues = useWatch({ control });
 
@@ -157,6 +160,29 @@ export default function ProjectForm({ ...props }) {
       reset();
     });
   };
+
+  const onBlurProjectName = async () => {
+    if (!formValues.name || Boolean(formValues.abbreviation)) return;
+
+    try {
+      const response = await projectService.createProjectAbbreviation(
+        formValues.name
+      );
+      const generatedAbbreviation = response.data as string;
+      resetField("abbreviation");
+      setValue("abbreviation", generatedAbbreviation);
+    } catch (error) {
+      if (formValues.abbreviation) {
+        return;
+      }
+
+      setError("abbreviation", {
+        type: "manual",
+        message: `Abbreviation could not be auto-generated for "${formValues.name}"`,
+      });
+    }
+  };
+
   return (
     <>
       <FormProvider {...methods}>
@@ -200,14 +226,13 @@ export default function ProjectForm({ ...props }) {
                   />
                 </ETFormLabel>
               </Box>
-              <TextField
+              <ControlledTextField
+                name="name"
                 placeholder="Project Name"
                 disabled={disabled}
                 variant="outlined"
                 fullWidth
-                error={!!errors?.name?.message}
-                helperText={errors?.name?.message?.toString()}
-                {...register("name")}
+                onBlur={onBlurProjectName}
               />
             </Grid>
             <Grid item xs={6}>
@@ -272,13 +297,11 @@ export default function ProjectForm({ ...props }) {
             </Grid>
             <Grid item xs={12}>
               <ETFormLabel required>Project Description</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="description"
                 fullWidth
                 multiline
                 rows={4}
-                {...register("description")}
-                error={!!errors?.description?.message}
-                helperText={errors?.description?.message?.toString()}
               />
             </Grid>
           </Grid>
@@ -295,42 +318,36 @@ export default function ProjectForm({ ...props }) {
           >
             <Grid item xs={12}>
               <ETFormLabel required>Location Description</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="address"
                 placeholder="Provide a detailed description of a project's location"
                 fullWidth
                 multiline
                 rows={3}
-                {...register("address")}
-                error={!!errors?.address?.message}
-                helperText={errors?.address?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Latitude</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="latitude"
                 type="number"
                 inputProps={{
                   step: 0.000001,
                 }}
                 placeholder="e.g. 22.2222"
                 fullWidth
-                {...register("latitude")}
-                error={!!errors?.latitude?.message}
-                helperText={errors?.latitude?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Longitude</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="longitude"
                 type="number"
                 inputProps={{
                   step: 0.00001,
                 }}
                 placeholder="e.g. -22.2222"
                 fullWidth
-                {...register("longitude")}
-                error={!!errors?.longitude?.message}
-                helperText={errors?.longitude?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
@@ -372,66 +389,56 @@ export default function ProjectForm({ ...props }) {
           >
             <Grid item xs={6}>
               <ETFormLabel>Capital Investment</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="capital_investment"
                 type="number"
                 inputProps={{
                   min: 0,
                   step: 1,
                 }}
                 fullWidth
-                {...register("capital_investment")}
-                error={!!errors?.capital_investment?.message}
-                helperText={errors?.capital_investment?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>EPIC GUID</ETFormLabel>
-              <TextField
-                fullWidth
-                {...register("epic_guid")}
-                error={!!errors?.epic_guid?.message}
-                helperText={errors?.epic_guid?.message?.toString()}
-              />
+              <ControlledTextField name="epic_guid" fullWidth />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="fte_positions_construction"
                 type="number"
                 inputProps={{
                   min: 0,
                   step: 1,
                 }}
                 fullWidth
-                {...register("fte_positions_construction")}
-                error={!!errors?.fte_positions_construction?.message}
-                helperText={errors?.fte_positions_construction?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Operation</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name="fte_positions_operation"
                 type="number"
                 inputProps={{
                   min: 0,
                   step: 1,
                 }}
                 fullWidth
-                {...register("fte_positions_operation")}
-                error={!!errors?.fte_positions_operation?.message}
-                helperText={errors?.fte_positions_operation?.message?.toString()}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Certificate Number</ETFormLabel>
-              <TextField helperText fullWidth {...register("ea_certificate")} />
+              <ControlledTextField name="ea_certificate" helperText fullWidth />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Abbreviation</ETFormLabel>
-              <TextField
+              <ControlledTextField
+                name={"abbreviation"}
                 helperText
                 fullWidth
                 placeholder="EDRMS retrieval code"
-                {...register("abbreviation")}
+                inputEffects={(e) => e.target.value.toUpperCase()}
               />
             </Grid>
             <Grid
