@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import CardBody from "./CardBody";
 import CardFooter from "./CardFooter";
 import CardHeader from "./CardHeader";
@@ -6,12 +6,11 @@ import { Palette } from "../../../styles/theme";
 import { CardProps } from "./type";
 
 const Card = ({ workplan }: CardProps) => {
-  // console.log(workplan.title);
   console.log(workplan);
   return (
     <Box
       sx={{
-        width: "516px",
+        maxWidth: "516px",
         border: `1px solid var(--neutral-background-dark, ${Palette.neutral.bg.dark})`,
         borderRadius: "4px 4px 4px 4px",
       }}

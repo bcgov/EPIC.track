@@ -12,10 +12,17 @@ const CardList = () => {
   }
 
   return (
-    <Grid container direction="row" spacing={2}>
+    <Grid
+      container
+      direction="row"
+      alignItems="flex-start"
+      justifyContent="space-evenly"
+      spacing={2}
+      columns={{ xs: 12 }}
+    >
       {workplans.map((workplan) => {
         return (
-          <Grid item>
+          <Grid item xs={4}>
             <Card workplan={workplan} />
           </Grid>
         );

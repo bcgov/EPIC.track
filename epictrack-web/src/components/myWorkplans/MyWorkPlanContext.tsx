@@ -32,10 +32,14 @@ export const MyWorkplansProvider = ({
 
     try {
       const result = await workplanService.getAll(page);
-      setWorkplans((prevWorkplans) => [
-        ...prevWorkplans,
-        ...(result.data as any).items,
-      ]);
+      const newWorkplans = [...workplans, ...(result.data as any).items];
+      const filteredWorkplans = newWorkplans.filter(
+        (value: any, index: any, self: any) => {
+          return index === self.findIndex((t: any) => t.id === value.id); // Prevent same work being in list twice
+        }
+      );
+      setWorkplans(filteredWorkplans);
+      console.log(workplans);
       setLoadingWorkplans(false);
     } catch (error) {
       console.log(error);

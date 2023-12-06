@@ -1,6 +1,6 @@
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import { ETCaption1 } from "../../shared";
+import { ETCaption1, ETParagraph } from "../../shared";
 import { CardProps } from "./type";
 
 const CardHeader = ({ workplan }: CardProps) => {
