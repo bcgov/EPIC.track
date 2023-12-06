@@ -95,8 +95,15 @@ class WorkService:  # pylint: disable=too-many-public-methods
             only=("id", "work_state", "work_type", "federal_involvement", "eao_team", "title", "is_active")).dump(work)
         if work_phase[0]:
             serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
-                only=("work_phase.name", "total_number_of_days", "next_milestone", "milestone_progress", "days_left")
-            ).dump(work_phase[0])
+                only=(
+                    "work_phase.name",
+                    "total_number_of_days",
+                    "next_milestone",
+                    "milestone_progress",
+                    "days_left",
+                    "work_phase.phase.color"
+                )
+            ).dump(phase_info[0])
 
             serialized_work["phase_info"] = serialised_phase
 
