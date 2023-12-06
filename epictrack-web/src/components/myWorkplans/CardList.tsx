@@ -5,7 +5,6 @@ import Card from "./Card";
 const CardList = () => {
   const cards = [1, 2, 3, 4, 5];
 
-
   if (cards.length === 0) {
     return <NoResultsFound />;
   }
