@@ -90,8 +90,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         staff_info = work_staffs.get(work.id, [])
         works_status = works_statuses.get(work.id, None)
 
-        print(phase_info)
-
         serialized_work = WorkResponseSchema(
             only=("id", "work_state", "work_type", "federal_involvement", "eao_team", "title", "is_active")).dump(work)
         if phase_info[0]:

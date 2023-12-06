@@ -39,7 +39,6 @@ export const MyWorkplansProvider = ({
         }
       );
       setWorkplans(filteredWorkplans);
-      console.log(workplans);
       setLoadingWorkplans(false);
     } catch (error) {
       console.log(error);
