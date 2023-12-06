@@ -71,8 +71,9 @@ const WorkPlanContainer = () => {
           <ETTab
             label="Status"
             icon={
-              (ctx.statuses.length === 0 ||
-                ctx.statuses[0].is_approved === false) && <IndicatorIcon />
+              (ctx.statuses.length === 0 || ctx.isStatusOutOfDate()) && (
+                <IndicatorIcon />
+              )
             }
           />
           <ETTab label="Issues" />

@@ -6,35 +6,14 @@ import RecentStatus from "./RecentStatus";
 import { Box, Grid } from "@mui/material";
 import StatusHistory from "./StatusHistory";
 import WarningBox from "../../../shared/warningBox";
-import { dateUtils } from "../../../../utils";
-import moment from "moment";
 import { When } from "react-if";
 
 const StatusView = () => {
-  const { statuses } = React.useContext(WorkplanContext);
+  const { statuses, isStatusOutOfDate } = React.useContext(WorkplanContext);
   const { setShowStatusForm } = React.useContext(StatusContext);
 
   const onAddButtonClickHandler = () => {
     setShowStatusForm(true);
-  };
-
-  const STATUS_DATE_THRESHOLD = 7;
-
-  const isStatusOutOfDate = () => {
-    const lastApprovedStatus = statuses.find((status) => status.is_approved);
-
-    if (!lastApprovedStatus) {
-      return false;
-    }
-
-    const daysAgo = moment().subtract(STATUS_DATE_THRESHOLD, "days");
-    const NDaysAgo = dateUtils.diff(
-      daysAgo.toLocaleString(),
-      lastApprovedStatus?.approved_date,
-      "days"
-    );
-
-    return NDaysAgo > 0;
   };
 
   return (
