@@ -473,26 +473,6 @@ const EventListTable = ({
             },
           };
         }
-        // if (
-        //   row.original.event_configuration?.event_position ===
-        //   EventPosition.START
-        // ) {
-        //   return {
-        //     style: {
-        //       background: "#E2EFDA",
-        //     },
-        //   };
-        // }
-        // if (
-        //   row.original.event_configuration?.event_position === EventPosition.END
-        // ) {
-        //   return {
-        //     style: {
-        //       background: "#FFCCCC",
-        //     },
-        //   };
-        // }
-
         return {};
       }}
       state={{
