@@ -48,7 +48,9 @@ const WorkPlanContainer = () => {
         <ETHeading2 bold color={Palette.primary.main}>
           {ctx.work?.title}
         </ETHeading2>
-        <WorkState />
+        <ETCaption3 bold>
+          <WorkState work_state={ctx.work?.work_state} />
+        </ETCaption3>
       </Box>
       <Box
         sx={{

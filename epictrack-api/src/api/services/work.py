@@ -37,7 +37,7 @@ from api.models.work_status import WorkStatus
 from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from api.schemas.response import (
     ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
-    WorkPhaseAdditionalInfoResponseSchema, WorkStaffRoleReponseSchema, WorkStatusResponseSchema, WorkResponseSchema)
+    WorkPhaseAdditionalInfoResponseSchema, WorkStatusResponseSchema, WorkResponseSchema, StaffWorkRoleResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.services.event import EventService
@@ -72,10 +72,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
         work_staffs = WorkService.find_staff_for_works(work_ids)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
+        work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
+        work_phases = WorkPhaseService.find_multiple_works_phases_status(work_id_phase_id_dict)
 
         work: Work
         for work in works:
-            serialized_work = WorkService._serialize_work(work, work_staffs, works_statuses)
+            serialized_work = WorkService._serialize_work(work, work_staffs, works_statuses, work_phases.get(work.id))
             serialized_works.append(serialized_work)
 
         return {
@@ -84,23 +86,29 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @staticmethod
-    def _serialize_work(work, work_staffs, works_statuses):
+    def _serialize_work(work, work_staffs, works_statuses, work_phase):
         """Serialize a single work"""
-        phase_info = WorkPhaseService.find_work_phases_status(work.id, work.current_work_phase_id)
         staff_info = work_staffs.get(work.id, [])
         works_status = works_statuses.get(work.id, None)
 
         serialized_work = WorkResponseSchema(
             only=("id", "work_state", "work_type", "federal_involvement", "eao_team", "title", "is_active")).dump(work)
-        if phase_info[0]:
+        if work_phase[0]:
             serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
-                only=("work_phase.name", "total_number_of_days", "next_milestone", "milestone_progress", "days_left")
-            ).dump(phase_info[0])
+                only=(
+                    "work_phase.name",
+                    "total_number_of_days",
+                    "next_milestone",
+                    "milestone_progress",
+                    "days_left",
+                    "work_phase.phase.color"
+                )
+            ).dump(work_phase[0])
 
             serialized_work["phase_info"] = serialised_phase
 
         serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(works_status)
-        serialized_work["staff_info"] = WorkStaffRoleReponseSchema(many=True).dump(staff_info)
+        serialized_work["staff_info"] = StaffWorkRoleResponseSchema(many=True).dump(staff_info)
 
         return serialized_work
 
@@ -288,11 +296,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_work_staff(
-        cls, work_id: int, data: dict, commit: bool = True
+            cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Create Staff Work"""
         if cls.check_work_staff_existence(
-            work_id, data.get("staff_id"), data.get("role_id")
+                work_id, data.get("staff_id"), data.get("role_id")
         ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff = StaffWorkRole(
@@ -319,7 +327,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
         if cls.check_work_staff_existence(
-            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
+                work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
         ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff.is_active = data.get("is_active")
@@ -330,7 +338,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def copy_outcome_and_actions(
-        cls, template: dict, config: EventConfiguration
+            cls, template: dict, config: EventConfiguration
     ) -> None:
         """Copy the outcome and actions"""
         outcome_params = {"event_template_id": template.get("id")}
@@ -369,13 +377,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _prepare_regular_event(  # pylint: disable=too-many-arguments
-        cls,
-        name: str,
-        start_date: str,
-        number_of_days: int,
-        ev_config_id: int,
-        work_id: int,
-        source_e_id: int = None,
+            cls,
+            name: str,
+            start_date: str,
+            number_of_days: int,
+            ev_config_id: int,
+            work_id: int,
+            source_e_id: int = None,
     ) -> dict:
         """Prepare the event object"""
         return {
@@ -437,7 +445,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_workplan(
-        cls, work_phase_id: int
+            cls, work_phase_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         milestone_events = EventService.find_milestone_events_by_work_phase(
@@ -591,9 +599,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_indigenous_nation:
             raise ResourceNotFoundError("No first nation work association found")
         if cls.check_work_nation_existence(
-            work_indigenous_nation.work_id,
-            data.get("indigenous_nation_id"),
-            work_indigenous_nation_id,
+                work_indigenous_nation.work_id,
+                data.get("indigenous_nation_id"),
+                work_indigenous_nation_id,
         ):
             raise ResourceExistsError("First nation Work association already exists")
         work_indigenous_nation.is_active = data.get("is_active")
@@ -607,7 +615,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_first_nations_excel(
-        cls, work_id: int
+            cls, work_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         first_nations = cls.find_first_nations(work_id, None)

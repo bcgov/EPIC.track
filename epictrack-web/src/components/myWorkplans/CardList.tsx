@@ -1,19 +1,29 @@
 import { Grid } from "@mui/material";
 import NoResultsFound from "../NoResultsFound";
 import Card from "./Card";
+import { useContext } from "react";
+import { MyWorkplansContext } from "./MyWorkPlanContext";
 
 const CardList = () => {
-  const cards = [];
-  if (cards.length === 0) {
+  const { workplans } = useContext(MyWorkplansContext);
+
+  if (workplans.length === 0) {
     return <NoResultsFound />;
   }
 
   return (
-    <Grid container direction="row" spacing={2}>
-      {[1, 2, 3, 4, 5].map(() => {
+    <Grid
+      container
+      direction="row"
+      alignItems="flex-start"
+      justifyContent="space-evenly"
+      spacing={2}
+      columns={{ xs: 12 }}
+    >
+      {workplans.map((workplan) => {
         return (
-          <Grid item>
-            <Card />
+          <Grid item xs={4}>
+            <Card workplan={workplan} />
           </Grid>
         );
       })}

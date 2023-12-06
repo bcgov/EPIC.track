@@ -9,7 +9,7 @@ from api.models.event_template import EventTemplateVisibilityEnum, EventPosition
 from api.schemas import response as res
 
 
-# pylint: disable= import-outside-toplevel
+# pylint: disable= import-outside-toplevel, too-many-locals
 class AddPhase(ActionFactory):
     """Add a new phase"""
 
@@ -19,14 +19,14 @@ class AddPhase(ActionFactory):
         from api.services.work import WorkService
         from api.services.work_phase import WorkPhaseService
 
-        # Push the sort order of the existing work phases after the new ones
         number_of_phases = len(params)
+        # Push the sort order of the existing work phases after the new ones
         self.preset_sort_order(source_event, number_of_phases)
         phase_start_date = source_event.actual_date + timedelta(days=1)
         sort_order = source_event.event_configuration.work_phase.sort_order + 1
         total_number_of_days = 0
         for param in params:
-            work_phase_data = self.get_additional_params(param)
+            work_phase_data = self.get_additional_params(source_event, param)
             total_number_of_days = total_number_of_days + work_phase_data.get(
                 "number_of_days"
             )
@@ -130,7 +130,7 @@ class AddPhase(ActionFactory):
         )
         EventService.update_event(start_event_dict, start_event.id, True, commit=False)
 
-    def get_additional_params(self, params):
+    def get_additional_params(self, source_event, params):
         """Returns additional parameter"""
         query_params = {
             "name": params.get("phase_name"),

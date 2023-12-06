@@ -186,8 +186,9 @@ export const ETParagraph = React.forwardRef(
           <Typography
             color={color}
             sx={{
-              fontSize: "1rem",
-              lineHeight: "1.5rem",
+              fontSize: "15px",
+              lineHeight: "24px",
+              letterSpacing: "-0.32px",
               fontWeight: bold
                 ? MET_Header_Font_Weight_Bold
                 : MET_Header_Font_Weight_Regular,
@@ -224,6 +225,7 @@ export const ETCaption1 = ({
           ? MET_Header_Font_Weight_Bold
           : MET_Header_Font_Weight_Regular,
         fontFamily: MET_Header_Font_Family,
+        letterSpacing: "0.39px",
       }}
       variant="caption"
       {...rest}
