@@ -1,9 +1,11 @@
 """Disable work start date action handler"""
 from datetime import timedelta
+from sqlalchemy import and_
 
 from api.actions.base import ActionFactory
 from api.models import Event, EventConfiguration, WorkPhase, Work, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
+from api.models.event_template import EventTemplateVisibilityEnum, EventPositionEnum
 from api.schemas import response as res
 
 
@@ -17,13 +19,19 @@ class AddPhase(ActionFactory):
         from api.services.work import WorkService
         from api.services.work_phase import WorkPhaseService
 
-        self.preset_sort_order(source_event, len(params))
+        # Push the sort order of the existing work phases after the new ones
+        number_of_phases = len(params)
+        self.preset_sort_order(source_event, number_of_phases)
         phase_start_date = source_event.actual_date + timedelta(days=1)
         sort_order = source_event.event_configuration.work_phase.sort_order + 1
+        total_number_of_days = 0
         for param in params:
-            work_phase_data = self.get_additional_params(source_event, param)
+            work_phase_data = self.get_additional_params(param)
+            total_number_of_days = total_number_of_days + work_phase_data.get(
+                "number_of_days"
+            )
             end_date = phase_start_date + timedelta(
-                days=work_phase_data["number_of_days"]
+                days=work_phase_data.get("number_of_days")
             )
             work_phase_data.update(
                 {
@@ -50,9 +58,15 @@ class AddPhase(ActionFactory):
         current_work_phase = WorkPhaseService.find_current_work_phase(
             source_event.work_id
         )
+
         work = Work.find_by_id(source_event.work_id)
         work.current_work_phase_id = current_work_phase.id
         work.update(work.as_dict(recursive=False), commit=False)
+
+        if work_phase:
+            self.update_susequent_work_phases(
+                number_of_phases, total_number_of_days, work_phase
+            )
 
     def preset_sort_order(self, source_event, number_of_new_work_phases: int) -> None:
         """Adjust the sort order of the existing work phases for the new ones"""
@@ -64,7 +78,59 @@ class AddPhase(ActionFactory):
             {WorkPhase.sort_order: WorkPhase.sort_order + number_of_new_work_phases}
         )
 
-    def get_additional_params(self, source_event, params):
+    def update_susequent_work_phases(
+        self,
+        number_of_phases: int,
+        number_of_extra_days: int,
+        latet_work_phase_added: WorkPhase,
+    ):
+        """Update subsequent work phases with the number of additional days added by the phases"""
+        from api.services.event import EventService
+
+        # Find the next work phase after the new work phases
+        next_work_phase = (
+            db.session.query(WorkPhase)
+            .filter(
+                WorkPhase.work_id == latet_work_phase_added.work_id,
+                WorkPhase.sort_order > latet_work_phase_added.sort_order,
+                WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+            )
+            .order_by(WorkPhase.sort_order)
+            .first()
+        )
+
+        # Find the start event of the work phase
+        start_event = (
+            db.session.query(Event)
+            .join(
+                EventConfiguration,
+                and_(
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.is_active.is_(True),
+                    EventConfiguration.visibility
+                    == EventTemplateVisibilityEnum.MANDATORY.value,
+                    EventConfiguration.event_position == EventPositionEnum.START,
+                ),
+            )
+            .join(
+                WorkPhase,
+                and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.id == next_work_phase.id,
+                ),
+            )
+            .first()
+        )
+
+        # Update the start event anticipated date by the number of total days added by all the new phases
+        # This will push all the susequent work phases and all the events
+        start_event_dict = start_event.as_dict(recursive=False)
+        start_event_dict["anticipated_date"] = start_event.anticipated_date + timedelta(
+            days=number_of_extra_days + number_of_phases
+        )
+        EventService.update_event(start_event_dict, start_event.id, True, commit=False)
+
+    def get_additional_params(self, params):
         """Returns additional parameter"""
         query_params = {
             "name": params.get("phase_name"),

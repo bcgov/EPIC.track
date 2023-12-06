@@ -42,16 +42,18 @@ const AxiosErrorHandler = ({ ...props }) => {
         // Handle errors here
         if (error.response?.status) {
           switch (error.response.status) {
-            case 401:
-              // Handle Unauthenticated here
-              break;
-            case 403:
-              // Handle Unauthorized here
-              break;
-            // ... And so on
-            case 422:
-              console.log("ERROR ", error.response?.data);
-              break;
+            // case 401:
+            //   // Handle Unauthenticated here
+            //   break;
+            // case 403:
+            //   // Handle Unauthorized here
+            //   break;
+            // // ... And so on
+            // case 422:
+            //   console.log("ERROR ", error.response?.data);
+            //   break;
+            default:
+              throw error;
           }
         }
 
