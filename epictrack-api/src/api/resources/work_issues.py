@@ -92,7 +92,7 @@ class ApproveIssues(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.has_one_of_roles([[Role.CREATE.value]])
+    @auth.has_one_of_roles([Role.CREATE.value])
     @profiletime
     # pylint: disable=unused-argument
     def patch(work_id, issue_id, update_id):
