@@ -95,11 +95,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if phase_info[0]:
             serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
                 only=(
-                    "work_phase.name", 
-                    "total_number_of_days", 
-                    "next_milestone", 
-                    "milestone_progress", 
-                    "days_left", 
+                    "work_phase.name",
+                    "total_number_of_days",
+                    "next_milestone",
+                    "milestone_progress",
+                    "days_left",
                     "work_phase.phase.color"
                 )
             ).dump(phase_info[0])
