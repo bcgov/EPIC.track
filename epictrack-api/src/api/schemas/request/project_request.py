@@ -14,6 +14,8 @@
 """Project resource's input validations"""
 from marshmallow import fields, validate
 
+from api.schemas.validators import is_uppercase
+
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
@@ -56,9 +58,8 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
     )
     abbreviation = fields.Str(
         metadata={"description": "Abbreviation of the project"},
-        validate=validate.Length(max=150),
-        allow_none=True,
-        load_default=None,
+        validate=[validate.Length(max=150), is_uppercase],
+        required=True,
     )
     description = fields.Str(
         metadata={"description": "Description of project"},
@@ -161,4 +162,14 @@ class ProjectFirstNationsQueryParamSchema(RequestQueryParameterSchema):
         load_default=None,
         allow_none=True,
         missing=None
+    )
+
+
+class ProjectAbbreviationParameterSchema(RequestPathParameterSchema):
+    """project id path parameter schema"""
+
+    name = fields.Str(
+        metadata={"description": "Name of project"},
+        validate=validate.Length(max=150),
+        required=True,
     )

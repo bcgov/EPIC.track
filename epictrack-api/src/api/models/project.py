@@ -63,7 +63,7 @@ class Project(BaseModelVersioned):
     proponent_id = Column(ForeignKey("proponents.id"), nullable=False)
     region_id_env = Column(ForeignKey("regions.id"), nullable=True)
     region_id_flnro = Column(ForeignKey("regions.id"), nullable=True)
-    abbreviation = Column(String(10), nullable=True)
+    abbreviation = Column(String(10), nullable=True, unique=True)
     sub_type = relationship("SubType", foreign_keys=[sub_type_id], lazy="select")
     type = relationship("Type", foreign_keys=[type_id], lazy="select")
     proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")
@@ -81,6 +81,11 @@ class Project(BaseModelVersioned):
         if query.count() > 0:
             return True
         return False
+
+    @classmethod
+    def get_by_abbreviation(cls, abbreviation: str):
+        """Get project by abbreviation."""
+        return Project.query.filter_by(abbreviation=abbreviation).first()
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""

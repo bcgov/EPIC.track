@@ -7,7 +7,10 @@ import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import { DATE_FORMAT } from "../../../constants/application-constant";
+import {
+  DATE_FORMAT,
+  EARLIEST_WORK_DATE,
+} from "../../../constants/application-constant";
 import Moment from "moment";
 import { StatusContext } from "./StatusContext";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -19,7 +22,21 @@ const StatusForm = () => {
   const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
   const { status, onSave, isCloning } = useContext(StatusContext);
-  const { getWorkStatuses } = useContext(WorkplanContext);
+  const { getWorkStatuses, statuses } = useContext(WorkplanContext);
+
+  const getPostedDateMin = () => {
+    if (isCloning) {
+      return dayjs(statuses[0].posted_date);
+    }
+    if (statuses.length === 1 && statuses[0]?.is_approved) {
+      return dayjs(EARLIEST_WORK_DATE);
+    }
+
+    return dayjs(statuses[1]?.posted_date || EARLIEST_WORK_DATE);
+  };
+
+  const postedDateMin = getPostedDateMin();
+  const postedDateMax = dayjs(new Date()).add(7, "day");
 
   React.useEffect(() => {
     if (status) {
@@ -76,6 +93,8 @@ const StatusForm = () => {
             render={({ field: { onChange, value }, fieldState: { error } }) => (
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
+                  minDate={postedDateMin}
+                  maxDate={postedDateMax}
                   format={DATE_FORMAT}
                   slotProps={{
                     textField: {

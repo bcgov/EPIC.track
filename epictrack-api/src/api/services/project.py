@@ -19,11 +19,11 @@ import pandas as pd
 from flask import current_app
 from sqlalchemy import and_
 
-from api.exceptions import ResourceExistsError, ResourceNotFoundError
+from api.exceptions import BadRequestError, ResourceExistsError, ResourceNotFoundError
 from api.models import Project, db
-from api.models.project import ProjectStateEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
+from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.sub_types import SubType
@@ -31,6 +31,7 @@ from api.models.types import Type
 from api.models.work import Work
 from api.models.work_type import WorkType
 from api.utils.constants import PROJECT_STATE_ENUM_MAPS
+from api.utils.enums import ProjectCodeMethod
 from api.utils.token_info import TokenInfo
 
 
@@ -284,3 +285,36 @@ class ProjectService:
         if region is None:
             raise ResourceNotFoundError(f"Region with name {name} does not exist")
         return region.id
+
+    @classmethod
+    def _generate_project_abbreviation(cls, project_name: str, method: ProjectCodeMethod):
+        words = project_name.split()
+
+        # Method 1: 1st 3 LETTERS OF FIRST WORD IN NAME + FIRST 3 LETTERS OF 2nd WORD IN NAME
+        if method == ProjectCodeMethod.METHOD_1 and len(words) >= 2:
+            return f'{words[0][:3]}{words[1][:3]}'.upper()
+
+        # Method 2: 1st LETTER OF FIRST WORD IN NAME
+        # + 1st LETTER OF 2nd WORD IN NAME + 1st FOUR LETTERS OF THIRD WORD IN NAME
+        if method == ProjectCodeMethod.METHOD_2 and len(words) >= 3:
+            return f'{words[0][0]}{words[1][0]}{words[2][:4]}'.upper()
+
+        # Method 3: 1st 6 LETTERS OF FIRST WORD IN NAME
+        if method == ProjectCodeMethod.METHOD_3 and len(words[0]) >= 6:
+            return words[0][:6].upper()
+
+        return None
+
+    @classmethod
+    def create_project_abbreviation(cls, project_name: str):
+        """Return a project code based on the project name"""
+        for method in ProjectCodeMethod:
+            project_abbreviation = cls._generate_project_abbreviation(project_name, method)
+
+            if project_abbreviation is not None:
+                # Check if project abbreviation already exists
+                project = Project.get_by_abbreviation(project_abbreviation)
+                if not project:
+                    return project_abbreviation
+
+        raise BadRequestError("Could not generate a unique project abbreviation")

@@ -15,6 +15,8 @@ const CardFooter = ({ workplan }: CardProps) => {
     return false;
   });
 
+  console.log(workplan.staff_info);
+
   return (
     <Grid
       container
@@ -48,7 +50,7 @@ const CardFooter = ({ workplan }: CardProps) => {
               </Grid>
               <Grid item>
                 <ETParagraph color={Palette.neutral.dark}>
-                  {team_lead?.full_name}
+                  {team_lead?.staff.full_name}
                 </ETParagraph>
               </Grid>
             </Grid>
@@ -79,7 +81,7 @@ const CardFooter = ({ workplan }: CardProps) => {
                       >
                         <ETCaption2
                           bold
-                        >{`${staff.first_name[0]}${staff.last_name[0]}`}</ETCaption2>
+                        >{`${staff.staff.first_name[0]}${staff.staff.last_name[0]}`}</ETCaption2>
                       </Avatar>
                     );
                   })}

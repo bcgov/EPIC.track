@@ -29,7 +29,11 @@ export interface WorkPlan {
 
   staff_info: [
     {
-      full_name: string;
+      staff: {
+        first_name: string;
+        last_name: string;
+        full_name: string;
+      };
       role: {
         name: string;
       };
