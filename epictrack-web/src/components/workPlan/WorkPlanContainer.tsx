@@ -16,6 +16,7 @@ import { IconProps } from "../icons/type";
 import Issues from "./issues";
 import WorkState from "./WorkState";
 import ComingSoon from "../../routes/ComingSoon";
+import { isStatusOutOfDate } from "./status/shared";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -73,9 +74,10 @@ const WorkPlanContainer = () => {
           <ETTab
             label="Status"
             icon={
-              (ctx.statuses.length === 0 || ctx.isStatusOutOfDate()) && (
-                <IndicatorIcon />
-              )
+              (ctx.statuses.length === 0 ||
+                isStatusOutOfDate(
+                  ctx.statuses.find((status) => status.is_approved)
+                )) && <IndicatorIcon />
             }
           />
           <ETTab label="Issues" />
