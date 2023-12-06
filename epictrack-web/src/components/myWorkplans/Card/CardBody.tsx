@@ -1,4 +1,4 @@
-import { Box, Grid, SxProps } from "@mui/material";
+import { Box, Grid, SxProps, colors } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -13,6 +13,10 @@ const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
+  const phase_color =
+    workplan.phase_info.work_phase.phase.color === "#FFFFFF"
+      ? Palette.primary.dark
+      : workplan.phase_info.work_phase.phase.color;
   return (
     <Grid
       container
@@ -44,7 +48,7 @@ const CardBody = ({ workplan }: CardProps) => {
         sx={{ paddingBottom: "8px" }}
       >
         <Grid item sx={{ marginTop: "2px" }}>
-          <DotIcon />
+          <DotIcon fill={phase_color} />
         </Grid>
         <Grid item>
           <ETCaption2 bold color={Palette.neutral.main}>
