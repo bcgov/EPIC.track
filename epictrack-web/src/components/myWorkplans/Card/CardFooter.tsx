@@ -15,8 +15,6 @@ const CardFooter = ({ workplan }: CardProps) => {
     return false;
   });
 
-  console.log(workplan.staff_info);
-
   return (
     <Grid
       container

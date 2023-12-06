@@ -14,8 +14,15 @@ const Filters = () => {
       <Grid item>
         <NameFilter />
       </Grid>
-      <Grid item xs container spacing={2} justifyContent="flex-end">
-        <Grid item>
+      <Grid
+        item
+        xs
+        container
+        columns={14}
+        spacing={2}
+        justifyContent="flex-end"
+      >
+        <Grid item xs={2}>
           <FilterSelect
             options={[]}
             variant="inline"
@@ -28,7 +35,7 @@ const Filters = () => {
             info={true}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <FilterSelect
             options={[]}
             variant="inline"
@@ -41,7 +48,7 @@ const Filters = () => {
             info={true}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <FilterSelect
             options={[]}
             variant="inline"
@@ -54,7 +61,7 @@ const Filters = () => {
             info={true}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <FilterSelect
             options={[]}
             variant="inline"
@@ -67,7 +74,7 @@ const Filters = () => {
             info={true}
           />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <FilterSelect
             options={[]}
             variant="inline"

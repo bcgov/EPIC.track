@@ -7,9 +7,10 @@ import { Box, Grid } from "@mui/material";
 import StatusHistory from "./StatusHistory";
 import WarningBox from "../../../shared/warningBox";
 import { When } from "react-if";
+import { isStatusOutOfDate } from "../shared";
 
 const StatusView = () => {
-  const { statuses, isStatusOutOfDate } = React.useContext(WorkplanContext);
+  const { statuses } = React.useContext(WorkplanContext);
   const { setShowStatusForm } = React.useContext(StatusContext);
 
   const onAddButtonClickHandler = () => {
@@ -26,7 +27,11 @@ const StatusView = () => {
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       </When>
-      <When condition={isStatusOutOfDate()}>
+      <When
+        condition={isStatusOutOfDate(
+          statuses.find((status) => status.is_approved)
+        )}
+      >
         <Box sx={{ paddingBottom: "16px" }}>
           <WarningBox
             title="The Work status is out of date"
