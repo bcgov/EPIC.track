@@ -148,17 +148,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             total_days = (
                     work_phase.end_date.date() - work_phase.start_date.date()
             ).days
-            work_phase_events = list(
-                filter(
-                    lambda x, _work_phase_id=work_phase.id: x.event_configuration.work_phase_id
-                    == _work_phase_id,
-                    events,
-                )
-            )
-            work_phase_events = sorted(
-                work_phase_events,
-                key=functools.cmp_to_key(EventService.event_compare_func),
-            )
+            work_phase_events = cls._filter_sort_events(events, work_phase)
+
             suspended_days = functools.reduce(
                 lambda x, y: x + y,
                 map(
@@ -176,17 +167,27 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             )
             if next_milestone_event:
                 result_item["next_milestone"] = next_milestone_event.name
-            total_number_of_milestones = len(work_phase_events)
-            completed_ones = len(
-                list(filter(lambda x: x.actual_date is not None, work_phase_events))
-            )
-            result_item["milestone_progress"] = (
-                                                        completed_ones / total_number_of_milestones
-                                                ) * 100
+            result_item["milestone_progress"] = cls._calculate_milestone_progress(work_phase_events)
             days_left = cls._get_days_left(suspended_days, total_days, work_phase)
             result_item["days_left"] = days_left
             result.append(result_item)
         return result
+
+    @classmethod
+    def _calculate_milestone_progress(cls, work_phase_events):
+        total_number_of_milestones = len(work_phase_events)
+        completed_ones = sum(1 for x in work_phase_events if x.actual_date is not None)
+        milestone_progress = (completed_ones / total_number_of_milestones) * 100
+        return milestone_progress
+
+    @classmethod
+    def _filter_sort_events(cls, events, work_phase):
+        work_phase_events = [x for x in events if x.event_configuration.work_phase_id == work_phase.id]
+        work_phase_events = sorted(
+            work_phase_events,
+            key=functools.cmp_to_key(EventService.event_compare_func)
+        )
+        return work_phase_events
 
     @classmethod
     def _get_days_left(cls, suspended_days, total_days, work_phase):
