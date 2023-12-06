@@ -762,8 +762,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
             parent_event_configs = list(
                 filter(
                     lambda x, _work_phase_id=work_phase.id: not x.parent_id and
-                                                            x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
-                                                            x.work_phase_id == _work_phase_id,
+                    x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
+                    x.work_phase_id == _work_phase_id,
                     event_configurations,
                 )
             )

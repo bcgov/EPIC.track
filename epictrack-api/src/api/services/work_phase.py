@@ -155,8 +155,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 map(
                     lambda x: x.number_of_days
                     if x.event_configuration.event_type_id
-                       == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                       and x.actual_date is not None
+                    == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                    and x.actual_date is not None
                     else 0,
                     work_phase_events,
                 ),
