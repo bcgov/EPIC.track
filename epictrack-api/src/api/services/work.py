@@ -37,7 +37,7 @@ from api.models.work_status import WorkStatus
 from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from api.schemas.response import (
     ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
-    WorkPhaseAdditionalInfoResponseSchema, WorkStaffRoleReponseSchema, WorkStatusResponseSchema, WorkResponseSchema)
+    WorkPhaseAdditionalInfoResponseSchema, WorkStatusResponseSchema, WorkResponseSchema, StaffWorkRoleResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.services.event import EventService
@@ -72,10 +72,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
         work_staffs = WorkService.find_staff_for_works(work_ids)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
+        work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
+        work_phases = WorkPhaseService.find_work_phases_status(work_id_phase_id_dict)
 
         work: Work
         for work in works:
-            serialized_work = WorkService._serialize_work(work, work_staffs, works_statuses)
+            serialized_work = WorkService._serialize_work(work, work_staffs, works_statuses, work_phases.get(work.id))
             serialized_works.append(serialized_work)
 
         return {
@@ -84,23 +86,22 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @staticmethod
-    def _serialize_work(work, work_staffs, works_statuses):
+    def _serialize_work(work, work_staffs, works_statuses, work_phase):
         """Serialize a single work"""
-        phase_info = WorkPhaseService.find_work_phases_status(work.id, work.current_work_phase_id)
         staff_info = work_staffs.get(work.id, [])
         works_status = works_statuses.get(work.id, None)
 
         serialized_work = WorkResponseSchema(
             only=("id", "work_state", "work_type", "federal_involvement", "eao_team", "title", "is_active")).dump(work)
-        if phase_info[0]:
+        if work_phase[0]:
             serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
                 only=("work_phase.name", "total_number_of_days", "next_milestone", "milestone_progress", "days_left")
-            ).dump(phase_info[0])
+            ).dump(work_phase[0])
 
             serialized_work["phase_info"] = serialised_phase
 
         serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(works_status)
-        serialized_work["staff_info"] = WorkStaffRoleReponseSchema(many=True).dump(staff_info)
+        serialized_work["staff_info"] = StaffWorkRoleResponseSchema(many=True).dump(staff_info)
 
         return serialized_work
 
