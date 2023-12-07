@@ -34,6 +34,7 @@ from api.models.indigenous_work import IndigenousWork
 from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work_status import WorkStatus
+from api.models.work_type import WorkType
 from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from api.schemas.response import (
     ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
@@ -829,3 +830,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
                                 )
                             )
                         )
+
+    @classmethod
+    def find_all_work_types(cls):
+        """Get all work types"""
+        work_types = WorkType.find_all()
+        return {
+            work_types: [work_type.as_dict() for work_type in work_types]
+        }

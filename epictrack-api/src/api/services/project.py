@@ -318,3 +318,11 @@ class ProjectService:
                     return project_abbreviation
 
         raise BadRequestError("Could not generate a unique project abbreviation")
+
+    @classmethod
+    def find_all_project_types(cls):
+        """Get all project types"""
+        project_types = Type.find_all(default_filters=False)
+        return {
+            "project_types": [project_type.as_dict() for project_type in project_types]
+        }

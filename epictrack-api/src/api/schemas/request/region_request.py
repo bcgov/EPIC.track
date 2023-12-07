@@ -11,29 +11,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Enum definitions."""
-from enum import Enum
+"""Type resource's input validations"""
+from marshmallow import fields, validate
+
+from .base import RequestPathParameterSchema
 
 
-class HttpMethod(Enum):
-    """Http methods"""
+class RegionTypePathParameterSchema(RequestPathParameterSchema):
+    """Type id path parameter schema"""
 
-    GET = 'GET'
-    PUT = 'PUT'
-    POST = 'POST'
-    PATCH = 'PATCH'
-    DELETE = 'DELETE'
-
-
-class ProjectCodeMethod(Enum):
-    """Project abbreviation code generation methods"""
-
-    METHOD_1 = 1
-    METHOD_2 = 2
-    METHOD_3 = 3
-
-class RegionEntityType(Enum):
-    """Region entity types"""
-    
-    ENV = "ENV"
-    FLNR = "FLNR"
+    type = fields.Str(
+        metadata={"description": "The type of the region"},
+        validate=validate.Length(min=1), required=True
+    )

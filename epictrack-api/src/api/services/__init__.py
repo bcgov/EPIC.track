@@ -38,3 +38,5 @@ from .act_section import ActSectionService
 from .work_status import WorkStatusService
 from .work_issues import WorkIssuesService
 from .event import EventService
+from .region import RegionService
+from .eao_team_service import EAOTeamService

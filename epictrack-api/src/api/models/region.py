@@ -28,6 +28,11 @@ class Region(db.Model, CodeTableVersioned):
     entity = Column(String())
     sort_order = Column(Integer, nullable=False)
 
+    @classmethod
+    def find_all_by_region_type(cls, region_type: str):
+        """Find all regions by region type."""
+        return cls.query.filter_by(entity=region_type).all()
+
     def as_dict(self):
         """Return Json representation."""
         result = CodeTableVersioned.as_dict(self)

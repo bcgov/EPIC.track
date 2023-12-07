@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exposes all the request validation schemas"""
+from api.schemas.request.region_request import RegionTypePathParameterSchema
 from .act_section_request import ActSectionQueryParameterSchema
 from .action_configuration_request import ActionConfigurationBodyParameterSchema
 from .action_template_request import ActionTemplateBodyParameterSchema
