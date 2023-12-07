@@ -83,5 +83,8 @@ const Endpoints = {
   Workplan: {
     GET_ALL: "/works/dashboard",
   },
+  Position: {
+    GET_ALL: "positions",
+  },
 };
 export default Endpoints;
