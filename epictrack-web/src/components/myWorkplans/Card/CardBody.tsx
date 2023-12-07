@@ -27,13 +27,21 @@ const CardBody = ({ workplan }: CardProps) => {
       }}
       gap={1}
     >
-      <Grid item container direction="row" spacing={1}>
-        <Grid item>
-          <ETHeading4 bold color={Palette.neutral.dark}>
+      <Grid item container spacing={1}>
+        <Grid item xs={6}>
+          <ETHeading4
+            bold
+            color={Palette.neutral.dark}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {workplan.work_type.name}
           </ETHeading4>
         </Grid>
-        <Grid item>
+        <Grid item container xs={6}>
           <ETCaption1 bold>
             <WorkState work_state={workplan.work_state} />
           </ETCaption1>
