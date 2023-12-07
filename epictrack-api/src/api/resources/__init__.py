@@ -37,6 +37,7 @@ from .ops import API as OPS_API
 from .outcome import API as OUTCOME_API
 from .outcome_configuration import API as OUTCOME_CONFIGURATION_API
 from .phase import API as PHASE_API
+from .position import API as POSITION_API
 from .project import API as PROJECTS_API
 from .proponent import API as PROPONENT_API
 from .reminder_configuration import API as REMINDER_CONFIGURATION_API
@@ -110,3 +111,4 @@ API.add_namespace(ACT_SECTION_API, path="/act-sections")
 API.add_namespace(WORK_STATUS_API, path='/work/<int:work_id>/statuses')
 API.add_namespace(WORK_ISSUES_API, path='/work/<int:work_id>/issues')
 API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')
+API.add_namespace(POSITION_API, path='/positions')
