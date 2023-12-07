@@ -39,7 +39,7 @@ class ActionConfiguration(BaseModelVersioned):
         actions = db.session.query(
             ActionConfiguration
         ).filter(
-            ActionConfiguration.outcome_id.in_(outcome_ids),
+            ActionConfiguration.outcome_configuration_id.in_(outcome_ids),
             ActionConfiguration.is_active.is_(True)
         ).all()  # pylint: disable=no-member
         return actions

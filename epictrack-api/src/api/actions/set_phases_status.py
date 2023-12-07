@@ -44,6 +44,10 @@ class SetPhasesStatus(ActionFactory):
             for event in events_to_be_updated:
                 event.is_active = False
                 event.update(event.as_dict(recursive=False), commit=False)
+            # Set the current work phase completed as there will be no more
+            db.session.query(WorkPhase).filter(
+                WorkPhase.id == source_event.event_configuration.work_phase_id
+            ).update({WorkPhase.is_completed: True})
         self._deactivate_phases_and_events(work_phase_ids)
 
     def get_additional_params(self, source_event: Event, params) -> int:
