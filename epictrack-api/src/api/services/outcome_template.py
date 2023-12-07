@@ -37,5 +37,7 @@ class OutcomeTemplateService:
     @classmethod
     def find_all_outcomes(cls, params: dict) -> [OutcomeTemplate]:
         """Return all active outcomes"""
-        outcomes = OutcomeTemplate.find_by_criteria(params)
+        outcomes = OutcomeTemplate.find_by_params(
+            {"event_template_id": params.get("event_template_id")}
+        )
         return outcomes

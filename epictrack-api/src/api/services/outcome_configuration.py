@@ -23,7 +23,9 @@ class OutcomeConfigurationService:  # pylint: disable=too-few-public-methods
     """Service to manage outcome related operations"""
 
     @classmethod
-    def find_by_configuration_id(cls, configuration_id: int) -> List[OutcomeConfiguration]:
+    def find_by_configuration_id(
+        cls, configuration_id: int
+    ) -> List[OutcomeConfiguration]:
         """Find outcomes by configuration_id"""
         current_app.logger.debug(
             f"Find outcomes by configuration id {configuration_id}"
@@ -32,3 +34,11 @@ class OutcomeConfigurationService:  # pylint: disable=too-few-public-methods
             {"event_configuration_id": configuration_id}
         )
         return outcome_configurations
+
+    @classmethod
+    def find_all_outcomes(cls, params: dict) -> [OutcomeConfiguration]:
+        """Return all active outcomes"""
+        outcomes = OutcomeConfiguration.find_by_params(
+            {"event_configuration_id": params.get("event_configuration_id")}
+        )
+        return outcomes

@@ -100,35 +100,36 @@ class AddPhase(ActionFactory):
         )
 
         # Find the start event of the work phase
-        start_event = (
-            db.session.query(Event)
-            .join(
-                EventConfiguration,
-                and_(
-                    Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.is_active.is_(True),
-                    EventConfiguration.visibility
-                    == EventTemplateVisibilityEnum.MANDATORY.value,
-                    EventConfiguration.event_position == EventPositionEnum.START,
-                ),
+        if next_work_phase:
+            start_event = (
+                db.session.query(Event)
+                .join(
+                    EventConfiguration,
+                    and_(
+                        Event.event_configuration_id == EventConfiguration.id,
+                        EventConfiguration.is_active.is_(True),
+                        EventConfiguration.visibility
+                        == EventTemplateVisibilityEnum.MANDATORY.value,
+                        EventConfiguration.event_position == EventPositionEnum.START,
+                    ),
+                )
+                .join(
+                    WorkPhase,
+                    and_(
+                        EventConfiguration.work_phase_id == WorkPhase.id,
+                        WorkPhase.id == next_work_phase.id,
+                    ),
+                )
+                .first()
             )
-            .join(
-                WorkPhase,
-                and_(
-                    EventConfiguration.work_phase_id == WorkPhase.id,
-                    WorkPhase.id == next_work_phase.id,
-                ),
-            )
-            .first()
-        )
 
-        # Update the start event anticipated date by the number of total days added by all the new phases
-        # This will push all the susequent work phases and all the events
-        start_event_dict = start_event.as_dict(recursive=False)
-        start_event_dict["anticipated_date"] = start_event.anticipated_date + timedelta(
-            days=number_of_extra_days + number_of_phases
-        )
-        EventService.update_event(start_event_dict, start_event.id, True, commit=False)
+            # Update the start event anticipated date by the number of total days added by all the new phases
+            # This will push all the susequent work phases and all the events
+            start_event_dict = start_event.as_dict(recursive=False)
+            start_event_dict["anticipated_date"] = start_event.anticipated_date + timedelta(
+                days=number_of_extra_days + number_of_phases
+            )
+            EventService.update_event(start_event_dict, start_event.id, True, commit=False)
 
     def get_additional_params(self, source_event, params):
         """Returns additional parameter"""

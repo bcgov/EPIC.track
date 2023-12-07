@@ -97,11 +97,14 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
     @classmethod
     def find_work_phases_status(cls, work_id: int):
         """Return the work phases with additional information"""
-        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}).get(work_id, [])
+        return WorkPhaseService.find_multiple_works_phases_status({work_id: None}).get(
+            work_id, []
+        )
 
     @classmethod
-    def find_multiple_works_phases_status(cls, work_params_dict: Dict[str, Union[int, None]]) -> Dict[
-            int, List[Dict[str, Any]]]:
+    def find_multiple_works_phases_status(
+        cls, work_params_dict: Dict[str, Union[int, None]]
+    ) -> Dict[int, List[Dict[str, Any]]]:
         """Return a dictionary with work_id and its work phases with additional information."""
         result_dict = {}
         work_ids = list(work_params_dict.keys())
@@ -109,8 +112,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         work_phases_dict = cls._query_work_phases(work_ids)
 
         for work_id, work_phase_id in work_params_dict.items():
-            result_dict[work_id] = cls._find_work_phase_status(work_id, work_phase_id,
-                                                               work_phases_dict.get(work_id, []))
+            result_dict[work_id] = cls._find_work_phase_status(
+                work_id, work_phase_id, work_phases_dict.get(work_id, [])
+            )
 
         return result_dict
 
@@ -146,7 +150,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         for work_phase in work_phases:
             result_item = {"work_phase": work_phase}
             total_days = (
-                    work_phase.end_date.date() - work_phase.start_date.date()
+                work_phase.end_date.date() - work_phase.start_date.date()
             ).days
             work_phase_events = cls._filter_sort_events(events, work_phase)
 
@@ -167,7 +171,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             )
             if next_milestone_event:
                 result_item["next_milestone"] = next_milestone_event.name
-            result_item["milestone_progress"] = cls._calculate_milestone_progress(work_phase_events)
+            result_item["milestone_progress"] = cls._calculate_milestone_progress(
+                work_phase_events
+            )
             days_left = cls._get_days_left(suspended_days, total_days, work_phase)
             result_item["days_left"] = days_left
             result.append(result_item)
@@ -182,24 +188,28 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def _filter_sort_events(cls, events, work_phase):
-        work_phase_events = [x for x in events if x.event_configuration.work_phase_id == work_phase.id]
+        work_phase_events = [
+            x for x in events if x.event_configuration.work_phase_id == work_phase.id
+        ]
         work_phase_events = sorted(
-            work_phase_events,
-            key=functools.cmp_to_key(EventService.event_compare_func)
+            work_phase_events, key=functools.cmp_to_key(EventService.event_compare_func)
         )
         return work_phase_events
 
     @classmethod
     def _get_days_left(cls, suspended_days, total_days, work_phase):
-        if work_phase.work.current_work_phase_id == work_phase.id:
+        if (
+            work_phase.work.current_work_phase_id == work_phase.id
+            and work_phase.is_completed is False
+        ):
             if work_phase.is_suspended:
                 days_passed = (
-                        work_phase.suspended_date.date() - work_phase.start_date.date()
+                    work_phase.suspended_date.date() - work_phase.start_date.date()
                 ).days
             else:
                 days_passed = (
-                        datetime.datetime.now(timezone.utc).date()
-                        - work_phase.start_date.date()
+                    datetime.datetime.now(timezone.utc).date()
+                    - work_phase.start_date.date()
                 ).days
                 days_passed = 0 if days_passed < 0 else days_passed
             days_left = (total_days - suspended_days) - days_passed
