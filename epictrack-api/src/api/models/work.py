@@ -112,7 +112,11 @@ class Work(BaseModelVersioned):
         return False
 
     @classmethod
-    def fetch_all_works(cls, pagination_options: PaginationOptions, search_filters: dict =None) -> Tuple[List[Work], int]:
+    def fetch_all_works(
+        cls,
+        pagination_options: PaginationOptions,
+        search_filters: dict = None
+    ) -> Tuple[List[Work], int]:
         """Fetch all active works."""
         query = cls.query.filter_by(is_active=True, is_deleted=False)
 

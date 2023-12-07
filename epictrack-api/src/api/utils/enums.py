@@ -32,6 +32,7 @@ class ProjectCodeMethod(Enum):
     METHOD_2 = 2
     METHOD_3 = 3
 
+
 class RegionEntityType(Enum):
     """Region entity types"""
 
