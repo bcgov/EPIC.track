@@ -34,6 +34,6 @@ class ProjectCodeMethod(Enum):
 
 class RegionEntityType(Enum):
     """Region entity types"""
-    
+
     ENV = "ENV"
     FLNR = "FLNR"

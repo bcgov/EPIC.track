@@ -20,6 +20,11 @@ class EAOTeamService:
     """Service to manage EAO Team related operations."""
 
     @staticmethod
+    def find_team_by_id(team_id: int):
+        """Get team by id."""
+        return EAOTeam.find_by_id(team_id)
+
+    @staticmethod
     def find_all_teams():
         """Get all teams."""
         return EAOTeam.find_all()

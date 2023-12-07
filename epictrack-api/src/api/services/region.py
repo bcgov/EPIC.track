@@ -20,6 +20,11 @@ class RegionService:
     """Service to manage Region related operations."""
 
     @staticmethod
+    def find_all_regions():
+        """Get all regions."""
+        return Region.find_all()
+
+    @staticmethod
     def find_regions_by_type(region_type: str):
         """Get all regions by region type."""
         return Region.find_all_by_region_type(region_type)

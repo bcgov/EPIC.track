@@ -18,7 +18,6 @@ from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 from api.schemas.region import RegionSchema
 
-from api.services import SubTypeService
 from api.services.region import RegionService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache

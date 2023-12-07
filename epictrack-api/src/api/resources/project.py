@@ -211,7 +211,7 @@ class ProjectAbbreviation(Resource):
 
 @cors_preflight("GET, DELETE, POST")
 @API.route("/types", methods=["GET", "POST", "OPTIONS"])
-class Projects(Resource):
+class ProjectTypes(Resource):
     """Endpoint resource to manage projects."""
 
     @staticmethod
@@ -220,11 +220,8 @@ class Projects(Resource):
     @profiletime
     def get():
         """Return all project types."""
-        try:
-            project_types = ProjectService.find_all_project_types()
-            return (
-                jsonify(project_types),
-                HTTPStatus.OK,
-            )
-        except Exception as e:
-            return str(e), HTTPStatus.INTERNAL_SERVER_ERROR
+        project_types = ProjectService.find_all_project_types()
+        return (
+            jsonify(project_types),
+            HTTPStatus.OK,
+        )

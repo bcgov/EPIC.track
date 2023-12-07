@@ -134,16 +134,16 @@ class Work(BaseModelVersioned):
             return query
 
         query = cls._filter_by_search_text(query, search_filters.get('search_text'))
-        
+
         query = cls._filter_by_eao_team(query, search_filters.get('teams'))
-        
+
         query = cls._filter_by_work_type(query, search_filters.get('work_type_ids'))
-        
+
         query = cls._filter_by_project_type(query, search_filters.get('project_type_ids'))
 
         query = cls._filter_by_env_regions(query, search_filters.get('env_regions'))
 
-        query = cls._filter_by_work_states(search_filters.get('work_states'))
+        query = cls._filter_by_work_states(query, search_filters.get('work_states'))
 
         return query
 
@@ -180,7 +180,7 @@ class Work(BaseModelVersioned):
         if work_type_ids:
             query = query.filter(Work.work_type_id.in_(work_type_ids))
         return query
-    
+
     @classmethod
     def _filter_by_project_type(cls, query, project_type_ids):
         if project_type_ids:
@@ -191,7 +191,7 @@ class Work(BaseModelVersioned):
             )
             query = query.filter(subquery)
         return query
-    
+
     @classmethod
     def _filter_by_env_regions(cls, query, env_regions):
         if env_regions:
@@ -202,7 +202,7 @@ class Work(BaseModelVersioned):
             )
             query = query.filter(subquery)
         return query
-    
+
     @classmethod
     def _filter_by_work_states(cls, query, work_states):
         if work_states:

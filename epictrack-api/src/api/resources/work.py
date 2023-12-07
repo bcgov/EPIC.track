@@ -454,7 +454,7 @@ class ValidateWorkNation(Resource):
 
 @cors_preflight("GET, POST")
 @API.route("/types", methods=["GET", "POST", "OPTIONS"])
-class Works(Resource):
+class WorkTypes(Resource):
     """Endpoint resource to manage works."""
 
     @staticmethod
