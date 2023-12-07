@@ -1,4 +1,4 @@
-import { Box, Grid, SxProps } from "@mui/material";
+import { Box, Grid, SxProps, colors } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -7,12 +7,15 @@ import { CardProps } from "./type";
 import WorkState from "../../workPlan/WorkState";
 import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
+import { isStatusOutOfDate } from "../../workPlan/status/shared";
+import { Status } from "../../../models/status";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
+  const phase_color = workplan.phase_info.work_phase.phase.color;
   return (
     <Grid
       container
@@ -44,10 +47,10 @@ const CardBody = ({ workplan }: CardProps) => {
         sx={{ paddingBottom: "8px" }}
       >
         <Grid item sx={{ marginTop: "2px" }}>
-          <DotIcon />
+          <DotIcon fill={phase_color} />
         </Grid>
         <Grid item>
-          <ETCaption2 bold color={Palette.neutral.main}>
+          <ETCaption2 bold color={phase_color}>
             {workplan.phase_info.work_phase.name}
           </ETCaption2>
         </Grid>
@@ -93,8 +96,8 @@ const CardBody = ({ workplan }: CardProps) => {
           </ETCaption1>
         </Grid>
         <Grid item sx={{ marginTop: "2px" }}>
-          {}
-          <IndicatorSmallIcon />
+          {(isStatusOutOfDate(workplan.status_info as Status) ||
+            !workplan.status_info?.posted_date) && <IndicatorSmallIcon />}
         </Grid>
       </Grid>
       <Grid item sx={{ height: "49px", width: "100%" }}>

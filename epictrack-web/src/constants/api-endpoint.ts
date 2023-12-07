@@ -91,5 +91,8 @@ const Endpoints = {
   REGION: {
     GET_ALL: "/regions",
   },
+  Position: {
+    GET_ALL: "positions",
+  },
 };
 export default Endpoints;

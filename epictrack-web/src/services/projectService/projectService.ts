@@ -5,8 +5,8 @@ import { MasterBase } from "../../models/type";
 import { ListType } from "../../models/code";
 
 class ProjectService implements ServiceBase {
-  async getAll() {
-    return await http.GetRequest(Endpoints.Projects.PROJECTS);
+  async getAll(return_type?: string) {
+    return await http.GetRequest(Endpoints.Projects.PROJECTS, { return_type });
   }
 
   async getById(id: string) {

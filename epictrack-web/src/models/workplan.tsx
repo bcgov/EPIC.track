@@ -16,6 +16,9 @@ export interface WorkPlan {
     total_number_of_days: number;
     work_phase: {
       name: string;
+      phase: {
+        color: string;
+      };
     };
   };
 

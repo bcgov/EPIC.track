@@ -283,7 +283,11 @@ const EventForm = ({
   }, [configurations, event]);
 
   useEffect(() => {
-    getConfigurations();
+    if (!Boolean(event)) {
+      getConfigurations();
+    } else if (event) {
+      setConfigurations([(event as MilestoneEvent).event_configuration]);
+    }
   }, [event]);
 
   const getConfigurations = async () => {
@@ -711,10 +715,13 @@ const EventForm = ({
               <DecisionInput
                 isFormFieldsLocked={isFormFieldsLocked}
                 configurationId={selectedConfiguration?.id}
-                decisionMakerPositionId={
+                decisionMakerPositionId={[
                   ctx.work?.decision_maker_position_id ||
-                  POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR
-                }
+                    POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
+                  POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
+                  POSITION_ENUM.ADM,
+                  POSITION_ENUM.MINISTER,
+                ]}
               />
             </When>
             <When
@@ -752,7 +759,7 @@ const EventForm = ({
         />
         <TrackDialog
           open={showEventPushConfirmation}
-          dialogTitle={"Update this Milestone  Only?"}
+          dialogTitle={"Update this Milestone only?"}
           disableEscapeKeyDown
           fullWidth
           maxWidth="sm"

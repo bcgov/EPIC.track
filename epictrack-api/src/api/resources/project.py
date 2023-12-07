@@ -40,10 +40,12 @@ class Projects(Resource):
     def get():
         """Return all projects."""
         projects = ProjectService.find_all()
-        return (
-            jsonify(res.ProjectResponseSchema(many=True).dump(projects)),
-            HTTPStatus.OK,
-        )
+        return_type = request.args.get("return_type", None)
+        if return_type == "list_type":
+            schema = res.ListTypeResponseSchema(many=True)
+        else:
+            schema = res.ProjectResponseSchema(many=True)
+        return jsonify(schema.dump(projects)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -201,7 +203,9 @@ class ProjectAbbreviation(Resource):
     def post():
         """Create new project abbreviation"""
         request_json = req.ProjectAbbreviationParameterSchema().load(API.payload)
-        project_abbreviation = ProjectService.create_project_abbreviation(request_json.get("name"))
+        project_abbreviation = ProjectService.create_project_abbreviation(
+            request_json.get("name")
+        )
         return project_abbreviation, HTTPStatus.CREATED
 
 

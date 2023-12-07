@@ -23,10 +23,29 @@ from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
-from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
+from api.exceptions import (
+    ResourceExistsError,
+    ResourceNotFoundError,
+    UnprocessableEntityError,
+)
 from api.models import (
-    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
-    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
+    ActionConfiguration,
+    ActionTemplate,
+    CalendarEvent,
+    EAOTeam,
+    Event,
+    EventConfiguration,
+    OutcomeConfiguration,
+    Project,
+    Role,
+    Staff,
+    StaffWorkRole,
+    Work,
+    WorkCalendarEvent,
+    WorkPhase,
+    WorkStateEnum,
+    db,
+)
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
@@ -35,14 +54,24 @@ from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
-from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
+from api.schemas.request import (
+    ActionConfigurationBodyParameterSchema,
+    OutcomeConfigurationBodyParameterSchema,
+)
 from api.schemas.response import (
-    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
-    WorkPhaseAdditionalInfoResponseSchema, WorkStatusResponseSchema, WorkResponseSchema, StaffWorkRoleResponseSchema)
+    ActionTemplateResponseSchema,
+    EventTemplateResponseSchema,
+    OutcomeTemplateResponseSchema,
+    WorkPhaseAdditionalInfoResponseSchema,
+    WorkStatusResponseSchema,
+    WorkResponseSchema,
+    StaffWorkRoleResponseSchema,
+)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.schemas.work_type import WorkTypeSchema
 from api.services.event import EventService
+from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
@@ -75,17 +104,18 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work_staffs = WorkService.find_staff_for_works(work_ids)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
         work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
-        work_phases = WorkPhaseService.find_multiple_works_phases_status(work_id_phase_id_dict)
+        work_phases = WorkPhaseService.find_multiple_works_phases_status(
+            work_id_phase_id_dict
+        )
 
         work: Work
         for work in works:
-            serialized_work = WorkService._serialize_work(work, work_staffs, works_statuses, work_phases.get(work.id))
+            serialized_work = WorkService._serialize_work(
+                work, work_staffs, works_statuses, work_phases.get(work.id)
+            )
             serialized_works.append(serialized_work)
 
-        return {
-            'items': serialized_works,
-            'total': total
-        }
+        return {"items": serialized_works, "total": total}
 
     @staticmethod
     def _serialize_work(work, work_staffs, works_statuses, work_phase):
@@ -94,7 +124,16 @@ class WorkService:  # pylint: disable=too-many-public-methods
         works_status = works_statuses.get(work.id, None)
 
         serialized_work = WorkResponseSchema(
-            only=("id", "work_state", "work_type", "federal_involvement", "eao_team", "title", "is_active")).dump(work)
+            only=(
+                "id",
+                "work_state",
+                "work_type",
+                "federal_involvement",
+                "eao_team",
+                "title",
+                "is_active",
+            )
+        ).dump(work)
         if work_phase[0]:
             serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
                 only=(
@@ -103,14 +142,18 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "next_milestone",
                     "milestone_progress",
                     "days_left",
-                    "work_phase.phase.color"
+                    "work_phase.phase.color",
                 )
             ).dump(work_phase[0])
 
             serialized_work["phase_info"] = serialised_phase
 
-        serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(works_status)
-        serialized_work["staff_info"] = StaffWorkRoleResponseSchema(many=True).dump(staff_info)
+        serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(
+            works_status
+        )
+        serialized_work["staff_info"] = StaffWorkRoleResponseSchema(many=True).dump(
+            staff_info
+        )
 
         return serialized_work
 
@@ -207,18 +250,18 @@ class WorkService:  # pylint: disable=too-many-public-methods
             if sort_order == 1:
                 work.current_work_phase_id = work_phase_id
             sort_order = sort_order + 1
-        role_id = CodeService.find_code_values_by_type(
-            "roles",
-            {
-                "name": "Team Lead"
-            }
-        ).get("codes")[0].get("id")
+        role_id = (
+            CodeService.find_code_values_by_type("roles", {"name": "Team Lead"})
+            .get("codes")[0]
+            .get("id")
+        )
         WorkService.create_work_staff(
             work.id,
             {
                 "staff_id": payload["work_lead_id"],
-                "role_id": role_id, "is_active": True
-            }
+                "role_id": role_id,
+                "is_active": True,
+            },
         )
         if commit:
             db.session.commit()
@@ -243,8 +286,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return query.all()
 
     @classmethod
-    def find_staff_for_works(cls, work_ids: List[int], is_active: Optional[bool] = None) -> Dict[
-            int, List[StaffWorkRole]]:
+    def find_staff_for_works(
+        cls, work_ids: List[int], is_active: Optional[bool] = None
+    ) -> Dict[int, List[StaffWorkRole]]:
         """Active staff assigned on multiple works"""
         query = (
             db.session.query(StaffWorkRole, Work)
@@ -281,7 +325,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_staff_existence(
-            cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ) -> bool:
         """Check the existence of staff in work"""
         query = db.session.query(StaffWorkRole).filter(
@@ -298,11 +342,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_work_staff(
-            cls, work_id: int, data: dict, commit: bool = True
+        cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Create Staff Work"""
         if cls.check_work_staff_existence(
-                work_id, data.get("staff_id"), data.get("role_id")
+            work_id, data.get("staff_id"), data.get("role_id")
         ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff = StaffWorkRole(
@@ -329,7 +373,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
         if cls.check_work_staff_existence(
-                work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
+            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
         ):
             raise ResourceExistsError("Staff Work association already exists")
         work_staff.is_active = data.get("is_active")
@@ -340,13 +384,19 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def copy_outcome_and_actions(
-            cls, template: dict, config: EventConfiguration
+        cls, template: dict, config: EventConfiguration, from_template: bool
     ) -> None:
         """Copy the outcome and actions"""
-        outcome_params = {"event_template_id": template.get("id")}
-        outcomes = OutcomeTemplateService.find_all_outcomes(outcome_params)
-        outcome_ids = list(map(lambda x: x.id, outcomes))
-        actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
+        if from_template:
+            outcome_params = {"event_template_id": template.get("id")}
+            outcomes = OutcomeTemplateService.find_all_outcomes(outcome_params)
+            outcome_ids = list(map(lambda x: x.id, outcomes))
+            actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
+        if not from_template:
+            outcome_params = {"event_configuration_id": template.get("id")}
+            outcomes = OutcomeConfigurationService.find_all_outcomes(outcome_params)
+            outcome_ids = list(map(lambda x: x.id, outcomes))
+            actions = ActionConfiguration.find_by_outcome_ids(outcome_ids)
         for outcome in outcomes:
             outcome_json = OutcomeTemplateResponseSchema().dump(outcome)
             outcome_json["event_configuration_id"] = config.id
@@ -355,7 +405,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             ).flush()
             outcome_actions = list(
                 filter(
-                    lambda x, _outcome_id=outcome.id: x.outcome_id == _outcome_id,
+                    lambda x, _outcome_id=outcome.id: x.outcome_id
+                    if from_template
+                    else x.outcome_configuration_id == _outcome_id,
                     actions,
                 )
             )
@@ -379,13 +431,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _prepare_regular_event(  # pylint: disable=too-many-arguments
-            cls,
-            name: str,
-            start_date: str,
-            number_of_days: int,
-            ev_config_id: int,
-            work_id: int,
-            source_e_id: int = None,
+        cls,
+        name: str,
+        start_date: str,
+        number_of_days: int,
+        ev_config_id: int,
+        work_id: int,
+        source_e_id: int = None,
     ) -> dict:
         """Prepare the event object"""
         return {
@@ -447,7 +499,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_workplan(
-            cls, work_phase_id: int
+        cls, work_phase_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         milestone_events = EventService.find_milestone_events_by_work_phase(
@@ -569,7 +621,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_work_indigenous_nation(
-            cls, work_id: int, data: dict, commit: bool = True
+        cls, work_id: int, data: dict, commit: bool = True
     ) -> IndigenousWork:
         """Create Indigenous Work"""
         if cls.check_work_nation_existence(work_id, data.get("indigenous_nation_id")):
@@ -590,7 +642,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def update_work_indigenous_nation(
-            cls, work_indigenous_nation_id: int, data: dict
+        cls, work_indigenous_nation_id: int, data: dict
     ) -> IndigenousWork:
         """Update work indigenous nation"""
         work_indigenous_nation = (
@@ -601,9 +653,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_indigenous_nation:
             raise ResourceNotFoundError("No first nation work association found")
         if cls.check_work_nation_existence(
-                work_indigenous_nation.work_id,
-                data.get("indigenous_nation_id"),
-                work_indigenous_nation_id,
+            work_indigenous_nation.work_id,
+            data.get("indigenous_nation_id"),
+            work_indigenous_nation_id,
         ):
             raise ResourceExistsError("First nation Work association already exists")
         work_indigenous_nation.is_active = data.get("is_active")
@@ -617,7 +669,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_first_nations_excel(
-            cls, work_id: int
+        cls, work_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         first_nations = cls.find_first_nations(work_id, None)
@@ -697,7 +749,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_nation_existence(
-            cls, work_id: int, nation_id: int, work_nation_id: int = None
+        cls, work_id: int, nation_id: int, work_nation_id: int = None
     ) -> bool:
         """Check the existence of first nation in work"""
         query = db.session.query(IndigenousWork).filter(
@@ -713,7 +765,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_template(
-            cls, work_phase: WorkPhase, phase_event_templates: [dict]
+        cls, work_phase: WorkPhase, phase_event_templates: [dict]
     ) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))
@@ -725,7 +777,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_configurations(
-            cls, work_phase: WorkPhase, event_configs: [dict], from_template: bool = True
+        cls, work_phase: WorkPhase, event_configs: [dict], from_template: bool = True
     ) -> [EventConfiguration]:
         """Create event configurations from existing configurations/templates"""
         event_configurations: [EventConfiguration] = []
@@ -736,13 +788,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
             )
             p_result.flush()
             event_configurations.append(p_result)
-            cls.copy_outcome_and_actions(parent_config, p_result)
+            cls.copy_outcome_and_actions(parent_config, p_result, from_template)
             for child in list(
-                    filter(
-                        lambda x, _parent_config_id=parent_config["id"]: x["parent_id"] ==
-                        _parent_config_id,
-                        event_configs,
-                    )
+                filter(
+                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"]
+                    == _parent_config_id,
+                    event_configs,
+                )
             ):
                 child["parent_id"] = p_result.id
                 child["work_phase_id"] = work_phase.id
@@ -752,20 +804,20 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     )
                 )
                 event_configurations.append(c_result)
-                cls.copy_outcome_and_actions(child, c_result)
+                cls.copy_outcome_and_actions(child, c_result, from_template)
         return event_configurations
 
     @classmethod
     def create_events_by_configuration(
-            cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
+        cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
     ) -> None:
         """Create events by given event configurations"""
         if work_phase.visibility.value == PhaseVisibilityEnum.REGULAR.value:
             parent_event_configs = list(
                 filter(
-                    lambda x, _work_phase_id=work_phase.id: not x.parent_id and
-                    x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
-                    x.work_phase_id == _work_phase_id,
+                    lambda x, _work_phase_id=work_phase.id: not x.parent_id
+                    and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                    and x.work_phase_id == _work_phase_id,
                     event_configurations,
                 )
             )
@@ -787,9 +839,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 )
                 c_events = list(
                     filter(
-                        lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id ==
-                        _parent_id and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value and
-                        x.work_phase_id == _work_phase_id,
+                        lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id
+                        == _parent_id
+                        and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                        and x.work_phase_id == _work_phase_id,
                         event_configurations,
                     )
                 )
@@ -798,7 +851,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         days=cls._find_start_at_value(c_event_conf.start_at, 0)
                     )
                     if (
-                            c_event_conf.event_category_id == EventCategoryEnum.CALENDAR.value
+                        c_event_conf.event_category_id
+                        == EventCategoryEnum.CALENDAR.value
                     ):
                         cal_event = CalendarEvent.flush(
                             CalendarEvent(

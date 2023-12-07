@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -52,6 +52,8 @@ import EventForm from "./EventForm";
 import { EventContext } from "./EventContext";
 import { When } from "react-if";
 import WarningBox from "../../shared/warningBox";
+import { useAppDispatch } from "../../../hooks";
+import { setLoadingState } from "../../../services/loadingService";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -84,6 +86,7 @@ const IButton = styled(IconButton)({
 });
 
 const EventList = () => {
+  const dispatch = useAppDispatch();
   const [events, setEvents] = React.useState<EventsGridModel[]>([]);
   const [milestoneEvent, setMilestoneEvent] = React.useState<MilestoneEvent>();
   const [taskEvent, setTaskEvent] = React.useState<TaskEvent>();
@@ -392,16 +395,18 @@ const EventList = () => {
     } catch (error) {}
   }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
 
-  const onRowClick = (event: any, row: EventsGridModel) => {
+  const onRowClick = async (event: any, row: EventsGridModel) => {
     event.preventDefault();
+    dispatch(setLoadingState(true));
     if (row.type === EVENT_TYPE.MILESTONE) {
-      getMilestoneEvent(row.id);
+      await getMilestoneEvent(row.id);
       setShowMilestoneForm(row.type === EVENT_TYPE.MILESTONE);
     }
     if (row.type === EVENT_TYPE.TASK) {
-      getTaskEvent(row.id);
+      await getTaskEvent(row.id);
       setShowTaskForm(row.type === EVENT_TYPE.TASK);
     }
+    dispatch(setLoadingState(false));
     setShowDeleteMilestoneButton(
       row.type === EVENT_TYPE.MILESTONE &&
         !(row.visibility === EventTemplateVisibility.MANDATORY)

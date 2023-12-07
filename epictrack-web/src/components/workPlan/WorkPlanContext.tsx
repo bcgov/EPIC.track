@@ -19,8 +19,6 @@ import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
 import statusService from "../../services/statusService/statusService";
-import dateUtils from "../../utils/dateUtils";
-import moment from "moment";
 
 interface WorkplanContextProps {
   selectedWorkPhase?: WorkPhaseAdditionalInfo;
@@ -41,7 +39,6 @@ interface WorkplanContextProps {
   getWorkStatuses: () => Promise<void>;
   issues: WorkIssue[];
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
-  isStatusOutOfDate: () => boolean;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -64,7 +61,6 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   issues: [],
   setIssues: () => ({}),
   getWorkStatuses: () => new Promise((resolve) => resolve),
-  isStatusOutOfDate: () => false,
 });
 
 export const WorkplanProvider = ({
@@ -172,25 +168,6 @@ export const WorkplanProvider = ({
     }
   };
 
-  const STATUS_DATE_THRESHOLD = 7;
-
-  const isStatusOutOfDate = () => {
-    const lastApprovedStatus = statuses.find((status) => status.is_approved);
-
-    if (!lastApprovedStatus) {
-      return false;
-    }
-
-    const daysAgo = moment().subtract(STATUS_DATE_THRESHOLD, "days");
-    const NDaysAgo = dateUtils.diff(
-      daysAgo.toLocaleString(),
-      lastApprovedStatus?.posted_date,
-      "days"
-    );
-
-    return NDaysAgo > 0;
-  };
-
   return (
     <WorkplanContext.Provider
       value={{
@@ -210,7 +187,6 @@ export const WorkplanProvider = ({
         statuses,
         issues,
         setIssues,
-        isStatusOutOfDate,
       }}
     >
       {children}

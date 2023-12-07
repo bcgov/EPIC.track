@@ -13,6 +13,7 @@ import staffService from "../../services/staffService/staffService";
 import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { ControlledMaskTextField } from "../shared/maskTextField";
+import positionService from "../../services/positionService";
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -71,9 +72,9 @@ export default function StaffForm({ ...props }) {
   }, [ctx.item]);
 
   const getPositions = async () => {
-    const positionResult = await codeService.getCodes("positions");
+    const positionResult = await positionService.getAll();
     if (positionResult.status === 200) {
-      setPositions((positionResult.data as never)["codes"]);
+      setPositions(positionResult.data as ListType[]);
     }
   };
   React.useEffect(() => {
