@@ -28,6 +28,7 @@ export interface EventsGridModel {
 export interface MilestoneEvent {
   name: string;
   event_configuration_id: number;
+  event_configuration: EventConfiguration;
   anticipated_date: string;
   actual_date: string;
   id: number;

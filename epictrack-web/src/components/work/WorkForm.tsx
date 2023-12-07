@@ -26,6 +26,7 @@ import LockClosed from "../../assets/images/lock-closed.svg";
 import projectService from "../../services/projectService/projectService";
 import ControlledDatePicker from "../shared/controlledInputComponents/ControlledDatePicker";
 import { MIN_WORK_START_DATE } from "./constant";
+import { sort } from "../../utils";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -146,9 +147,11 @@ export default function WorkForm({ ...props }) {
   };
 
   const getProjects = async () => {
-    const projectResult = await projectService.getAll();
+    const projectResult = await projectService.getAll("list_type");
     if (projectResult.status === 200) {
-      setProjects(projectResult.data as ListType[]);
+      let projects = projectResult.data as ListType[];
+      projects = sort(projects, "name");
+      setProjects(projects);
     }
   };
 

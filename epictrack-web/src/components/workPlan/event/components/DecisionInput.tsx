@@ -12,7 +12,7 @@ import { Staff } from "../../../../models/staff";
 
 export interface DecisionInputProps {
   configurationId?: number;
-  decisionMakerPositionId: number;
+  decisionMakerPositionId: number[];
   isFormFieldsLocked: boolean;
 }
 const DecisionInput = ({
@@ -24,7 +24,6 @@ const DecisionInput = ({
   const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
   const {
     register,
-    unregister,
     formState: { errors },
   } = useFormContext();
   React.useEffect(() => {
@@ -50,7 +49,7 @@ const DecisionInput = ({
   const getDecisionMakers = async () => {
     try {
       const result = await staffService.getStaffByPosition(
-        decisionMakerPositionId.toString()
+        decisionMakerPositionId.join(",")
       );
       if (result.status === 200) {
         setDecisionMakers(result.data as Staff[]);

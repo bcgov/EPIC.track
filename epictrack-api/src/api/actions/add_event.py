@@ -23,13 +23,14 @@ class AddEvent(ActionFactory):
     def run(self, source_event: Event, params) -> None:
         """Adds a new event based on params"""
         from api.services.event import EventService
+
         for param in params:
             event_data, work_phase_id = self.get_additional_params(source_event, param)
             event_data.update(
                 {
                     "is_active": True,
                     "work_id": source_event.work_id,
-                    "anticipated_date": find_event_date(source_event)
+                    "anticipated_date": find_event_date(source_event),
                 }
             )
             new_event = EventService.create_event(
@@ -79,7 +80,9 @@ class AddEvent(ActionFactory):
         template_json = EventTemplateResponseSchema().dump(
             old_event_config.event_template
         )
-        WorkService.copy_outcome_and_actions(template_json, event_configuration)
+        WorkService.copy_outcome_and_actions(
+            template_json, event_configuration, from_template=False
+        )
         event_data = {
             "event_configuration_id": event_configuration.id,
             "name": event_configuration.name,

@@ -13,7 +13,10 @@
 # limitations under the License.
 """Exposes all of the Services used in the API."""
 
+from .act_section import ActSectionService
+from .action_template import ActionTemplateService
 from .code import CodeService
+from .event import EventService
 from .event_configuration import EventConfigurationService
 from .event_template import EventTemplateService
 from .indigenous_nation import IndigenousNationService
@@ -21,6 +24,7 @@ from .inspection import InspectionService
 from .lookups import LookupService
 from .outcome_template import OutcomeTemplateService
 from .phaseservice import PhaseService
+from .position import PositionService
 from .project import ProjectService
 from .proponent import ProponentService
 from .reminder_configuration import ReminderConfigurationService
@@ -32,9 +36,6 @@ from .task import TaskService
 from .task_template import TaskTemplateService
 from .user import UserService
 from .work import WorkService
-from .work_phase import WorkPhaseService
-from .action_template import ActionTemplateService
-from .act_section import ActSectionService
-from .work_status import WorkStatusService
 from .work_issues import WorkIssuesService
-from .event import EventService
+from .work_phase import WorkPhaseService
+from .work_status import WorkStatusService

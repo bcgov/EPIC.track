@@ -263,7 +263,7 @@ class EventService:
     ) -> None:
         # pylint: disable=too-many-arguments
         """Process the event date logic"""
-        cls._end_event_anticipated_change_rule(event, event_old)
+        cls._end_event_anticipated_change_rule(event, event_old, current_work_phase)
         all_work_phases = WorkPhase.find_by_params(
             {
                 "work_id": current_work_phase.work_id,
@@ -604,10 +604,13 @@ class EventService:
         return phase_events
 
     @classmethod
-    def _end_event_anticipated_change_rule(cls, event: Event, event_old: Event) -> None:
+    def _end_event_anticipated_change_rule(
+        cls, event: Event, event_old: Event, current_work_phase: WorkPhase
+    ) -> None:
         """Anticipated date of end event cannot be changed"""
         if (
-            event.event_configuration.event_position.value
+            current_work_phase.legislated
+            and event.event_configuration.event_position.value
             == EventPositionEnum.END.value
             and (event_old.anticipated_date.date() - event.anticipated_date.date()).days
             != 0

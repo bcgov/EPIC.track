@@ -19,7 +19,11 @@ const PhaseContainer = () => {
   >([]);
 
   useEffect(() => {
-    if (ctx.work?.current_work_phase_id && ctx.workPhases.length > 0) {
+    if (
+      ctx.work?.current_work_phase_id &&
+      ctx.workPhases.length > 0 &&
+      !ctx.selectedWorkPhase
+    ) {
       const phase = ctx.workPhases.find(
         (workPhase) =>
           workPhase.work_phase.id === ctx.work?.current_work_phase_id
