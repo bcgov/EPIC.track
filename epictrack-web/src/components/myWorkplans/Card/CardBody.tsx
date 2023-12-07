@@ -54,44 +54,73 @@ const CardBody = ({ workplan }: CardProps) => {
         spacing={1}
         sx={{ paddingBottom: "8px" }}
       >
-        <Grid item sx={{ marginTop: "2px" }}>
+        <Grid item container sx={{ marginTop: "2px" }} xs={1}>
           <DotIcon fill={phase_color} />
         </Grid>
-        <Grid item>
-          <ETCaption2 bold color={phase_color}>
+        <Grid item container xs={6}>
+          <ETCaption2
+            bold
+            color={phase_color}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {workplan.phase_info.work_phase.name}
           </ETCaption2>
         </Grid>
-        <Grid item sx={{ marginTop: "4px" }}>
+        <Grid item container sx={{ marginTop: "4px" }} xs={1}>
           <ClockIcon />
         </Grid>
-        <Grid item>
-          <ETCaption2 bold color={Palette.neutral.main}>
+        <Grid item container xs={4}>
+          <ETCaption2
+            bold
+            color={Palette.neutral.main}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
             {workplan.phase_info.days_left}/
             {workplan.phase_info.total_number_of_days} days left
           </ETCaption2>
         </Grid>
       </Grid>
       <Grid item container direction="row" spacing={1}>
-        <Grid item>
+        <Grid
+          item
+          sx={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           <ETCaption1 color={Palette.neutral.main}>
-            UPCOMING MILESTONE
-          </ETCaption1>
-        </Grid>
-        <Grid item>
-          <ETCaption1 color={Palette.neutral.main}>
-            {dayjs(new Date())
+            {`UPCOMING MILESTONE ${dayjs(new Date())
               .add(workplan.phase_info.days_left, "days")
               .format(MONTH_DAY_YEAR)
-              .toUpperCase()}
+              .toUpperCase()}`}
           </ETCaption1>
         </Grid>
       </Grid>
-      <Grid item sx={{ paddingBottom: "8px" }}>
-        <ETParagraph bold color={Palette.neutral.dark}>
-          {workplan.phase_info.next_milestone}
-        </ETParagraph>
+      <Grid item container direction="row" spacing={1}>
+        <Grid item sx={{ overflow: "hidden" }}>
+          <ETParagraph
+            bold
+            color={Palette.neutral.dark}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {workplan.phase_info.next_milestone}
+          </ETParagraph>
+        </Grid>
       </Grid>
+
       <Grid item container direction="row" spacing={1}>
         <Grid item>
           <ETCaption1 color={Palette.neutral.main}>

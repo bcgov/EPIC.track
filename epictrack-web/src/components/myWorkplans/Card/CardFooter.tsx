@@ -10,10 +10,13 @@ const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
 const CardFooter = ({ workplan }: CardProps) => {
   const team_lead = workplan.staff_info.find((staff: any) => {
     if (staff.role.name === "Team Lead") {
-      return staff.full_name;
+      return staff.staff.full_name;
     }
     return false;
   });
+
+  console.log(team_lead);
+  console.log(workplan);
 
   return (
     <Grid
