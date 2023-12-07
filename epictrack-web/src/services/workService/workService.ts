@@ -5,6 +5,8 @@ import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Work } from "../../models/work";
+import { ListType } from "../../models/code";
+import { WorkType } from "../../models/workType";
 
 class WorkService implements ServiceBase {
   async getAll() {
@@ -202,6 +204,12 @@ class WorkService implements ServiceBase {
       indigenous_nation_id,
       work_indigenous_nation_id,
     });
+  }
+
+  async getWorkTypes() {
+    return await http.GetRequest<WorkType[]>(
+      Endpoints.Works.GET_ALL_WORK_TYPES
+    );
   }
 }
 export default new WorkService();

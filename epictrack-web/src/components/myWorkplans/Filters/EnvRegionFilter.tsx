@@ -3,7 +3,7 @@ import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import EAOTeamService from "../../../services/eao_team";
 import { OptionType } from "../../shared/filterSelect/type";
 
-export const TeamFilter = () => {
+export const EnvRegionFilter = () => {
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -30,15 +30,14 @@ export const TeamFilter = () => {
     <FilterSelect
       options={options}
       variant="inline"
-      placeholder={"Team"}
+      placeholder="Region"
       filterAppliedCallback={() => {
         return;
       }}
-      name="team"
+      name="region"
       isMulti
       info={true}
       isLoading={loading}
-      isDisabled={loading}
     />
   );
 };

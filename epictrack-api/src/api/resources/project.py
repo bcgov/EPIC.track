@@ -215,9 +215,12 @@ class Projects(Resource):
     @auth.require
     @profiletime
     def get():
-        """Return all projects."""
-        project_types = ProjectService.find_all_project_types()
-        return (
-            jsonify(project_types),
-            HTTPStatus.OK,
-        )
+        """Return all project types."""
+        try:
+            project_types = ProjectService.find_all_project_types()
+            return (
+                jsonify(project_types),
+                HTTPStatus.OK,
+            )
+        except Exception as e:
+            return str(e), HTTPStatus.INTERNAL_SERVER_ERROR

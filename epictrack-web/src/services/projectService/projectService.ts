@@ -2,6 +2,7 @@ import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
 import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
+import { ListType } from "../../models/code";
 
 class ProjectService implements ServiceBase {
   async getAll() {
@@ -72,6 +73,10 @@ class ProjectService implements ServiceBase {
         name,
       })
     );
+  }
+
+  async getProjectTypes() {
+    return await http.GetRequest<ListType[]>(Endpoints.Projects.PROJECT_TYPES);
   }
 }
 

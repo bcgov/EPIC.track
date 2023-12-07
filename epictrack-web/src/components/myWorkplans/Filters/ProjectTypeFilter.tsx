@@ -1,21 +1,21 @@
 import { useEffect, useState } from "react";
+import projectService from "../../../services/projectService/projectService";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
-import EAOTeamService from "../../../services/eao_team";
 import { OptionType } from "../../shared/filterSelect/type";
 
-export const TeamFilter = () => {
+export const ProjectTypeFilter = () => {
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchOptions = async () => {
     setLoading(true);
     try {
-      const response = await EAOTeamService.getEaoTeams();
-      const teams = response.data.map((team) => ({
-        label: team.name,
-        value: team.id.toString(),
+      const response = await projectService.getProjectTypes();
+      const types = response.data.map((type) => ({
+        label: type.name,
+        value: type.id.toString(),
       }));
-      setOptions(teams);
+      setOptions(types);
       setLoading(false);
     } catch (error) {
       console.log(error);
@@ -30,15 +30,14 @@ export const TeamFilter = () => {
     <FilterSelect
       options={options}
       variant="inline"
-      placeholder={"Team"}
+      placeholder="Project Type"
       filterAppliedCallback={() => {
         return;
       }}
-      name="team"
+      name="projectType"
       isMulti
       info={true}
       isLoading={loading}
-      isDisabled={loading}
     />
   );
 };

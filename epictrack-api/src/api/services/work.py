@@ -41,6 +41,7 @@ from api.schemas.response import (
     WorkPhaseAdditionalInfoResponseSchema, WorkStatusResponseSchema, WorkResponseSchema, StaffWorkRoleResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
+from api.schemas.work_type import WorkTypeSchema
 from api.services.event import EventService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_template import OutcomeTemplateService
@@ -835,6 +836,4 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def find_all_work_types(cls):
         """Get all work types"""
         work_types = WorkType.find_all()
-        return {
-            work_types: [work_type.as_dict() for work_type in work_types]
-        }
+        return WorkTypeSchema(many=True).dump(work_types)

@@ -1,7 +1,11 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { NameFilter } from "./NameFilter";
+import { TeamFilter } from "./TeamFilter";
+import { WorkTypeFilter } from "./WorkType";
+import { ProjectTypeFilter } from "./ProjectTypeFilter";
+import { WorkStateFilter } from "./WorkStateFilter";
+import { EnvRegionFilter } from "./EnvRegionFilter";
 
 const Filters = () => {
   return (
@@ -16,69 +20,19 @@ const Filters = () => {
       </Grid>
       <Grid item xs container spacing={2} justifyContent="flex-end">
         <Grid item>
-          <FilterSelect
-            options={[]}
-            variant="inline"
-            placeholder="Team"
-            filterAppliedCallback={() => {
-              return;
-            }}
-            name="team"
-            isMulti
-            info={true}
-          />
+          <TeamFilter />
         </Grid>
         <Grid item>
-          <FilterSelect
-            options={[]}
-            variant="inline"
-            placeholder="Work Type"
-            filterAppliedCallback={() => {
-              return;
-            }}
-            name="work_type"
-            isMulti
-            info={true}
-          />
+          <WorkTypeFilter />
         </Grid>
         <Grid item>
-          <FilterSelect
-            options={[]}
-            variant="inline"
-            placeholder="Project Type"
-            filterAppliedCallback={() => {
-              return;
-            }}
-            name="project_type"
-            isMulti
-            info={true}
-          />
+          <ProjectTypeFilter />
         </Grid>
         <Grid item>
-          <FilterSelect
-            options={[]}
-            variant="inline"
-            placeholder="ENV Region"
-            filterAppliedCallback={() => {
-              return;
-            }}
-            name="env_region"
-            isMulti
-            info={true}
-          />
+          <EnvRegionFilter />
         </Grid>
         <Grid item>
-          <FilterSelect
-            options={[]}
-            variant="inline"
-            placeholder="Work State"
-            filterAppliedCallback={() => {
-              return;
-            }}
-            name="work_state"
-            isMulti
-            info={true}
-          />
+          <WorkStateFilter />
         </Grid>
       </Grid>
     </Grid>

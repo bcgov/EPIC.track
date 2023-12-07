@@ -9,6 +9,7 @@ const Endpoints = {
   },
   Projects: {
     PROJECTS: "projects",
+    PROJECT_TYPES: "projects/types",
     WORK_TYPES: "projects/:project_id/work-types",
     FIRST_NATIONS: "projects/:project_id/first-nations",
     FIRST_NATION_AVAILABLE: "projects/:project_id/first-nation-available",
@@ -36,6 +37,7 @@ const Endpoints = {
     DOWNLOAD_WORK_FIRST_NATIONS: "works/:work_id/first-nations/download",
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
+    GET_ALL_WORK_TYPES: "works/types",
   },
   WorkIssues: {
     ISSUES: "work/:work_id/issues",
@@ -82,6 +84,12 @@ const Endpoints = {
   },
   Workplan: {
     GET_ALL: "/works/dashboard",
+  },
+  EAO_TEAMS: {
+    GET_ALL: "/eao-teams",
+  },
+  REGION: {
+    GET_ALL: "/regions",
   },
 };
 export default Endpoints;

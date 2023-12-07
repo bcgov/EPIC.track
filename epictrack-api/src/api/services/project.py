@@ -13,6 +13,7 @@
 # limitations under the License.
 """Service to manage Project."""
 from typing import IO, List
+from api.schemas.types import TypeSchema
 
 import numpy as np
 import pandas as pd
@@ -322,7 +323,5 @@ class ProjectService:
     @classmethod
     def find_all_project_types(cls):
         """Get all project types"""
-        project_types = Type.find_all(default_filters=False)
-        return {
-            "project_types": [project_type.as_dict() for project_type in project_types]
-        }
+        project_types = Type.find_all(default_filters=False)        
+        return TypeSchema(many=True).dump(project_types)
