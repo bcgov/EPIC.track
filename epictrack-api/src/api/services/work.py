@@ -382,7 +382,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def copy_outcome_and_actions(
-        cls, template: dict, config: EventConfiguration, from_template: bool
+        cls, template: dict, config: EventConfiguration, from_template: bool = True
     ) -> None:
         """Copy the outcome and actions"""
         if from_template:
@@ -403,7 +403,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             ).flush()
             outcome_actions = list(
                 filter(
-                    lambda x, _outcome_id=outcome.id: x.outcome_id
+                    lambda x, _outcome_id=outcome.id: x.outcome_id == _outcome_id
                     if from_template
                     else x.outcome_configuration_id == _outcome_id,
                     actions,
