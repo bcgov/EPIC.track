@@ -75,25 +75,24 @@ const CardBody = ({ workplan }: CardProps) => {
               {workplan?.phase_info?.work_phase.name}
             </ETCaption2>
           </Grid>
+          <Grid item container sx={{ marginTop: "4px" }} xs={1}>
+            <ClockIcon />
+          </Grid>
+          <Grid item container xs={4}>
+            <ETCaption2
+              bold
+              color={Palette.neutral.main}
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {workplan?.phase_info?.days_left}/
+              {workplan?.phase_info?.total_number_of_days} days left
+            </ETCaption2>
+          </Grid>
         </When>
-
-        <Grid item container sx={{ marginTop: "4px" }} xs={1}>
-          <ClockIcon />
-        </Grid>
-        <Grid item container xs={4}>
-          <ETCaption2
-            bold
-            color={Palette.neutral.main}
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {workplan.phase_info.days_left}/
-            {workplan.phase_info.total_number_of_days} days left
-          </ETCaption2>
-        </Grid>
       </Grid>
       <Grid item container direction="row" spacing={1}>
         <Grid
@@ -106,7 +105,7 @@ const CardBody = ({ workplan }: CardProps) => {
         >
           <ETCaption1 color={Palette.neutral.main}>
             {`UPCOMING MILESTONE ${dayjs(new Date())
-              .add(workplan.phase_info.days_left, "days")
+              .add(workplan?.phase_info?.days_left, "days")
               .format(MONTH_DAY_YEAR)
               .toUpperCase()}`}
           </ETCaption1>
