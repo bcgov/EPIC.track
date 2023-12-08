@@ -9,13 +9,14 @@ import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 import { isStatusOutOfDate } from "../../workPlan/status/shared";
 import { Status } from "../../../models/status";
+import { When } from "react-if";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
-  const phase_color = workplan.phase_info.work_phase.phase.color;
+  const phase_color = workplan?.phase_info?.work_phase?.phase.color;
   const statusOutOfDate =
     isStatusOutOfDate(workplan.status_info as Status) ||
     !workplan.status_info?.posted_date;
@@ -57,22 +58,25 @@ const CardBody = ({ workplan }: CardProps) => {
         spacing={1}
         sx={{ paddingBottom: "8px" }}
       >
-        <Grid item container sx={{ marginTop: "2px" }} xs={1}>
-          <DotIcon fill={phase_color} />
-        </Grid>
-        <Grid item container xs={6}>
-          <ETCaption2
-            bold
-            color={phase_color}
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {workplan.phase_info.work_phase.name}
-          </ETCaption2>
-        </Grid>
+        <When condition={"phase_info" in workplan}>
+          <Grid item container sx={{ marginTop: "2px" }} xs={1}>
+            <DotIcon fill={phase_color} />
+          </Grid>
+          <Grid item container xs={6}>
+            <ETCaption2
+              bold
+              color={phase_color}
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {workplan?.phase_info?.work_phase.name}
+            </ETCaption2>
+          </Grid>
+        </When>
+
         <Grid item container sx={{ marginTop: "4px" }} xs={1}>
           <ClockIcon />
         </Grid>
