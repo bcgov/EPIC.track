@@ -15,9 +15,6 @@ const CardFooter = ({ workplan }: CardProps) => {
     return false;
   });
 
-  console.log(team_lead);
-  console.log(workplan);
-
   return (
     <Grid
       container
@@ -72,6 +69,7 @@ const CardFooter = ({ workplan }: CardProps) => {
                   {workplan.staff_info.map((staff: any) => {
                     return (
                       <Avatar
+                        key={staff.staff.id}
                         sx={{
                           bgcolor: Palette.neutral.bg.main,
                           color: Palette.neutral.dark,

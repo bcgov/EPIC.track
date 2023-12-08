@@ -5,7 +5,7 @@ import workplanService from "../../services/workplanService";
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
   loadingWorkplans: boolean;
-  loadMoreWorkplans: () => void;
+  loadMoreWorkplans: () => any;
 }
 
 export const MyWorkplansContext = createContext<MyWorkplanContextProps>({

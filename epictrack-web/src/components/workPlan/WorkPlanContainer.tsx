@@ -39,6 +39,10 @@ const WorkPlanContainer = () => {
     return <WorkPlanSkeleton />;
   }
 
+  const statusOutOfDate =
+    ctx.statuses.length === 0 ||
+    isStatusOutOfDate(ctx.statuses.find((status) => status.is_approved));
+
   return (
     <ETPageContainer
       sx={{
@@ -71,15 +75,7 @@ const WorkPlanContainer = () => {
             }}
             label="Workplan"
           />
-          <ETTab
-            label="Status"
-            icon={
-              (ctx.statuses.length === 0 ||
-                isStatusOutOfDate(
-                  ctx.statuses.find((status) => status.is_approved)
-                )) && <IndicatorIcon />
-            }
-          />
+          <ETTab label="Status" icon={statusOutOfDate && <IndicatorIcon />} />
           <ETTab label="Issues" />
           <ETTab label="About Project" />
           <ETTab

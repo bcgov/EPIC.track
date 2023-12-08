@@ -17,6 +17,10 @@ const StatusView = () => {
     setShowStatusForm(true);
   };
 
+  const statusOutOfDate = isStatusOutOfDate(
+    statuses.find((status) => status.is_approved)
+  );
+
   return (
     <>
       <When condition={statuses.length === 0}>
@@ -27,11 +31,7 @@ const StatusView = () => {
           onAddNewClickHandler={() => onAddButtonClickHandler()}
         />
       </When>
-      <When
-        condition={isStatusOutOfDate(
-          statuses.find((status) => status.is_approved)
-        )}
-      >
+      <When condition={statusOutOfDate}>
         <Box sx={{ paddingBottom: "16px" }}>
           <WarningBox
             title="The Work status is out of date"

@@ -1,21 +1,21 @@
-import { useContext, useRef } from "react";
+import { useContext } from "react";
 import { ETPageContainer } from "../shared";
 import { MyWorkplansContext } from "./MyWorkPlanContext";
 import CardList from "./CardList";
 import { Grid } from "@mui/material";
 import Filters from "./Filters";
 import { AssigneeToggle } from "./Filters/AssigneeToggle";
-import { useOnScreen } from "../../hooks";
+import DummyElement from "../shared/DummyElement";
+import throttle from "lodash/throttle";
 
 const WorkPlanContainer = () => {
   const { loadMoreWorkplans, loadingWorkplans } =
     useContext(MyWorkplansContext);
-  const ref = useRef<HTMLDivElement>(null);
-  const isVisible = useOnScreen(ref);
 
-  if (isVisible && !loadingWorkplans) {
-    setTimeout(() => loadMoreWorkplans(), 250);
-  }
+  const callbackFn = throttle(() => {
+    if (loadingWorkplans) return;
+    loadMoreWorkplans();
+  }, 2000);
 
   return (
     <>
@@ -35,7 +35,7 @@ const WorkPlanContainer = () => {
         <Grid item xs={12}>
           <CardList />
         </Grid>
-        <Grid item ref={ref} />
+        <DummyElement callbackFn={callbackFn} />
       </ETPageContainer>
     </>
   );

@@ -16,6 +16,9 @@ const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
   const phase_color = workplan.phase_info.work_phase.phase.color;
+  const statusOutOfDate =
+    isStatusOutOfDate(workplan.status_info as Status) ||
+    !workplan.status_info?.posted_date;
   return (
     <Grid
       container
@@ -133,8 +136,7 @@ const CardBody = ({ workplan }: CardProps) => {
           </ETCaption1>
         </Grid>
         <Grid item sx={{ marginTop: "2px" }}>
-          {(isStatusOutOfDate(workplan.status_info as Status) ||
-            !workplan.status_info?.posted_date) && <IndicatorSmallIcon />}
+          {statusOutOfDate && <IndicatorSmallIcon />}
         </Grid>
       </Grid>
       <Grid item sx={{ height: "49px", width: "100%" }}>
