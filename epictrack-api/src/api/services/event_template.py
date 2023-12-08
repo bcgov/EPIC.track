@@ -20,7 +20,17 @@ import pandas as pd
 
 from api.exceptions import BadRequestError
 from api.models import (
-    Action, ActionTemplate, EAAct, EventCategory, EventTemplate, EventType, OutcomeTemplate, PhaseCode, WorkType, db)
+    Action,
+    ActionTemplate,
+    EAAct,
+    EventCategory,
+    EventTemplate,
+    EventType,
+    OutcomeTemplate,
+    PhaseCode,
+    WorkType,
+    db,
+)
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services.phaseservice import PhaseService
@@ -100,8 +110,9 @@ class EventTemplateService:
             parent_events = copy.deepcopy(
                 list(
                     filter(
-                        lambda x, _phase_no=phase["no"]: "phase_no" in x and
-                        x["phase_no"] == _phase_no and not x["parent_id"],
+                        lambda x, _phase_no=phase["no"]: "phase_no" in x
+                        and x["phase_no"] == _phase_no
+                        and not x["parent_id"],
                         event_dict,
                     )
                 )
@@ -120,8 +131,9 @@ class EventTemplateService:
                 child_events = copy.deepcopy(
                     list(
                         filter(
-                            lambda x, _parent_id=event["no"]: "parent_id" in x and
-                            x["parent_id"] == _parent_id, event_dict,
+                            lambda x, _parent_id=event["no"]: "parent_id" in x
+                            and x["parent_id"] == _parent_id,
+                            event_dict,
                         )
                     )
                 )
@@ -261,7 +273,9 @@ class EventTemplateService:
                 (
                     e
                     for e in existing_outcomes
-                    if e.name == outcome["name"] and e.event_template_id == outcome["event_template_id"]
+                    if e.name == outcome["name"]
+                    and e.event_template_id == outcome["event_template_id"]
+                    and e.sort_order == outcome["sort_order"]
                 ),
                 None,
             )
@@ -280,7 +294,8 @@ class EventTemplateService:
             actions_list = copy.deepcopy(
                 list(
                     filter(
-                        lambda x, _outcome_no=outcome["no"]: x["outcome_no"] == _outcome_no,
+                        lambda x, _outcome_no=outcome["no"]: x["outcome_no"]
+                        == _outcome_no,
                         action_dict.to_dict("records"),
                     )
                 )
@@ -290,8 +305,9 @@ class EventTemplateService:
                     (
                         e
                         for e in existing_actions
-                        if e.action_id == action["action_id"] and
-                        e.outcome_id == action["outcome_id"] and e.sort_order == action["sort_order"]
+                        if e.action_id == action["action_id"]
+                        and e.outcome_id == action["outcome_id"]
+                        and e.sort_order == action["sort_order"]
                     ),
                     None,
                 )
@@ -316,9 +332,11 @@ class EventTemplateService:
             (
                 e
                 for e in existing_events
-                if e.name == event["name"] and e.phase_id == phase_id and
-                (e.parent_id == parent_id) and e.event_type_id == event["event_type_id"] and
-                e.event_category_id == event["event_category_id"]
+                if e.name == event["name"]
+                and e.phase_id == phase_id
+                and (e.parent_id == parent_id)
+                and e.event_type_id == event["event_type_id"]
+                and e.event_category_id == event["event_category_id"]
             ),
             None,
         )
@@ -394,7 +412,9 @@ class EventTemplateService:
         except ValueError as exc:
             raise BadRequestError(
                 "Sheets missing in the imported excel.\
-                                    Required sheets are [" + ",".join(sheets) + "]"
+                                    Required sheets are ["
+                + ",".join(sheets)
+                + "]"
             ) from exc
         return result
 

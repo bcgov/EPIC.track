@@ -78,9 +78,9 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
                 return err.message, HTTPStatus.FORBIDDEN
             if isinstance(err, UnprocessableEntityError):
                 return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
-            if run_mode == "development":
-                # To get stacktrace in local development for internal server errors
-                raise err
+            # if run_mode == "development":
+            #     # To get stacktrace in local development for internal server errors
+            #     raise err
             return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)

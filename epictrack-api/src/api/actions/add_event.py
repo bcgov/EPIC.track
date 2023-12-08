@@ -9,7 +9,6 @@ from api.models.work_phase import WorkPhase
 from api.schemas.response.event_configuration_response import (
     EventConfigurationResponseSchema,
 )
-from api.schemas.response.event_template_response import EventTemplateResponseSchema
 from .set_event_date import SetEventDate
 from .common import find_event_date
 
@@ -77,11 +76,13 @@ class AddEvent(ActionFactory):
         del event_configuration["id"]
         event_configuration = EventConfiguration(**event_configuration)
         event_configuration.flush()
-        template_json = EventTemplateResponseSchema().dump(
-            old_event_config.event_template
-        )
+        # event_configuration_json = EventConfigurationResponseSchema().dump(
+        #     event_configuration
+        # )
         WorkService.copy_outcome_and_actions(
-            template_json, event_configuration, from_template=False
+            old_event_config.as_dict(recursive=False),
+            event_configuration,
+            from_template=False,
         )
         event_data = {
             "event_configuration_id": event_configuration.id,
