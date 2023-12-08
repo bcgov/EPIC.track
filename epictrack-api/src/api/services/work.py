@@ -132,7 +132,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "is_active",
             )
         ).dump(work)
-        if work_phase[0]:
+        if work_phase and len(work_phase) > 0:
             serialised_phase = WorkPhaseAdditionalInfoResponseSchema(
                 only=(
                     "work_phase.name",
