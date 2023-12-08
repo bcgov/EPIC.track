@@ -64,9 +64,7 @@ class AddPhase(ActionFactory):
         work.update(work.as_dict(recursive=False), commit=False)
 
         if work_phase:
-            self.update_susequent_work_phases(
-                number_of_phases, total_number_of_days, work_phase
-            )
+            self.update_susequent_work_phases(work_phase)
 
     def preset_sort_order(self, source_event, number_of_new_work_phases: int) -> None:
         """Adjust the sort order of the existing work phases for the new ones"""
@@ -80,9 +78,7 @@ class AddPhase(ActionFactory):
 
     def update_susequent_work_phases(
         self,
-        number_of_phases: int,
-        number_of_extra_days: int,
-        latet_work_phase_added: WorkPhase,
+        latest_work_phase_added: WorkPhase,
     ):
         """Update subsequent work phases with the number of additional days added by the phases"""
         from api.services.event import EventService
@@ -91,9 +87,10 @@ class AddPhase(ActionFactory):
         next_work_phase = (
             db.session.query(WorkPhase)
             .filter(
-                WorkPhase.work_id == latet_work_phase_added.work_id,
-                WorkPhase.sort_order > latet_work_phase_added.sort_order,
+                WorkPhase.work_id == latest_work_phase_added.work_id,
+                WorkPhase.sort_order > latest_work_phase_added.sort_order,
                 WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                WorkPhase.is_active.is_(True),
             )
             .order_by(WorkPhase.sort_order)
             .first()
@@ -126,10 +123,12 @@ class AddPhase(ActionFactory):
             # Update the start event anticipated date by the number of total days added by all the new phases
             # This will push all the susequent work phases and all the events
             start_event_dict = start_event.as_dict(recursive=False)
-            start_event_dict["anticipated_date"] = start_event.anticipated_date + timedelta(
-                days=number_of_extra_days + number_of_phases
+            start_event_dict[
+                "anticipated_date"
+            ] = latest_work_phase_added.end_date + timedelta(days=1)
+            EventService.update_event(
+                start_event_dict, start_event.id, True, commit=False
             )
-            EventService.update_event(start_event_dict, start_event.id, True, commit=False)
 
     def get_additional_params(self, source_event, params):
         """Returns additional parameter"""
