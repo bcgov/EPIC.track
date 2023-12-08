@@ -53,6 +53,8 @@ from .user import API as USER_API
 from .work import API as WORK_API
 from .work_issues import API as WORK_ISSUES_API
 from .work_status import API as WORK_STATUS_API
+from .region import API as REGION_API
+from .eao_team import API as EAO_TEAM_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -112,3 +114,5 @@ API.add_namespace(WORK_STATUS_API, path='/work/<int:work_id>/statuses')
 API.add_namespace(WORK_ISSUES_API, path='/work/<int:work_id>/issues')
 API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')
 API.add_namespace(POSITION_API, path='/positions')
+API.add_namespace(REGION_API, path='/regions')
+API.add_namespace(EAO_TEAM_API, path='/eao-teams')

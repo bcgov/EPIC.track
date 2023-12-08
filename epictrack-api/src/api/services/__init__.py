@@ -39,3 +39,5 @@ from .work import WorkService
 from .work_issues import WorkIssuesService
 from .work_phase import WorkPhaseService
 from .work_status import WorkStatusService
+from .region import RegionService
+from .eao_team_service import EAOTeamService

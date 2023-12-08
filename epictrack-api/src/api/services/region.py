@@ -11,30 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Enum definitions."""
-from enum import Enum
+"""Region service"""
+
+from api.models.region import Region
 
 
-class HttpMethod(Enum):
-    """Http methods"""
+class RegionService:
+    """Service to manage Region related operations."""
 
-    GET = 'GET'
-    PUT = 'PUT'
-    POST = 'POST'
-    PATCH = 'PATCH'
-    DELETE = 'DELETE'
+    @staticmethod
+    def find_all_regions():
+        """Get all regions."""
+        return Region.find_all()
 
-
-class ProjectCodeMethod(Enum):
-    """Project abbreviation code generation methods"""
-
-    METHOD_1 = 1
-    METHOD_2 = 2
-    METHOD_3 = 3
-
-
-class RegionEntityType(Enum):
-    """Region entity types"""
-
-    ENV = "ENV"
-    FLNR = "FLNR"
+    @staticmethod
+    def find_regions_by_type(region_type: str):
+        """Get all regions by region type."""
+        return Region.find_all_by_region_type(region_type)

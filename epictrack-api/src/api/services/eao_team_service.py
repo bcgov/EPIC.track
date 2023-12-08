@@ -11,30 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Enum definitions."""
-from enum import Enum
+"""EAO Team service"""
+
+from api.models.eao_team import EAOTeam
 
 
-class HttpMethod(Enum):
-    """Http methods"""
+class EAOTeamService:
+    """Service to manage EAO Team related operations."""
 
-    GET = 'GET'
-    PUT = 'PUT'
-    POST = 'POST'
-    PATCH = 'PATCH'
-    DELETE = 'DELETE'
+    @staticmethod
+    def find_team_by_id(team_id: int):
+        """Get team by id."""
+        return EAOTeam.find_by_id(team_id)
 
-
-class ProjectCodeMethod(Enum):
-    """Project abbreviation code generation methods"""
-
-    METHOD_1 = 1
-    METHOD_2 = 2
-    METHOD_3 = 3
-
-
-class RegionEntityType(Enum):
-    """Region entity types"""
-
-    ENV = "ENV"
-    FLNR = "FLNR"
+    @staticmethod
+    def find_all_teams():
+        """Get all teams."""
+        return EAOTeam.find_all()

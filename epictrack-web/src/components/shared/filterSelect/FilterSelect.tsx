@@ -198,12 +198,12 @@ const FilterSelect = (props: SelectProps) => {
               ? Palette.primary.accent.light
               : Palette.neutral.accent.light,
           boxShadow: "none",
-          "&:hover": {
-            borderColor:
-              props.isFocused || props.menuIsOpen
-                ? Palette.primary.accent.light
-                : "transparent",
-          },
+          // "&:hover": {
+          //   borderColor:
+          //     props.isFocused || props.menuIsOpen
+          //       ? Palette.primary.accent.light
+          //       : "transparent",
+          // },
           ...(props.selectProps.filterProps?.variant === "bar" && {
             borderColor: props.isFocused
               ? Palette.primary.accent.light
@@ -247,6 +247,9 @@ const FilterSelect = (props: SelectProps) => {
       // classNames={{
       //   control: () => (props.info ? classes.infoSelect : ""),
       // }}
+      isLoading={props.isLoading}
+      loadingMessage={() => "Loading..."}
+      isDisabled={props.isDisabled}
     />
   );
 };

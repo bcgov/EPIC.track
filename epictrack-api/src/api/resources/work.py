@@ -450,3 +450,18 @@ class ValidateWorkNation(Resource):
             args.get("work_indigenous_nation_id"),
         )
         return {"exists": exists}, HTTPStatus.OK
+
+
+@cors_preflight("GET, POST")
+@API.route("/types", methods=["GET", "POST", "OPTIONS"])
+class WorkTypes(Resource):
+    """Endpoint resource to manage works."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return all active works."""
+        work_types = WorkService.find_all_work_types()
+        return jsonify(work_types), HTTPStatus.OK

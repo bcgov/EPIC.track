@@ -53,6 +53,7 @@ from api.models.indigenous_work import IndigenousWork
 from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work_status import WorkStatus
+from api.models.work_type import WorkType
 from api.schemas.request import (
     ActionConfigurationBodyParameterSchema,
     OutcomeConfigurationBodyParameterSchema,
@@ -68,6 +69,7 @@ from api.schemas.response import (
 )
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
+from api.schemas.work_type import WorkTypeSchema
 from api.services.event import EventService
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.event_template import EventTemplateService
@@ -883,3 +885,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
                                 )
                             )
                         )
+
+    @classmethod
+    def find_all_work_types(cls):
+        """Get all work types"""
+        work_types = WorkType.find_all()
+        return WorkTypeSchema(many=True).dump(work_types)

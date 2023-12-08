@@ -207,3 +207,21 @@ class ProjectAbbreviation(Resource):
             request_json.get("name")
         )
         return project_abbreviation, HTTPStatus.CREATED
+
+
+@cors_preflight("GET, DELETE, POST")
+@API.route("/types", methods=["GET", "POST", "OPTIONS"])
+class ProjectTypes(Resource):
+    """Endpoint resource to manage projects."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Return all project types."""
+        project_types = ProjectService.find_all_project_types()
+        return (
+            jsonify(project_types),
+            HTTPStatus.OK,
+        )
