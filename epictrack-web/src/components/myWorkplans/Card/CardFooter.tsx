@@ -10,7 +10,7 @@ const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
 const CardFooter = ({ workplan }: CardProps) => {
   const team_lead = workplan.staff_info.find((staff: any) => {
     if (staff.role.name === "Team Lead") {
-      return staff.full_name;
+      return staff.staff.full_name;
     }
     return false;
   });
@@ -69,6 +69,7 @@ const CardFooter = ({ workplan }: CardProps) => {
                   {workplan.staff_info.map((staff: any) => {
                     return (
                       <Avatar
+                        key={staff.staff.id}
                         sx={{
                           bgcolor: Palette.neutral.bg.main,
                           color: Palette.neutral.dark,

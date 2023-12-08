@@ -3,8 +3,11 @@ import Endpoints from "../../constants/api-endpoint";
 import { WorkPlan } from "../../models/workplan";
 
 class WorkPlanService {
-  async getAll(page: number) {
-    return await http.GetRequest<WorkPlan[]>(Endpoints.Workplan.GET_ALL);
+  async getAll(page: number, size: number) {
+    return await http.GetRequest<WorkPlan[]>(Endpoints.Workplan.GET_ALL, {
+      page: page,
+      size: size,
+    });
   }
 }
 export default new WorkPlanService();
