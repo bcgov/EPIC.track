@@ -1,4 +1,4 @@
-import { Box, Grid, SxProps, colors } from "@mui/material";
+import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -20,6 +20,20 @@ const CardBody = ({ workplan }: CardProps) => {
   const statusOutOfDate =
     isStatusOutOfDate(workplan.status_info as Status) ||
     !workplan.status_info?.posted_date;
+
+  const daysLeft = () => {
+    const daysLeft = workplan?.phase_info?.days_left;
+    const totalDays = workplan?.phase_info?.total_number_of_days;
+
+    if (daysLeft >= 0) {
+      return `${daysLeft}/${totalDays} days left`;
+    }
+
+    const daysOver = Math.abs(daysLeft);
+
+    return `${daysOver} day${daysOver > 1 ? "s" : ""} over`;
+  };
+
   return (
     <Grid
       container
@@ -76,20 +90,29 @@ const CardBody = ({ workplan }: CardProps) => {
             </ETCaption2>
           </Grid>
           <Grid item container sx={{ marginTop: "4px" }} xs={1}>
-            <ClockIcon />
+            <ClockIcon
+              fill={
+                workplan?.phase_info?.days_left > 0
+                  ? Palette.neutral.main
+                  : Palette.error.main
+              }
+            />
           </Grid>
           <Grid item container xs={3}>
             <ETCaption2
               bold
-              color={Palette.neutral.main}
+              color={
+                workplan?.phase_info?.days_left > 0
+                  ? Palette.neutral.main
+                  : Palette.error.main
+              }
               sx={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}
             >
-              {workplan?.phase_info?.days_left}/
-              {workplan?.phase_info?.total_number_of_days} days left
+              {daysLeft()}
             </ETCaption2>
           </Grid>
         </When>
