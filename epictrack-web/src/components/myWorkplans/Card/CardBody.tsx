@@ -62,7 +62,7 @@ const CardBody = ({ workplan }: CardProps) => {
           <Grid item container sx={{ marginTop: "2px" }} xs={1}>
             <DotIcon fill={phase_color} />
           </Grid>
-          <Grid item container xs={6}>
+          <Grid item container xs={5}>
             <ETCaption2
               bold
               color={phase_color}
@@ -78,7 +78,7 @@ const CardBody = ({ workplan }: CardProps) => {
           <Grid item container sx={{ marginTop: "4px" }} xs={1}>
             <ClockIcon />
           </Grid>
-          <Grid item container xs={4}>
+          <Grid item container xs={3}>
             <ETCaption2
               bold
               color={Palette.neutral.main}
