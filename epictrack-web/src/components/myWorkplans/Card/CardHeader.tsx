@@ -15,12 +15,28 @@ const CardHeader = ({ workplan }: CardProps) => {
       }}
       justifyContent="space-between"
     >
-      <Grid item>
-        <ETCaption1 bold color={Palette.primary.main}>
+      <Grid
+        item
+        xs={10}
+        sx={{
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        <ETCaption1
+          bold
+          color={Palette.primary.main}
+          sx={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
           {workplan.title}
         </ETCaption1>
       </Grid>
-      <Grid item>
+      <Grid item container xs={2} justifyContent="flex-end">
         <ETCaption1
           bold
           sx={{

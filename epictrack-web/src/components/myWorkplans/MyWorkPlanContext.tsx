@@ -5,7 +5,7 @@ import workplanService from "../../services/workplanService";
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
   loadingWorkplans: boolean;
-  loadMoreWorkplans: () => void;
+  loadMoreWorkplans: () => any;
 }
 
 export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
@@ -24,21 +24,13 @@ export const MyWorkplansProvider = ({
   const [loadingWorkplans, setLoadingWorkplans] = useState<boolean>(true);
   const [workplans, setWorkplans] = useState<WorkPlan[]>([]);
   const [page, setPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(6);
 
   const loadWorkplans = async (page: number) => {
-    if (!loadingWorkplans) {
-      setLoadingWorkplans(true);
-    }
-
     try {
-      const result = await workplanService.getAll(page);
+      const result = await workplanService.getAll(page, perPage);
       const newWorkplans = [...workplans, ...(result.data as any).items];
-      const filteredWorkplans = newWorkplans.filter(
-        (value: any, index: any, self: any) => {
-          return index === self.findIndex((t: any) => t.id === value.id); // Prevent same work being in list twice
-        }
-      );
-      setWorkplans(filteredWorkplans);
+      setWorkplans(newWorkplans);
       setLoadingWorkplans(false);
     } catch (error) {
       console.log(error);
@@ -46,11 +38,12 @@ export const MyWorkplansProvider = ({
   };
 
   const loadMoreWorkplans = () => {
-    setPage((prevPage) => prevPage + 1);
+    setLoadingWorkplans(true);
+    setPage(page + 1);
   };
 
   useEffect(() => {
-    loadWorkplans(page);
+    if (loadingWorkplans) loadWorkplans(page);
   }, [page]);
 
   return (
