@@ -14,6 +14,7 @@
 """Resource for work endpoints."""
 from http import HTTPStatus
 from io import BytesIO
+from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 
 from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
@@ -69,8 +70,15 @@ class WorkDashboard(Resource):
             sort_key=args.get('sort_key', 'name', str),
             sort_order=args.get('sort_order', 'asc', str),
         )
-
-        works = WorkService.fetch_all_work_plans(pagination_options)
+        search_options = WorkplanDashboardSearchOptions(
+            teams=list(map(int, args.getlist('teams[]'))),
+            work_states=args.getlist('work_states[]'),
+            regions=list(map(int, args.getlist('regions[]'))),
+            project_types=list(map(int, args.getlist('project_types[]'))),
+            work_types=list(map(int, args.getlist('work_types[]'))),
+            text=args.get('text', None, str),
+        )
+        works = WorkService.fetch_all_work_plans(pagination_options, search_options)
         return jsonify(works), HTTPStatus.OK
 
 

@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import projectService from "../../../services/projectService/projectService";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
+import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const ProjectTypeFilter = () => {
+  const { setSearchOptions } = useContext(MyWorkplansContext);
+
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,8 +34,13 @@ export const ProjectTypeFilter = () => {
       options={options}
       variant="inline"
       placeholder="Project Type"
-      filterAppliedCallback={() => {
-        return;
+      filterAppliedCallback={(value) => {
+        if (!value) return;
+
+        setSearchOptions((prev) => ({
+          ...prev,
+          project_types: value as string[],
+        }));
       }}
       name="projectType"
       isMulti

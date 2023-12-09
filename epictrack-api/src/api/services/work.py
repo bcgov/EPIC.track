@@ -19,6 +19,7 @@ from itertools import product
 from typing import List, Optional, Dict
 
 import pandas as pd
+from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
@@ -94,9 +95,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return works
 
     @classmethod
-    def fetch_all_work_plans(cls, pagination_options: PaginationOptions):
+    def fetch_all_work_plans(
+        cls, pagination_options: PaginationOptions,
+        search_options: WorkplanDashboardSearchOptions
+    ):
         """Fetch all workplans"""
-        works, total = Work.fetch_all_works(pagination_options)
+        works, total = Work.fetch_all_works(pagination_options, search_options)
         work_ids = [work.id for work in works]
 
         serialized_works = []
