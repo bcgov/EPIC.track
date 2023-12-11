@@ -15,3 +15,4 @@ class WorkplanDashboardSearchOptions:  # pylint: disable=too-many-instance-attri
     regions: Optional[List[int]]
     project_types: Optional[List[int]]
     work_types: Optional[List[int]]
+    staff_id: Optional[int]
