@@ -6,15 +6,15 @@ import { FormControlLabel, Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { showNotification } from "../../shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import indigenousNationService from "../../../services/indigenousNationService/indigenousNationService";
 import { sort } from "../../../utils";
 import workService from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
-import { getAxiosError } from "../../../utils/axiosUtils";
 import { FirstNation, WorkFirstNation } from "../../../models/firstNation";
 import { OptionType } from "../../shared/filterSelect/type";
+import { getErrorMessage } from "../../../utils/axiosUtils";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 
 interface FirstNationFormProps {
   workNationId?: number;
@@ -161,11 +161,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
         }
       }
     } catch (e: any) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });

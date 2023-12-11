@@ -8,14 +8,14 @@ import ControlledSelectV2 from "../../shared/controlledInputComponents/Controlle
 import { Staff, StaffWorkRole } from "../../../models/staff";
 import { ListType } from "../../../models/code";
 import { showNotification } from "../../shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import staffService from "../../../services/staffService/staffService";
 import { sort } from "../../../utils";
 import codeService from "../../../services/codeService";
 import workService from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
-import { getAxiosError } from "../../../utils/axiosUtils";
+import { getErrorMessage } from "../../../utils/axiosUtils";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 
 interface TeamFormProps {
   workStaffId?: number;
@@ -164,11 +164,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         }
       }
     } catch (e: any) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });

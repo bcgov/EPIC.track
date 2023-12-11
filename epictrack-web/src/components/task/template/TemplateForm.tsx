@@ -13,9 +13,8 @@ import { ListType } from "../../../models/code";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import TrackDialog from "../../shared/TrackDialog";
 import { showNotification } from "../../shared/notificationProvider";
-import { getAxiosError } from "../../../utils/axiosUtils";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import templateService from "../../../services/taskService/templateService";
+import { getErrorMessage } from "../../../utils/axiosUtils";
 
 export default function TemplateForm({ ...props }) {
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
@@ -99,11 +98,7 @@ export default function TemplateForm({ ...props }) {
       }
       reset();
     } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });

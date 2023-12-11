@@ -35,9 +35,9 @@ import { Palette } from "../../../styles/theme";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
-import { getAxiosError } from "../../../utils/axiosUtils";
 import projectService from "../../../services/projectService/projectService";
 import { Restricted } from "../../shared/restricted";
+import { getErrorMessage } from "../../../utils/axiosUtils";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -393,11 +393,7 @@ const FirstNationList = () => {
         getWorkFirstNations();
       }
     } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });

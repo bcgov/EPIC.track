@@ -5,10 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import Moment from "moment";
-import {
-  COMMON_ERROR_MESSAGE,
-  DATE_FORMAT,
-} from "../../../constants/application-constant";
+import { DATE_FORMAT } from "../../../constants/application-constant";
 import { Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import { TaskEvent, statusOptions } from "../../../models/taskEvent";
@@ -20,7 +17,6 @@ import { WorkplanContext } from "../WorkPlanContext";
 import workService from "../../../services/workService/workService";
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
-import { getAxiosError } from "../../../utils/axiosUtils";
 import { ListType } from "../../../models/code";
 import codeService from "../../../services/codeService";
 import RichTextEditor from "../../shared/richTextEditor";
@@ -28,6 +24,7 @@ import { dateUtils } from "../../../utils";
 import { EVENT_TYPE } from "../phase/type";
 import { EventContext } from "../event/EventContext";
 import ControlledMultiSelect from "../../shared/controlledInputComponents/ControlledMultiSelect";
+import { getErrorMessage } from "../../../utils/axiosUtils";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -162,11 +159,7 @@ const TaskForm = ({
       await saveTask(dataToSave);
       onSave();
     } catch (e: any) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });
