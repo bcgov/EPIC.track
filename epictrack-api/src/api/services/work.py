@@ -16,37 +16,18 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 from io import BytesIO
 from itertools import product
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 import pandas as pd
-from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
-from api.exceptions import (
-    ResourceExistsError,
-    ResourceNotFoundError,
-    UnprocessableEntityError,
-)
+from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    ActionConfiguration,
-    ActionTemplate,
-    CalendarEvent,
-    EAOTeam,
-    Event,
-    EventConfiguration,
-    OutcomeConfiguration,
-    Project,
-    Role,
-    Staff,
-    StaffWorkRole,
-    Work,
-    WorkCalendarEvent,
-    WorkPhase,
-    WorkStateEnum,
-    db,
-)
+    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
+    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
+from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
@@ -55,29 +36,20 @@ from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
-from api.schemas.request import (
-    ActionConfigurationBodyParameterSchema,
-    OutcomeConfigurationBodyParameterSchema,
-)
+from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
 from api.schemas.response import (
-    ActionTemplateResponseSchema,
-    EventTemplateResponseSchema,
-    OutcomeTemplateResponseSchema,
-    WorkPhaseAdditionalInfoResponseSchema,
-    WorkStatusResponseSchema,
-    WorkResponseSchema,
-    StaffWorkRoleResponseSchema,
-)
+    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
+    StaffWorkRoleResponseSchema, WorkPhaseAdditionalInfoResponseSchema, WorkResponseSchema, WorkStatusResponseSchema)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.schemas.work_type import WorkTypeSchema
+from api.services.code import CodeService
 from api.services.event import EventService
-from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.event_template import EventTemplateService
+from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
 from api.services.work_phase import WorkPhaseService
-from api.services.code import CodeService
 
 
 class WorkService:  # pylint: disable=too-many-public-methods

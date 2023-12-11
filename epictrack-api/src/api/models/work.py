@@ -14,13 +14,14 @@
 """Model to handle all operations related to Work."""
 
 from __future__ import annotations
-import enum
-from typing import Tuple, List
-from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, func, exists, and_
+import enum
+from typing import List, Tuple
+
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func
 from sqlalchemy.orm import relationship
 
+from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.project import Project
 from api.models.staff_work_role import StaffWorkRole
 
