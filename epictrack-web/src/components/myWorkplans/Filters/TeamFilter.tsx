@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import EAOTeamService from "../../../services/eao_team";
 import { OptionType } from "../../shared/filterSelect/type";
+import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const TeamFilter = () => {
+  const { setSearchOptions } = useContext(MyWorkplansContext);
+
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,8 +34,10 @@ export const TeamFilter = () => {
       options={options}
       variant="inline"
       placeholder={"Team"}
-      filterAppliedCallback={() => {
-        return;
+      filterAppliedCallback={(value) => {
+        if (!value) return;
+
+        setSearchOptions((prev) => ({ ...prev, teams: value as string[] }));
       }}
       name="team"
       isMulti

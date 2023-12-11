@@ -18,14 +18,16 @@ from io import BytesIO
 from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
 
+from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services import WorkService
 from api.services.work_phase import WorkPhaseService
 from api.utils import auth, profiletime
-from api.utils.util import cors_preflight
 from api.utils.datetime_helper import get_start_of_day
+from api.utils.util import cors_preflight
+
 
 API = Namespace("works", description="Works")
 
@@ -69,8 +71,15 @@ class WorkDashboard(Resource):
             sort_key=args.get('sort_key', 'name', str),
             sort_order=args.get('sort_order', 'asc', str),
         )
-
-        works = WorkService.fetch_all_work_plans(pagination_options)
+        search_options = WorkplanDashboardSearchOptions(
+            teams=list(map(int, args.getlist('teams[]'))),
+            work_states=args.getlist('work_states[]'),
+            regions=list(map(int, args.getlist('regions[]'))),
+            project_types=list(map(int, args.getlist('project_types[]'))),
+            work_types=list(map(int, args.getlist('work_types[]'))),
+            text=args.get('text', None, str),
+        )
+        works = WorkService.fetch_all_work_plans(pagination_options, search_options)
         return jsonify(works), HTTPStatus.OK
 
 

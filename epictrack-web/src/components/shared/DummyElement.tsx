@@ -1,11 +1,11 @@
 import { useEffect, useRef } from "react";
 import { useOnScreen } from "../../hooks";
 
-interface DummyElementProps {
+interface TriggerOnViewedProps {
   callbackFn: () => void;
 }
 
-const DummyElement = ({ callbackFn }: DummyElementProps) => {
+const TriggerOnViewed = ({ callbackFn }: TriggerOnViewedProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const isVisible = useOnScreen(ref);
 
@@ -18,4 +18,4 @@ const DummyElement = ({ callbackFn }: DummyElementProps) => {
   return <div style={{ width: "100%" }} ref={ref} />;
 };
 
-export default DummyElement;
+export default TriggerOnViewed;

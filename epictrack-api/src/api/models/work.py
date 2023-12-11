@@ -14,12 +14,14 @@
 """Model to handle all operations related to Work."""
 
 from __future__ import annotations
-import enum
-from typing import Tuple, List
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, func
+import enum
+from typing import List, Tuple
+
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func
 from sqlalchemy.orm import relationship
 
+from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.project import Project
 from api.models.staff_work_role import StaffWorkRole
 
@@ -115,7 +117,7 @@ class Work(BaseModelVersioned):
     def fetch_all_works(
         cls,
         pagination_options: PaginationOptions,
-        search_filters: dict = None
+        search_filters: WorkplanDashboardSearchOptions = None
     ) -> Tuple[List[Work], int]:
         """Fetch all active works."""
         query = cls.query.filter_by(is_active=True, is_deleted=False)
@@ -132,22 +134,22 @@ class Work(BaseModelVersioned):
         return page.items, page.total
 
     @classmethod
-    def filter_by_search_criteria(cls, query, search_filters: dict):
+    def filter_by_search_criteria(cls, query, search_filters: WorkplanDashboardSearchOptions):
         """Filter by search criteria."""
         if not search_filters:
             return query
 
-        query = cls._filter_by_search_text(query, search_filters.get('search_text'))
+        query = cls._filter_by_search_text(query, search_filters.text)
 
-        query = cls._filter_by_eao_team(query, search_filters.get('teams'))
+        query = cls._filter_by_eao_team(query, search_filters.teams)
 
-        query = cls._filter_by_work_type(query, search_filters.get('work_type_ids'))
+        query = cls._filter_by_work_type(query, search_filters.work_types)
 
-        query = cls._filter_by_project_type(query, search_filters.get('project_type_ids'))
+        query = cls._filter_by_project_type(query, search_filters.project_types)
 
-        query = cls._filter_by_env_regions(query, search_filters.get('env_regions'))
+        query = cls._filter_by_env_regions(query, search_filters.regions)
 
-        query = cls._filter_by_work_states(query, search_filters.get('work_states'))
+        query = cls._filter_by_work_states(query, search_filters.work_states)
 
         return query
 
@@ -171,12 +173,7 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_eao_team(cls, query, team_ids):
         if team_ids:
-            subquery = (
-                Project.query
-                .filter(Project.eao_team_id.in_(team_ids))
-                .exists()
-            )
-            query = query.filter(subquery)
+            query = query.filter(Work.eao_team_id.in_(team_ids))
         return query
 
     @classmethod
@@ -188,22 +185,14 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_project_type(cls, query, project_type_ids):
         if project_type_ids:
-            subquery = (
-                Project.query
-                .filter(Project.type_id.in_(project_type_ids))
-                .exists()
-            )
+            subquery = exists().where(and_(Work.project_id == Project.id, Project.type_id.in_(project_type_ids)))
             query = query.filter(subquery)
         return query
 
     @classmethod
     def _filter_by_env_regions(cls, query, env_regions):
         if env_regions:
-            subquery = (
-                Project.query
-                .filter(Project.region_id_env.in_(env_regions))
-                .exists()
-            )
+            subquery = exists().where(and_(Work.project_id == Project.id, Project.region_id_env.in_(env_regions)))
             query = query.filter(subquery)
         return query
 

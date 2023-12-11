@@ -6,3 +6,8 @@ export const WORK_STATE = Object.freeze({
   CLOSED: "CLOSED",
   COMPLETED: "COMPLETED",
 });
+
+export const REGIONS = Object.freeze({
+  ENV: "ENV",
+  FLNR: "FLNR",
+});
