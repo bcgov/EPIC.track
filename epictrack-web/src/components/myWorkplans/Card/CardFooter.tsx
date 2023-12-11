@@ -27,6 +27,7 @@ const CardFooter = ({ workplan }: CardProps) => {
         borderTop: `1px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "16px 32px",
         alignItems: "center",
+        height: "80px",
       }}
     >
       <Grid item>

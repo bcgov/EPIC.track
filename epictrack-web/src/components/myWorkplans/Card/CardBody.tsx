@@ -42,6 +42,7 @@ const CardBody = ({ workplan }: CardProps) => {
       sx={{
         backgroundColor: Palette.white,
         padding: "16px 24px",
+        height: "313px",
       }}
       gap={1}
     >
@@ -65,13 +66,7 @@ const CardBody = ({ workplan }: CardProps) => {
           </ETCaption1>
         </Grid>
       </Grid>
-      <Grid
-        item
-        container
-        direction="row"
-        spacing={1}
-        sx={{ paddingBottom: "8px" }}
-      >
+      <Grid item container direction="row" spacing={1}>
         <When condition={"phase_info" in workplan}>
           <Grid item container sx={{ marginTop: "2px" }} xs={1}>
             <DotIcon fill={phase_color} />
