@@ -117,38 +117,40 @@ const CardBody = ({ workplan }: CardProps) => {
           </Grid>
         </When>
       </Grid>
-      <Grid item container direction="row" spacing={1}>
-        <Grid
-          item
-          sx={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <ETCaption1 color={Palette.neutral.main}>
-            {`UPCOMING MILESTONE ${dayjs(new Date())
-              .add(workplan?.phase_info?.days_left, "days")
-              .format(MONTH_DAY_YEAR)
-              .toUpperCase()}`}
-          </ETCaption1>
-        </Grid>
-      </Grid>
-      <Grid item container direction="row" spacing={1}>
-        <Grid item sx={{ overflow: "hidden" }}>
-          <ETParagraph
-            bold
-            color={Palette.neutral.dark}
+      <When condition={Boolean(workplan?.phase_info)}>
+        <Grid item container direction="row" spacing={1}>
+          <Grid
+            item
             sx={{
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
             }}
           >
-            {workplan.phase_info.next_milestone}
-          </ETParagraph>
+            <ETCaption1 color={Palette.neutral.main}>
+              {`UPCOMING MILESTONE ${dayjs(new Date())
+                .add(workplan?.phase_info?.days_left, "days")
+                .format(MONTH_DAY_YEAR)
+                .toUpperCase()}`}
+            </ETCaption1>
+          </Grid>
         </Grid>
-      </Grid>
+        <Grid item container direction="row" spacing={1}>
+          <Grid item sx={{ overflow: "hidden" }}>
+            <ETParagraph
+              bold
+              color={Palette.neutral.dark}
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {workplan.phase_info?.next_milestone}
+            </ETParagraph>
+          </Grid>
+        </Grid>
+      </When>
 
       <Grid item container direction="row" spacing={1}>
         <Grid item>
