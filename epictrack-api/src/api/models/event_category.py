@@ -46,4 +46,5 @@ PRIMARY_CATEGORIES = [EventCategoryEnum.MILESTONE,
                       EventCategoryEnum.DECISION,
                       EventCategoryEnum.EXTENSION,
                       EventCategoryEnum.SUSPENSION,
-                      EventCategoryEnum.PCP]
+                      EventCategoryEnum.PCP,
+                      EventCategoryEnum.FINANCE]

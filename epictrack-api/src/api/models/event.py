@@ -16,7 +16,7 @@
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_
 from sqlalchemy.orm import relationship
 
-from api.models.event_category import EventCategory
+from api.models.event_category import EventCategory, PRIMARY_CATEGORIES
 from api.models.event_configuration import EventConfiguration
 
 from .base_model import BaseModelVersioned
@@ -66,6 +66,7 @@ class Event(BaseModelVersioned):
     @classmethod
     def find_milestone_events_by_work_phase(cls, work_phase_id: int):
         """Return milestones by work id and phase id."""
+        category_ids = list(map(lambda x: x.value, PRIMARY_CATEGORIES))
         return (
             Event.query.join(
                 EventConfiguration,
@@ -80,7 +81,7 @@ class Event(BaseModelVersioned):
                 EventCategory,
                 and_(
                     EventConfiguration.event_category_id == EventCategory.id,
-                    EventCategory.name.notin_(["Calendar", "Finance"]),
+                    EventCategory.id.in_(category_ids),
                 ),
             )
             .all()
