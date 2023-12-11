@@ -63,28 +63,25 @@ class WorkDashboard(Resource):
     @auth.require
     def get():
         """Return all active works."""
-        try:
-            args = request.args
+        args = request.args
 
-            pagination_options = PaginationOptions(
-                page=args.get('page', None, int),
-                size=args.get('size', None, int),
-                sort_key=args.get('sort_key', 'name', str),
-                sort_order=args.get('sort_order', 'asc', str),
-            )
-            search_options = WorkplanDashboardSearchOptions(
-                teams=list(map(int, args.getlist('teams[]'))),
-                work_states=args.getlist('work_states[]'),
-                regions=list(map(int, args.getlist('regions[]'))),
-                project_types=list(map(int, args.getlist('project_types[]'))),
-                work_types=list(map(int, args.getlist('work_types[]'))),
-                text=args.get('text', None, str),
-                staff_id=args.get('staff_id', None, int),
-            )
-            works = WorkService.fetch_all_work_plans(pagination_options, search_options)
-            return jsonify(works), HTTPStatus.OK
-        except Exception as e:
-            return {"message": str(e)}, HTTPStatus.BAD_REQUEST
+        pagination_options = PaginationOptions(
+            page=args.get('page', None, int),
+            size=args.get('size', None, int),
+            sort_key=args.get('sort_key', 'name', str),
+            sort_order=args.get('sort_order', 'asc', str),
+        )
+        search_options = WorkplanDashboardSearchOptions(
+            teams=list(map(int, args.getlist('teams[]'))),
+            work_states=args.getlist('work_states[]'),
+            regions=list(map(int, args.getlist('regions[]'))),
+            project_types=list(map(int, args.getlist('project_types[]'))),
+            work_types=list(map(int, args.getlist('work_types[]'))),
+            text=args.get('text', None, str),
+            staff_id=args.get('staff_id', None, int),
+        )
+        works = WorkService.fetch_all_work_plans(pagination_options, search_options)
+        return jsonify(works), HTTPStatus.OK
 
 
 @cors_preflight("GET, POST")
