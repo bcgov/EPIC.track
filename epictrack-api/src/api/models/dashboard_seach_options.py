@@ -11,7 +11,7 @@ class WorkplanDashboardSearchOptions:  # pylint: disable=too-many-instance-attri
 
     text: str
     teams: Optional[List[int]]
-    work_states : Optional[List[str]]
+    work_states: Optional[List[str]]
     regions: Optional[List[int]]
     project_types: Optional[List[int]]
     work_types: Optional[List[int]]
