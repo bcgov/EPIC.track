@@ -4,8 +4,7 @@ import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog from "./TrackDialog";
 import { SxProps } from "@mui/material";
 import { showNotification } from "./notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "../../constants/application-constant";
-import { getAxiosError } from "../../utils/axiosUtils";
+import { getErrorMessage } from "../../utils/axiosUtils";
 
 interface MasterContextProps {
   // error: string | undefined;
@@ -146,11 +145,7 @@ export const MasterProvider = ({
         setShowModalForm(false);
         getData();
       } catch (e) {
-        const error = getAxiosError(e);
-        const message =
-          error?.response?.status === 422
-            ? error.response.data?.toString()
-            : COMMON_ERROR_MESSAGE;
+        const message = getErrorMessage(e);
         showNotification(message, {
           type: "error",
         });

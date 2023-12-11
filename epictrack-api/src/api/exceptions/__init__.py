@@ -19,6 +19,8 @@ BusinessException - error, status_code - Business rules error
 error - a description of the error {code / description: classname / full text}
 status_code - where possible use HTTP Error Codes
 """
+from werkzeug.exceptions import UnprocessableEntity, Forbidden, NotFound, BadRequest, Conflict
+from werkzeug.wrappers.response import Response
 
 
 class BusinessError(Exception):
@@ -31,46 +33,51 @@ class BusinessError(Exception):
         self.status_code = status_code
 
 
-class ResourceExistsError(Exception):
+class ResourceExistsError(Conflict):
     """Exception raised when a duplicate resource exists."""
 
     def __init__(self, message, *args, **kwargs):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
-        self.message = message
+        self.description = message
+        self.response = Response(message, status=409)
 
 
-class BadRequestError(Exception):
+class BadRequestError(BadRequest):
     """Exception raised when there are issues with the api input"""
 
     def __init__(self, message, *args, **kwargs):
         """Return a valid BadRequestError."""
         super().__init__(*args, **kwargs)
-        self.message = message
+        self.description = message
+        self.response = Response(message, status=400)
 
 
-class ResourceNotFoundError(Exception):
+class ResourceNotFoundError(NotFound):
     """Exception raised when resource not found"""
 
     def __init__(self, message, *args, **kwargs):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
-        self.message = message
+        self.description = message
+        self.response = Response(message, status=404)
 
 
-class PermissionDeniedError(Exception):
+class PermissionDeniedError(Forbidden):
     """Exception raised when resource not found"""
 
     def __init__(self, message, *args, **kwargs):
         """Return a valid ResourceExistsError."""
         super().__init__(*args, **kwargs)
-        self.message = message
+        self.description = message
+        self.response = Response(message, status=403)
 
 
-class UnprocessableEntityError(Exception):
+class UnprocessableEntityError(UnprocessableEntity):
     """Exception raised when resource is not processable"""
 
     def __init__(self, message, *args, **kwargs):
         """Return a valid UnprocessableEntityError."""
         super().__init__(*args, **kwargs)
-        self.message = message
+        self.description = message
+        self.response = Response(message, status=422)

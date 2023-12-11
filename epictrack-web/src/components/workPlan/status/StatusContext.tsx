@@ -4,11 +4,10 @@ import TrackDialog from "../../shared/TrackDialog";
 import StatusForm from "./StatusForm";
 import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
-import { getAxiosError } from "../../../utils/axiosUtils";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import statusService from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/SearchParams";
 import { WorkplanContext } from "../WorkPlanContext";
+import { getErrorMessage } from "../../../utils/axiosUtils";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -99,11 +98,7 @@ export const StatusProvider = ({
       getWorkStatuses();
       setShowStatusForm(false);
     } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });
@@ -124,11 +119,7 @@ export const StatusProvider = ({
       setStatus(undefined);
       getWorkStatuses();
     } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });

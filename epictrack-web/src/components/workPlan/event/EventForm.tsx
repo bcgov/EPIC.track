@@ -18,7 +18,7 @@ import ControlledSelectV2 from "../../shared/controlledInputComponents/Controlle
 import { Palette } from "../../../styles/theme";
 import { WorkplanContext } from "../WorkPlanContext";
 import { showNotification } from "../../shared/notificationProvider";
-import { getAxiosError } from "../../../utils/axiosUtils";
+import { getErrorMessage } from "../../../utils/axiosUtils";
 import { ListType } from "../../../models/code";
 import RichTextEditor from "../../shared/richTextEditor";
 import eventService from "../../../services/eventService/eventService";
@@ -371,11 +371,7 @@ const EventForm = ({
         handleSaveEvent(submittedData);
       }
     } catch (e: any) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });
@@ -463,11 +459,7 @@ const EventForm = ({
           setDateCheckStatus(undefined);
         }
       } catch (e) {
-        const error = getAxiosError(e);
-        const message =
-          error?.response?.status === 422
-            ? error.response.data?.toString()
-            : COMMON_ERROR_MESSAGE;
+        const message = getErrorMessage(e);
         showNotification(message, {
           type: "error",
         });

@@ -35,8 +35,6 @@ import {
 import taskEventService from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import ImportTaskEvent from "../task/ImportTaskEvent";
-import { getAxiosError } from "../../../utils/axiosUtils";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import {
   TemplateStatus,
   Work,
@@ -54,6 +52,8 @@ import { When } from "react-if";
 import WarningBox from "../../shared/warningBox";
 import { useAppDispatch } from "../../../hooks";
 import { setLoadingState } from "../../../services/loadingService";
+import { getErrorMessage } from "../../../utils/axiosUtils";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -369,11 +369,7 @@ const EventList = () => {
         getTemplateUploadStatus();
       }
     } catch (e) {
-      const error = getAxiosError(e);
-      const message =
-        error?.response?.status === 422
-          ? error.response.data?.toString()
-          : COMMON_ERROR_MESSAGE;
+      const message = getErrorMessage(e);
       showNotification(message, {
         type: "error",
       });
@@ -562,11 +558,7 @@ const EventList = () => {
           handleHighlightRows(highlightedRows);
         }
       } catch (e) {
-        const error = getAxiosError(e);
-        const message =
-          error?.response?.status === 422
-            ? error.response.data?.toString()
-            : COMMON_ERROR_MESSAGE;
+        const message = getErrorMessage(e);
         showNotification(message, {
           type: "error",
         });
@@ -599,11 +591,7 @@ const EventList = () => {
           handleHighlightRows(highlightedRows);
         }
       } catch (e) {
-        const error = getAxiosError(e);
-        const message =
-          error?.response?.status === 422
-            ? error.response.data?.toString()
-            : COMMON_ERROR_MESSAGE;
+        const message = getErrorMessage(e);
         showNotification(message, {
           type: "error",
         });
@@ -633,11 +621,7 @@ const EventList = () => {
           handleHighlightRows(highlightedRows);
         }
       } catch (e) {
-        const error = getAxiosError(e);
-        const message =
-          error?.response?.status === 422
-            ? error.response.data?.toString()
-            : COMMON_ERROR_MESSAGE;
+        const message = getErrorMessage(e);
         showNotification(message, {
           type: "error",
         });
