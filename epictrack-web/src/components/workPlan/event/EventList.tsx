@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useCallback, useContext, useMemo } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -282,6 +282,10 @@ const EventList = () => {
     }
     return Promise.resolve(result);
   };
+  const milestoneEvents = useMemo(
+    () => events.filter((p) => p.type === EVENT_TYPE.MILESTONE),
+    [events]
+  );
   const getMilestoneEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
@@ -895,6 +899,7 @@ const EventList = () => {
         <EventForm
           onSave={onDialogClose}
           event={milestoneEvent}
+          milestoneEvents={milestoneEvents}
           isFormFieldsLocked={isEventFormFieldLocked}
         />
       </TrackDialog>

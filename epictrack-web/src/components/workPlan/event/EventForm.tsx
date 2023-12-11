@@ -26,6 +26,7 @@ import {
   EventCategory,
   EventPosition,
   EventType,
+  EventsGridModel,
   MilestoneEvent,
   MilestoneEventDateCheck,
 } from "../../../models/event";
@@ -53,6 +54,7 @@ import ControlledDatePicker from "../../shared/controlledInputComponents/Control
 interface EventFormProps {
   onSave: () => void;
   event?: MilestoneEvent;
+  milestoneEvents: EventsGridModel[];
   isFormFieldsLocked: boolean;
 }
 interface NumberOfDaysChangeProps {
@@ -66,6 +68,7 @@ const EventForm = ({
     return;
   },
   event,
+  milestoneEvents,
   isFormFieldsLocked,
 }: EventFormProps) => {
   const [configurations, setConfigurations] = useState<EventConfiguration[]>(
@@ -149,6 +152,30 @@ const EventForm = ({
     }
   }, [selectedConfiguration, event]);
 
+  const decisionMakerPositionIds = useMemo<number[]>(() => {
+    const workPhaseIndex = ctx.workPhases.findIndex(
+      (p) => p.work_phase.id === ctx.selectedWorkPhase?.work_phase.id
+    );
+    const lastDecisionIndex = milestoneEvents.findLastIndex(
+      (p: EventsGridModel) =>
+        p.event_configuration.event_category_id === EventCategory.DECISION
+    );
+    const currentEventIndex = milestoneEvents.findIndex(
+      (p: EventsGridModel) => p.id === event?.id
+    );
+    if (
+      workPhaseIndex === ctx.workPhases.length - 1 &&
+      lastDecisionIndex === currentEventIndex
+    ) {
+      return [Number(ctx.work?.decision_maker_position_id)];
+    }
+    return [
+      POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
+      POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
+      POSITION_ENUM.ADM,
+      POSITION_ENUM.MINISTER,
+    ];
+  }, [ctx.work, ctx.workPhases, ctx.selectedWorkPhase, event, milestoneEvents]);
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
@@ -715,13 +742,7 @@ const EventForm = ({
               <DecisionInput
                 isFormFieldsLocked={isFormFieldsLocked}
                 configurationId={selectedConfiguration?.id}
-                decisionMakerPositionId={[
-                  ctx.work?.decision_maker_position_id ||
-                    POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
-                  POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
-                  POSITION_ENUM.ADM,
-                  POSITION_ENUM.MINISTER,
-                ]}
+                decisionMakerPositionId={decisionMakerPositionIds}
               />
             </When>
             <When
