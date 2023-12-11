@@ -31,6 +31,7 @@ export interface WorkPlanSearchOptions {
   project_types: string[];
   work_types: string[];
   text: string;
+  staff_id: number | null;
 }
 
 const PAGE_SIZE = 6;
@@ -52,6 +53,7 @@ export const MyWorkplansProvider = ({
     project_types: [],
     work_types: [],
     text: "",
+    staff_id: null,
   });
 
   const fetchWorkplans = async (page: number, shouldAppend = false) => {

@@ -139,6 +139,8 @@ class Work(BaseModelVersioned):
         if not search_filters:
             return query
 
+        query = cls._filter_by_staff_id(query, search_filters.staff_id)
+
         query = cls._filter_by_search_text(query, search_filters.text)
 
         query = cls._filter_by_eao_team(query, search_filters.teams)
@@ -156,11 +158,7 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_staff_id(cls, query, staff_id):
         if staff_id:
-            subquery = (
-                cls.query
-                .filter(StaffWorkRole.staff_id == staff_id)
-                .exists()
-            )
+            subquery = exists().where(and_(Work.id == StaffWorkRole.work_id, StaffWorkRole.staff_id == staff_id))
             query = query.filter(subquery)
         return query
 

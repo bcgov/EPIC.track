@@ -1,5 +1,6 @@
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
+import { Staff } from "../../models/staff";
 import { MasterBase } from "../../models/type";
 import ServiceBase from "../common/serviceBase";
 
@@ -42,7 +43,7 @@ class StaffService implements ServiceBase {
   }
 
   async getByEmail(email: string) {
-    return await http.GetRequest(Endpoints.Staffs.STAFFS + `/${email}`);
+    return await http.GetRequest<Staff>(Endpoints.Staffs.STAFFS + `/${email}`);
   }
 }
 
