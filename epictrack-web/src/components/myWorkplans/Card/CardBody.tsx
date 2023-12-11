@@ -1,4 +1,4 @@
-import { Box, Grid, SxProps, colors } from "@mui/material";
+import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -9,16 +9,31 @@ import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 import { isStatusOutOfDate } from "../../workPlan/status/shared";
 import { Status } from "../../../models/status";
+import { When } from "react-if";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
-  const phase_color = workplan.phase_info.work_phase.phase.color;
+  const phase_color = workplan?.phase_info?.work_phase?.phase?.color;
   const statusOutOfDate =
     isStatusOutOfDate(workplan.status_info as Status) ||
     !workplan.status_info?.posted_date;
+
+  const daysLeft = () => {
+    const daysLeft = workplan?.phase_info?.days_left;
+    const totalDays = workplan?.phase_info?.total_number_of_days;
+
+    if (daysLeft >= 0) {
+      return `${daysLeft}/${totalDays} days left`;
+    }
+
+    const daysOver = Math.abs(daysLeft);
+
+    return `${daysOver} day${daysOver > 1 ? "s" : ""} over`;
+  };
+
   return (
     <Grid
       container
@@ -57,39 +72,50 @@ const CardBody = ({ workplan }: CardProps) => {
         spacing={1}
         sx={{ paddingBottom: "8px" }}
       >
-        <Grid item container sx={{ marginTop: "2px" }} xs={1}>
-          <DotIcon fill={phase_color} />
-        </Grid>
-        <Grid item container xs={6}>
-          <ETCaption2
-            bold
-            color={phase_color}
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {workplan.phase_info.work_phase.name}
-          </ETCaption2>
-        </Grid>
-        <Grid item container sx={{ marginTop: "4px" }} xs={1}>
-          <ClockIcon />
-        </Grid>
-        <Grid item container xs={4}>
-          <ETCaption2
-            bold
-            color={Palette.neutral.main}
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {workplan.phase_info.days_left}/
-            {workplan.phase_info.total_number_of_days} days left
-          </ETCaption2>
-        </Grid>
+        <When condition={"phase_info" in workplan}>
+          <Grid item container sx={{ marginTop: "2px" }} xs={1}>
+            <DotIcon fill={phase_color} />
+          </Grid>
+          <Grid item container xs={5}>
+            <ETCaption2
+              bold
+              color={phase_color}
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {workplan?.phase_info?.work_phase.name}
+            </ETCaption2>
+          </Grid>
+          <Grid item container sx={{ marginTop: "4px" }} xs={1}>
+            <ClockIcon
+              fill={
+                workplan?.phase_info?.days_left > 0
+                  ? Palette.neutral.main
+                  : Palette.error.main
+              }
+            />
+          </Grid>
+          <Grid item container xs={3}>
+            <ETCaption2
+              bold
+              color={
+                workplan?.phase_info?.days_left > 0
+                  ? Palette.neutral.main
+                  : Palette.error.main
+              }
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {daysLeft()}
+            </ETCaption2>
+          </Grid>
+        </When>
       </Grid>
       <Grid item container direction="row" spacing={1}>
         <Grid
@@ -102,7 +128,7 @@ const CardBody = ({ workplan }: CardProps) => {
         >
           <ETCaption1 color={Palette.neutral.main}>
             {`UPCOMING MILESTONE ${dayjs(new Date())
-              .add(workplan.phase_info.days_left, "days")
+              .add(workplan?.phase_info?.days_left, "days")
               .format(MONTH_DAY_YEAR)
               .toUpperCase()}`}
           </ETCaption1>

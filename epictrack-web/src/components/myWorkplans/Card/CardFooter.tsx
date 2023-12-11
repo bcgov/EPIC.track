@@ -4,10 +4,12 @@ import { ETCaption1, ETCaption2, ETParagraph } from "../../shared";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { CardProps } from "./type";
+import { useNavigate } from "react-router-dom";
 
 const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
 
 const CardFooter = ({ workplan }: CardProps) => {
+  const navigate = useNavigate();
   const team_lead = workplan.staff_info.find((staff: any) => {
     if (staff.role.name === "Team Lead") {
       return staff.staff.full_name;
@@ -98,9 +100,9 @@ const CardFooter = ({ workplan }: CardProps) => {
             backgroundColor: "inherit",
             borderColor: "transparent",
           }}
-          onClick={() => undefined}
+          onClick={() => navigate(`/work-plan?work_id=${workplan.id}`)}
         >
-          <ETCaption2 bold>View Only</ETCaption2>
+          <ETCaption2 bold>View</ETCaption2>
         </Button>
       </Grid>
     </Grid>
