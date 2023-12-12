@@ -147,7 +147,6 @@ const FilterSelect = (props: SelectProps) => {
       name={name}
       options={options}
       isMulti={isMulti}
-      defaultValue={defaultValue}
       onChange={handleChange}
       components={{
         Option,
