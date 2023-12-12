@@ -12,4 +12,5 @@ export interface UserMenuProps {
   origin?: PopoverOrigin;
   sx?: SxProps;
   id?: string;
+  onMouseLeave?: (event: React.MouseEvent<HTMLElement>) => any;
 }
