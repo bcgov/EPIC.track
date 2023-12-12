@@ -34,7 +34,7 @@ const CardHeader = ({ workplan }: CardProps) => {
             whiteSpace: "nowrap",
           }}
         >
-          {workplan.title}
+          {workplan?.project?.name}
         </ETCaption1>
       </Grid>
       <Grid item container xs={2} justifyContent="flex-end">

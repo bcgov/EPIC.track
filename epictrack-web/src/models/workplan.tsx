@@ -9,6 +9,10 @@ export interface WorkPlan {
   work_type: WorkType;
   work_state: string;
 
+  project: {
+    name: string;
+  };
+
   phase_info: {
     days_left: number;
     milestone_progress: number;
