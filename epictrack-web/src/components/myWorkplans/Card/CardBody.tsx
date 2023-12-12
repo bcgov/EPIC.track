@@ -178,7 +178,9 @@ const CardBody = ({ workplan }: CardProps) => {
         </ETParagraph>
       </Grid>
       <Grid item>
-        <ETCaption1 color={Palette.neutral.main}>IAAC INVOLVEMENT</ETCaption1>
+        <ETCaption1 color={Palette.neutral.main}>
+          FEDERAL INVOLVEMENT
+        </ETCaption1>
       </Grid>
       <Grid item>
         <ETParagraph color={Palette.neutral.dark}>
