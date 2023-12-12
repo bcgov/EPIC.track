@@ -32,7 +32,7 @@ export const ProjectTypeFilter = () => {
   return (
     <FilterSelect
       options={options}
-      variant="inline"
+      variant="inline-standalone"
       placeholder="Project Type"
       filterAppliedCallback={(value) => {
         if (!value) return;
