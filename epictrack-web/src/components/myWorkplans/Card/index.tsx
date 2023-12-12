@@ -10,7 +10,7 @@ const Card = ({ workplan }: CardProps) => {
     <Box
       sx={{
         maxWidth: "516px",
-        border: `1px solid var(--neutral-background-dark, ${Palette.neutral.bg.dark})`,
+        border: `2px solid var(--neutral-background-dark, ${Palette.neutral.bg.dark})`,
         borderRadius: "4px 4px 4px 4px",
       }}
     >

@@ -1,6 +1,6 @@
-import { Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import { ETCaption1, ETParagraph } from "../../shared";
+import { ETCaption1 } from "../../shared";
 import { CardProps } from "./type";
 
 const CardHeader = ({ workplan }: CardProps) => {
@@ -9,9 +9,10 @@ const CardHeader = ({ workplan }: CardProps) => {
       container
       sx={{
         backgroundColor: Palette.neutral.bg.light,
-        borderBottom: `1px solid var(--neutral-background-dark, #DBDCDC)`,
+        borderBottom: `2px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "12px 24px",
         alignItems: "center",
+        height: "48px",
       }}
       justifyContent="space-between"
     >
