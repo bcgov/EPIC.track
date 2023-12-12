@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -60,7 +60,7 @@ const CardBody = ({ workplan }: CardProps) => {
             {workplan.work_type.name}
           </ETHeading4>
         </Grid>
-        <Grid item container xs={6}>
+        <Grid item container xs={6} justifyContent={"flex-end"}>
           <ETCaption1 bold>
             <WorkState work_state={workplan.work_state} />
           </ETCaption1>
@@ -68,47 +68,57 @@ const CardBody = ({ workplan }: CardProps) => {
       </Grid>
       <Grid item container direction="row" spacing={1}>
         <When condition={"phase_info" in workplan}>
-          <Grid item container sx={{ marginTop: "2px" }} xs={1}>
-            <DotIcon fill={phase_color} />
-          </Grid>
-          <Grid item container xs={5}>
-            <ETCaption2
-              bold
-              color={phase_color}
-              sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+          <Grid item xs={6}>
+            <Stack
+              direction={"row"}
+              spacing={1}
+              alignItems={"center"}
+              sx={{ overflow: "clip" }}
             >
-              {workplan?.phase_info?.work_phase.name}
-            </ETCaption2>
+              <DotIcon fill={phase_color} />
+              <ETCaption2
+                bold
+                color={phase_color}
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {workplan?.phase_info?.work_phase.name}
+              </ETCaption2>
+            </Stack>
           </Grid>
-          <Grid item container sx={{ marginTop: "4px" }} xs={1}>
-            <ClockIcon
-              fill={
-                workplan?.phase_info?.days_left > 0
-                  ? Palette.neutral.main
-                  : Palette.error.main
-              }
-            />
-          </Grid>
-          <Grid item container xs={3}>
-            <ETCaption2
-              bold
-              color={
-                workplan?.phase_info?.days_left > 0
-                  ? Palette.neutral.main
-                  : Palette.error.main
-              }
-              sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+          <Grid item xs={6}>
+            <Stack
+              direction={"row"}
+              spacing={1}
+              alignItems={"center"}
+              sx={{ overflow: "clip" }}
             >
-              {daysLeft()}
-            </ETCaption2>
+              <ClockIcon
+                fill={
+                  workplan?.phase_info?.days_left > 0
+                    ? Palette.neutral.main
+                    : Palette.error.main
+                }
+              />
+              <ETCaption2
+                bold
+                color={
+                  workplan?.phase_info?.days_left > 0
+                    ? Palette.neutral.main
+                    : Palette.error.main
+                }
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {daysLeft()}
+              </ETCaption2>
+            </Stack>
           </Grid>
         </When>
       </Grid>
