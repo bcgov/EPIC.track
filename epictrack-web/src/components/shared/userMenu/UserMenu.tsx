@@ -38,6 +38,7 @@ const UserMenu = (props: UserMenuProps) => {
     phone,
     origin,
     id,
+    onMouseLeave,
   } = props;
   const menuOrigin = React.useMemo(() => {
     if (origin === undefined)
@@ -60,6 +61,7 @@ const UserMenu = (props: UserMenuProps) => {
       transformOrigin={menuOrigin}
       open={Boolean(anchorEl)}
       onClose={onClose}
+      onMouseLeave={onMouseLeave}
       PaperProps={{
         style: {
           pointerEvents: "none",

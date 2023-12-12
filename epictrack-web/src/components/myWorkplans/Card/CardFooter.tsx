@@ -1,4 +1,12 @@
-import { Avatar, AvatarGroup, Box, Button, Grid } from "@mui/material";
+import {
+  Avatar,
+  AvatarGroup,
+  Box,
+  Button,
+  Grid,
+  ListItem,
+  avatarGroupClasses,
+} from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -8,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import RenderSurplus from "./RenderSurplus";
+import { Staff } from "../../../models/staff";
 
 const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
 
@@ -88,34 +97,46 @@ const CardFooter = ({ workplan }: CardProps) => {
               </Grid>
               <Grid item>
                 <AvatarGroup
-                  spacing={2}
+                  spacing={1}
                   max={4}
                   renderSurplus={(surplus: number) => (
-                    <RenderSurplus renderSurplus={surplus} />
+                    <RenderSurplus
+                      renderSurplus={surplus}
+                      staff={workplan.staff_info as unknown as Staff[]}
+                    />
                   )}
+                  sx={{
+                    [`& .${avatarGroupClasses.avatar}`]: {
+                      width: "24px",
+                      height: "24px",
+                    },
+                  }}
                 >
                   {workplan.staff_info.map((staff: any) => {
                     return (
-                      <Avatar
-                        key={staff.staff.id}
-                        sx={{
-                          bgcolor: Palette.neutral.bg.main,
-                          color: Palette.neutral.dark,
-                          lineHeight: "12px",
-                          width: "24px",
-                          height: "24px",
-                        }}
-                        onMouseEnter={(event) => {
-                          event.stopPropagation();
-                          event.preventDefault();
-                          handleOpenUserMenu(event, staff.staff);
-                        }}
-                        onMouseLeave={handleCloseUserMenu}
-                      >
-                        <ETCaption2
-                          bold
-                        >{`${staff.staff.first_name[0]}${staff.staff.last_name[0]}`}</ETCaption2>
+                      <>
+                        <Avatar
+                          key={staff.staff.id}
+                          sx={{
+                            bgcolor: Palette.neutral.bg.main,
+                            color: Palette.neutral.dark,
+                            lineHeight: "12px",
+                            width: "24px",
+                            height: "24px",
+                          }}
+                          onMouseEnter={(event) => {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            handleOpenUserMenu(event, staff.staff);
+                          }}
+                          // onMouseLeave={handleCloseUserMenu}
+                        >
+                          <ETCaption2
+                            bold
+                          >{`${staff.staff.first_name[0]}${staff.staff.last_name[0]}`}</ETCaption2>
+                        </Avatar>
                         <UserMenu
+                          onMouseLeave={handleCloseUserMenu}
                           anchorEl={userMenuAnchorEl}
                           email={staffHover?.email || ""}
                           phone={staffHover?.phone || ""}
@@ -129,7 +150,7 @@ const CardFooter = ({ workplan }: CardProps) => {
                           }}
                           id={staff.staff.id}
                         />
-                      </Avatar>
+                      </>
                     );
                   })}
                 </AvatarGroup>
