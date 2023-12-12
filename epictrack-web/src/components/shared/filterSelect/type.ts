@@ -20,7 +20,7 @@ declare module "react-select/dist/declarations/src/Select" {
       selectedOptions: any[];
       options?: any[];
       onCancel?: () => void;
-      variant?: "inline" | "bar";
+      variant?: "inline" | "bar" | "inline-standalone";
       getOptionLabel?: (option: any) => string;
       getOptionValue?: (option: any) => string;
       label?: string;
@@ -31,7 +31,7 @@ declare module "react-select/dist/declarations/src/Select" {
 }
 
 export type SelectProps = {
-  variant: "inline" | "bar";
+  variant: "inline" | "bar" | "inline-standalone";
   info?: boolean;
 } & Props<OptionType>;
 

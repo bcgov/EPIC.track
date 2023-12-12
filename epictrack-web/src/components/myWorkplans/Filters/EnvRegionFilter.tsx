@@ -33,7 +33,7 @@ export const EnvRegionFilter = () => {
   return (
     <FilterSelect
       options={options}
-      variant="inline"
+      variant="inline-standalone"
       placeholder="Region"
       filterAppliedCallback={(value) => {
         if (!value) return;

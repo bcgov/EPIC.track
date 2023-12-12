@@ -33,7 +33,7 @@ const MultiValue = (props: MultiValueProps) => {
           >
             {filterProps?.variant === "inline"
               ? "Filtered"
-              : `${props.selectProps.placeholder}(${
+              : `${props.selectProps.placeholder} (${
                   (props.selectProps.value as []).length
                 })`}
           </ETCaption2>

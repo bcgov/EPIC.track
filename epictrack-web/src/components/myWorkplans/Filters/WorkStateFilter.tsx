@@ -14,7 +14,7 @@ export const WorkStateFilter = () => {
   return (
     <FilterSelect
       options={options}
-      variant="inline"
+      variant="inline-standalone"
       placeholder="Work State"
       filterAppliedCallback={(value) => {
         if (!value) return;

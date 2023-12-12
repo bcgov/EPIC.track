@@ -32,7 +32,7 @@ export const WorkTypeFilter = () => {
   return (
     <FilterSelect
       options={options}
-      variant="inline"
+      variant="inline-standalone"
       placeholder="Work Type"
       filterAppliedCallback={(value) => {
         if (!value) return;
