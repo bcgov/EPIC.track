@@ -32,7 +32,7 @@ export const TeamFilter = () => {
   return (
     <FilterSelect
       options={options}
-      variant="inline"
+      variant="inline-standalone"
       placeholder={"Team"}
       filterAppliedCallback={(value) => {
         if (!value) return;

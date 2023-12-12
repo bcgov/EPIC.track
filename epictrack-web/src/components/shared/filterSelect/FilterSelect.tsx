@@ -29,7 +29,7 @@ const FilterSelect = (props: SelectProps) => {
   const [options, setOptions] = React.useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = React.useState<any>();
   const [selectValue, setSelectValue] = React.useState<any>(
-    props.defaultValue || standardDefault
+    defaultValue ?? standardDefault
   );
   const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(
     !!props.menuIsOpen
