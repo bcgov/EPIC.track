@@ -19,19 +19,19 @@ const Filters = () => {
         <NameFilter />
       </Grid>
       <Grid item xs container spacing={2} justifyContent="flex-end">
-        <Grid item>
+        <Grid item xs={2}>
           <TeamFilter />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <WorkTypeFilter />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <ProjectTypeFilter />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <EnvRegionFilter />
         </Grid>
-        <Grid item>
+        <Grid item xs={2}>
           <WorkStateFilter />
         </Grid>
       </Grid>

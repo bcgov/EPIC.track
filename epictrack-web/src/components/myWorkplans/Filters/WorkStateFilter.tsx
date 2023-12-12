@@ -7,8 +7,8 @@ export const WorkStateFilter = () => {
   const { setSearchOptions } = useContext(MyWorkplansContext);
 
   const options = Object.values(WORK_STATE).map((state) => ({
-    label: state,
-    value: state,
+    label: state.label,
+    value: state.value,
   }));
 
   return (
@@ -27,6 +27,12 @@ export const WorkStateFilter = () => {
       name="workState"
       isMulti
       info={true}
+      defaultValue={[
+        {
+          label: WORK_STATE.IN_PROGRESS.label,
+          value: WORK_STATE.IN_PROGRESS.value,
+        },
+      ]}
     />
   );
 };

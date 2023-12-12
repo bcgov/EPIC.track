@@ -8,7 +8,6 @@ import { Palette } from "../../../styles/theme";
 import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
-import clsx from "clsx";
 
 // const useStyle = makeStyles({
 //   infoSelect: {
@@ -25,10 +24,13 @@ import clsx from "clsx";
 
 const FilterSelect = (props: SelectProps) => {
   // const classes = useStyle();
-  const { name, isMulti } = props;
+  const { name, isMulti, defaultValue } = props;
+  const standardDefault = isMulti ? [] : "";
   const [options, setOptions] = React.useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = React.useState<any>();
-  const [selectValue, setSelectValue] = React.useState<any>(isMulti ? [] : "");
+  const [selectValue, setSelectValue] = React.useState<any>(
+    props.defaultValue || standardDefault
+  );
   const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(
     !!props.menuIsOpen
   );
@@ -47,10 +49,6 @@ const FilterSelect = (props: SelectProps) => {
 
   const isOptionSelected = (o: OptionType) =>
     isMulti ? selectedOptions.includes(o.value) : selectedOptions === o.value;
-
-  React.useEffect(() => {
-    setSelectValue(isMulti ? [] : "");
-  }, []);
 
   React.useEffect(() => {
     const currentValues = isMulti

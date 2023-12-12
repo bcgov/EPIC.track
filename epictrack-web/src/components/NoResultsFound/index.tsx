@@ -1,8 +1,8 @@
 import React from "react";
-import { Container, Grid } from "@mui/material";
+import { Box, Container, Grid } from "@mui/material";
 import { ETHeading1, ETHeading3, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
-import SearchIcon from "@mui/icons-material/Search";
+import SearchIcon from "../../assets/images/search.svg";
 
 const NoResultsFound = () => {
   return (
@@ -23,7 +23,7 @@ const NoResultsFound = () => {
           spacing={2}
         >
           <Grid item>
-            <SearchIcon sx={{ height: "3em", width: "3em" }} />
+            <Box component="img" src={SearchIcon} alt="Search" width="32px" />
           </Grid>
           <Grid item>
             <ETHeading1
