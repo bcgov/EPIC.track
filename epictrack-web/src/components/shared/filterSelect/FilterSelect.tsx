@@ -58,7 +58,6 @@ const FilterSelect = (props: SelectProps) => {
   }, [menuIsOpen]);
 
   const handleChange = (newValue: any, actionMeta: any) => {
-    console.log("changing");
     if (!isMulti) {
       if (isOptionSelected(newValue)) {
         setSelectedOptions("");
@@ -139,11 +138,6 @@ const FilterSelect = (props: SelectProps) => {
     if (isMulti) filterOptions = [selectAllOption, ...filterOptions];
     setOptions(filterOptions);
   }, [props.options]);
-
-  React.useEffect(() => {
-    console.log("selectValue", selectValue);
-    // setSelectValue(defaultValue || standardDefault);
-  }, [selectValue]);
 
   return (
     <Select
@@ -233,11 +227,11 @@ const FilterSelect = (props: SelectProps) => {
             fontWeight: 700,
           }),
         }),
-        // menuPortal: (base, props) => ({
-        //   ...base,
-        //   zIndex: 2,
-        //   marginTop: "4px",
-        // }),
+        menuPortal: (base, props) => ({
+          ...base,
+          zIndex: 2,
+          marginTop: "4px",
+        }),
         input: (base, props) => ({
           ...base,
           fontWeight: "400",
