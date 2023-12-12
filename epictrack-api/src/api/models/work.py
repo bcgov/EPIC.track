@@ -165,7 +165,7 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_search_text(cls, query, search_text):
         if search_text:
-            query = query.filter(Work.title.ilike(f'%{search_text}%'))
+            query = query.filter(Project.name.ilike(f'%{search_text}%'))
         return query
 
     @classmethod

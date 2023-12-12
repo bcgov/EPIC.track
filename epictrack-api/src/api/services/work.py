@@ -108,6 +108,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "eao_team",
                 "title",
                 "is_active",
+                "project.name"
             )
         ).dump(work)
         if work_phase and len(work_phase) > 0:
