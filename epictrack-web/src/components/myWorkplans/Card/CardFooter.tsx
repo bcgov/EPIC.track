@@ -13,23 +13,48 @@ import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { CardProps } from "./type";
 import { useNavigate } from "react-router-dom";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import RenderSurplus from "./RenderSurplus";
 import { Staff } from "../../../models/staff";
+import { useAppSelector } from "../../../hooks";
 
 const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
 
 const CardFooter = ({ workplan }: CardProps) => {
+  const { email } = useAppSelector((state) => state.user.userDetail);
   const navigate = useNavigate();
   const [staffHover, setStaffHover] = React.useState<any>(null);
   const [userMenuAnchorEl, setUserMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
+  const [staffList, setStaffList] = useState<Array<any>>([]);
+
   const team_lead = workplan.staff_info.find((staff: any) => {
     if (staff.role.name === "Team Lead") {
       return staff.staff.full_name;
     }
     return false;
+  });
+
+  const sortTeam = () => {
+    let userIndex = -1;
+    workplan.staff_info.map((staffObject: any, index: number) => {
+      const staff = staffObject.staff;
+      if (staff.email === email) {
+        userIndex = index;
+      }
+    });
+    if (userIndex >= 0) {
+      [workplan.staff_info[0], workplan.staff_info[userIndex]] = [
+        workplan.staff_info[userIndex],
+        workplan.staff_info[0],
+      ];
+    }
+    setStaffList(workplan.staff_info);
+  };
+
+  useEffect(() => {
+    sortTeam();
   });
 
   const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
@@ -55,7 +80,7 @@ const CardFooter = ({ workplan }: CardProps) => {
         borderTop: `1px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "16px 32px",
         alignItems: "center",
-        // height: "80px",
+        height: "80px",
       }}
     >
       <Grid item>
@@ -112,14 +137,19 @@ const CardFooter = ({ workplan }: CardProps) => {
                     },
                   }}
                 >
-                  {workplan.staff_info.map((staff: any) => {
+                  {staffList.map((staff: any) => {
+                    const isLoggedInUser = staff?.staff?.email === email;
                     return (
-                      <>
+                      <Box>
                         <Avatar
                           key={staff.staff.id}
                           sx={{
-                            bgcolor: Palette.neutral.bg.main,
-                            color: Palette.neutral.dark,
+                            bgcolor: isLoggedInUser
+                              ? Palette.primary.main
+                              : Palette.neutral.bg.main,
+                            color: isLoggedInUser
+                              ? Palette.white
+                              : Palette.neutral.dark,
                             lineHeight: "12px",
                             width: "24px",
                             height: "24px",
@@ -129,7 +159,6 @@ const CardFooter = ({ workplan }: CardProps) => {
                             event.preventDefault();
                             handleOpenUserMenu(event, staff.staff);
                           }}
-                          // onMouseLeave={handleCloseUserMenu}
                         >
                           <ETCaption2
                             bold
@@ -150,7 +179,7 @@ const CardFooter = ({ workplan }: CardProps) => {
                           }}
                           id={staff.staff.id}
                         />
-                      </>
+                      </Box>
                     );
                   })}
                 </AvatarGroup>
