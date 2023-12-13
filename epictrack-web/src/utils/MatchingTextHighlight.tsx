@@ -1,6 +1,5 @@
 import { Palette } from "../styles/theme";
 
-
 export const highlightText = (text: string, query: string) => {
   const index = text.toLowerCase().indexOf(query.toLowerCase());
   if (index !== -1) {
