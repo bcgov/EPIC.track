@@ -12,6 +12,7 @@ import { highlightText } from "../../../utils/MatchingTextHighlight";
 
 const SEARCH_TEXT_THRESHOLD = 1;
 export const NameFilter = () => {
+  const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState<string[]>([]);
   const [searchText, setSearchText] = useState<string>("");
 
@@ -31,14 +32,19 @@ export const NameFilter = () => {
   useEffect(() => {
     const fetchProjectNames = async () => {
       // Replace this with your actual backend API call
-      const with_works = true;
-      const response = (await projectService.getAll(
-        PROJECT_RETURN_TYPE.LIST_TYPE,
-        with_works
-      )) as { data: ListType[] };
+      try {
+        const with_works = true;
+        const response = (await projectService.getAll(
+          PROJECT_RETURN_TYPE.LIST_TYPE,
+          with_works
+        )) as { data: ListType[] };
 
-      const projectNames = response.data.map((project) => project.name);
-      setOptions(projectNames);
+        const projectNames = response.data.map((project) => project.name);
+        setOptions(projectNames);
+        setLoading(false);
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     fetchProjectNames();
@@ -79,6 +85,7 @@ export const NameFilter = () => {
       renderOption={(props, option, state) => (
         <li {...props}>{highlightText(option, state.inputValue)}</li>
       )}
+      disabled={loading}
     />
   );
 };
