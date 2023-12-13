@@ -46,9 +46,16 @@ class ProjectService:
         return project
 
     @classmethod
-    def find_all(cls):
+    def find_all(cls, with_works=False):
         """Find all projects"""
+        if with_works:
+            return Project.find_all_with_works()
         return Project.find_all(default_filters=False)
+
+    @classmethod
+    def find_all_with_works(cls):
+        """Find all projects"""
+        return Project.find_all_with_works()
 
     @classmethod
     def create_project(cls, payload: dict):

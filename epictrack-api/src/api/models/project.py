@@ -69,6 +69,12 @@ class Project(BaseModelVersioned):
     proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")
     region_env = relationship("Region", foreign_keys=[region_id_env], lazy="select")
     region_flnro = relationship("Region", foreign_keys=[region_id_flnro], lazy="select")
+    works = relationship('Work', lazy='dynamic')
+
+    @classmethod
+    def find_all_with_works(cls):
+        """Return all projects with works."""
+        return cls.query.filter(cls.works.any()).filter(cls.is_deleted.is_(False)).all()
 
     @classmethod
     def check_existence(cls, name, project_id=None):
