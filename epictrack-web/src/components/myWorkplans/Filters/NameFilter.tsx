@@ -52,6 +52,7 @@ export const NameFilter = () => {
 
   return (
     <Autocomplete
+      freeSolo
       options={searchText.length >= SEARCH_TEXT_THRESHOLD ? options : []}
       onInputChange={(_, newValue) => {
         setSearchText(newValue ?? "");
@@ -67,7 +68,7 @@ export const NameFilter = () => {
           InputProps={{
             ...params.InputProps,
             startAdornment: (
-              <InputAdornment position="start">
+              <InputAdornment position="start" sx={{ marginLeft: "0.5em" }}>
                 <Box
                   component="img"
                   src={SearchIcon}
