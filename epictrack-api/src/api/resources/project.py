@@ -39,21 +39,18 @@ class Projects(Resource):
     @profiletime
     def get():
         """Return all projects."""
-        try:            
-            with_works = request.args.get(
-                'with_works',
-                default=False,
-                type=lambda v: v.lower() == 'true'
-            )
-            projects = ProjectService.find_all(with_works)
-            return_type = request.args.get("return_type", None)
-            if return_type == "list_type":
-                schema = res.ListTypeResponseSchema(many=True)
-            else:
-                schema = res.ProjectResponseSchema(many=True)
-            return jsonify(schema.dump(projects)), HTTPStatus.OK
-        except Exception as e:
-            return jsonify({"message": str(e)}), HTTPStatus.INTERNAL_SERVER_ERROR
+        with_works = request.args.get(
+            'with_works',
+            default=False,
+            type=lambda v: v.lower() == 'true'
+        )
+        projects = ProjectService.find_all(with_works)
+        return_type = request.args.get("return_type", None)
+        if return_type == "list_type":
+            schema = res.ListTypeResponseSchema(many=True)
+        else:
+            schema = res.ProjectResponseSchema(many=True)
+        return jsonify(schema.dump(projects)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
