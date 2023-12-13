@@ -51,8 +51,7 @@ const UserMenu = (props: UserMenuProps) => {
   return (
     <Menu
       sx={{
-        // mt: "2.5rem",
-        mt: "28px",
+        mt: "2.5rem",
         ...props.sx,
       }}
       id={id || "menu-appbar"}
