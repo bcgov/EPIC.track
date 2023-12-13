@@ -5,6 +5,11 @@ from api.models.event import Event
 from api.models.event_configuration import EventConfiguration
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.work_phase import WorkPhase
+from api.models.work_calendar_event import WorkCalendarEvent
+from api.models.calendar_event import CalendarEvent
+from api.models.task_event import TaskEvent
+
+from .common import deactivate_calendar_events_by_configuration_ids
 
 
 class SetPhasesStatus(ActionFactory):
@@ -48,7 +53,29 @@ class SetPhasesStatus(ActionFactory):
             db.session.query(WorkPhase).filter(
                 WorkPhase.id == source_event.event_configuration.work_phase_id
             ).update({WorkPhase.is_completed: True})
+            source_event_ids = list(map(lambda x: x.id, events_to_be_updated))
+            self.deactivate_calendar_events(source_event_ids)
         self._deactivate_phases_and_events(work_phase_ids)
+
+    def deactivate_calendar_events(self, source_event_ids: [int]) -> None:
+        """Deactivate calendar events by source event ids"""
+        work_calendar_events = db.session.query(WorkCalendarEvent).filter(
+            WorkCalendarEvent.source_event_id.in_(source_event_ids)
+        )
+        work_calendar_events_ids = list(map(lambda x: x.id, work_calendar_events))
+        calendar_event_ids = list(
+            map(lambda x: x.calendar_event_id, work_calendar_events)
+        )
+        db.session.query(WorkCalendarEvent).filter(
+            WorkCalendarEvent.id.in_(work_calendar_events_ids)
+        ).update({WorkCalendarEvent.is_active: False})
+        db.session.query(CalendarEvent).filter(CalendarEvent.id.in_(calendar_event_ids))
+
+    def deactivate_task_events(self, work_phase_ids: [int]) -> None:
+        """Deactivate task events by work phase ids"""
+        db.session.query(TaskEvent).filter(
+            TaskEvent.work_phase_id.in_(work_phase_ids)
+        ).update({TaskEvent.is_active: False})
 
     def get_additional_params(self, source_event: Event, params) -> int:
         """Returns additional parameter"""
@@ -81,3 +108,5 @@ class SetPhasesStatus(ActionFactory):
         db.session.query(Event).filter(
             Event.event_configuration_id.in_(event_configuration_ids)
         ).update({Event.is_active: False})
+        deactivate_calendar_events_by_configuration_ids(event_configuration_ids)
+        self.deactivate_task_events(work_phase_ids)
