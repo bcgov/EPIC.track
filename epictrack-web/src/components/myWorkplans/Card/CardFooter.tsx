@@ -55,7 +55,7 @@ const CardFooter = ({ workplan }: CardProps) => {
 
   useEffect(() => {
     sortTeam();
-  });
+  }, []);
 
   const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setUserMenuAnchorEl(null);
