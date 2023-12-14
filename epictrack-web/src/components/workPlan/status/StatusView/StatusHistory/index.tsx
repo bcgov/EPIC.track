@@ -77,7 +77,7 @@ const StatusHistory = () => {
                   </ReadMoreText>
                 </ETPreviewText>
                 <When condition={isSuccess}>
-                  <Restricted allowed={[ROLES.EDIT_APPROVED_FIELDS]}>
+                  <Restricted allowed={[ROLES.EXTENDED_EDIT]}>
                     <Button
                       variant="text"
                       startIcon={<PencilEditIcon />}

@@ -11,7 +11,11 @@ import { Else, If, Then, When } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
 import IssueHistory from "./IssueHistory";
-import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
+import {
+  MONTH_DAY_YEAR,
+  ROLES,
+} from "../../../../constants/application-constant";
+import { Restricted } from "../../../shared/restricted";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
@@ -116,20 +120,40 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               </If>
 
               <Grid item>
-                <Button
-                  variant="text"
-                  startIcon={<PencilEditIcon />}
-                  sx={{
-                    backgroundColor: "inherit",
-                    borderColor: "transparent",
-                  }}
-                  onClick={() => {
-                    setUpdateToEdit(latestUpdate);
-                    setShowIssuesForm(true);
-                  }}
-                >
-                  Edit
-                </Button>
+                <If condition={latestUpdate.is_approved}>
+                  <Restricted allowed={[ROLES.EXTENDED_EDIT]}>
+                    <Button
+                      variant="text"
+                      startIcon={<PencilEditIcon />}
+                      sx={{
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
+                      onClick={() => {
+                        setUpdateToEdit(latestUpdate);
+                        setShowIssuesForm(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Restricted>
+                  <Else>
+                    <Button
+                      variant="text"
+                      startIcon={<PencilEditIcon />}
+                      sx={{
+                        backgroundColor: "inherit",
+                        borderColor: "transparent",
+                      }}
+                      onClick={() => {
+                        setUpdateToEdit(latestUpdate);
+                        setShowIssuesForm(true);
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </Else>
+                </If>
               </Grid>
             </Grid>
           </GrayBox>
