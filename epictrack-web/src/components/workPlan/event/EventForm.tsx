@@ -153,9 +153,9 @@ const EventForm = ({
   }, [selectedConfiguration, event]);
 
   const decisionMakerPositionIds = useMemo<number[]>(() => {
-    const workPhaseIndex = ctx.workPhases.findIndex(
-      (p) => p.work_phase.id === ctx.selectedWorkPhase?.work_phase.id
-    );
+    // const workPhaseIndex = ctx.workPhases.findIndex(
+    //   (p) => p.work_phase.id === ctx.selectedWorkPhase?.work_phase.id
+    // );
     const lastDecisionIndex = milestoneEvents.findLastIndex(
       (p: EventsGridModel) =>
         p.event_configuration.event_category_id === EventCategory.DECISION
@@ -164,7 +164,7 @@ const EventForm = ({
       (p: EventsGridModel) => p.id === event?.id
     );
     if (
-      workPhaseIndex === ctx.workPhases.length - 1 &&
+      ctx.selectedWorkPhase?.is_last_phase &&
       lastDecisionIndex === currentEventIndex
     ) {
       return [Number(ctx.work?.decision_maker_position_id)];

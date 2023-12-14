@@ -42,6 +42,7 @@ export const Palette = {
     light: "#FDD166",
     bg: {
       light: "#FEEEC5",
+      main: "FEDD8C",
     },
   },
   success: {

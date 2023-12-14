@@ -40,6 +40,12 @@ export const EnvRegionFilter = () => {
 
         setSearchOptions((prev) => ({ ...prev, regions: value as string[] }));
       }}
+      filterClearedCallback={() => {
+        setSearchOptions((prev) => ({
+          ...prev,
+          regions: [],
+        }));
+      }}
       name="region"
       isMulti
       info={true}

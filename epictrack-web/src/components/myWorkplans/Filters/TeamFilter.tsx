@@ -39,6 +39,12 @@ export const TeamFilter = () => {
 
         setSearchOptions((prev) => ({ ...prev, teams: value as string[] }));
       }}
+      filterClearedCallback={() => {
+        setSearchOptions((prev) => ({
+          ...prev,
+          teams: [],
+        }));
+      }}
       name="team"
       isMulti
       info={true}

@@ -9,21 +9,8 @@ import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 
-// const useStyle = makeStyles({
-//   infoSelect: {
-//     pointerEvents: "auto",
-//     borderRadius: "4px",
-//     "& > div:first-child": {
-//       paddingRight: 0,
-//     },
-//     "&:hover": {
-//       backgroundColor: Palette.neutral.bg.main,
-//     },
-//   },
-// });
-
+const INPUT_SIZE = "0.875rem";
 const FilterSelect = (props: SelectProps) => {
-  // const classes = useStyle();
   const { name, isMulti, defaultValue } = props;
   const standardDefault = isMulti ? [] : "";
   const [options, setOptions] = React.useState<OptionType[]>([]);
@@ -92,7 +79,6 @@ const FilterSelect = (props: SelectProps) => {
   };
 
   const applyFilters = () => {
-    // header.column.setFilterValue(selectedOptions);
     if (props.filterAppliedCallback) {
       props.filterAppliedCallback(selectedOptions);
     }
@@ -117,7 +103,6 @@ const FilterSelect = (props: SelectProps) => {
   const clearFilters = () => {
     setSelectedOptions([]);
     setSelectValue(isMulti ? [] : "");
-    // header.column.setFilterValue(isMulti ? [] : "");
     if (props.filterClearedCallback) {
       props.filterClearedCallback(isMulti ? [] : "");
     }
@@ -138,6 +123,16 @@ const FilterSelect = (props: SelectProps) => {
     if (isMulti) filterOptions = [selectAllOption, ...filterOptions];
     setOptions(filterOptions);
   }, [props.options]);
+
+  const isSearchable = () => {
+    if (props.isSearchable !== undefined) return props.isSearchable;
+
+    if (selectValue instanceof Array) {
+      return selectValue.length === 0;
+    }
+
+    return !selectValue;
+  };
 
   return (
     <Select
@@ -196,12 +191,6 @@ const FilterSelect = (props: SelectProps) => {
               ? Palette.primary.accent.light
               : Palette.neutral.accent.light,
           boxShadow: "none",
-          // "&:hover": {
-          //   borderColor:
-          //     props.isFocused || props.menuIsOpen
-          //       ? Palette.primary.accent.light
-          //       : "transparent",
-          // },
           ...(props.selectProps.filterProps?.variant === "bar" && {
             borderColor: props.isFocused
               ? Palette.primary.accent.light
@@ -219,7 +208,7 @@ const FilterSelect = (props: SelectProps) => {
           ...base,
           fontWeight: MET_Header_Font_Weight_Regular,
           color: Palette.neutral.light,
-          fontSize: "0.875rem",
+          fontSize: INPUT_SIZE,
           lineHeight: "1rem",
           ...(props.selectProps.filterProps?.variant == "bar" && {
             color: Palette.primary.accent.main,
@@ -234,20 +223,16 @@ const FilterSelect = (props: SelectProps) => {
         input: (base, props) => ({
           ...base,
           fontWeight: "400",
+          fontSize: INPUT_SIZE,
         }),
       }}
       isClearable={false}
       menuPortalTarget={document.body}
       controlShouldRenderValue={props.controlShouldRenderValue}
-      // className={clsx({
-      //   [classes.infoSelect]: props.info,
-      // })}
-      // classNames={{
-      //   control: () => (props.info ? classes.infoSelect : ""),
-      // }}
       isLoading={props.isLoading}
       loadingMessage={() => "Loading..."}
       isDisabled={props.isDisabled}
+      isSearchable={isSearchable()}
     />
   );
 };
