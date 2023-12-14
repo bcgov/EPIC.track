@@ -86,4 +86,6 @@ export const ROLES = {
   EDIT: "edit",
   DELETE: "delete",
   DEFAULT_ROLES_EAO_EPIC: "default-roles-eao-epic",
+  MANAGE_USERS: "manage_users",
+  EDIT_APPROVED_FIELDS: "edit_approved_fields",
 };

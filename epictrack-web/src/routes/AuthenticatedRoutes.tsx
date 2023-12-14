@@ -74,7 +74,7 @@ const AuthenticatedRoutes = () => {
       />
       <Route path="/list-management/work-staff" element={<WorkStaffList />} />
       <Route path="/work-plan" element={<WorkPlan />} />
-      <Route element={<AuthGate allowed={[ROLES.CREATE]} />}>
+      <Route element={<AuthGate allowed={[ROLES.MANAGE_USERS]} />}>
         <Route path="/admin/users" element={<UserList />} />
       </Route>
       <Route path="/admin/users" element={<UserList />} />
