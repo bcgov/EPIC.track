@@ -68,7 +68,10 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 </Else>
               </If>
               <When condition={isSuccess}>
-                <Restricted allowed={[ROLES.EXTENDED_EDIT]}>
+                <Restricted
+                  allowed={[ROLES.EXTENDED_EDIT]}
+                  errorProps={{ disabled: true }}
+                >
                   <Button
                     variant="text"
                     startIcon={<PencilEditIcon />}

@@ -121,7 +121,10 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
 
               <Grid item>
                 <If condition={latestUpdate.is_approved}>
-                  <Restricted allowed={[ROLES.EXTENDED_EDIT]}>
+                  <Restricted
+                    allowed={[ROLES.EXTENDED_EDIT]}
+                    errorProps={{ disabled: true }}
+                  >
                     <Button
                       variant="text"
                       startIcon={<PencilEditIcon />}

@@ -128,7 +128,10 @@ const RecentStatus = () => {
           </Else>
         </If>
         <If condition={statuses[0].is_approved}>
-          <Restricted allowed={[ROLES.EXTENDED_EDIT]}>
+          <Restricted
+            allowed={[ROLES.EXTENDED_EDIT]}
+            errorProps={{ disabled: true }}
+          >
             <Button
               onClick={() => {
                 setShowStatusForm(true);
