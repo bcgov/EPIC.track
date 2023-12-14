@@ -15,7 +15,7 @@ const Filters = () => {
       justifyContent={"space-between"}
       direction="row"
     >
-      <Grid item>
+      <Grid item xs={3}>
         <NameFilter />
       </Grid>
       <Grid item xs container spacing={2} justifyContent="flex-end">
