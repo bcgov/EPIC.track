@@ -42,6 +42,12 @@ export const WorkTypeFilter = () => {
           work_types: value as string[],
         }));
       }}
+      filterClearedCallback={() => {
+        setSearchOptions((prev) => ({
+          ...prev,
+          work_types: [],
+        }));
+      }}
       name="workType"
       isMulti
       info={true}

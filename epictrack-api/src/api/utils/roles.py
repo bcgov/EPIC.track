@@ -21,6 +21,8 @@ class Role(Enum):
     # Keycloak Based roles
     CREATE = 'create'
     EDIT = 'edit'
+    MANAGE_USERS = 'manage_users'
+    EXTENDED_EDIT = 'extended_edit'
 
 
 class Membership(Enum):

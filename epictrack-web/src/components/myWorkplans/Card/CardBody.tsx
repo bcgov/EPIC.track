@@ -66,36 +66,31 @@ const CardBody = ({ workplan }: CardProps) => {
           </ETCaption1>
         </Grid>
       </Grid>
-      <Grid item container direction="row" spacing={1}>
+      <Grid item container direction="row" spacing={1} sx={{ height: "26px" }}>
         <When condition={"phase_info" in workplan}>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <Stack
               direction={"row"}
               spacing={1}
               alignItems={"center"}
-              sx={{ overflow: "clip" }}
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
             >
               <DotIcon fill={phase_color} />
               <ETCaption2
                 bold
+                enableEllipsis
                 color={phase_color}
                 sx={{
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {workplan?.phase_info?.work_phase.name}
               </ETCaption2>
-            </Stack>
-          </Grid>
-          <Grid item xs={6}>
-            <Stack
-              direction={"row"}
-              spacing={1}
-              alignItems={"center"}
-              sx={{ overflow: "clip" }}
-            >
               <ClockIcon
                 fill={
                   workplan?.phase_info?.days_left > 0
@@ -105,6 +100,7 @@ const CardBody = ({ workplan }: CardProps) => {
               />
               <ETCaption2
                 bold
+                enableEllipsis
                 color={
                   workplan?.phase_info?.days_left > 0
                     ? Palette.neutral.main
@@ -113,7 +109,6 @@ const CardBody = ({ workplan }: CardProps) => {
                 sx={{
                   overflow: "hidden",
                   textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
                 }}
               >
                 {daysLeft()}
@@ -122,40 +117,42 @@ const CardBody = ({ workplan }: CardProps) => {
           </Grid>
         </When>
       </Grid>
-      <When condition={Boolean(workplan?.phase_info)}>
-        <Grid item container direction="row" spacing={1}>
-          <Grid
-            item
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            <ETCaption1 color={Palette.neutral.main}>
-              {`UPCOMING MILESTONE ${dayjs(new Date())
-                .add(workplan?.phase_info?.days_left, "days")
-                .format(MONTH_DAY_YEAR)
-                .toUpperCase()}`}
-            </ETCaption1>
-          </Grid>
-        </Grid>
-        <Grid item container direction="row" spacing={1}>
-          <Grid item sx={{ overflow: "hidden" }}>
-            <ETParagraph
-              bold
-              color={Palette.neutral.dark}
+      <Grid container sx={{ height: "64px" }} spacing={1}>
+        <When condition={Boolean(workplan?.phase_info)}>
+          <Grid item container direction="row" spacing={1}>
+            <Grid
+              item
               sx={{
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
               }}
             >
-              {workplan.phase_info?.next_milestone}
-            </ETParagraph>
+              <ETCaption1 color={Palette.neutral.main}>
+                {`UPCOMING MILESTONE ${dayjs(new Date())
+                  .add(workplan?.phase_info?.days_left, "days")
+                  .format(MONTH_DAY_YEAR)
+                  .toUpperCase()}`}
+              </ETCaption1>
+            </Grid>
           </Grid>
-        </Grid>
-      </When>
+          <Grid item container direction="row" spacing={1}>
+            <Grid item sx={{ overflow: "hidden" }}>
+              <ETParagraph
+                bold
+                color={Palette.neutral.dark}
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {workplan.phase_info?.next_milestone}
+              </ETParagraph>
+            </Grid>
+          </Grid>
+        </When>
+      </Grid>
 
       <Grid item container direction="row" spacing={1}>
         <Grid item>
@@ -172,13 +169,24 @@ const CardBody = ({ workplan }: CardProps) => {
           {statusOutOfDate && <IndicatorSmallIcon />}
         </Grid>
       </Grid>
-      <Grid item sx={{ height: "49px", width: "100%" }}>
-        <ETParagraph sx={{ height: "49px" }} enableEllipsis>
+      <Grid item>
+        <ETParagraph
+          sx={{
+            height: "50px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            display: "-webkit-box",
+            "-webkit-line-clamp": "2",
+            "-webkit-box-orient": "vertical",
+          }}
+        >
           {workplan.status_info.description}
         </ETParagraph>
       </Grid>
       <Grid item>
-        <ETCaption1 color={Palette.neutral.main}>IAAC INVOLVEMENT</ETCaption1>
+        <ETCaption1 color={Palette.neutral.main}>
+          FEDERAL INVOLVEMENT
+        </ETCaption1>
       </Grid>
       <Grid item>
         <ETParagraph color={Palette.neutral.dark}>

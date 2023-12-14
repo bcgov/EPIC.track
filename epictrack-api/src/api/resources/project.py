@@ -39,7 +39,12 @@ class Projects(Resource):
     @profiletime
     def get():
         """Return all projects."""
-        projects = ProjectService.find_all()
+        with_works = request.args.get(
+            'with_works',
+            default=False,
+            type=lambda v: v.lower() == 'true'
+        )
+        projects = ProjectService.find_all(with_works)
         return_type = request.args.get("return_type", None)
         if return_type == "list_type":
             schema = res.ListTypeResponseSchema(many=True)

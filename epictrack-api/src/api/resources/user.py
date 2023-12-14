@@ -21,6 +21,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services import UserService
 from api.utils import auth, profiletime
+from api.utils.roles import Role
 from api.utils.util import cors_preflight
 
 API = Namespace("users", description="Users")
@@ -33,7 +34,7 @@ class Users(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.require
+    @auth.has_one_of_roles([Role.MANAGE_USERS.value])
     @profiletime
     def get():
         """Get all users"""
@@ -48,7 +49,7 @@ class Groups(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.require
+    @auth.has_one_of_roles([Role.MANAGE_USERS.value])
     @profiletime
     def get():
         """Get all groups"""
@@ -63,7 +64,7 @@ class UserGroups(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.require
+    @auth.has_one_of_roles([Role.MANAGE_USERS.value])
     @profiletime
     def put(user_id):
         """Update the group of the user"""

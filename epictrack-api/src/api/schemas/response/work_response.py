@@ -136,6 +136,7 @@ class WorkPhaseAdditionalInfoResponseSchema(Schema):
     )
     next_milestone = fields.Str(metadata={"description": "Next milestone in the phase"})
     milestone_progress = fields.Number(metadata={"description": "Milestone progress"})
+    is_last_phase = fields.Number(metadata={"description": "Indicate if this the last phase of the work"})
     days_left = fields.Number(
         metadata={"description": "Number of days left in the phase"}
     )

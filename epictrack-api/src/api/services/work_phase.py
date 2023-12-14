@@ -109,12 +109,15 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         result_dict = {}
         work_ids = list(work_params_dict.keys())
 
-        work_phases_dict = cls._query_work_phases(work_ids)
+        work_phases_dict, total_work_phases = cls._query_work_phases(work_ids)
 
+        index = 1
         for work_id, work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls._find_work_phase_status(
                 work_id, work_phase_id, work_phases_dict.get(work_id, [])
             )
+            result_dict["is_last_phase"] = index == total_work_phases
+            index = index + 1
 
         return result_dict
 
@@ -126,19 +129,19 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .filter(
                 WorkPhase.work_id.in_(work_ids),
-                WorkPhase.is_active.is_(True),
                 WorkPhase.is_deleted.is_(False),
                 WorkPhase.visibility != PhaseVisibilityEnum.HIDDEN.value,
             )
             .order_by(WorkPhase.sort_order)
             .all()
         )
-
+        total_work_phases = len(work_phases_dict)
+        work_phases_dict = list(filter(lambda x: x[1].is_active is True, work_phases_dict))
         result_dict = defaultdict(list)
         for work_id, work_phase in work_phases_dict:
             result_dict[work_id].append(work_phase)
 
-        return result_dict
+        return result_dict, total_work_phases
 
     @classmethod
     def _find_work_phase_status(cls, work_id, work_phase_id, work_phases):
