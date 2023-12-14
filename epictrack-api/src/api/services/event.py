@@ -280,42 +280,17 @@ class EventService:
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, event_old, current_work_phase
         )
-        if (
-            event.actual_date
-            and event.event_configuration.event_position.value
-            == EventPositionEnum.END.value
-        ):
-            # set the numebr of days to the work phase phasestartdate - actual date
-            cls._complete_work_phase(current_work_phase)
-        if (
-            event.event_configuration.event_position.value
-            == EventPositionEnum.START.value
-        ):
-            current_work_phase.start_date = cls._find_event_date(event)
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
-        if (
-            event.event_configuration.event_type_id
-            == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
-            and event.actual_date
-        ):
-            current_work_phase.suspended_date = event.actual_date
-            current_work_phase.is_suspended = True
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
-        if (
-            event.event_configuration.event_type_id
-            == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-            and event.actual_date
-        ):
-            event.number_of_days = number_of_days_to_be_pushed
-            event.update(event.as_dict(recursive=False), commit=False)
-            current_work_phase.is_suspended = False
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
+        cls._handle_work_phase_for_end_phase_end_event(
+            all_work_phases, current_work_phase_index, event, current_work_phase
+        )
+        cls._handle_work_phase_for_start_event(event, current_work_phase)
+        cls._handle_work_phase_for_suspension(event, current_work_phase)
+        cls._handle_work_phase_for_resumption(
+            event, current_work_phase, number_of_days_to_be_pushed
+        )
+        cls._handle_work_phase_for_extension_without_push_events(
+            event, current_work_phase, push_events, number_of_days_to_be_pushed
+        )
 
         current_event_index = cls.find_event_index(
             all_work_events, event_old if event_old else event, current_work_phase
@@ -386,6 +361,106 @@ class EventService:
                 )
 
     @classmethod
+    def _handle_work_phase_for_start_event(
+        cls, event: Event, current_work_phase: WorkPhase
+    ) -> None:
+        """Update the work phase's start date if the start event's date changed"""
+        if (
+            event.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+        ):
+            current_work_phase.start_date = cls._find_event_date(event)
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+    @classmethod
+    def _handle_work_phase_for_suspension(
+        cls, event: Event, current_work_phase: WorkPhase
+    ) -> None:
+        """Update the work phase if the phase is suspended"""
+        if (
+            event.event_configuration.event_type_id
+            == EventTypeEnum.TIME_LIMIT_SUSPENSION.value
+            and event.actual_date
+        ):
+            current_work_phase.suspended_date = event.actual_date
+            current_work_phase.is_suspended = True
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+    @classmethod
+    def _handle_work_phase_for_resumption(
+        cls,
+        event: Event,
+        current_work_phase: WorkPhase,
+        number_of_days_to_be_pushed: int,
+    ) -> None:
+        """Update the work phase if the phase is resumed"""
+        if (
+            event.event_configuration.event_type_id
+            == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+            and event.actual_date
+        ):
+            event.number_of_days = number_of_days_to_be_pushed
+            event.update(event.as_dict(recursive=False), commit=False)
+            current_work_phase.is_suspended = False
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+    @classmethod
+    def _handle_work_phase_for_end_phase_end_event(
+        cls,
+        all_work_phases: [WorkPhase],
+        current_work_phase_index: int,
+        event: Event,
+        current_work_phase: WorkPhase,
+    ) -> None:
+        """Mark the current work phase complete and set the next work phase as the current one in the work"""
+        if (
+            event.actual_date
+            and event.event_configuration.event_position.value
+            == EventPositionEnum.END.value
+        ):
+            current_work_phase.is_completed = True
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+            work: Work = Work.find_by_id(current_work_phase.work_id)
+            if current_work_phase_index == len(all_work_phases) - 1:
+                work.work_state = WorkStateEnum.COMPLETED
+            else:
+                work.current_work_phase_id = all_work_phases[
+                    current_work_phase_index + 1
+                ].id
+            work.update(work.as_dict(recursive=False), commit=False)
+
+    @classmethod
+    def _handle_work_phase_for_extension_without_push_events(
+        cls,
+        event: Event,
+        current_work_phase: WorkPhase,
+        push_events: bool,
+        number_of_days_to_be_pushed: int,
+    ) -> None:
+        """Update the work phase for extension with actual date and push events option as false"""
+        if (
+            event.event_configuration.event_category_id
+            == EventCategoryEnum.EXTENSION.value
+            and event.actual_date
+            and not push_events
+        ):
+            current_work_phase.end_date = current_work_phase.end_date + timedelta(
+                days=number_of_days_to_be_pushed
+            )
+            current_work_phase.update(
+                current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+    @classmethod
     def event_compare_func(cls, event_x, event_y):
         """Compare function for event sort"""
         if (
@@ -451,29 +526,6 @@ class EventService:
                 index = i
                 break
         return index
-
-    @classmethod
-    def _complete_work_phase(cls, current_work_phase: WorkPhase) -> None:
-        """Mark the current work phase complete and set the next work phase as the current one in the work"""
-        all_work_phases = WorkPhase.find_by_params(
-            {"work_id": current_work_phase.work_id}
-        )
-        current_work_phase.is_completed = True
-        current_work_phase.update(
-            current_work_phase.as_dict(recursive=False), commit=False
-        )
-
-        current_work_phase_index = util.find_index_in_array(
-            all_work_phases, current_work_phase
-        )
-        work: Work = Work.find_by_id(current_work_phase.work_id)
-        if current_work_phase_index == len(all_work_phases) - 1:
-            work.work_state = WorkStateEnum.COMPLETED
-        else:
-            work.current_work_phase_id = all_work_phases[
-                current_work_phase_index + 1
-            ].id
-        work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _get_number_of_days_to_be_pushed(
