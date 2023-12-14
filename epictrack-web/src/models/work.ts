@@ -71,6 +71,7 @@ export interface WorkPhaseAdditionalInfo {
   next_milestone: string;
   milestone_progress: number;
   days_left: number;
+  is_last_phase: boolean;
 }
 
 export interface TemplateStatus extends MasterBase {

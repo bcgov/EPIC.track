@@ -2,6 +2,8 @@
 from datetime import datetime
 from api.models import Event, EventConfiguration, WorkPhase, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
+from api.models.work_calendar_event import WorkCalendarEvent
+from api.models.calendar_event import CalendarEvent
 
 
 def find_configuration(source_event: Event, params) -> int:
@@ -42,3 +44,29 @@ def find_event_date(source_event: Event) -> datetime:
         if source_event.actual_date
         else source_event.anticipated_date
     )
+
+
+def deactivate_calendar_events_by_configuration_ids(configuration_ids: [int]):
+    """Make the calendar events inactive based on the source event configuration ids"""
+    if len(configuration_ids) > 0:
+        events_result = (
+            db.session.query(Event)
+            .filter(Event.event_configuration_id.in_(configuration_ids))
+            .all()
+        )
+        source_event_ids = list(map(lambda x: x.id, events_result))
+        work_calendar_events = (
+            db.session.query(WorkCalendarEvent)
+            .filter(WorkCalendarEvent.source_event_id.in_(source_event_ids))
+            .all()
+        )
+        work_calendar_event_ids = list(map(lambda x: x.id, work_calendar_events))
+        calendar_event_ids = list(
+            map(lambda x: x.calendar_event_id, work_calendar_events)
+        )
+        db.session.query(WorkCalendarEvent).filter(
+            WorkCalendarEvent.id.in_(work_calendar_event_ids)
+        ).update({WorkCalendarEvent.is_active: False})
+        db.session.query(CalendarEvent).filter(
+            CalendarEvent.id.in_(calendar_event_ids)
+        ).update({CalendarEvent.is_active: False})
