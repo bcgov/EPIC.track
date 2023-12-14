@@ -33,7 +33,7 @@ const CardFooter = ({ workplan }: CardProps) => {
         height: "80px",
       }}
     >
-      <Grid item>
+      <Grid item xs={6}>
         <Grid
           item
           container
@@ -41,7 +41,7 @@ const CardFooter = ({ workplan }: CardProps) => {
           direction={"row"}
           justifyContent={"space-between"}
         >
-          <Grid item>
+          <Grid item xs={1}>
             <Grid container direction="column" spacing={1}>
               <Grid item>
                 <ETCaption1 color={Palette.neutral.main}>TEAM</ETCaption1>
@@ -53,7 +53,7 @@ const CardFooter = ({ workplan }: CardProps) => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item>
+          <Grid item xs={1}>
             <Grid container direction="column" spacing={1}>
               <Grid item>
                 <ETCaption1 color={Palette.neutral.main}>LEAD</ETCaption1>
@@ -73,7 +73,7 @@ const CardFooter = ({ workplan }: CardProps) => {
               </Grid>
             </Grid>
           </Grid>
-          <Grid item>
+          <Grid item xs={1}>
             <Grid container direction="column" spacing={1}>
               <Grid item>
                 <ETCaption1 color={Palette.neutral.main}>STAFF</ETCaption1>
