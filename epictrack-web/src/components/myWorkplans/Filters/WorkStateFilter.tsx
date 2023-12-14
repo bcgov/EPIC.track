@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { WORK_STATE } from "../../shared/constants";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
-import { MyWorkplansContext } from "../MyWorkPlanContext";
+import { DEFAULT_WORK_STATE, MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const WorkStateFilter = () => {
   const { setSearchOptions } = useContext(MyWorkplansContext);
@@ -24,13 +24,19 @@ export const WorkStateFilter = () => {
           work_states: value as string[],
         }));
       }}
+      filterClearedCallback={() => {
+        setSearchOptions((prev) => ({
+          ...prev,
+          work_states: [],
+        }));
+      }}
       name="workState"
       isMulti
       info={true}
       defaultValue={[
         {
-          label: WORK_STATE.IN_PROGRESS.label,
-          value: WORK_STATE.IN_PROGRESS.value,
+          label: DEFAULT_WORK_STATE.label,
+          value: DEFAULT_WORK_STATE.value,
         },
       ]}
     />
