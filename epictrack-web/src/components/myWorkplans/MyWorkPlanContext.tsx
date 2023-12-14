@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import { WorkPlan } from "../../models/workplan";
 import workplanService from "../../services/workplanService";
+import { WORK_STATE } from "../shared/constants";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
@@ -35,26 +36,32 @@ export interface WorkPlanSearchOptions {
 }
 
 const PAGE_SIZE = 6;
+
+// used in WorkStateFilter as default value for the Filter Select
+export const DEFAULT_WORK_STATE = WORK_STATE.IN_PROGRESS;
+
 export const MyWorkplansProvider = ({
   children,
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
+  const defaultSearchOptions: WorkPlanSearchOptions = {
+    teams: [],
+    work_states: [DEFAULT_WORK_STATE.value],
+    regions: [],
+    project_types: [],
+    work_types: [],
+    text: "",
+    staff_id: null,
+  };
   const [loadingWorkplans, setLoadingWorkplans] = useState<boolean>(true);
   const [loadingMoreWorkplans, setLoadingMoreWorkplans] =
     useState<boolean>(false);
   const [workplans, setWorkplans] = useState<WorkPlan[]>([]);
   const [totalWorkplans, setTotalWorkplans] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
-  const [searchOptions, setSearchOptions] = useState<WorkPlanSearchOptions>({
-    teams: [],
-    work_states: [],
-    regions: [],
-    project_types: [],
-    work_types: [],
-    text: "",
-    staff_id: null,
-  });
+  const [searchOptions, setSearchOptions] =
+    useState<WorkPlanSearchOptions>(defaultSearchOptions);
 
   const fetchWorkplans = async (page: number, shouldAppend = false) => {
     try {

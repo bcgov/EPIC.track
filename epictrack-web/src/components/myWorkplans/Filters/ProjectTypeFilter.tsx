@@ -42,6 +42,12 @@ export const ProjectTypeFilter = () => {
           project_types: value as string[],
         }));
       }}
+      filterClearedCallback={() => {
+        setSearchOptions((prev) => ({
+          ...prev,
+          project_types: [],
+        }));
+      }}
       name="projectType"
       isMulti
       info={true}
