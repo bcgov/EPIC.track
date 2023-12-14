@@ -69,6 +69,7 @@ const RenderSurplus = ({ renderSurplus, staff }: RenderSurplusProps) => {
           return (
             <MenuItem>
               <Avatar
+                key={staffObject?.staff?.id}
                 sx={{
                   bgcolor: Palette.neutral.bg.main,
                   color: Palette.neutral.dark,
