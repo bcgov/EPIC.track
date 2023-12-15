@@ -11,4 +11,5 @@ export interface Group {
   id: string;
   name: string;
   level: number;
+  display_name: string;
 }

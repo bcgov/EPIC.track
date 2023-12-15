@@ -26,40 +26,67 @@ class UserService:
         """Get all users"""
         users = KeycloakService.get_users()
         for user in users:
-            user['group'] = None
+            user["group"] = None
         groups = UserService.get_groups()
-        groups = sorted(groups, key=lambda x: x['attributes']['level'][0])
+        groups = sorted(groups, key=lambda x: x["attributes"]["level"][0])
         for group in groups:
-            members = KeycloakService.get_group_members(group['id'])
-            member_ids = [member['id'] for member in members]
-            filtered_users = list(filter(lambda x, _member_ids=member_ids: x['id'] in _member_ids, users))
+            members = KeycloakService.get_group_members(group["id"])
+            member_ids = [member["id"] for member in members]
+            filtered_users = list(
+                filter(lambda x, _member_ids=member_ids: x["id"] in _member_ids, users)
+            )
             for user in filtered_users:
-                user['group'] = group
+                user["group"] = group
         return users
 
     @staticmethod
     def get_groups():
         """Get groups that has level set up"""
         groups = KeycloakService.get_groups()
-        filtered_groups = list(filter((lambda g: 'level' in g['attributes']), groups))
+        filtered_groups = (
+            []
+        )  # list(filter((lambda g: 'level' in g['attributes']), groups))
+        for group in groups:
+            if group.get("subGroups"):
+                for sub_group in group.get("subGroups"):
+                    if "level" in sub_group["attributes"]:
+                        filtered_groups.append(sub_group)
+            elif "level" in group["attributes"]:
+                filtered_groups.append(group)
         return filtered_groups
 
     @staticmethod
     def update_user_group(user_id, user_group_request):
         """Update the group of a user"""
-        token_groups = TokenInfo.get_user_data()['groups']
+        token_groups = TokenInfo.get_user_data()["groups"]
         groups = UserService.get_groups()
-        requested_group = next((group for group in groups if group['name'] in token_groups), None)
-        updating_group = next((group for group in groups
-                               if group['id'] == user_group_request.get('group_id_to_update')), None)
-        if (not requested_group and not updating_group and
-           int(requested_group['attributes']['level'][0]) < int(updating_group['attributes']['level'][0])):
-            raise PermissionDeniedError('Permission denied')
+        requested_group = next(
+            (group for group in groups if group["name"] in token_groups), None
+        )
+        updating_group = next(
+            (
+                group
+                for group in groups
+                if group["id"] == user_group_request.get("group_id_to_update")
+            ),
+            None,
+        )
+        if (
+            not requested_group
+            and not updating_group
+            and int(requested_group["attributes"]["level"][0])
+            < int(updating_group["attributes"]["level"][0])
+        ):
+            raise PermissionDeniedError("Permission denied")
 
-        existing_group_id = user_group_request.get('existing_group_id')
+        existing_group_id = user_group_request.get("existing_group_id")
         if existing_group_id:
-            result = KeycloakService.delete_user_group(user_id, user_group_request.get('existing_group_id'))
+            result = KeycloakService.delete_user_group(
+                user_id, user_group_request.get("existing_group_id")
+            )
             if result.status_code != 204:
-                raise BusinessError('Error removing group', 500)
-        result = KeycloakService.update_user_group(user_id, user_group_request['group_id_to_update'])
+                raise BusinessError("Error removing group", 500)
+        result = KeycloakService.update_user_group(
+            user_id, user_group_request["group_id_to_update"]
+        )
         return result

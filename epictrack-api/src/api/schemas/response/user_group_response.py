@@ -22,7 +22,12 @@ class UserGroupResponseSchema(Schema):
     name = fields.Str(metadata={"description": "Name of the group"})
 
     level = fields.Method("get_level")
+    display_name = fields.Method("get_display_name")
 
     def get_level(self, instance):
         """Get the full name"""
         return int(instance["attributes"]["level"][0])
+
+    def get_display_name(self, instance):
+        """Get the display name of the group"""
+        return instance["attributes"]["display_name"][0]
