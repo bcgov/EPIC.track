@@ -1,5 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Autocomplete, Box, InputAdornment, TextField } from "@mui/material";
+import {
+  Autocomplete,
+  Box,
+  InputAdornment,
+  MenuItem,
+  TextField,
+} from "@mui/material";
 import {
   MyWorkplansContext,
   WorkPlanSearchOptions,
@@ -84,7 +90,9 @@ export const NameFilter = () => {
       clearOnBlur
       noOptionsText=""
       renderOption={(props, option, state) => (
-        <li {...props}>{highlightText(option, state.inputValue)}</li>
+        <MenuItem {...props}>
+          {highlightText(option, state.inputValue)}
+        </MenuItem>
       )}
       disabled={loading}
     />

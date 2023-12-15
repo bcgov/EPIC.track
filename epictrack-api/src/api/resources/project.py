@@ -13,6 +13,7 @@
 # limitations under the License.
 """Resource for project endpoints."""
 from http import HTTPStatus
+from api.utils.caching import AppCache
 
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
@@ -21,7 +22,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.schemas.work_type import WorkTypeSchema
 from api.services import ProjectService
-from api.utils import auth, profiletime
+from api.utils import auth, constants, profiletime
 from api.utils.util import cors_preflight
 
 
@@ -223,6 +224,7 @@ class ProjectTypes(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all project types."""
         project_types = ProjectService.find_all_project_types()
