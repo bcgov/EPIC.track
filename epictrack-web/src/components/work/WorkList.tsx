@@ -13,9 +13,10 @@ import { IconProps } from "../icons/type";
 import Icons from "../icons";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted } from "../shared/restricted";
-import { GROUPS, ROLES } from "../../constants/application-constant";
+import { Restricted, hasPermission } from "../shared/restricted";
+import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
+import { useAppSelector } from "../../hooks";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -28,6 +29,8 @@ const WorkList = () => {
   const [ministries, setMinistries] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
   const ctx = React.useContext(MasterContext);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
   React.useEffect(() => {
     ctx.setForm(<WorkForm workId={workId} />);
   }, [workId]);
@@ -95,15 +98,17 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: ({ row, renderedCellValue }) => (
-          <ETGridTitle
-            to="#"
-            onClick={() => onEdit(row.original.id)}
-            titleText={row.original.title}
-          >
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ row, renderedCellValue }) => (
+              <ETGridTitle
+                to="#"
+                onClick={() => onEdit(row.original.id)}
+                titleText={row.original.title}
+              >
+                {renderedCellValue}
+              </ETGridTitle>
+            )
+          : undefined,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
