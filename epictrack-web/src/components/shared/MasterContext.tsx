@@ -5,6 +5,8 @@ import TrackDialog from "./TrackDialog";
 import { SxProps } from "@mui/material";
 import { showNotification } from "./notificationProvider";
 import { getErrorMessage } from "../../utils/axiosUtils";
+import { Restricted } from "./restricted";
+import { ROLES } from "../../constants/application-constant";
 
 interface MasterContextProps {
   // error: string | undefined;
@@ -211,23 +213,25 @@ export const MasterProvider = ({
         onCancel={() => handleDelete()}
         onOk={() => deleteItem(id)}
       />
-      <TrackDialog
-        open={showModalForm}
-        dialogTitle={title ? title : id ? "Update " : "Create "}
-        onClose={(event, reason) => onDialogClose(event, reason)}
-        disableEscapeKeyDown
-        fullWidth
-        maxWidth="lg"
-        okButtonText="Save"
-        cancelButtonText="Cancel"
-        isActionsRequired
-        onCancel={() => onDialogClose()}
-        formId={formId}
-        // onOk={() => deleteItem(id)}
-        sx={formStyle}
-      >
-        {form}
-      </TrackDialog>
+      <Restricted allowed={[ROLES.EDIT]}>
+        <TrackDialog
+          open={showModalForm}
+          dialogTitle={title ? title : id ? "Update " : "Create "}
+          onClose={(event, reason) => onDialogClose(event, reason)}
+          disableEscapeKeyDown
+          fullWidth
+          maxWidth="lg"
+          okButtonText="Save"
+          cancelButtonText="Cancel"
+          isActionsRequired
+          onCancel={() => onDialogClose()}
+          formId={formId}
+          // onOk={() => deleteItem(id)}
+          sx={formStyle}
+        >
+          {form}
+        </TrackDialog>
+      </Restricted>
     </MasterContext.Provider>
   );
 };

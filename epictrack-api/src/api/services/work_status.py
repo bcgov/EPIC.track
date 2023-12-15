@@ -13,10 +13,8 @@
 # limitations under the License.
 """Service to manage Work status."""
 from datetime import datetime
-from http import HTTPStatus
 from typing import Dict
 
-from api.exceptions import BusinessError
 from api.models import WorkStatus as WorkStatusModel
 from api.utils import TokenInfo
 from api.utils.roles import Membership
@@ -57,8 +55,10 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         """Update an existing work status."""
         # TODO Add Super user check
         if work_status.is_approved:
-            if not TokenInfo.is_super_user():
-                raise BusinessError("Access Denied", HTTPStatus.UNAUTHORIZED)
+            one_of_roles = (
+                KeycloakRole.EXTENDED_EDIT.value
+            )
+            authorisation.check_auth(one_of_roles=one_of_roles)
 
         work_status.update(work_status_data)
 

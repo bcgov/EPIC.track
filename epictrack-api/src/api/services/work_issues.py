@@ -18,6 +18,8 @@ from api.exceptions import ResourceNotFoundError
 from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
 from api.models import WorkIssues as WorkIssuesModel
 from api.utils import TokenInfo
+from api.utils.roles import Role as KeycloakRole
+from api.services import authorisation
 
 
 class WorkIssuesService:  # pylint: disable=too-many-public-methods
@@ -110,6 +112,11 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
                     issue_update_model: WorkIssueUpdatesModel = WorkIssueUpdatesModel.find_by_id(description_id)
                     if not issue_update_model:
                         raise ResourceNotFoundError("Issue Description doesnt exist")
+                    if issue_update_model.is_approved:
+                        one_of_roles = (
+                            KeycloakRole.EXTENDED_EDIT.value
+                        )
+                        authorisation.check_auth(one_of_roles=one_of_roles)
                     issue_update_model.description = update_description.get('description')
                     issue_update_model.flush()
 

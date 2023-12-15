@@ -11,9 +11,10 @@ import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted } from "../shared/restricted";
-import { GROUPS, ROLES } from "../../constants/application-constant";
+import { Restricted, hasPermission } from "../shared/restricted";
+import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
+import { useAppSelector } from "../../hooks";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
@@ -21,6 +22,9 @@ const ProjectList = () => {
   const [types, setTypes] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState<number>();
   const ctx = React.useContext(MasterContext);
+
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
   React.useEffect(() => {
     ctx.setForm(<ProjectForm projectId={projectId} />);
@@ -82,16 +86,18 @@ const ProjectList = () => {
       {
         accessorKey: "name",
         header: "Project Name",
-        Cell: ({ cell, row, renderedCellValue }) => (
-          <ETGridTitle
-            to={"#"}
-            onClick={() => onEdit(row.original.id)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ cell, row, renderedCellValue }) => (
+              <ETGridTitle
+                to={"#"}
+                onClick={() => onEdit(row.original.id)}
+                enableTooltip={true}
+                tooltip={cell.getValue<string>()}
+              >
+                {renderedCellValue}
+              </ETGridTitle>
+            )
+          : undefined,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },

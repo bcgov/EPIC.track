@@ -1,11 +1,8 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import {
-  Delete as DeleteIcon,
-  Visibility as VisibilityIcon,
-} from "@mui/icons-material";
-import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
-import { RESULT_STATUS } from "../../../constants/application-constant";
+import { Delete as DeleteIcon } from "@mui/icons-material";
+import { Box, Button, Grid, IconButton } from "@mui/material";
+import { RESULT_STATUS, ROLES } from "../../../constants/application-constant";
 import TemplateForm from "./TemplateForm";
 import { Template } from "../../../models/template";
 import MasterTrackTable from "../../shared/MasterTrackTable";
@@ -16,6 +13,8 @@ import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 import templateService from "../../../services/taskService/templateService";
 import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
 import TableFilter from "../../shared/filterSelect/TableFilter";
+import { useAppSelector } from "../../../hooks";
+import { Restricted, hasPermission } from "../../shared/restricted";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -31,6 +30,9 @@ const TemplateList = () => {
   const [eaActs, setEAActs] = React.useState<string[]>([]);
   const [phases, setPhases] = React.useState<string[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
+
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
   const titleSuffix = "Task Template Details";
   const onDialogClose = (event: any = undefined, reason: any = undefined) => {
@@ -103,11 +105,16 @@ const TemplateList = () => {
       {
         accessorKey: "name",
         header: "Name",
-        Cell: ({ row, renderedCellValue }) => (
-          <ETGridTitle to={"#"} onClick={() => onViewDetails(row.original.id)}>
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ row, renderedCellValue }) => (
+              <ETGridTitle
+                to={"#"}
+                onClick={() => onViewDetails(row.original.id)}
+              >
+                {renderedCellValue}
+              </ETGridTitle>
+            )
+          : undefined,
         sortingFn: "sortFn",
       },
       {
@@ -245,15 +252,20 @@ const TemplateList = () => {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  onClick={() => {
-                    setShowCreateDialog(true);
-                    setTemplateId(undefined);
-                  }}
-                  variant="contained"
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create Task Template
-                </Button>
+                  <Button
+                    onClick={() => {
+                      setShowCreateDialog(true);
+                      setTemplateId(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create Task Template
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />

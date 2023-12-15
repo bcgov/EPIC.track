@@ -21,6 +21,10 @@ const CardBody = ({ workplan }: CardProps) => {
     isStatusOutOfDate(workplan.status_info as Status) ||
     !workplan.status_info?.posted_date;
 
+  const lastStatusUpdate = dayjs(workplan.status_info.posted_date).format(
+    MONTH_DAY_YEAR
+  );
+
   const daysLeft = () => {
     const daysLeft = workplan?.phase_info?.days_left;
     const totalDays = workplan?.phase_info?.total_number_of_days;
@@ -160,11 +164,13 @@ const CardBody = ({ workplan }: CardProps) => {
             LAST STATUS UPDATE
           </ETCaption1>
         </Grid>
-        <Grid item>
-          <ETCaption1 color={Palette.neutral.main}>
-            {dayjs(workplan.status_info.posted_date).format(MONTH_DAY_YEAR)}
-          </ETCaption1>
-        </Grid>
+        <When condition={workplan?.status_info?.posted_date}>
+          <Grid item>
+            <ETCaption1 color={Palette.neutral.main}>
+              {lastStatusUpdate}
+            </ETCaption1>
+          </Grid>
+        </When>
         <Grid item sx={{ marginTop: "2px" }}>
           {statusOutOfDate && <IndicatorSmallIcon />}
         </Grid>

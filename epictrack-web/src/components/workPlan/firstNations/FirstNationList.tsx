@@ -36,8 +36,9 @@ import UserMenu from "../../shared/userMenu/UserMenu";
 import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
 import projectService from "../../../services/projectService/projectService";
-import { Restricted } from "../../shared/restricted";
+import { Restricted, hasPermission } from "../../shared/restricted";
 import { getErrorMessage } from "../../../utils/axiosUtils";
+import { useAppSelector } from "../../../hooks";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -64,6 +65,10 @@ const FirstNationList = () => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showNationForm, setShowNationForm] = React.useState<boolean>(false);
   const [modalTitle, setModalTitle] = React.useState<string>("Add Nation");
+
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+
   const ctx = React.useContext(WorkplanContext);
   const firstNations = React.useMemo(
     () => ctx.firstNations,
@@ -149,17 +154,19 @@ const FirstNationList = () => {
         header: "Nation",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 250,
-        Cell: ({ cell, row }) => (
-          <ETGridTitle
-            to="#"
-            enableEllipsis
-            onClick={(event: any) => onRowClick(event, row.original)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {cell.getValue<string>()}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ cell, row }) => (
+              <ETGridTitle
+                to="#"
+                enableEllipsis
+                onClick={(event: any) => onRowClick(event, row.original)}
+                enableTooltip={true}
+                tooltip={cell.getValue<string>()}
+              >
+                {cell.getValue<string>()}
+              </ETGridTitle>
+            )
+          : undefined,
         sortingFn: "sortFn",
       },
       {
