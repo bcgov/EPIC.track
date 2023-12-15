@@ -94,5 +94,9 @@ const Endpoints = {
   Position: {
     GET_ALL: "positions",
   },
+  SpecialFields: {
+    SPECIAL_FIELDS: "/special-fields",
+    UPDATE: "/special-fields/:specialFieldId",
+  },
 };
 export default Endpoints;

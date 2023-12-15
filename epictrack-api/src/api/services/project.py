@@ -26,11 +26,13 @@ from api.models.indigenous_work import IndigenousWork
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.region import Region
+from api.models.special_field import EntityEnum
 from api.models.sub_types import SubType
 from api.models.types import Type
 from api.models.work import Work
 from api.models.work_type import WorkType
 from api.schemas.types import TypeSchema
+from api.services.special_field import SpecialFieldService
 from api.utils.constants import PROJECT_STATE_ENUM_MAPS
 from api.utils.enums import ProjectCodeMethod
 from api.utils.token_info import TokenInfo
@@ -66,6 +68,23 @@ class ProjectService:
         project = Project(**payload)
         project.project_state = ProjectStateEnum.PRE_WORK
         current_app.logger.info(f"Project obj {dir(project)}")
+        project.flush()
+        proponent_special_field_data = {
+            "entity": EntityEnum.PROJECT,
+            "entity_id": project.id,
+            "field_name": "proponent_id",
+            "field_value": project.proponent_id,
+            "active_from": project.created_at
+        }
+        SpecialFieldService.create_special_field_entry(proponent_special_field_data)
+        project_name_special_field_data = {
+            "entity": EntityEnum.PROJECT,
+            "entity_id": project.id,
+            "field_name": "name",
+            "field_value": project.name,
+            "active_from": project.created_at
+        }
+        SpecialFieldService.create_special_field_entry(project_name_special_field_data)
         project.save()
         return project
 

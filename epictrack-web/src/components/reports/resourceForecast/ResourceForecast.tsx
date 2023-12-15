@@ -9,10 +9,11 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import MaterialReactTable, {
+import {
+  MaterialReactTable,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
-  MRT_FullScreenToggleButton,
+  MRT_ToggleFullScreenButton,
   MRT_ShowHideColumnsButton,
   MRT_TableInstance,
   MRT_ToggleFiltersButton,
@@ -428,7 +429,7 @@ export default function ResourceForecast() {
                     <FileDownloadIcon />
                   </IconButton>
                 </Tooltip>
-                <MRT_FullScreenToggleButton table={table} />
+                <MRT_ToggleFullScreenButton table={table} />
               </>
             )}
             data={rfData}

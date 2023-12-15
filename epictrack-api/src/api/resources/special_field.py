@@ -22,8 +22,7 @@ from api.exceptions import ResourceNotFoundError
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services.special_field import SpecialFieldService
-from api.utils import auth, constants
-from api.utils.caching import AppCache
+from api.utils import auth
 from api.utils.profiler import profiletime
 from api.utils.util import cors_preflight
 
@@ -40,7 +39,6 @@ class SpecialFields(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all special field values based on params."""
         params = req.SpecialFieldQueryParamSchema().load(request.args)
@@ -85,23 +83,3 @@ class SpecialField(Resource):
         request_json = req.SpecialFieldBodyParameterSchema().load(API.payload)
         special_field_entry = SpecialFieldService.update_special_field_entry(special_field_id, request_json)
         return res.SpecialFieldResponseSchema().dump(special_field_entry), HTTPStatus.OK
-
-
-@cors_preflight('GET')
-@API.route('/exists', methods=['GET', 'OPTIONS'])
-class ValidateSpecialFieldEntry(Resource):
-    """Endpoint resource to check for existing special field entry."""
-
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    @auth.require
-    @profiletime
-    def get():
-        """Checks for existing special field entries."""
-        args = req.SpecialFieldExistanceQueryParamSchema().load(request.args)
-        special_field_entry_id = args.pop('spcial_field_id')
-        exists = SpecialFieldService.check_existence(args, special_field_id=special_field_entry_id)
-        return (
-            {'exists': exists},
-            HTTPStatus.OK,
-        )

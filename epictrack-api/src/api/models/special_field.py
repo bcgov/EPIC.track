@@ -41,3 +41,16 @@ class SpecialField(BaseModelVersioned):
     time_range = Column(TSTZRANGE, nullable=False)
 
     __table_args__ = (Index('entity_field_index', "entity", "entity_id", "field_name", "time_range"), )
+
+    @classmethod
+    def find_by_params(cls, params: dict, default_filters=True):
+        """Returns based on the params"""
+        query = {}
+        for key, value in params.items():
+            query[key] = value
+        if default_filters and hasattr(cls, 'is_active'):
+            query['is_active'] = True
+        if hasattr(cls, 'is_deleted'):
+            query['is_deleted'] = False
+        rows = cls.query.filter_by(**query).order_by(SpecialField.time_range.desc()).all()
+        return rows

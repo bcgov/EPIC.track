@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import MaterialReactTable, {
-  type MaterialReactTableProps,
+import {
+  MaterialReactTable,
   type MRT_ColumnDef,
   type MRT_Row,
 } from "material-react-table";
@@ -18,7 +18,9 @@ import { RESULT_STATUS } from "../../constants/application-constant";
 import UserService from "../../services/userService";
 import { ETPageContainer } from "../shared";
 import Select from "react-select";
-import MasterTrackTable from "../shared/MasterTrackTable";
+import MasterTrackTable, {
+  MaterialReactTableProps,
+} from "../shared/MasterTrackTable";
 import { UserGroupUpdate } from "../../services/userService/type";
 import { useAppSelector } from "../../hooks";
 
@@ -159,7 +161,7 @@ const UserList = () => {
           <MasterTrackTable
             columns={columns}
             data={users}
-            editingMode="modal"
+            editDisplayMode="modal"
             enableColumnOrdering
             enableEditing
             initialState={{

@@ -87,3 +87,9 @@ export const ROLES = {
   DELETE: "delete",
   DEFAULT_ROLES_EAO_EPIC: "default-roles-eao-epic",
 };
+
+export enum SpecialFieldEntityEnum {
+  PROJECT = "PROJECT",
+  PROPONENT = "PROPONENT",
+  WORK = "WORK",
+}

@@ -457,7 +457,7 @@ const EventListTable = ({
       enableSelectAll
       enablePagination
       onPaginationChange={setPagination}
-      muiTablePaginationProps={{
+      muiPaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(events.length),
       }}
       muiTableBodyRowProps={({ row }) => {
