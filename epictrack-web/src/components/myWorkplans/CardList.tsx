@@ -32,7 +32,7 @@ const CardList = () => {
     <Grid container spacing={2}>
       {workplans.map((workplan) => {
         return (
-          <Grid item xs={4}>
+          <Grid key={workplan.id} item xs={4}>
             <Card workplan={workplan} />
           </Grid>
         );
