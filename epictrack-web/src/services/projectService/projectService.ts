@@ -79,7 +79,7 @@ class ProjectService implements ServiceBase {
   }
 
   async getProjectTypes() {
-    return await http.GetRequest<ListType[]>(Endpoints.Projects.PROJECT_TYPES);
+    return await http.GetRequest<ListType[]>(Endpoints.ProjectTypes.GET_ALL);
   }
 }
 

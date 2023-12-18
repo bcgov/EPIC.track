@@ -207,9 +207,7 @@ class WorkService implements ServiceBase {
   }
 
   async getWorkTypes() {
-    return await http.GetRequest<WorkType[]>(
-      Endpoints.Works.GET_ALL_WORK_TYPES
-    );
+    return await http.GetRequest<WorkType[]>(Endpoints.WorkTypes.GET_ALL);
   }
 }
 export default new WorkService();
