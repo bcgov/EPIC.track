@@ -21,31 +21,27 @@ from .keycloak import KeycloakService
 class UserService:
     """User Service"""
 
-    @staticmethod
-    def get_all_users():
+    @classmethod
+    def get_all_users(cls):
         """Get all users"""
         users = KeycloakService.get_users()
         for user in users:
             user["group"] = None
         groups = UserService.get_groups()
-        groups = sorted(groups, key=lambda x: x["attributes"]["level"][0])
+        groups = sorted(groups, key=UserService._get_level)
         for group in groups:
             members = KeycloakService.get_group_members(group["id"])
             member_ids = [member["id"] for member in members]
-            filtered_users = list(
-                filter(lambda x, _member_ids=member_ids: x["id"] in _member_ids, users)
-            )
+            filtered_users = [user for user in users if user["id"] in member_ids]
             for user in filtered_users:
                 user["group"] = group
         return users
 
-    @staticmethod
-    def get_groups():
+    @classmethod
+    def get_groups(cls):
         """Get groups that has level set up"""
         groups = KeycloakService.get_groups()
-        filtered_groups = (
-            []
-        )  # list(filter((lambda g: 'level' in g['attributes']), groups))
+        filtered_groups = []
         for group in groups:
             if group.get("subGroups"):
                 for sub_group in group.get("subGroups"):
@@ -55,11 +51,11 @@ class UserService:
                 filtered_groups.append(group)
         return filtered_groups
 
-    @staticmethod
-    def update_user_group(user_id, user_group_request):
+    @classmethod
+    def update_user_group(cls, user_id, user_group_request):
         """Update the group of a user"""
         token_groups = TokenInfo.get_user_data()["groups"]
-        groups = UserService.get_groups()
+        groups = cls.get_groups()
         requested_group = next(
             (group for group in groups if group["name"] in token_groups), None
         )
@@ -90,3 +86,8 @@ class UserService:
             user_id, user_group_request["group_id_to_update"]
         )
         return result
+
+    @classmethod
+    def _get_level(cls, group):
+        """Gets the level from the group"""
+        return group["attributes"]["level"][0]
