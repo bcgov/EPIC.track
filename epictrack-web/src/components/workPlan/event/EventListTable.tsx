@@ -24,8 +24,10 @@ import {
   rowsPerPageOptions,
 } from "../../shared/MasterTrackTable/utils";
 import { EventContext } from "./EventContext";
-import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
+import { MONTH_DAY_YEAR, ROLES } from "../../../constants/application-constant";
 import { searchFilter } from "../../shared/MasterTrackTable/filters";
+import { useAppSelector } from "../../../hooks";
+import { hasPermission } from "../../shared/restricted";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -46,6 +48,8 @@ const EventListTable = ({
   setRowSelection,
 }: EventListTable) => {
   const { highlightedRows } = useContext(EventContext);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -117,20 +121,22 @@ const EventListTable = ({
         sortingFn: "sortFn",
         filterFn: searchFilter,
         size: 300,
-        Cell: ({ cell, row, renderedCellValue }) => (
-          <ETGridTitle
-            to="#"
-            bold={[EventPosition.START, EventPosition.END].includes(
-              row.original.event_configuration?.event_position
-            )}
-            enableEllipsis
-            onClick={(event: any) => onRowClick(event, row.original)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ cell, row, renderedCellValue }) => (
+              <ETGridTitle
+                to="#"
+                bold={[EventPosition.START, EventPosition.END].includes(
+                  row.original.event_configuration?.event_position
+                )}
+                enableEllipsis
+                onClick={(event: any) => onRowClick(event, row.original)}
+                enableTooltip={true}
+                tooltip={cell.getValue<string>()}
+              >
+                {renderedCellValue}
+              </ETGridTitle>
+            )
+          : undefined,
       },
       {
         accessorKey: "type",

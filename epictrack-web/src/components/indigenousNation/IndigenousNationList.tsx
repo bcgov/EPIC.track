@@ -13,11 +13,17 @@ import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
+import { Restricted, hasPermission } from "../shared/restricted";
+import { ROLES } from "../../constants/application-constant";
+import { useAppSelector } from "../../hooks";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const ctx = React.useContext(MasterContext);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+
   React.useEffect(() => {
     ctx.setForm(
       <IndigenousNationForm indigenousNationID={indigenousNationID} />
@@ -58,16 +64,18 @@ export default function IndigenousNationList() {
       {
         accessorKey: "name",
         header: "Name",
-        Cell: ({ cell, row, renderedCellValue }) => (
-          <ETGridTitle
-            to={"#"}
-            onClick={() => onEdit(row.original.id)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ cell, row, renderedCellValue }) => (
+              <ETGridTitle
+                to={"#"}
+                onClick={() => onEdit(row.original.id)}
+                enableTooltip={true}
+                tooltip={cell.getValue<string>()}
+              >
+                {renderedCellValue}
+              </ETGridTitle>
+            )
+          : undefined,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
@@ -164,15 +172,20 @@ export default function IndigenousNationList() {
                   justifyContent: "right",
                 }}
               >
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setIndigenousNationID(undefined);
-                  }}
-                  variant="contained"
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  errorProps={{ disabled: true }}
                 >
-                  Create First Nation
-                </Button>
+                  <Button
+                    onClick={() => {
+                      ctx.setShowModalForm(true);
+                      setIndigenousNationID(undefined);
+                    }}
+                    variant="contained"
+                  >
+                    Create First Nation
+                  </Button>
+                </Restricted>
               </Box>
             )}
           />
