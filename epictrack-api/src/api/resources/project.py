@@ -13,7 +13,6 @@
 # limitations under the License.
 """Resource for project endpoints."""
 from http import HTTPStatus
-from api.utils.caching import AppCache
 
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
@@ -23,6 +22,7 @@ from api.schemas import response as res
 from api.schemas.work_type import WorkTypeSchema
 from api.services import ProjectService
 from api.utils import auth, constants, profiletime
+from api.utils.caching import AppCache
 from api.utils.util import cors_preflight
 
 

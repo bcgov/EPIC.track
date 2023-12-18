@@ -14,7 +14,6 @@
 """Resource for work endpoints."""
 from http import HTTPStatus
 from io import BytesIO
-from api.utils.caching import AppCache
 
 from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
@@ -26,6 +25,7 @@ from api.schemas import response as res
 from api.services import WorkService
 from api.services.work_phase import WorkPhaseService
 from api.utils import auth, constants, profiletime
+from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
 from api.utils.util import cors_preflight
 
