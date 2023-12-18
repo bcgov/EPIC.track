@@ -33,7 +33,6 @@ const schema = yup.object<Work>().shape({
   work_type_id: yup.number().required("Work type is required"),
   start_date: yup.date().required("Start date is required"),
   project_id: yup.number().required("Project is required"),
-  ministry_id: yup.number().required("Responsible ministry is required"),
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),

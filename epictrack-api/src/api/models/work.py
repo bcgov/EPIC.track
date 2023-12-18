@@ -67,7 +67,7 @@ class Work(BaseModelVersioned):
     work_decision_date = Column(DateTime(timezone=True))
 
     project_id = Column(ForeignKey('projects.id'), nullable=False)
-    ministry_id = Column(ForeignKey('ministries.id'), nullable=False)
+    ministry_id = Column(ForeignKey('ministries.id'), nullable=True)
     ea_act_id = Column(ForeignKey('ea_acts.id'), nullable=False)
     eao_team_id = Column(ForeignKey('eao_teams.id'), nullable=False)
     federal_involvement_id = Column(ForeignKey('federal_involvements.id'), nullable=False)
