@@ -113,7 +113,7 @@ export const Routes: RouteType[] = [
       {
         name: "Users",
         path: "/admin/users",
-        allowedRoles: [ROLES.CREATE],
+        allowedRoles: [ROLES.MANAGE_USERS],
         isAuthenticated: true,
       },
     ],
