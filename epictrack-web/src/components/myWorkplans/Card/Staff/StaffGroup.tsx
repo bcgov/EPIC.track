@@ -34,6 +34,7 @@ const StaffGroup = ({ workplan }: CardProps) => {
           width: AVATAR_WIDTH,
           height: AVATAR_HEIGHT,
         },
+        justifyContent: "flex-end",
       }}
     >
       {staffList.map((staff) => {

@@ -5,6 +5,8 @@ import { ETCaption2 } from "../../../shared";
 import UserMenu from "../../../shared/userMenu/UserMenu";
 import debounce from "lodash/debounce";
 import { AVATAR_HEIGHT, AVATAR_WIDTH } from "./constants";
+import { useAppSelector } from "../../../../hooks";
+import { Palette } from "../../../../styles/theme";
 
 interface CardProps {
   staff: Staff;
@@ -12,6 +14,8 @@ interface CardProps {
 const StaffAvatar = ({ staff }: CardProps) => {
   const [userMenuAnchorEl, setUserMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
+
+  const { email } = useAppSelector((state) => state.user.userDetail);
 
   const [inAvatar, setInAvatar] = React.useState<boolean>(false);
   const [inUserMenu, setInUserMenu] = React.useState<boolean>(false);
@@ -32,6 +36,8 @@ const StaffAvatar = ({ staff }: CardProps) => {
     }
   }, [inAvatar, inUserMenu]);
 
+  const isLoggedUser = staff?.email === email;
+
   if (!staff) return null;
 
   return (
@@ -42,6 +48,10 @@ const StaffAvatar = ({ staff }: CardProps) => {
         sx={{
           width: AVATAR_WIDTH,
           height: AVATAR_HEIGHT,
+          bgcolor: isLoggedUser
+            ? Palette.primary.main
+            : Palette.neutral.bg.main,
+          color: isLoggedUser ? Palette.white : Palette.neutral.dark,
         }}
         onMouseEnter={(event) => {
           handleOpenUserMenu(event);
