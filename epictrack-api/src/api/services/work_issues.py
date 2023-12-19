@@ -113,9 +113,9 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
                     if not issue_update_model:
                         raise ResourceNotFoundError("Issue Description doesnt exist")
                     if issue_update_model.is_approved:
-                        one_of_roles = (
+                        one_of_roles = ([
                             KeycloakRole.EXTENDED_EDIT.value
-                        )
+                        ])
                         authorisation.check_auth(one_of_roles=one_of_roles)
                     issue_update_model.description = update_description.get('description')
                     issue_update_model.flush()
