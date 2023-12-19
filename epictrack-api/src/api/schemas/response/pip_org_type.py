@@ -8,7 +8,7 @@ from api.schemas.base import AutoSchemaBase
 class PIPOrgTypeSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
-    """Staff model schema class"""
+    """PIP Org Type model schema class"""
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""
