@@ -19,7 +19,7 @@ depends_on = None
 def upgrade():
     op.execute("TRUNCATE sub_types RESTART IDENTITY CASCADE")
     op.execute("alter sequence sub_types_id_seq restart with 1")
-    one = "INSERT INTO public.sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
+    one = "INSERT INTO sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
 	 ('Plant',1,'Power Plants',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,1),\
 	 ('Lines',1,'Transmission Lines',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,2),\
 	 ('Refinery',2,'Oil Refineries',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,4),\
@@ -30,7 +30,7 @@ def upgrade():
 	 ('Coal',4,'Coal Mines',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,13),\
 	 ('Mineral',4,'Mineral Mines',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,14),\
 	 ('Gravel',4,'Sand and Gravel Pits',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,15)"
-    two = "INSERT INTO public.sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
+    two = "INSERT INTO sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
 	 ('Placer',4,'Placer Mineral Mines',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,16),\
 	 ('Offshore',4,'Offshore Mines',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,18),\
 	 ('Resort',5,'Resort Developments',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,19),\
@@ -41,7 +41,7 @@ def upgrade():
 	 ('Railway',6,'Railways',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,24),\
 	 ('Ferry',6,'Ferry Terminals',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,25),\
 	 ('Port',6,'Marine Ports',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,26)"
-    three = "INSERT INTO public.sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
+    three = "INSERT INTO sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
 	 ('Airport',6,'Airports',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,27),\
 	 ('Dams',8,'Dams',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,31),\
 	 ('Dikes',8,'Dikes',NULL,'2023-01-31 20:53:25.024762+00',NULL,NULL,true,false,32),\
@@ -52,7 +52,7 @@ def upgrade():
 	 ('Proccesing',2,'Natural Gas Processing Plants',NULL,'2023-01-31 20:53:25.024762+00','u1','2023-02-09 18:25:04.806071+00',true,false,5),\
 	 ('Storage',2,'Energy Storage Facilities',NULL,'2023-01-31 20:53:25.024762+00','u1','2023-02-09 18:25:04.80806+00',true,false,3),\
 	 ('Pipeline',2,'Transmission Pipelines',NULL,'2023-01-31 20:53:25.024762+00','u1','2023-02-09 18:25:04.808792+00',true,false,6)"
-    four = "INSERT INTO public.sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
+    four = "INSERT INTO sub_types (short_name,type_id,name,created_by,created_at,updated_by,updated_at,is_active,is_deleted,sort_order) VALUES\
 	 ('Offshore',2,'Offshore Oil or Gas Facilities',NULL,'2023-01-31 20:53:25.024762+00','u1','2023-02-09 18:25:04.809499+00',true,false,7),\
 	 ('Chemicals',3,'Organic & Inorganic Chemical',NULL,'2023-01-31 20:53:25.024762+00','u1','2023-02-09 18:25:04.810227+00',true,false,8),\
 	 ('Stone',4,'Construction Stone & Industrial Mineral Quarries',NULL,'2023-01-31 20:53:25.024762+00','u1','2023-02-09 18:25:04.810975+00',true,false,17),\
