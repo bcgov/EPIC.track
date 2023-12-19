@@ -95,3 +95,10 @@ export enum SpecialFieldEntityEnum {
   PROPONENT = "PROPONENT",
   WORK = "WORK",
 }
+
+export const SpecialFields = {
+  PROJECT: {
+    NAME: "name",
+    PROPONENT: "proponent_id",
+  },
+};

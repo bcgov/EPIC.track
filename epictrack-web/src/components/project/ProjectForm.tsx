@@ -18,7 +18,10 @@ import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwit
 import { Palette } from "../../styles/theme";
 import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
 import { SpecialFieldGrid } from "../shared/specialField";
-import { SpecialFieldEntityEnum } from "../../constants/application-constant";
+import {
+  SpecialFieldEntityEnum,
+  SpecialFields,
+} from "../../constants/application-constant";
 import { Else, If, Then, When } from "react-if";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
@@ -224,14 +227,18 @@ export default function ProjectForm({ ...props }) {
               >
                 <ETFormLabel required>Name</ETFormLabel>
                 <When condition={disabled}>
-                  <If condition={specialField === "name"}>
+                  <If condition={specialField === SpecialFields.PROJECT.NAME}>
                     <Then>
                       <IconButton onClick={() => setSpecialField("")}>
                         <LockOpenIcon fill={Palette.primary.accent.main} />
                       </IconButton>
                     </Then>
                     <Else>
-                      <IconButton onClick={() => setSpecialField("name")}>
+                      <IconButton
+                        onClick={() =>
+                          setSpecialField(SpecialFields.PROJECT.NAME)
+                        }
+                      >
                         <LockClosedIcon fill={Palette.primary.accent.main} />
                       </IconButton>
                     </Else>
@@ -257,7 +264,9 @@ export default function ProjectForm({ ...props }) {
               >
                 <ETFormLabel required>Proponent</ETFormLabel>
                 <When condition={disabled}>
-                  <If condition={specialField === "proponent_id"}>
+                  <If
+                    condition={specialField === SpecialFields.PROJECT.PROPONENT}
+                  >
                     <Then>
                       <IconButton onClick={() => setSpecialField("")}>
                         <LockOpenIcon fill={Palette.primary.accent.main} />
@@ -265,7 +274,9 @@ export default function ProjectForm({ ...props }) {
                     </Then>
                     <Else>
                       <IconButton
-                        onClick={() => setSpecialField("proponent_id")}
+                        onClick={() =>
+                          setSpecialField(SpecialFields.PROJECT.PROPONENT)
+                        }
                       >
                         <LockClosedIcon fill={Palette.primary.accent.main} />
                       </IconButton>
@@ -292,24 +303,34 @@ export default function ProjectForm({ ...props }) {
                   entity_id={(ctx.item as Project)?.id}
                   fieldName={specialField}
                   fieldLabel={
-                    specialField === "proponent_id" ? "Proponent Name" : "Name"
+                    specialField === SpecialFields.PROJECT.PROPONENT
+                      ? "Proponent Name"
+                      : "Name"
                   }
                   fieldType={
-                    specialField === "proponent_id" ? "select" : "text"
+                    specialField === SpecialFields.PROJECT.PROPONENT
+                      ? "select"
+                      : "text"
                   }
                   title={
-                    specialField === "proponent_id"
+                    specialField === SpecialFields.PROJECT.PROPONENT
                       ? "Proponet History"
                       : (ctx.item as Project)?.name
                   }
                   description={
                     <>
-                      <When condition={specialField === "proponent_id"}>
+                      <When
+                        condition={
+                          specialField === SpecialFields.PROJECT.PROPONENT
+                        }
+                      >
                         Update the Proponent of this Project.{" "}
                         <a href="#">Click this link</a> for detailed
                         instructions.
                       </When>
-                      <When condition={specialField === "name"}>
+                      <When
+                        condition={specialField === SpecialFields.PROJECT.NAME}
+                      >
                         Update the legal name of the Project and the dates each
                         name was in legal use. <a href="#">Click this link</a>{" "}
                         for detailed instructions
@@ -317,7 +338,7 @@ export default function ProjectForm({ ...props }) {
                     </>
                   }
                   options={
-                    specialField === "proponent_id"
+                    specialField === SpecialFields.PROJECT.PROPONENT
                       ? proponents?.map((p) => ({
                           label: p.name,
                           value: p.id.toString(),
