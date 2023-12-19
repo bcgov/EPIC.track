@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Box } from "@mui/material";
+import { Grid, Box, IconButton } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -14,10 +14,20 @@ import subTypeService from "../../services/subTypeService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
-import LockClosed from "../../assets/images/lock-closed.svg";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { Palette } from "../../styles/theme";
 import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
+import { SpecialFieldGrid } from "../shared/specialField";
+import {
+  SpecialFieldEntityEnum,
+  SpecialFields,
+} from "../../constants/application-constant";
+import { Else, If, Then, When } from "react-if";
+import Icons from "../icons";
+import { IconProps } from "../icons/type";
+
+const LockClosedIcon: React.FC<IconProps> = Icons["LockClosedIcon"];
+const LockOpenIcon: React.FC<IconProps> = Icons["LockOpenIcon"];
 
 const schema = yup.object().shape({
   name: yup
@@ -64,6 +74,8 @@ export default function ProjectForm({ ...props }) {
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
   const [disabled, setDisabled] = React.useState<boolean>();
+  const [specialField, setSpecialField] = React.useState<string>("");
+
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
@@ -214,17 +226,24 @@ export default function ProjectForm({ ...props }) {
                 }}
               >
                 <ETFormLabel required>Name</ETFormLabel>
-                <ETFormLabel>
-                  <Box
-                    sx={{
-                      opacity: disabled ? "100" : "0",
-                      cursor: "pointer",
-                    }}
-                    component="img"
-                    src={LockClosed}
-                    alt="Lock"
-                  />
-                </ETFormLabel>
+                <When condition={disabled}>
+                  <If condition={specialField === SpecialFields.PROJECT.NAME}>
+                    <Then>
+                      <IconButton onClick={() => setSpecialField("")}>
+                        <LockOpenIcon fill={Palette.primary.accent.main} />
+                      </IconButton>
+                    </Then>
+                    <Else>
+                      <IconButton
+                        onClick={() =>
+                          setSpecialField(SpecialFields.PROJECT.NAME)
+                        }
+                      >
+                        <LockClosedIcon fill={Palette.primary.accent.main} />
+                      </IconButton>
+                    </Else>
+                  </If>
+                </When>
               </Box>
               <ControlledTextField
                 name="name"
@@ -244,17 +263,26 @@ export default function ProjectForm({ ...props }) {
                 }}
               >
                 <ETFormLabel required>Proponent</ETFormLabel>
-                <ETFormLabel>
-                  <Box
-                    sx={{
-                      opacity: disabled ? "100" : "0",
-                      cursor: "pointer",
-                    }}
-                    component="img"
-                    src={LockClosed}
-                    alt="Lock"
-                  />
-                </ETFormLabel>
+                <When condition={disabled}>
+                  <If
+                    condition={specialField === SpecialFields.PROJECT.PROPONENT}
+                  >
+                    <Then>
+                      <IconButton onClick={() => setSpecialField("")}>
+                        <LockOpenIcon fill={Palette.primary.accent.main} />
+                      </IconButton>
+                    </Then>
+                    <Else>
+                      <IconButton
+                        onClick={() =>
+                          setSpecialField(SpecialFields.PROJECT.PROPONENT)
+                        }
+                      >
+                        <LockClosedIcon fill={Palette.primary.accent.main} />
+                      </IconButton>
+                    </Else>
+                  </If>
+                </When>
               </Box>
               <ControlledSelectV2
                 placeholder="Select"
@@ -267,6 +295,64 @@ export default function ProjectForm({ ...props }) {
                 getOptionLabel={(o: Proponent) => o.name}
                 {...register("proponent_id")}
               ></ControlledSelectV2>
+            </Grid>
+            <Grid item xs={12}>
+              <When condition={Boolean(specialField)}>
+                <SpecialFieldGrid
+                  entity={SpecialFieldEntityEnum.PROJECT}
+                  entity_id={(ctx.item as Project)?.id}
+                  fieldName={specialField}
+                  fieldLabel={
+                    specialField === SpecialFields.PROJECT.PROPONENT
+                      ? "Proponent Name"
+                      : "Name"
+                  }
+                  fieldType={
+                    specialField === SpecialFields.PROJECT.PROPONENT
+                      ? "select"
+                      : "text"
+                  }
+                  title={
+                    specialField === SpecialFields.PROJECT.PROPONENT
+                      ? "Proponet History"
+                      : (ctx.item as Project)?.name
+                  }
+                  description={
+                    <>
+                      <When
+                        condition={
+                          specialField === SpecialFields.PROJECT.PROPONENT
+                        }
+                      >
+                        Update the Proponent of this Project.{" "}
+                        <a href="#">Click this link</a> for detailed
+                        instructions.
+                      </When>
+                      <When
+                        condition={specialField === SpecialFields.PROJECT.NAME}
+                      >
+                        Update the legal name of the Project and the dates each
+                        name was in legal use. <a href="#">Click this link</a>{" "}
+                        for detailed instructions
+                      </When>
+                    </>
+                  }
+                  options={
+                    specialField === SpecialFields.PROJECT.PROPONENT
+                      ? proponents?.map((p) => ({
+                          label: p.name,
+                          value: p.id.toString(),
+                        })) || []
+                      : []
+                  }
+                  onSave={() => {
+                    // TODO: Refresh form field value for the specific field?
+                    // OR do we just call form save/submit handler
+                    ctx.setId(props.projectId);
+                    ctx.getData();
+                  }}
+                />
+              </When>
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel required>Type</ETFormLabel>

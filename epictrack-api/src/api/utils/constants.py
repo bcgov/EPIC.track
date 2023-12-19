@@ -1,6 +1,9 @@
 """File representing constants used in the application"""
 
-from api.models.project import ProjectStateEnum
+from api.models.project import Project, ProjectStateEnum
+from api.models.proponent import Proponent
+from api.models.special_field import EntityEnum
+from api.models.work import Work
 
 
 SCHEMA_MAPS = {
@@ -27,3 +30,9 @@ PROJECT_STATE_ENUM_MAPS = {
 }
 
 PIP_LINK_URL_BASE = "https://apps.nrs.gov.bc.ca/int/fnp/FirstNationDetail.xhtml?name="
+
+SPECIAL_FIELD_ENTITY_MODEL_MAPS = {
+    EntityEnum.PROJECT: Project,
+    EntityEnum.WORK: Work,
+    EntityEnum.PROPONENT: Proponent,
+}

@@ -89,3 +89,16 @@ export const ROLES = {
   MANAGE_USERS: "manage_users",
   EXTENDED_EDIT: "extended_edit",
 };
+
+export enum SpecialFieldEntityEnum {
+  PROJECT = "PROJECT",
+  PROPONENT = "PROPONENT",
+  WORK = "WORK",
+}
+
+export const SpecialFields = {
+  PROJECT: {
+    NAME: "name",
+    PROPONENT: "proponent_id",
+  },
+};

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Special field resource's input validations"""
-from marshmallow import fields, validate
+from marshmallow import EXCLUDE, fields, validate
 
 from api.models.special_field import EntityEnum
 
@@ -71,11 +71,11 @@ class SpecialFieldBodyParameterSchema(RequestBodyParameterSchema):
     active_from = fields.DateTime(
         metadata={"description": "Lower bound for time range"}, required=True
     )
-    active_to = fields.DateTime(
-        metadata={"description": "Upper bound for time range"},
-        allow_none=True,
-        missing=None,
-    )
+
+    class Meta:  # pylint: disable=too-few-public-methods
+        """Meta information"""
+
+        unknown = EXCLUDE
 
 
 class SpecialFieldIdPathParameterSchema(RequestPathParameterSchema):
@@ -85,50 +85,4 @@ class SpecialFieldIdPathParameterSchema(RequestPathParameterSchema):
         metadata={"description": "The id of the special field entry"},
         validate=validate.Range(min=1),
         required=True,
-    )
-
-
-class SpecialFieldExistanceQueryParamSchema(RequestQueryParameterSchema):
-    """Special field existance check query parameters"""
-
-    entity = fields.Str(
-        metadata={"description": "Entity name"},
-        required=True,
-        validate=validate.OneOf([x.value for x in EntityEnum]),
-    )
-
-    entity_id = fields.Int(
-        metadata={"description": "The id of the entity"},
-        validate=validate.Range(min=1),
-        required=True,
-    )
-
-    field_name = fields.Str(
-        metadata={"description": "Name of the special field"},
-        validate=validate.Length(max=150),
-        required=True,
-    )
-
-    field_value = fields.Str(
-        metadata={"description": "Value of the special field"},
-        validate=validate.Length(min=1),
-        required=True,
-    )
-
-    active_from = fields.DateTime(
-        metadata={"description": "Lower bound for time range"}, required=True
-    )
-
-    active_to = fields.DateTime(
-        metadata={"description": "Upper bound for time range"},
-        allow_none=True,
-        missing=None,
-    )
-
-    spcial_field_id = fields.Int(
-        metadata={"description": "The id of the special field entry"},
-        validate=validate.Range(min=1),
-        required=False,
-        allow_none=True,
-        missing=None
     )
