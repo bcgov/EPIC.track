@@ -11,13 +11,15 @@ import staffService from "../../services/staffService/staffService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted } from "../shared/restricted";
-import { GROUPS, ROLES } from "../../constants/application-constant";
+import { Restricted, hasPermission } from "../shared/restricted";
+import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
+import { useAppSelector } from "../../hooks";
 
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
   const [positions, setPositions] = React.useState<string[]>([]);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
   const ctx = React.useContext(MasterContext);
 
   React.useEffect(() => {
@@ -55,21 +57,27 @@ const StaffList = () => {
     }
   }, [staff]);
 
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+
   const columns = React.useMemo<MRT_ColumnDef<Staff>[]>(
     () => [
       {
         accessorKey: "full_name",
         header: "Name",
-        Cell: ({ cell, row, renderedCellValue }) => (
-          <ETGridTitle
-            to={"#"}
-            onClick={() => onEdit(row.original.id)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {renderedCellValue}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ cell, row, renderedCellValue }) => (
+              <Restricted allowed={[ROLES.EDIT]} RenderError={undefined}>
+                <ETGridTitle
+                  to={"#"}
+                  onClick={() => onEdit(row.original.id)}
+                  enableTooltip={true}
+                  tooltip={cell.getValue<string>()}
+                >
+                  {renderedCellValue}
+                </ETGridTitle>
+              </Restricted>
+            )
+          : undefined,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },

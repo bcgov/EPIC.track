@@ -127,22 +127,43 @@ const RecentStatus = () => {
             </Button>
           </Else>
         </If>
-        <Restricted allowed={[ROLES.EDIT]}>
-          <Button
-            onClick={() => {
-              setShowStatusForm(true);
-              setStatus(statuses[0]);
-            }}
-            sx={{
-              gap: "8px",
-              backgroundColor: "inherit",
-              borderColor: "transparent",
-            }}
+        <If condition={statuses[0].is_approved}>
+          <Restricted
+            allowed={[ROLES.EXTENDED_EDIT]}
+            errorProps={{ disabled: true }}
           >
-            <PencilEditIcon />
-            Edit
-          </Button>
-        </Restricted>
+            <Button
+              onClick={() => {
+                setShowStatusForm(true);
+                setStatus(statuses[0]);
+              }}
+              sx={{
+                gap: "8px",
+                backgroundColor: "inherit",
+                borderColor: "transparent",
+              }}
+            >
+              <PencilEditIcon />
+              Edit
+            </Button>
+          </Restricted>
+          <Else>
+            <Button
+              onClick={() => {
+                setShowStatusForm(true);
+                setStatus(statuses[0]);
+              }}
+              sx={{
+                gap: "8px",
+                backgroundColor: "inherit",
+                borderColor: "transparent",
+              }}
+            >
+              <PencilEditIcon />
+              Edit
+            </Button>
+          </Else>
+        </If>
       </Box>
     </GrayBox>
   );

@@ -18,7 +18,11 @@ import { Else, If, Then, When } from "react-if";
 import { IconProps } from "../../../icons/type";
 import icons from "../../../icons";
 import { IssuesContext } from "../IssuesContext";
-import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
+import {
+  MONTH_DAY_YEAR,
+  ROLES,
+} from "../../../../constants/application-constant";
+import { Restricted } from "../../../shared/restricted";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
@@ -64,20 +68,25 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 </Else>
               </If>
               <When condition={isSuccess}>
-                <Button
-                  variant="text"
-                  startIcon={<PencilEditIcon />}
-                  sx={{
-                    backgroundColor: "inherit",
-                    borderColor: "transparent",
-                  }}
-                  onClick={() => {
-                    setUpdateToEdit(update);
-                    setShowIssuesForm(true);
-                  }}
+                <Restricted
+                  allowed={[ROLES.EXTENDED_EDIT]}
+                  errorProps={{ disabled: true }}
                 >
-                  Edit
-                </Button>
+                  <Button
+                    variant="text"
+                    startIcon={<PencilEditIcon />}
+                    sx={{
+                      backgroundColor: "inherit",
+                      borderColor: "transparent",
+                    }}
+                    onClick={() => {
+                      setUpdateToEdit(update);
+                      setShowIssuesForm(true);
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </Restricted>
               </When>
             </TimelineOppositeContent>
             <TimelineSeparator>

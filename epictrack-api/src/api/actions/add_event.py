@@ -76,9 +76,6 @@ class AddEvent(ActionFactory):
         del event_configuration["id"]
         event_configuration = EventConfiguration(**event_configuration)
         event_configuration.flush()
-        # event_configuration_json = EventConfigurationResponseSchema().dump(
-        #     event_configuration
-        # )
         WorkService.copy_outcome_and_actions(
             old_event_config.as_dict(recursive=False),
             event_configuration,

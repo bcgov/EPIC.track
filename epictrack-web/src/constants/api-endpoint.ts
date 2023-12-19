@@ -9,11 +9,13 @@ const Endpoints = {
   },
   Projects: {
     PROJECTS: "projects",
-    PROJECT_TYPES: "projects/types",
     WORK_TYPES: "projects/:project_id/work-types",
     FIRST_NATIONS: "projects/:project_id/first-nations",
     FIRST_NATION_AVAILABLE: "projects/:project_id/first-nation-available",
     PROJECT_ABBREVIATION: "projects/abbreviation",
+  },
+  ProjectTypes: {
+    GET_ALL: "project-types",
   },
   Codes: {
     GET_CODES: "codes",
@@ -38,6 +40,9 @@ const Endpoints = {
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
     GET_ALL_WORK_TYPES: "works/types",
+  },
+  WorkTypes: {
+    GET_ALL: "work-types",
   },
   WorkIssues: {
     ISSUES: "work/:work_id/issues",
