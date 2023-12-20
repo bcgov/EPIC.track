@@ -9,7 +9,8 @@ interface MyWorkplanContextProps {
   lazyLoadMoreWorkplans: () => any;
   totalWorkplans: number;
   setSearchOptions: React.Dispatch<React.SetStateAction<WorkPlanSearchOptions>>;
-  loadingMoreWorkplans?: boolean;
+  loadingMoreWorkplans: boolean;
+  setLoadingMoreWorkplans: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
@@ -23,6 +24,9 @@ export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
     return;
   },
   loadingMoreWorkplans: false,
+  setLoadingMoreWorkplans: () => {
+    return;
+  },
 });
 
 export interface WorkPlanSearchOptions {
@@ -101,6 +105,12 @@ export const MyWorkplansProvider = ({
     loadWorkplans();
   }, [searchOptions]);
 
+  useEffect(() => {
+    if (loadingMoreWorkplans) {
+      lazyLoadMoreWorkplans();
+    }
+  }, [loadingMoreWorkplans]);
+
   return (
     <MyWorkplansContext.Provider
       value={{
@@ -110,6 +120,7 @@ export const MyWorkplansProvider = ({
         totalWorkplans,
         setSearchOptions,
         loadingMoreWorkplans,
+        setLoadingMoreWorkplans,
       }}
     >
       {children}
