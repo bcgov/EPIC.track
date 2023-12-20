@@ -2,14 +2,14 @@
 from datetime import timedelta
 
 from flask import jsonify
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
 from api.models import db
 from api.models.ea_act import EAAct
 from api.models.event import Event
-from api.models.event_category import EventCategory
+from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode
@@ -67,19 +67,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
         decision_by = aliased(Staff)
         pecp_event = aliased(Event)
 
-        pecp_category = EventCategory.query.filter(EventCategory.name == "PCP").first()
-        pecp_configuration_ids = EventConfiguration.query.filter(
-            EventConfiguration.event_category_id == pecp_category.id
-        ).all()
-        pecp_configuration_ids = [x.id for x in pecp_configuration_ids]
+        pecp_configuration_ids = db.session.execute(
+            select(EventConfiguration.id)
+            .where(
+                EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
+            )
+        ).scalars().all()
 
-        decision_category = EventCategory.query.filter(
-            EventCategory.name == "Decision"
-        ).first()
-        decision_configuration_ids = EventConfiguration.query.filter(
-            EventConfiguration.event_category_id == decision_category.id
-        ).all()
-        decision_configuration_ids = [x.id for x in decision_configuration_ids]
+        decision_configuration_ids = db.session.execute(
+            select(EventConfiguration.id)
+            .where(
+                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+            )
+        ).scalars().all()
 
         next_decision_event_query = (
             db.session.query(
@@ -122,8 +122,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             status_update_max_date_query,
             and_(
                 WorkStatus.work_id == status_update_max_date_query.c.work_id,
-                WorkStatus.posted_date
-                == status_update_max_date_query.c.max_posted_date,
+                WorkStatus.posted_date == status_update_max_date_query.c.max_posted_date,
             ),
         )
 
@@ -134,8 +133,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 next_decision_event_query,
                 and_(
                     Event.work_id == next_decision_event_query.c.work_id,
-                    Event.anticipated_date
-                    == next_decision_event_query.c.min_anticipated_date,
+                    Event.anticipated_date == next_decision_event_query.c.min_anticipated_date,
                 ),
             )
             .join(
@@ -155,19 +153,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .outerjoin(eac_decision_by, Work.eac_decision_by)
             .outerjoin(decision_by, Work.decision_by)
             .outerjoin(SubstitutionAct)
-            # .outerjoin(
-            #     WorkEngagement,
-            #     and_(
-            #         WorkEngagement.project_id == Work.project_id,
-            #         WorkEngagement.milestone_id.in_(pecp_configuration_ids),
-            #     ),
-            # )
-            # .outerjoin(Engagement, WorkEngagement.engagement)
             .outerjoin(
                 pecp_event,
                 and_(
                     pecp_event.work_id == Work.id,
-                    # next_pecp_query.c.min_start_date == pecp_event.actual_date,
                     pecp_event.event_configuration_id.in_(pecp_configuration_ids),
                 ),
             )
@@ -200,14 +189,12 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"),
                                                        INTERVAL)
                 ).label("anticipated_decision_date"),
-                # Event.anticipated_end_date.label("anticipated_decision_date"),
                 WorkStatus.description.label("additional_info"),
                 Ministry.name.label("ministry_name"),
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"),
                                                        INTERVAL)
                 ).label("referral_date"),
-                # Event.anticipated_end_date.label("referral_date"),
                 eac_decision_by.full_name.label("eac_decision_by"),
                 decision_by.full_name.label("decision_by"),
                 EventConfiguration.event_type_id.label("milestone_type"),

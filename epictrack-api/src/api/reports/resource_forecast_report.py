@@ -13,7 +13,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Table, TableStyle
-from sqlalchemy import Date, and_, func
+from sqlalchemy import and_, func, select
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
@@ -21,12 +21,12 @@ from api.models import (
     EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
     WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
-from api.models.event_template import EventTemplateVisibilityEnum
+from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 
 from .report_factory import ReportFactory
 
 
-# pylint:disable=not-callable
+# pylint:disable=not-callable,cell-var-from-loop
 
 daterange = partial(func.daterange, type_=DATERANGE)
 
@@ -243,6 +243,48 @@ class EAResourceForeCastReport(ReportFactory):
             .subquery()
         )
 
+        works_started = (
+            db.session.execute(
+                select(WorkPhase.work_id)
+                .join(
+                    EventConfiguration,
+                    and_(
+                        EventConfiguration.work_phase_id == WorkPhase.id,
+                        EventConfiguration.event_position == EventPositionEnum.START.value,
+                    ),
+                )
+                .join(Event, Event.event_configuration_id == EventConfiguration.id)
+                .where(
+                    func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date
+                )
+                .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
+                .distinct(WorkPhase.work_id)
+            )
+            .scalars()
+            .all()
+        )
+
+        works_not_finished = (
+            db.session.execute(
+                select(WorkPhase.work_id)
+                .join(
+                    EventConfiguration,
+                    and_(
+                        EventConfiguration.work_phase_id == WorkPhase.id,
+                        EventConfiguration.event_position == EventPositionEnum.END.value,
+                    ),
+                )
+                .join(Event, Event.event_configuration_id == EventConfiguration.id)
+                .where(Event.actual_date >= report_date)
+                .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
+                .distinct(WorkPhase.work_id)
+            )
+            .scalars()
+            .all()
+        )
+
+        valid_work_ids = set(works_not_finished) & set(works_started)
+
         second_month = self._add_months(first_month, 1)
         third_month = self._add_months(second_month, 1)
         remaining_start_month = self._add_months(third_month, 1, False)
@@ -310,14 +352,7 @@ class EAResourceForeCastReport(ReportFactory):
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
-                daterange(
-                    Work.start_date.cast(Date),
-                    func.coalesce(
-                        Work.decision_date.cast(Date),
-                        Work.anticipated_decision_date.cast(Date),
-                    ),
-                    "[)",
-                ).overlaps(daterange(report_start_date, self.end_date, "[)"))
+                Work.id.in_(valid_work_ids),
             )
             .add_columns(
                 Project.name.label("project_name"),
@@ -381,7 +416,8 @@ class EAResourceForeCastReport(ReportFactory):
             for index, month in enumerate(self.months[1:]):
                 month_events = list(
                     filter(
-                        lambda x: x.start_date.date() <= month, events[work_id]  # pylint:disable=cell-var-from-loop
+                        lambda x: x.start_date.date() <= month,
+                        events[work_id],
                     )
                 )
                 month_events = sorted(month_events, key=lambda x: x.start_date)
@@ -484,7 +520,7 @@ class EAResourceForeCastReport(ReportFactory):
                 Event.query.filter(
                     Event.event_configuration_id == referral_timing_obj.event_configuration_id
                 )
-                .add_column(
+                .add_columns(
                     func.coalesce(Event.actual_date, Event.anticipated_date).label(
                         "event_start_date"
                     )
