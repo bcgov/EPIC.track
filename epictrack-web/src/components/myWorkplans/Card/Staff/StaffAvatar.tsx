@@ -59,7 +59,7 @@ const StaffAvatar = ({ staff }: CardProps) => {
         }}
         onMouseLeave={() => debouncedCloseUserMenu()}
       >
-        <ETCaption2 bold>{`${staff.first_name[0] || "X"}${
+        <ETCaption2>{`${staff.first_name[0] || "X"}${
           staff.last_name[0] || "X"
         }`}</ETCaption2>
       </Avatar>
