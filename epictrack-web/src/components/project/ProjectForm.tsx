@@ -296,6 +296,15 @@ export default function ProjectForm({ ...props }) {
                 {...register("proponent_id")}
               ></ControlledSelectV2>
             </Grid>
+            <SpecialFieldGrid
+              entity={SpecialFieldEntityEnum.PROJECT}
+              title={(ctx?.item as Project)?.name}
+              description={<>description</>}
+              entity_id={1}
+              fieldLabel={"fieldLabel"}
+              fieldName={"project"}
+              fieldType="text"
+            />
             <Grid item xs={12}>
               <When condition={Boolean(specialField)}>
                 <SpecialFieldGrid

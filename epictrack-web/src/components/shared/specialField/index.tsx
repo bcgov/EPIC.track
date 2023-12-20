@@ -220,6 +220,7 @@ export const SpecialFieldGrid = ({
       isLoading: loading,
     },
     enableSorting: false,
+    enableBottomToolbar: false,
     editDisplayMode: "row",
     createDisplayMode: "row",
     enableFilters: false,
