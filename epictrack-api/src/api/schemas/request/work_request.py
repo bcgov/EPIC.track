@@ -62,7 +62,7 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
     ministry_id = fields.Int(
         metadata={"description": "Ministry id of the work"},
         validate=validate.Range(min=1),
-        required=True,
+        required=False,
     )
     federal_involvement_id = fields.Int(
         metadata={"description": "Federal involvement id of the work"},

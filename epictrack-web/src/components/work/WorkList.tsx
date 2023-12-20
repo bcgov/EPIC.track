@@ -66,7 +66,7 @@ const WorkList = () => {
       const codes = works
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        .map((w) => w[key][accessor])
+        .map((w) => (w[key] ? w[key][accessor] : null))
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
