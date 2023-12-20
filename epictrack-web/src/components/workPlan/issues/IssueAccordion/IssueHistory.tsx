@@ -14,7 +14,7 @@ import TimelineContent, {
   timelineContentClasses,
 } from "@mui/lab/TimelineContent";
 import { Button, Collapse, Grid, useTheme } from "@mui/material";
-import { Else, If, Then, When } from "react-if";
+import { Else, If, Then, When, Unless } from "react-if";
 import { IconProps } from "../../../icons/type";
 import icons from "../../../icons";
 import { IssuesContext } from "../IssuesContext";
@@ -38,6 +38,12 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
 
   const SHOW_MORE_THRESHOLD = 3;
 
+  const firstNUpdatesInTimeline = subsequentUpdates.slice(
+    0,
+    SHOW_MORE_THRESHOLD
+  );
+  const restOfUpdatesInTimeline = subsequentUpdates.slice(SHOW_MORE_THRESHOLD);
+
   return (
     <Timeline
       position="left"
@@ -50,7 +56,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
         paddingLeft: 0,
       }}
     >
-      {subsequentUpdates.slice(0, SHOW_MORE_THRESHOLD).map((update, index) => {
+      {firstNUpdatesInTimeline.map((update, index) => {
         const isSuccess = highlightFirstInTimeLineApproved && index === 0;
         return (
           <TimelineItem key={update.id}>
@@ -97,13 +103,19 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                   },
                 ]}
               />
-              <TimelineConnector
-                sx={[
-                  isSuccess && {
-                    bgcolor: Palette.success.light,
-                  },
-                ]}
-              />
+              <Unless
+                condition={
+                  index === firstNUpdatesInTimeline.length - 1 && !expand
+                }
+              >
+                <TimelineConnector
+                  sx={[
+                    isSuccess && {
+                      bgcolor: Palette.success.light,
+                    },
+                  ]}
+                />
+              </Unless>
             </TimelineSeparator>
             <TimelineContent>
               <ETCaption3 color={Palette.neutral.main}>
@@ -113,9 +125,9 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
           </TimelineItem>
         );
       })}
-      <When condition={subsequentUpdates.length > SHOW_MORE_THRESHOLD}>
+      <When condition={restOfUpdatesInTimeline.length > 0}>
         <Collapse in={expand}>
-          {subsequentUpdates.slice(SHOW_MORE_THRESHOLD).map((update) => (
+          {restOfUpdatesInTimeline.map((update, index) => (
             <TimelineItem key={update.id}>
               <TimelineOppositeContent>
                 <ETPreviewText color={Palette.neutral.main}>
@@ -124,7 +136,11 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
               </TimelineOppositeContent>
               <TimelineSeparator>
                 <TimelineDot />
-                <TimelineConnector />
+                <Unless
+                  condition={index === restOfUpdatesInTimeline.length - 1}
+                >
+                  <TimelineConnector />
+                </Unless>
               </TimelineSeparator>
               <TimelineContent>
                 <ETCaption3 color={Palette.neutral.main}>
