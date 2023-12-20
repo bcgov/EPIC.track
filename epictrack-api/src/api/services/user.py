@@ -39,14 +39,16 @@ class UserService:
 
     @classmethod
     def get_groups(cls):
-        """Get groups that has level set up"""
+        """Get groups that has "level" attribute set up"""
         groups = KeycloakService.get_groups()
         filtered_groups = []
         for group in groups:
             if group.get("subGroups"):
-                for sub_group in group.get("subGroups"):
-                    if "level" in sub_group["attributes"]:
-                        filtered_groups.append(sub_group)
+                filtered_groups = filtered_groups + [
+                    sub_group
+                    for sub_group in group.get("subGroups")
+                    if "level" in sub_group["attributes"]
+                ]
             elif "level" in group["attributes"]:
                 filtered_groups.append(group)
         return filtered_groups
@@ -70,8 +72,8 @@ class UserService:
         if (
             not requested_group
             and not updating_group
-            and int(requested_group["attributes"]["level"][0])
-            < int(updating_group["attributes"]["level"][0])
+            and int(UserService._get_level(requested_group))
+            < int(UserService._get_level(updating_group))
         ):
             raise PermissionDeniedError("Permission denied")
 

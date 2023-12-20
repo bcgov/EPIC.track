@@ -69,19 +69,6 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
         @app.errorhandler(Exception)
         def handle_error(err):
             current_app.logger.error(str(err))
-            # if isinstance(err, ValidationError):
-            #     return err.messages, HTTPStatus.BAD_REQUEST
-            # if isinstance(err, ResourceExistsError):
-            #     return err.message, HTTPStatus.CONFLICT
-            # if isinstance(err, ResourceNotFoundError):
-            #     return err.message, HTTPStatus.NOT_FOUND
-            # if isinstance(err, PermissionDeniedError):
-            #     return err.message, HTTPStatus.FORBIDDEN
-            # if isinstance(err, UnprocessableEntityError):
-            #     return err.message, HTTPStatus.UNPROCESSABLE_ENTITY
-            # if run_mode == "development":
-            #     # To get stacktrace in local development for internal server errors
-            #     raise err
             return 'Internal server error', HTTPStatus.INTERNAL_SERVER_ERROR
 
         register_shellcontext(app)
