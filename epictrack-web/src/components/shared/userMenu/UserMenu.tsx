@@ -38,8 +38,9 @@ const UserMenu = (props: UserMenuProps) => {
     phone,
     origin,
     id,
-    onMouseLeave,
+    ...rest
   } = props;
+
   const menuOrigin = React.useMemo(() => {
     if (origin === undefined)
       return {
@@ -48,6 +49,7 @@ const UserMenu = (props: UserMenuProps) => {
       } as PopoverOrigin;
     return origin;
   }, [origin]);
+
   return (
     <Menu
       sx={{
@@ -61,7 +63,6 @@ const UserMenu = (props: UserMenuProps) => {
       transformOrigin={menuOrigin}
       open={Boolean(anchorEl)}
       onClose={onClose}
-      onMouseLeave={onMouseLeave}
       PaperProps={{
         style: {
           pointerEvents: "none",
@@ -78,6 +79,7 @@ const UserMenu = (props: UserMenuProps) => {
       }}
       container={document.body}
       disablePortal
+      {...rest}
     >
       <Box sx={{ display: "flex", flexDirection: "column" }}>
         <Box

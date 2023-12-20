@@ -47,6 +47,7 @@ const CardBody = ({ workplan }: CardProps) => {
         backgroundColor: Palette.white,
         padding: "16px 24px",
         height: "313px",
+        overflow: "scroll",
       }}
       gap={1}
     >

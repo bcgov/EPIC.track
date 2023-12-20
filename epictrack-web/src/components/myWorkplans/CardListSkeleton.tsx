@@ -4,9 +4,9 @@ import { CardSkeleton } from "./Card/CardSkeleton";
 export const CardListSkeleton = () => {
   return (
     <>
-      {[1, 2, 3, 4, 5, 6].map(() => {
+      {[1, 2, 3, 4, 5, 6].map((key) => {
         return (
-          <Grid item xs={4}>
+          <Grid item xs={4} key={key}>
             <CardSkeleton />
           </Grid>
         );
