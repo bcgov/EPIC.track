@@ -174,7 +174,7 @@ export default function ProjectForm({ ...props }) {
   };
 
   const onBlurProjectName = async () => {
-    if (!formValues.name || Boolean(formValues.abbreviation)) return;
+    if (!formValues.name || Boolean(props.projectId)) return;
 
     try {
       const response = await projectService.createProjectAbbreviation(
