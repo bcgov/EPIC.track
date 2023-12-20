@@ -4,6 +4,7 @@ from marshmallow import EXCLUDE, fields
 from api.models import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
 from api.schemas.base import AutoSchemaBase
+from api.schemas.response.pip_org_type import PIPOrgTypeSchema
 from api.schemas.staff import StaffSchema
 
 
@@ -21,6 +22,10 @@ class IndigenousResponseNationSchema(
 
     relationship_holder = fields.Nested(
         StaffSchema, dump_only=True, exclude=("position",)
+    )
+
+    pip_org_type = fields.Nested(
+        PIPOrgTypeSchema, dump_only=True
     )
 
 

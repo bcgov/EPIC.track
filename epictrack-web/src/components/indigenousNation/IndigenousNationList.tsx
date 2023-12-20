@@ -80,6 +80,10 @@ export default function IndigenousNationList() {
         filterFn: searchFilter,
       },
       {
+        accessorKey: "pip_org_type.name",
+        header: "Organization Type",
+      },
+      {
         accessorKey: "relationship_holder.full_name",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
