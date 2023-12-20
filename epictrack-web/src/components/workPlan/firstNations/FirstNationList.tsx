@@ -42,6 +42,8 @@ import { useAppSelector } from "../../../hooks";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
+const basePIPUrl =
+  "https://apps.nrs.gov.bc.ca/int/fnp/FirstNationDetail.xhtml?name=";
 
 const IButton = styled(IconButton)({
   "& .icon": {
@@ -271,10 +273,10 @@ const FirstNationList = () => {
           <>
             {cell.getValue<string>() && (
               <ETGridTitle
-                to={cell.getValue<string>()}
+                to={basePIPUrl + cell.getValue<string>()}
                 enableEllipsis
                 enableTooltip={true}
-                tooltip={cell.getValue<string>()}
+                tooltip={basePIPUrl + cell.getValue<string>()}
                 target="_blank"
                 rel="noopener"
               >
