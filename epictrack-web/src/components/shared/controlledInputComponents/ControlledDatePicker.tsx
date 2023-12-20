@@ -1,9 +1,8 @@
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { DATE_FORMAT } from "../../../constants/application-constant";
+import TrackDatePicker from "../DatePicker";
 
 type ControlledDatePickerProps = {
   name: string;
@@ -38,33 +37,26 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
       defaultValue={defaultValue}
       control={control}
       render={({ field: { onChange, value }, fieldState: { error } }) => (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            views={["year", "month", "day"]}
-            format={DATE_FORMAT}
-            slotProps={{
-              textField: {
-                id: name,
-                fullWidth: true,
-                error: !!error,
-                helperText: error?.message || "",
-                placeholder: datePickerProps?.placeholder || DATE_FORMAT,
-                ...datePickerSlotProps,
-              },
-              ...register(name),
-            }}
-            value={value ? dayjs(value) : value}
-            onChange={(event: Dayjs | null) => {
-              if (datePickerProps?.onDateChange) {
-                datePickerProps.onDateChange(event, onChange);
-              } else {
-                onChange(event?.format() || "");
-              }
-            }}
-            {...datePickerProps}
-            sx={{ display: "block" }}
-          />
-        </LocalizationProvider>
+        <TrackDatePicker
+          slotProps={{
+            textField: {
+              id: name,
+              error: !!error,
+              placeholder: datePickerProps?.placeholder || DATE_FORMAT,
+              helperText: error?.message || "",
+              ...datePickerSlotProps,
+            },
+            ...register(name),
+          }}
+          value={value ? dayjs(value) : value}
+          onChange={(event: Dayjs | null) => {
+            if (datePickerProps?.onDateChange) {
+              datePickerProps.onDateChange(event, onChange);
+            } else {
+              onChange(event?.format() || "");
+            }
+          }}
+        />
       )}
     />
   );
