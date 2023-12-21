@@ -460,7 +460,7 @@ const FirstNationList = () => {
                 showGlobalFilter: true,
               }}
               onHoveredRowChange={({ ...params }) => {
-                debugger;
+                return;
               }}
             />
           </Grid>

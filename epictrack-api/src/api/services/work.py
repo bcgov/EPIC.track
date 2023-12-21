@@ -19,6 +19,8 @@ from itertools import product
 from typing import Dict, List, Optional
 
 import pandas as pd
+from api.models.special_field import EntityEnum
+from api.services.special_field import SpecialFieldService
 from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
@@ -243,6 +245,19 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if commit:
             db.session.commit()
         return work
+    
+    @classmethod
+    def create_special_fields(cls, work: Work):
+        """Create work special fields"""
+        work.flush()
+        work_epd_special_field_data = {
+            "entity": EntityEnum.WORK,
+            "entity_id": work.id,
+            "field_name": "responsible_epd_id",
+            "field_value": work.responsible_epd_id,
+            "active_from": work.created_at
+        }
+        SpecialFieldService.create_special_field_entry(work_epd_special_field_data)       
 
     @classmethod
     def find_staff(cls, work_id: int, is_active) -> [Staff]:
