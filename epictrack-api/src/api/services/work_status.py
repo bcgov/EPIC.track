@@ -56,7 +56,7 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         # TODO Add Super user check
         if work_status.is_approved:
             one_of_roles = (
-                KeycloakRole.EXTENDED_EDIT.value
+                KeycloakRole.EXTENDED_EDIT.value,
             )
             authorisation.check_auth(one_of_roles=one_of_roles)
 

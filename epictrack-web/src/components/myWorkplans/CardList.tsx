@@ -5,16 +5,16 @@ import { useContext } from "react";
 import { MyWorkplansContext } from "./MyWorkPlanContext";
 import { CardListSkeleton } from "./CardListSkeleton";
 import { Unless } from "react-if";
-import { throttle } from "lodash";
 import TriggerOnViewed from "../shared/DummyElement";
 
 const CardList = () => {
-  const { workplans, loadingWorkplans, totalWorkplans, lazyLoadMoreWorkplans } =
-    useContext(MyWorkplansContext);
-
-  const throttledLazyLoadWorkplans = throttle(() => {
-    lazyLoadMoreWorkplans();
-  }, 5000);
+  const {
+    workplans,
+    loadingWorkplans,
+    totalWorkplans,
+    loadingMoreWorkplans,
+    setLoadingMoreWorkplans,
+  } = useContext(MyWorkplansContext);
 
   if (loadingWorkplans) {
     return (
@@ -38,9 +38,18 @@ const CardList = () => {
         );
       })}
       <Unless
-        condition={loadingWorkplans || workplans.length === totalWorkplans}
+        condition={
+          loadingWorkplans ||
+          loadingMoreWorkplans ||
+          workplans.length === totalWorkplans
+        }
       >
-        <TriggerOnViewed callbackFn={throttledLazyLoadWorkplans} />
+        <TriggerOnViewed
+          callbackFn={() => {
+            console.log("triggered");
+            setLoadingMoreWorkplans(true);
+          }}
+        />
       </Unless>
       <Unless condition={workplans.length === totalWorkplans}>
         <CardListSkeleton />
