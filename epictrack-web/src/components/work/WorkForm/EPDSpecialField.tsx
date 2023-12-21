@@ -8,7 +8,7 @@ import { ETCaption3 } from "../../shared";
 import { Grid } from "@mui/material";
 import { When } from "react-if";
 import { Staff } from "../../../models/staff";
-import { SpecialFieldLock } from "./SpecialFieldLock";
+import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
 
 interface EPDSpecialFieldProps {
   id: number;
@@ -40,7 +40,7 @@ export const EPDSpecialField = ({
           id={id}
           open={open}
           onLockClick={onLockClick}
-          label={"Work Lead"}
+          label={"Responsible EPD"}
           required
         />
         {children}

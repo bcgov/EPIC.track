@@ -4,13 +4,11 @@ import {
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
-import { ETCaption3, ETFormLabel } from "../../shared";
-import { Box, Grid, IconButton } from "@mui/material";
-import icons from "../../icons";
-import { IconProps } from "../../icons/type";
-import { Palette } from "../../../styles/theme";
+import { ETCaption3 } from "../../shared";
+import { Grid } from "@mui/material";
 import { When } from "react-if";
 import { Staff } from "../../../models/staff";
+import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
 
 interface WorkLeadSpecialFieldProps {
   id: number;
@@ -28,9 +26,6 @@ export const WorkLeadSpecialField = ({
   options,
   children,
 }: WorkLeadSpecialFieldProps) => {
-  const LockClosedIcon: React.FC<IconProps> = icons["LockClosedIcon"];
-  const LockOpenIcon: React.FC<IconProps> = icons["LockOpenIcon"];
-
   const selectOptions = useMemo(() => {
     return options.map((option) => ({
       label: option.full_name,
@@ -41,27 +36,13 @@ export const WorkLeadSpecialField = ({
   return (
     <>
       <Grid item xs={6}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            paddingTop: "3px",
-          }}
-        >
-          <ETFormLabel required>Work Lead</ETFormLabel>
-          <IconButton
-            onClick={onLockClick}
-            disableRipple
-            disabled={!id}
-            sx={{ padding: 0 }}
-          >
-            {open ? (
-              <LockOpenIcon fill={Palette.primary.accent.main} />
-            ) : (
-              <LockClosedIcon fill={Palette.primary.accent.main} />
-            )}
-          </IconButton>
-        </Box>
+        <SpecialFieldLock
+          id={id}
+          open={open}
+          onLockClick={onLockClick}
+          label={"Work Lead"}
+          required
+        />
         {children}
       </Grid>
       <When condition={open}>

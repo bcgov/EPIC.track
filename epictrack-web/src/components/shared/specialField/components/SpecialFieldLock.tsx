@@ -1,9 +1,9 @@
 import React from "react";
-import { ETFormLabel } from "../../shared";
+import { ETFormLabel } from "../..";
 import { IconButton, Stack } from "@mui/material";
-import icons from "../../icons";
-import { IconProps } from "../../icons/type";
-import { Palette } from "../../../styles/theme";
+import icons from "../../../icons";
+import { IconProps } from "../../../icons/type";
+import { Palette } from "../../../../styles/theme";
 
 interface SpecialFieldLockProps {
   id: number;
