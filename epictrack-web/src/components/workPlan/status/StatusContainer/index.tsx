@@ -5,9 +5,9 @@ import { Palette } from "../../../../styles/theme";
 import StatusView from "../StatusView";
 import { ETTab, ETTabs } from "../../../shared/tab/Tab";
 import TabPanel from "../../../shared/tab/TabPanel";
-import StatusPreview from "./StatusPreview";
 import StatusNotes from "./StatusNotes";
 import { tabPanelStyle, tabStyle, titleStyle } from "../../common/styles";
+import { ReportsPreview } from "../../issues/ReportsPreview";
 
 const StatusContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
@@ -43,7 +43,7 @@ const StatusContainer = () => {
               paddingLeft: 0,
               ...tabStyle,
             }}
-            label="Status Preview"
+            label="Reports Preview"
           />
           <ETTab
             label="Notes"
@@ -62,7 +62,13 @@ const StatusContainer = () => {
       >
         <StatusView />
       </Grid>
-      <Grid item xs={4}>
+      <Grid
+        item
+        xs={4}
+        sx={{
+          pt: "2rem",
+        }}
+      >
         <TabPanel
           index={0}
           value={selectedTabIndex}
@@ -70,7 +76,7 @@ const StatusContainer = () => {
             ...tabPanelStyle,
           }}
         >
-          <StatusPreview />
+          <ReportsPreview />
         </TabPanel>
         <TabPanel
           index={1}
