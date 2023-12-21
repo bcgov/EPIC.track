@@ -101,4 +101,7 @@ export const SpecialFields = {
     NAME: "name",
     PROPONENT: "proponent_id",
   },
+  PROPONENT: {
+    NAME: "name",
+  },
 };

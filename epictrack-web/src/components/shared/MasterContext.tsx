@@ -28,6 +28,7 @@ interface MasterContextProps {
   setFormId: Dispatch<SetStateAction<string | undefined>>;
   onDialogClose(event: any, reason: any): any;
   setFormStyle: Dispatch<SetStateAction<SxProps | undefined>>;
+  getById: (id: string) => Promise<void>;
 }
 
 export const MasterContext = createContext<MasterContextProps>({
@@ -48,6 +49,9 @@ export const MasterContext = createContext<MasterContextProps>({
   setFormId: () => ({}),
   onDialogClose: (event: any, reason: any) => ({}),
   setFormStyle: () => ({}),
+  getById: async (id: string) => {
+    return Promise.resolve();
+  },
 });
 
 export const MasterProvider = ({
@@ -172,6 +176,7 @@ export const MasterProvider = ({
   return (
     <MasterContext.Provider
       value={{
+        getById,
         title,
         setTitle,
         data,
