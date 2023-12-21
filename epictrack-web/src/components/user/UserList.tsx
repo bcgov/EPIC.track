@@ -82,13 +82,8 @@ const UserList = () => {
         sortingFn: "sortFn",
         enableEditing: false,
       },
-      // {
-      //   accessorKey: "email",
-      //   header: "Email",
-      //   enableEditing: false,
-      // },
       {
-        accessorKey: "group.name",
+        accessorKey: "group.display_name",
         header: "Group",
         enableEditing: true,
         Edit: ({ cell }) => (
@@ -96,7 +91,7 @@ const UserList = () => {
             <Select
               menuPosition="fixed"
               getOptionValue={(opt) => opt.id}
-              getOptionLabel={(opt) => opt.name}
+              getOptionLabel={(opt) => opt.display_name}
               options={groups.filter((p) => currentUserGroup.level >= p.level)}
               required={true}
               // menuPortalTarget={document.body}
