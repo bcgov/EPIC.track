@@ -19,8 +19,6 @@ from itertools import product
 from typing import Dict, List, Optional
 
 import pandas as pd
-from api.models.special_field import EntityEnum
-from api.services.special_field import SpecialFieldService
 from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
@@ -36,6 +34,7 @@ from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
 from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
+from api.models.special_field import EntityEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
 from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
@@ -51,6 +50,7 @@ from api.services.event_template import EventTemplateService
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
+from api.services.special_field import SpecialFieldService
 from api.services.work_phase import WorkPhaseService
 
 
@@ -245,7 +245,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if commit:
             db.session.commit()
         return work
-    
+
     @classmethod
     def create_special_fields(cls, work: Work):
         """Create work special fields"""
@@ -257,7 +257,16 @@ class WorkService:  # pylint: disable=too-many-public-methods
             "field_value": work.responsible_epd_id,
             "active_from": work.created_at
         }
-        SpecialFieldService.create_special_field_entry(work_epd_special_field_data)       
+        work_team_lead_special_field_data = {
+            "entity": EntityEnum.WORK,
+            "entity_id": work.id,
+            "field_name": "work_lead_id",
+            "field_value": work.work_lead_id,
+            "active_from": work.created_at
+        }
+
+        SpecialFieldService.create_special_field_entry(work_epd_special_field_data)
+        SpecialFieldService.create_special_field_entry(work_team_lead_special_field_data)
 
     @classmethod
     def find_staff(cls, work_id: int, is_active) -> [Staff]:
