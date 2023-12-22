@@ -188,6 +188,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if cls.check_existence(payload["title"]):
             raise ResourceExistsError("Work with same title already exists")
         work = Work(**payload)
+        cls.create_special_fields(work)
         work.work_state = WorkStateEnum.IN_PROGRESS
         phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
             work.ea_act_id, work.work_type_id

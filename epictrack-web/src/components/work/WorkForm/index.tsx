@@ -80,6 +80,8 @@ export default function WorkForm({ ...props }) {
   const [selectedWorktype, setSelectedWorkType] = React.useState<any>();
   const [selectedProject, setSelectedProject] = React.useState<any>();
 
+  const work = ctx?.item as Work;
+
   const [isEpdFieldLocked, setIsEpdFieldLocked] =
     React.useState<boolean>(false);
 
@@ -96,11 +98,7 @@ export default function WorkForm({ ...props }) {
 
   React.useEffect(() => {
     ctx.setTitle(
-      ctx.item
-        ? (ctx?.item as Work)?.title +
-            " - " +
-            (ctx?.item as Work)?.work_type?.name
-        : "Create Work"
+      ctx.item ? work?.title + " - " + work?.work_type?.name : "Create Work"
     );
   }, [ctx.title, ctx.item]);
 
@@ -214,7 +212,7 @@ export default function WorkForm({ ...props }) {
           <ControlledSelectV2
             placeholder="Select EA Act"
             helperText={errors?.ea_act_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.ea_act_id}
+            defaultValue={work?.ea_act_id}
             options={eaActs || []}
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
@@ -227,7 +225,7 @@ export default function WorkForm({ ...props }) {
             onHandleChange={handleWorktypeChange}
             placeholder="Select Worktype"
             helperText={errors?.ea_act_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.ea_act_id}
+            defaultValue={work?.ea_act_id}
             options={workTypes || []}
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
@@ -252,7 +250,7 @@ export default function WorkForm({ ...props }) {
             onHandleChange={handleProjectChange}
             placeholder="Select"
             helperText={errors?.project_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.project_id}
+            defaultValue={work?.project_id}
             options={projects || []}
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
@@ -264,7 +262,7 @@ export default function WorkForm({ ...props }) {
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.ministry_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.ministry_id}
+            defaultValue={work?.ministry_id}
             options={ministries || []}
             getOptionValue={(o: Ministry) => o?.id.toString()}
             getOptionLabel={(o: Ministry) => o.name}
@@ -276,7 +274,7 @@ export default function WorkForm({ ...props }) {
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.federal_involvement_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.federal_involvement_id}
+            defaultValue={work?.federal_involvement_id}
             options={federalInvolvements || []}
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
@@ -289,7 +287,7 @@ export default function WorkForm({ ...props }) {
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.substitution_act_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.substitution_act_id}
+            defaultValue={work?.substitution_act_id}
             options={substitutionActs || []}
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
@@ -323,7 +321,7 @@ export default function WorkForm({ ...props }) {
         <Grid item xs={12}>
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
-            defaultChecked={(ctx.item as Work)?.is_cac_recommended}
+            defaultChecked={work?.is_cac_recommended}
             name="is_cac_recommended"
           />
           <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
@@ -341,7 +339,7 @@ export default function WorkForm({ ...props }) {
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.eao_team_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.eao_team_id}
+            defaultValue={work?.eao_team_id}
             options={teams || []}
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
@@ -350,19 +348,20 @@ export default function WorkForm({ ...props }) {
         </Grid>
 
         <EPDSpecialField
-          id={(ctx?.item as Work)?.id}
+          id={work?.id}
           onLockClick={() => setIsEpdFieldLocked((prev) => !prev)}
           open={isEpdFieldLocked}
           onSave={() => {
-            return;
+            //TODO: Uncomment this once the the PR that adds it is merged
+            // ctx.getById(workId);
           }}
           options={leads || []}
         >
           <ControlledSelectV2
-            disabled={(ctx.item as Work)?.responsible_epd_id != undefined}
+            disabled={work?.responsible_epd_id != undefined}
             placeholder="Select"
             helperText={errors?.responsible_epd_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.responsible_epd_id}
+            defaultValue={work?.responsible_epd_id}
             options={epds || []}
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
@@ -371,16 +370,20 @@ export default function WorkForm({ ...props }) {
         </EPDSpecialField>
 
         <WorkLeadSpecialField
-          id={(ctx?.item as Work)?.id}
+          id={work?.id}
           onLockClick={() => setIsWorkLeadFieldLocked((prev) => !prev)}
           open={isWorkLeadFieldLocked}
+          onSave={() => {
+            //TODO: Uncomment this once the the PR that adds it is merged
+            // ctx.getById(workId);
+          }}
           options={leads || []}
         >
           <ControlledSelectV2
-            disabled={(ctx.item as Work)?.work_lead_id != undefined}
+            disabled={work?.work_lead_id != undefined}
             placeholder="Select"
             helperText={errors?.work_lead_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.work_lead_id}
+            defaultValue={work?.work_lead_id}
             options={leads || []}
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
@@ -394,7 +397,7 @@ export default function WorkForm({ ...props }) {
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.decision_by_id?.message?.toString()}
-            defaultValue={(ctx.item as Work)?.decision_by_id}
+            defaultValue={work?.decision_by_id}
             options={decisionMakers || []}
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
@@ -411,7 +414,7 @@ export default function WorkForm({ ...props }) {
         <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
-            defaultChecked={(ctx.item as Work)?.is_high_priority}
+            defaultChecked={work?.is_high_priority}
             name="is_high_priority"
           />
           <ETFormLabel id="is_watched">High Priority</ETFormLabel>
