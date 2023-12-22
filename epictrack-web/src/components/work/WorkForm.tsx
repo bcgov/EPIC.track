@@ -12,7 +12,10 @@ import { Ministry } from "../../models/ministry";
 import { Code } from "../../services/codeService";
 import { ETFormLabel } from "../shared";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { DATE_FORMAT } from "../../constants/application-constant";
+import {
+  DATE_FORMAT,
+  MIN_WORK_START_DATE,
+} from "../../constants/application-constant";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import dayjs from "dayjs";
@@ -25,7 +28,6 @@ import Icons from "../icons/index";
 import LockClosed from "../../assets/images/lock-closed.svg";
 import projectService from "../../services/projectService/projectService";
 import ControlledDatePicker from "../shared/controlledInputComponents/ControlledDatePicker";
-import { MIN_WORK_START_DATE } from "./constant";
 import { sort } from "../../utils";
 
 const schema = yup.object<Work>().shape({
