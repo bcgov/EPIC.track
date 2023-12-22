@@ -10,12 +10,12 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
 from api.models import Event, Project, Work, WorkStatus, WorkType, db
-from api.models.event_category import EventCategory
+from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 
 from .report_factory import ReportFactory
@@ -47,20 +47,19 @@ class ThirtySixtyNinetyReport(ReportFactory):
         super().__init__(data_keys, filters=filters)
         self.report_date = None
         self.report_title = "30-60-90"
-        # TODO: Is this correct? Previous was all milestones with outcomes
-        decision_category = EventCategory.query.filter(
-            EventCategory.name == "Decision"
-        ).first()
-        decision_configuration_ids = EventConfiguration.query.filter(
-            EventConfiguration.event_category_id == decision_category.id
-        ).all()
-        self.decision_configuration_ids = [x.id for x in decision_configuration_ids]
+        self.pecp_configuration_ids = db.session.execute(
+            select(EventConfiguration.id)
+            .where(
+                EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
+            )
+        ).scalars().all()
 
-        pecp_category = EventCategory.query.filter(EventCategory.name == "PCP").first()
-        pecp_configuration_ids = EventConfiguration.query.filter(
-            EventConfiguration.event_category_id == pecp_category.id
-        ).all()
-        self.pecp_configuration_ids = [x.id for x in pecp_configuration_ids]
+        self.decision_configuration_ids = db.session.execute(
+            select(EventConfiguration.id)
+            .where(
+                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+            )
+        ).scalars().all()
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA 30-60-90 Report"""
@@ -335,8 +334,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ]
-                + styles
+                ] + styles
             )
         )
         story.append(table)

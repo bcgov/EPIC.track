@@ -15,10 +15,12 @@ const CardHeader = ({ workplan }: CardProps) => {
         height: "48px",
       }}
       justifyContent="space-between"
+      alignContent={"center"}
     >
       <Grid
         item
         xs={10}
+        container
         sx={{
           overflow: "hidden",
           textOverflow: "ellipsis",
@@ -27,7 +29,7 @@ const CardHeader = ({ workplan }: CardProps) => {
       >
         <ETCaption1
           bold
-          color={Palette.primary.main}
+          color={Palette.neutral.dark}
           sx={{
             overflow: "hidden",
             textOverflow: "ellipsis",
@@ -35,19 +37,6 @@ const CardHeader = ({ workplan }: CardProps) => {
           }}
         >
           {workplan?.project?.name}
-        </ETCaption1>
-      </Grid>
-      <Grid item container xs={2} justifyContent="flex-end">
-        <ETCaption1
-          bold
-          sx={{
-            color: Palette.success.dark,
-            backgroundColor: Palette.success.bg.light,
-            padding: "4px 8px",
-            borderRadius: "4px",
-          }}
-        >
-          {workplan.is_active ? "Active" : "Inactive"}
         </ETCaption1>
       </Grid>
     </Grid>

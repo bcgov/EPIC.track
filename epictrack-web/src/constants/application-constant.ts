@@ -2,6 +2,7 @@ export const DATE_FORMAT = "YYYY-MM-DD";
 export const DISPLAY_DATE_FORMAT = "DD MMM YYYY";
 export const MONTH_DAY_YEAR = "MMM.DD YYYY";
 export const EARLIEST_WORK_DATE = "2019-12-16";
+export const MIN_WORK_START_DATE = "1995-06-30";
 export const REPORT_TYPES = [
   {
     Text: "Anticipated EA Referral Schedule",
@@ -101,6 +102,10 @@ export const SPECIAL_FIELDS = Object.freeze({
     NAME: "name",
     PROPONENT: "proponent_id",
   },
+  PROPONENT: {
+    NAME: "name",
+  },
+};
   WORK: {
     RESPONSIBLE_EPD: "responsible_epd_id",
     WORK_LEAD: "work_lead_id",

@@ -459,9 +459,6 @@ const FirstNationList = () => {
                 isLoading: loading,
                 showGlobalFilter: true,
               }}
-              onHoveredRowChange={({ ...params }) => {
-                return;
-              }}
             />
           </Grid>
         </Grid>

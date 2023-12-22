@@ -22,7 +22,7 @@ const StaffGroup = ({ workplan }: CardProps) => {
 
   return (
     <AvatarGroup
-      max={4}
+      max={3}
       renderSurplus={(surplus: number) => (
         <RenderSurplus
           renderSurplus={surplus}

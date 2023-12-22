@@ -11,7 +11,10 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import Moment from "moment";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import {
+  COMMON_ERROR_MESSAGE,
+  MIN_WORK_START_DATE,
+} from "../../../constants/application-constant";
 import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
@@ -152,10 +155,12 @@ const EventForm = ({
     }
   }, [selectedConfiguration, event]);
 
+  /**
+   * If the event is the last decision event, then, the decision maker
+   * position id has to be selected from the decision make position id
+   * stored in Work model
+   */
   const decisionMakerPositionIds = useMemo<number[]>(() => {
-    // const workPhaseIndex = ctx.workPhases.findIndex(
-    //   (p) => p.work_phase.id === ctx.selectedWorkPhase?.work_phase.id
-    // );
     const lastDecisionIndex = milestoneEvents.findLastIndex(
       (p: EventsGridModel) =>
         p.event_configuration.event_category_id === EventCategory.DECISION
@@ -212,13 +217,15 @@ const EventForm = ({
 
   const anticipatedMinDate = useMemo(
     () =>
-      isStartEvent && isStartPhase ? undefined : dayjs(ctx.work?.start_date),
+      isStartEvent && isStartPhase
+        ? dayjs(MIN_WORK_START_DATE)
+        : dayjs(ctx.work?.start_date),
     [ctx.work?.start_date, isStartEvent, isStartPhase]
   );
   const actualDateMin = useMemo(
     () =>
       isStartEvent && isStartPhase
-        ? undefined
+        ? dayjs(MIN_WORK_START_DATE)
         : dayjs(ctx.selectedWorkPhase?.work_phase.start_date),
     [ctx.selectedWorkPhase, isStartEvent, isStartPhase]
   );
@@ -298,6 +305,10 @@ const EventForm = ({
     }
   }, [event, configurations]);
 
+  /**
+   * If the phase is suspended, the, when you try to add a new event
+   * the form should be pre set with RESUMPTION milestone type
+   */
   useEffect(() => {
     if (
       ctx.selectedWorkPhase?.work_phase.is_suspended &&

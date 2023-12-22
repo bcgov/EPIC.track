@@ -19,7 +19,9 @@ import pandas as pd
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Proponent, db
+from api.models.special_field import EntityEnum
 from api.models.staff import Staff
+from api.services.special_field import SpecialFieldService
 from api.utils.token_info import TokenInfo
 
 
@@ -52,6 +54,15 @@ class ProponentService:
         if exists:
             raise ResourceExistsError("Proponent with same name exists")
         proponent = Proponent(**payload)
+        proponent.flush()
+        proponent_name_special_field_data = {
+            "entity": EntityEnum.PROPONENT,
+            "entity_id": proponent.id,
+            "field_name": "name",
+            "field_value": proponent.name,
+            "active_from": proponent.created_at
+        }
+        SpecialFieldService.create_special_field_entry(proponent_name_special_field_data)
         proponent.save()
         return proponent
 

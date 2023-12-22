@@ -93,7 +93,6 @@ export const SpecialFieldGrid = ({
             value = options?.find((o) => row.original.field_value == o.value);
           }
           const onBlur = (newValue: any) => {
-            debugger;
             row._valuesCache[column.id] =
               fieldType === "select" ? newValue.value : newValue.target.value;
             if (Boolean(tableState.creatingRow)) {
@@ -186,7 +185,6 @@ export const SpecialFieldGrid = ({
 
   const handleCreateRowSave: MRT_TableOptions<SpecialField>["onCreatingRowSave"] =
     async ({ values, table }) => {
-      debugger;
       await saveEntry(values);
       table.setCreatingRow(null); //exit creating mode
     };
@@ -220,6 +218,7 @@ export const SpecialFieldGrid = ({
       isLoading: loading,
     },
     enableSorting: false,
+    enableBottomToolbar: false,
     editDisplayMode: "row",
     createDisplayMode: "row",
     enableFilters: false,

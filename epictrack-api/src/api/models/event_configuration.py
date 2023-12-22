@@ -17,6 +17,7 @@ import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
+
 from .base_model import BaseModelVersioned
 from .db import db
 
