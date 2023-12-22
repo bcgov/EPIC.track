@@ -14,7 +14,7 @@ import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwit
 import { When, If, Then, Else } from "react-if";
 import {
   SpecialFieldEntityEnum,
-  SpecialFields,
+  SPECIAL_FIELDS,
 } from "../../constants/application-constant";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
@@ -113,7 +113,7 @@ export default function ProponentForm({ ...props }) {
             >
               <ETFormLabel required>Name</ETFormLabel>
               <When condition={disabled}>
-                <If condition={specialField === SpecialFields.PROPONENT.NAME}>
+                <If condition={specialField === SPECIAL_FIELDS.PROPONENT.NAME}>
                   <Then>
                     <IconButton onClick={() => setSpecialField("")}>
                       <LockOpenIcon fill={Palette.primary.accent.main} />
@@ -122,7 +122,7 @@ export default function ProponentForm({ ...props }) {
                   <Else>
                     <IconButton
                       onClick={() =>
-                        setSpecialField(SpecialFields.PROPONENT.NAME)
+                        setSpecialField(SPECIAL_FIELDS.PROPONENT.NAME)
                       }
                     >
                       <LockClosedIcon fill={Palette.primary.accent.main} />
@@ -164,13 +164,13 @@ export default function ProponentForm({ ...props }) {
                 entity_id={(ctx.item as Proponent)?.id}
                 fieldName={specialField}
                 fieldLabel={
-                  specialField === SpecialFields.PROPONENT.NAME
+                  specialField === SPECIAL_FIELDS.PROPONENT.NAME
                     ? "Proponent Name"
                     : "Name"
                 }
                 fieldType={"text"}
                 title={
-                  specialField === SpecialFields.PROPONENT.NAME
+                  specialField === SPECIAL_FIELDS.PROPONENT.NAME
                     ? "Proponet History"
                     : (ctx.item as Proponent)?.name
                 }
@@ -178,14 +178,14 @@ export default function ProponentForm({ ...props }) {
                   <>
                     <When
                       condition={
-                        specialField === SpecialFields.PROJECT.PROPONENT
+                        specialField === SPECIAL_FIELDS.PROJECT.PROPONENT
                       }
                     >
                       Update the Proponent of this Project.{" "}
                       <a href="#">Click this link</a> for detailed instructions.
                     </When>
                     <When
-                      condition={specialField === SpecialFields.PROJECT.NAME}
+                      condition={specialField === SPECIAL_FIELDS.PROJECT.NAME}
                     >
                       Update the legal name of the Project and the dates each
                       name was in legal use. <a href="#">Click this link</a> for

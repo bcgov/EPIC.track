@@ -18,15 +18,14 @@ import workService from "../../../services/workService/workService";
 import { MasterContext } from "../../shared/MasterContext";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { IconProps } from "../../icons/type";
-import LockClosed from "../../../assets/images/lock-closed.svg";
 import projectService from "../../../services/projectService/projectService";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { MIN_WORK_START_DATE } from "../constant";
 import { sort } from "../../../utils";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 import { EPDSpecialField } from "./EPDSpecialField";
 import icons from "../../icons";
 import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
+import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
