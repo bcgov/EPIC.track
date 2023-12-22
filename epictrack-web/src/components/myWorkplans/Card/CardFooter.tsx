@@ -8,8 +8,6 @@ import { useNavigate } from "react-router-dom";
 import React from "react";
 import StaffGroup from "./Staff/StaffGroup";
 
-const EyeIcon: React.FC<IconProps> = Icons["EyeIcon"];
-
 const CardFooter = ({ workplan }: CardProps) => {
   const navigate = useNavigate();
 
@@ -33,14 +31,10 @@ const CardFooter = ({ workplan }: CardProps) => {
         height: "90px",
         overflow: "hidden",
       }}
+      xs={12}
     >
-      <Grid item xs={9}>
-        <Grid
-          container
-          spacing={3}
-          direction={"row"}
-          justifyContent={"space-between"}
-        >
+      <Grid item xs={8}>
+        <Grid container direction={"row"} justifyContent={"space-between"}>
           <Grid item xs={4}>
             <Grid container direction="row" spacing={1}>
               <Grid item xs={12}>
@@ -54,12 +48,7 @@ const CardFooter = ({ workplan }: CardProps) => {
             </Grid>
           </Grid>
           <Grid item xs={4}>
-            <Grid
-              container
-              direction="row"
-              spacing={1}
-              alignItems={"flex-start"}
-            >
+            <Grid container direction="row" spacing={1}>
               <Grid item xs={12}>
                 <ETCaption1 color={Palette.neutral.main}>LEAD</ETCaption1>
               </Grid>
@@ -82,20 +71,26 @@ const CardFooter = ({ workplan }: CardProps) => {
               <Grid item xs={12}>
                 <ETCaption1 color={Palette.neutral.main}>STAFF</ETCaption1>
               </Grid>
-              <Grid item xs={12}>
+              <Grid item xs={12} sx={{ marginLeft: "6px" }}>
                 <StaffGroup workplan={workplan} />
               </Grid>
             </Grid>
           </Grid>
         </Grid>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item justifyContent={"flex-end"}>
         <Button
           variant="text"
-          startIcon={<EyeIcon />}
           sx={{
             backgroundColor: "inherit",
             borderColor: "transparent",
+            borderRadius: "4px",
+            width: "80px",
+            border: "2px solid var(--Primary-Main, #036)",
+            ":hover": {
+              borderRadius: "4px",
+              border: "2px solid var(--Primary-Main, #036)",
+            },
           }}
           onClick={() => navigate(`/work-plan?work_id=${workplan.id}`)}
         >

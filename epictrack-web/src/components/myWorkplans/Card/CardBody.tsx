@@ -12,7 +12,6 @@ import { Status } from "../../../models/status";
 import { When } from "react-if";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
-const DotIcon: React.FC<IconProps> = Icons["DotIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
@@ -47,7 +46,6 @@ const CardBody = ({ workplan }: CardProps) => {
         backgroundColor: Palette.white,
         padding: "16px 24px",
         height: "313px",
-        overflow: "scroll",
       }}
       gap={1}
     >
@@ -84,7 +82,6 @@ const CardBody = ({ workplan }: CardProps) => {
                 whiteSpace: "nowrap",
               }}
             >
-              <DotIcon fill={phase_color} />
               <ETCaption2
                 bold
                 enableEllipsis
