@@ -9,7 +9,7 @@ export const CustomSwitch = styled((props: SwitchProps) => (
     {...props}
     disabled={props.disabled}
   />
-))(() => ({
+))((props: SwitchProps) => ({
   width: 40,
   height: 24,
   padding: 0,
@@ -20,7 +20,9 @@ export const CustomSwitch = styled((props: SwitchProps) => (
       transform: "translateX(16px)",
       color: "#FFFFFF",
       "& + .MuiSwitch-track": {
-        backgroundColor: Palette.primary.accent.main,
+        backgroundColor: `${
+          props.disabled ? Palette.neutral.light : Palette.primary.accent.main
+        }`,
         opacity: 1,
       },
     },
