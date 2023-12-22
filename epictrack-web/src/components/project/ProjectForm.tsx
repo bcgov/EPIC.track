@@ -365,6 +365,7 @@ export default function ProjectForm({ ...props }) {
                 options={types || []}
                 getOptionValue={(o: Type) => o?.id?.toString()}
                 getOptionLabel={(o: Type) => o.name}
+                disabled={Boolean(specialField)}
                 {...register("type_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -378,6 +379,7 @@ export default function ProjectForm({ ...props }) {
                 options={subTypes || []}
                 getOptionValue={(o: SubType) => o?.id?.toString()}
                 getOptionLabel={(o: SubType) => o.name}
+                disabled={Boolean(specialField)}
                 {...register("sub_type_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -388,6 +390,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 multiline
                 rows={4}
+                disabled={Boolean(specialField)}
               />
             </Grid>
           </Grid>
@@ -410,6 +413,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 multiline
                 rows={3}
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -422,6 +426,7 @@ export default function ProjectForm({ ...props }) {
                 }}
                 placeholder="e.g. 22.2222"
                 fullWidth
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -434,6 +439,7 @@ export default function ProjectForm({ ...props }) {
                 }}
                 placeholder="e.g. -22.2222"
                 fullWidth
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -446,6 +452,7 @@ export default function ProjectForm({ ...props }) {
                 options={envRegions || []}
                 getOptionValue={(o: Region) => o?.id?.toString()}
                 getOptionLabel={(o: Region) => o?.name}
+                disabled={Boolean(specialField)}
                 {...register("region_id_env")}
               ></ControlledSelectV2>
             </Grid>
@@ -459,6 +466,7 @@ export default function ProjectForm({ ...props }) {
                 options={nrsRegions || []}
                 getOptionValue={(o: Region) => o?.id?.toString()}
                 getOptionLabel={(o: Region) => o?.name}
+                disabled={Boolean(specialField)}
                 {...register("region_id_flnro")}
               ></ControlledSelectV2>
             </Grid>
@@ -483,11 +491,16 @@ export default function ProjectForm({ ...props }) {
                   step: 1,
                 }}
                 fullWidth
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>EPIC GUID</ETFormLabel>
-              <ControlledTextField name="epic_guid" fullWidth />
+              <ControlledTextField
+                name="epic_guid"
+                fullWidth
+                disabled={Boolean(specialField)}
+              />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Est. FTE Positions in Construction</ETFormLabel>
@@ -499,6 +512,7 @@ export default function ProjectForm({ ...props }) {
                   step: 1,
                 }}
                 fullWidth
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid item xs={6}>
@@ -511,11 +525,17 @@ export default function ProjectForm({ ...props }) {
                   step: 1,
                 }}
                 fullWidth
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Certificate Number</ETFormLabel>
-              <ControlledTextField name="ea_certificate" helperText fullWidth />
+              <ControlledTextField
+                name="ea_certificate"
+                helperText
+                fullWidth
+                disabled={Boolean(specialField)}
+              />
             </Grid>
             <Grid item xs={6}>
               <ETFormLabel>Abbreviation</ETFormLabel>
@@ -525,6 +545,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 placeholder="EDRMS retrieval code"
                 inputEffects={(e) => e.target.value.toUpperCase()}
+                disabled={Boolean(specialField)}
               />
             </Grid>
             <Grid
@@ -537,6 +558,7 @@ export default function ProjectForm({ ...props }) {
               <ControlledSwitch
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
                 name={"is_active"}
+                disabled={Boolean(specialField)}
               />
               <ETFormLabel id="active">Active</ETFormLabel>
             </Grid>
@@ -544,6 +566,7 @@ export default function ProjectForm({ ...props }) {
               <ControlledSwitch
                 name={"is_project_closed"}
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
+                disabled={Boolean(specialField)}
               />
               <ETFormLabel id="active">Closed</ETFormLabel>
             </Grid>
