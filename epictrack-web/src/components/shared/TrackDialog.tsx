@@ -2,6 +2,7 @@ import React, { FC, useEffect } from "react";
 import {
   Box,
   Button,
+  ButtonProps,
   Dialog,
   DialogActions,
   DialogContent,
@@ -14,7 +15,7 @@ import { IconProps } from "../icons/type";
 import Icons from "../icons";
 import { ETHeading4, ETSubhead } from ".";
 
-type TrackDialogProps = {
+export type TrackDialogProps = {
   onCancel?: () => void;
   onOk?: (args: any) => void;
   cancelButtonText?: string;
@@ -27,6 +28,7 @@ type TrackDialogProps = {
   additionalActions?: React.ReactNode;
   formId?: string;
   externalSubmitButtonUsed?: boolean;
+  saveButtonProps?: ButtonProps;
 } & DialogProps;
 
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
@@ -45,6 +47,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
   formId,
   additionalActions,
   externalSubmitButtonUsed = false,
+  saveButtonProps,
   ...props
 }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -154,6 +157,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
               type={formId ? "submit" : "button"}
               form={formId}
               variant="contained"
+              {...saveButtonProps}
             >
               {okButtonText || "Ok"}
             </Button>

@@ -4,11 +4,10 @@ import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import Moment from "moment";
 import { yupResolver } from "@hookform/resolvers/yup";
-import codeService from "../../../services/codeService";
+import codeService, { Code } from "../../../services/codeService";
 import { Work, defaultWork } from "../../../models/work";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
-import { Code } from "../../../services/codeService";
 import { ETFormLabel } from "../../shared";
 import { Staff } from "../../../models/staff";
 import staffService from "../../../services/staffService/staffService";
@@ -87,6 +86,16 @@ export default function WorkForm({ ...props }) {
   const [isWorkLeadFieldLocked, setIsWorkLeadFieldLocked] =
     React.useState<boolean>(false);
 
+  const isSpecialFieldLocked = isEpdFieldLocked || isWorkLeadFieldLocked;
+
+  React.useEffect(() => {
+    ctx.setDialogProps({
+      saveButtonProps: {
+        disabled: isSpecialFieldLocked,
+      },
+    });
+  }, [isSpecialFieldLocked]);
+
   React.useEffect(() => {
     ctx.setFormId("work-form");
   }, []);
@@ -113,7 +122,6 @@ export default function WorkForm({ ...props }) {
     formState: { errors },
     reset,
     setValue,
-    control,
   } = methods;
 
   React.useEffect(() => {
@@ -216,6 +224,7 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("ea_act_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={4}>
@@ -229,6 +238,7 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("work_type_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={4}>
@@ -239,6 +249,7 @@ export default function WorkForm({ ...props }) {
             name="start_date"
             datePickerProps={{
               minDate: dayjs(MIN_WORK_START_DATE),
+              disabled: isSpecialFieldLocked,
             }}
           />
         </Grid>
@@ -254,6 +265,7 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("project_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
@@ -266,6 +278,7 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: Ministry) => o?.id.toString()}
             getOptionLabel={(o: Ministry) => o.name}
             {...register("ministry_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
@@ -278,6 +291,7 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("federal_involvement_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
 
@@ -291,11 +305,16 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("substitution_act_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
           <ETFormLabel required>Title</ETFormLabel>
-          <ControlledTextField name="title" fullWidth />
+          <ControlledTextField
+            name="title"
+            fullWidth
+            disabled={isSpecialFieldLocked}
+          />
         </Grid>
         <Grid item xs={12}>
           <ETFormLabel required>Work Description</ETFormLabel>
@@ -305,6 +324,7 @@ export default function WorkForm({ ...props }) {
             multiline
             fullWidth
             rows={2}
+            disabled={isSpecialFieldLocked}
           />
         </Grid>
         <Grid item xs={12}>
@@ -315,6 +335,7 @@ export default function WorkForm({ ...props }) {
             fullWidth
             multiline
             rows={4}
+            disabled={isSpecialFieldLocked}
           />
         </Grid>
         <Grid item xs={12}>
@@ -322,6 +343,7 @@ export default function WorkForm({ ...props }) {
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             defaultChecked={work?.is_cac_recommended}
             name="is_cac_recommended"
+            disabled={isSpecialFieldLocked}
           />
           <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
           <Tooltip
@@ -343,6 +365,7 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("eao_team_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
 
@@ -351,10 +374,9 @@ export default function WorkForm({ ...props }) {
           onLockClick={() => setIsEpdFieldLocked((prev) => !prev)}
           open={isEpdFieldLocked}
           onSave={() => {
-            //TODO: Uncomment this once the the PR that adds it is merged
-            // ctx.getById(workId);
+            ctx.getById(props.workId);
           }}
-          options={leads || []}
+          options={epds || []}
         >
           <ControlledSelectV2
             disabled={work?.responsible_epd_id != undefined}
@@ -373,8 +395,7 @@ export default function WorkForm({ ...props }) {
           onLockClick={() => setIsWorkLeadFieldLocked((prev) => !prev)}
           open={isWorkLeadFieldLocked}
           onSave={() => {
-            //TODO: Uncomment this once the the PR that adds it is merged
-            // ctx.getById(workId);
+            ctx.getById(props.workId);
           }}
           options={leads || []}
         >
@@ -401,12 +422,14 @@ export default function WorkForm({ ...props }) {
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("decision_by_id")}
+            disabled={isSpecialFieldLocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name="is_active"
+            disabled={isSpecialFieldLocked}
           />
           <ETFormLabel id="is_active">Active</ETFormLabel>
         </Grid>
@@ -415,6 +438,7 @@ export default function WorkForm({ ...props }) {
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             defaultChecked={work?.is_high_priority}
             name="is_high_priority"
+            disabled={isSpecialFieldLocked}
           />
           <ETFormLabel id="is_watched">High Priority</ETFormLabel>
           <Tooltip
