@@ -1,8 +1,8 @@
 import React, { Dispatch, SetStateAction, createContext } from "react";
 import { MasterBase } from "../../models/type";
 import ServiceBase from "../../services/common/serviceBase";
-import TrackDialog from "./TrackDialog";
-import { SxProps } from "@mui/material";
+import TrackDialog, { TrackDialogProps } from "./TrackDialog";
+import { DialogProps, SxProps } from "@mui/material";
 import { showNotification } from "./notificationProvider";
 import { getErrorMessage } from "../../utils/axiosUtils";
 import { Restricted } from "./restricted";
@@ -29,6 +29,7 @@ interface MasterContextProps {
   onDialogClose(event: any, reason: any): any;
   setFormStyle: Dispatch<SetStateAction<SxProps | undefined>>;
   getById: (id: string) => Promise<void>;
+  setDialogProps: Dispatch<SetStateAction<Partial<TrackDialogProps>>>;
 }
 
 export const MasterContext = createContext<MasterContextProps>({
@@ -52,6 +53,7 @@ export const MasterContext = createContext<MasterContextProps>({
   getById: async (id: string) => {
     return Promise.resolve();
   },
+  setDialogProps: () => ({}),
 });
 
 export const MasterProvider = ({
@@ -74,6 +76,9 @@ export const MasterProvider = ({
   const [formId, setFormId] = React.useState<string | undefined>();
   const [showModalForm, setShowModalForm] = React.useState<boolean>(false);
   const [formStyle, setFormStyle] = React.useState<SxProps>();
+  const [dialogProps, setDialogProps] = React.useState<
+    Partial<TrackDialogProps>
+  >({});
 
   React.useEffect(() => {
     if (id && !showDeleteDialog) {
@@ -193,6 +198,7 @@ export const MasterProvider = ({
         setFormId,
         onDialogClose,
         setFormStyle,
+        setDialogProps,
       }}
     >
       {children}
@@ -233,6 +239,7 @@ export const MasterProvider = ({
           formId={formId}
           // onOk={() => deleteItem(id)}
           sx={formStyle}
+          {...dialogProps}
         >
           {form}
         </TrackDialog>
