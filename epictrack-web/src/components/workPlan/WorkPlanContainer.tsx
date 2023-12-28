@@ -17,6 +17,7 @@ import Issues from "./issues";
 import WorkState from "./WorkState";
 import ComingSoon from "../../routes/ComingSoon";
 import { isStatusOutOfDate } from "./status/shared";
+import About from "./about";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -123,7 +124,8 @@ const WorkPlanContainer = () => {
           ...tabPanel,
         }}
       >
-        <ComingSoon />
+        {/* <ComingSoon /> */}
+        <About />
       </TabPanel>
       <TabPanel
         index={4}

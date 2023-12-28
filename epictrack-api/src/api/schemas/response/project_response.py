@@ -19,6 +19,7 @@ class ProjectResponseSchema(
         model = Project
         include_fk = True
         unknown = EXCLUDE
+        exclude=("created_by", "updated_at", "updated_by", "is_deleted")
 
     sub_type = fields.Nested(SubTypeSchema, dump_only=True, exclude=("type", "type_id"))
     type = fields.Nested(TypeSchema, dump_only=True)
