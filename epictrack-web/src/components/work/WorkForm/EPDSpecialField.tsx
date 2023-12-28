@@ -9,8 +9,6 @@ import { Grid } from "@mui/material";
 import { When } from "react-if";
 import { Staff } from "../../../models/staff";
 import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
-import { FocusTrap } from "@mui/base/FocusTrap";
-
 interface EPDSpecialFieldProps {
   id: number;
   options: Staff[];
