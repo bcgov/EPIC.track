@@ -3,11 +3,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { When } from "react-if";
 import {
   MRT_ColumnDef,
+  MRT_Row,
   MRT_TableOptions,
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
-import ReactSelect, { CSSObjectWithLabel } from "react-select";
 import { Palette } from "../../../styles/theme";
 import { ETCaption2, ETCaption3, ETParagraph } from "..";
 import Icons from "../../icons";
@@ -16,6 +16,8 @@ import { SpecialField, SpecialFieldProps } from "./type";
 import specialFieldService from "../../../services/specialFieldService";
 import { dateUtils } from "../../../utils";
 import { InLineDatePicker } from "./components/InLineDatePicker";
+import TrackSelect from "../TrackSelect";
+import ReactSelect, { CSSObjectWithLabel } from "react-select";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 const EditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -27,6 +29,20 @@ const Styles = {
     display: "flex",
     alignItems: "flex-start",
   },
+};
+
+type SPECIAL_FIELD_KEY = "field_value" | "active_from";
+const SPECIAL_FIELD_KEYS: { [x: string]: SPECIAL_FIELD_KEY } = {
+  FIELD_VALUE: "field_value",
+  ACTIVE_FROM: "active_from",
+};
+
+type ErrorState = {
+  [key in SPECIAL_FIELD_KEY]: boolean;
+};
+
+type Errors = {
+  [key: string]: ErrorState | undefined;
 };
 
 export const SpecialFieldGrid = ({
@@ -42,6 +58,10 @@ export const SpecialFieldGrid = ({
 }: SpecialFieldProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [entries, setEntries] = useState<SpecialField[]>([]);
+  const [errors, setErrors] = useState({
+    field_value: false,
+    active_from: false,
+  });
 
   const getEntries = async () => {
     setLoading(true);
@@ -60,10 +80,17 @@ export const SpecialFieldGrid = ({
     getEntries();
   }, [fieldName]);
 
+  const resetErrors = () => {
+    setErrors({
+      field_value: false,
+      active_from: false,
+    });
+  };
+
   const columns = useMemo<MRT_ColumnDef<SpecialField>[]>(
     () => [
       {
-        accessorKey: "field_value",
+        accessorKey: SPECIAL_FIELD_KEYS.FIELD_VALUE,
         header: fieldLabel,
         editVariant: fieldType,
         editSelectOptions: options,
@@ -79,7 +106,7 @@ export const SpecialFieldGrid = ({
           }
           return <span>{value}</span>;
         },
-        muiEditTextFieldProps: ({ cell, column, row, table }) => {
+        muiEditTextFieldProps: () => {
           return {
             required: true,
             InputProps: {
@@ -114,6 +141,15 @@ export const SpecialFieldGrid = ({
                   menuPortalTarget={document.body}
                   name={fieldName}
                   styles={{
+                    control: (base: CSSObjectWithLabel) => ({
+                      ...base,
+                      borderColor: errors.field_value
+                        ? Palette.error.main
+                        : base.borderColor,
+                      borderWidth: errors.field_value
+                        ? "2px"
+                        : base.borderWidth,
+                    }),
                     container: (base: CSSObjectWithLabel) => ({
                       ...base,
                       maxWidth: "284px", // 300 - padding of 16px
@@ -135,6 +171,7 @@ export const SpecialFieldGrid = ({
                   onBlur={onBlur}
                   name={fieldName}
                   defaultValue={row._valuesCache[column.id]}
+                  error={errors.field_value}
                 />
               </When>
             </>
@@ -142,19 +179,19 @@ export const SpecialFieldGrid = ({
         },
       },
       {
-        accessorKey: "active_from",
+        accessorKey: SPECIAL_FIELD_KEYS.ACTIVE_FROM,
         header: "From",
         editVariant: "text",
         size: 170,
-        Edit: ({ cell, column, row, table }) => {
+        Edit: ({ column, row, table }) => {
           return (
             <InLineDatePicker
-              cell={cell}
               column={column}
               row={row}
               table={table}
               isCreating={Boolean(tableState.creatingRow)}
-              name="active_from"
+              name={SPECIAL_FIELD_KEYS.ACTIVE_FROM}
+              error={errors.active_from}
             />
           );
         },
@@ -174,19 +211,52 @@ export const SpecialFieldGrid = ({
         },
       },
     ],
-    [fieldLabel, fieldName, options]
+    [fieldLabel, fieldName, options, errors]
   );
+
+  const validateRowInputs = (values: Record<SPECIAL_FIELD_KEY, any>) => {
+    const newErrors = {
+      field_value: !values.field_value,
+      active_from: !values.active_from,
+    };
+
+    const isError = Object.values(newErrors).some((v) => v);
+    setErrors(newErrors);
+
+    return !isError;
+  };
 
   const handleEditRowSave: MRT_TableOptions<SpecialField>["onEditingRowSave"] =
     async ({ values, table, row }) => {
-      await saveEntry(values, row.original.id);
-      table.setEditingRow(null); //exit editing mode
+      const isValid = validateRowInputs(values);
+      if (!isValid) {
+        return;
+      }
+
+      try {
+        await saveEntry(values, row.original.id);
+        table.setEditingRow(null); //exit editing mode
+        resetErrors();
+      } catch (error) {
+        console.log(error);
+      }
     };
 
   const handleCreateRowSave: MRT_TableOptions<SpecialField>["onCreatingRowSave"] =
-    async ({ values, table }) => {
-      await saveEntry(values);
-      table.setCreatingRow(null); //exit creating mode
+    async ({ values, table, row }) => {
+      const isValid = validateRowInputs(values);
+      console.log("isValid", isValid);
+      if (!isValid) {
+        return;
+      }
+
+      try {
+        await saveEntry(values);
+        table.setCreatingRow(null); //exit creating mode
+        resetErrors();
+      } catch (error) {
+        console.log(error);
+      }
     };
 
   const saveEntry = async (
@@ -240,6 +310,8 @@ export const SpecialFieldGrid = ({
         startIcon={<AddIcon fill={Palette.white} />}
         onClick={() => {
           table.setCreatingRow(true);
+          table.setEditingRow(null);
+          resetErrors();
         }}
       >
         <ETCaption2 bold>New Entry</ETCaption2>
@@ -261,6 +333,8 @@ export const SpecialFieldGrid = ({
       <IconButton
         onClick={() => {
           table.setEditingRow(row);
+          table.setCreatingRow(null);
+          resetErrors();
         }}
       >
         <EditIcon fill={Palette.primary.accent.main} />
@@ -282,9 +356,9 @@ export const SpecialFieldGrid = ({
     <Box
       sx={{
         ...Styles.flexStart,
-        padding: "24px",
         flexDirection: "column",
-        gap: "24px",
+        padding: "24px",
+        // gap: "24px",
         borderRadius: "4px",
         border: `2px solid ${Palette.neutral.bg.dark}`,
         background: Palette.white,
