@@ -1,33 +1,25 @@
 import React from "react";
-import { Grid, Box, IconButton } from "@mui/material";
+import { Grid } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ETFormLabel } from "../shared/index";
-import codeService, { Code } from "../../services/codeService";
-import { Project, defaultProject } from "../../models/project";
-import { Proponent } from "../../models/proponent";
-import { Region } from "../../models/region";
-import { Type } from "../../models/type";
-import { SubType } from "../../models/subtype";
-import subTypeService from "../../services/subTypeService";
-import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
-import { MasterContext } from "../shared/MasterContext";
-import projectService from "../../services/projectService/projectService";
-import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
-import { Palette } from "../../styles/theme";
-import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
-import { SpecialFieldGrid } from "../shared/specialField";
-import {
-  SpecialFieldEntityEnum,
-  SPECIAL_FIELDS,
-} from "../../constants/application-constant";
-import { Else, If, Then, When } from "react-if";
-import Icons from "../icons";
-import { IconProps } from "../icons/type";
+import { ETFormLabel } from "../../shared/index";
+import codeService, { Code } from "../../../services/codeService";
+import { Project, defaultProject } from "../../../models/project";
+import { Proponent } from "../../../models/proponent";
+import { Region } from "../../../models/region";
+import { Type } from "../../../models/type";
+import { SubType } from "../../../models/subtype";
+import subTypeService from "../../../services/subTypeService";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import { MasterContext } from "../../shared/MasterContext";
+import projectService from "../../../services/projectService/projectService";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import { Palette } from "../../../styles/theme";
+import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
-const LockClosedIcon: React.FC<IconProps> = Icons["LockClosedIcon"];
-const LockOpenIcon: React.FC<IconProps> = Icons["LockOpenIcon"];
+import { ProponentSpecialField } from "./ProponentSpecialField";
+import { ProjectNameSpecialField } from "./ProjectNameSpecialField";
 
 const schema = yup.object().shape({
   name: yup
@@ -74,9 +66,26 @@ export default function ProjectForm({ ...props }) {
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
   const [disabled, setDisabled] = React.useState<boolean>();
-  const [specialField, setSpecialField] = React.useState<string>("");
+
+  const [isProponentFieldLocked, setIsProponentFieldLocked] =
+    React.useState<boolean>(false);
+
+  const [isNameFieldLocked, setIsNameFieldLocked] =
+    React.useState<boolean>(false);
 
   const ctx = React.useContext(MasterContext);
+
+  const project = ctx?.item as Project;
+
+  const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
+
+  React.useEffect(() => {
+    ctx.setDialogProps({
+      saveButtonProps: {
+        disabled: isSpecialFieldLocked,
+      },
+    });
+  }, [isSpecialFieldLocked]);
 
   React.useEffect(() => {
     ctx.setFormId("project-form");
@@ -217,7 +226,7 @@ export default function ProjectForm({ ...props }) {
               padding: "24px 40px",
             }}
           >
-            <Grid item xs={6}>
+            {/* <Grid item xs={6}>
               <Box
                 sx={{
                   display: "flex",
@@ -253,8 +262,49 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 onBlur={onBlurProjectName}
               />
-            </Grid>
-            <Grid item xs={6}>
+            </Grid> */}
+            <ProjectNameSpecialField
+              id={project?.id}
+              onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
+              open={isNameFieldLocked}
+              onSave={() => {
+                //TODO: Uncomment this once the the PR that adds it is merged
+                // ctx.getById(workId);
+              }}
+              title={project?.name}
+            >
+              <ControlledTextField
+                name="name"
+                placeholder="Project Name"
+                disabled={disabled}
+                variant="outlined"
+                fullWidth
+                onBlur={onBlurProjectName}
+              />
+            </ProjectNameSpecialField>
+            <ProponentSpecialField
+              id={project?.id}
+              onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
+              open={isProponentFieldLocked}
+              onSave={() => {
+                //TODO: Uncomment this once the the PR that adds it is merged
+                // ctx.getById(workId);
+              }}
+              options={proponents || []}
+            >
+              <ControlledSelectV2
+                placeholder="Select"
+                disabled={disabled}
+                key={`proponent_select_${formValues.proponent_id}`}
+                helperText={errors?.proponent_id?.message?.toString()}
+                defaultValue={(ctx.item as Project)?.proponent_id}
+                options={proponents || []}
+                getOptionValue={(o: Proponent) => o?.id?.toString()}
+                getOptionLabel={(o: Proponent) => o.name}
+                {...register("proponent_id")}
+              ></ControlledSelectV2>
+            </ProponentSpecialField>
+            {/* <Grid item xs={6}>
               <Box
                 sx={{
                   display: "flex",
@@ -297,9 +347,10 @@ export default function ProjectForm({ ...props }) {
                 getOptionLabel={(o: Proponent) => o.name}
                 {...register("proponent_id")}
               ></ControlledSelectV2>
-            </Grid>
-            <Grid item xs={12}>
-              <When condition={Boolean(specialField)}>
+            </Grid> */}
+
+            {/* <Grid item xs={12}>
+              <When condition={isProponentFieldLocked || isWorkLeadFieldLocked}>
                 <SpecialFieldGrid
                   entity={SpecialFieldEntityEnum.PROJECT}
                   entity_id={(ctx.item as Project)?.id}
@@ -355,7 +406,7 @@ export default function ProjectForm({ ...props }) {
                   }}
                 />
               </When>
-            </Grid>
+            </Grid> */}
             <Grid item xs={6}>
               <ETFormLabel required>Type</ETFormLabel>
               <ControlledSelectV2
@@ -367,7 +418,7 @@ export default function ProjectForm({ ...props }) {
                 options={types || []}
                 getOptionValue={(o: Type) => o?.id?.toString()}
                 getOptionLabel={(o: Type) => o.name}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
                 {...register("type_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -381,7 +432,7 @@ export default function ProjectForm({ ...props }) {
                 options={subTypes || []}
                 getOptionValue={(o: SubType) => o?.id?.toString()}
                 getOptionLabel={(o: SubType) => o.name}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
                 {...register("sub_type_id")}
               ></ControlledSelectV2>
             </Grid>
@@ -392,7 +443,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 multiline
                 rows={4}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
           </Grid>
@@ -415,7 +466,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 multiline
                 rows={3}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -428,7 +479,7 @@ export default function ProjectForm({ ...props }) {
                 }}
                 placeholder="e.g. 22.2222"
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -441,7 +492,7 @@ export default function ProjectForm({ ...props }) {
                 }}
                 placeholder="e.g. -22.2222"
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -454,7 +505,7 @@ export default function ProjectForm({ ...props }) {
                 options={envRegions || []}
                 getOptionValue={(o: Region) => o?.id?.toString()}
                 getOptionLabel={(o: Region) => o?.name}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
                 {...register("region_id_env")}
               ></ControlledSelectV2>
             </Grid>
@@ -468,7 +519,7 @@ export default function ProjectForm({ ...props }) {
                 options={nrsRegions || []}
                 getOptionValue={(o: Region) => o?.id?.toString()}
                 getOptionLabel={(o: Region) => o?.name}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
                 {...register("region_id_flnro")}
               ></ControlledSelectV2>
             </Grid>
@@ -493,7 +544,7 @@ export default function ProjectForm({ ...props }) {
                   step: 1,
                 }}
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -501,7 +552,7 @@ export default function ProjectForm({ ...props }) {
               <ControlledTextField
                 name="epic_guid"
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -514,7 +565,7 @@ export default function ProjectForm({ ...props }) {
                   step: 1,
                 }}
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -527,7 +578,7 @@ export default function ProjectForm({ ...props }) {
                   step: 1,
                 }}
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -536,7 +587,7 @@ export default function ProjectForm({ ...props }) {
                 name="ea_certificate"
                 helperText
                 fullWidth
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid item xs={6}>
@@ -547,7 +598,7 @@ export default function ProjectForm({ ...props }) {
                 fullWidth
                 placeholder="EDRMS retrieval code"
                 inputEffects={(e) => e.target.value.toUpperCase()}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
             </Grid>
             <Grid
@@ -560,7 +611,7 @@ export default function ProjectForm({ ...props }) {
               <ControlledSwitch
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
                 name={"is_active"}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
               <ETFormLabel id="active">Active</ETFormLabel>
             </Grid>
@@ -568,7 +619,7 @@ export default function ProjectForm({ ...props }) {
               <ControlledSwitch
                 name={"is_project_closed"}
                 sx={{ paddingLeft: "0px", marginRight: "10px" }}
-                disabled={Boolean(specialField)}
+                disabled={isSpecialFieldLocked}
               />
               <ETFormLabel id="active">Closed</ETFormLabel>
             </Grid>
