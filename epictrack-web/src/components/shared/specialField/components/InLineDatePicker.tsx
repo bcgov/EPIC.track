@@ -1,5 +1,4 @@
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import React from "react";
 import dayjs from "dayjs";
 import {
   MRT_Cell,
@@ -7,25 +6,25 @@ import {
   MRT_Row,
   MRT_TableInstance,
 } from "material-react-table";
-import React from "react";
 import { SpecialField } from "../type";
+import TrackDatePicker from "../../DatePicker";
 
 interface Props {
-  cell: MRT_Cell<SpecialField>;
   column: MRT_Column<SpecialField>;
   row: MRT_Row<SpecialField>;
   table: MRT_TableInstance<SpecialField>;
   isCreating: boolean;
   name: string;
+  error?: boolean;
 }
 
 export const InLineDatePicker = ({
-  cell,
   column,
   row,
   table,
   isCreating,
   name,
+  error = false,
 }: Props) => {
   const onBlur = (newValue: any) => {
     row._valuesCache[column.id] = newValue;
@@ -39,24 +38,23 @@ export const InLineDatePicker = ({
   const value = dayjs(row._valuesCache[column.id]);
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DatePicker
-        value={value.isValid() ? value : null}
-        onChange={onBlur}
-        disableFuture
-        slotProps={{
-          textField: {
-            id: name,
-            name: name,
-            placeholder: "Today",
-            inputProps: {
-              sx: {
-                fontSize: "14px",
-              },
+    <TrackDatePicker
+      value={value.isValid() ? value : null}
+      onChange={onBlur}
+      disableFuture
+      slotProps={{
+        textField: {
+          id: name,
+          name: name,
+          placeholder: "Today",
+          inputProps: {
+            sx: {
+              fontSize: "14px",
             },
           },
-        }}
-      />
-    </LocalizationProvider>
+          error: error,
+        },
+      }}
+    />
   );
 };
