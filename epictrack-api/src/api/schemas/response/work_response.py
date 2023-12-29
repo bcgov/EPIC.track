@@ -49,9 +49,10 @@ class WorkResponseSchema(
         model = Work
         include_fk = True
         unknown = EXCLUDE
-        exclude=("created_by", "updated_at", "updated_by", "is_deleted")
+        exclude = ("created_by", "updated_at", "updated_by", "is_deleted")
 
-    project = fields.Nested(ProjectResponseSchema(exclude=("created_by", "updated_at", "updated_by", "is_deleted")), dump_only=True)
+    project = fields.Nested(
+        ProjectResponseSchema(exclude=("created_by", "updated_at", "updated_by", "is_deleted")), dump_only=True)
     ministry = fields.Nested(MinistrySchema, dump_only=True)
     eao_team = fields.Nested(EAOTeamSchema, dump_only=True)
     ea_act = fields.Nested(EAActSchema, dump_only=True)

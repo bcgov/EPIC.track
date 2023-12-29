@@ -10,7 +10,7 @@ const WorkDetails = () => {
   const [phaseInfo, setPhaseInfo] = useState<any>({});
   const { work, workPhases } = useContext(WorkplanContext);
 
-  const getCurrentAndNextPhaseInfo = () => {
+  const getNextPhaseInfo = () => {
     workPhases.map((phase) => {
       if (phase?.work_phase?.id === work?.current_work_phase_id) {
         setPhaseInfo(phase);
@@ -19,7 +19,7 @@ const WorkDetails = () => {
   };
 
   useEffect(() => {
-    getCurrentAndNextPhaseInfo();
+    getNextPhaseInfo();
   }, []);
 
   return (
