@@ -1,29 +1,16 @@
 import React from "react";
-import Select, { CSSObjectWithLabel } from "react-select";
+import Select, { CSSObjectWithLabel, Props } from "react-select";
 import { FormHelperText } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import { OptionType } from "../filterSelect/type";
 
-type SelectProps = {
-  options: OptionType[];
-  getOptionLabel: (option: any) => string;
-  getOptionValue: (option: any) => string;
-  isMulti?: boolean;
-  disabled?: boolean;
-  value: any;
-  onChange: (val: any) => void;
+type TrackSelectProps = Props & {
   error?: boolean;
   helperText?: string;
+  disabled?: boolean;
 };
 
-const TrackSelect: React.FC<SelectProps> = ({
-  options,
-  getOptionLabel,
-  getOptionValue,
-  isMulti,
+const TrackSelect: React.FC<TrackSelectProps> = ({
   disabled,
-  value,
-  onChange,
   error = false,
   helperText = "",
   ...rest
@@ -31,28 +18,10 @@ const TrackSelect: React.FC<SelectProps> = ({
   return (
     <>
       <Select
-        options={options}
         menuPosition="fixed"
-        getOptionValue={getOptionValue}
-        getOptionLabel={getOptionLabel}
         isSearchable={true}
         isDisabled={!!disabled}
         isClearable={true}
-        value={options.filter((c) => {
-          if (isMulti && value) {
-            return (value as any[])
-              .map((p) => p.toString())
-              .includes(getOptionValue(c));
-          }
-          return getOptionValue(c) === value?.toString();
-        })}
-        isMulti={isMulti}
-        onChange={(val: any) => {
-          let v;
-          if (isMulti) v = val.map((v: any) => getOptionValue(v));
-          else v = getOptionValue(val);
-          onChange(v);
-        }}
         menuPortalTarget={document.body}
         styles={{
           control: (baseStyles, state) => {
