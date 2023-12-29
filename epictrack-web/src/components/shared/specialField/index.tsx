@@ -16,6 +16,7 @@ import specialFieldService from "../../../services/specialFieldService";
 import { dateUtils } from "../../../utils";
 import { InLineDatePicker } from "./components/InLineDatePicker";
 import ReactSelect, { CSSObjectWithLabel } from "react-select";
+import TrackSelect from "../TrackSelect";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 const EditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -130,36 +131,16 @@ export const SpecialFieldGrid = ({
           return (
             <>
               <When condition={fieldType === "select"}>
-                <ReactSelect
+                <TrackSelect
                   options={options}
                   placeholder={fieldLabel}
                   filterAppliedCallback={() => {
                     return;
                   }}
-                  menuPortalTarget={document.body}
                   name={fieldName}
-                  styles={{
-                    control: (base: CSSObjectWithLabel) => ({
-                      ...base,
-                      borderColor: errors.field_value
-                        ? Palette.error.main
-                        : base.borderColor,
-                      borderWidth: errors.field_value
-                        ? "2px"
-                        : base.borderWidth,
-                    }),
-                    container: (base: CSSObjectWithLabel) => ({
-                      ...base,
-                      maxWidth: "284px", // 300 - padding of 16px
-                    }),
-                    menuPortal: (base: CSSObjectWithLabel) => ({
-                      ...base,
-                      zIndex: 99999,
-                      fontSize: "14px",
-                    }),
-                  }}
                   defaultValue={value || ""}
                   onChange={onBlur}
+                  error={errors.field_value}
                 />
               </When>
               <When condition={fieldType === "text"}>
@@ -218,6 +199,7 @@ export const SpecialFieldGrid = ({
       active_from: !values.active_from,
     };
 
+    console.log(newErrors);
     const isError = Object.values(newErrors).some((v) => v);
     setErrors(newErrors);
 
@@ -242,6 +224,7 @@ export const SpecialFieldGrid = ({
 
   const handleCreateRowSave: MRT_TableOptions<SpecialField>["onCreatingRowSave"] =
     async ({ values, table, row }) => {
+      console.log(values);
       const isValid = validateRowInputs(values);
       console.log("isValid", isValid);
       if (!isValid) {
