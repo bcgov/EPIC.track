@@ -199,7 +199,6 @@ export const SpecialFieldGrid = ({
       active_from: !values.active_from,
     };
 
-    console.log(newErrors);
     const isError = Object.values(newErrors).some((v) => v);
     setErrors(newErrors);
 
@@ -224,9 +223,7 @@ export const SpecialFieldGrid = ({
 
   const handleCreateRowSave: MRT_TableOptions<SpecialField>["onCreatingRowSave"] =
     async ({ values, table, row }) => {
-      console.log(values);
       const isValid = validateRowInputs(values);
-      console.log("isValid", isValid);
       if (!isValid) {
         return;
       }
