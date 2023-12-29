@@ -4,6 +4,7 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { DATE_FORMAT } from "../../../../constants/application-constant";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { dateUtils } from "../../../../utils";
+import TrackDatePicker from "../../../shared/DatePicker";
 
 const ReportHeader = ({ ...props }) => {
   const STALE_DATE_BANNER =
@@ -21,19 +22,16 @@ const ReportHeader = ({ ...props }) => {
           <FormLabel>Report Date</FormLabel>
         </Grid>
         <Grid item sm={2}>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              format={DATE_FORMAT}
-              onChange={(dateVal: any) =>
-                props.setReportDate(dateUtils.formatDate(dateVal.$d))
-              }
-              slotProps={{
-                textField: {
-                  id: "ReportDate",
-                },
-              }}
-            />
-          </LocalizationProvider>
+          <TrackDatePicker
+            onChange={(dateVal: any) =>
+              props.setReportDate(dateUtils.formatDate(dateVal.$d))
+            }
+            slotProps={{
+              textField: {
+                id: "ReportDate",
+              },
+            }}
+          />
         </Grid>
         <Grid item sm={4}></Grid>
         <Grid item sm={2}>

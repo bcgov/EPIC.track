@@ -1,12 +1,9 @@
 import React, { useState, useContext, useRef, useEffect, useMemo } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import Moment from "moment";
-import { DATE_FORMAT } from "../../../constants/application-constant";
-import { Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import { TaskEvent, statusOptions } from "../../../models/taskEvent";
 import dayjs from "dayjs";
@@ -25,6 +22,9 @@ import { EVENT_TYPE } from "../phase/type";
 import { EventContext } from "../event/EventContext";
 import ControlledMultiSelect from "../../shared/controlledInputComponents/ControlledMultiSelect";
 import { getErrorMessage } from "../../../utils/axiosUtils";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import TrackDatePicker from "../../shared/DatePicker";
+import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -66,7 +66,6 @@ const TaskForm = ({
     handleSubmit,
     formState: { errors },
     reset,
-    control,
     setValue,
   } = methods;
 
@@ -219,57 +218,34 @@ const TaskForm = ({
           >
             <Grid item xs={12}>
               <ETFormLabel required>Title</ETFormLabel>
-              <TextField
-                fullWidth
+              <ControlledTextField
+                name="name"
                 placeholder="Title"
                 defaultValue={taskEvent?.name}
-                error={!!errors?.name?.message}
-                helperText={errors?.name?.message?.toString()}
-                {...register("name")}
+                fullWidth
               />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Start Date</ETFormLabel>
-              <Controller
+              <ControlledDatePicker
                 name="start_date"
-                control={control}
                 defaultValue={Moment(taskEvent?.start_date).format()}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      format={DATE_FORMAT}
-                      slotProps={{
-                        textField: {
-                          id: "start_date",
-                          fullWidth: true,
-                          inputRef: startDateRef,
-                          error: error ? true : false,
-                          helperText: error?.message,
-                          placeholder: "MM-DD-YYYY",
-                        },
-                        ...register("start_date"),
-                      }}
-                      value={dayjs(value)}
-                      onChange={(event) => {
-                        onChange(event);
-                      }}
-                      defaultValue={dayjs(
-                        taskEvent?.start_date ? taskEvent?.start_date : ""
-                      )}
-                      sx={{ display: "block" }}
-                    />
-                  </LocalizationProvider>
-                )}
+                datePickerProps={{
+                  onDateChange: (event: any, defaultOnChange: any) => {
+                    defaultOnChange(event);
+                  },
+                }}
+                datePickerSlotProps={{
+                  inputRef: startDateRef,
+                }}
               />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Number of Days</ETFormLabel>
-              <TextField
-                fullWidth
+              <ControlledTextField
+                name="number_of_days"
                 defaultValue={taskEvent?.number_of_days}
+                fullWidth
                 InputProps={{
                   inputProps: {
                     min: 0,
@@ -277,49 +253,35 @@ const TaskForm = ({
                 }}
                 inputRef={numberOfDaysRef}
                 type="number"
-                {...register("number_of_days")}
                 onChange={daysOnChangeHandler}
               />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>End Date</ETFormLabel>
-              <Controller
-                name="start_date"
-                control={control}
-                render={({
-                  field: { onChange, value },
-                  fieldState: { error },
-                }) => (
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      format={DATE_FORMAT}
-                      slotProps={{
-                        textField: {
-                          id: "start_date",
-                          fullWidth: true,
-                          inputRef: endDateRef,
-                          error: error ? true : false,
-                          helperText: error?.message,
-                          placeholder: "MM-DD-YYYY",
-                        },
-                      }}
-                      value={dayjs(
-                        dateUtils
-                          .add(
-                            taskEvent?.start_date || "",
-                            taskEvent?.number_of_days || 0,
-                            "days"
-                          )
-                          .toString()
-                      )}
-                      onChange={(event: any) => {
-                        const d = event ? event["$d"] : null;
-                        endDateChangeHandler(d);
-                      }}
-                      sx={{ display: "block" }}
-                    />
-                  </LocalizationProvider>
+              <TrackDatePicker
+                slotProps={{
+                  textField: {
+                    id: "end_date",
+                    fullWidth: true,
+                    inputRef: endDateRef,
+                    placeholder: "MM-DD-YYYY",
+                    error: !!errors["start_date"],
+                    helperText: errors["start_date"]?.message,
+                  },
+                }}
+                value={dayjs(
+                  dateUtils
+                    .add(
+                      taskEvent?.start_date || "",
+                      taskEvent?.number_of_days || 0,
+                      "days"
+                    )
+                    .toString()
                 )}
+                onChange={(event: any) => {
+                  const d = event ? event["$d"] : null;
+                  endDateChangeHandler(d);
+                }}
               />
             </Grid>
             <Grid item xs={5}>
