@@ -35,8 +35,18 @@ export interface Work extends MasterBase {
   decision_by_id: number;
   decision_maker_position_id: number;
   start_date_locked: boolean;
-
-  project: ListType & { description: string };
+  created_at: string;
+  project: ListType & {
+    created_at: string;
+    description: string;
+    address: string;
+    abbreviation: string;
+    type: ListType & { name: string };
+    sub_type: ListType & { name: string };
+    proponent: ListType & { name: string };
+    region_env: ListType & { name: string };
+    region_flnro: ListType & { name: string };
+  };
   ministry: Ministry;
   ea_act: ListType;
   eao_team: ListType;
