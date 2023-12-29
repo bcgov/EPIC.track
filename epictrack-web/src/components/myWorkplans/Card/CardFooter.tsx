@@ -89,7 +89,12 @@ const CardFooter = ({ workplan }: CardProps) => {
             border: "2px solid var(--Primary-Main, #036)",
             ":hover": {
               borderRadius: "4px",
-              border: "2px solid var(--Primary-Main, #036)",
+              border: "var(--Primary-Main, #036);",
+              backgroundColor: Palette.primary.main,
+              color: Palette.white,
+            },
+            ":active": {
+              backgroundColor: Palette.primary.dark,
             },
           }}
           onClick={() => navigate(`/work-plan?work_id=${workplan.id}`)}
