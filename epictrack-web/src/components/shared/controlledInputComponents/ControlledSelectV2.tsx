@@ -41,8 +41,9 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
       control={control}
       name={name}
       defaultValue={defaultValues?.[name] || ""}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const { onChange, value } = field;
+        const { error } = fieldState;
         return (
           <TrackSelect
             placeholder={placeholder}
@@ -67,8 +68,8 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               if (onHandleChange !== undefined) onHandleChange(v);
               return onChange(v);
             }}
-            error={!!errors[name]}
-            helperText={String(errors[name]?.message) || helperText}
+            error={!!error}
+            helperText={String(error?.message) || helperText}
           />
         );
       }}

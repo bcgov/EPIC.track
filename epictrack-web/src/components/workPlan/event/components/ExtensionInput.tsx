@@ -11,6 +11,7 @@ import { dateUtils } from "../../../../utils";
 import { SyntheticEvent } from "react-draft-wysiwyg";
 import { ETFormLabel } from "../../../shared";
 import ExtensionSuspensionInput from "./ExtensionSuspensionInput";
+import ControlledDatePicker from "../../../shared/controlledInputComponents/ControlledDatePicker";
 
 interface ExtensionInputProps {
   isFormFieldsLocked: boolean;
@@ -106,34 +107,19 @@ const ExtensionInput = (props: ExtensionInputProps) => {
       </Grid>
       <Grid item xs={6}>
         <ETFormLabel required>End Date</ETFormLabel>
-        <Controller
+        <ControlledDatePicker
           name="phase_end_date"
-          control={control}
-          render={({ field: { onChange, value }, fieldState: { error } }) => (
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-                disabled={props.isFormFieldsLocked}
-                format={DATE_FORMAT}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    inputRef: endDateRef,
-                    error: error ? true : false,
-                    helperText: error?.message,
-                    placeholder: "MM-DD-YYYY",
-                  },
-                  ...register("phase_end_date"),
-                }}
-                value={dayjs(value)}
-                onChange={(event: any) => {
-                  const d = event ? event["$d"] : null;
-                  onChange(d);
-                  onEndDateChange(d);
-                }}
-                sx={{ display: "block" }}
-              />
-            </LocalizationProvider>
-          )}
+          datePickerProps={{
+            disabled: props.isFormFieldsLocked,
+            onDateChange: (event: any, defaultOnChange: any) => {
+              const d = event ? event["$d"] : null;
+              defaultOnChange(d);
+              onEndDateChange(d);
+            },
+          }}
+          datePickerSlotProps={{
+            inputRef: endDateRef,
+          }}
         />
       </Grid>
       <ExtensionSuspensionInput isFormFieldsLocked={props.isFormFieldsLocked} />
