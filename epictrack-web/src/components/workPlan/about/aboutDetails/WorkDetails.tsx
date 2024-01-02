@@ -1,5 +1,5 @@
 import { Divider, Grid } from "@mui/material";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { ETCaption1, ETCaption2, GrayBox } from "../../../shared";
 import { Palette } from "../../../../styles/theme";
@@ -9,7 +9,7 @@ import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 const WorkDetails = () => {
   const { work, workPhases } = useContext(WorkplanContext);
 
-  const currentWorkPhase = workPhases.find(
+  const currentWorkPhase = workPhases?.find(
     (phase) => phase.work_phase.id === work?.current_work_phase_id
   );
 
