@@ -6,7 +6,7 @@ import Moment from "moment";
 import { Grid } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import { TaskEvent, statusOptions } from "../../../models/taskEvent";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "../../../styles/theme";
 import { Staff } from "../../../models/staff";
@@ -30,11 +30,11 @@ const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
   start_date: yup.string().required("Please select start date"),
   status: yup.string().required("Please select status"),
+  number_of_days: yup.number().required("Please enter number of days"),
+  responsibility_ids: yup.array().required("Please select responsibility"),
+  assignee_ids: yup.array().required("Please select assignee"),
 });
-interface NumberOfDaysChangeProps {
-  numberOfDays?: number | undefined;
-  startDate?: string | undefined;
-}
+
 interface TaskFormProps {
   onSave: () => void;
   taskEvent?: TaskEvent;
@@ -48,6 +48,7 @@ const TaskForm = ({
   const [assignees, setAssignees] = useState<Staff[]>([]);
   const [responsibilities, setResponsibilities] = useState<ListType[]>([]);
   const [notes, setNotes] = useState("");
+  const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const endDateRef = useRef();
   const startDateRef = useRef();
   const numberOfDaysRef = useRef();
@@ -67,6 +68,7 @@ const TaskForm = ({
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = methods;
 
   useEffect(() => {
@@ -79,10 +81,6 @@ const TaskForm = ({
 
   useEffect(() => {
     reset(taskEvent);
-    daysOnChangeHandler({
-      numberOfDays: taskEvent?.number_of_days,
-      startDate: taskEvent?.start_date,
-    });
     if (taskEvent) {
       setNotes(taskEvent?.notes);
     }
@@ -165,34 +163,31 @@ const TaskForm = ({
     }
   };
 
-  const daysOnChangeHandler = (params: NumberOfDaysChangeProps | any = {}) => {
-    let number_of_days = 0;
-    if (numberOfDaysRef?.current as any) {
-      number_of_days =
-        params.numberOfDays ||
-        Number((numberOfDaysRef?.current as any)["value"]);
-    }
-    if (endDateRef?.current as any) {
-      (endDateRef?.current as any)["value"] = dateUtils.formatDate(
-        dateUtils
-          .add(
-            params.startDate || String((startDateRef?.current as any)["value"]),
-            number_of_days,
-            "days"
-          )
-          .toISOString()
-      );
-    }
-  };
+  const number_of_days = watch("number_of_days");
+  const startDate = watch("start_date");
 
-  const endDateChangeHandler = (endDate: any) => {
-    if (startDateRef?.current as any) {
-      const startDate = (startDateRef?.current as any)["value"];
-      const dateDiff = dateUtils.diff(endDate, startDate, "days");
-      (numberOfDaysRef.current as any)["value"] = dateDiff;
-      setValue("number_of_days", dateDiff);
-    }
-  };
+  useEffect(() => {
+    const handleNDaysChange = () => {
+      const endDate = dayjs(
+        dateUtils.add(startDate, number_of_days, "days").toString()
+      );
+      setEndDate(endDate);
+    };
+
+    handleNDaysChange();
+  }, [number_of_days]);
+
+  useEffect(() => {
+    const handleEndDateChange = () => {
+      if (!endDate) {
+        return;
+      }
+      const startDate = dayjs(watch("start_date"));
+      const numberOfDays = endDate.diff(startDate, "day");
+      setValue("number_of_days", numberOfDays);
+    };
+    handleEndDateChange();
+  }, [endDate]);
 
   return (
     <>
@@ -244,7 +239,7 @@ const TaskForm = ({
               <ETFormLabel>Number of Days</ETFormLabel>
               <ControlledTextField
                 name="number_of_days"
-                defaultValue={taskEvent?.number_of_days}
+                defaultValue={taskEvent?.number_of_days || 0}
                 fullWidth
                 InputProps={{
                   inputProps: {
@@ -253,7 +248,6 @@ const TaskForm = ({
                 }}
                 inputRef={numberOfDaysRef}
                 type="number"
-                onChange={daysOnChangeHandler}
               />
             </Grid>
             <Grid item xs={4}>
@@ -269,19 +263,12 @@ const TaskForm = ({
                     helperText: errors["start_date"]?.message,
                   },
                 }}
-                value={dayjs(
-                  dateUtils
-                    .add(
-                      taskEvent?.start_date || "",
-                      taskEvent?.number_of_days || 0,
-                      "days"
-                    )
-                    .toString()
-                )}
-                onChange={(event: any) => {
-                  const d = event ? event["$d"] : null;
-                  endDateChangeHandler(d);
+                value={endDate}
+                onChange={(value: any) => {
+                  const newValue = dayjs(value["$d"]);
+                  setEndDate(newValue);
                 }}
+                minDate={dayjs(startDate)}
               />
             </Grid>
             <Grid item xs={5}>
