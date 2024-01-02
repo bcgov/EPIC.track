@@ -61,13 +61,13 @@ const WorkDetails = () => {
 
         <Grid item xs={6}>
           <ETCaption1 color={Palette.neutral.dark}>
-            {currentWorkPhase?.current_milestone}
+            {currentWorkPhase?.current_milestone ?? "-"}
           </ETCaption1>
         </Grid>
 
         <Grid item xs={6}>
           <ETCaption1 color={Palette.neutral.dark}>
-            {currentWorkPhase?.next_milestone}
+            {currentWorkPhase?.next_milestone ?? "-"}
           </ETCaption1>
         </Grid>
         <Grid item xs={4}>
