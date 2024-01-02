@@ -80,7 +80,6 @@ const TaskForm = ({
   }, [ctx.work?.id]);
 
   useEffect(() => {
-    console.log(taskEvent);
     reset(taskEvent);
     if (taskEvent) {
       setNotes(taskEvent?.notes);
