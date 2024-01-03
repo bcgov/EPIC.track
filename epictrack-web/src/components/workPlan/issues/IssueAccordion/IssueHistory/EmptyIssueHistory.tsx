@@ -18,7 +18,7 @@ export const EmptyIssueHistory = () => {
         <IssueHistoryIcon />
       </span>
 
-      <ETCaption2 bold>Your Status History will appear here</ETCaption2>
+      <ETCaption2 bold>Your Issue History will appear here</ETCaption2>
       <ETCaption3 color={Palette.neutral.main}>
         Adding New Update will create your Status History
       </ETCaption3>
