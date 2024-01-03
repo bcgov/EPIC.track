@@ -31,7 +31,15 @@ export const ThirtySixtyNinety = () => {
   );
 
   const issueUpdates = activeApprovedHighprioIssues
-    .map((issue) => issue.updates.find((update) => update.is_approved))
+    .map((issue) => {
+      const update = issue.updates.find((update) => update.is_approved);
+      if (!update) return null;
+
+      return {
+        issueTitle: issue.title,
+        ...update,
+      };
+    })
     .filter((update) => Boolean(update));
 
   const latestIssue = activeApprovedHighprioIssues?.[0];
@@ -89,9 +97,20 @@ export const ThirtySixtyNinety = () => {
               <Then>
                 <Stack spacing={2} direction="column">
                   {issueUpdates.map((issueUpdate) => (
-                    <ETPreviewText color={Palette.neutral.dark}>
-                      {issueUpdate?.description}
-                    </ETPreviewText>
+                    <>
+                      <ETPreviewText
+                        key={`title-${issueUpdate?.id}`}
+                        color={Palette.neutral.dark}
+                      >
+                        {issueUpdate?.issueTitle}
+                      </ETPreviewText>
+                      <ETPreviewText
+                        key={`description-${issueUpdate?.id}`}
+                        color={Palette.neutral.dark}
+                      >
+                        {issueUpdate?.description}
+                      </ETPreviewText>
+                    </>
                   ))}
                 </Stack>
               </Then>
