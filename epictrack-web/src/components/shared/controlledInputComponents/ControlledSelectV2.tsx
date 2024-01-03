@@ -1,8 +1,6 @@
 import React from "react";
-import { FormHelperText } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
-import Select, { CSSObjectWithLabel, Props, ThemeConfig } from "react-select";
-import { Palette } from "../../../styles/theme";
+import TrackSelect from "../TrackSelect";
 
 type IFormInputProps = {
   placeholder?: string;
@@ -21,22 +19,19 @@ type IFormInputProps = {
 const ControlledSelectV2: React.ForwardRefRenderFunction<
   HTMLDivElement,
   IFormInputProps
-> = (
-  {
-    placeholder,
-    name,
-    options,
-    getOptionLabel,
-    getOptionValue,
-    isMulti,
-    disabled,
-    helperText,
-    onHandleChange,
-    // menuPortalTarget,
-    ...otherProps
-  },
-  ref
-) => {
+> = ({
+  placeholder,
+  name,
+  options,
+  getOptionLabel,
+  getOptionValue,
+  isMulti,
+  disabled,
+  helperText,
+  onHandleChange,
+  // menuPortalTarget,
+  ...otherProps
+}) => {
   const {
     control,
     formState: { errors, defaultValues },
@@ -46,75 +41,36 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
       control={control}
       name={name}
       defaultValue={defaultValues?.[name] || ""}
-      render={({ field }) => {
-        const { onChange, value, ref } = field;
+      render={({ field, fieldState }) => {
+        const { onChange, value } = field;
+        const { error } = fieldState;
         return (
-          <>
-            <Select
-              placeholder={placeholder}
-              {...field}
-              ref={ref}
-              {...otherProps}
-              options={options}
-              menuPosition="fixed"
-              getOptionValue={getOptionValue}
-              getOptionLabel={getOptionLabel}
-              isSearchable={true}
-              isDisabled={!!disabled}
-              isClearable={true}
-              value={options.filter((c) => {
-                if (isMulti && value) {
-                  return (value as any[])
-                    .map((p) => p.toString())
-                    .includes(getOptionValue(c));
-                }
-                return getOptionValue(c) === value?.toString();
-              })}
-              isMulti={isMulti}
-              onChange={(val: any) => {
-                let v;
-                if (isMulti) v = val.map((v: any) => getOptionValue(v));
-                else v = getOptionValue(val);
-                if (onHandleChange !== undefined) onHandleChange(v);
-                return onChange(v);
-              }}
-              menuPortalTarget={document.body}
-              styles={{
-                control: (baseStyles, state) => {
-                  return {
-                    ...baseStyles,
-                    borderColor: !!errors[name]
-                      ? "#d32f2f"
-                      : Palette.neutral.accent.light,
-                    borderWidth: "2px",
-                    fontSize: "16px",
-                    lineHeight: "24px",
-                    backgroundColor: !!disabled
-                      ? Palette.neutral.bg.dark
-                      : Palette.white,
-                    fontWeight: "400",
-                    "&:hover": {
-                      borderColor: Palette.primary.accent.light,
-                    },
-                  };
-                },
-                menuPortal: (base: CSSObjectWithLabel) => ({
-                  ...base,
-                  zIndex: 99999,
-                  fontSize: "1rem",
-                }),
-              }}
-            ></Select>
-            {helperText && (
-              <FormHelperText
-                error={true}
-                className="MuiFormHelperText-sizeSmall"
-                style={{ marginInline: "14px" }}
-              >
-                {String(errors[name]?.message || "")}
-              </FormHelperText>
-            )}
-          </>
+          <TrackSelect
+            placeholder={placeholder}
+            {...field}
+            {...otherProps}
+            isMulti={isMulti}
+            options={options}
+            getOptionValue={getOptionValue}
+            getOptionLabel={getOptionLabel}
+            value={options.filter((c) => {
+              if (isMulti && value) {
+                return (value as any[])
+                  .map((p) => p.toString())
+                  .includes(getOptionValue(c));
+              }
+              return getOptionValue(c) === value?.toString();
+            })}
+            onChange={(val: any) => {
+              let v;
+              if (isMulti) v = val.map((v: any) => getOptionValue(v));
+              else v = getOptionValue(val);
+              if (onHandleChange !== undefined) onHandleChange(v);
+              return onChange(v);
+            }}
+            error={!!error}
+            helperText={String(error?.message) || helperText}
+          />
         );
       }}
     />

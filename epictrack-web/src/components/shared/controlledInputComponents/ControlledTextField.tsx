@@ -4,6 +4,7 @@ import { Controller, useFormContext } from "react-hook-form";
 
 type IFormInputProps = {
   name: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   inputEffects?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => string;
@@ -12,6 +13,7 @@ type IFormInputProps = {
 const ControlledTextField: FC<IFormInputProps> = ({
   name,
   inputEffects,
+  onChange: onInputChange,
   ...otherProps
 }) => {
   const {
@@ -29,6 +31,9 @@ const ControlledTextField: FC<IFormInputProps> = ({
           {...field}
           {...otherProps}
           onChange={(e) => {
+            if (onInputChange) {
+              onInputChange(e);
+            }
             if (inputEffects) {
               e.target.value = inputEffects(e);
             }

@@ -46,7 +46,6 @@ const CardList = () => {
       >
         <TriggerOnViewed
           callbackFn={() => {
-            console.log("triggered");
             setLoadingMoreWorkplans(true);
           }}
         />

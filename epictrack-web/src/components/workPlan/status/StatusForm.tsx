@@ -1,21 +1,21 @@
 import React, { useContext, useRef } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Grid, TextField } from "@mui/material";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
-import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
-import {
-  DATE_FORMAT,
-  EARLIEST_WORK_DATE,
-} from "../../../constants/application-constant";
+import { EARLIEST_WORK_DATE } from "../../../constants/application-constant";
 import Moment from "moment";
 import { StatusContext } from "./StatusContext";
 import { WorkplanContext } from "../WorkPlanContext";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
-const schema = yup.object().shape({});
+const schema = yup.object().shape({
+  posted_date: yup.string().required("Date is required"),
+  description: yup.string().required("Description is required"),
+});
 const CHARACTER_LIMIT = 500;
 
 const StatusForm = () => {
@@ -53,13 +53,7 @@ const StatusForm = () => {
     mode: "onBlur",
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    control,
-  } = methods;
+  const { handleSubmit, reset } = methods;
 
   const handleDescriptionChange = (event: any) => {
     setDescription(event.target.value);
@@ -84,40 +78,18 @@ const StatusForm = () => {
         }}
         onSubmit={handleSubmit(onSubmitHandler)}
       >
-        <Grid item xs={4}>
+        <Grid item xs={5}>
           <ETFormLabel required>Date</ETFormLabel>
-          <Controller
+          <ControlledDatePicker
             name="posted_date"
-            control={control}
-            defaultValue={Moment(status?.posted_date).format()}
-            render={({ field: { onChange, value }, fieldState: { error } }) => (
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  minDate={postedDateMin}
-                  maxDate={postedDateMax}
-                  format={DATE_FORMAT}
-                  slotProps={{
-                    textField: {
-                      id: "start_date",
-                      fullWidth: true,
-                      inputRef: startDateRef,
-                      error: error ? true : false,
-                      helperText: error?.message,
-                      placeholder: "MM-DD-YYYY",
-                    },
-                    ...register("posted_date"),
-                  }}
-                  value={dayjs(value)}
-                  onChange={(event) => {
-                    onChange(event);
-                  }}
-                  defaultValue={dayjs(
-                    status?.posted_date ? status?.posted_date : ""
-                  )}
-                  sx={{ display: "block" }}
-                />
-              </LocalizationProvider>
-            )}
+            defaultValue={dayjs(status?.posted_date ? status?.posted_date : "")}
+            datePickerProps={{
+              minDate: postedDateMin,
+              maxDate: postedDateMax,
+            }}
+            datePickerSlotProps={{
+              inputRef: startDateRef,
+            }}
           />
         </Grid>
         <Grid item xs={12}>
@@ -128,14 +100,12 @@ const StatusForm = () => {
           >
             Description
           </ETFormLabelWithCharacterLimit>
-          <TextField
-            fullWidth
+          <ControlledTextField
+            name="description"
             multiline
             rows={4}
-            {...register("description")}
-            error={!!errors?.description?.message}
-            helperText={errors?.description?.message?.toString()}
             onChange={handleDescriptionChange}
+            fullWidth
             inputProps={{
               maxLength: CHARACTER_LIMIT,
             }}

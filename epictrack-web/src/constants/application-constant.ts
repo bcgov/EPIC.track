@@ -76,6 +76,17 @@ export const FN_RESOURCES = [
   },
 ];
 
+export const ABOUT_RESOURCES = [
+  {
+    title: "Link to eGuide",
+    url: "https://intranet.gov.bc.ca/eao/our-work/eguide-2018",
+  },
+  {
+    title: "Link to EA Act (2018)",
+    url: "https://www.bclaws.gov.bc.ca/civix/document/id/complete/statreg/18051",
+  },
+];
+
 export const GROUPS = {
   SUPER_USER: "Super User",
   DEVELOPER: "Developer",
