@@ -231,8 +231,7 @@ export default function ProjectForm({ ...props }) {
               onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
               open={isNameFieldLocked}
               onSave={() => {
-                //TODO: Uncomment this once the the PR that adds it is merged
-                // ctx.getById(workId);
+                ctx.getById(project?.id.toString());
               }}
               title={project?.name}
             >
@@ -250,8 +249,7 @@ export default function ProjectForm({ ...props }) {
               onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
               open={isProponentFieldLocked}
               onSave={() => {
-                //TODO: Uncomment this once the the PR that adds it is merged
-                // ctx.getById(workId);
+                ctx.getById(project?.id.toString());
               }}
               options={proponents || []}
             >

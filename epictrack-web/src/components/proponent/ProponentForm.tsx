@@ -20,6 +20,7 @@ import Icons from "../icons";
 import { IconProps } from "../icons/type";
 import { Palette } from "../../styles/theme";
 import { SpecialFieldGrid } from "../shared/specialField";
+import { ProponentNameSpecialField } from "./ProponentNameSpecialField";
 
 const schema = yup.object().shape({
   name: yup
@@ -49,6 +50,8 @@ export default function ProponentForm({ ...props }) {
   const [disabled, setDisabled] = React.useState<boolean>();
   const ctx = React.useContext(MasterContext);
   const [specialField, setSpecialField] = React.useState<string>("");
+  const [isNameFieldLocked, setIsNameFieldLocked] =
+    React.useState<boolean>(false);
 
   React.useEffect(() => {
     ctx.setFormId("proponent-form");
@@ -62,6 +65,8 @@ export default function ProponentForm({ ...props }) {
   React.useEffect(() => {
     ctx.setId(props.proponentId);
   }, [ctx.id]);
+
+  const proponent = ctx?.item as Proponent;
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -93,6 +98,15 @@ export default function ProponentForm({ ...props }) {
       reset();
     });
   };
+
+  React.useEffect(() => {
+    ctx.setDialogProps({
+      saveButtonProps: {
+        disabled: isNameFieldLocked,
+      },
+    });
+  }, [isNameFieldLocked]);
+
   return (
     <>
       <FormProvider {...methods}>
@@ -103,46 +117,25 @@ export default function ProponentForm({ ...props }) {
           spacing={2}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
-          <Grid item xs={6}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                paddingTop: "3px",
-              }}
-            >
-              <ETFormLabel required>Name</ETFormLabel>
-              <When condition={disabled}>
-                <If condition={specialField === SPECIAL_FIELDS.PROPONENT.NAME}>
-                  <Then>
-                    <IconButton onClick={() => setSpecialField("")}>
-                      <LockOpenIcon fill={Palette.primary.accent.main} />
-                    </IconButton>
-                  </Then>
-                  <Else>
-                    <IconButton
-                      onClick={() =>
-                        setSpecialField(SPECIAL_FIELDS.PROPONENT.NAME)
-                      }
-                    >
-                      <LockClosedIcon fill={Palette.primary.accent.main} />
-                    </IconButton>
-                  </Else>
-                </If>
-              </When>
-            </Box>
-            <Box sx={{ paddingTop: "4px" }}>
-              <TextField
-                variant="outlined"
-                disabled={disabled}
-                placeholder="Proponent Name"
-                fullWidth
-                error={!!errors?.name?.message}
-                helperText={errors?.name?.message?.toString()}
-                {...register("name")}
-              />
-            </Box>
-          </Grid>
+          <ProponentNameSpecialField
+            id={proponent?.id}
+            onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
+            open={isNameFieldLocked}
+            onSave={() => {
+              ctx.getById(proponent?.id.toString());
+            }}
+            title={proponent?.name}
+          >
+            <TextField
+              variant="outlined"
+              disabled={disabled}
+              placeholder="Proponent Name"
+              fullWidth
+              error={!!errors?.name?.message}
+              helperText={errors?.name?.message?.toString()}
+              {...register("name")}
+            />
+          </ProponentNameSpecialField>
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
             <Box sx={{ paddingTop: Boolean(specialField) ? "15px" : "11px" }}>
@@ -156,51 +149,6 @@ export default function ProponentForm({ ...props }) {
                 {...register("relationship_holder_id")}
               ></ControlledSelectV2>
             </Box>
-          </Grid>
-          <Grid item xs={12}>
-            <When condition={Boolean(specialField)}>
-              <SpecialFieldGrid
-                entity={SpecialFieldEntityEnum.PROPONENT}
-                entity_id={(ctx.item as Proponent)?.id}
-                fieldName={specialField}
-                fieldLabel={
-                  specialField === SPECIAL_FIELDS.PROPONENT.NAME
-                    ? "Proponent Name"
-                    : "Name"
-                }
-                fieldType={"text"}
-                title={
-                  specialField === SPECIAL_FIELDS.PROPONENT.NAME
-                    ? "Proponet History"
-                    : (ctx.item as Proponent)?.name
-                }
-                description={
-                  <>
-                    <When
-                      condition={
-                        specialField === SPECIAL_FIELDS.PROJECT.PROPONENT
-                      }
-                    >
-                      Update the Proponent of this Project.{" "}
-                      <a href="#">Click this link</a> for detailed instructions.
-                    </When>
-                    <When
-                      condition={specialField === SPECIAL_FIELDS.PROJECT.NAME}
-                    >
-                      Update the legal name of the Project and the dates each
-                      name was in legal use. <a href="#">Click this link</a> for
-                      detailed instructions
-                    </When>
-                  </>
-                }
-                onSave={() => {
-                  // TODO: Refresh form field value for the specific field?
-                  // OR do we just call form save/submit handler
-                  ctx.setId(props.proponentId);
-                  ctx.getById(props.proponentId);
-                }}
-              />
-            </When>
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
