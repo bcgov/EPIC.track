@@ -69,7 +69,7 @@ const IssuesView = () => {
               </Button>
             </Grid>
             {issues.map((issue, index) => (
-              <Grid item xs={12}>
+              <Grid key={`accordion-${issue.id}`} item xs={12}>
                 <IssueAccordion
                   issue={issue}
                   defaultOpen={

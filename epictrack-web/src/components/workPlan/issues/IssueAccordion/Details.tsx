@@ -163,19 +163,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
         </Grid>
 
         <Grid item lg={6} xs={12}>
-          <When condition={issue.updates.length > 1}>
-            <Stack
-              sx={{
-                padding: "16px",
-              }}
-              direction="column"
-            >
-              <ETCaption1 bold color={Palette.neutral.dark}>
-                ISSUE HISTORY
-              </ETCaption1>
-              <IssueHistory issue={issue} />
-            </Stack>
-          </When>
+          <IssueHistory issue={issue} />
         </Grid>
       </Grid>
 
