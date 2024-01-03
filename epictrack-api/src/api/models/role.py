@@ -12,11 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Role."""
-
+import enum
 from sqlalchemy import Column, Integer, String
 
 from .code_table import CodeTableVersioned
 from .db import db
+
+
+class RoleEnum(enum.Enum):
+    """Enum for role"""
+
+    RESPONSIBLE_EPD = 1
+    TEAM_LEAD = 2
+    OFFICER_ANALYST = 3
+    FN_CAIRT = 4
+    OTHER = 5
 
 
 class Role(db.Model, CodeTableVersioned):

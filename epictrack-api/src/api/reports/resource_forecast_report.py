@@ -13,13 +13,27 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Table, TableStyle
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, or_, func, select
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
 from api.models import (
-    EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
-    WorkPhase, WorkType, db)
+    EAAct,
+    EAOTeam,
+    Event,
+    FederalInvolvement,
+    PhaseCode,
+    Project,
+    Region,
+    Staff,
+    StaffWorkRole,
+    SubType,
+    Type,
+    Work,
+    WorkPhase,
+    WorkType,
+    db,
+)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 
@@ -72,8 +86,9 @@ class EAResourceForeCastReport(ReportFactory):
                 EventConfiguration.work_phase_id,
             )
             .filter(
-                EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY.value,
-                EventConfiguration.start_at == "0",
+                EventConfiguration.visibility
+                == EventTemplateVisibilityEnum.MANDATORY.value,
+                EventConfiguration.event_position == EventPositionEnum.START.value,
             )
             .group_by(EventConfiguration.work_phase_id)
             .all()
@@ -228,18 +243,12 @@ class EAResourceForeCastReport(ReportFactory):
         responsible_epd = aliased(Staff)
         work_lead = aliased(Staff)
         project_phase = aliased(PhaseCode)
-        work_phase = aliased(WorkPhase)
 
-        project_phase_query = (
+        end_work_phase_query = (
             db.session.query(
-                Event.work_id,
-                func.max(Event.actual_date).label("max_start_date"),
+                func.max(WorkPhase.id).label("end_phase_id"),
             )
-            .filter(
-                Event.actual_date <= first_month,
-                Event.event_configuration_id.in_(self.start_event_configurations),
-            )
-            .group_by(Event.work_id)
+            .group_by(WorkPhase.work_id)
             .subquery()
         )
 
@@ -250,12 +259,18 @@ class EAResourceForeCastReport(ReportFactory):
                     EventConfiguration,
                     and_(
                         EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.event_position == EventPositionEnum.START.value,
+                        EventConfiguration.event_position
+                        == EventPositionEnum.START.value,
+                        WorkPhase.sort_order == 1,
                     ),
                 )
                 .join(Event, Event.event_configuration_id == EventConfiguration.id)
                 .where(
-                    func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date
+                    and_(
+                        func.coalesce(Event.actual_date, Event.anticipated_date)
+                        <= self.end_date,
+                        WorkPhase.sort_order == 1,
+                    )
                 )
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
                 .distinct(WorkPhase.work_id)
@@ -271,11 +286,16 @@ class EAResourceForeCastReport(ReportFactory):
                     EventConfiguration,
                     and_(
                         EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.event_position == EventPositionEnum.END.value,
+                        EventConfiguration.event_position
+                        == EventPositionEnum.END.value,
                     ),
                 )
                 .join(Event, Event.event_configuration_id == EventConfiguration.id)
-                .where(Event.actual_date >= report_date)
+                .join(
+                    end_work_phase_query,
+                    WorkPhase.id == end_work_phase_query.c.end_phase_id,
+                )
+                .where(or_(Event.actual_date.is_(None), Event.actual_date >= report_date))
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
                 .distinct(WorkPhase.work_id)
             )
@@ -320,21 +340,7 @@ class EAResourceForeCastReport(ReportFactory):
             .join(WorkType, Work.work_type_id == WorkType.id)
             .join(EAAct, Work.ea_act_id == EAAct.id)
             .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
-            .join(FederalInvolvement)
-            .join(project_phase_query, project_phase_query.c.work_id == Work.id)
-            .join(
-                Event,
-                and_(
-                    project_phase_query.c.work_id == Event.work_id,
-                    Event.actual_date == project_phase_query.c.max_start_date,
-                    # Event.event_configuration_id.in_(self.start_event_configurations),
-                ),
-            )
-            .join(
-                EventConfiguration,
-                Event.event_configuration_id == EventConfiguration.id,
-            )
-            .join(work_phase, EventConfiguration.work_phase_id == work_phase.id)
+            .join(FederalInvolvement, Work.federal_involvement_id == FederalInvolvement.id)
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
             .join(env_region, env_region.id == Project.region_id_env)
@@ -390,7 +396,8 @@ class EAResourceForeCastReport(ReportFactory):
             Event.query.filter(
                 Event.work_id.in_(work_ids),
                 Event.event_configuration_id.in_(self.start_event_configurations),
-                func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
+                func.coalesce(Event.actual_date, Event.anticipated_date)
+                <= self.end_date,
             )
             .join(
                 EventConfiguration,
@@ -497,7 +504,8 @@ class EAResourceForeCastReport(ReportFactory):
                     EventConfiguration,
                     and_(
                         EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY,
+                        EventConfiguration.visibility
+                        == EventTemplateVisibilityEnum.MANDATORY,
                     ),
                 )
                 .join(Event, EventConfiguration.id == Event.event_configuration_id)
@@ -518,7 +526,8 @@ class EAResourceForeCastReport(ReportFactory):
                 referral_timing_obj = referral_timing_query.first()
             referral_timing = (
                 Event.query.filter(
-                    Event.event_configuration_id == referral_timing_obj.event_configuration_id
+                    Event.event_configuration_id
+                    == referral_timing_obj.event_configuration_id
                 )
                 .add_columns(
                     func.coalesce(Event.actual_date, Event.anticipated_date).label(
@@ -601,7 +610,8 @@ class EAResourceForeCastReport(ReportFactory):
                     Paragraph(
                         f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style
                     )
-                ] + [""] * (len(table_headers[1]) - 1)
+                ]
+                + [""] * (len(table_headers[1]) - 1)
             )
             normal_style.textColor = colors.black
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
@@ -653,7 +663,8 @@ class EAResourceForeCastReport(ReportFactory):
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ] + styles
+                ]
+                + styles
             )
         )
 
