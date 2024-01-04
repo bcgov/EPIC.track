@@ -1,5 +1,5 @@
 import React from "react";
-import Select, { SelectInstance } from "react-select";
+import Select from "react-select";
 import Menu from "./components/Menu";
 import Option from "./components/Option";
 import MultiValue from "./components/MultiValueContainer";
@@ -21,7 +21,7 @@ const FilterSelect = (props: SelectProps) => {
   const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(
     !!props.menuIsOpen
   );
-  const selectRef = React.useRef<SelectInstance | null>(null);
+  const selectRef = React.useRef<any | null>(null);
 
   const selectAllOption = React.useMemo(
     () => ({
