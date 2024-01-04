@@ -45,8 +45,6 @@ const StatusView = () => {
           <Grid item xs={6}>
             <RecentStatus />
           </Grid>
-        </When>
-        <When condition={statuses.length > 1}>
           <Grid item xs={6}>
             <StatusHistory />
           </Grid>

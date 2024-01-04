@@ -1,11 +1,11 @@
 import React from "react";
-import icons from "../../../../icons";
 import { Stack } from "@mui/material";
+import icons from "../../../../icons";
 import { ETCaption2, ETCaption3 } from "../../../../shared";
 import { Palette } from "../../../../../styles/theme";
 
-export const EmptyIssueHistory = () => {
-  const IssueHistoryIcon = icons["TimelineIcon"];
+export const EmptyStatusHistory = () => {
+  const StatusHistoryIcon = icons["TimelineIcon"];
 
   return (
     <Stack
@@ -15,12 +15,12 @@ export const EmptyIssueHistory = () => {
       spacing={1}
     >
       <span style={{ marginBottom: "0.5em" }}>
-        <IssueHistoryIcon />
+        <StatusHistoryIcon />
       </span>
 
-      <ETCaption2 bold>Your Issue History will appear here</ETCaption2>
+      <ETCaption2 bold>Your Status History will appear here</ETCaption2>
       <ETCaption3 color={Palette.neutral.main}>
-        Adding New Update will create your Issue History
+        Adding New Update will create your Status History
       </ETCaption3>
     </Stack>
   );

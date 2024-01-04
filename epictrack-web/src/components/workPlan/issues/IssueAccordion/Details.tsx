@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Grid, Stack } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
 import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
@@ -7,7 +7,7 @@ import { ActiveChip, ErrorChip } from "../../../shared/chip/ETChip";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { Palette } from "../../../../styles/theme";
-import { Else, If, Then, When } from "react-if";
+import { Else, If, Then } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
 import IssueHistory from "./IssueHistory";
@@ -21,7 +21,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
-  const CloneIcon: React.FC<IconProps> = icons["CloneIcon"];
+  const AddIcon: React.FC<IconProps> = icons["AddIcon"];
 
   const {
     setShowIssuesForm,
@@ -103,7 +103,11 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   <Grid item>
                     <Button
                       variant="text"
-                      startIcon={<CloneIcon />}
+                      startIcon={
+                        <AddIcon
+                          style={{ fill: Palette.primary.accent.main }}
+                        />
+                      }
                       sx={{
                         backgroundColor: "inherit",
                         borderColor: "transparent",
@@ -113,7 +117,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                         setShowCloneForm(true);
                       }}
                     >
-                      Clone
+                      New Update
                     </Button>
                   </Grid>
                 </Else>
