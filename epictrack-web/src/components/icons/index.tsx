@@ -477,7 +477,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   CloseXIcon,
   LockClosedIcon,
   LockOpenIcon,
-  IssueHistoryIcon: TimelineIcon,
+  TimelineIcon,
 };
 
 export default icons;

@@ -7,7 +7,6 @@ import Icons from "../../../icons";
 import { Palette } from "../../../../styles/theme";
 import { StatusContext } from "../StatusContext";
 import { WorkplanContext } from "../../WorkPlanContext";
-import { useAppSelector } from "../../../../hooks";
 import { Else, If, Then, When } from "react-if";
 import {
   MONTH_DAY_YEAR,
