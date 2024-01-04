@@ -17,7 +17,7 @@ import { Restricted } from "../../../shared/restricted";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
-const CloneIcon: React.FC<IconProps> = Icons["CloneIcon"];
+const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
 const RecentStatus = () => {
   const { statuses } = React.useContext(WorkplanContext);
@@ -95,6 +95,7 @@ const RecentStatus = () => {
         <If condition={!statuses[0].is_approved}>
           <Then>
             <Button
+              startIcon={<CheckCircleIcon />}
               onClick={() => {
                 setStatus(statuses[0]);
                 setShowApproveStatusDialog(true);
@@ -102,28 +103,27 @@ const RecentStatus = () => {
               sx={{
                 backgroundColor: "inherit",
                 borderColor: "transparent",
-                gap: "8px",
               }}
             >
-              <CheckCircleIcon />
               Approve
             </Button>
           </Then>
           <Else>
             <Button
+              startIcon={
+                <AddIcon style={{ fill: Palette.primary.accent.main }} />
+              }
               onClick={() => {
                 setStatus(statuses[0]);
                 setIsCloning(true);
                 setShowStatusForm(true);
               }}
               sx={{
-                gap: "8px",
                 backgroundColor: "inherit",
                 borderColor: "transparent",
               }}
             >
-              <CloneIcon />
-              Clone
+              New Update
             </Button>
           </Else>
         </If>
@@ -133,33 +133,31 @@ const RecentStatus = () => {
             errorProps={{ disabled: true }}
           >
             <Button
+              startIcon={<PencilEditIcon />}
               onClick={() => {
                 setShowStatusForm(true);
                 setStatus(statuses[0]);
               }}
               sx={{
-                gap: "8px",
                 backgroundColor: "inherit",
                 borderColor: "transparent",
               }}
             >
-              <PencilEditIcon />
               Edit
             </Button>
           </Restricted>
           <Else>
             <Button
+              startIcon={<PencilEditIcon />}
               onClick={() => {
                 setShowStatusForm(true);
                 setStatus(statuses[0]);
               }}
               sx={{
-                gap: "8px",
                 backgroundColor: "inherit",
                 borderColor: "transparent",
               }}
             >
-              <PencilEditIcon />
               Edit
             </Button>
           </Else>
