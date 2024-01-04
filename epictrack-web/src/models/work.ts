@@ -79,6 +79,7 @@ export interface WorkPhaseAdditionalInfo {
   work_phase: WorkPhase;
   total_number_of_days: number;
   next_milestone: string;
+  current_milestone: string;
   milestone_progress: number;
   days_left: number;
   is_last_phase: boolean;
