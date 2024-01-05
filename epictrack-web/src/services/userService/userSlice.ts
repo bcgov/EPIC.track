@@ -15,6 +15,7 @@ const initialState: UserState = {
     firstName: "",
     lastName: "",
     email: "",
+    staffId: 0,
     phone: "",
     position: "",
     roles: [],
