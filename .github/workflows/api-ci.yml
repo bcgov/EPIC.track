@@ -1,4 +1,4 @@
-name: Report API CI
+name: EPICTRACK API CI
 
 on:
   pull_request:
