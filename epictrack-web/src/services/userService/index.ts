@@ -72,6 +72,8 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]
         .roles ?? [];
     const roles = [...realmAccesRoles, ...clientLevelRoles];
+
+    console.log(staffProfile);
     const userDetail = new UserDetail(
       userInfo["sub"],
       userInfo["preferred_username"],
@@ -79,13 +81,14 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       userInfo["given_name"],
       userInfo["family_name"],
       userInfo["email"],
+      staffProfile?.id ?? 0,
       staffProfile?.phone ?? "",
       staffProfile?.position?.name ?? "",
       roles
     );
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));
-    dispatch(userAuthentication(KeycloakData.authenticated ? true : false));
+    dispatch(userAuthentication(Boolean(KeycloakData.authenticated)));
     refreshToken(dispatch);
   } catch (err) {
     console.error(err);
@@ -94,7 +97,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
 };
 
 const getToken = () =>
-  KeycloakData.token || window.localStorage.getItem("authToken");
+  KeycloakData.token ?? window.localStorage.getItem("authToken");
 const doLogin = () => KeycloakData.login;
 
 // User management service methods

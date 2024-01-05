@@ -19,6 +19,7 @@ export class UserDetail {
   firstName: string;
   lastName: string;
   email: string;
+  staffId: number;
   position: string;
   phone: string;
   roles: string[];
@@ -29,6 +30,7 @@ export class UserDetail {
     firstName: string,
     lastName: string,
     email: string,
+    staffId: number,
     phone: string,
     position: string,
     roles: string[]
@@ -38,6 +40,7 @@ export class UserDetail {
     this.firstName = firstName;
     this.lastName = lastName;
     this.email = email;
+    this.staffId = staffId;
     this.phone = phone;
     this.position = position;
     this.groups = groups.map((p) => p.substring(1, p.length));
