@@ -12,7 +12,6 @@ import { Loader } from "./components/shared/loader";
 
 export function App() {
   const dispatch = useAppDispatch();
-  UserService.initKeycloak(dispatch);
   const isLoggedIn = useAppSelector(
     (state) => state.user?.authentication.authenticated
   );

@@ -14,7 +14,7 @@ const KeycloakData: Keycloak = new Keycloak({
   url: `${AppConfig.keycloak.url}/auth`,
 });
 const doLogout = KeycloakData.logout;
-let refreshInterval: NodeJS.Timer;
+let refreshInterval: NodeJS.Timeout;
 /**
  * Logout function
  */
