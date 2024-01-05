@@ -73,7 +73,6 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
         .roles ?? [];
     const roles = [...realmAccesRoles, ...clientLevelRoles];
 
-    console.log(staffProfile);
     const userDetail = new UserDetail(
       userInfo["sub"],
       userInfo["preferred_username"],
