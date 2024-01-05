@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Test suite for phases."""
 
+"""Test suite for EAO Teams."""
 from http import HTTPStatus
 from urllib.parse import urljoin
 
@@ -20,8 +20,8 @@ from urllib.parse import urljoin
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_phases(client):
-    """Test get phases."""
-    url = urljoin(API_BASE_URL, 'milestones/phases/11')
+def test_get_eao_teams(client):
+    """Test get EAO Teams."""
+    url = urljoin(API_BASE_URL, 'eao-teams')
     result = client.get(url)
     assert result.status_code == HTTPStatus.OK

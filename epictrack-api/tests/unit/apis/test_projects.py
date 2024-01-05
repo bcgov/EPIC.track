@@ -25,13 +25,17 @@ def test_create_project(client):
     payload = {
         "name": "New Project",
         "description": "Testing the create project endpoint",
-        "latitude": "54.2681",
-        "longitude": "-130.3828",
+        "location": "Victoria, BC",
+        "address": "Helsinki Airport, Artesaaninkuja, Lemminkäinen, Tuusula, Helsinki sub-region, \
+            Uusimaa, Southern Finland, Mainland Finland, 04360, Finland",
         "type_id": 1,
         "sub_type_id": 1,
         "proponent_id": 1,
         "region_id_env": 1,
         "region_id_flnro": 1,
+        "latitude": "54.2681",
+        "longitude": "-130.3828",
+        "abbreviation": "NP",
     }
     url = urljoin(API_BASE_URL, "projects")
     response = client.post(url, json=payload)
@@ -58,6 +62,9 @@ def test_update_project(client):
         "proponent_id": 1,
         "region_id_env": 1,
         "region_id_flnro": 1,
+        "type_id": 1,
+        "sub_type_id": 1,
+        "abbreviation": "NPC",
     }
     # Create a project
     url = urljoin(API_BASE_URL, "projects")
@@ -84,6 +91,9 @@ def test_delete_project(client):
         "proponent_id": 1,
         "region_id_env": 1,
         "region_id_flnro": 1,
+        "type_id": 1,
+        "sub_type_id": 1,
+        "abbreviation": "NPD",
     }
     # Create a project
     projects_url = urljoin(API_BASE_URL, "projects")
@@ -100,7 +110,7 @@ def test_delete_project(client):
 def test_project_detail(client):
     """Test project details."""
     payload = {
-        "name": "New Project for details",
+        "name": "New Project for details testing",
         "description": "Testing the create project endpoint",
         "latitude": "54.2681",
         "longitude": "-130.3828",
@@ -109,6 +119,7 @@ def test_project_detail(client):
         "proponent_id": 1,
         "region_id_env": 1,
         "region_id_flnro": 1,
+        "abbreviation": "NPDT",
     }
     # Create a project
     projects_url = urljoin(API_BASE_URL, "projects")
