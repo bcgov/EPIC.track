@@ -25,6 +25,7 @@ import { EPDSpecialField } from "./EPDSpecialField";
 import icons from "../../icons";
 import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
 import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
+import { Project } from "../../../models/project";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -165,6 +166,13 @@ export default function WorkForm({ ...props }) {
     }
   };
 
+  const getProject = async (id: string) => {
+    const projectResult = await projectService.getById(id);
+    if (projectResult.status === 200) {
+      return projectResult.data as Project;
+    }
+  };
+
   React.useEffect(() => {
     const promises: any[] = [];
     Object.keys(codeTypes).forEach(async (key) => {
@@ -194,8 +202,9 @@ export default function WorkForm({ ...props }) {
     const selectedProject: any = projects.filter((project) => {
       return project.id.toString() === id;
     });
-    setSelectedProject(selectedProject[0]);
-    setValue("epic_description", selectedProject[0]?.description);
+    const project = await getProject(selectedProject[0].id);
+    setSelectedProject(project);
+    setValue("epic_description", String(project?.description));
   };
 
   const handleWorktypeChange = async (id: string) => {
@@ -335,7 +344,7 @@ export default function WorkForm({ ...props }) {
             fullWidth
             multiline
             rows={4}
-            disabled={isSpecialFieldLocked}
+            disabled
           />
         </Grid>
         <Grid item xs={12}>
