@@ -85,6 +85,21 @@ jobs:
          run: |
            make test
 
+       - name: Sets Codecov branch name
+         run: |
+          echo "CODECOV_BRANCH=PR_${{github.head_ref}}" >> $GITHUB_ENV
+          if: github.event_name == 'pull_request'
+          
+       - name: Upload coverage to Codecov
+         uses: codecov/codecov-action@v3
+         with:
+          flags: metapi
+          name: codecov-met-api
+          fail_ci_if_error: true   
+          verbose: true 
+          override_branch: ${{env.CODECOV_BRANCH}}
+          token: ${{ secrets.CODECOV_TOKEN }}
+
   build:
     # needs: PyTest
     runs-on: ubuntu-20.04
