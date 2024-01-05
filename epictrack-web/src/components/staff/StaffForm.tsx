@@ -17,7 +17,7 @@ import positionService from "../../services/positionService";
 const schema = yup.object().shape({
   email: yup
     .string()
-    .email()
+    .email("Invalid email address")
     .required("Email is required")
     .test({
       name: "checkDuplicateEmail",
@@ -26,7 +26,9 @@ const schema = yup.object().shape({
       test: async (value, { parent }) => {
         if (value) {
           const result = await staffService.validateEmail(value, parent["id"]);
-          return !(result.data as never)["exists"];
+          if (result.status === 200) {
+            return !(result.data as never)["exists"];
+          }
         }
         return true;
       },
