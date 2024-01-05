@@ -93,8 +93,8 @@ jobs:
        - name: Upload coverage to Codecov
          uses: codecov/codecov-action@v3
          with:
-          flags: metapi
-          name: codecov-met-api
+          flags: epictrack-api
+          name: codecov-epictrack-api
           fail_ci_if_error: true   
           verbose: true 
           override_branch: ${{env.CODECOV_BRANCH}}
