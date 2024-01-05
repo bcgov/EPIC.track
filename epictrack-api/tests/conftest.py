@@ -85,9 +85,9 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         Migrate(app, _db)
         upgrade()
 
-        initial_project = Project(name="Initial Project", description="Example Project")
-        _db.session.add(initial_project)
-        _db.session.commit()
+        # initial_project = Project(name="Initial Project", description="Example Project")
+        # _db.session.add(initial_project)
+        # _db.session.commit()
 
         return _db
 
