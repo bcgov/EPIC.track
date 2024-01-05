@@ -16,8 +16,8 @@ from http import HTTPStatus
 
 from flask import jsonify
 from flask_restx import Namespace, Resource, cors
-from api.schemas.eao_team import EAOTeamSchema
 
+from api.schemas.eao_team import EAOTeamSchema
 from api.services.eao_team_service import EAOTeamService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache

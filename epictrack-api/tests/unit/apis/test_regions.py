@@ -11,8 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Test suite for phases."""
 
+"""Test suite for Region."""
 from http import HTTPStatus
 from urllib.parse import urljoin
 
@@ -20,16 +20,14 @@ from urllib.parse import urljoin
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_phases(client):
-    """Test GET phases."""
-    url = urljoin(API_BASE_URL, 'phases')
-    url = f'{url}/ea_acts/3/work_types/6'
+def test_get_regions_by_type(client):
+    """Test get regions by type."""
+    # type = ENV
+    url = urljoin(API_BASE_URL, 'regions?type=ENV')
     result = client.get(url)
     assert result.status_code == HTTPStatus.OK
 
-
-def test_get_all_phases(client):
-    """Test GET all phases."""
-    url = urljoin(API_BASE_URL, 'phases/')
+    # type = FLNR
+    url = urljoin(API_BASE_URL, 'regions?type=FLNR')
     result = client.get(url)
     assert result.status_code == HTTPStatus.OK
