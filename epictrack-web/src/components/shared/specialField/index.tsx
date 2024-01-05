@@ -15,7 +15,6 @@ import { SpecialField, SpecialFieldProps } from "./type";
 import specialFieldService from "../../../services/specialFieldService";
 import { dateUtils } from "../../../utils";
 import { InLineDatePicker } from "./components/InLineDatePicker";
-import ReactSelect, { CSSObjectWithLabel } from "react-select";
 import TrackSelect from "../TrackSelect";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];

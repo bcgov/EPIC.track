@@ -169,17 +169,27 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 ),
             )
             result_item["total_number_of_days"] = total_days - suspended_days
-            next_milestone_event = next(
-                (x for x in work_phase_events if x.actual_date is None), None
-            )
-            if next_milestone_event:
-                result_item["next_milestone"] = next_milestone_event.name
-            result_item["milestone_progress"] = cls._calculate_milestone_progress(
-                work_phase_events
-            )
+
+            milestone_info = cls._get_milestone_information(work_phase_events)
+            result_item = {**result_item, **milestone_info}
+
             days_left = cls._get_days_left(suspended_days, total_days, work_phase)
             result_item["days_left"] = days_left
             result.append(result_item)
+        return result
+
+    @classmethod
+    def _get_milestone_information(cls, work_phase_events):
+        result = {}
+
+        completed_milestone_events = [event for event in work_phase_events if event.actual_date]
+        result["current_milestone"] = completed_milestone_events[-1].name if completed_milestone_events else None
+
+        remaining_milestone_events = [event for event in work_phase_events if event.actual_date is None]
+        result["next_milestone"] = remaining_milestone_events[0].name if remaining_milestone_events else None
+
+        result["milestone_progress"] = cls._calculate_milestone_progress(work_phase_events)
+
         return result
 
     @classmethod
