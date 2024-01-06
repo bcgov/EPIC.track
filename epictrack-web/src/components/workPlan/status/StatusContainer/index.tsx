@@ -7,7 +7,7 @@ import { ETTab, ETTabs } from "../../../shared/tab/Tab";
 import TabPanel from "../../../shared/tab/TabPanel";
 import StatusNotes from "./StatusNotes";
 import { tabPanelStyle, tabStyle, titleStyle } from "../../common/styles";
-import { ReportsPreview } from "../../issues/ReportsPreview";
+import { ReportsPreview } from "./ReportsPreview";
 
 const StatusContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);

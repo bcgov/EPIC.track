@@ -78,24 +78,18 @@ export const IssuesProvider = ({
 
   const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
 
-  const { issues, setIssues } = useContext(WorkplanContext);
+  const { issues, loadIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
   const workId = query.get("work_id");
 
-  const loadIssues = async () => {
-    if (!workId) return;
-    try {
-      const response = await issueService.getAll(workId);
-      setIssues(response.data);
-      setIsIssuesLoading(false);
-    } catch (error) {
-      setIsIssuesLoading(false);
-    }
+  const handleLoadIssues = async () => {
+    await loadIssues();
+    setIsIssuesLoading(false);
   };
 
   useEffect(() => {
     if (!issues?.length) {
-      loadIssues();
+      handleLoadIssues();
     } else {
       setIsIssuesLoading(false);
     }
@@ -110,7 +104,7 @@ export const IssuesProvider = ({
         updates: [issueForm.description],
       };
       await issueService.create(workId, request);
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
@@ -143,7 +137,7 @@ export const IssuesProvider = ({
         String(updateToEdit.work_issue_id),
         request
       );
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
@@ -158,7 +152,7 @@ export const IssuesProvider = ({
         String(issueId),
         String(issueUpdateId)
       );
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
@@ -171,7 +165,7 @@ export const IssuesProvider = ({
       await issueService.clone(workId, String(updateToClone.work_issue_id), {
         description_data: [cloneForm.description],
       });
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
