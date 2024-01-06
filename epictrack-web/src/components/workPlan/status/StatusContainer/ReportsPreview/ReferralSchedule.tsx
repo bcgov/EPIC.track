@@ -95,8 +95,8 @@ export const ReferralSchedule = () => {
         <Grid item xs={12}>
           <ETCaption2 bold mb={"0.5em"}>
             Status{" "}
-            {latestIssue?.updated_at
-              ? `(${moment(latestIssue?.updated_at).format(MONTH_DAY_YEAR)})`
+            {currentStatus?.posted_date
+              ? `(${moment(currentStatus?.posted_date).format(MONTH_DAY_YEAR)})`
               : ""}
           </ETCaption2>
           <ETPreviewBox>
