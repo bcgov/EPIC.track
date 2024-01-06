@@ -72,7 +72,7 @@ export const ThirtySixtyNinety = () => {
           </ETPreviewText>
         </Grid>
 
-        <When condition={Boolean(currentStatus)}>
+        <When condition={Boolean(issueUpdates.length > 0)}>
           <Grid item xs={12}>
             <ETCaption2 bold color={Palette.neutral.light}>
               {`Issue (${moment(latestIssue?.updated_at)
