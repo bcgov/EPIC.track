@@ -14,7 +14,6 @@
 
 """Common setup and fixtures for the py-test suite used by this service."""
 
-import asyncio
 from functools import wraps
 from unittest.mock import patch
 
@@ -22,7 +21,6 @@ import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.schema import DropConstraint, MetaData
 
 from api import create_app
 from api import jwt as _jwt
@@ -178,6 +176,7 @@ def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
         # This instruction rollsback any commit that were executed in the tests.
         txn.rollback()
         conn.close()
+
 
 def mock_decorator(f, *args, **kwargs):
     """Function to mock a decorator. Used to mock auth.require"""
