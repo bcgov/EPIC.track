@@ -85,7 +85,6 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
         Migrate(app, _db)
         upgrade()
-        sess.commit()
         return _db
 
 
