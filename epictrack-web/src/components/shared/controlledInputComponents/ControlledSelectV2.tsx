@@ -68,6 +68,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
               if (onHandleChange !== undefined) onHandleChange(v);
               return onChange(v);
             }}
+            disabled={disabled}
             error={!!error}
             helperText={String(error?.message) || helperText}
           />

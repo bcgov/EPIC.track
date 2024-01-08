@@ -80,26 +80,10 @@ const CardFooter = ({ workplan }: CardProps) => {
       </Grid>
       <Grid item justifyContent={"flex-end"}>
         <Button
-          variant="text"
-          sx={{
-            backgroundColor: "inherit",
-            borderColor: "transparent",
-            borderRadius: "4px",
-            width: "80px",
-            border: "2px solid var(--Primary-Main, #036)",
-            ":hover": {
-              borderRadius: "4px",
-              border: "var(--Primary-Main, #036);",
-              backgroundColor: Palette.primary.main,
-              color: Palette.white,
-            },
-            ":active": {
-              backgroundColor: Palette.primary.dark,
-            },
-          }}
+          variant="outlined"
           onClick={() => navigate(`/work-plan?work_id=${workplan.id}`)}
         >
-          <ETCaption2 bold>View</ETCaption2>
+          View
         </Button>
       </Grid>
     </Grid>
