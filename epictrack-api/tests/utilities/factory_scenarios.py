@@ -36,5 +36,6 @@ class TestProjectInfo(Enum):
         "region_id_flnro": fake.random_int(min=1, max=10),
         "latitude": fake.latitude(),
         "longitude": fake.longitude(),
-        "abbreviation": fake.word().upper(),
+        "abbreviation": fake.word().upper()[:10]
+
     }

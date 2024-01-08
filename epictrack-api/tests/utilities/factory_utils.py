@@ -15,11 +15,9 @@
 
 Test Utility for creating model factory.
 """
-from faker import Faker
-from flask import current_app, g
+from api.models.project import Project as ProjectModel
 from tests.utilities.factory_scenarios import (
     TestProjectInfo)
-from api.models.project import Project as ProjectModel
 
 
 def factory_project_model(project_data: dict = TestProjectInfo.project1.value):

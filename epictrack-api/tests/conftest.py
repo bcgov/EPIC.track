@@ -135,11 +135,12 @@ def new_staff():
 
     return staff
 
+
 @pytest.fixture(scope="function", autouse=True)
 def session(app, db):
     """Return a function-scoped session."""
     with app.app_context(), db.engine.connect() as conn:
-        transaction = conn.begin()
+        conn.begin()
         session_factory = sessionmaker(bind=conn)
         sess = scoped_session(session_factory)
         sess.begin_nested()

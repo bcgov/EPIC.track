@@ -38,7 +38,6 @@ def test_get_projects(client):
 
 def test_update_project(client):
     """Test update project."""
-
     project = factory_project_model()
     # Update the project
     payload = TestProjectInfo.project1.value
