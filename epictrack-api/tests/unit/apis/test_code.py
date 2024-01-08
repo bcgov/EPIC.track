@@ -16,18 +16,17 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_code_by_type(client):
+def test_get_code_by_type(client, session):
     """Test get code by type."""
     url = urljoin(API_BASE_URL, 'codes/work_types')
     result = client.get(url)
     assert result.status_code == HTTPStatus.OK
 
 
-def test_get_code_by_type_and_code(client):
+def test_get_code_by_type_and_code(client, session):
     """Test get code by type and code."""
     url = urljoin(API_BASE_URL, 'codes/work_types/1')
     result = client.get(url)

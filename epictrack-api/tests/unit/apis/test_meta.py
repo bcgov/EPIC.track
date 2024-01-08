@@ -16,11 +16,10 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_info(client):
+def test_get_info(client, session):
     """Test get meta info."""
     url = urljoin(API_BASE_URL, 'meta/info')
     result = client.get(url)

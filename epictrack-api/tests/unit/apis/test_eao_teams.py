@@ -16,11 +16,10 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_eao_teams(client):
+def test_get_eao_teams(client, session):
     """Test get EAO Teams."""
     url = urljoin(API_BASE_URL, 'eao-teams')
     result = client.get(url)

@@ -16,11 +16,10 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_regions_by_type(client):
+def test_get_regions_by_type(client, session):
     """Test get regions by type."""
     # type = ENV
     url = urljoin(API_BASE_URL, 'regions?type=ENV')

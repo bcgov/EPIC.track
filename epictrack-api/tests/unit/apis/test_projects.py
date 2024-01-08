@@ -16,11 +16,10 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-
 API_BASE_URL = "/api/v1/"
 
 
-def test_create_project(client):
+def test_create_project(client, session):
     """Test create new project."""
     payload = {
         "name": "New Project",
@@ -43,14 +42,14 @@ def test_create_project(client):
     assert "id" in response.json
 
 
-def test_get_projects(client):
+def test_get_projects(client, session):
     """Test get projects."""
     url = urljoin(API_BASE_URL, "projects")
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
 
 
-def test_update_project(client):
+def test_update_project(client, session):
     """Test update project."""
     payload = {
         "name": "New Project Created",
@@ -79,7 +78,7 @@ def test_update_project(client):
     assert response.json["name"] == "New Project Updated"
 
 
-def test_delete_project(client):
+def test_delete_project(client, session):
     """Test delete project."""
     payload = {
         "name": "New Project for deletion",
@@ -107,7 +106,7 @@ def test_delete_project(client):
     assert len(response.json) == num_projects - 1
 
 
-def test_project_detail(client):
+def test_project_detail(client, session):
     """Test project details."""
     payload = {
         "name": "New Project for details testing",

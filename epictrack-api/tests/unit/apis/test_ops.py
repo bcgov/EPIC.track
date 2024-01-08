@@ -16,14 +16,14 @@
 from http import HTTPStatus
 
 
-def test_get_healthz(client):
+def test_get_healthz(client, session):
     """Test get health endpoint."""
     url = '/ops/healthz'
     result = client.get(url)
     assert result.status_code == HTTPStatus.OK
 
 
-def test_get_readyz(client):
+def test_get_readyz(client, session):
     """Test readiness endpoint."""
     url = '/ops/readyz'
     result = client.get(url)

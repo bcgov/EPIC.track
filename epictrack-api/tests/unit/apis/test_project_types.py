@@ -16,11 +16,10 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_project_types(client):
+def test_get_project_types(client, session):
     """Test get project types."""
     url = urljoin(API_BASE_URL, 'project-types')
     result = client.get(url)

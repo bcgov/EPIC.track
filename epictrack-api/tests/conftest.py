@@ -85,6 +85,9 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
         Migrate(app, _db)
         upgrade()
+        print(
+            '----1111---db------------db------------db------------db------------db------------db------------db---------111---db------------db------------db------------db------------db-1111----')
+
         return _db
 
 
@@ -141,6 +144,9 @@ def new_staff():
 def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a function-scoped session."""
     with app.app_context():
+        print(
+            '----SESSION---db------------db------------db------------db------------db------------db------------db------------db------------db------------db------------db------------db-----')
+
         conn = db.engine.connect()
         txn = conn.begin()
 
