@@ -14,14 +14,13 @@
 
 """Common setup and fixtures for the py-test suite used by this service."""
 
-import asyncio
 from functools import wraps
 from unittest.mock import patch
 
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
-from sqlalchemy.schema import DropConstraint, MetaData
+from sqlalchemy.orm import scoped_session, sessionmaker
 
 from api import create_app
 from api import jwt as _jwt
@@ -65,111 +64,27 @@ def client_ctx(app):
         yield _client
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope='session')
 def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
-    Drops all existing tables - Meta follows Postgres FKs
+    Drops schema, and recreate.
     """
     with app.app_context():
-        # Clear out any existing tables
-        metadata = MetaData()
-        metadata.reflect(bind=_db.engine)
-        for table in metadata.tables.values():
-            for fk in table.foreign_keys:  # pylint: disable=invalid-name
-                _db.session.execute(DropConstraint(fk.constraint))
-        metadata.drop_all(_db.engine)
-        _db.drop_all()
-
-        sequence_sql = """SELECT sequence_name FROM information_schema.sequences
-                          WHERE sequence_schema='public'
-                       """
+        drop_schema_sql = text("""DROP SCHEMA public CASCADE;
+                                    CREATE SCHEMA public;
+                                    GRANT ALL ON SCHEMA public TO postgres;
+                                    GRANT ALL ON SCHEMA public TO public;
+                                 """)
 
         sess = _db.session()
-        for seq in [name for (name,) in sess.execute(text(sequence_sql))]:
-            try:
-                sess.execute(text("DROP SEQUENCE public.%s ;" % seq))
-                print("DROP SEQUENCE public.%s " % seq)
-            except Exception as err:  # NOQA pylint: disable=broad-except
-                print(f"Error: {err}")
+        sess.execute(drop_schema_sql)
         sess.commit()
 
-        # ############################################
-        # There are 2 approaches, an empty database, or the same one that the app will use
-        #     create the tables
-        #     _db.create_all()
-        # or
-        # Use Alembic to load all of the DB revisions including supporting lookup data
-        # This is the path we'll use in legal_api!!
-
-        # even though this isn't referenced directly, it sets up the internal configs that upgrade needs
         Migrate(app, _db)
         upgrade()
 
         return _db
-
-
-@pytest.fixture(scope="function", autouse=True)
-def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
-    """Return a function-scoped session."""
-    with app.app_context():
-        conn = db.engine.connect()
-        txn = conn.begin()
-
-        options = dict(bind=conn, binds={})
-        sess = db._make_scoped_session(options=options)
-
-        # establish  a SAVEPOINT just before beginning the test
-        # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
-        sess.begin_nested()
-
-        @event.listens_for(sess(), "after_transaction_end")
-        def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
-            # Detecting whether this is indeed the nested transaction of the test
-            if (
-                trans.nested and not trans._parent.nested
-            ):  # pylint: disable=protected-access
-                # Handle where test DOESN'T session.commit(),
-                sess2.expire_all()
-                sess.begin_nested()
-
-        db.session = sess
-
-        sql = text("select 1")
-        sess.execute(sql)
-
-        yield sess
-
-        # Cleanup
-        sess.remove()
-        # This instruction rollsback any commit that were executed in the tests.
-        txn.rollback()
-        conn.close()
-
-
-@pytest.fixture(scope="function")
-def future(event_loop):
-    """Return a future that is used for managing function tests."""
-    _future = asyncio.Future(loop=event_loop)
-    return _future
-
-
-@pytest.fixture
-def create_mock_coro(mocker, monkeypatch):
-    """Return a mocked coroutine, and optionally patch-it in."""
-
-    def _create_mock_patch_coro(to_patch=None):
-        """Return a mocked coroutine, and optionally patch-it in."""
-        mock = mocker.Mock()
-
-        async def _coro(*args, **kwargs):
-            return mock(*args, **kwargs)
-
-        if to_patch:  # <-- may not need/want to patch anything
-            monkeypatch.setattr(to_patch, _coro)
-        return mock, _coro
-
-    return _create_mock_patch_coro
 
 
 @pytest.fixture(scope="session")
@@ -219,6 +134,28 @@ def new_staff():
     _db.session.commit()
 
     return staff
+
+@pytest.fixture(scope="function", autouse=True)
+def session(app, db):
+    """Return a function-scoped session."""
+    with app.app_context(), db.engine.connect() as conn:
+        transaction = conn.begin()
+        session_factory = sessionmaker(bind=conn)
+        sess = scoped_session(session_factory)
+        sess.begin_nested()
+
+        @event.listens_for(sess(), 'after_transaction_end')
+        def restart_savepoint(sess2, trans):
+            if trans.nested and not trans._parent.nested:
+                sess2.expire_all()
+                sess.begin_nested()
+
+        db.session = sess
+
+        sql = text('select 1')
+        sess.execute(sql)
+
+        yield sess
 
 
 def mock_decorator(f, *args, **kwargs):
