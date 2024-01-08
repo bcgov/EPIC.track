@@ -68,7 +68,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
 
         @app.errorhandler(Exception)
         def handle_error(err):
-            if run_mode == "development":
+            if run_mode != "production":
                 # To get stacktrace in local development for internal server errors
                 raise err
             current_app.logger.error(str(err))

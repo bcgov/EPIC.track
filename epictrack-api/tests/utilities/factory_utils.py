@@ -15,7 +15,7 @@
 
 Test Utility for creating model factory.
 """
-from api.models.project import Project as ProjectModel
+from api.models.project import Project as ProjectModel, ProjectStateEnum
 from tests.utilities.factory_scenarios import (
     TestProjectInfo)
 
@@ -34,6 +34,7 @@ def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
         latitude=project_data["latitude"],
         longitude=project_data["longitude"],
         abbreviation=project_data["abbreviation"],
+        project_state=ProjectStateEnum.PRE_WORK.value
     )
     project.save()
     return project
