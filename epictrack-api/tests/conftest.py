@@ -21,6 +21,7 @@ from unittest.mock import patch
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.schema import DropConstraint, MetaData
 
 from api import create_app
@@ -72,11 +73,11 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     Drops schema, and recreate.
     """
     with app.app_context():
-        drop_schema_sql = """DROP SCHEMA public CASCADE;
-                             CREATE SCHEMA public;
-                             GRANT ALL ON SCHEMA public TO postgres;
-                             GRANT ALL ON SCHEMA public TO public;
-                          """
+        drop_schema_sql = text("""DROP SCHEMA public CASCADE;
+                                    CREATE SCHEMA public;
+                                    GRANT ALL ON SCHEMA public TO postgres;
+                                    GRANT ALL ON SCHEMA public TO public;
+                                 """)
 
         sess = _db.session()
         sess.execute(drop_schema_sql)
@@ -84,11 +85,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
 
         Migrate(app, _db)
         upgrade()
-
-        # initial_project = Project(name="Initial Project", description="Example Project")
-        # _db.session.add(initial_project)
-        # _db.session.commit()
-
+        sess.commit()
         return _db
 
 
@@ -140,6 +137,42 @@ def new_staff():
 
     return staff
 
+
+@pytest.fixture(scope='function')
+def session(app, db):  # pylint: disable=redefined-outer-name, invalid-name
+    """Return a function-scoped session."""
+    with app.app_context():
+        conn = db.engine.connect()
+        txn = conn.begin()
+
+        # Creating a session factory using sessionmaker
+        session_factory = sessionmaker(bind=conn)
+        sess = scoped_session(session_factory)
+
+        # establish  a SAVEPOINT just before beginning the test
+        # (http://docs.sqlalchemy.org/en/latest/orm/session_transaction.html#using-savepoint)
+        sess.begin_nested()
+
+        @event.listens_for(sess(), 'after_transaction_end')
+        def restart_savepoint(sess2, trans):  # pylint: disable=unused-variable
+            # Detecting whether this is indeed the nested transaction of the test
+            if trans.nested and not trans._parent.nested:  # pylint: disable=protected-access
+                # Handle where test DOESN'T session.commit(),
+                sess2.expire_all()
+                sess.begin_nested()
+
+        db.session = sess
+
+        sql = text('select 1')
+        sess.execute(sql)
+
+        yield sess
+
+        # Cleanup
+        sess.remove()
+        # This instruction rollsback any commit that were executed in the tests.
+        txn.rollback()
+        conn.close()
 
 def mock_decorator(f, *args, **kwargs):
     """Function to mock a decorator. Used to mock auth.require"""
