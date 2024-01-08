@@ -1,7 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import { useContext } from "react";
 import { WorkplanContext } from "../../WorkPlanContext";
-import { ETCaption1, ETCaption2, GrayBox } from "../../../shared";
+import { ETCaption1, ETCaption2, ETParagraph, GrayBox } from "../../../shared";
 import { Palette } from "../../../../styles/theme";
 import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
@@ -15,38 +15,31 @@ const WorkDetails = () => {
 
   return (
     <GrayBox>
-      <Grid
-        container
-        sx={{
-          padding: "16px 24px",
-        }}
-      >
-        <Grid item xs={12}>
-          <ETCaption1 color={Palette.neutral.main}>WORK START DATE</ETCaption1>
+      <Grid container spacing={1}>
+        <Grid item xs={12} container>
+          <Grid item xs={12}>
+            <ETCaption1 color={Palette.neutral.main}>
+              WORK START DATE
+            </ETCaption1>
+          </Grid>
+          <Grid item xs={12}>
+            <ETParagraph color={Palette.neutral.dark}>
+              {dayjs(work?.created_at).format(MONTH_DAY_YEAR)}
+            </ETParagraph>
+          </Grid>
         </Grid>
         <Grid item xs={12}>
-          <ETCaption2 color={Palette.neutral.dark}>
-            {dayjs(work?.created_at).format(MONTH_DAY_YEAR)}
-          </ETCaption2>
+          <Divider sx={{ paddingTop: "8px" }} />
         </Grid>
-      </Grid>
-      <Divider style={{ width: "100%" }} />
-      <Grid
-        container
-        spacing={1}
-        sx={{
-          padding: "16px 24px",
-        }}
-      >
         <Grid item xs={12}>
           <ETCaption1 bold color={Palette.primary.main}>
             ANTICIPATED REFERRAL DATE
           </ETCaption1>
         </Grid>
         <Grid item xs={12}>
-          <ETCaption2 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {work?.anticipated_decision_date ?? "-"}
-          </ETCaption2>
+          </ETParagraph>
         </Grid>
         <Grid item xs={6}>
           <ETCaption1 bold color={Palette.primary.main}>
@@ -60,15 +53,15 @@ const WorkDetails = () => {
         </Grid>
 
         <Grid item xs={6}>
-          <ETCaption1 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {currentWorkPhase?.current_milestone ?? "-"}
-          </ETCaption1>
+          </ETParagraph>
         </Grid>
 
         <Grid item xs={6}>
-          <ETCaption1 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {currentWorkPhase?.next_milestone ?? "-"}
-          </ETCaption1>
+          </ETParagraph>
         </Grid>
         <Grid item xs={4}>
           <ETCaption1 bold color={Palette.primary.main}>
@@ -86,19 +79,19 @@ const WorkDetails = () => {
           </ETCaption1>
         </Grid>
         <Grid item xs={4}>
-          <ETCaption1 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {work?.ea_act?.name}
-          </ETCaption1>
+          </ETParagraph>
         </Grid>
         <Grid item xs={4}>
-          <ETCaption1 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {work?.federal_involvement?.name}
-          </ETCaption1>
+          </ETParagraph>
         </Grid>
         <Grid item xs={4}>
-          <ETCaption1 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {work?.substitution_act?.name}
-          </ETCaption1>
+          </ETParagraph>
         </Grid>
         <Grid item xs={12}>
           <ETCaption1 bold color={Palette.primary.main}>
@@ -106,9 +99,9 @@ const WorkDetails = () => {
           </ETCaption1>
         </Grid>
         <Grid item xs={12}>
-          <ETCaption2 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {work?.ministry?.name}
-          </ETCaption2>
+          </ETParagraph>
         </Grid>
         <Grid item xs={12}>
           <ETCaption1 bold color={Palette.primary.main}>
@@ -116,9 +109,9 @@ const WorkDetails = () => {
           </ETCaption1>
         </Grid>
         <Grid item xs={12}>
-          <ETCaption2 color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark}>
             {work?.decision_by?.full_name}
-          </ETCaption2>
+          </ETParagraph>
         </Grid>
       </Grid>
     </GrayBox>
