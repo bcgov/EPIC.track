@@ -9,10 +9,16 @@ import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 const WorkDetails = () => {
   const { work, workPhases } = useContext(WorkplanContext);
 
-  const currentWorkPhase = workPhases?.find(
+  const currentWorkPhaseIndex = workPhases?.findIndex(
     (phase) => phase.work_phase.id === work?.current_work_phase_id
   );
+  const currentWorkPhase = workPhases?.[currentWorkPhaseIndex];
+  const nextWorkPhase =
+    currentWorkPhaseIndex + 1 < workPhases.length
+      ? workPhases?.[currentWorkPhaseIndex + 1]
+      : null;
 
+  console.log(nextWorkPhase);
   return (
     <GrayBox>
       <Grid container spacing={1}>
@@ -60,7 +66,9 @@ const WorkDetails = () => {
 
         <Grid item xs={6}>
           <ETParagraph color={Palette.neutral.dark}>
-            {currentWorkPhase?.next_milestone ?? "-"}
+            {currentWorkPhase?.next_milestone ??
+              nextWorkPhase?.next_milestone ??
+              "-"}
           </ETParagraph>
         </Grid>
         <Grid item xs={4}>
