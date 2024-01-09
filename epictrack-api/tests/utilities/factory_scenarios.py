@@ -27,7 +27,6 @@ class TestProjectInfo(Enum):
     project1 = {
         "name": fake.word(),
         "description": fake.sentence(),
-        "location": fake.city(),
         "address": fake.address(),
         "type_id": fake.random_int(min=1, max=10),
         "sub_type_id": fake.random_int(min=1, max=10),
