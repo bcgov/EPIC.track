@@ -15,6 +15,9 @@
 
 from http import HTTPStatus
 from urllib.parse import urljoin
+
+from decimal import Decimal
+
 from tests.utilities.factory_scenarios import (TestProjectInfo)
 from tests.utilities.factory_utils import factory_project_model
 
@@ -51,52 +54,26 @@ def test_update_project(client):
 
 def test_delete_project(client):
     """Test delete project."""
-    payload = {
-        "name": "New Project for deletion",
-        "description": "Testing the create project endpoint",
-        "latitude": "54.2681",
-        "longitude": "-130.3828",
-        "type_id": 1,
-        "sub_type_id": 1,
-        "proponent_id": 1,
-        "region_id_env": 1,
-        "region_id_flnro": 1,
-        "type_id": 1,
-        "sub_type_id": 1,
-        "abbreviation": "NPD",
-    }
-    # Create a project
-    projects_url = urljoin(API_BASE_URL, "projects")
-    project = client.post(projects_url, json=payload)
-    response = client.get(projects_url)
-    num_projects = len(response.json)
-    assert num_projects >= 1
-    url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
+    project = factory_project_model()
+    url = urljoin(API_BASE_URL, f'projects/{project.id}')
     client.delete(url)
+    projects_url = urljoin(API_BASE_URL, "projects")
     response = client.get(projects_url)
-    assert len(response.json) == num_projects - 1
+    assert len(response.json) == 0
 
 
 def test_project_detail(client):
     """Test project details."""
-    payload = {
-        "name": "New Project for details testing",
-        "description": "Testing the create project endpoint",
-        "latitude": "54.2681",
-        "longitude": "-130.3828",
-        "type_id": 1,
-        "sub_type_id": 1,
-        "proponent_id": 1,
-        "region_id_env": 1,
-        "region_id_flnro": 1,
-        "abbreviation": "NPDT",
-    }
-    # Create a project
-    projects_url = urljoin(API_BASE_URL, "projects")
-    project = client.post(projects_url, json=payload)
-    url = urljoin(API_BASE_URL, f'projects/{project.json["id"]}')
+    project_payload = TestProjectInfo.project1.value
+    project = factory_project_model()
+    url = urljoin(API_BASE_URL, f'projects/{project.id}')
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
     assert "id" in response.json
-    for key, value in payload.items():
-        assert value == response.json[key]
+    for key, expected_value in project_payload.items():
+        response_value = response.json.get(key)
+        assert response_value is not None, f"Key {key} not found in response"
+        if isinstance(expected_value, Decimal):  # some of the values are decimal
+            response_value = Decimal(response_value)
+        assert expected_value == response_value, \
+            f"Value mismatch for key {key}: expected {expected_value}, got {response_value}"
