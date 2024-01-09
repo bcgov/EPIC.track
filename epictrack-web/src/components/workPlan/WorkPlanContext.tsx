@@ -19,6 +19,7 @@ import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
 import statusService from "../../services/statusService/statusService";
+import issueService from "../../services/issueService";
 
 interface WorkplanContextProps {
   selectedWorkPhase?: WorkPhaseAdditionalInfo;
@@ -39,6 +40,7 @@ interface WorkplanContextProps {
   getWorkStatuses: () => Promise<void>;
   issues: WorkIssue[];
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
+  loadIssues: () => Promise<void>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -61,6 +63,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   issues: [],
   setIssues: () => ({}),
   getWorkStatuses: () => new Promise((resolve) => resolve),
+  loadIssues: () => new Promise((resolve) => resolve),
 });
 
 export const WorkplanProvider = ({
@@ -80,6 +83,16 @@ export const WorkplanProvider = ({
   const workId = useMemo(() => query.get("work_id"), [query]);
 
   const [issues, setIssues] = useState<WorkIssue[]>([]);
+
+  const loadIssues = async () => {
+    if (!workId) return;
+    try {
+      const response = await issueService.getAll(workId);
+      setIssues(response.data);
+    } catch (error) {
+      return;
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -187,6 +200,7 @@ export const WorkplanProvider = ({
         statuses,
         issues,
         setIssues,
+        loadIssues,
       }}
     >
       {children}
