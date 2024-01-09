@@ -15,30 +15,16 @@
 
 from http import HTTPStatus
 from urllib.parse import urljoin
-
+from tests.utilities.factory_scenarios import (TestProjectInfo)
+from tests.utilities.factory_utils import factory_project_model
 
 API_BASE_URL = "/api/v1/"
 
 
 def test_create_project(client):
     """Test create new project."""
-    payload = {
-        "name": "New Project",
-        "description": "Testing the create project endpoint",
-        "location": "Victoria, BC",
-        "address": "Helsinki Airport, Artesaaninkuja, Lemminkäinen, Tuusula, Helsinki sub-region, \
-            Uusimaa, Southern Finland, Mainland Finland, 04360, Finland",
-        "type_id": 1,
-        "sub_type_id": 1,
-        "proponent_id": 1,
-        "region_id_env": 1,
-        "region_id_flnro": 1,
-        "latitude": "54.2681",
-        "longitude": "-130.3828",
-        "abbreviation": "NP",
-    }
     url = urljoin(API_BASE_URL, "projects")
-    response = client.post(url, json=payload)
+    response = client.post(url, json=TestProjectInfo.project1.value)
     assert response.status_code == HTTPStatus.CREATED
     assert "id" in response.json
 
@@ -52,27 +38,11 @@ def test_get_projects(client):
 
 def test_update_project(client):
     """Test update project."""
-    payload = {
-        "name": "New Project Created",
-        "description": "Testing the create project endpoint",
-        "latitude": "54.2681",
-        "longitude": "-130.3828",
-        "type_id": 1,
-        "sub_type_id": 1,
-        "proponent_id": 1,
-        "region_id_env": 1,
-        "region_id_flnro": 1,
-        "type_id": 1,
-        "sub_type_id": 1,
-        "abbreviation": "NPC",
-    }
-    # Create a project
-    url = urljoin(API_BASE_URL, "projects")
-    response = client.post(url, json=payload)
-
+    project = factory_project_model()
     # Update the project
+    payload = TestProjectInfo.project1.value
     payload["name"] = "New Project Updated"
-    url = urljoin(API_BASE_URL, f'projects/{response.json["id"]}')
+    url = urljoin(API_BASE_URL, f'projects/{project.id}')
     response = client.put(url, json=payload)
 
     assert response.status_code == HTTPStatus.OK
