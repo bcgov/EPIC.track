@@ -42,14 +42,10 @@ const schema = yup.object().shape({
     }),
 });
 
-const LockClosedIcon: React.FC<IconProps> = Icons["LockClosedIcon"];
-const LockOpenIcon: React.FC<IconProps> = Icons["LockOpenIcon"];
-
 export default function ProponentForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const [disabled, setDisabled] = React.useState<boolean>();
   const ctx = React.useContext(MasterContext);
-  const [specialField, setSpecialField] = React.useState<string>("");
   const [isNameFieldLocked, setIsNameFieldLocked] =
     React.useState<boolean>(false);
 
@@ -138,9 +134,11 @@ export default function ProponentForm({ ...props }) {
           </ProponentNameSpecialField>
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
-            <Box sx={{ paddingTop: Boolean(specialField) ? "15px" : "11px" }}>
+            <Box
+              sx={{ paddingTop: Boolean(isNameFieldLocked) ? "15px" : "11px" }}
+            >
               <ControlledSelectV2
-                disabled={Boolean(specialField)}
+                disabled={Boolean(isNameFieldLocked)}
                 placeholder="Select"
                 defaultValue={(ctx.item as Proponent)?.relationship_holder_id}
                 options={staffs || []}
@@ -152,7 +150,7 @@ export default function ProponentForm({ ...props }) {
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch
-              disabled={Boolean(specialField)}
+              disabled={Boolean(isNameFieldLocked)}
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               name="is_active"
             />
