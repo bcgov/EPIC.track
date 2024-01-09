@@ -27,6 +27,7 @@ const IssueAccordion = ({
 
   return (
     <ETAccordion
+      data-cy="issue-accordion"
       expanded={expanded}
       onChange={() => {
         setExpanded(!expanded);
@@ -40,6 +41,7 @@ const IssueAccordion = ({
         expanded={expanded}
         expandIcon={
           <ExpandIcon
+            data-cy={`${issue.id}-expand-icon`}
             sx={{
               fill: Palette.primary.main,
               cursor: "pointer",

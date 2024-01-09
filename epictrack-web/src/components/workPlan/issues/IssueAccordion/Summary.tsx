@@ -26,7 +26,7 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
       <Grid item xs lg="auto">
         <AccordionSummaryItem title="Issue" enableTooltip={true}>
           <Stack spacing={2} direction={"row"}>
-            <ETParagraph>{issue.title}</ETParagraph>
+            <ETParagraph data-cy="issue-title">{issue.title}</ETParagraph>
             {issue.is_high_priority && (
               <HighPriorityChip label="High Priority" />
             )}

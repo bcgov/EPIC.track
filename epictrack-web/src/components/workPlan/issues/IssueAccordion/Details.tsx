@@ -23,6 +23,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
 
+  const issueContext = React.useContext(IssuesContext);
   const {
     setShowIssuesForm,
     approveIssue,
@@ -31,7 +32,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     setUpdateToClone,
     setShowCloneForm,
     setUpdateToEdit,
-  } = React.useContext(IssuesContext);
+  } = issueContext;
 
   const handleApproveIssue = () => {
     approveIssue(issue.id, latestUpdate.id);
@@ -74,6 +75,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
 
               <Grid item xs={12}>
                 <ETParagraph
+                  data-cy="issue-description"
                   color={Palette.neutral.dark}
                   sx={{ whiteSpace: "pre-wrap" }}
                 >
@@ -102,6 +104,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Else>
                   <Grid item>
                     <Button
+                      data-cy="new-issue-update"
                       variant="text"
                       startIcon={
                         <AddIcon
