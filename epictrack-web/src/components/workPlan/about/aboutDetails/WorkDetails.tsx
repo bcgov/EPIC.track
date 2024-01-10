@@ -1,7 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import { useContext } from "react";
 import { WorkplanContext } from "../../WorkPlanContext";
-import { ETCaption1, ETCaption2, ETParagraph, GrayBox } from "../../../shared";
+import { ETCaption1, ETParagraph, GrayBox } from "../../../shared";
 import { Palette } from "../../../../styles/theme";
 import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
