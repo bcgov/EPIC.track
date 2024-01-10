@@ -29,7 +29,7 @@ interface IssueContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
 
-export const IssuesContext = createContext<IssuesContextProps>({
+export const initialIssueContextValue: IssuesContextProps = {
   showIssuesForm: false,
   setShowIssuesForm: () => ({}),
   isIssuesLoading: true,
@@ -55,7 +55,11 @@ export const IssuesContext = createContext<IssuesContextProps>({
   },
   updateToEdit: null,
   setUpdateToEdit: () => ({}),
-});
+};
+
+export const IssuesContext = createContext<IssuesContextProps>(
+  initialIssueContextValue
+);
 
 export const LASTEST_ISSUE_UPDATE_INDEX = 0;
 
