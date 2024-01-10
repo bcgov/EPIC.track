@@ -326,7 +326,7 @@ export default function WorkForm({ ...props }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel required>Work Description</ETFormLabel>
+          <ETFormLabel>Work Description</ETFormLabel>
           <ControlledTextField
             name="report_description"
             placeholder="Description will be shown on all reports"
