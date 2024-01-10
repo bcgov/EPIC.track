@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid, Box, IconButton } from "@mui/material";
+import { TextField, Grid, Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,15 +11,8 @@ import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSe
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
-import { When, If, Then, Else } from "react-if";
-import {
-  SpecialFieldEntityEnum,
-  SPECIAL_FIELDS,
-} from "../../constants/application-constant";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
-import { Palette } from "../../styles/theme";
-import { SpecialFieldGrid } from "../shared/specialField";
 import { ProponentNameSpecialField } from "./ProponentNameSpecialField";
 
 const schema = yup.object().shape({
@@ -124,7 +117,7 @@ export default function ProponentForm({ ...props }) {
           >
             <TextField
               variant="outlined"
-              disabled={disabled}
+              disabled={isNameFieldLocked}
               placeholder="Proponent Name"
               fullWidth
               error={!!errors?.name?.message}
@@ -134,9 +127,7 @@ export default function ProponentForm({ ...props }) {
           </ProponentNameSpecialField>
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
-            <Box
-              sx={{ paddingTop: Boolean(isNameFieldLocked) ? "15px" : "11px" }}
-            >
+            <Box>
               <ControlledSelectV2
                 disabled={Boolean(isNameFieldLocked)}
                 placeholder="Select"

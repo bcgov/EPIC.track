@@ -189,7 +189,7 @@ class ProjectService:
         return {"first_nation_available": result}
 
     @classmethod
-    def import_projects(cls, file: IO):  # pylint: disable=too-many-locals
+    def import_projects(cls, file: IO):
         """Import proponents"""
         data = cls._read_excel(file)
         proponent_names = set(data["proponent_id"].to_list())
@@ -197,30 +197,12 @@ class ProjectService:
         sub_type_names = set(data["sub_type_id"].to_list())
         env_region_names = set(data["region_id_env"].to_list())
         flnro_region_names = set(data["region_id_flnro"].to_list())
-        project_names = set(data["name"].to_list())
 
-        proponents = (
-            db.session.query(Proponent)
-            .filter(Proponent.name.in_(proponent_names), Proponent.is_active.is_(True))
-            .all()
-        )
-        types = (
-            db.session.query(Type)
-            .filter(Type.name.in_(type_names), Type.is_active.is_(True))
-            .all()
-        )
-        sub_types = (
-            db.session.query(SubType)
-            .filter(SubType.name.in_(sub_type_names), SubType.is_active.is_(True))
-            .all()
-        )
-        regions = (
-            db.session.query(Region)
-            .filter(
-                Region.name.in_(env_region_names.union(flnro_region_names)),
-                Region.is_active.is_(True),
-            )
-            .all()
+        proponents, types, sub_types, regions = cls._get_master_data(
+            proponent_names,
+            type_names,
+            sub_type_names,
+            env_region_names.union(flnro_region_names),
         )
 
         data["proponent_id"] = data.apply(
@@ -242,30 +224,9 @@ class ProjectService:
             lambda x: PROJECT_STATE_ENUM_MAPS[x["project_state"]], axis=1
         )
 
-        existing_projects_qry = db.session.query(Project).filter()
-
-        existing_projects = existing_projects_qry.all()
-        # Create set of existing project names
-        existing_projects = {x.name for x in existing_projects}
-
-        # Mark removed entries as inactive
-        to_delete = existing_projects - project_names
-        disabled_count = existing_projects_qry.filter(
-            Project.name.in_(to_delete),
-        ).update({"is_active": False, "is_deleted": True})
-        current_app.logger.info(f"Disabled {disabled_count} Projects")
-
-        # Update existing entries to be active
-        to_update = existing_projects & project_names
-        enabled_count = existing_projects_qry.filter(
-            Project.name.in_(to_update)
-        ).update({"is_active": True})
-        current_app.logger.info(f"Enabled {enabled_count} Projects")
-
         username = TokenInfo.get_username()
         data["created_by"] = username
-        # Remove updated projects to avoid creating duplicates
-        data = data[~data["name"].isin(to_update)]
+        data = cls._update_or_delete_old_projects(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Project, data)
         db.session.commit()
@@ -389,3 +350,60 @@ class ProjectService:
         """Get all project types"""
         project_types = Type.find_all(default_filters=False)
         return TypeSchema(many=True).dump(project_types)
+
+    @classmethod
+    def _get_master_data(
+        cls, proponent_names, type_names, sub_type_names, region_names
+    ):
+        proponents = (
+            db.session.query(Proponent)
+            .filter(Proponent.name.in_(proponent_names), Proponent.is_active.is_(True))
+            .all()
+        )
+        types = (
+            db.session.query(Type)
+            .filter(Type.name.in_(type_names), Type.is_active.is_(True))
+            .all()
+        )
+        sub_types = (
+            db.session.query(SubType)
+            .filter(SubType.name.in_(sub_type_names), SubType.is_active.is_(True))
+            .all()
+        )
+        regions = (
+            db.session.query(Region)
+            .filter(
+                Region.name.in_(region_names),
+                Region.is_active.is_(True),
+            )
+            .all()
+        )
+        return proponents, types, sub_types, regions
+
+    @classmethod
+    def _update_or_delete_old_projects(cls, data) -> pd.DataFrame:
+        """Marks old entries as deleted or active depending on their existence in input data.
+
+        Returns the DataFrame after filtering out updated entries.
+        """
+        project_names = set(data["name"].to_list())
+        existing_projects_qry = db.session.query(Project).filter()
+
+        existing_projects = existing_projects_qry.all()
+        # Create set of existing project names
+        existing_projects = {x.name for x in existing_projects}
+        # Mark removed entries as inactive
+        to_delete = existing_projects - project_names
+        disabled_count = existing_projects_qry.filter(
+            Project.name.in_(to_delete),
+        ).update({"is_active": False, "is_deleted": True})
+        current_app.logger.info(f"Disabled {disabled_count} Projects")
+
+        # Update existing entries to be active
+        to_update = existing_projects & project_names
+        enabled_count = existing_projects_qry.filter(
+            Project.name.in_(to_update)
+        ).update({"is_active": True})
+        current_app.logger.info(f"Enabled {enabled_count} Projects")
+        # Remove updated projects to avoid creating duplicates
+        return data[~data["name"].isin(to_update)]
