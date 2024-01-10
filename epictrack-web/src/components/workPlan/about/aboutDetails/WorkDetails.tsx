@@ -18,7 +18,6 @@ const WorkDetails = () => {
       ? workPhases?.[currentWorkPhaseIndex + 1]
       : null;
 
-  console.log(nextWorkPhase);
   return (
     <GrayBox>
       <Grid container spacing={1}>
