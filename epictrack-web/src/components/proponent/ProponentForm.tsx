@@ -35,9 +35,6 @@ const schema = yup.object().shape({
     }),
 });
 
-const LockClosedIcon: React.FC<IconProps> = Icons["LockClosedIcon"];
-const LockOpenIcon: React.FC<IconProps> = Icons["LockOpenIcon"];
-
 export default function ProponentForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const [disabled, setDisabled] = React.useState<boolean>();
