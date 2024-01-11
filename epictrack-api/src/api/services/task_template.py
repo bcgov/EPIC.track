@@ -14,6 +14,7 @@
 """Service to manage Task Templates."""
 from typing import IO, List
 
+import numpy as np
 import pandas as pd
 from flask import current_app
 from sqlalchemy.sql import exists
@@ -47,6 +48,8 @@ class TaskTemplateService:
                 {"responsibility_id": res.id},
                 regex=True,
             )
+        task_data = task_data.replace({np.nan: None})
+        task_data = task_data.replace({np.NaN: None})
         tasks = task_data.to_dict("records")
         cls.create_bulk_tasks(tasks)
         TaskTemplate.commit()

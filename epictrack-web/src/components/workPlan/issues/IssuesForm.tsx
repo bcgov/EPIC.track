@@ -4,7 +4,11 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, FormControlLabel, Grid, Stack, Tooltip } from "@mui/material";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import { ETFormLabelWithCharacterLimit, ETParagraph } from "../../shared";
+import {
+  ETFormLabel,
+  ETFormLabelWithCharacterLimit,
+  ETParagraph,
+} from "../../shared";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { IssuesContext } from "./IssuesContext";
 import { IconProps } from "../../icons/type";
@@ -141,19 +145,11 @@ const IssuesForm = () => {
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabelWithCharacterLimit
-            characterCount={watchedDescription.length}
-            maxCharacterLength={descriptionCharacterLimit}
-          >
-            Description
-          </ETFormLabelWithCharacterLimit>
+          <ETFormLabel>Description</ETFormLabel>
           <ControlledTextField
             name="description"
             fullWidth
             size="small"
-            inputProps={{
-              maxLength: descriptionCharacterLimit,
-            }}
             multiline
             rows={4}
           />

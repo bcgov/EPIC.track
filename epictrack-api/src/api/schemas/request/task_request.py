@@ -87,8 +87,7 @@ class TaskBodyParameterSchema(RequestBodyParameterSchema):
 
     tips = fields.Str(
         metadata={"description": "Practical info on why/how to do the task"},
-        # validate=validate.Length(max=150),
-        required=True,
+        allow_none=True
     )
 
     number_of_days = fields.Int(

@@ -96,12 +96,12 @@ class StaffService:
     @classmethod
     def check_existence(cls, email, staff_id=None):
         """Checks if a staff exists with given email address"""
-        return Staff.check_existence(email, staff_id)
+        return Staff.check_existence(email.lower(), staff_id)
 
     @classmethod
     def find_by_email(cls, email):
         """Find staff by email address"""
-        return Staff.find_by_email(email)
+        return Staff.find_by_email(email.lower())
 
     @classmethod
     def import_staffs(cls, file: IO):
@@ -121,6 +121,7 @@ class StaffService:
         username = TokenInfo.get_username()
         data["created_by"] = username
         data = data.to_dict("records")
+        data["email"] = data["email"].lower()
         db.session.bulk_insert_mappings(Staff, data)
         db.session.commit()
         return "Inserted successfully"

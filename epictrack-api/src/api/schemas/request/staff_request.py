@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Staff resource's input validations"""
-from marshmallow import fields, validate
+from marshmallow import fields, pre_load, validate
 
 from api.schemas.validators import Phone
 
@@ -91,6 +91,12 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "Active status of the staff"},
         required=True
     )
+
+    @pre_load
+    def convert_email_to_lower(self, data, **kwargs):
+        """Converts staff email into lower case string"""
+        data["email"] = data["email"].lower()
+        return data
 
 
 class StaffEmailPathParameterSchema(RequestPathParameterSchema):
