@@ -5,18 +5,17 @@ import { useAppDispatch } from "../../../hooks";
 import { envBanner } from "../../../styles/uiStateSlice";
 import InfoIcon from "../../../assets/images/infoIcon.svg";
 import { ETSubhead } from "../../shared";
-
+import { AppConfig } from "../../../config";
 const EnvironmentBanner = () => {
   const dispatch = useAppDispatch();
-  const host = window.location.hostname;
+  const env = AppConfig.environment;
   const isTestEnvironment =
-    host.indexOf("dev") !== -1 ||
-    host.indexOf("test") !== -1 ||
-    host.indexOf("demo") !== -1 ||
-    host.indexOf("localhost") !== -1;
+    env === "dev" || env === "test" || env === "demo" || env === "localhost";
+
   React.useEffect(() => {
     dispatch(envBanner(isTestEnvironment));
   }, []);
+
   if (!isTestEnvironment) {
     return (
       <Box
@@ -28,6 +27,7 @@ const EnvironmentBanner = () => {
       ></Box>
     );
   }
+
   return (
     <Box
       sx={{

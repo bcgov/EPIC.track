@@ -7,6 +7,7 @@ declare global {
       REACT_APP_KEYCLOAK_URL: string;
       REACT_APP_KEYCLOAK_CLIENT: string;
       REACT_APP_KEYCLOAK_REALM: string;
+      REACT_APP_ENV: string;
     };
   }
 }
@@ -22,9 +23,12 @@ const KC_CLIENT =
 const KC_REALM =
   window._env_?.REACT_APP_KEYCLOAK_REALM ||
   process.env.REACT_APP_KEYCLOAK_REALM;
+const APP_ENVIRONMENT =
+  window._env_?.REACT_APP_ENV || process.env.REACT_APP_ENV;
 
 export const AppConfig = {
   apiUrl: `${API_URL}/api/v1/`,
+  environment: APP_ENVIRONMENT,
   keycloak: {
     url: KC_URL || "",
     clientId: KC_CLIENT || "",
