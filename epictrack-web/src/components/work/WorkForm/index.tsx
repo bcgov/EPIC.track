@@ -35,6 +35,7 @@ const schema = yup.object<Work>().shape({
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),
+  report_description: yup.string().required("Description is required"),
   title: yup
     .string()
     .required("Title is required")
@@ -326,7 +327,7 @@ export default function WorkForm({ ...props }) {
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel>Work Description</ETFormLabel>
+          <ETFormLabel required>Work Description</ETFormLabel>
           <ControlledTextField
             name="report_description"
             placeholder="Description will be shown on all reports"
