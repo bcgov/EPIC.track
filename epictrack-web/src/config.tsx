@@ -24,7 +24,7 @@ const KC_REALM =
   window._env_?.REACT_APP_KEYCLOAK_REALM ||
   process.env.REACT_APP_KEYCLOAK_REALM;
 const APP_ENVIRONMENT =
-  window._env_?.REACT_APP_ENV || process.env.REACT_APP_ENV;
+  window._env_?.REACT_APP_ENV || process.env.REACT_APP_ENV || "";
 
 export const AppConfig = {
   apiUrl: `${API_URL}/api/v1/`,

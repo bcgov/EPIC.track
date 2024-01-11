@@ -9,8 +9,7 @@ import { AppConfig } from "../../../config";
 const EnvironmentBanner = () => {
   const dispatch = useAppDispatch();
   const env = AppConfig.environment;
-  const isTestEnvironment =
-    env === "dev" || env === "test" || env === "demo" || env === "localhost";
+  const isTestEnvironment = ["dev", "test", "demo", "localhost"].includes(env);
 
   React.useEffect(() => {
     dispatch(envBanner(isTestEnvironment));
@@ -44,7 +43,7 @@ const EnvironmentBanner = () => {
       textAlign="center"
     >
       <Box component="img" src={InfoIcon} alt="EPIC.track" />
-      <ETSubhead>You are using a TEST environment</ETSubhead>
+      <ETSubhead>You are using a {env.toUpperCase()} environment</ETSubhead>
     </Box>
   );
 };
