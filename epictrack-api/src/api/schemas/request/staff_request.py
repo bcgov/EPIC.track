@@ -93,7 +93,7 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     @pre_load
-    def convert_email_to_lower(self, data, **kwargs):
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
         """Converts staff email into lower case string"""
         data["email"] = data["email"].lower()
         return data
