@@ -35,7 +35,7 @@ const schema = yup.object<Work>().shape({
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),
-  report_description: yup.string().required("Work Description is required"),
+  report_description: yup.string().required("Work description is required"),
   title: yup
     .string()
     .required("Title is required")
