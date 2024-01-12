@@ -21,7 +21,6 @@ def upgrade():
 
     ministries = sa.table(
         'ministries',
-        sa.Column('id', sa.Integer),
         sa.Column('name', sa.String),
         sa.column('abbreviation', sa.String),
         sa.Column('is_active', sa.Boolean),
@@ -29,18 +28,8 @@ def upgrade():
         sa.Column('sort_order', sa.Integer),
     )
 
-    ## select greatest id from ministries
-    conn = op.get_bind()
-    result = conn.execute(
-        sa.text(
-            "SELECT max(id) FROM ministries"
-        )
-    )
-    new_id = result.fetchone()[0] + 1
-
     op.execute(
         ministries.insert().values(
-            id=new_id,
             name=NoneMinistryName,
             abbreviation=NoneMinistryName,
             is_active=True,
