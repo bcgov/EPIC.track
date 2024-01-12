@@ -13,27 +13,13 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.platypus import Paragraph, Table, TableStyle
-from sqlalchemy import and_, or_, func, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
 from api.models import (
-    EAAct,
-    EAOTeam,
-    Event,
-    FederalInvolvement,
-    PhaseCode,
-    Project,
-    Region,
-    Staff,
-    StaffWorkRole,
-    SubType,
-    Type,
-    Work,
-    WorkPhase,
-    WorkType,
-    db,
-)
+    EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
+    WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 
@@ -64,9 +50,9 @@ class EAResourceForeCastReport(ReportFactory):
             "work_lead",
             "env_region",
             "nrs_region",
-            "staff_first_name",
-            "staff_last_name",
-            "role_id",
+            # "staff_first_name",
+            # "staff_last_name",
+            # "role_id",
             "work_id",
             "ea_type_label",
             "sector(sub)",
@@ -235,6 +221,7 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _fetch_data(self, report_date: datetime):  # pylint: disable=too-many-locals
         """Fetches the relevant data for EA Resource Forecast Report"""
+        # TODO: FIX LIST INDEX OUT OF BOUNDS FOR CERTAIN MONTHS, EX:- NOV 1, 2024
         report_start_date = report_date.date().replace(day=1)
         first_month = self._add_months(report_start_date, 1, False)
         self.end_date = self._add_months(first_month, 5)
@@ -242,7 +229,6 @@ class EAResourceForeCastReport(ReportFactory):
         nrs_region = aliased(Region)
         responsible_epd = aliased(Staff)
         work_lead = aliased(Staff)
-        project_phase = aliased(PhaseCode)
 
         end_work_phase_query = (
             db.session.query(
@@ -295,7 +281,9 @@ class EAResourceForeCastReport(ReportFactory):
                     end_work_phase_query,
                     WorkPhase.id == end_work_phase_query.c.end_phase_id,
                 )
-                .where(or_(Event.actual_date.is_(None), Event.actual_date >= report_date))
+                .where(
+                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date)
+                )
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
                 .distinct(WorkPhase.work_id)
             )
@@ -337,22 +325,18 @@ class EAResourceForeCastReport(ReportFactory):
                 Project.is_active.is_(True),
             )
             .join(Work, Work.project_id == Project.id)
+            .join(WorkPhase, WorkPhase.id == Work.current_work_phase_id)
+            .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
             .join(WorkType, Work.work_type_id == WorkType.id)
             .join(EAAct, Work.ea_act_id == EAAct.id)
             .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
-            .join(FederalInvolvement, Work.federal_involvement_id == FederalInvolvement.id)
+            .join(
+                FederalInvolvement, Work.federal_involvement_id == FederalInvolvement.id
+            )
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
             .join(env_region, env_region.id == Project.region_id_env)
             .join(nrs_region, nrs_region.id == Project.region_id_flnro)
-            .outerjoin(StaffWorkRole, Work.id == StaffWorkRole.work_id)
-            .outerjoin(
-                Staff,
-                and_(
-                    StaffWorkRole.staff_id == Staff.id,
-                    StaffWorkRole.role_id.in_([3, 4, 5]),
-                ),
-            )
             .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
             .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
             .filter(
@@ -366,7 +350,7 @@ class EAResourceForeCastReport(ReportFactory):
                 WorkType.name.label("ea_type"),
                 WorkType.report_title.label("ea_type_label"),
                 WorkType.sort_order.label("ea_type_sort_order"),
-                project_phase.name.label("project_phase"),
+                PhaseCode.name.label("project_phase"),
                 EAAct.name.label("ea_act"),
                 FederalInvolvement.name.label("iaac"),
                 SubType.short_name.label("sub_type"),
@@ -377,9 +361,6 @@ class EAResourceForeCastReport(ReportFactory):
                 Work.id.label("work_id"),
                 responsible_epd.full_name.label("responsible_epd"),
                 work_lead.full_name.label("work_lead"),
-                Staff.first_name.label("staff_first_name"),
-                Staff.last_name.label("staff_last_name"),
-                StaffWorkRole.role_id.label("role_id"),
                 Work.id.label("work_id"),
                 func.concat(SubType.short_name, " (", Type.short_name, ")").label(
                     "sector(sub)"
@@ -475,13 +456,22 @@ class EAResourceForeCastReport(ReportFactory):
             staffs = []
             work_data = values[0]
             work_data["cairt_lead"] = ""
-            for value in values:
-                role = value.pop("role_id")
-                first_name = value.pop("staff_first_name")
-                last_name = value.pop("staff_last_name")
-                if role == 4:
+            work_team_members = (
+                db.session.query(StaffWorkRole)
+                .filter(StaffWorkRole.work_id == work_data["work_id"])
+                .join(Staff, Staff.id == StaffWorkRole.staff_id)
+                .add_columns(
+                    Staff.first_name.label("first_name"),
+                    Staff.last_name.label("last_name"),
+                    StaffWorkRole.role_id.label("role_id"),
+                )
+            )
+            for work_team_member in work_team_members:
+                first_name = work_team_member.first_name
+                last_name = work_team_member.last_name
+                if work_team_member.role_id == 4:
                     work_data["cairt_lead"] = f"{last_name}, {first_name}"
-                elif role in [3, 5]:
+                elif work_team_member.role_id in [3, 5]:
                     staffs.append({"first_name": first_name, "last_name": last_name})
             staffs = sorted(staffs, key=lambda x: x["last_name"])
             staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
@@ -638,7 +628,7 @@ class EAResourceForeCastReport(ReportFactory):
                     row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
                     color = month_data["color"][1:]
-                    bg_color = [int(color[i: i + 2], 16) / 255 for i in (0, 2, 4)]
+                    bg_color = [int(color[i : i + 2], 16) / 255 for i in (0, 2, 4)]
                     styles.append(
                         (
                             "BACKGROUND",
