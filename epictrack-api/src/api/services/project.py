@@ -74,7 +74,7 @@ class ProjectService:
             "entity_id": project.id,
             "field_name": "proponent_id",
             "field_value": project.proponent_id,
-            "active_from": project.created_at
+            "active_from": project.created_at,
         }
         SpecialFieldService.create_special_field_entry(proponent_special_field_data)
         project_name_special_field_data = {
@@ -82,7 +82,7 @@ class ProjectService:
             "entity_id": project.id,
             "field_name": "name",
             "field_value": project.name,
-            "active_from": project.created_at
+            "active_from": project.created_at,
         }
         SpecialFieldService.create_special_field_entry(project_name_special_field_data)
         project.save()
@@ -171,7 +171,10 @@ class ProjectService:
                 IndigenousWork,
                 Work.id == IndigenousWork.work_id,
             )
-            .join(IndigenousNation, IndigenousNation.id == IndigenousWork.indigenous_nation_id,)
+            .join(
+                IndigenousNation,
+                IndigenousNation.id == IndigenousWork.indigenous_nation_id,
+            )
             .filter(
                 Project.id == Work.project_id,
                 IndigenousWork.is_active.is_(True),
@@ -194,25 +197,12 @@ class ProjectService:
         sub_type_names = set(data["sub_type_id"].to_list())
         env_region_names = set(data["region_id_env"].to_list())
         flnro_region_names = set(data["region_id_flnro"].to_list())
-        proponents = (
-            db.session.query(Proponent)
-            .filter(Proponent.name.in_(proponent_names), Proponent.is_active.is_(True))
-            .all()
-        )
-        types = (
-            db.session.query(Type)
-            .filter(Type.name.in_(type_names), Type.is_active.is_(True))
-            .all()
-        )
-        sub_types = (
-            db.session.query(SubType)
-            .filter(SubType.name.in_(sub_type_names), SubType.is_active.is_(True))
-            .all()
-        )
-        regions = (
-            db.session.query(Region)
-            .filter(Region.name.in_(env_region_names.union(flnro_region_names)), Region.is_active.is_(True))
-            .all()
+
+        proponents, types, sub_types, regions = cls._get_master_data(
+            proponent_names,
+            type_names,
+            sub_type_names,
+            env_region_names.union(flnro_region_names),
         )
 
         data["proponent_id"] = data.apply(
@@ -236,6 +226,7 @@ class ProjectService:
 
         username = TokenInfo.get_username()
         data["created_by"] = username
+        data = cls._update_or_delete_old_projects(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Project, data)
         db.session.commit()
@@ -262,12 +253,14 @@ class ProjectService:
             "Project Closed": "is_project_closed",
             "FTE Positions Construction": "fte_positions_construction",
             "FTE Positions Operation": "fte_positions_operation",
-            "Project State": "project_state"
+            "Project State": "project_state",
         }
         data_frame = pd.read_excel(file)
         data_frame.rename(column_map, axis="columns", inplace=True)
         data_frame = data_frame.infer_objects()
-        data_frame = data_frame.apply(lambda x: x.str.strip() if x.dtype == "object" else x)
+        data_frame = data_frame.apply(
+            lambda x: x.str.strip() if x.dtype == "object" else x
+        )
         data_frame = data_frame.replace({np.nan: None})
         data_frame = data_frame.replace({np.NaN: None})
         return data_frame
@@ -308,23 +301,27 @@ class ProjectService:
         """Find and return the id of region from given list"""
         if name is None:
             return None
-        region = next((x for x in regions if x.name == name and x.entity == entity), None)
+        region = next(
+            (x for x in regions if x.name == name and x.entity == entity), None
+        )
         if region is None:
             raise ResourceNotFoundError(f"Region with name {name} does not exist")
         return region.id
 
     @classmethod
-    def _generate_project_abbreviation(cls, project_name: str, method: ProjectCodeMethod):
+    def _generate_project_abbreviation(
+        cls, project_name: str, method: ProjectCodeMethod
+    ):
         words = project_name.split()
 
         # Method 1: 1st 3 LETTERS OF FIRST WORD IN NAME + FIRST 3 LETTERS OF 2nd WORD IN NAME
         if method == ProjectCodeMethod.METHOD_1 and len(words) >= 2:
-            return f'{words[0][:3]}{words[1][:3]}'.upper()
+            return f"{words[0][:3]}{words[1][:3]}".upper()
 
         # Method 2: 1st LETTER OF FIRST WORD IN NAME
         # + 1st LETTER OF 2nd WORD IN NAME + 1st FOUR LETTERS OF THIRD WORD IN NAME
         if method == ProjectCodeMethod.METHOD_2 and len(words) >= 3:
-            return f'{words[0][0]}{words[1][0]}{words[2][:4]}'.upper()
+            return f"{words[0][0]}{words[1][0]}{words[2][:4]}".upper()
 
         # Method 3: 1st 6 LETTERS OF FIRST WORD IN NAME
         if method == ProjectCodeMethod.METHOD_3 and len(words[0]) >= 6:
@@ -336,7 +333,9 @@ class ProjectService:
     def create_project_abbreviation(cls, project_name: str):
         """Return a project code based on the project name"""
         for method in ProjectCodeMethod:
-            project_abbreviation = cls._generate_project_abbreviation(project_name, method)
+            project_abbreviation = cls._generate_project_abbreviation(
+                project_name, method
+            )
 
             if project_abbreviation is not None:
                 # Check if project abbreviation already exists
@@ -351,3 +350,60 @@ class ProjectService:
         """Get all project types"""
         project_types = Type.find_all(default_filters=False)
         return TypeSchema(many=True).dump(project_types)
+
+    @classmethod
+    def _get_master_data(
+        cls, proponent_names, type_names, sub_type_names, region_names
+    ):
+        proponents = (
+            db.session.query(Proponent)
+            .filter(Proponent.name.in_(proponent_names), Proponent.is_active.is_(True))
+            .all()
+        )
+        types = (
+            db.session.query(Type)
+            .filter(Type.name.in_(type_names), Type.is_active.is_(True))
+            .all()
+        )
+        sub_types = (
+            db.session.query(SubType)
+            .filter(SubType.name.in_(sub_type_names), SubType.is_active.is_(True))
+            .all()
+        )
+        regions = (
+            db.session.query(Region)
+            .filter(
+                Region.name.in_(region_names),
+                Region.is_active.is_(True),
+            )
+            .all()
+        )
+        return proponents, types, sub_types, regions
+
+    @classmethod
+    def _update_or_delete_old_projects(cls, data) -> pd.DataFrame:
+        """Marks old entries as deleted or active depending on their existence in input data.
+
+        Returns the DataFrame after filtering out updated entries.
+        """
+        project_names = set(data["name"].to_list())
+        existing_projects_qry = db.session.query(Project).filter()
+
+        existing_projects = existing_projects_qry.all()
+        # Create set of existing project names
+        existing_projects = {x.name for x in existing_projects}
+        # Mark removed entries as inactive
+        to_delete = existing_projects - project_names
+        disabled_count = existing_projects_qry.filter(
+            Project.name.in_(to_delete),
+        ).update({"is_active": False, "is_deleted": True})
+        current_app.logger.info(f"Disabled {disabled_count} Projects")
+
+        # Update existing entries to be active
+        to_update = existing_projects & project_names
+        enabled_count = existing_projects_qry.filter(
+            Project.name.in_(to_update)
+        ).update({"is_active": True})
+        current_app.logger.info(f"Enabled {enabled_count} Projects")
+        # Remove updated projects to avoid creating duplicates
+        return data[~data["name"].isin(to_update)]

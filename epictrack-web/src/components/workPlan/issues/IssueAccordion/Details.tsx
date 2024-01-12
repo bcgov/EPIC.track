@@ -23,14 +23,15 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
 
+  const issueContext = React.useContext(IssuesContext);
   const {
-    setShowIssuesForm,
+    setEditIssueUpdateFormIsOpen,
     approveIssue,
     issueToApproveId,
     setIssueToApproveId,
     setUpdateToClone,
-    setShowCloneForm,
     setUpdateToEdit,
+    setNewIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
 
   const handleApproveIssue = () => {
@@ -74,6 +75,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
 
               <Grid item xs={12}>
                 <ETParagraph
+                  data-cy="issue-description"
                   color={Palette.neutral.dark}
                   sx={{ whiteSpace: "pre-wrap" }}
                 >
@@ -102,6 +104,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Else>
                   <Grid item>
                     <Button
+                      data-cy="new-issue-update"
                       variant="text"
                       startIcon={
                         <AddIcon
@@ -114,7 +117,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToClone(latestUpdate);
-                        setShowCloneForm(true);
+                        setNewIssueUpdateFormIsOpen(true);
                       }}
                     >
                       New Update
@@ -138,7 +141,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(latestUpdate);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit
@@ -154,7 +157,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(latestUpdate);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit

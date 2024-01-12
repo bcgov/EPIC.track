@@ -1,7 +1,7 @@
 import { Divider, Grid } from "@mui/material";
 import { useContext } from "react";
 import { WorkplanContext } from "../../WorkPlanContext";
-import { ETCaption1, ETCaption2, ETParagraph, GrayBox } from "../../../shared";
+import { ETCaption1, ETParagraph, GrayBox } from "../../../shared";
 import { Palette } from "../../../../styles/theme";
 import dayjs from "dayjs";
 import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
@@ -9,9 +9,14 @@ import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
 const WorkDetails = () => {
   const { work, workPhases } = useContext(WorkplanContext);
 
-  const currentWorkPhase = workPhases?.find(
+  const currentWorkPhaseIndex = workPhases?.findIndex(
     (phase) => phase.work_phase.id === work?.current_work_phase_id
   );
+  const currentWorkPhase = workPhases?.[currentWorkPhaseIndex];
+  const nextWorkPhase =
+    currentWorkPhaseIndex + 1 < workPhases.length
+      ? workPhases?.[currentWorkPhaseIndex + 1]
+      : null;
 
   return (
     <GrayBox>
@@ -60,7 +65,9 @@ const WorkDetails = () => {
 
         <Grid item xs={6}>
           <ETParagraph color={Palette.neutral.dark}>
-            {currentWorkPhase?.next_milestone ?? "-"}
+            {currentWorkPhase?.next_milestone ??
+              nextWorkPhase?.next_milestone ??
+              "-"}
           </ETParagraph>
         </Grid>
         <Grid item xs={4}>

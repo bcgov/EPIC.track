@@ -207,7 +207,7 @@ class WorkStatusParameterSchema(RequestBodyParameterSchema):
 
 
 class WorkIssuesParameterSchema(RequestBodyParameterSchema):
-    """Work status request body schema"""
+    """Work issues request body schema"""
 
     title = fields.Str(
         metadata={"description": "Title Of the issue"},
@@ -233,6 +233,10 @@ class WorkIssuesParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "Expected Resolution date for the issue"}, required=False
     )
 
+
+class WorkIssuesCreateParameterSchema(WorkIssuesParameterSchema):
+    """Work issues create request body schema"""
+
     updates = fields.List(
         fields.Str,
         metadata={"description": "List of updates for the issue"},
@@ -240,30 +244,18 @@ class WorkIssuesParameterSchema(RequestBodyParameterSchema):
     )
 
 
-class WorkIssuesUpdateSchema(WorkIssuesParameterSchema):
+class WorkIssuesUpdateSchema(RequestBodyParameterSchema):
     """Work status update request body schema for PUT requests"""
 
-    title = fields.Str(
-        metadata={"description": "Title Of the issue"},
-        validate=validate.Length(max=50),
-        required=False,
+    id = fields.Int(
+        metadata={"description": "ID of the update"},
+        required=True
     )
 
-    updates = fields.List(
-        fields.Dict(
-            description=fields.Str(
-                metadata={"description": "Description of the update"},
-                required=True
-            ),
-            id=fields.Int(
-                metadata={"description": "ID of the update"},
-                required=True
-            ),
-            metadata={"description": "List of updates for the issue with IDs"},
-            required=True
-        ),
-        metadata={"description": "List of updates for the issue with IDs"},
-        required=False,
+    description = fields.Str(
+        metadata={"description": "Description of the update"},
+        validate=validate.Length(max=500),
+        required=True
     )
 
 
