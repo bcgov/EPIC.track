@@ -47,6 +47,13 @@ class StaffExistanceQueryParamSchema(RequestQueryParameterSchema):
         missing=None,
     )
 
+    @pre_load
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Converts staff email into lower case string"""
+        data = dict(data)
+        data["email"] = data["email"].lower()
+        return data
+
 
 class StaffByPositionsQueryParamSchema(BasicRequestQueryParameterSchema):
     """Staff by positions query parameter"""
@@ -88,8 +95,7 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     is_active = fields.Boolean(
-        metadata={"description": "Active status of the staff"},
-        required=True
+        metadata={"description": "Active status of the staff"}, required=True
     )
 
     @pre_load
@@ -107,3 +113,10 @@ class StaffEmailPathParameterSchema(RequestPathParameterSchema):
         validate=validate.Email(),
         required=True,
     )
+
+    @pre_load
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Converts staff email into lower case string"""
+        data = dict(data)
+        data["email"] = data["email"].lower()
+        return data
