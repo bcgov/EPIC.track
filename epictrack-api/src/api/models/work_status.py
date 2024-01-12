@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Dict, List
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Text, desc
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, desc
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
@@ -28,7 +28,7 @@ class WorkStatus(BaseModelVersioned):
     __tablename__ = 'work_statuses'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    description = Column(Text(), nullable=False)
+    description = Column(String(2000), nullable=False)
     posted_date = Column(DateTime(timezone=True), nullable=False)
     posted_by = Column(String(100), nullable=True)
     work_id = Column(ForeignKey('works.id'), nullable=False)

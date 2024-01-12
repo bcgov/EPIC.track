@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Issues."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
@@ -25,7 +25,7 @@ class WorkIssueUpdates(BaseModelVersioned):
     __tablename__ = 'work_issue_updates'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    description = Column(Text(), nullable=False)
+    description = Column(String(2000), nullable=False)
 
     is_approved = Column(Boolean(), default=False, nullable=True)
     approved_by = Column(String(255), default=None, nullable=True)
