@@ -38,6 +38,7 @@ const schema = yup.object<Work>().shape({
   title: yup
     .string()
     .required("Title is required")
+    .max(150, "Title should not exceed 150 characters")
     .test({
       name: "checkDuplicateWork",
       exclusive: true,
@@ -48,7 +49,9 @@ const schema = yup.object<Work>().shape({
             value,
             parent["id"]
           );
-          return !(validateWorkResult.data as any)["exists"] as boolean;
+          return validateWorkResult.data
+            ? (!(validateWorkResult.data as any)["exists"] as boolean)
+            : true;
         }
         return true;
       },
@@ -123,7 +126,11 @@ export default function WorkForm({ ...props }) {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = methods;
+
+  const title = watch("title");
+  const titleLength = title ? title.length : 0;
 
   React.useEffect(() => {
     reset(ctx.item ?? defaultWork);
@@ -318,7 +325,7 @@ export default function WorkForm({ ...props }) {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel required>Title</ETFormLabel>
+          <ETFormLabel required>Title ({title?.length || 0}/150)</ETFormLabel>
           <ControlledTextField
             name="title"
             fullWidth
