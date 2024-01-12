@@ -333,7 +333,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Latitude</ETFormLabel>
+            <ETFormLabel required>Latitude</ETFormLabel>
             <ControlledTextField
               name="latitude"
               type="number"
@@ -346,7 +346,7 @@ export default function ProjectForm({ ...props }) {
             />
           </Grid>
           <Grid item xs={6}>
-            <ETFormLabel>Longitude</ETFormLabel>
+            <ETFormLabel required>Longitude</ETFormLabel>
             <ControlledTextField
               name="longitude"
               type="number"
