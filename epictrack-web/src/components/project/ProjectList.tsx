@@ -19,6 +19,7 @@ import { useAppSelector } from "../../hooks";
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
   const [subTypes, setSubTypes] = React.useState<string[]>([]);
+  const [proponents, setProponents] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState<number>();
   const ctx = React.useContext(MasterContext);
@@ -57,11 +58,15 @@ const ProjectList = () => {
     const subTypes = projects
       .map((p) => p.sub_type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    const project_proponents = projects
+      .map((p) => p.proponent_id)
+      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const envRegions = projects
       .map((p) => p.region_env?.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setTypes(types);
     setSubTypes(subTypes);
+    setProponents(project_proponents);
     setEnvRegions(envRegions);
   }, [projects]);
 
@@ -160,6 +165,35 @@ const ProjectList = () => {
         },
       },
       {
+        accessorKey: "proponent.name",
+        header: "Proponents",
+        filterSelectOptions: proponents,
+        filterVariant: "multi-select",
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > proponents.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
+      },
+      {
         accessorKey: "region_env.name",
         header: "ENV Region",
         filterSelectOptions: envRegionsOptions,
@@ -231,7 +265,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    [types, subTypes, envRegions]
+    [types, subTypes, envRegions, proponents]
   );
   return (
     <>
