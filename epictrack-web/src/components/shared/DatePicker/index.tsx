@@ -28,6 +28,8 @@ const TrackDatePicker: React.FC<TrackDatePickerProps> = ({
           textField: {
             fullWidth: true,
             placeholder: placeholder ?? DATE_FORMAT,
+            onKeyDown: (e) => e.preventDefault(),
+            onBlur: (e) => rest.onBlur(e),
             ...(textFieldProps ?? {}),
           },
           ...restSlotProps,

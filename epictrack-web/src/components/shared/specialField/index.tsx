@@ -3,19 +3,28 @@ import React, { useEffect, useMemo, useState } from "react";
 import { When } from "react-if";
 import {
   MRT_ColumnDef,
+  MRT_TableInstance,
   MRT_TableOptions,
+  MRT_TableState,
   MaterialReactTable,
   useMaterialReactTable,
 } from "material-react-table";
 import { Palette } from "../../../styles/theme";
 import { ETCaption2, ETCaption3, ETParagraph } from "..";
 import Icons from "../../icons";
+import { styled } from "@mui/system";
 import { IconProps } from "../../icons/type";
 import { SpecialField, SpecialFieldProps } from "./type";
 import specialFieldService from "../../../services/specialFieldService";
 import { dateUtils } from "../../../utils";
 import { InLineDatePicker } from "./components/InLineDatePicker";
 import TrackSelect from "../TrackSelect";
+import {
+  DATE_FORMAT,
+  MIN_WORK_START_DATE,
+} from "../../../constants/application-constant";
+import dayjs from "dayjs";
+import MasterTrackTable from "../MasterTrackTable";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 const EditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -60,6 +69,13 @@ export const SpecialFieldGrid = ({
     field_value: false,
     active_from: false,
   });
+  const [tableInstance, setTableInstance] =
+    useState<MRT_TableInstance<SpecialField>>();
+  const tableState = useMemo<MRT_TableState<SpecialField> | undefined>(() => {
+    if (tableInstance) {
+      return tableInstance.getState();
+    }
+  }, [tableInstance]);
 
   const getEntries = async () => {
     setLoading(true);
@@ -118,9 +134,14 @@ export const SpecialFieldGrid = ({
             value = options?.find((o) => row.original.field_value == o.value);
           }
           const onBlur = (newValue: any) => {
-            row._valuesCache[column.id] =
+            const value =
               fieldType === "select" ? newValue.value : newValue.target.value;
-            if (Boolean(tableState.creatingRow)) {
+            row._valuesCache[column.id] = value;
+            setErrors({
+              ...errors,
+              field_value: !value,
+            });
+            if (Boolean(tableState && tableState.creatingRow)) {
               table.setCreatingRow(row);
             } else {
               table.setEditingRow(row);
@@ -148,6 +169,9 @@ export const SpecialFieldGrid = ({
                   variant="outlined"
                   onBlur={onBlur}
                   name={fieldName}
+                  sx={{
+                    width: "100%",
+                  }}
                   defaultValue={row._valuesCache[column.id]}
                   error={errors.field_value}
                 />
@@ -162,14 +186,32 @@ export const SpecialFieldGrid = ({
         editVariant: "text",
         size: 170,
         Edit: ({ column, row, table }) => {
+          const onBlurDate = (event: any) => {
+            const value =
+              event.target.value === DATE_FORMAT
+                ? undefined
+                : event.target.value;
+            setErrors({
+              ...errors,
+              active_from: !value,
+            });
+          };
           return (
             <InLineDatePicker
               column={column}
               row={row}
               table={table}
-              isCreating={Boolean(tableState.creatingRow)}
+              minDate={dayjs(MIN_WORK_START_DATE)}
+              isCreating={Boolean(tableState && tableState.creatingRow)}
               name={SPECIAL_FIELD_KEYS.ACTIVE_FROM}
               error={errors.active_from}
+              onBlur={onBlurDate}
+              onChange={(val) =>
+                setErrors({
+                  ...errors,
+                  active_from: !val,
+                })
+              }
             />
           );
         },
@@ -181,7 +223,7 @@ export const SpecialFieldGrid = ({
       {
         accessorKey: "active_to",
         header: "To",
-        size: 170,
+        size: 120,
         enableEditing: false,
         Cell: ({ cell }) => {
           const value = cell.getValue<string>();
@@ -189,7 +231,7 @@ export const SpecialFieldGrid = ({
         },
       },
     ],
-    [fieldLabel, fieldName, options, errors]
+    [fieldLabel, fieldName, options, errors, tableState]
   );
 
   const validateRowInputs = (values: Record<SPECIAL_FIELD_KEY, any>) => {
@@ -258,84 +300,12 @@ export const SpecialFieldGrid = ({
     }
   };
 
-  const table = useMaterialReactTable({
-    columns: columns,
-    data: entries,
-    state: {
-      isLoading: loading,
-    },
-    enableSorting: false,
-    enableBottomToolbar: false,
-    editDisplayMode: "row",
-    createDisplayMode: "row",
-    enableFilters: false,
-    enableGlobalFilter: false,
-    enableEditing: true,
-    positionActionsColumn: "last",
-    enableHiding: false,
-    enableStickyHeader: true,
-    enableDensityToggle: false,
-    enableColumnFilters: true,
-    enableFullScreenToggle: false,
-    enableColumnActions: false,
-    enablePinning: false,
-    enablePagination: false,
-    getRowId: (originalRow) => originalRow.id?.toString() || "",
-    renderTopToolbarCustomActions: ({ table }) => (
-      <Button
-        variant="contained"
-        startIcon={<AddIcon fill={Palette.white} />}
-        onClick={() => {
-          table.setCreatingRow(true);
-          table.setEditingRow(null);
-          resetErrors();
-        }}
-      >
-        <ETCaption2 bold>New Entry</ETCaption2>
-      </Button>
-    ),
-    muiTableBodyCellProps: {
-      sx: {
-        fontSize: "14px",
-      },
-    },
-    muiTableHeadCellProps: {
-      sx: {
-        fontSize: "14px",
-      },
-    },
-    onEditingRowSave: handleEditRowSave,
-    onCreatingRowSave: handleCreateRowSave,
-    renderRowActions: ({ row, table }) => (
-      <IconButton
-        onClick={() => {
-          table.setEditingRow(row);
-          table.setCreatingRow(null);
-          resetErrors();
-        }}
-      >
-        <EditIcon fill={Palette.primary.accent.main} />
-      </IconButton>
-    ),
-    icons: {
-      SaveIcon: (props: any) => (
-        <CheckIcon {...props} fill={Palette.success.main} />
-      ),
-      CancelIcon: (props: any) => (
-        <CancelIcon {...props} fill={Palette.error.main} />
-      ),
-    },
-  });
-
-  const tableState = table.getState();
-
   return (
     <Box
       sx={{
         ...Styles.flexStart,
         flexDirection: "column",
         padding: "24px",
-        // gap: "24px",
         borderRadius: "4px",
         border: `2px solid ${Palette.neutral.bg.dark}`,
         background: Palette.white,
@@ -355,8 +325,86 @@ export const SpecialFieldGrid = ({
         </ETParagraph>
         <ETCaption3>{description}</ETCaption3>
       </Box>
+      <Box
+        sx={{
+          marginTop: "1.5rem",
+        }}
+      >
+        <Button
+          variant="contained"
+          startIcon={<AddIcon fill={Palette.white} />}
+          onClick={() => {
+            tableInstance && tableInstance.setCreatingRow(true);
+            tableInstance && tableInstance.setEditingRow(null);
+            resetErrors();
+          }}
+        >
+          <ETCaption2 bold>New Entry</ETCaption2>
+        </Button>
+      </Box>
       <Box sx={{ ...Styles.flexStart, flexDirection: "column", gap: "8px" }}>
-        <MaterialReactTable table={table} />
+        <MasterTrackTable
+          setTableInstance={(instance) => setTableInstance(instance)}
+          columns={columns}
+          data={entries}
+          state={{
+            isLoading: loading,
+          }}
+          enableSorting={false}
+          enableBottomToolbar={false}
+          enableTopToolbar={false}
+          editDisplayMode={"row"}
+          createDisplayMode={"row"}
+          enableFilters={false}
+          enableGlobalFilter={false}
+          enableEditing={true}
+          positionActionsColumn={"last"}
+          enableHiding={false}
+          enableStickyHeader={true}
+          enableDensityToggle={false}
+          enableColumnFilters={true}
+          enableFullScreenToggle={false}
+          enableColumnActions={false}
+          enablePinning={false}
+          enablePagination={false}
+          getRowId={(originalRow) => originalRow.id?.toString() || ""}
+          muiTableBodyCellProps={{
+            sx: {
+              fontSize: "14px",
+            },
+          }}
+          muiTableHeadCellProps={{
+            sx: {
+              fontSize: "14px",
+            },
+          }}
+          displayColumnDefOptions={{
+            "mrt-row-actions": {
+              size: 100,
+            },
+          }}
+          onEditingRowSave={handleEditRowSave}
+          onCreatingRowSave={handleCreateRowSave}
+          renderRowActions={({ row, table }) => (
+            <IconButton
+              onClick={() => {
+                table.setEditingRow(row);
+                table.setCreatingRow(null);
+                resetErrors();
+              }}
+            >
+              <EditIcon fill={Palette.primary.accent.main} />
+            </IconButton>
+          )}
+          icons={{
+            SaveIcon: (props: any) => (
+              <CheckIcon {...props} fill={Palette.success.main} />
+            ),
+            CancelIcon: (props: any) => (
+              <CancelIcon {...props} fill={Palette.error.main} />
+            ),
+          }}
+        />
       </Box>
     </Box>
   );

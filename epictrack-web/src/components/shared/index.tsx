@@ -186,9 +186,9 @@ export const ETParagraph = React.forwardRef(
           <Typography
             color={color}
             sx={{
-              fontSize: "15px",
-              lineHeight: "24px",
-              letterSpacing: "-0.32px",
+              // fontSize: "15px",
+              // lineHeight: "24px",
+              // letterSpacing: "-0.32px",
               fontWeight: bold
                 ? MET_Header_Font_Weight_Bold
                 : MET_Header_Font_Weight_Regular,
@@ -197,9 +197,6 @@ export const ETParagraph = React.forwardRef(
               ...(rest.enableEllipsis && useStyle.textEllipsis),
             }}
             variant="body1"
-            // className={clsx({
-            //   [classes.textEllipsis]: rest.enableEllipsis,
-            // })}
           >
             {children}
           </Typography>

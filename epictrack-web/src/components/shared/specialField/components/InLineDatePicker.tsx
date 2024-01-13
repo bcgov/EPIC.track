@@ -1,11 +1,6 @@
 import React from "react";
 import dayjs from "dayjs";
-import {
-  MRT_Cell,
-  MRT_Column,
-  MRT_Row,
-  MRT_TableInstance,
-} from "material-react-table";
+import { MRT_Column, MRT_Row, MRT_TableInstance } from "material-react-table";
 import { SpecialField } from "../type";
 import TrackDatePicker from "../../DatePicker";
 
@@ -16,6 +11,9 @@ interface Props {
   isCreating: boolean;
   name: string;
   error?: boolean;
+  minDate?: dayjs.Dayjs;
+  onBlur?: (value: any) => void;
+  onChange?: (value: any) => void;
 }
 
 export const InLineDatePicker = ({
@@ -25,8 +23,14 @@ export const InLineDatePicker = ({
   isCreating,
   name,
   error = false,
+  minDate,
+  onBlur,
+  onChange,
 }: Props) => {
-  const onBlur = (newValue: any) => {
+  const onChangeDate = (newValue: any) => {
+    if (onChange) {
+      onChange(newValue);
+    }
     row._valuesCache[column.id] = newValue;
     if (isCreating) {
       table.setCreatingRow(row);
@@ -40,8 +44,10 @@ export const InLineDatePicker = ({
   return (
     <TrackDatePicker
       value={value.isValid() ? value : null}
-      onChange={onBlur}
+      onChange={onChangeDate}
+      onBlur={onBlur}
       disableFuture
+      minDate={minDate}
       slotProps={{
         textField: {
           id: name,
