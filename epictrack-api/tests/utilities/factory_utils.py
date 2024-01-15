@@ -53,7 +53,6 @@ def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
 
 def factory_work_status_model(work_id, status_data: dict = TestStatus.status1.value):
     """Create and return a WorkStatus model instance."""
-
     status = WorkStatus(
         description=status_data["description"],
         posted_date=status_data["posted_date"],

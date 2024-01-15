@@ -74,8 +74,6 @@ def test_create_and_fetch_work_issues(client):
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
     result_get = client.get(url)
     retrieved_issue_json = result_get.json[0]
-    print('-retrieved_issue_json--',retrieved_issue_json)
-    print('-issue_data--', issue_data)
     assert "id" in retrieved_issue_json
     assert retrieved_issue_json["work_id"] == work.id
     assert retrieved_issue_json["title"] == work_issue.title
