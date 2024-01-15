@@ -1,6 +1,6 @@
 import { Grid } from "@mui/material";
 import ProjectDetails from "./ProjectDetails";
-import WorkDetials from "./WorkDetails";
+import WorkDetails from "./WorkDetails";
 
 const AboutDetials = () => {
   return (
@@ -9,7 +9,7 @@ const AboutDetials = () => {
         <ProjectDetails />
       </Grid>
       <Grid item xs={6}>
-        <WorkDetials />
+        <WorkDetails />
       </Grid>
     </Grid>
   );
