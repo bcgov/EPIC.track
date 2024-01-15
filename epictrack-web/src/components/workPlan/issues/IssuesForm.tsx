@@ -145,13 +145,21 @@ const IssuesForm = () => {
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel>Description</ETFormLabel>
+          <ETFormLabelWithCharacterLimit
+            characterCount={watchedDescription.length}
+            maxCharacterLength={descriptionCharacterLimit}
+          >
+            Description
+          </ETFormLabelWithCharacterLimit>
           <ControlledTextField
             name="description"
             fullWidth
             size="small"
             multiline
             rows={4}
+            inputProps={{
+              maxLength: descriptionCharacterLimit,
+            }}
           />
         </Grid>
         <Grid item xs={12}>

@@ -17,6 +17,8 @@ const schema = yup.object().shape({
   description: yup.string().required("Description is required"),
 });
 
+const CHARACTER_LIMIT = 500;
+
 const StatusForm = () => {
   const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
@@ -92,13 +94,22 @@ const StatusForm = () => {
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel>Description</ETFormLabel>
+          <ETFormLabelWithCharacterLimit
+            characterCount={description.length}
+            maxCharacterLength={CHARACTER_LIMIT}
+            required
+          >
+            Description
+          </ETFormLabelWithCharacterLimit>
           <ControlledTextField
             name="description"
             multiline
             rows={4}
             onChange={handleDescriptionChange}
             fullWidth
+            inputProps={{
+              maxLength: CHARACTER_LIMIT,
+            }}
           />
         </Grid>
       </Grid>
