@@ -27,7 +27,8 @@ import { EmptyIssueHistory } from "./EmptyIssueHistory";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
-  const { setUpdateToEdit, setShowIssuesForm } = useContext(IssuesContext);
+  const { setUpdateToEdit, setEditIssueUpdateFormIsOpen } =
+    useContext(IssuesContext);
 
   const [expand, setExpand] = useState(false);
 
@@ -101,7 +102,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(update);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit
