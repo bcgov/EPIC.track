@@ -23,7 +23,7 @@ class KeycloakService:
     @staticmethod
     def get_groups(brief_representation: bool = False):
         """Get all the groups"""
-        response = KeycloakService._request_keycloak(f'groups?briefRepresentation={brief_representation}&max=2000')
+        response = KeycloakService._request_keycloak(f'groups?briefRepresentation={brief_representation}')
         return response.json()
 
     @staticmethod

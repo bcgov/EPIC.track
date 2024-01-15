@@ -186,9 +186,6 @@ export const ETParagraph = React.forwardRef(
           <Typography
             color={color}
             sx={{
-              // fontSize: "15px",
-              // lineHeight: "24px",
-              // letterSpacing: "-0.32px",
               fontWeight: bold
                 ? MET_Header_Font_Weight_Bold
                 : MET_Header_Font_Weight_Regular,
