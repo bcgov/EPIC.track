@@ -20,13 +20,28 @@ class IssueService {
     return await http.PostRequest(query, JSON.stringify(data));
   }
 
-  async update(workId: string, issue_id: string, data: MasterBase) {
-    let query = `${Endpoints.WorkIssues.UPDATE_ISSUE.replace(
+  async editIssue(workId: string, issue_id: string, data: MasterBase) {
+    let query = `${Endpoints.WorkIssues.EDIT_ISSUE.replace(
       ":work_id",
-      workId.toString()
+      workId
     )}`;
-    query = query.replace(":issue_id", issue_id.toString());
-    return await http.PutRequest(query, JSON.stringify(data));
+    query = query.replace(":issue_id", issue_id);
+    return await http.PatchRequest(query, JSON.stringify(data));
+  }
+
+  async editIssueUpdate(
+    workId: string,
+    issue_id: string,
+    issue_update_id: string,
+    data: MasterBase
+  ) {
+    let query = `${Endpoints.WorkIssues.EDIT_ISSUE_UPDATE.replace(
+      ":work_id",
+      workId
+    )}`;
+    query = query.replace(":issue_id", issue_id);
+    query = query.replace(":issue_update_id", issue_update_id);
+    return await http.PatchRequest(query, JSON.stringify(data));
   }
 
   async clone(workId: string, issue_id: string, data: MasterBase) {
