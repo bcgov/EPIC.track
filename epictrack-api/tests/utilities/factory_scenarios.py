@@ -109,7 +109,6 @@ class TestStatus(Enum):
     status1 = {
         "description": fake.sentence(),
         "posted_date": fake.date_time_this_decade(tzinfo=None).isoformat(),
-        "posted_by": fake.name(),
         "is_approved": False,
         "approved_by": None,
         "approved_date": None,
