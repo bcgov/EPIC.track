@@ -26,6 +26,7 @@ import icons from "../../icons";
 import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
 import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
 import { Project } from "../../../models/project";
+import { ETFormLabelWithCharacterLimit } from "../../shared";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
@@ -130,7 +131,6 @@ export default function WorkForm({ ...props }) {
   } = methods;
 
   const title = watch("title");
-  const titleLength = title ? title.length : 0;
 
   React.useEffect(() => {
     reset(ctx.item ?? defaultWork);
@@ -325,7 +325,12 @@ export default function WorkForm({ ...props }) {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel required>Title ({title?.length || 0}/150)</ETFormLabel>
+          <ETFormLabelWithCharacterLimit
+            characterCount={title?.length || 0}
+            maxCharacterLength={150}
+          >
+            Title
+          </ETFormLabelWithCharacterLimit>
           <ControlledTextField
             name="title"
             fullWidth
