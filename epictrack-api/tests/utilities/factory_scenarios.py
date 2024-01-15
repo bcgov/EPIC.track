@@ -140,7 +140,9 @@ class TestJwtClaims(dict, Enum):
         'realm_access': {
             'roles': [
                 'staff',
-                'create'
+                'create',
+                'edit'
+
             ]
         }
     }

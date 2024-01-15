@@ -56,7 +56,6 @@ def factory_work_status_model(work_id, status_data: dict = TestStatus.status1.va
     status = WorkStatus(
         description=status_data["description"],
         posted_date=status_data["posted_date"],
-        posted_by=status_data["posted_by"],
         work_id=work_id,
         is_approved=status_data["is_approved"],
         approved_by=status_data["approved_by"],

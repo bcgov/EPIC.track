@@ -20,7 +20,7 @@ from faker import Faker
 from flask import g
 
 from tests.utilities.factory_scenarios import (TestJwtClaims, TestStatus)
-from tests.utilities.factory_utils import factory_work_model, factory_auth_header
+from tests.utilities.factory_utils import factory_work_model, factory_auth_header, factory_work_status_model
 
 API_BASE_URL = "/api/v1/"
 
@@ -66,3 +66,31 @@ def test_create_and_fetch_work_status(client, jwt):
     assert not retrieved_status_json["is_approved"]
     assert retrieved_status_json["approved_by"] is None
     assert retrieved_status_json["approved_date"] is None
+
+
+def test_approve_work_status(client, jwt):
+    """Test approve work status."""
+    work = factory_work_model()
+    status_data = TestStatus.status1.value
+    work_status = factory_work_status_model(work.id, status_data)
+
+    # Assert that the initial state is not approved
+    assert not work_status.is_approved
+
+    # Approve the work status
+    staff_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=staff_user)
+    g.token_info = staff_user
+    url_approve = urljoin(API_BASE_URL, f'work/{work.id}/statuses/{work_status.id}/approve')
+    result_approve = client.patch(url_approve, headers=headers)
+
+    assert result_approve.status_code == HTTPStatus.OK
+
+    # Fetch the updated work status
+    url_get = urljoin(API_BASE_URL, f'work/{work.id}/statuses')
+    result_get = client.get(url_get)
+    approved_work_status = result_get.json[0]
+    # Assert that the WorkStatus is now approved and approved_by and approved_date are set
+    assert approved_work_status["is_approved"]
+    assert approved_work_status["approved_by"] == staff_user["preferred_username"]
+    assert "approved_date" in approved_work_status
