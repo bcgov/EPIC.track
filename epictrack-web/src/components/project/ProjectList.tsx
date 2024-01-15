@@ -15,15 +15,16 @@ import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
+import proponentService from "services/proponentService/proponentService";
+import { Proponent } from "models/proponent";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
   const [subTypes, setSubTypes] = React.useState<string[]>([]);
-  const [proponents, setProponents] = React.useState<string[]>([]);
+  const [proponents, setProponents] = React.useState<Proponent[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState<number>();
   const ctx = React.useContext(MasterContext);
-
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
@@ -51,6 +52,21 @@ const ProjectList = () => {
 
   const projects = React.useMemo(() => ctx.data as Project[], [ctx.data]);
 
+  async function fetchProponents() {
+    const project_proponents = projects
+      .map((p) => p.proponent_id)
+      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+
+    const proponentsResponses = await Promise.all(
+      project_proponents.map((proponentId) =>
+        proponentService.getById(proponentId.toString())
+      )
+    );
+
+    const proponents = proponentsResponses.map((response) => response.data);
+    setProponents(proponents as Proponent[]);
+  }
+
   React.useEffect(() => {
     const types = projects
       .map((p) => p.type.name)
@@ -58,16 +74,13 @@ const ProjectList = () => {
     const subTypes = projects
       .map((p) => p.sub_type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    const project_proponents = projects
-      .map((p) => p.proponent_id)
-      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const envRegions = projects
       .map((p) => p.region_env?.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setTypes(types);
     setSubTypes(subTypes);
-    setProponents(project_proponents);
     setEnvRegions(envRegions);
+    fetchProponents();
   }, [projects]);
 
   const statusesOptions = useMemo(
@@ -167,7 +180,7 @@ const ProjectList = () => {
       {
         accessorKey: "proponent.name",
         header: "Proponents",
-        filterSelectOptions: proponents,
+        filterSelectOptions: proponents.map((p) => p.name),
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
