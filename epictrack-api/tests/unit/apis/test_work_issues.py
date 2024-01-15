@@ -79,7 +79,7 @@ def test_create_and_fetch_work_issues(client):
     assert retrieved_issue_json["title"] == work_issue.title
 
 
-def test_create_and_update_work_issues(client):
+def test_create_and_update_work_issues(client,jwt):
     """Test create and update WorkIssues with updates."""
     work = factory_work_model()
     issue_data = TestWorkIssuesInfo.issue1.value
@@ -90,11 +90,14 @@ def test_create_and_update_work_issues(client):
     result_get = client.get(url)
     assert work_issue_update.description == result_get.json[0].get('updates')[0]['description']
 
+    updates_id = result_get.json[0].get('updates')[0]['id']
     new_description = fake.sentence()
     updated_update_data = {"id": work_issue_update.id, "description": new_description}
-    url_update = urljoin(API_BASE_URL, f'work/{work.id}/issues/{work_issue.id}')
-    result_update = client.put(url_update, json={"updates": [updated_update_data]})
-    assert result_update.status_code == HTTPStatus.CREATED
+    staff_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=staff_user)
+    url_update = urljoin(API_BASE_URL, f'work/{work.id}/issues/{work_issue.id}/update/{updates_id}')
+    result_update = client.patch(url_update,headers= headers, json=updated_update_data)
+    assert result_update.status_code == HTTPStatus.OK
 
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
     result_get = client.get(url)
