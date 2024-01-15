@@ -5,18 +5,16 @@ import { useAppDispatch } from "../../../hooks";
 import { envBanner } from "../../../styles/uiStateSlice";
 import InfoIcon from "../../../assets/images/infoIcon.svg";
 import { ETSubhead } from "../../shared";
-
+import { AppConfig } from "../../../config";
 const EnvironmentBanner = () => {
   const dispatch = useAppDispatch();
-  const host = window.location.hostname;
-  const isTestEnvironment =
-    host.indexOf("dev") !== -1 ||
-    host.indexOf("test") !== -1 ||
-    host.indexOf("demo") !== -1 ||
-    host.indexOf("localhost") !== -1;
+  const env = AppConfig.environment;
+  const isTestEnvironment = ["dev", "test", "demo", "localhost"].includes(env);
+
   React.useEffect(() => {
     dispatch(envBanner(isTestEnvironment));
   }, []);
+
   if (!isTestEnvironment) {
     return (
       <Box
@@ -28,6 +26,7 @@ const EnvironmentBanner = () => {
       ></Box>
     );
   }
+
   return (
     <Box
       sx={{
@@ -44,7 +43,7 @@ const EnvironmentBanner = () => {
       textAlign="center"
     >
       <Box component="img" src={InfoIcon} alt="EPIC.track" />
-      <ETSubhead>You are using a TEST environment</ETSubhead>
+      <ETSubhead>You are using a {env.toUpperCase()} environment</ETSubhead>
     </Box>
   );
 };
