@@ -8,7 +8,7 @@ import codeService, { Code } from "../../../services/codeService";
 import { Work, defaultWork } from "../../../models/work";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
-import { ETFormLabel } from "../../shared";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { Staff } from "../../../models/staff";
 import staffService from "../../../services/staffService/staffService";
 import dayjs from "dayjs";
@@ -26,7 +26,6 @@ import icons from "../../icons";
 import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
 import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
 import { Project } from "../../../models/project";
-import { ETFormLabelWithCharacterLimit } from "../../shared";
 
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
