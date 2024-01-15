@@ -108,9 +108,7 @@ export default function WorkForm({ ...props }) {
   }, [ctx.id]);
 
   React.useEffect(() => {
-    ctx.setTitle(
-      ctx.item ? work?.title + " - " + work?.work_type?.name : "Create Work"
-    );
+    ctx.setTitle(ctx.item ? work?.title : "Create Work");
   }, [ctx.title, ctx.item]);
 
   const methods = useForm({
