@@ -15,9 +15,20 @@
 
 Test Utility for creating model factory.
 """
+from datetime import datetime
+
+from api.config import get_named_config
+from api.models import Work as WorkModel, Staff, WorkIssues, WorkIssueUpdates, WorkStatus
 from api.models.project import Project as ProjectModel, ProjectStateEnum
 from tests.utilities.factory_scenarios import (
-    TestProjectInfo)
+    TestProjectInfo, TestWorkInfo, TestStaffInfo, TestWorkIssuesInfo, TestWorkIssueUpdatesInfo, TestStatus)
+
+CONFIG = get_named_config('testing')
+
+JWT_HEADER = {
+    'typ': 'JWT',
+    'kid': 'epictrack'
+}
 
 
 def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
@@ -38,3 +49,97 @@ def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
     )
     project.save()
     return project
+
+
+def factory_work_status_model(work_id, status_data: dict = TestStatus.status1.value):
+    """Create and return a WorkStatus model instance."""
+
+    status = WorkStatus(
+        description=status_data["description"],
+        posted_date=status_data["posted_date"],
+        posted_by=status_data["posted_by"],
+        work_id=work_id,
+        is_approved=status_data["is_approved"],
+        approved_by=status_data["approved_by"],
+        approved_date=datetime.fromisoformat(status_data["approved_date"]) if status_data["approved_date"] else None,
+    )
+    status.save()
+    return status
+
+
+def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
+    """Produce a work model."""
+    project = factory_project_model()
+    epd = factory_staff_model()
+    work = WorkModel(
+        title=work_data["title"],
+        report_description=work_data["report_description"],
+        epic_description=work_data["epic_description"],
+        is_active=work_data["is_active"],
+        start_date=work_data["start_date"],
+        project_id=project.id,
+        ministry_id=work_data["ministry_id"],
+        ea_act_id=work_data["ea_act_id"],
+        eao_team_id=work_data["eao_team_id"],
+        federal_involvement_id=work_data["federal_involvement_id"],
+        responsible_epd_id=epd.id,
+        work_lead_id=epd.id,
+        work_type_id=work_data["work_type_id"],
+        substitution_act_id=work_data["substitution_act_id"],
+        decision_by_id=epd.id
+    )
+    work.save()
+    return work
+
+
+def factory_staff_model(staff_data: dict = TestStaffInfo.staff1.value):
+    """Produce a staff model."""
+    staff = Staff(
+        first_name=staff_data["first_name"],
+        last_name=staff_data["last_name"],
+        phone=staff_data["phone"],
+        email=staff_data["email"],
+        is_active=staff_data["is_active"],
+        position_id=1
+    )
+    staff.save()
+    return staff
+
+
+def factory_work_issues_model(work_id, issue_data=None):
+    """Produce a WorkIssues model."""
+    if issue_data is None:
+        issue_data = TestWorkIssuesInfo.issue1.value
+
+    work_issue = WorkIssues(
+        title=issue_data["title"],
+        is_active=issue_data["is_active"],
+        is_high_priority=issue_data["is_high_priority"],
+        start_date=issue_data["start_date"],
+        expected_resolution_date=issue_data["expected_resolution_date"],
+        work_id=work_id,
+    )
+    work_issue.save()
+    return work_issue
+
+
+def factory_work_issue_updates_model(work_issue_id, update_data=None):
+    """Produce a WorkIssueUpdates model."""
+    if update_data is None:
+        update_data = TestWorkIssueUpdatesInfo.update1.value
+
+    work_issue_update = WorkIssueUpdates(
+        description=update_data["description"],
+        is_approved=update_data["is_approved"],
+        approved_by=update_data["approved_by"],
+        work_issue_id=work_issue_id,
+    )
+    work_issue_update.save()
+    return work_issue_update
+
+
+def factory_auth_header(jwt, claims):
+    """Produce JWT tokens for use in tests."""
+    return {
+        'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)
+    }
