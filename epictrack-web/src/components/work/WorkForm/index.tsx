@@ -8,7 +8,7 @@ import codeService, { Code } from "../../../services/codeService";
 import { Work, defaultWork } from "../../../models/work";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
-import { ETFormLabel } from "../../shared";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { Staff } from "../../../models/staff";
 import staffService from "../../../services/staffService/staffService";
 import dayjs from "dayjs";
@@ -40,6 +40,7 @@ const schema = yup.object<Work>().shape({
   title: yup
     .string()
     .required("Title is required")
+    .max(150, "Title should not exceed 150 characters")
     .test({
       name: "checkDuplicateWork",
       exclusive: true,
@@ -50,7 +51,9 @@ const schema = yup.object<Work>().shape({
             value,
             parent["id"]
           );
-          return !(validateWorkResult.data as any)["exists"] as boolean;
+          return validateWorkResult.data
+            ? (!(validateWorkResult.data as any)["exists"] as boolean)
+            : true;
         }
         return true;
       },
@@ -123,7 +126,10 @@ export default function WorkForm({ ...props }) {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = methods;
+
+  const title = watch("title");
 
   React.useEffect(() => {
     reset(ctx.item ?? defaultWork);
@@ -318,7 +324,12 @@ export default function WorkForm({ ...props }) {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel required>Title</ETFormLabel>
+          <ETFormLabelWithCharacterLimit
+            characterCount={title?.length || 0}
+            maxCharacterLength={150}
+          >
+            Title
+          </ETFormLabelWithCharacterLimit>
           <ControlledTextField
             name="title"
             fullWidth
