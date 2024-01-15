@@ -172,7 +172,7 @@ class WorkTypeIdQueryParamSchema(RequestQueryParameterSchema):
         metadata={"description": "The id of the work type"},
         validate=validate.Range(min=1),
         load_default=None,
-        allow_none=True
+        allow_none=True,
     )
 
 
@@ -192,12 +192,12 @@ class WorkStatusParameterSchema(RequestBodyParameterSchema):
 
     description = fields.Str(
         metadata={"description": "description of status"},
+        validate=validate.Length(max=500),
         required=True,
     )
 
     notes = fields.Str(
-        metadata={"description": "Notes for the work status "},
-        allow_none=True
+        metadata={"description": "Notes for the work status "}, allow_none=True
     )
 
     posted_date = fields.DateTime(
@@ -229,7 +229,8 @@ class WorkIssuesParameterSchema(RequestBodyParameterSchema):
     )
 
     expected_resolution_date = fields.DateTime(
-        metadata={"description": "Expected Resolution date for the issue"}, required=False
+        metadata={"description": "Expected Resolution date for the issue"},
+        required=False,
     )
 
     updates = fields.List(
@@ -251,15 +252,11 @@ class WorkIssuesUpdateSchema(WorkIssuesParameterSchema):
     updates = fields.List(
         fields.Dict(
             description=fields.Str(
-                metadata={"description": "Description of the update"},
-                required=True
+                metadata={"description": "Description of the update"}, required=True
             ),
-            id=fields.Int(
-                metadata={"description": "ID of the update"},
-                required=True
-            ),
+            id=fields.Int(metadata={"description": "ID of the update"}, required=True),
             metadata={"description": "List of updates for the issue with IDs"},
-            required=True
+            required=True,
         ),
         metadata={"description": "List of updates for the issue with IDs"},
         required=False,
@@ -277,6 +274,8 @@ class WorkNotesBodySchema(RequestBodyParameterSchema):
 
     note_type = fields.Str(
         metadata={"description": "Type of work status notes"},
-        validate=validate.OneOf(['status_notes', 'issue_notes']),  # Add your predefined types
+        validate=validate.OneOf(
+            ["status_notes", "issue_notes"]
+        ),  # Add your predefined types
         required=True,
     )
