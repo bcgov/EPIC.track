@@ -543,7 +543,11 @@ const EventList = () => {
       assignee_ids = assignee_ids.filter(
         (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
       );
-      const data = { task_ids: Object.keys(rowSelection), assignee_ids };
+      const data = {
+        task_ids: Object.keys(rowSelection),
+        assignee_ids,
+        work_id: ctx.work?.id,
+      };
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
@@ -576,6 +580,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         responsibility_ids,
+        work_id: ctx.work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -606,6 +611,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         status,
+        work_id: ctx.work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -634,6 +640,7 @@ const EventList = () => {
   const deleteTasks = async () => {
     const data = {
       task_ids: Object.keys(rowSelection).join(","),
+      work_id: ctx.work?.id,
     };
     const response = await taskEventService.deleteTasks(data);
     try {
