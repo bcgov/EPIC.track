@@ -15,6 +15,7 @@
 import copy
 import functools
 from datetime import datetime, timedelta
+from typing import List
 
 from sqlalchemy import and_, extract, func, or_
 
