@@ -54,7 +54,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               >
                 <Grid item xs={"auto"}>
                   <ETCaption1 bold color={Palette.neutral.dark}>
-                    {moment(issue.created_at)
+                    {moment(latestUpdate.posted_date)
                       .format(MONTH_DAY_YEAR)
                       .toUpperCase()}
                   </ETCaption1>

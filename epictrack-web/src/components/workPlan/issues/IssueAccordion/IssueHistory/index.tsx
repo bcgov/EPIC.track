@@ -134,7 +134,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
               </TimelineSeparator>
               <TimelineContent>
                 <ETCaption3 color={Palette.neutral.main}>
-                  {moment(issue.created_at).format(MONTH_DAY_YEAR)}
+                  {moment(update.posted_date).format(MONTH_DAY_YEAR)}
                 </ETCaption3>
               </TimelineContent>
             </TimelineItem>
@@ -159,7 +159,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 </TimelineSeparator>
                 <TimelineContent>
                   <ETCaption3 color={Palette.neutral.main}>
-                    {moment(issue.created_at).format("MMM.DD YYYY")}
+                    {moment(update.posted_date).format("MMM.DD YYYY")}
                   </ETCaption3>
                 </TimelineContent>
               </TimelineItem>

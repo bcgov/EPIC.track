@@ -17,7 +17,7 @@ interface IssuesContextProps {
   setUpdateToClone: React.Dispatch<
     React.SetStateAction<WorkIssueUpdate | null>
   >;
-  cloneIssueUpdate: (cloneForm: { description: string }) => Promise<void>;
+  cloneIssueUpdate: (cloneForm: CloneForm) => Promise<void>;
   updateToEdit: WorkIssueUpdate | null;
   setUpdateToEdit: React.Dispatch<React.SetStateAction<WorkIssueUpdate | null>>;
   createIssueFormIsOpen: boolean;
@@ -179,8 +179,8 @@ export const IssuesProvider = ({
     setIsIssuesLoading(true);
     try {
       const request = {
-        id: updateToEdit.id,
         description: issueForm.description,
+        posted_date: issueForm.posted_date,
       };
 
       await issueService.editIssueUpdate(
@@ -215,7 +215,8 @@ export const IssuesProvider = ({
     setIsIssuesLoading(true);
     try {
       await issueService.clone(workId, String(updateToClone.work_issue_id), {
-        description_data: [cloneForm.description],
+        description: cloneForm.description,
+        posted_date: cloneForm.posted_date,
       });
       handleLoadIssues();
     } catch (error) {

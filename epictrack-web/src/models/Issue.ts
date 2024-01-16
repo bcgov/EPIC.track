@@ -1,5 +1,6 @@
 export interface WorkIssueUpdate {
   id: number;
+  posted_date: string;
   description: string;
   work_issue_id: number;
   is_active: boolean;

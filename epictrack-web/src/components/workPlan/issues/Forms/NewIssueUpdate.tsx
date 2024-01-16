@@ -1,16 +1,22 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Grid } from "@mui/material";
 import ControlledTextField from "../../../shared/controlledInputComponents/ControlledTextField";
-import { ETFormLabelWithCharacterLimit } from "../../../shared";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
 import { IssuesContext } from "../IssuesContext";
-import { WorkplanContext } from "../../WorkPlanContext";
 import { CloneForm } from "../types";
+import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
+import dayjs from "dayjs";
+import { descriptionCharacterLimit } from "./constants";
 
 const schema = yup.object().shape({
-  description: yup.string().required("Description is required"),
+  posted_date: yup.string().required("Date is required"),
+  description: yup
+    .string()
+    .required("Description is required")
+    .max(descriptionCharacterLimit),
 });
 
 const NewIssueUpdate = () => {
@@ -24,6 +30,9 @@ const NewIssueUpdate = () => {
   const methods = useForm<CloneForm>({
     resolver: yupResolver(schema),
     defaultValues: {
+      posted_date: updateToClone?.posted_date
+        ? dayjs(updateToClone.posted_date).format().toString()
+        : "",
       description: updateToClone?.description || "",
     },
     mode: "onSubmit",
@@ -55,6 +64,12 @@ const NewIssueUpdate = () => {
         }}
         onSubmit={handleSubmit(onSubmitHandler)}
       >
+        <Grid item xs={12} container>
+          <Grid item xs={6}>
+            <ETFormLabel required>Date</ETFormLabel>
+            <ControlledDatePicker name="posted_date" />
+          </Grid>
+        </Grid>
         <Grid item xs={12}>
           <ETFormLabelWithCharacterLimit
             characterCount={watchedDescription.length}
