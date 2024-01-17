@@ -51,7 +51,8 @@ class StaffExistanceQueryParamSchema(RequestQueryParameterSchema):
     def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
         """Converts staff email into lower case string"""
         data = dict(data)
-        data["email"] = data["email"].lower()
+        if "email" in data:
+            data["email"] = data["email"].lower()
         return data
 
 
@@ -101,7 +102,8 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     @pre_load
     def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
         """Converts staff email into lower case string"""
-        data["email"] = data["email"].lower()
+        if "email" in data:
+            data["email"] = data["email"].lower()
         return data
 
 
@@ -118,5 +120,6 @@ class StaffEmailPathParameterSchema(RequestPathParameterSchema):
     def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
         """Converts staff email into lower case string"""
         data = dict(data)
-        data["email"] = data["email"].lower()
+        if "email" in data:
+            data["email"] = data["email"].lower()
         return data
