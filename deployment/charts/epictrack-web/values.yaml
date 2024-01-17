@@ -15,7 +15,7 @@ image:
   tag: latest
   repository: image-registry.openshift-image-registry.svc:5000/c72cba-tools/
 keycloak:
-  url: "https://test.loginproxy.gov.bc.ca"
+  url: "https://dev.loginproxy.gov.bc.ca"
   realm: eao-epic
   client: epictrack-web
 service:
