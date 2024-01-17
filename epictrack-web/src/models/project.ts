@@ -1,6 +1,7 @@
 import { Type } from "./type";
 import { SubType } from "./subtype";
 import { Region } from "./region";
+import { Proponent } from "./proponent";
 
 export interface Project {
   id: number;
@@ -14,6 +15,7 @@ export interface Project {
   region_id_env: number;
   region_id_flnro: number;
   proponent_id: number;
+  proponent: Proponent;
   ea_certificate: string;
   abbreviation: string;
   epic_guid: string;

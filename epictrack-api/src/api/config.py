@@ -145,7 +145,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     JWT_OIDC_TEST_KEYS = {
         'keys': [
             {
-                'kid': 'forms-flow-ai',
+                'kid': 'epictrack',
                 'kty': 'RSA',
                 'alg': 'RS256',
                 'use': 'sig',

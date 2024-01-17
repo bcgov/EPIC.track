@@ -51,6 +51,7 @@ from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
+from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
 
 
@@ -507,7 +508,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         milestone_events = EventService.find_milestone_events_by_work_phase(
             work_phase_id
         )
-        task_events = []  # TaskService.find_task_events(work_id, phase_id)
+        task_events = TaskService.find_task_events(work_phase_id)
 
         work_plan_schema = WorkPlanSchema(many=True)
         work_plan_schema.context["type"] = "Milestone"

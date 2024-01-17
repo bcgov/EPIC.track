@@ -8,7 +8,7 @@ import codeService, { Code } from "../../../services/codeService";
 import { Work, defaultWork } from "../../../models/work";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
-import { ETFormLabel } from "../../shared";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import { Staff } from "../../../models/staff";
 import staffService from "../../../services/staffService/staffService";
 import dayjs from "dayjs";
@@ -32,12 +32,15 @@ const schema = yup.object<Work>().shape({
   work_type_id: yup.number().required("Work type is required"),
   start_date: yup.date().required("Start date is required"),
   project_id: yup.number().required("Project is required"),
+  ministry_id: yup.number().required("Responsible Ministry is required"),
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),
+  report_description: yup.string().required("Work description is required"),
   title: yup
     .string()
     .required("Title is required")
+    .max(150, "Title should not exceed 150 characters")
     .test({
       name: "checkDuplicateWork",
       exclusive: true,
@@ -48,7 +51,9 @@ const schema = yup.object<Work>().shape({
             value,
             parent["id"]
           );
-          return !(validateWorkResult.data as any)["exists"] as boolean;
+          return validateWorkResult.data
+            ? (!(validateWorkResult.data as any)["exists"] as boolean)
+            : true;
         }
         return true;
       },
@@ -106,9 +111,7 @@ export default function WorkForm({ ...props }) {
   }, [ctx.id]);
 
   React.useEffect(() => {
-    ctx.setTitle(
-      ctx.item ? work?.title + " - " + work?.work_type?.name : "Create Work"
-    );
+    ctx.setTitle(ctx.item ? work?.title : "Create Work");
   }, [ctx.title, ctx.item]);
 
   const methods = useForm({
@@ -123,7 +126,10 @@ export default function WorkForm({ ...props }) {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = methods;
+
+  const title = watch("title");
 
   React.useEffect(() => {
     reset(ctx.item ?? defaultWork);
@@ -278,7 +284,7 @@ export default function WorkForm({ ...props }) {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel>Responsible Ministry</ETFormLabel>
+          <ETFormLabel required>Responsible Ministry</ETFormLabel>
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.ministry_id?.message?.toString()}
@@ -318,7 +324,12 @@ export default function WorkForm({ ...props }) {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel required>Title</ETFormLabel>
+          <ETFormLabelWithCharacterLimit
+            characterCount={title?.length || 0}
+            maxCharacterLength={150}
+          >
+            Title
+          </ETFormLabelWithCharacterLimit>
           <ControlledTextField
             name="title"
             fullWidth

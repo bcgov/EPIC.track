@@ -25,14 +25,14 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
 
   const issueContext = React.useContext(IssuesContext);
   const {
-    setShowIssuesForm,
+    setEditIssueUpdateFormIsOpen,
     approveIssue,
     issueToApproveId,
     setIssueToApproveId,
     setUpdateToClone,
-    setShowCloneForm,
     setUpdateToEdit,
-  } = issueContext;
+    setNewIssueUpdateFormIsOpen,
+  } = React.useContext(IssuesContext);
 
   const handleApproveIssue = () => {
     approveIssue(issue.id, latestUpdate.id);
@@ -117,7 +117,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToClone(latestUpdate);
-                        setShowCloneForm(true);
+                        setNewIssueUpdateFormIsOpen(true);
                       }}
                     >
                       New Update
@@ -141,7 +141,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(latestUpdate);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit
@@ -157,7 +157,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(latestUpdate);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit

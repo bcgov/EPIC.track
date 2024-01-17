@@ -42,8 +42,10 @@ from api.models.project import Project
 from api.models.work_type import WorkType
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
+from . import authorisation
 
 from .event_configuration import EventConfigurationService
+from ..utils.roles import Membership, Role as KeycloakRole
 
 
 # pylint:disable=not-callable
@@ -58,6 +60,13 @@ class EventService:
     ) -> Event:
         """Create milestone event"""
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=current_work_phase.work_id)
+
         all_work_events = cls.find_events(
             current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
@@ -82,6 +91,13 @@ class EventService:
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=current_work_phase.work_id)
+
         all_work_events = cls.find_events(
             current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
         )
@@ -906,6 +922,13 @@ class EventService:
         event = Event.find_by_id(event_id)
         if not event:
             raise ResourceNotFoundError("No event found with given id")
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=event.work_id)
+
         if event.actual_date:
             raise UnprocessableEntityError("Locked events cannot be deleted")
         db.session.query(Event).filter(

@@ -86,14 +86,12 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         return work_issue_update
 
     @classmethod
-    def edit_issue_update(cls, work_id, issue_id, issue_data):
-        """Update an existing work issue, and save it only if there are changes."""
+    def edit_issue(cls, work_id, issue_id, issue_data):
+        """Edit an existing work issue, and save it only if there are changes."""
         work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
 
         if not work_issue:
             raise ResourceNotFoundError("Work issue doesnt exist")
-
-        updates = issue_data.pop('updates', [])
 
         # Create a flag to track changes on work_issues
         has_changes_to_work_issue = False
@@ -102,26 +100,30 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             if getattr(work_issue, key) != value:
                 setattr(work_issue, key, value)
                 has_changes_to_work_issue = True
-
-        if updates:
-            for update_description in updates:
-                description_id = update_description.get('id')
-                if not description_id:
-                    raise ResourceNotFoundError("Issue Description doesnt exist")
-                if (description_id := update_description.get('id')) is not None:
-                    issue_update_model: WorkIssueUpdatesModel = WorkIssueUpdatesModel.find_by_id(description_id)
-                    if not issue_update_model:
-                        raise ResourceNotFoundError("Issue Description doesnt exist")
-                    if issue_update_model.is_approved:
-                        one_of_roles = (
-                            KeycloakRole.EXTENDED_EDIT.value,
-                        )
-                        authorisation.check_auth(one_of_roles=one_of_roles)
-                    issue_update_model.description = update_description.get('description')
-                    issue_update_model.flush()
-
         if has_changes_to_work_issue:
-            work_issue.save()  # Save the updated work issue only if there are changes
-        else:
-            issue_update_model.commit()
+            work_issue.save()
         return work_issue
+
+    @classmethod
+    def edit_issue_update(cls, work_id, issue_id, issue_update_id, issue_data):
+        """Edit an existing work issue update."""
+        work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
+
+        if not work_issue:
+            raise ResourceNotFoundError("Work issue doesnt exist")
+
+        issue_update: WorkIssueUpdatesModel = WorkIssueUpdatesModel.find_by_id(issue_update_id)
+
+        if not issue_update:
+            raise ResourceNotFoundError("Issue Description doesnt exist")
+
+        if issue_update.is_approved:
+            one_of_roles = (
+                KeycloakRole.EXTENDED_EDIT.value,
+            )
+            authorisation.check_auth(one_of_roles=one_of_roles)
+
+        issue_update.description = issue_data.get('description')
+        issue_update.save()
+
+        return issue_update

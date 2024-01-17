@@ -108,6 +108,7 @@ const DrawerBox = () => {
 
   return (
     <Box
+      data-testid={`sidenav`}
       sx={{
         overflow: "auto",
         height: "100%",
@@ -164,6 +165,7 @@ const DrawerBox = () => {
                             {route.routes?.map((subRoute, i) => (
                               <ListItemStyled
                                 key={`sub-list-${subRoute?.name}`}
+                                data-testid={`SideNav/${subRoute.name}-button`}
                               >
                                 <ListItemButtonStyled
                                   key={`sub-list-button-${subRoute?.name}`}
