@@ -48,4 +48,4 @@ def _has_team_membership(kwargs, team_permitted_roles) -> bool:
 
     membership_ids = {membership.value for membership in Membership}
 
-    return any(role.id in membership_ids for role in work_roles)
+    return any(work_role.role_id in membership_ids for work_role in work_roles)

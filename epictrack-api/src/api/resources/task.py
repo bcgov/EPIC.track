@@ -71,7 +71,9 @@ class Events(Resource):
     def delete():
         """Delete tasks."""
         request_json = req.TasksBulkDeleteQueryParamSchema().load(request.args)
-        result = TaskService.bulk_delete_tasks(request_json["task_ids"])
+        task_ids = request_json.get("task_ids")
+        work_id = request_json.get("work_id")
+        result = TaskService.bulk_delete_tasks(task_ids, work_id)
         return result, HTTPStatus.OK
 
 
