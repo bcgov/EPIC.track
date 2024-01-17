@@ -128,6 +128,7 @@ def factory_work_issue_updates_model(work_issue_id, update_data=None):
 
     work_issue_update = WorkIssueUpdates(
         description=update_data["description"],
+        posted_date=update_data["posted_date"],
         is_approved=update_data["is_approved"],
         approved_by=update_data["approved_by"],
         work_issue_id=work_issue_id,
