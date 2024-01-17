@@ -23,6 +23,7 @@ from api.models import (
     WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
+from api.models.work import WorkStateEnum
 
 from .report_factory import ReportFactory
 
@@ -640,6 +641,7 @@ class EAResourceForeCastReport(ReportFactory):
                     and_(
                         func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
                         WorkPhase.sort_order == 1,
+                        Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
                     )
                 )
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
@@ -665,7 +667,8 @@ class EAResourceForeCastReport(ReportFactory):
                     WorkPhase.id == end_work_phase_query.c.end_phase_id,
                 )
                 .where(
-                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date)
+                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date),
+                    Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
                 )
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
                 .distinct(WorkPhase.work_id)
