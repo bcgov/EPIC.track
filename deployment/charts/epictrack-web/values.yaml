@@ -2,6 +2,7 @@ app:
   name: epictrack
   url: epictrack-web-{{ .Release.Namespace }}.apps.gold.devops.gov.bc.ca
   api: https://eao-reports-{{ .Release.Namespace }}.apps.silver.devops.gov.bc.ca
+  env: dev
 resources:
   cpu:
     limit: 300m
@@ -14,7 +15,7 @@ image:
   tag: latest
   repository: image-registry.openshift-image-registry.svc:5000/c72cba-tools/
 keycloak:
-  url: "https://test.loginproxy.gov.bc.ca"
+  url: "https://dev.loginproxy.gov.bc.ca"
   realm: eao-epic
   client: epictrack-web
 service:
