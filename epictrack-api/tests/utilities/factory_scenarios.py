@@ -120,6 +120,7 @@ class TestWorkIssueUpdatesInfo(Enum):
 
     update1 = {
         "description": fake.sentence(),
+        "posted_date": fake.date_time_this_decade(tzinfo=None).isoformat(),
         "is_approved": False,
         "approved_by": None,
     }
