@@ -245,3 +245,8 @@ class TasksBulkDeleteQueryParamSchema(RequestQueryParameterSchema):
     """Tasks bulk delete query parameter"""
 
     task_ids = IntegerList(metadata={"description": "comma separated task ids"})
+    work_id = fields.Int(
+        metadata={"description": "Work id of the task"},
+        validate=validate.Range(min=1),
+        required=True,
+    )

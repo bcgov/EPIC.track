@@ -1,8 +1,9 @@
-import React from "react";
+import React, { Dispatch, SetStateAction, useEffect } from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
   MRT_RowData,
+  MRT_TableInstance,
   MRT_TableOptions,
   useMaterialReactTable,
 } from "material-react-table";
@@ -58,11 +59,13 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   extends MRT_TableOptions<TData> {
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
+  setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
 }
 
 const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
   data,
+  setTableInstance,
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const table = useMaterialReactTable({
@@ -203,6 +206,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     icons: {
       FilterAltIcon: () => null,
       CloseIcon: () => null,
+      ...rest.icons,
     },
     filterFns: {
       multiSelectFilter: (row, id, filterValue) => {
@@ -211,6 +215,11 @@ const MasterTrackTable = <TData extends MRT_RowData>({
       },
     },
   });
+  useEffect(() => {
+    if (table && setTableInstance) {
+      setTableInstance(table);
+    }
+  }, [table]);
   return (
     <>
       <MaterialReactTable table={table} />

@@ -23,8 +23,10 @@ from sqlalchemy.orm import contains_eager, lazyload
 from api.exceptions import UnprocessableEntityError
 from api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, WorkPhase, db
 from api.models.task_event_responsibility import TaskEventResponsibility
+from . import authorisation
 
 from .task_template import TaskTemplateService
+from ..utils.roles import Membership, Role as KeycloakRole
 
 
 class TaskService:
@@ -35,6 +37,13 @@ class TaskService:
         """Create task event"""
         task_event = TaskEvent(**cls._prepare_task_event_object(data))
         work_phase = WorkPhase.find_by_id(data.get("work_phase_id"))
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
+
         if data.get("assignee_ids") and not cls._validate_assignees(
             data.get("assignee_ids"), work_phase.work_id
         ):
@@ -58,6 +67,13 @@ class TaskService:
         """Update task event"""
         task_event = TaskEvent.find_by_id(task_event_id)
         work_phase = WorkPhase.find_by_id(data.get("work_phase_id"))
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
+
         if data.get("assignee_ids") and not cls._validate_assignees(
             data.get("assignee_ids"), work_phase.work_id
         ):
@@ -111,6 +127,13 @@ class TaskService:
     ) -> [TaskEvent]:
         """Create a list of task events from the given task template"""
         work_phase = WorkPhase.find_by_id(params.get("work_phase_id"))
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
+
         if not work_phase:
             raise UnprocessableEntityError("No data found for the given work and phase")
         if work_phase.task_added:
@@ -225,6 +248,13 @@ class TaskService:
     @classmethod
     def bulk_update(cls, data: dict):
         """Bulk update task events"""
+        work_id = data.get("work_id")
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
+
         task_ids = data.pop("task_ids")
         if "assignee_ids" in data:
             cls._handle_assignees(data["assignee_ids"], task_ids)
@@ -241,8 +271,14 @@ class TaskService:
         return "Updated successfully"
 
     @classmethod
-    def bulk_delete_tasks(cls, task_ids: List):
+    def bulk_delete_tasks(cls, task_ids: List, work_id: int):
         """Mark tasks as deleted"""
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
+
         db.session.query(TaskEvent).filter(TaskEvent.id.in_(task_ids)).update(
             {"is_active": False, "is_deleted": True}
         )

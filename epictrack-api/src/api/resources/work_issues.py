@@ -46,24 +46,24 @@ class WorkStatus(Resource):
     @profiletime
     def post(work_id):
         """Create new work status"""
-        request_dict = req.WorkIssuesParameterSchema().load(API.payload)
+        request_dict = req.WorkIssuesCreateParameterSchema().load(API.payload)
         work_issues = WorkIssuesService.create_work_issue_and_updates(work_id, request_dict)
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
-@cors_preflight("PUT")
-@API.route("/<int:issue_id>", methods=["PUT", "OPTIONS"])
+@cors_preflight("PATCH")
+@API.route("/<int:issue_id>", methods=["PATCH", "OPTIONS"])
 class IssueUpdateEdits(Resource):
-    """Endpoint resource to manage updates/edits for a specific issue and its description."""
+    """Endpoint resource to manage updates/edits for a specific issue."""
 
     @staticmethod
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def put(work_id, issue_id):
+    def patch(work_id, issue_id):
         """Create a new update for the specified issue."""
-        request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
-        work_issues = WorkIssuesService.edit_issue_update(work_id, issue_id, request_dict)
+        request_dict = req.WorkIssuesParameterSchema().load(API.payload)
+        work_issues = WorkIssuesService.edit_issue(work_id, issue_id, request_dict)
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
@@ -86,8 +86,26 @@ class WorkIssueUpdate(Resource):
 
 
 @cors_preflight("PATCH")
-@API.route("/<int:issue_id>/update/<int:update_id>/approve", methods=["PATCH", "OPTIONS"])
+@API.route("/<int:issue_id>/update/<int:update_id>", methods=["PATCH", "OPTIONS"])
 class ApproveIssues(Resource):
+    """Endpoint resource to manage approving of work status."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.has_one_of_roles([Role.CREATE.value])
+    @profiletime
+    # pylint: disable=unused-argument
+    def patch(work_id, issue_id, update_id):
+        """Approve a work status."""
+        request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
+        edited_issue_update = WorkIssuesService.edit_issue_update(work_id, issue_id, update_id, request_dict)
+
+        return res.WorkIssueUpdatesResponseSchema().dump(edited_issue_update), HTTPStatus.OK
+
+
+@cors_preflight("PATCH")
+@API.route("/<int:issue_id>/update/<int:update_id>/approve", methods=["PATCH", "OPTIONS"])
+class EditIssueUpdate(Resource):
     """Endpoint resource to manage approving of work status."""
 
     @staticmethod

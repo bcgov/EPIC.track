@@ -1,51 +1,38 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, FormControlLabel, Grid, Stack, Tooltip } from "@mui/material";
-import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import {
-  ETFormLabel,
-  ETFormLabelWithCharacterLimit,
-  ETParagraph,
-} from "../../shared";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { IssuesContext } from "./IssuesContext";
-import { IconProps } from "../../icons/type";
-import Icons from "../../icons";
-import { IssueForm } from "./types";
+import ControlledTextField from "../../../shared/controlledInputComponents/ControlledTextField";
+import { ETFormLabelWithCharacterLimit, ETParagraph } from "../../../shared";
+import ControlledSwitch from "../../../shared/controlledInputComponents/ControlledSwitch";
+import { IssuesContext } from "../IssuesContext";
+import { IconProps } from "../../../icons/type";
+import Icons from "../../../icons";
+import { CreateIssueForm } from "../types";
 import moment from "moment";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { WorkplanContext } from "../WorkPlanContext";
-
-const schema = yup.object().shape({
-  title: yup.string().required("Title is required"),
-  description: yup.string().required("Description is required"),
-  is_active: yup.boolean(),
-  is_high_priority: yup.boolean(),
-  start_date: yup.string().required("Start date is required"),
-  expected_resolution_date: yup.string().nullable(),
-});
+import ControlledDatePicker from "../../../shared/controlledInputComponents/ControlledDatePicker";
 
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
-const IssuesForm = () => {
-  const {
-    setShowIssuesForm,
-    addIssue,
-    updateIssue,
-    updateToEdit,
-    setUpdateToEdit,
-  } = React.useContext(IssuesContext);
+const CreateIssue = () => {
+  const { setCreateIssueFormIsOpen, addIssue } =
+    React.useContext(IssuesContext);
 
-  const { issues } = React.useContext(WorkplanContext);
+  const schema = yup.object().shape({
+    title: yup.string().required("Title is required"),
+    description: yup.string().required("Description is required"),
+    is_active: yup.boolean(),
+    is_high_priority: yup.boolean(),
+    start_date: yup.string().required("Start date is required"),
+    expected_resolution_date: yup.string().nullable(),
+  });
 
-  const methods = useForm<IssueForm>({
+  const methods = useForm<CreateIssueForm>({
     resolver: yupResolver(schema),
     defaultValues: {
       title: "",
       description: "",
-      description_id: null,
       is_active: true,
       is_high_priority: false,
       start_date: "",
@@ -54,43 +41,14 @@ const IssuesForm = () => {
     mode: "onSubmit",
   });
 
-  const { handleSubmit, watch, reset } = methods;
-
-  const loadForm = () => {
-    if (!updateToEdit) return;
-
-    const issueToEdit = issues.find(
-      (issue) => issue.id === updateToEdit.work_issue_id
-    );
-
-    if (!issueToEdit) return;
-
-    reset({
-      title: issueToEdit.title,
-      description: updateToEdit.description,
-      is_active: issueToEdit.is_active,
-      is_high_priority: issueToEdit.is_high_priority,
-      start_date: issueToEdit.start_date,
-      expected_resolution_date: issueToEdit.expected_resolution_date,
-    });
-  };
-  useEffect(() => {
-    loadForm();
-  }, [updateToEdit]);
+  const { handleSubmit, watch } = methods;
 
   const watchedTitle = watch("title");
   const titleCharacterLimit = 50;
   const watchedDescription = watch("description");
   const descriptionCharacterLimit = 250;
 
-  const saveIssue = (issueForm: IssueForm) => {
-    if (updateToEdit) {
-      return updateIssue(issueForm);
-    }
-    return addIssue(issueForm);
-  };
-
-  const onSubmitHandler = async (data: IssueForm) => {
+  const onSubmitHandler = async (data: CreateIssueForm) => {
     const {
       title,
       description,
@@ -111,9 +69,8 @@ const IssuesForm = () => {
       is_high_priority: Boolean(is_high_priority),
     };
 
-    saveIssue(dataToBeSubmitted);
-    setShowIssuesForm(false);
-    setUpdateToEdit(null);
+    addIssue(dataToBeSubmitted);
+    setCreateIssueFormIsOpen(false);
   };
 
   return (
@@ -155,11 +112,11 @@ const IssuesForm = () => {
             name="description"
             fullWidth
             size="small"
-            multiline
-            rows={4}
             inputProps={{
               maxLength: descriptionCharacterLimit,
             }}
+            multiline
+            rows={4}
           />
         </Grid>
         <Grid item xs={12}>
@@ -205,4 +162,4 @@ const IssuesForm = () => {
   );
 };
 
-export default IssuesForm;
+export default CreateIssue;
