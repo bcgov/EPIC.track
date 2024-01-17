@@ -67,4 +67,3 @@ from .work_request import (
     WorkTypeIdQueryParamSchema,
     WorkIssuesUpdateEditSchema
 )
-

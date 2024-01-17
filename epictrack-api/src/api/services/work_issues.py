@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
-from typing import Dict, List
+from typing import Dict
 
 from api.exceptions import ResourceNotFoundError
 from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
