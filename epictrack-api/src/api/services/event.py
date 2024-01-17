@@ -22,18 +22,8 @@ from sqlalchemy import and_, extract, func, or_
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    PRIMARY_CATEGORIES,
-    CalendarEvent,
-    Event,
-    EventCategoryEnum,
-    EventConfiguration,
-    EventTypeEnum,
-    Work,
-    WorkCalendarEvent,
-    WorkPhase,
-    WorkStateEnum,
-    db,
-)
+    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, Work,
+    WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
@@ -42,13 +32,14 @@ from api.models.project import Project
 from api.models.work_type import WorkType
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
+
+from ..utils.roles import Membership
+from ..utils.roles import Role as KeycloakRole
 from . import authorisation
-
 from .event_configuration import EventConfigurationService
-from ..utils.roles import Membership, Role as KeycloakRole
 
 
-# pylint:disable=not-callable
+# pylint:disable=not-callable, too-many-lines
 
 
 class EventService:

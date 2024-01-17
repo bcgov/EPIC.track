@@ -12,6 +12,8 @@ const WorkDetails = () => {
   const currentWorkPhaseIndex = workPhases?.findIndex(
     (phase) => phase.work_phase.id === work?.current_work_phase_id
   );
+  const previousWorkPhase =
+    currentWorkPhaseIndex > 0 ? workPhases?.[currentWorkPhaseIndex - 1] : null;
   const currentWorkPhase = workPhases?.[currentWorkPhaseIndex];
   const nextWorkPhase =
     currentWorkPhaseIndex + 1 < workPhases.length
@@ -59,7 +61,9 @@ const WorkDetails = () => {
 
         <Grid item xs={6}>
           <ETParagraph color={Palette.neutral.dark}>
-            {currentWorkPhase?.current_milestone ?? "-"}
+            {currentWorkPhase?.current_milestone ??
+              previousWorkPhase?.current_milestone ??
+              "-"}
           </ETParagraph>
         </Grid>
 

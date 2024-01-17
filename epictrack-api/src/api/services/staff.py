@@ -121,6 +121,7 @@ class StaffService:
         username = TokenInfo.get_username()
         data["created_by"] = username
         data = data.to_dict("records")
+        data["email"] = data["email"].lower()
         db.session.bulk_insert_mappings(Staff, data)
         db.session.commit()
         return "Inserted successfully"
