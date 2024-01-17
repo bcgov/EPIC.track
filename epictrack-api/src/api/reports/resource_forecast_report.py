@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
+from typing import Set
 
 from dateutil import rrule
 from reportlab.lib import colors
@@ -72,8 +73,7 @@ class EAResourceForeCastReport(ReportFactory):
                 EventConfiguration.work_phase_id,
             )
             .filter(
-                EventConfiguration.visibility
-                == EventTemplateVisibilityEnum.MANDATORY.value,
+                EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY.value,
                 EventConfiguration.event_position == EventPositionEnum.START.value,
             )
             .group_by(EventConfiguration.work_phase_id)
@@ -221,102 +221,13 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _fetch_data(self, report_date: datetime):  # pylint: disable=too-many-locals
         """Fetches the relevant data for EA Resource Forecast Report"""
-        # TODO: FIX LIST INDEX OUT OF BOUNDS FOR CERTAIN MONTHS, EX:- NOV 1, 2024
-        report_start_date = report_date.date().replace(day=1)
-        first_month = self._add_months(report_start_date, 1, False)
-        self.end_date = self._add_months(first_month, 5)
         env_region = aliased(Region)
         nrs_region = aliased(Region)
         responsible_epd = aliased(Staff)
         work_lead = aliased(Staff)
 
-        end_work_phase_query = (
-            db.session.query(
-                func.max(WorkPhase.id).label("end_phase_id"),
-            )
-            .group_by(WorkPhase.work_id)
-            .subquery()
-        )
-
-        works_started = (
-            db.session.execute(
-                select(WorkPhase.work_id)
-                .join(
-                    EventConfiguration,
-                    and_(
-                        EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.event_position
-                        == EventPositionEnum.START.value,
-                        WorkPhase.sort_order == 1,
-                    ),
-                )
-                .join(Event, Event.event_configuration_id == EventConfiguration.id)
-                .where(
-                    and_(
-                        func.coalesce(Event.actual_date, Event.anticipated_date)
-                        <= self.end_date,
-                        WorkPhase.sort_order == 1,
-                    )
-                )
-                .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
-                .distinct(WorkPhase.work_id)
-            )
-            .scalars()
-            .all()
-        )
-
-        works_not_finished = (
-            db.session.execute(
-                select(WorkPhase.work_id)
-                .join(
-                    EventConfiguration,
-                    and_(
-                        EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.event_position
-                        == EventPositionEnum.END.value,
-                    ),
-                )
-                .join(Event, Event.event_configuration_id == EventConfiguration.id)
-                .join(
-                    end_work_phase_query,
-                    WorkPhase.id == end_work_phase_query.c.end_phase_id,
-                )
-                .where(
-                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date)
-                )
-                .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
-                .distinct(WorkPhase.work_id)
-            )
-            .scalars()
-            .all()
-        )
-
-        valid_work_ids = set(works_not_finished) & set(works_started)
-
-        second_month = self._add_months(first_month, 1)
-        third_month = self._add_months(second_month, 1)
-        remaining_start_month = self._add_months(third_month, 1, False)
-        self.months = [
-            report_start_date.replace(
-                day=monthrange(report_start_date.year, report_start_date.month)[1]
-            ),
-            first_month.replace(day=monthrange(first_month.year, first_month.month)[1]),
-            second_month,
-            third_month,
-            self.end_date,
-        ]
-        self.month_labels = list(map(lambda x: f"{x:%B}", self.months[1:-1]))
-        q2_month_labels = []
-        for month in rrule.rrule(
-            rrule.MONTHLY, dtstart=remaining_start_month, until=self.end_date
-        ):
-            month_label = f"{month:%b}"
-            if month.month == 12:
-                month_label += f"{month:%Y}"
-            q2_month_labels.append(month_label)
-        if self.end_date.year > first_month.year:
-            q2_month_labels[-1] += f"{self.end_date:%Y}"
-        self.month_labels.append(", ".join(q2_month_labels))
+        self._set_month_labels(report_date)
+        valid_work_ids = self._get_valid_work_ids(report_date)
 
         works = (
             Project.query.filter(
@@ -377,8 +288,7 @@ class EAResourceForeCastReport(ReportFactory):
             Event.query.filter(
                 Event.work_id.in_(work_ids),
                 Event.event_configuration_id.in_(self.start_event_configurations),
-                func.coalesce(Event.actual_date, Event.anticipated_date)
-                <= self.end_date,
+                func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
             )
             .join(
                 EventConfiguration,
@@ -408,14 +318,22 @@ class EAResourceForeCastReport(ReportFactory):
                         events[work_id],
                     )
                 )
-                month_events = sorted(month_events, key=lambda x: x.start_date)
-                latest_event = month_events[-1]
-                work.update(
-                    {
-                        self.month_labels[index]: latest_event.event_phase,
-                        f"{self.month_labels[index]}_color": latest_event.phase_color,
-                    }
-                )
+                if month_events:
+                    month_events = sorted(month_events, key=lambda x: x.start_date)
+                    latest_event = month_events[-1]
+                    work.update(
+                        {
+                            self.month_labels[index]: latest_event.event_phase,
+                            f"{self.month_labels[index]}_color": latest_event.phase_color,
+                        }
+                    )
+                else:
+                    work.update(
+                        {
+                            self.month_labels[index]: "",
+                            f"{self.month_labels[index]}_color": "#FFFFFF",
+                        }
+                    )
             work_data[0] = work
             results[work_id] = work_data
         return results
@@ -494,8 +412,7 @@ class EAResourceForeCastReport(ReportFactory):
                     EventConfiguration,
                     and_(
                         EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.visibility
-                        == EventTemplateVisibilityEnum.MANDATORY,
+                        EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY,
                     ),
                 )
                 .join(Event, EventConfiguration.id == Event.event_configuration_id)
@@ -516,8 +433,7 @@ class EAResourceForeCastReport(ReportFactory):
                 referral_timing_obj = referral_timing_query.first()
             referral_timing = (
                 Event.query.filter(
-                    Event.event_configuration_id
-                    == referral_timing_obj.event_configuration_id
+                    Event.event_configuration_id == referral_timing_obj.event_configuration_id
                 )
                 .add_columns(
                     func.coalesce(Event.actual_date, Event.anticipated_date).label(
@@ -600,8 +516,7 @@ class EAResourceForeCastReport(ReportFactory):
                     Paragraph(
                         f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style
                     )
-                ]
-                + [""] * (len(table_headers[1]) - 1)
+                ] + [""] * (len(table_headers[1]) - 1)
             )
             normal_style.textColor = colors.black
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
@@ -628,7 +543,7 @@ class EAResourceForeCastReport(ReportFactory):
                     row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
                     color = month_data["color"][1:]
-                    bg_color = [int(color[i : i + 2], 16) / 255 for i in (0, 2, 4)]
+                    bg_color = [int(color[i: i + 2], 16) / 255 for i in (0, 2, 4)]
                     styles.append(
                         (
                             "BACKGROUND",
@@ -653,8 +568,7 @@ class EAResourceForeCastReport(ReportFactory):
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ]
-                + styles
+                ] + styles
             )
         )
 
@@ -700,3 +614,95 @@ class EAResourceForeCastReport(ReportFactory):
         if set_to_last:
             result = result.replace(day=monthrange(start.year + year_offset, month)[1])
         return result
+
+    def _get_valid_work_ids(self, report_date: datetime) -> Set[int]:
+        """Find and return works that are started before end date and did not end before report date"""
+        end_work_phase_query = (
+            db.session.query(
+                func.max(WorkPhase.id).label("end_phase_id"),
+            )
+            .group_by(WorkPhase.work_id)
+            .subquery()
+        )
+        works_started = (
+            db.session.execute(
+                select(WorkPhase.work_id)
+                .join(
+                    EventConfiguration,
+                    and_(
+                        EventConfiguration.work_phase_id == WorkPhase.id,
+                        EventConfiguration.event_position == EventPositionEnum.START.value,
+                        WorkPhase.sort_order == 1,
+                    ),
+                )
+                .join(Event, Event.event_configuration_id == EventConfiguration.id)
+                .where(
+                    and_(
+                        func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
+                        WorkPhase.sort_order == 1,
+                    )
+                )
+                .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
+                .distinct(WorkPhase.work_id)
+            )
+            .scalars()
+            .all()
+        )
+
+        works_not_finished = (
+            db.session.execute(
+                select(WorkPhase.work_id)
+                .join(
+                    EventConfiguration,
+                    and_(
+                        EventConfiguration.work_phase_id == WorkPhase.id,
+                        EventConfiguration.event_position == EventPositionEnum.END.value,
+                    ),
+                )
+                .join(Event, Event.event_configuration_id == EventConfiguration.id)
+                .join(
+                    end_work_phase_query,
+                    WorkPhase.id == end_work_phase_query.c.end_phase_id,
+                )
+                .where(
+                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date)
+                )
+                .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
+                .distinct(WorkPhase.work_id)
+            )
+            .scalars()
+            .all()
+        )
+        valid_work_ids = set(works_not_finished) & set(works_started)
+        return valid_work_ids
+
+    def _set_month_labels(self, report_date: datetime) -> None:
+        """Calculate and set month related attributes to the self"""
+        report_start_date = report_date.date().replace(day=1)
+        first_month = self._add_months(report_start_date, 1, False)
+        self.end_date = self._add_months(first_month, 5)
+
+        second_month = self._add_months(first_month, 1)
+        third_month = self._add_months(second_month, 1)
+        remaining_start_month = self._add_months(third_month, 1, False)
+        self.months = [
+            report_start_date.replace(
+                day=monthrange(report_start_date.year, report_start_date.month)[1]
+            ),
+            first_month.replace(day=monthrange(first_month.year, first_month.month)[1]),
+            second_month,
+            third_month,
+            self.end_date,
+        ]
+        self.month_labels = list(map(lambda x: f"{x:%B}", self.months[1:-1]))
+        q2_month_labels = []
+        for month in rrule.rrule(
+            rrule.MONTHLY, dtstart=remaining_start_month, until=self.end_date
+        ):
+            month_label = f"{month:%b}"
+            if month.month == 12:
+                month_label += f"{month:%Y}"
+            q2_month_labels.append(month_label)
+        if self.end_date.year > first_month.year:
+            q2_month_labels[-1] += f"{self.end_date:%Y}"
+        self.month_labels.append(", ".join(q2_month_labels))
