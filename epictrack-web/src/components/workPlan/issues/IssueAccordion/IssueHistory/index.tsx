@@ -76,7 +76,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
           return (
             <TimelineItem
               key={update.id}
-              data-cy={`histor-update-${update.id}`}
+              data-cy={`history-update-${update.id}`}
             >
               <TimelineOppositeContent>
                 <If condition={isSuccess}>

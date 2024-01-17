@@ -175,12 +175,12 @@ describe("<IssueAccordion />", () => {
 
     cy.get('[data-cy="empty-issue-history"]').should("not.exist");
 
-    cy.get(`[data-cy="histor-update-${mockUpdates[1].id}"]`)
+    cy.get(`[data-cy="history-update-${mockUpdates[1].id}"]`)
       .should("be.visible")
       .find("p")
       .contains(mockUpdates[1].description);
 
-    cy.get(`[data-cy="histor-update-${mockUpdates[2].id}"]`)
+    cy.get(`[data-cy="history-update-${mockUpdates[2].id}"]`)
       .should("be.visible")
       .find("p")
       .contains(mockUpdates[2].description);
@@ -220,12 +220,12 @@ describe("<IssueAccordion />", () => {
 
     cy.get('[data-cy="empty-issue-history"]').should("not.exist");
 
-    cy.get(`[data-cy="histor-update-${mockUpdates[1].id}"]`)
+    cy.get(`[data-cy="history-update-${mockUpdates[1].id}"]`)
       .should("be.visible")
       .find("p")
       .contains(mockUpdates[1].description);
 
-    cy.get(`[data-cy="histor-update-${mockUpdates[2].id}"]`)
+    cy.get(`[data-cy="history-update-${mockUpdates[2].id}"]`)
       .should("be.visible")
       .find("p")
       .contains(mockUpdates[2].description);
