@@ -28,6 +28,7 @@ import { MONTH_DAY_YEAR, ROLES } from "../../../constants/application-constant";
 import { searchFilter } from "../../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../../hooks";
 import { hasPermission } from "../../shared/restricted";
+import { WorkplanContext } from "../WorkPlanContext";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 
@@ -47,9 +48,14 @@ const EventListTable = ({
   rowSelection,
   setRowSelection,
 }: EventListTable) => {
+  const { team } = useContext(WorkplanContext);
   const { highlightedRows } = useContext(EventContext);
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const { roles, email } = useAppSelector((state) => state.user.userDetail);
+  const userIsTeamMember = Boolean(
+    team.find((member) => member.staff.email === email)
+  );
+  const canEdit =
+    hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsTeamMember;
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -460,7 +466,7 @@ const EventListTable = ({
     <MasterTrackTable
       enableSorting={false}
       enableRowSelection={(row) => row.original.type !== "Milestone"}
-      enableSelectAll
+      enableSelectAll={canEdit}
       enablePagination
       onPaginationChange={setPagination}
       muiPaginationProps={{
@@ -490,8 +496,9 @@ const EventListTable = ({
       muiSelectCheckboxProps={({ row }) => ({
         indeterminateIcon: <LockIcon />,
         disabled:
-          row.original.type === EVENT_TYPE.MILESTONE &&
-          !row.original.is_complete,
+          !canEdit ||
+          (row.original.type === EVENT_TYPE.MILESTONE &&
+            !row.original.is_complete),
         indeterminate:
           row.original.is_complete &&
           row.original.type === EVENT_TYPE.MILESTONE,

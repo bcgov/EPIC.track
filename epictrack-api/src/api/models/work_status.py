@@ -14,7 +14,7 @@
 """Model to handle all operations related to WorkStatus."""
 from __future__ import annotations
 
-from typing import List, Dict
+from typing import Dict, List
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, desc
 from sqlalchemy.orm import relationship

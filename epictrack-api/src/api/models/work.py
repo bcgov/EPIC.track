@@ -165,7 +165,7 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_search_text(cls, query, search_text):
         if search_text:
-            subquery = exists().where(and_(Work.project_id == Project.id, Project.name == search_text))
+            subquery = exists().where(and_(Work.project_id == Project.id, Project.name.ilike(f'%{search_text}%')))
             query = query.filter(subquery)
         return query
 

@@ -53,6 +53,7 @@ const Header = () => {
         >
           {!isMediumScreen && (
             <IconButton
+              data-testid="menu-icon"
               component={MenuIcon}
               color="info"
               sx={{
@@ -93,6 +94,7 @@ const Header = () => {
               alignItems: "baseline",
               gap: "1rem",
             }}
+            data-testid="user-menu-box"
             onMouseEnter={handleOpenProfileMenu}
             onMouseLeave={handleCloseProfileMenu}
           >
@@ -113,6 +115,7 @@ const Header = () => {
               >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
             </Avatar>
             <UserMenu
+              data-testid="user-menu"
               anchorEl={profileMenuAnchorEl}
               email={user.email}
               phone={user.phone}

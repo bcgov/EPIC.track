@@ -87,8 +87,7 @@ class TaskBodyParameterSchema(RequestBodyParameterSchema):
 
     tips = fields.Str(
         metadata={"description": "Practical info on why/how to do the task"},
-        # validate=validate.Length(max=150),
-        required=True,
+        allow_none=True
     )
 
     number_of_days = fields.Int(
@@ -246,3 +245,8 @@ class TasksBulkDeleteQueryParamSchema(RequestQueryParameterSchema):
     """Tasks bulk delete query parameter"""
 
     task_ids = IntegerList(metadata={"description": "comma separated task ids"})
+    work_id = fields.Int(
+        metadata={"description": "Work id of the task"},
+        validate=validate.Range(min=1),
+        required=True,
+    )
