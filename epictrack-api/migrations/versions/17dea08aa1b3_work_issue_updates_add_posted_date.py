@@ -1,8 +1,8 @@
-"""Add posted date to work issue updates
+"""Add posted date to work_issue_updates
 
-Revision ID: 6224097fad58
-Revises: 09a79ca8e8fd
-Create Date: 2024-01-16 15:13:01.072018
+Revision ID: 17dea08aa1b3
+Revises: 52b37bc04925
+Create Date: 2024-01-17 10:22:55.964733
 
 """
 from alembic import op
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6224097fad58'
-down_revision = '09a79ca8e8fd'
+revision = '17dea08aa1b3'
+down_revision = '52b37bc04925'
 branch_labels = None
 depends_on = None
 
