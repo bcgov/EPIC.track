@@ -74,7 +74,10 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
         {firstNUpdatesInTimeline.map((update, index) => {
           const isSuccess = highlightFirstInTimeLineApproved && index === 0;
           return (
-            <TimelineItem key={update.id}>
+            <TimelineItem
+              key={update.id}
+              data-cy={`histor-update-${update.id}`}
+            >
               <TimelineOppositeContent>
                 <If condition={isSuccess}>
                   <Then>
@@ -94,6 +97,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                     errorProps={{ disabled: true }}
                   >
                     <Button
+                      data-cy="edit-history-update-button"
                       variant="text"
                       startIcon={<PencilEditIcon />}
                       sx={{

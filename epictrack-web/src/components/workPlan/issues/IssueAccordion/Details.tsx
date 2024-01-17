@@ -23,7 +23,6 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
 
-  const issueContext = React.useContext(IssuesContext);
   const {
     setEditIssueUpdateFormIsOpen,
     approveIssue,
@@ -62,12 +61,15 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <If condition={latestUpdate.is_approved}>
                   <Then>
                     <Grid item xs="auto">
-                      <ActiveChip label="Approved" />
+                      <ActiveChip data-cy={`approved-chip`} label="Approved" />
                     </Grid>
                   </Then>
                   <Else>
                     <Grid item xs="auto">
-                      <ErrorChip label="Need Approval" />
+                      <ErrorChip
+                        data-cy={`need-approval-chip`}
+                        label="Need Approval"
+                      />
                     </Grid>
                   </Else>
                 </If>
@@ -87,6 +89,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Then>
                   <Grid item>
                     <Button
+                      data-cy="approve-issue-update-button"
                       variant="text"
                       startIcon={<CheckCircleIcon />}
                       sx={{
@@ -104,7 +107,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Else>
                   <Grid item>
                     <Button
-                      data-cy="new-issue-update"
+                      data-cy="new-issue-update-button"
                       variant="text"
                       startIcon={
                         <AddIcon
@@ -133,6 +136,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                     errorProps={{ disabled: true }}
                   >
                     <Button
+                      data-cy="edit-issue-update-button"
                       variant="text"
                       startIcon={<PencilEditIcon />}
                       sx={{
@@ -149,6 +153,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   </Restricted>
                   <Else>
                     <Button
+                      data-cy="edit-issue-update-button"
                       variant="text"
                       startIcon={<PencilEditIcon />}
                       sx={{
