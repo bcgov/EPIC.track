@@ -1,5 +1,4 @@
 import { ListType } from "./code";
-import { MilestoneEvent } from "./event";
 import { Ministry } from "./ministry";
 import { Staff } from "./staff";
 import { MasterBase } from "./type";
