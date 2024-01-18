@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Staff resource's input validations"""
-from marshmallow import fields, validate
+from marshmallow import fields, pre_load, validate
 
 from api.schemas.validators import Phone
 
@@ -46,6 +46,14 @@ class StaffExistanceQueryParamSchema(RequestQueryParameterSchema):
         validate=validate.Range(min=1),
         missing=None,
     )
+
+    @pre_load
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Converts staff email into lower case string"""
+        data = dict(data)
+        if "email" in data:
+            data["email"] = data["email"].lower()
+        return data
 
 
 class StaffByPositionsQueryParamSchema(BasicRequestQueryParameterSchema):
@@ -88,9 +96,15 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     is_active = fields.Boolean(
-        metadata={"description": "Active status of the staff"},
-        required=True
+        metadata={"description": "Active status of the staff"}, required=True
     )
+
+    @pre_load
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Converts staff email into lower case string"""
+        if "email" in data:
+            data["email"] = data["email"].lower()
+        return data
 
 
 class StaffEmailPathParameterSchema(RequestPathParameterSchema):
@@ -101,3 +115,11 @@ class StaffEmailPathParameterSchema(RequestPathParameterSchema):
         validate=validate.Email(),
         required=True,
     )
+
+    @pre_load
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Converts staff email into lower case string"""
+        data = dict(data)
+        if "email" in data:
+            data["email"] = data["email"].lower()
+        return data

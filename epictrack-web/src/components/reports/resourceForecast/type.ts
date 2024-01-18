@@ -1,5 +1,5 @@
 export type ResourceForecastModel = {
-  project_name: string;
+  work_title: string;
   capital_investment: number;
   fte_positions_operation: number;
   fte_positions_construction: number;

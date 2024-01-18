@@ -23,6 +23,7 @@ from api.models import (
     WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
+from api.models.work import WorkStateEnum
 
 from .report_factory import ReportFactory
 
@@ -38,7 +39,7 @@ class EAResourceForeCastReport(ReportFactory):
     def __init__(self, filters):
         """Initialize the ReportFactory"""
         data_keys = [
-            "project_name",
+            "work_title",
             "capital_investment",
             "ea_type",
             "project_phase",
@@ -51,9 +52,6 @@ class EAResourceForeCastReport(ReportFactory):
             "work_lead",
             "env_region",
             "nrs_region",
-            # "staff_first_name",
-            # "staff_last_name",
-            # "role_id",
             "work_id",
             "ea_type_label",
             "sector(sub)",
@@ -86,7 +84,7 @@ class EAResourceForeCastReport(ReportFactory):
         self.month_labels = []
         self.report_cells = {
             "[PROJECT BACKGROUND]": [
-                {"data_key": "project_name", "label": "PROJECT NAME", "width": 0.050},
+                {"data_key": "work_title", "label": "WORK TITLE", "width": 0.050},
                 {
                     "data_key": "capital_investment",
                     "label": "EST. CAP. INVESTMENT",
@@ -256,7 +254,7 @@ class EAResourceForeCastReport(ReportFactory):
                 Work.id.in_(valid_work_ids),
             )
             .add_columns(
-                Project.name.label("project_name"),
+                Work.title.label("work_title"),
                 Project.capital_investment.label("capital_investment"),
                 WorkType.name.label("ea_type"),
                 WorkType.report_title.label("ea_type_label"),
@@ -480,7 +478,7 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._format_data(data)
         if not data:
             return {}, None
-        data = sorted(data, key=lambda k: (k["ea_type_sort_order"], k["project_name"]))
+        data = sorted(data, key=lambda k: (k["ea_type_sort_order"], k["work_title"]))
         if return_type == "json" and data:
             return data, None
         formatted_data = defaultdict(list)
@@ -640,6 +638,7 @@ class EAResourceForeCastReport(ReportFactory):
                     and_(
                         func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
                         WorkPhase.sort_order == 1,
+                        Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
                     )
                 )
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
@@ -665,7 +664,8 @@ class EAResourceForeCastReport(ReportFactory):
                     WorkPhase.id == end_work_phase_query.c.end_phase_id,
                 )
                 .where(
-                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date)
+                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date),
+                    Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
                 )
                 .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
                 .distinct(WorkPhase.work_id)
