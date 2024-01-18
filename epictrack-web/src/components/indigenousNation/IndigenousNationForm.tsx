@@ -179,11 +179,7 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>PIP URL</ETFormLabel>
-            <TextField
-              data-cy="indigenous-form-pip-url"
-              fullWidth
-              {...register("pip_link")}
-            />
+            <TextField fullWidth {...register("pip_link")} />
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch name="is_active" />
