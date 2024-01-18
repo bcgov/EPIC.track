@@ -78,5 +78,4 @@ def _get_special_history_map():
         else:
             special_histories_map[key].append(special_history.field_name)
 
-    print('-special_histories_map-', special_histories_map)
     return special_histories_map
