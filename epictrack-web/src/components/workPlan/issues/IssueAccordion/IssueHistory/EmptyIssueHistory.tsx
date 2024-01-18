@@ -9,6 +9,7 @@ export const EmptyIssueHistory = () => {
 
   return (
     <Stack
+      data-cy="empty-issue-history"
       justifyContent={"center"}
       alignItems={"center"}
       sx={{ height: "100%" }}
