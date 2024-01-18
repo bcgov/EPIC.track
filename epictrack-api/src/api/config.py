@@ -25,7 +25,6 @@ import sys
 from dotenv import find_dotenv, load_dotenv
 from api.utils import constants
 
-
 # this will load all the envars from a .env file located in the project root (api)
 load_dotenv(find_dotenv())
 
@@ -107,6 +106,8 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     CACHE_TYPE = constants.CACHE_TYPE
     CACHE_DEFAULT_TIMEOUT = constants.CACHE_DEFAULT_TIMEOUT
+
+    MIN_WORK_START_DATE = _get_config('MIN_WORK_START_DATE', default='1995-06-30')
 
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
@@ -209,7 +210,7 @@ class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     DEBUG = False
 
 
-class MigrationConfig():  # pylint: disable=too-few-public-methods
+class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
     """Config for db migration."""
 
     TESTING = False
