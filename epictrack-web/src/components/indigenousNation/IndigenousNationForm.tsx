@@ -146,7 +146,6 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Name</ETFormLabel>
             <TextField
-              data-cy="indigenous-form-name"
               placeholder="Name"
               fullWidth
               error={!!errors?.name?.message}
@@ -157,7 +156,6 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
             <ControlledSelectV2
-              testId="indigenous-form-relationship-holder"
               placeholder="Select a Relationship Holder"
               defaultValue={
                 (ctx.item as FirstNation)?.relationship_holder_id || ""
@@ -194,12 +192,10 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={12}>
             <ETFormLabel>Notes</ETFormLabel>
-            <div data-cy="indigenous-form-notes">
-              <RichTextEditor
-                handleEditorStateChange={setNotes}
-                initialRawEditorState={initialNotes}
-              />
-            </div>
+            <RichTextEditor
+              handleEditorStateChange={setNotes}
+              initialRawEditorState={initialNotes}
+            />
           </Grid>
         </Grid>
       </FormProvider>

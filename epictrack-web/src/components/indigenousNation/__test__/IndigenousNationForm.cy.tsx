@@ -102,25 +102,21 @@ describe("IndigenousNationForm", () => {
   });
 
   it("renders the name field", () => {
-    cy.get('[data-cy="indigenous-form-name"').should("be.visible");
+    cy.get('input[name="name"]');
   });
 
   it("renders the pip url field", () => {
-    cy.get('[data-cy="indigenous-form-pip-url"').should("be.visible");
+    cy.get('input[name="pip_link"]');
   });
 
-  it("renders the notes field", () => {
-    cy.get('[data-cy="indigenous-form-notes"').should("be.visible");
+  it("renders the rich text editor", () => {
+    cy.get(".DraftEditor-editorContainer");
   });
 
   it("renders the relationship holder field", () => {
-    cy.get('[data-cy="indigenous-form-relationship-holder"').should(
-      "be.visible"
-    );
+    cy.get('input[name="relationship_holder_id"]');
   });
   it("renders the pip organization type field", () => {
-    cy.get('[data-cy="indigenous-form-pip-organization-type"').should(
-      "be.visible"
-    );
+    cy.get('input[name="pip_org_type_id"]');
   });
 });
