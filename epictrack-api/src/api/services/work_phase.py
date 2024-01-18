@@ -147,7 +147,6 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
         if work_phase_id is not None:
             work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
-        index = 1
         for index, work_phase in enumerate(work_phases, start=1):
             result_item = {"work_phase": work_phase}
             total_days = (
