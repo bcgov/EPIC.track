@@ -312,7 +312,7 @@ export default function AnticipatedEAOSchedule() {
                                   <TableBody>
                                     <TableRow>
                                       <TableCell>
-                                        {item["milestone_type"] === 4
+                                        {item["milestone_type"] === 5
                                           ? "Referral Date"
                                           : "Decision Date"}
                                       </TableCell>
