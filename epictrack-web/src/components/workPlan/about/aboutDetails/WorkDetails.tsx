@@ -20,6 +20,8 @@ const WorkDetails = () => {
       ? workPhases?.[currentWorkPhaseIndex + 1]
       : null;
 
+  if (!work) return null;
+
   return (
     <GrayBox>
       <Grid container spacing={1}>
@@ -31,7 +33,7 @@ const WorkDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {dayjs(work?.created_at).format(MONTH_DAY_YEAR)}
+              {dayjs(work.created_at).format(MONTH_DAY_YEAR)}
             </ETParagraph>
           </Grid>
         </Grid>
@@ -45,7 +47,7 @@ const WorkDetails = () => {
         </Grid>
         <Grid item xs={12}>
           <ETParagraph color={Palette.neutral.dark}>
-            {work?.anticipated_decision_date ?? "-"}
+            {work.anticipated_decision_date ?? "-"}
           </ETParagraph>
         </Grid>
         <Grid item xs={6}>
@@ -74,6 +76,19 @@ const WorkDetails = () => {
               "-"}
           </ETParagraph>
         </Grid>
+
+        <Grid item xs={12}>
+          <ETCaption1 bold color={Palette.primary.main}>
+            WORK DESCRIPTION
+          </ETCaption1>
+        </Grid>
+
+        <Grid item xs={12}>
+          <ETParagraph color={Palette.neutral.dark}>
+            {work.report_description}
+          </ETParagraph>
+        </Grid>
+
         <Grid item xs={4}>
           <ETCaption1 bold color={Palette.primary.main}>
             EA ACT
@@ -91,17 +106,17 @@ const WorkDetails = () => {
         </Grid>
         <Grid item xs={4}>
           <ETParagraph color={Palette.neutral.dark}>
-            {work?.ea_act?.name}
+            {work.ea_act?.name}
           </ETParagraph>
         </Grid>
         <Grid item xs={4}>
           <ETParagraph color={Palette.neutral.dark}>
-            {work?.federal_involvement?.name}
+            {work.federal_involvement?.name}
           </ETParagraph>
         </Grid>
         <Grid item xs={4}>
           <ETParagraph color={Palette.neutral.dark}>
-            {work?.substitution_act?.name}
+            {work.substitution_act?.name}
           </ETParagraph>
         </Grid>
         <Grid item xs={12}>
@@ -111,7 +126,7 @@ const WorkDetails = () => {
         </Grid>
         <Grid item xs={12}>
           <ETParagraph color={Palette.neutral.dark}>
-            {work?.ministry?.name}
+            {work.ministry?.name}
           </ETParagraph>
         </Grid>
         <Grid item xs={12}>
@@ -121,7 +136,7 @@ const WorkDetails = () => {
         </Grid>
         <Grid item xs={12}>
           <ETParagraph color={Palette.neutral.dark}>
-            {work?.decision_by?.full_name}
+            {work.decision_by?.full_name}
           </ETParagraph>
         </Grid>
       </Grid>
