@@ -169,7 +169,6 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>PIP Organization Type</ETFormLabel>
             <ControlledSelectV2
-              testId="indigenous-form-pip-organization-type"
               placeholder="Select an Organization Type"
               defaultValue={(ctx.item as FirstNation)?.pip_org_type_id || ""}
               getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
