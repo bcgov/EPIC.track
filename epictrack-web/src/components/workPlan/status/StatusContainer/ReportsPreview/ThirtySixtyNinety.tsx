@@ -17,7 +17,8 @@ export const ThirtySixtyNinety = () => {
   const { work, workPhases, issues, statuses } =
     React.useContext(WorkplanContext);
 
-  const currentStatus = statuses.find((status) => status.is_approved);
+  const approvedStatuses = statuses.filter((status) => status.is_approved);
+  const currentStatus = approvedStatuses[0];
 
   const currentWorkPhase = workPhases.find(
     (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id
@@ -25,9 +26,7 @@ export const ThirtySixtyNinety = () => {
 
   const activeApprovedHighprioIssues = issues.filter(
     (issue) =>
-      issue.is_active &&
-      issue.is_high_priority &&
-      issue.updates.find((update) => update.is_approved)
+      issue.is_active && issue.updates.find((update) => update.is_approved)
   );
 
   const issueUpdates = activeApprovedHighprioIssues
@@ -102,7 +101,7 @@ export const ThirtySixtyNinety = () => {
               : ""}
           </ETCaption2>
           <ETPreviewBox>
-            <If condition={issueUpdates.length > 0}>
+            <If condition={approvedStatuses.length > 0}>
               <Then>
                 <ETPreviewText color={Palette.neutral.dark}>
                   {currentStatus?.description}
