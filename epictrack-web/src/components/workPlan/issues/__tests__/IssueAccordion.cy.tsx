@@ -4,16 +4,6 @@ import { WorkIssue, WorkIssueUpdate } from "models/Issue";
 import { IssuesContext, initialIssueContextValue } from "../IssuesContext";
 import { faker } from "@faker-js/faker";
 
-const mockApprovedIssueUpdate: WorkIssueUpdate = {
-  id: 1,
-  work_issue_id: 1,
-  description: faker.lorem.paragraph(1),
-  is_active: true,
-  is_deleted: false,
-  approved_by: faker.person.fullName(),
-  is_approved: true,
-};
-
 const mockIssue: WorkIssue = {
   id: 1,
   title: faker.lorem.words(2),
@@ -27,7 +17,7 @@ const mockIssue: WorkIssue = {
   created_at: "2021-10-01",
   updated_by: "John Doe",
   updated_at: "2021-10-01",
-  updates: [mockApprovedIssueUpdate],
+  updates: [],
 };
 
 type GenerateMockIssueUpdate = {
@@ -46,6 +36,7 @@ const generateMockIssueUpdate = ({
     is_deleted: false,
     approved_by: faker.person.fullName(),
     is_approved: approved,
+    posted_date: faker.date.recent().toDateString(),
   };
 };
 
