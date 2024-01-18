@@ -12,6 +12,7 @@ const mockApprovedIssueUpdate: WorkIssueUpdate = {
   is_deleted: false,
   approved_by: faker.person.fullName(),
   is_approved: true,
+  posted_date: "",
 };
 
 const mockIssue: WorkIssue = {
@@ -46,6 +47,7 @@ const generateMockIssueUpdate = ({
     is_deleted: false,
     approved_by: faker.person.fullName(),
     is_approved: approved,
+    posted_date: "",
   };
 };
 

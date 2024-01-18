@@ -85,9 +85,13 @@ export default function IndigenousNationForm({ ...props }) {
   }, [ctx.item]);
 
   const getStaffs = async () => {
-    const staffsResult = await staffService.getAll();
-    if (staffsResult.status === 200) {
-      setStaffs(staffsResult.data as never);
+    try {
+      const staffsResult = await staffService.getAll();
+      if (staffsResult.status === 200) {
+        setStaffs(staffsResult.data as Staff[]);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -96,9 +100,13 @@ export default function IndigenousNationForm({ ...props }) {
   };
 
   const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
+    try {
+      const codeResult = await codeService.getCodes(code);
+      if (codeResult.status === 200) {
+        codeTypes[code]((codeResult.data as never)["codes"]);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -132,6 +140,7 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel required>Name</ETFormLabel>
             <TextField
+              data-cy="indigenous-form-name"
               placeholder="Name"
               fullWidth
               error={!!errors?.name?.message}
@@ -142,6 +151,7 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
             <ControlledSelectV2
+              data-cy="indigenous-form-relationship-holder"
               placeholder="Select a Relationship Holder"
               defaultValue={
                 (ctx.item as FirstNation)?.relationship_holder_id || ""
@@ -154,18 +164,24 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>PIP Organization Type</ETFormLabel>
-            <ControlledSelectV2
-              placeholder="Select an Organization Type"
-              defaultValue={(ctx.item as FirstNation)?.pip_org_type_id || ""}
-              getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
-              getOptionValue={(o: PIPOrgType) => (o ? o.id.toString() : "")}
-              options={pipOrgTypes || []}
-              {...register("pip_org_type_id")}
-            ></ControlledSelectV2>
+            <div data-cy="indigenous-form-pip-organization-type">
+              <ControlledSelectV2
+                placeholder="Select an Organization Type"
+                defaultValue={(ctx.item as FirstNation)?.pip_org_type_id || ""}
+                getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
+                getOptionValue={(o: PIPOrgType) => (o ? o.id.toString() : "")}
+                options={pipOrgTypes || []}
+                {...register("pip_org_type_id")}
+              ></ControlledSelectV2>
+            </div>
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>PIP URL</ETFormLabel>
-            <TextField fullWidth {...register("pip_link")} />
+            <TextField
+              data-cy="indigenous-form-pip-url"
+              fullWidth
+              {...register("pip_link")}
+            />
           </Grid>
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch name="is_active" />
@@ -173,10 +189,12 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={12}>
             <ETFormLabel>Notes</ETFormLabel>
-            <RichTextEditor
-              handleEditorStateChange={setNotes}
-              initialRawEditorState={initialNotes}
-            />
+            <div data-cy="indigenous-form-notes">
+              <RichTextEditor
+                handleEditorStateChange={setNotes}
+                initialRawEditorState={initialNotes}
+              />
+            </div>
           </Grid>
         </Grid>
       </FormProvider>
