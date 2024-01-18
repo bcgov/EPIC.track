@@ -109,14 +109,14 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         result_dict = {}
         work_ids = list(work_params_dict.keys())
 
-        work_phases_dict, total_work_phases = cls._query_work_phases(work_ids)
+        work_phases_dict = cls._query_work_phases(work_ids)[0]
 
         index = 1
         for work_id, work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls._find_work_phase_status(
                 work_id, work_phase_id, work_phases_dict.get(work_id, [])
             )
-            result_dict["is_last_phase"] = index == total_work_phases
+            # result_dict["is_last_phase"] = index == total_work_phases
             index = index + 1
 
         return result_dict
@@ -150,6 +150,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
         if work_phase_id is not None:
             work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
+        index  = 1
         for work_phase in work_phases:
             result_item = {"work_phase": work_phase}
             total_days = (
@@ -175,6 +176,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
             days_left = cls._get_days_left(suspended_days, total_days, work_phase)
             result_item["days_left"] = days_left
+            result_item["is_last_phase"] = index == len(work_phases)
+            index = index + 1
             result.append(result_item)
         return result
 
