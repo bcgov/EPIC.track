@@ -16,6 +16,7 @@ from typing import IO, List
 
 import numpy as np
 import pandas as pd
+from flask import current_app
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Proponent, db
@@ -110,6 +111,7 @@ class ProponentService:
         )
         username = TokenInfo.get_username()
         data["created_by"] = username
+        data = cls._update_or_delete_old_data(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Proponent, data)
         db.session.commit()
@@ -136,3 +138,31 @@ class ProponentService:
         if staff is None:
             raise ResourceNotFoundError(f"Staff with email {email} does not exist")
         return staff.id
+
+    @classmethod
+    def _update_or_delete_old_data(cls, data) -> pd.DataFrame:
+        """Marks old entries as deleted or active depending on their existence in input data.
+
+        Returns the DataFrame after filtering out updated entries.
+        """
+        proponent_names = set(data["name"].to_list())
+        existing_proponents_qry = db.session.query(Proponent).filter()
+
+        existing_proponents = existing_proponents_qry.all()
+        # Create set of existing proponent names
+        existing_proponents = {x.name for x in existing_proponents}
+        # Mark removed entries as inactive
+        to_delete = existing_proponents - proponent_names
+        disabled_count = existing_proponents_qry.filter(
+            Proponent.name.in_(to_delete),
+        ).update({"is_active": False, "is_deleted": True})
+        current_app.logger.info(f"Disabled {disabled_count} Proponents")
+
+        # Update existing entries to be active
+        to_update = existing_proponents & proponent_names
+        enabled_count = existing_proponents_qry.filter(
+            Proponent.name.in_(to_update)
+        ).update({"is_active": True, "is_deleted": False})
+        current_app.logger.info(f"Enabled {enabled_count} Proponents")
+        # Remove updated proponents to avoid creating duplicates
+        return data[~data["name"].isin(to_update)]
