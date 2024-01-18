@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
-from typing import Dict, List
+from typing import Dict
 
 from api.exceptions import ResourceNotFoundError
 from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
@@ -50,23 +50,29 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         new_work_issue.save()
 
         for update_description in updates:
-            new_update = WorkIssueUpdatesModel(description=update_description)
+            new_update = WorkIssueUpdatesModel(
+                description=update_description,
+                posted_date=issue_data.get('start_date')
+            )
             new_update.work_issue_id = new_work_issue.id
             new_update.save()
 
         return new_work_issue
 
     @classmethod
-    def add_work_issue_update(cls, work_id, issue_id, description_data: List[str]):
+    def add_work_issue_update(cls, work_id, issue_id, data: dict):
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
         if not work_issues:
             raise ResourceNotFoundError("Work Issues not found")
-        for description in description_data:
-            new_update = WorkIssueUpdatesModel(description=description)
-            new_update.work_issue_id = work_issues[0].id
-            new_update.save()
+
+        new_update = WorkIssueUpdatesModel(
+            description=data.get('description'),
+            posted_date=data.get('posted_date')
+        )
+        new_update.work_issue_id = work_issues[0].id
+        new_update.save()
         return WorkIssuesModel.find_by_id(issue_id)
 
     @classmethod
@@ -124,6 +130,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             authorisation.check_auth(one_of_roles=one_of_roles)
 
         issue_update.description = issue_data.get('description')
+        issue_update.posted_date = issue_data.get('posted_date')
         issue_update.save()
 
         return issue_update

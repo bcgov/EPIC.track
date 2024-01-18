@@ -13,10 +13,11 @@
 # limitations under the License.
 """Model to handle all operations related to Issues."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
+from ..utils.utcnow import utcnow
 
 
 class WorkIssueUpdates(BaseModelVersioned):
@@ -32,6 +33,7 @@ class WorkIssueUpdates(BaseModelVersioned):
 
     work_issue_id = Column(ForeignKey('work_issues.id'), nullable=False)
     work_issue = relationship('WorkIssues', back_populates='updates')
+    posted_date = Column(DateTime(timezone=True), nullable=False, server_default=utcnow())
 
     def as_dict(self):  # pylint:disable=arguments-differ
         """Return Json representation."""

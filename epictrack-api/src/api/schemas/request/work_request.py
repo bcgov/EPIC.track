@@ -244,12 +244,27 @@ class WorkIssuesCreateParameterSchema(WorkIssuesParameterSchema):
     )
 
 
-class WorkIssuesUpdateSchema(RequestBodyParameterSchema):
+class WorkIssuesUpdateEditSchema(RequestBodyParameterSchema):
     """Work status update request body schema for PUT requests"""
 
-    id = fields.Int(
-        metadata={"description": "ID of the update"},
+    posted_date = fields.DateTime(
+        metadata={"description": "posted date for the update"},
+        required=False
+    )
+
+    description = fields.Str(
+        metadata={"description": "Description of the update"},
+        validate=validate.Length(max=500),
         required=True
+    )
+
+
+class WorkIssuesUpdateCloneSchema(RequestBodyParameterSchema):
+    """Work status update request body schema for PUT requests"""
+
+    posted_date = fields.DateTime(
+        metadata={"description": "posted date for the update"},
+        required=False
     )
 
     description = fields.Str(

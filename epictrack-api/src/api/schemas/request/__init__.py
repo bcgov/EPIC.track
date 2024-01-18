@@ -60,9 +60,10 @@ from .work_request import (
     WorkIdPhaseIdPathParameterSchema,
     WorkIssuesCreateParameterSchema,
     WorkIssuesParameterSchema,
-    WorkIssuesUpdateSchema,
+    WorkIssuesUpdateCloneSchema,
     WorkNotesBodySchema,
     WorkPlanDownloadQueryParamSchema,
     WorkStatusParameterSchema,
-    WorkTypeIdQueryParamSchema
+    WorkTypeIdQueryParamSchema,
+    WorkIssuesUpdateEditSchema
 )

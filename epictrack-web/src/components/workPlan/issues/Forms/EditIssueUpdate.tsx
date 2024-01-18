@@ -4,13 +4,14 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Grid } from "@mui/material";
 import ControlledTextField from "../../../shared/controlledInputComponents/ControlledTextField";
-import { ETFormLabelWithCharacterLimit } from "../../../shared";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
 import { IssuesContext } from "../IssuesContext";
 import { CloneForm } from "../types";
-
-const descriptionCharacterLimit = 500;
+import { descriptionCharacterLimit } from "./constants";
+import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
 
 const schema = yup.object().shape({
+  posted_date: yup.string().required("Date is required"),
   description: yup
     .string()
     .required("Description is required")
@@ -28,6 +29,7 @@ const EditIssueUpdate = () => {
   const methods = useForm<CloneForm>({
     resolver: yupResolver(schema),
     defaultValues: {
+      posted_date: updateToEdit?.posted_date,
       description: updateToEdit?.description,
     },
     mode: "onSubmit",
@@ -58,6 +60,12 @@ const EditIssueUpdate = () => {
         }}
         onSubmit={handleSubmit(onSubmitHandler)}
       >
+        <Grid item xs={12} container>
+          <Grid item xs={6}>
+            <ETFormLabel required>Date</ETFormLabel>
+            <ControlledDatePicker name="posted_date" />
+          </Grid>
+        </Grid>
         <Grid item xs={12}>
           <ETFormLabelWithCharacterLimit
             characterCount={watchedDescription.length}

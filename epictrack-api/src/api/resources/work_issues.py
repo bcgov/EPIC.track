@@ -68,7 +68,7 @@ class IssueUpdateEdits(Resource):
 
 
 @cors_preflight("POST")
-@API.route("/<int:issue_id>/issue_update", methods=["POST", "OPTIONS"])
+@API.route("/<int:issue_id>/update", methods=["POST", "OPTIONS"])
 class WorkIssueUpdate(Resource):
     """Endpoint resource to manage updates for a specific issue."""
 
@@ -78,16 +78,14 @@ class WorkIssueUpdate(Resource):
     @profiletime
     def post(work_id, issue_id):
         """Create a new update for the specified issue."""
-        description_data = API.payload.get('description_data', None)
-        if not description_data:
-            return jsonify({'error': 'description_data is required'}), HTTPStatus.BAD_REQUEST
-        work_issues = WorkIssuesService.add_work_issue_update(work_id, issue_id, description_data)
+        request_dict = req.WorkIssuesUpdateCloneSchema().load(API.payload)
+        work_issues = WorkIssuesService.add_work_issue_update(work_id, issue_id, request_dict)
         return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
 
 
 @cors_preflight("PATCH")
 @API.route("/<int:issue_id>/update/<int:update_id>", methods=["PATCH", "OPTIONS"])
-class ApproveIssues(Resource):
+class EditIssues(Resource):
     """Endpoint resource to manage approving of work status."""
 
     @staticmethod
@@ -97,7 +95,7 @@ class ApproveIssues(Resource):
     # pylint: disable=unused-argument
     def patch(work_id, issue_id, update_id):
         """Approve a work status."""
-        request_dict = req.WorkIssuesUpdateSchema().load(API.payload)
+        request_dict = req.WorkIssuesUpdateEditSchema().load(API.payload)
         edited_issue_update = WorkIssuesService.edit_issue_update(work_id, issue_id, update_id, request_dict)
 
         return res.WorkIssueUpdatesResponseSchema().dump(edited_issue_update), HTTPStatus.OK
@@ -105,7 +103,7 @@ class ApproveIssues(Resource):
 
 @cors_preflight("PATCH")
 @API.route("/<int:issue_id>/update/<int:update_id>/approve", methods=["PATCH", "OPTIONS"])
-class EditIssueUpdate(Resource):
+class ApproveIssueUpdate(Resource):
     """Endpoint resource to manage approving of work status."""
 
     @staticmethod

@@ -21,5 +21,6 @@ export interface EditIssueUpdateForm {
 }
 
 export interface CloneForm {
+  posted_date: string;
   description: string;
 }

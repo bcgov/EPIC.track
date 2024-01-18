@@ -92,7 +92,11 @@ def test_create_and_update_work_issues(client, jwt):
 
     updates_id = result_get.json[0].get('updates')[0]['id']
     new_description = fake.sentence()
-    updated_update_data = {"id": work_issue_update.id, "description": new_description}
+    updated_update_data = {
+        "id": work_issue_update.id,
+        "description": new_description,
+        "posted_date": fake.date_time_this_decade(tzinfo=None).isoformat()
+    }
     staff_user = TestJwtClaims.staff_admin_role
     headers = factory_auth_header(jwt=jwt, claims=staff_user)
     url_update = urljoin(API_BASE_URL, f'work/{work.id}/issues/{work_issue.id}/update/{updates_id}')
