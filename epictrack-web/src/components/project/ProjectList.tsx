@@ -276,6 +276,7 @@ const ProjectList = () => {
       >
         <Grid item xs={12}>
           <MasterTrackTable
+            data-cy="project-list"
             columns={columns}
             data={projects}
             initialState={{
