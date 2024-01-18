@@ -276,7 +276,6 @@ const ProjectList = () => {
       >
         <Grid item xs={12}>
           <MasterTrackTable
-            data-cy="project-list"
             columns={columns}
             data={projects}
             initialState={{
@@ -304,6 +303,7 @@ const ProjectList = () => {
                   errorProps={{ disabled: true }}
                 >
                   <Button
+                    data-cy="create-project-button"
                     onClick={() => {
                       ctx.setShowModalForm(true);
                       setProjectId(undefined);

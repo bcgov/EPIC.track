@@ -60,12 +60,14 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
   setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
+  testId?: string;
 }
 
 const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
   data,
   setTableInstance,
+  testId,
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const table = useMaterialReactTable({
@@ -221,9 +223,9 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     }
   }, [table]);
   return (
-    <>
+    <React.Fragment>
       <MaterialReactTable table={table} />
-    </>
+    </React.Fragment>
   );
 };
 

@@ -92,7 +92,34 @@ describe("ProjectList", () => {
   });
 
   it("should display the project list", () => {
-    cy.get('[data-testid="project-list"]').should("be.visible");
+    // Select the table container
+    cy.get(".MuiTableContainer-root.css-3i8oh7-MuiTableContainer-root").should(
+      "be.visible"
+    );
+
+    // Select the first cell in the first row of the table within the container
+    cy.get(
+      ".MuiTableContainer-root.css-3i8oh7-MuiTableContainer-root tbody tr:first-child td:first-child"
+    ).should("be.visible");
+
+    // Click on the first cell in the first row of the table within the container
+    cy.get(
+      ".MuiTableContainer-root.css-3i8oh7-MuiTableContainer-root tbody tr:first-child td:first-child"
+    ).click();
+  });
+
+  it("should have a horizontal scrollbar if the content overflows", () => {
+    // Select the table container
+    cy.get(".MuiTableContainer-root.css-3i8oh7-MuiTableContainer-root")
+      .should("be.visible")
+      .then(($table) => {
+        // Check if the scrollWidth is greater than the clientWidth
+        expect($table[0].scrollWidth).to.be.greaterThan($table[0].clientWidth);
+      });
+  });
+
+  it("should display the create project button", () => {
+    cy.get('[data-cy="create-project-button"]').should("be.visible");
   });
 
   // Add more tests as needed
