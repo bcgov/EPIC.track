@@ -145,7 +145,7 @@ export default function WorkForm({ ...props }) {
   };
 
   const staffByRoles: { [x: string]: any } = {
-    "4": setLeads,
+    "4,3": setLeads,
     "3": setEPDs,
     "1,2,8": setDecisionMakers,
   };
