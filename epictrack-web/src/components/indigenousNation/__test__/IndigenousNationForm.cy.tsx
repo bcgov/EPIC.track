@@ -114,7 +114,9 @@ describe("IndigenousNationForm", () => {
   });
 
   it("renders the relationship holder field", () => {
-    cy.get('[data-cy="indigenous-form-notes"').should("be.visible");
+    cy.get('[data-cy="indigenous-form-relationship-holder"').should(
+      "be.visible"
+    );
   });
   it("renders the pip organization type field", () => {
     cy.get('[data-cy="indigenous-form-pip-organization-type"').should(

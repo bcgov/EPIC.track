@@ -14,6 +14,8 @@ import { PIPOrgType } from "../../models/pipOrgType";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import RichTextEditor from "../shared/richTextEditor";
 import codeService, { Code } from "../../services/codeService";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
 const schema = yup.object().shape({
   name: yup
@@ -91,7 +93,9 @@ export default function IndigenousNationForm({ ...props }) {
         setStaffs(staffsResult.data as Staff[]);
       }
     } catch (e) {
-      console.log(e);
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   };
 
@@ -106,7 +110,9 @@ export default function IndigenousNationForm({ ...props }) {
         codeTypes[code]((codeResult.data as never)["codes"]);
       }
     } catch (e) {
-      console.log(e);
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   };
 
@@ -151,7 +157,7 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>Relationship Holder</ETFormLabel>
             <ControlledSelectV2
-              data-cy="indigenous-form-relationship-holder"
+              testId="indigenous-form-relationship-holder"
               placeholder="Select a Relationship Holder"
               defaultValue={
                 (ctx.item as FirstNation)?.relationship_holder_id || ""
@@ -164,16 +170,15 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>PIP Organization Type</ETFormLabel>
-            <div data-cy="indigenous-form-pip-organization-type">
-              <ControlledSelectV2
-                placeholder="Select an Organization Type"
-                defaultValue={(ctx.item as FirstNation)?.pip_org_type_id || ""}
-                getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
-                getOptionValue={(o: PIPOrgType) => (o ? o.id.toString() : "")}
-                options={pipOrgTypes || []}
-                {...register("pip_org_type_id")}
-              ></ControlledSelectV2>
-            </div>
+            <ControlledSelectV2
+              testId="indigenous-form-pip-organization-type"
+              placeholder="Select an Organization Type"
+              defaultValue={(ctx.item as FirstNation)?.pip_org_type_id || ""}
+              getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
+              getOptionValue={(o: PIPOrgType) => (o ? o.id.toString() : "")}
+              options={pipOrgTypes || []}
+              {...register("pip_org_type_id")}
+            ></ControlledSelectV2>
           </Grid>
           <Grid item xs={6}>
             <ETFormLabel>PIP URL</ETFormLabel>

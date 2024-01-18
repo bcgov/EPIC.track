@@ -27,6 +27,7 @@ const RichTextEditor = ({
   initialHTMLText = "",
   error = false,
   helperText = "",
+  testId = "",
 }) => {
   const getStateFromInitialValue = () => {
     if (initialRawEditorState) {
@@ -61,7 +62,10 @@ const RichTextEditor = ({
 
   return (
     <FormControl fullWidth>
-      <Box style={{ borderColor: `${error ? Palette.error.main : ""}` }}>
+      <Box
+        data-cy={testId}
+        style={{ borderColor: `${error ? Palette.error.main : ""}` }}
+      >
         <form>
           <Editor
             spellCheck
