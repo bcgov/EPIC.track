@@ -303,7 +303,6 @@ const ProjectList = () => {
                   errorProps={{ disabled: true }}
                 >
                   <Button
-                    data-cy="create-project-button"
                     onClick={() => {
                       ctx.setShowModalForm(true);
                       setProjectId(undefined);
