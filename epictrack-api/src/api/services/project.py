@@ -403,7 +403,7 @@ class ProjectService:
         to_update = existing_projects & project_names
         enabled_count = existing_projects_qry.filter(
             Project.name.in_(to_update)
-        ).update({"is_active": True})
+        ).update({"is_active": True, "is_deleted": False})
         current_app.logger.info(f"Enabled {enabled_count} Projects")
         # Remove updated projects to avoid creating duplicates
         return data[~data["name"].isin(to_update)]
