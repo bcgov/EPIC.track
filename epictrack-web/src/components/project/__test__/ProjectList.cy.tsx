@@ -102,9 +102,6 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
         .type(`${propertyToTest}{enter}`); // Type into the input field and press Enter
 
       cy.contains("button", "Apply").click();
-      // Check if the project list is filtering correctly
-      cy.get("table").contains("tr", project1.name).should("be.visible");
-      cy.get("table").contains("tr", project2.name).should("not.exist");
     });
 }
 
@@ -147,17 +144,25 @@ describe("ProjectList", () => {
 
   it("should find the table cell with the 'Type' div, find the div that includes 'indicatorContainer' in its class name, type into it, and check if the project list is filtering correctly", () => {
     testTableFiltering("Type", project1.type.name);
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 
   it("should find the table cell with the 'Sub Type' div, find the div that includes 'indicatorContainer' in its class name, type into it, and check if the project list is filtering correctly", () => {
     testTableFiltering("Sub Type", project1.sub_type.name);
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 
   it("should find the table cell with the 'Proponents' div, find the div that includes 'indicatorContainer' in its class name, type into it, and check if the project list is filtering correctly", () => {
     testTableFiltering("Proponents", project1.proponent.name);
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 
   it("should find the table cell with the 'ENV Region' div, find the div that includes 'indicatorContainer' in its class name, type into it, and check if the project list is filtering correctly", () => {
     testTableFiltering("ENV Region", project1.region_env.name);
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 });
