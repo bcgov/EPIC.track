@@ -27,6 +27,7 @@ class EventTypeEnum(enum.Enum):
     # pylint: disable=C0103
     TIME_LIMIT_SUSPENSION = 12
     TIME_LIMIT_RESUMPTION = 38
+    REFERRAL = 5
 
 
 class EventType(BaseModelVersioned):
