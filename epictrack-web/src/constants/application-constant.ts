@@ -121,3 +121,7 @@ export const SPECIAL_FIELDS = Object.freeze({
     WORK_LEAD: "work_lead_id",
   },
 });
+
+export const MILESTONE_TYPES = Object.freeze({
+  REFERRAL: 5,
+});

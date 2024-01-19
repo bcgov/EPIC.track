@@ -11,6 +11,7 @@ from api.models.ea_act import EAAct
 from api.models.event import Event
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
+from api.models.event_type import EventTypeEnum
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode
 from api.models.project import Project
@@ -219,7 +220,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EventConfiguration,
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.event_type_id == 5,
+                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
                 ),
             )
             .filter(
