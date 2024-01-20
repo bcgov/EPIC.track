@@ -127,11 +127,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       <Button
                         data-cy="new-issue-update-button"
                         variant="text"
-                        startIcon={
-                          <AddIcon
-                            style={{ fill: Palette.primary.accent.main }}
-                          />
-                        }
+                        startIcon={<AddIcon />}
                         sx={{
                           backgroundColor: "inherit",
                           borderColor: "transparent",

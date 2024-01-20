@@ -18,7 +18,7 @@ from api.exceptions import ResourceNotFoundError
 from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
 from api.models import WorkIssues as WorkIssuesModel
 from api.utils import TokenInfo
-from api.utils.roles import Role as KeycloakRole
+from api.utils.roles import Role as KeycloakRole, Membership
 from api.services import authorisation
 
 
@@ -44,6 +44,8 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Create a new work issue and its updates."""
         updates = issue_data.pop('updates', [])
 
+        cls._check_create_auth(work_id)
+
         new_work_issue = WorkIssuesModel(**issue_data,
                                          work_id=work_id
                                          )
@@ -64,6 +66,10 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
+        work_issue_id = work_issues[0].id
+
+        cls._check_create_auth(work_id)
+
         if not work_issues:
             raise ResourceNotFoundError("Work Issues not found")
 
@@ -71,9 +77,17 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             description=data.get('description'),
             posted_date=data.get('posted_date')
         )
-        new_update.work_issue_id = work_issues[0].id
+        new_update.work_issue_id = work_issue_id
         new_update.save()
         return WorkIssuesModel.find_by_id(issue_id)
+
+    @classmethod
+    def _check_create_auth(cls, work_id):
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
 
     @classmethod
     def approve_work_issues(cls, issue_id, update_id):
@@ -83,6 +97,8 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             raise ResourceNotFoundError("Work issue Description doesnt exist")
 
         work_issue_update: WorkIssueUpdatesModel = results[0]
+
+        cls._check_edit_auth(work_issue_update.work_issue.work_id)
 
         work_issue_update.is_approved = True
         work_issue_update.approved_by = TokenInfo.get_username()
@@ -99,6 +115,8 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if not work_issue:
             raise ResourceNotFoundError("Work issue doesnt exist")
 
+        cls._check_edit_auth(work_id)
+
         # Create a flag to track changes on work_issues
         has_changes_to_work_issue = False
 
@@ -109,6 +127,14 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if has_changes_to_work_issue:
             work_issue.save()
         return work_issue
+
+    @classmethod
+    def _check_edit_auth(cls, work_id):
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
 
     @classmethod
     def edit_issue_update(cls, work_id, issue_id, issue_update_id, issue_data):
@@ -123,14 +149,20 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if not issue_update:
             raise ResourceNotFoundError("Issue Description doesnt exist")
 
-        if issue_update.is_approved:
-            one_of_roles = (
-                KeycloakRole.EXTENDED_EDIT.value,
-            )
-            authorisation.check_auth(one_of_roles=one_of_roles)
+        cls._check_edit_update_auth(work_issue.id, issue_update)
 
         issue_update.description = issue_data.get('description')
         issue_update.posted_date = issue_data.get('posted_date')
         issue_update.save()
 
         return issue_update
+
+    @classmethod
+    def _check_edit_update_auth(cls, work_id, issue_update):
+        if issue_update.is_approved:
+            one_of_roles = (
+                KeycloakRole.EXTENDED_EDIT.value,
+            )
+            authorisation.check_auth(one_of_roles=one_of_roles)
+        else:
+            cls._check_edit_auth(work_id)
