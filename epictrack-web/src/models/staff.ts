@@ -11,7 +11,7 @@ export interface Staff extends MasterBase {
   first_name: string;
   last_name: string;
   full_name: string;
-  position: ListType;
+  position: ListType & { sort_order: number };
 }
 
 export interface StaffRole extends Staff {
