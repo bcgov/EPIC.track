@@ -36,12 +36,14 @@ def test_get_empty_work(client):
     assert result.status_code == HTTPStatus.OK
 
 
-def test_create_work(client):
+def test_create_work(client, jwt):
     """Test create new project."""
     work = factory_work_model()
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
     issue_data = TestIssues.issue2.value
-    result = client.post(url, json=issue_data)
+    staff_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=staff_user)
+    result = client.post(url, json=issue_data, headers=headers)
 
     assert result.status_code == HTTPStatus.CREATED
     result_json = result.json
