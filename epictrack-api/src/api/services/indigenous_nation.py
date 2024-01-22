@@ -13,10 +13,11 @@
 # limitations under the License.
 """Service to manage IndigenousNation."""
 from typing import IO, List
-from sqlalchemy import func
 
 import numpy as np
 import pandas as pd
+from flask import current_app
+from sqlalchemy import func
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import IndigenousNation, db
@@ -103,6 +104,7 @@ class IndigenousNationService:
         data["pip_org_type_id"] = data.apply(lambda x: cls._find_org_type_id(x["pip_org_type_id"], org_types), axis=1)
         username = TokenInfo.get_username()
         data["created_by"] = username
+        data = cls._update_or_delete_old_data(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(IndigenousNation, data)
         db.session.commit()
@@ -140,3 +142,31 @@ class IndigenousNationService:
         if org_type is None:
             raise ResourceNotFoundError(f"Org type with name {name} does not exist")
         return org_type.id
+
+    @classmethod
+    def _update_or_delete_old_data(cls, data) -> pd.DataFrame:
+        """Marks old entries as deleted or active depending on their existence in input data.
+
+        Returns the DataFrame after filtering out updated entries.
+        """
+        indigenous_nation_names = set(data["name"].to_list())
+        existing_indigenous_nations_qry = db.session.query(IndigenousNation).filter()
+
+        existing_indigenous_nations = existing_indigenous_nations_qry.all()
+        # Create set of existing indigenous_nation names
+        existing_indigenous_nations = {x.name for x in existing_indigenous_nations}
+        # Mark removed entries as inactive
+        to_delete = existing_indigenous_nations - indigenous_nation_names
+        disabled_count = existing_indigenous_nations_qry.filter(
+            IndigenousNation.name.in_(to_delete),
+        ).update({"is_active": False, "is_deleted": True})
+        current_app.logger.info(f"Disabled {disabled_count} IndigenousNations")
+
+        # Update existing entries to be active
+        to_update = existing_indigenous_nations & indigenous_nation_names
+        enabled_count = existing_indigenous_nations_qry.filter(
+            IndigenousNation.name.in_(to_update)
+        ).update({"is_active": True, "is_deleted": False})
+        current_app.logger.info(f"Enabled {enabled_count} IndigenousNations")
+        # Remove updated indigenous_nations to avoid creating duplicates
+        return data[~data["name"].isin(to_update)]
