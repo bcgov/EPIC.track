@@ -1,14 +1,10 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import ProjectList from "../ProjectList";
-import { Type } from "models/type";
-import { SubType } from "models/subtype";
-import { Region } from "models/region";
-import { Proponent } from "models/proponent";
 import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
 import { ListType } from "models/code";
 import { MasterContext } from "components/shared/MasterContext";
-import { createMockMasterContext } from "../../../../cypress/support/utils";
+import { createMockMasterContext } from "../../../../cypress/support/common";
 
 //ensure projects are never the same by incrementing the counter
 let projectCounter = 0;

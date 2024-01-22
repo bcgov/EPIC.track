@@ -1,22 +1,16 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import ProponentList from "../ProponentList";
-import { Type } from "models/type";
-import { SubType } from "models/subtype";
-import { Region } from "models/region";
 import { faker } from "@faker-js/faker";
 import { Proponent } from "models/proponent";
-import { ListType } from "models/code";
 import { MasterContext } from "components/shared/MasterContext";
 import { Staff } from "models/staff";
 import {
   createMockMasterContext,
   mockStaffs,
-  setupIntercepts,
   testTableFiltering,
-} from "../../../../cypress/support/utils";
-import { useSnackbar } from "notistack";
-
+} from "../../../../cypress/support/common";
+import { setupIntercepts } from "../../../../cypress/support/utils";
 //ensure proponents are never the same by incrementing the counter
 let proponentCounter = 0;
 

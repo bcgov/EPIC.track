@@ -1,12 +1,11 @@
 import { MasterContext } from "components/shared/MasterContext";
 import { defaultFirstNation } from "models/firstNation";
-import { MasterBase } from "models/type";
 import IndigenousNationForm from "../IndigenousNationForm";
 import {
-  setupIntercepts,
   mockStaffs,
   createMockMasterContext,
-} from "../../../../cypress/support/utils";
+} from "../../../../cypress/support/common";
+import { setupIntercepts } from "../../../../cypress/support/utils";
 
 const endpoints = [
   {
