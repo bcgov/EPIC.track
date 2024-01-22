@@ -83,6 +83,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _check_create_auth(cls, work_id):
+        """Check if user has create role or is team member"""
         one_of_roles = (
             Membership.TEAM_MEMBER.name,
             KeycloakRole.CREATE.value,
@@ -130,6 +131,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _check_edit_auth(cls, work_id):
+        """Check if user has edit role or is team member"""
         one_of_roles = (
             Membership.TEAM_MEMBER.name,
             KeycloakRole.EDIT.value,
@@ -159,6 +161,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _check_edit_update_auth(cls, work_id, issue_update):
+        """Check if user can edit issue update"""
         if issue_update.is_approved:
             one_of_roles = (
                 KeycloakRole.EXTENDED_EDIT.value,
