@@ -83,7 +83,7 @@ export default function WorkForm({ ...props }) {
   const ctx = React.useContext(MasterContext);
   const [selectedWorktype, setSelectedWorkType] = React.useState<any>();
   const [selectedProject, setSelectedProject] = React.useState<any>();
-
+  const maxTitleLength = 150;
   const work = ctx?.item as Work;
 
   const [isEpdFieldLocked, setIsEpdFieldLocked] =
@@ -326,13 +326,14 @@ export default function WorkForm({ ...props }) {
         <Grid item xs={12}>
           <ETFormLabelWithCharacterLimit
             characterCount={title?.length || 0}
-            maxCharacterLength={150}
+            maxCharacterLength={maxTitleLength}
           >
             Title
           </ETFormLabelWithCharacterLimit>
           <ControlledTextField
             name="title"
             fullWidth
+            maxLength={maxTitleLength}
             disabled={isSpecialFieldLocked}
           />
         </Grid>
