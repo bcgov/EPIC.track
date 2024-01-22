@@ -8,6 +8,7 @@ import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
 import { ListType } from "models/code";
 import { MasterContext } from "components/shared/MasterContext";
+import { createMockMasterContext } from "../../../../cypress/support/utils";
 
 //ensure projects are never the same by incrementing the counter
 let projectCounter = 0;
@@ -61,35 +62,7 @@ const generateMockProject = (): Project => {
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
-
-function createMockContext() {
-  return {
-    item: [project1, project2],
-    setFormId: cy.stub(),
-    setTitle: cy.stub(),
-    setId: cy.stub(),
-    onSave: cy.stub(),
-    title: "",
-    data: [project1, project2],
-    loading: false,
-    setItem: cy.stub(),
-    setShowDeleteDialog: cy.stub(),
-    setShowModalForm: cy.stub(),
-    getData: cy.stub(),
-    setService: cy.stub(),
-    setForm: cy.stub(),
-    onDialogClose: cy.stub(),
-    setFormStyle: cy.stub(),
-    getById: cy.stub(),
-    setDialogProps: cy.stub(),
-  };
-}
-
-export const defaultProject = {
-  is_active: true,
-  description:
-    "[Proponent] proposes to develop the [Project name], a [project type] which would be located approximately [distance]km from [known near population centre/known near landmark] within the boundaries of [the QQQ Region]. The proposed project is anticipated to produce approximately [production yield] per year of [product], and would include [describe major project components].",
-};
+const projects = [project1, project2];
 
 function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
   cy.contains("div", tableHeaderName)
@@ -110,7 +83,9 @@ describe("ProjectList", () => {
     // This assumes you have a route set up for your projects in your commands.js
     cy.mount(
       <Router>
-        <MasterContext.Provider value={createMockContext()}>
+        <MasterContext.Provider
+          value={createMockMasterContext(projects, projects)}
+        >
           <ProjectList />
         </MasterContext.Provider>
       </Router>
