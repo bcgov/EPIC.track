@@ -91,6 +91,7 @@ class EditIssues(Resource):
     @staticmethod
     @cors.crossdomain(origin="*")
     @profiletime
+    @auth.require
     # pylint: disable=unused-argument
     def patch(work_id, issue_id, update_id):
         """Approve a work status."""
@@ -107,8 +108,8 @@ class ApproveIssueUpdate(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.has_one_of_roles([Role.CREATE.value])
     @profiletime
+    @auth.require
     # pylint: disable=unused-argument
     def patch(work_id, issue_id, update_id):
         """Approve a work status."""
