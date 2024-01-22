@@ -1,8 +1,8 @@
 import { MasterContext } from "components/shared/MasterContext";
-import { defaultFirstNation } from "models/firstNation";
 import { MasterBase } from "models/type";
-import IndigenousNationForm from "../IndigenousNationForm";
+import ProponentForm from "../ProponentForm";
 import { Staff } from "models/staff";
+import { defaultProponent } from "models/proponent";
 
 const staffs: Staff[] = [
   {
@@ -59,7 +59,7 @@ const endpoints = [
 
 function createMockContext() {
   return {
-    item: defaultFirstNation,
+    item: defaultProponent,
     setFormId: cy.stub(),
     setTitle: cy.stub(),
     setId: cy.stub(),
@@ -85,14 +85,14 @@ function setupIntercepts(endpoints: any[]) {
   });
 }
 
-describe("IndigenousNationForm", () => {
+describe("ProponentForm", () => {
   beforeEach(() => {
     const mockContext = createMockContext();
     setupIntercepts(endpoints);
 
     cy.mount(
       <MasterContext.Provider value={mockContext}>
-        <IndigenousNationForm />
+        <ProponentForm />
       </MasterContext.Provider>
     );
   });
@@ -105,18 +105,7 @@ describe("IndigenousNationForm", () => {
     cy.get('input[name="name"]');
   });
 
-  it("renders the pip url field", () => {
-    cy.get('input[name="pip_link"]');
-  });
-
-  it("renders the rich text editor", () => {
-    cy.get(".DraftEditor-editorContainer");
-  });
-
   it("renders the relationship holder field", () => {
     cy.get('input[name="relationship_holder_id"]');
-  });
-  it("renders the pip organization type field", () => {
-    cy.get('input[name="pip_org_type_id"]');
   });
 });
