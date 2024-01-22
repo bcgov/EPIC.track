@@ -12,6 +12,7 @@ import Icons from "../../../icons";
 import { CreateIssueForm } from "../types";
 import moment from "moment";
 import ControlledDatePicker from "../../../shared/controlledInputComponents/ControlledDatePicker";
+import { descriptionCharacterLimit } from "./constants";
 
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
@@ -21,7 +22,10 @@ const CreateIssue = () => {
 
   const schema = yup.object().shape({
     title: yup.string().required("Title is required"),
-    description: yup.string().required("Description is required"),
+    description: yup
+      .string()
+      .required("Description is required")
+      .max(descriptionCharacterLimit),
     is_active: yup.boolean(),
     is_high_priority: yup.boolean(),
     start_date: yup.string().required("Start date is required"),
@@ -46,7 +50,6 @@ const CreateIssue = () => {
   const watchedTitle = watch("title");
   const titleCharacterLimit = 50;
   const watchedDescription = watch("description");
-  const descriptionCharacterLimit = 250;
 
   const onSubmitHandler = async (data: CreateIssueForm) => {
     const {
