@@ -32,10 +32,10 @@ const ControlledTextField: FC<IFormInputProps> = ({
         <TextField
           {...field}
           {...otherProps}
+          inputProps={{
+            maxLength: maxLength,
+          }}
           onChange={(e) => {
-            if (maxLength && e.target.value.length > maxLength) {
-              return;
-            }
             if (onInputChange) {
               onInputChange(e);
             }
