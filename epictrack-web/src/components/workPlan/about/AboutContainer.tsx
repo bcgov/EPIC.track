@@ -98,6 +98,7 @@ const AboutContainer = () => {
             display: "flex",
             flexDirection: "column",
             gap: "1rem",
+            padding: 0,
           }}
         >
           <Box

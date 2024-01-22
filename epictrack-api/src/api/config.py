@@ -108,6 +108,8 @@ class _Config():  # pylint: disable=too-few-public-methods
     CACHE_TYPE = constants.CACHE_TYPE
     CACHE_DEFAULT_TIMEOUT = constants.CACHE_DEFAULT_TIMEOUT
 
+    MIN_WORK_START_DATE = _get_config('MIN_WORK_START_DATE', default='1995-06-30')
+
 
 class DevConfig(_Config):  # pylint: disable=too-few-public-methods
     """Dev config."""
@@ -145,7 +147,7 @@ class TestConfig(_Config):  # pylint: disable=too-few-public-methods
     JWT_OIDC_TEST_KEYS = {
         'keys': [
             {
-                'kid': 'forms-flow-ai',
+                'kid': 'epictrack',
                 'kty': 'RSA',
                 'alg': 'RS256',
                 'use': 'sig',
@@ -209,7 +211,7 @@ class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     DEBUG = False
 
 
-class MigrationConfig():  # pylint: disable=too-few-public-methods
+class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
     """Config for db migration."""
 
     TESTING = False

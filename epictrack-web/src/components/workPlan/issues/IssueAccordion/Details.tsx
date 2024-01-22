@@ -24,13 +24,13 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
 
   const {
-    setShowIssuesForm,
+    setEditIssueUpdateFormIsOpen,
     approveIssue,
     issueToApproveId,
     setIssueToApproveId,
     setUpdateToClone,
-    setShowCloneForm,
     setUpdateToEdit,
+    setNewIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
 
   const handleApproveIssue = () => {
@@ -53,7 +53,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               >
                 <Grid item xs={"auto"}>
                   <ETCaption1 bold color={Palette.neutral.dark}>
-                    {moment(issue.created_at)
+                    {moment(latestUpdate.posted_date)
                       .format(MONTH_DAY_YEAR)
                       .toUpperCase()}
                   </ETCaption1>
@@ -61,12 +61,15 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <If condition={latestUpdate.is_approved}>
                   <Then>
                     <Grid item xs="auto">
-                      <ActiveChip label="Approved" />
+                      <ActiveChip data-cy={`approved-chip`} label="Approved" />
                     </Grid>
                   </Then>
                   <Else>
                     <Grid item xs="auto">
-                      <ErrorChip label="Need Approval" />
+                      <ErrorChip
+                        data-cy={`need-approval-chip`}
+                        label="Need Approval"
+                      />
                     </Grid>
                   </Else>
                 </If>
@@ -74,6 +77,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
 
               <Grid item xs={12}>
                 <ETParagraph
+                  data-cy="issue-description"
                   color={Palette.neutral.dark}
                   sx={{ whiteSpace: "pre-wrap" }}
                 >
@@ -85,6 +89,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Then>
                   <Grid item>
                     <Button
+                      data-cy="approve-issue-update-button"
                       variant="text"
                       startIcon={<CheckCircleIcon />}
                       sx={{
@@ -102,6 +107,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <Else>
                   <Grid item>
                     <Button
+                      data-cy="new-issue-update-button"
                       variant="text"
                       startIcon={
                         <AddIcon
@@ -114,7 +120,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToClone(latestUpdate);
-                        setShowCloneForm(true);
+                        setNewIssueUpdateFormIsOpen(true);
                       }}
                     >
                       New Update
@@ -130,6 +136,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                     errorProps={{ disabled: true }}
                   >
                     <Button
+                      data-cy="edit-issue-update-button"
                       variant="text"
                       startIcon={<PencilEditIcon />}
                       sx={{
@@ -138,7 +145,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(latestUpdate);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit
@@ -146,6 +153,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   </Restricted>
                   <Else>
                     <Button
+                      data-cy="edit-issue-update-button"
                       variant="text"
                       startIcon={<PencilEditIcon />}
                       sx={{
@@ -154,7 +162,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(latestUpdate);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit

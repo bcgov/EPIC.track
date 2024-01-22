@@ -14,4 +14,5 @@ data:
         "REACT_APP_KEYCLOAK_URL": "{{ .Values.keycloak.url }}",
         "REACT_APP_KEYCLOAK_CLIENT": "{{ .Values.keycloak.client }}",
         "REACT_APP_KEYCLOAK_REALM": "{{ .Values.keycloak.realm }}",
+        "REACT_APP_ENV": "{{ .Values.app.env }}",
       }

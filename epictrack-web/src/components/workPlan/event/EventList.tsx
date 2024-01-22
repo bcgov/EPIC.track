@@ -50,25 +50,19 @@ import EventForm from "./EventForm";
 import { EventContext } from "./EventContext";
 import { When } from "react-if";
 import WarningBox from "../../shared/warningBox";
-import { useAppDispatch } from "../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { setLoadingState } from "../../../services/loadingService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import {
+  COMMON_ERROR_MESSAGE,
+  ROLES,
+} from "../../../constants/application-constant";
+import { Restricted } from "components/shared/restricted";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
 
-const classes = {
-  textEllipsis: {
-    textOverflow: "ellipsis",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-  },
-  deleteIcon: {
-    fill: "currentcolor",
-  },
-};
 const IButton = styled(IconButton)({
   "& .icon": {
     fill: Palette.primary.accent.main,
@@ -99,7 +93,14 @@ const EventList = () => {
   const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
   const [showTemplateForm, setShowTemplateForm] =
     React.useState<boolean>(false);
+
   const ctx = useContext(WorkplanContext);
+  const { email } = useAppSelector((state) => state.user.userDetail);
+  const userIsTeamMember = useMemo(
+    () => ctx.team.some((member) => member.staff.email === email),
+    [ctx.team, email]
+  );
+
   const { handleHighlightRows } = useContext(EventContext);
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
     {}
@@ -542,7 +543,11 @@ const EventList = () => {
       assignee_ids = assignee_ids.filter(
         (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
       );
-      const data = { task_ids: Object.keys(rowSelection), assignee_ids };
+      const data = {
+        task_ids: Object.keys(rowSelection),
+        assignee_ids,
+        work_id: ctx.work?.id,
+      };
       const result = await taskEventService.patchTasks(data);
       try {
         if (result.status === 200) {
@@ -575,6 +580,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         responsibility_ids,
+        work_id: ctx.work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -605,6 +611,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         status,
+        work_id: ctx.work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -633,6 +640,7 @@ const EventList = () => {
   const deleteTasks = async () => {
     const data = {
       task_ids: Object.keys(rowSelection).join(","),
+      work_id: ctx.work?.id,
     };
     const response = await taskEventService.deleteTasks(data);
     try {
@@ -728,14 +736,26 @@ const EventList = () => {
       </Grid>
       <Grid container item columnSpacing={2}>
         <Grid item xs="auto">
-          <Button variant="contained" onClick={() => setShowTaskForm(true)}>
-            Add Task
-          </Button>
+          <Restricted
+            allowed={[ROLES.CREATE]}
+            errorProps={{ disabled: true }}
+            exception={userIsTeamMember}
+          >
+            <Button variant="contained" onClick={() => setShowTaskForm(true)}>
+              Add Task
+            </Button>
+          </Restricted>
         </Grid>
         <Grid item xs="auto">
-          <Button variant="outlined" onClick={onAddMilestone}>
-            Add Milestone
-          </Button>
+          <Restricted
+            allowed={[ROLES.CREATE]}
+            errorProps={{ disabled: true }}
+            exception={userIsTeamMember}
+          >
+            <Button variant="outlined" onClick={onAddMilestone}>
+              Add Milestone
+            </Button>
+          </Restricted>
         </Grid>
         <Grid
           item

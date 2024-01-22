@@ -20,17 +20,18 @@ interface RestrictedProps {
   children: React.ReactElement<any, any>;
   RenderError?: () => React.ReactElement<any, any>;
   errorProps?: any;
+  exception?: boolean;
   allowed: string[];
 }
 export function Restricted({
   children,
   RenderError,
   errorProps,
+  exception = false,
   allowed = [],
 }: RestrictedProps): React.ReactElement<any, any> {
   const { roles } = useAppSelector((state) => state.user.userDetail);
-
-  const permissionGranted = hasPermission({ roles, allowed });
+  const permissionGranted = exception || hasPermission({ roles, allowed });
 
   if (!permissionGranted && !errorProps && RenderError) return <RenderError />;
 

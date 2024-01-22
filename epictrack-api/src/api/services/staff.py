@@ -120,6 +120,8 @@ class StaffService:
 
         username = TokenInfo.get_username()
         data["created_by"] = username
+        data["email"] = data["email"].str.lower()
+        data = cls._update_or_delete_old_data(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Staff, data)
         db.session.commit()
@@ -150,3 +152,31 @@ class StaffService:
         if position is None:
             raise ResourceNotFoundError(f"position with name {name} does not exist")
         return position.id
+
+    @classmethod
+    def _update_or_delete_old_data(cls, data) -> pd.DataFrame:
+        """Marks old entries as deleted or active depending on their existence in input data.
+
+        Returns the DataFrame after filtering out updated entries.
+        """
+        staff_emails = set(data["email"].to_list())
+        existing_staffs_qry = db.session.query(Staff).filter()
+
+        existing_staffs = existing_staffs_qry.all()
+        # Create set of existing staff emails
+        existing_staffs = {x.email for x in existing_staffs}
+        # Mark removed entries as inactive
+        to_delete = existing_staffs - staff_emails
+        disabled_count = existing_staffs_qry.filter(
+            Staff.email.in_(to_delete),
+        ).update({"is_active": False, "is_deleted": True})
+        current_app.logger.info(f"Disabled {disabled_count} Staffs")
+
+        # Update existing entries to be active
+        to_update = existing_staffs & staff_emails
+        enabled_count = existing_staffs_qry.filter(
+            Staff.email.in_(to_update)
+        ).update({"is_active": True, "is_deleted": False})
+        current_app.logger.info(f"Enabled {enabled_count} Staffs")
+        # Remove updated indigenous_nations to avoid creating duplicates
+        return data[~data["email"].isin(to_update)]

@@ -14,6 +14,8 @@ import { PIPOrgType } from "../../models/pipOrgType";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import RichTextEditor from "../shared/richTextEditor";
 import codeService, { Code } from "../../services/codeService";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
 const schema = yup.object().shape({
   name: yup
@@ -85,9 +87,15 @@ export default function IndigenousNationForm({ ...props }) {
   }, [ctx.item]);
 
   const getStaffs = async () => {
-    const staffsResult = await staffService.getAll();
-    if (staffsResult.status === 200) {
-      setStaffs(staffsResult.data as never);
+    try {
+      const staffsResult = await staffService.getAll();
+      if (staffsResult.status === 200) {
+        setStaffs(staffsResult.data as Staff[]);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   };
 
@@ -96,9 +104,15 @@ export default function IndigenousNationForm({ ...props }) {
   };
 
   const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
+    try {
+      const codeResult = await codeService.getCodes(code);
+      if (codeResult.status === 200) {
+        codeTypes[code]((codeResult.data as never)["codes"]);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   };
 

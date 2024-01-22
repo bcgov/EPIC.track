@@ -5,7 +5,7 @@ import indigenousNationService from "../../services/indigenousNationService/indi
 import { FirstNation } from "../../models/firstNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
-import IndigenousNationForm from "./IndigneousNationForm";
+import IndigenousNationForm from "./IndigenousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { MasterContext } from "../shared/MasterContext";

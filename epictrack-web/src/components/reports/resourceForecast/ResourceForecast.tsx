@@ -159,7 +159,7 @@ export default function ResourceForecast() {
     [rfData]
   );
 
-  const projectFilter = filterFn("project_name");
+  const workFilter = filterFn("work_title");
   const eaTypeFilter = filterFn("ea_type");
   const projectPhaseFilter = filterFn("project_phase");
   const eaActFilter = filterFn("ea_act");
@@ -175,15 +175,15 @@ export default function ResourceForecast() {
   const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
       {
-        accessorKey: "project_name",
-        header: "Project",
+        accessorKey: "work_title",
+        header: "Work",
         enableHiding: false,
         filterVariant: "multi-select",
-        filterSelectOptions: projectFilter,
+        filterSelectOptions: workFilter,
         Filter: ({ ...props }) => (
           <Autocomplete
             multiple
-            options={projectFilter}
+            options={workFilter}
             onChange={(e, value) => props.header.column.setFilterValue(value)}
             value={
               props.header.column.getFilterValue()
@@ -304,7 +304,7 @@ export default function ResourceForecast() {
       epdFilter,
       iaacFilter,
       nrsRegionFilter,
-      projectFilter,
+      workFilter,
       projectPhaseFilter,
       teamFilter,
       typeFilter,

@@ -27,7 +27,8 @@ import { EmptyIssueHistory } from "./EmptyIssueHistory";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
-  const { setUpdateToEdit, setShowIssuesForm } = useContext(IssuesContext);
+  const { setUpdateToEdit, setEditIssueUpdateFormIsOpen } =
+    useContext(IssuesContext);
 
   const [expand, setExpand] = useState(false);
 
@@ -73,7 +74,10 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
         {firstNUpdatesInTimeline.map((update, index) => {
           const isSuccess = highlightFirstInTimeLineApproved && index === 0;
           return (
-            <TimelineItem key={update.id}>
+            <TimelineItem
+              key={update.id}
+              data-cy={`history-update-${update.id}`}
+            >
               <TimelineOppositeContent>
                 <If condition={isSuccess}>
                   <Then>
@@ -93,6 +97,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                     errorProps={{ disabled: true }}
                   >
                     <Button
+                      data-cy="edit-history-update-button"
                       variant="text"
                       startIcon={<PencilEditIcon />}
                       sx={{
@@ -101,7 +106,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                       }}
                       onClick={() => {
                         setUpdateToEdit(update);
-                        setShowIssuesForm(true);
+                        setEditIssueUpdateFormIsOpen(true);
                       }}
                     >
                       Edit
@@ -133,7 +138,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
               </TimelineSeparator>
               <TimelineContent>
                 <ETCaption3 color={Palette.neutral.main}>
-                  {moment(issue.created_at).format(MONTH_DAY_YEAR)}
+                  {moment(update.posted_date).format(MONTH_DAY_YEAR)}
                 </ETCaption3>
               </TimelineContent>
             </TimelineItem>
@@ -158,7 +163,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 </TimelineSeparator>
                 <TimelineContent>
                   <ETCaption3 color={Palette.neutral.main}>
-                    {moment(issue.created_at).format("MMM.DD YYYY")}
+                    {moment(update.posted_date).format("MMM.DD YYYY")}
                   </ETCaption3>
                 </TimelineContent>
               </TimelineItem>

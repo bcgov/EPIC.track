@@ -19,7 +19,6 @@ export function App() {
   const uiState = useAppSelector((state) => state.uiState);
   const drawerWidth = uiState.drawerWidth;
   React.useEffect(() => {
-    console.log("Involed");
     UserService.initKeycloak(dispatch);
   }, [dispatch]);
   return (

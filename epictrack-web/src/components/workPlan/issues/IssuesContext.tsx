@@ -3,14 +3,13 @@ import { WorkplanContext } from "../WorkPlanContext";
 import issueService from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/SearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
-import { CloneForm, IssueForm } from "./types";
+import { CloneForm, CreateIssueForm, EditIssueForm } from "./types";
 
 interface IssuesContextProps {
-  showIssuesForm: boolean;
-  setShowIssuesForm: React.Dispatch<React.SetStateAction<boolean>>;
   isIssuesLoading: boolean;
-  addIssue: (issueForm: IssueForm) => Promise<void>;
-  updateIssue: (issueForm: IssueForm) => Promise<void>;
+  addIssue: (issueForm: CreateIssueForm) => Promise<void>;
+  editIssue: (issueForm: EditIssueForm) => Promise<void>;
+  editIssueUpdate: (issueForm: CloneForm) => Promise<void>;
   approveIssue: (issueId: number, issueUpdateId: number) => Promise<void>;
   issueToApproveId: number | null;
   setIssueToApproveId: React.Dispatch<React.SetStateAction<number | null>>;
@@ -18,25 +17,34 @@ interface IssuesContextProps {
   setUpdateToClone: React.Dispatch<
     React.SetStateAction<WorkIssueUpdate | null>
   >;
-  showCloneForm: boolean;
-  setShowCloneForm: React.Dispatch<React.SetStateAction<boolean>>;
-  cloneIssueUpdate: (cloneForm: { description: string }) => Promise<void>;
+  cloneIssueUpdate: (cloneForm: CloneForm) => Promise<void>;
   updateToEdit: WorkIssueUpdate | null;
   setUpdateToEdit: React.Dispatch<React.SetStateAction<WorkIssueUpdate | null>>;
+  createIssueFormIsOpen: boolean;
+  setCreateIssueFormIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  editIsssueFormIsOpen: boolean;
+  setEditIssueFormIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  editIssueUpdateFormIsOpen: boolean;
+  setEditIssueUpdateFormIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  newIssueUpdateFormIsOpen: boolean;
+  setNewIssueUpdateFormIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  issueToEdit: WorkIssue | null;
+  setIssueToEdit: React.Dispatch<React.SetStateAction<WorkIssue | null>>;
 }
 
 interface IssueContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
 
-export const IssuesContext = createContext<IssuesContextProps>({
-  showIssuesForm: false,
-  setShowIssuesForm: () => ({}),
+export const initialIssueContextValue = {
   isIssuesLoading: true,
-  addIssue: (_: IssueForm) => {
+  addIssue: (_: CreateIssueForm) => {
     return Promise.resolve();
   },
-  updateIssue: (_: IssueForm) => {
+  editIssue: (_: EditIssueForm) => {
+    return Promise.resolve();
+  },
+  editIssueUpdate: (_: CloneForm) => {
     return Promise.resolve();
   },
   issueToApproveId: null,
@@ -48,14 +56,37 @@ export const IssuesContext = createContext<IssuesContextProps>({
   },
   updateToClone: null,
   setUpdateToClone: () => ({}),
-  showCloneForm: false,
-  setShowCloneForm: () => ({}),
   cloneIssueUpdate: (_: { description: string }) => {
     return Promise.resolve();
   },
   updateToEdit: null,
   setUpdateToEdit: () => ({}),
-});
+  issueToEdit: null,
+  setIssueToEdit: () => {
+    return;
+  },
+
+  createIssueFormIsOpen: false,
+  setCreateIssueFormIsOpen: () => {
+    return;
+  },
+  editIsssueFormIsOpen: false,
+  setEditIssueFormIsOpen: () => {
+    return;
+  },
+  editIssueUpdateFormIsOpen: false,
+  setEditIssueUpdateFormIsOpen: () => {
+    return;
+  },
+  newIssueUpdateFormIsOpen: false,
+  setNewIssueUpdateFormIsOpen: () => {
+    return;
+  },
+};
+
+export const IssuesContext = createContext<IssuesContextProps>(
+  initialIssueContextValue
+);
 
 export const LASTEST_ISSUE_UPDATE_INDEX = 0;
 
@@ -64,44 +95,44 @@ export const IssuesProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [showIssuesForm, setShowIssuesForm] = useState(false);
+  const [createIssueFormIsOpen, setCreateIssueFormIsOpen] = useState(false);
+  const [editIsssueFormIsOpen, setEditIssueFormIsOpen] = useState(false);
+  const [editIssueUpdateFormIsOpen, setEditIssueUpdateFormIsOpen] =
+    useState(false);
+  const [newIssueUpdateFormIsOpen, setNewIssueUpdateFormIsOpen] =
+    useState(false);
+
   const [isIssuesLoading, setIsIssuesLoading] = useState<boolean>(true);
 
+  const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
   const [updateToEdit, setUpdateToEdit] = useState<WorkIssueUpdate | null>(
     null
   );
 
-  const [showCloneForm, setShowCloneForm] = useState<boolean>(false);
   const [updateToClone, setUpdateToClone] = useState<WorkIssueUpdate | null>(
     null
   );
 
   const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
 
-  const { issues, setIssues } = useContext(WorkplanContext);
+  const { issues, loadIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
   const workId = query.get("work_id");
 
-  const loadIssues = async () => {
-    if (!workId) return;
-    try {
-      const response = await issueService.getAll(workId);
-      setIssues(response.data);
-      setIsIssuesLoading(false);
-    } catch (error) {
-      setIsIssuesLoading(false);
-    }
+  const handleLoadIssues = async () => {
+    await loadIssues();
+    setIsIssuesLoading(false);
   };
 
   useEffect(() => {
     if (!issues?.length) {
-      loadIssues();
+      handleLoadIssues();
     } else {
       setIsIssuesLoading(false);
     }
   }, []);
 
-  const addIssue = async (issueForm: IssueForm) => {
+  const addIssue = async (issueForm: CreateIssueForm) => {
     if (!workId) return;
     setIsIssuesLoading(true);
     try {
@@ -110,19 +141,18 @@ export const IssuesProvider = ({
         updates: [issueForm.description],
       };
       await issueService.create(workId, request);
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
   };
 
-  const updateIssue = async (issueForm: IssueForm) => {
-    if (!workId || !updateToEdit) return;
+  const editIssue = async (issueForm: EditIssueForm) => {
+    if (!workId || !issueToEdit) return;
     setIsIssuesLoading(true);
     try {
       const {
         title,
-        description,
         start_date,
         expected_resolution_date,
         is_active,
@@ -131,19 +161,35 @@ export const IssuesProvider = ({
 
       const request = {
         title,
-        description,
         start_date,
         expected_resolution_date,
         is_active,
         is_high_priority,
-        updates: [{ ...updateToEdit, description: issueForm.description }],
       };
-      await issueService.update(
+
+      await issueService.editIssue(workId, String(issueToEdit.id), request);
+      handleLoadIssues();
+    } catch (error) {
+      setIsIssuesLoading(false);
+    }
+  };
+
+  const editIssueUpdate = async (issueForm: CloneForm) => {
+    if (!workId || !updateToEdit) return;
+    setIsIssuesLoading(true);
+    try {
+      const request = {
+        description: issueForm.description,
+        posted_date: issueForm.posted_date,
+      };
+
+      await issueService.editIssueUpdate(
         workId,
         String(updateToEdit.work_issue_id),
+        String(updateToEdit.id),
         request
       );
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
@@ -158,7 +204,7 @@ export const IssuesProvider = ({
         String(issueId),
         String(issueUpdateId)
       );
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
@@ -169,9 +215,10 @@ export const IssuesProvider = ({
     setIsIssuesLoading(true);
     try {
       await issueService.clone(workId, String(updateToClone.work_issue_id), {
-        description_data: [cloneForm.description],
+        description: cloneForm.description,
+        posted_date: cloneForm.posted_date,
       });
-      loadIssues();
+      handleLoadIssues();
     } catch (error) {
       setIsIssuesLoading(false);
     }
@@ -180,21 +227,28 @@ export const IssuesProvider = ({
   return (
     <IssuesContext.Provider
       value={{
-        showIssuesForm,
-        setShowIssuesForm,
         isIssuesLoading,
         addIssue,
         issueToApproveId,
         setIssueToApproveId,
         approveIssue,
-        updateIssue,
+        editIssue,
         updateToClone,
         setUpdateToClone,
-        showCloneForm,
-        setShowCloneForm,
         cloneIssueUpdate,
         updateToEdit,
         setUpdateToEdit,
+        issueToEdit,
+        setIssueToEdit,
+        editIssueUpdate,
+        createIssueFormIsOpen,
+        setCreateIssueFormIsOpen,
+        editIsssueFormIsOpen,
+        setEditIssueFormIsOpen,
+        editIssueUpdateFormIsOpen,
+        setEditIssueUpdateFormIsOpen,
+        newIssueUpdateFormIsOpen,
+        setNewIssueUpdateFormIsOpen,
       }}
     >
       {children}
