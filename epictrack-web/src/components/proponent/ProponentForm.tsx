@@ -117,7 +117,7 @@ export default function ProponentForm({ ...props }) {
           >
             <TextField
               variant="outlined"
-              disabled={isNameFieldLocked}
+              disabled={proponent?.name !== undefined}
               placeholder="Proponent Name"
               fullWidth
               error={!!errors?.name?.message}

@@ -8,11 +8,13 @@ type IFormInputProps = {
   inputEffects?: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => string;
+  maxLength?: number;
 } & TextFieldProps;
 
 const ControlledTextField: FC<IFormInputProps> = ({
   name,
   inputEffects,
+  maxLength,
   onChange: onInputChange,
   ...otherProps
 }) => {
@@ -30,6 +32,9 @@ const ControlledTextField: FC<IFormInputProps> = ({
         <TextField
           {...field}
           {...otherProps}
+          inputProps={{
+            maxLength: maxLength,
+          }}
           onChange={(e) => {
             if (onInputChange) {
               onInputChange(e);
