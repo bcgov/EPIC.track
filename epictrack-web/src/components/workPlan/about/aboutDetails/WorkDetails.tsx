@@ -33,7 +33,7 @@ const WorkDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {dayjs(work.created_at).format(MONTH_DAY_YEAR)}
+              {dayjs(work.start_date).format(MONTH_DAY_YEAR)}
             </ETParagraph>
           </Grid>
         </Grid>
