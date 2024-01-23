@@ -20,8 +20,8 @@ from urllib.parse import urljoin
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_positions(client):
+def test_get_positions(client, auth_header):
     """Test get positions."""
     url = urljoin(API_BASE_URL, 'positions')
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
