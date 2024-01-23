@@ -12,16 +12,17 @@ from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
-from sqlalchemy.orm import aliased
 
 from api.models import Event, Project, Work, WorkStatus, WorkType, db
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
+from api.models.event_type import EventTypeEnum
+from api.models.work import WorkStateEnum
 
 from .report_factory import ReportFactory
 
 
-# pylint:disable=not-callable
+# pylint:disable=not-callable,no-member
 
 
 class ThirtySixtyNinetyReport(ReportFactory):
@@ -47,24 +48,34 @@ class ThirtySixtyNinetyReport(ReportFactory):
         super().__init__(data_keys, filters=filters)
         self.report_date = None
         self.report_title = "30-60-90"
-        self.pecp_configuration_ids = db.session.execute(
-            select(EventConfiguration.id)
-            .where(
-                EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
+        self.pecp_configuration_ids = (
+            db.session.execute(
+                select(EventConfiguration.id).where(
+                    EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
-        self.decision_configuration_ids = db.session.execute(
-            select(EventConfiguration.id)
-            .where(
-                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+        self.decision_configuration_ids = (
+            db.session.execute(
+                select(EventConfiguration.id).where(
+                    EventConfiguration.event_type_id.in_(
+                        [
+                            EventTypeEnum.MINISTER_DECISION.value,
+                            EventTypeEnum.CEAO_DECISION.value,
+                        ]
+                    )
+                )
             )
-        ).scalars().all()
+            .scalars()
+            .all()
+        )
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA 30-60-90 Report"""
         max_date = report_date + timedelta(days=90)
-        pecp_event = aliased(Event)
         status_update_max_date_query = (
             db.session.query(
                 WorkStatus.work_id,
@@ -74,60 +85,34 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .group_by(WorkStatus.work_id)
             .subquery()
         )
-        next_pecp_query = (
-            db.session.query(
-                Event.work_id,
-                func.min(
-                    func.coalesce(Event.actual_date, Event.anticipated_date)
-                ).label("min_start_date"),
-            )
-            .filter(
-                func.coalesce(Event.actual_date, Event.anticipated_date).between(
-                    report_date.date(), max_date.date()
-                ),
-                Event.event_configuration_id.in_(self.pecp_configuration_ids),
-            )
-            .group_by(Event.work_id)
-            .subquery()
-        )
+        next_pecp_query = self._get_next_pcp_query(report_date, max_date)
+        valid_event_ids = self._get_valid_event_ids(report_date, max_date)
 
         results_qry = (
-            Work.query.filter(Work.is_active.is_(True), Work.is_deleted.is_(False))
+            Work.query.filter(
+                Work.is_active.is_(True),
+                Work.is_deleted.is_(False),
+                Work.work_state.in_(
+                    [WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]
+                ),
+            )
             .join(Project)
             .join(WorkType)
             .join(
                 Event,
-                or_(
-                    and_(
-                        Event.work_id == Work.id,
-                        func.coalesce(
-                            Event.actual_date, Event.anticipated_date
-                        ).between(report_date.date(), max_date.date()),
-                        Event.event_configuration_id.in_(self.decision_configuration_ids),
-                    ),
-                    and_(
-                        Event.work_id == Work.id,
-                        Work.is_high_priority.is_(True),
-                        Event.high_priority.is_(True),
-                        func.coalesce(
-                            Event.actual_date, Event.anticipated_date
-                        ).between(report_date.date(), max_date.date()),
-                    ),
+                and_(
+                    Event.work_id == Work.id,
+                    Event.id.in_(valid_event_ids),
                 ),
             )
-            .join(EventConfiguration, EventConfiguration.id == Event.event_configuration_id)
+            .join(
+                EventConfiguration,
+                EventConfiguration.id == Event.event_configuration_id,
+            )
             .outerjoin(
                 next_pecp_query,
                 and_(
                     next_pecp_query.c.work_id == Work.id,
-                ),
-            )
-            .outerjoin(
-                pecp_event,
-                and_(
-                    next_pecp_query.c.work_id == pecp_event.work_id,
-                    next_pecp_query.c.min_start_date == pecp_event.actual_date,
-                    pecp_event.event_configuration_id.in_(self.pecp_configuration_ids),
                 ),
             )
             .outerjoin(WorkStatus)
@@ -142,15 +127,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 Project.name.label("project_name"),
                 WorkType.report_title.label("work_report_title"),
                 (
-                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"),
-                                                       INTERVAL)
+                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
-                # Event.anticipated_end_date.label("anticipated_decision_date"),
                 Work.report_description.label("work_short_description"),
                 WorkStatus.description.label("work_status_text"),
                 Event.notes.label("decision_information"),
                 Event.description.label("event_description"),
-                pecp_event.topic.label("pecp_explanation"),
+                next_pecp_query.c.topic.label("pecp_explanation"),
                 Work.id.label("work_id"),
                 Event.id.label("event_id"),
                 Event.name.label("event_title"),
@@ -166,40 +149,14 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _format_data(self, data):
         data = super()._format_data(data)
-        # major_decision_miletones =  Milestone.query.filter(
-        #     Milestone.milestone_type_id.in_((1, 4))
-        # ).all()
-        # major_decision_miletones = [x.id for x in major_decision_miletones]
         response = {
             "30": [],
             "60": [],
             "90": [],
         }
         for work in data:
-            next_major_decision_event_query = (
-                db.session.query(
-                    Event.work_id,
-                    func.min(Event.anticipated_date).label(
-                        "min_anticipated_start_date"
-                    ),
-                )
-                .filter(
-                    Event.anticipated_date >= work["anticipated_decision_date"],
-                    Event.event_configuration_id.in_(self.decision_configuration_ids),
-                )
-                .group_by(Event.work_id)
-                .subquery()
-            )
-            next_major_decision_event = (
-                Event.query.filter(Event.work_id == work["work_id"])
-                .join(
-                    next_major_decision_event_query,
-                    and_(
-                        Event.work_id == next_major_decision_event_query.c.work_id,
-                        Event.anticipated_date == next_major_decision_event_query.c.min_anticipated_start_date,
-                    ),
-                )
-                .first()
+            next_major_decision_event = self._get_next_major_decision_event(
+                work["work_id"], work["anticipated_decision_date"]
             )
             event_decision_date = work["anticipated_decision_date"]
             work[
@@ -240,11 +197,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
         pdf_stream = BytesIO()
         stylesheet = getSampleStyleSheet()
         doc = BaseDocTemplate(pdf_stream, pagesize=A4)
-        doc.page_width = doc.width + doc.leftMargin * 2  # pylint: disable=no-member
-        doc.page_height = doc.height + doc.bottomMargin * 2  # pylint: disable=no-member
+        doc.page_width = doc.width + doc.leftMargin * 2
+        doc.page_height = doc.height + doc.bottomMargin * 2
         page_table_frame = Frame(
-            doc.leftMargin,  # pylint: disable=no-member
-            doc.bottomMargin,  # pylint: disable=no-member
+            doc.leftMargin,
+            doc.bottomMargin,
             doc.width,
             doc.height,
             id="large_table",
@@ -263,66 +220,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
 
         table_data = [["Issue", "Status/Key Milestones/Next Steps"]]
-        styles = []
-        row_index = 1
 
         normal_style = stylesheet["Normal"]
         normal_style.fontSize = 6.5
-        for period, item in data.items():
-            table_data.append([f"{period} days", ""])
-            styles.append(
-                (
-                    "SPAN",
-                    (0, row_index),
-                    (-1, row_index),
-                )
-            )
-            styles.append(("ALIGN", (0, row_index), (-1, row_index), "LEFT"))
-            styles.append(
-                ("FONTNAME", (0, row_index), (-1, row_index), "Helvetica-Bold"),
-            )
-            row_index += 1
-            for work in item:
-                event_description = ""
-                if work["is_decision_event"] and work["decision_information"]:
-                    event_description = work["decision_information"]
-                elif work["is_pecp_event"] and work["pecp_explanation"]:
-                    event_description = work["pecp_explanation"]
-                elif work["event_description"]:
-                    event_description = work["event_description"]
-                table_data.append(
-                    [
-                        [
-                            Paragraph(
-                                f"{work['project_name']} - {work['work_report_title']}",
-                                normal_style,
-                            ),
-                            Paragraph(
-                                f"{work['anticipated_decision_date']: %B %d, %Y}",
-                                normal_style,
-                            ),
-                        ],
-                        [
-                            Paragraph(
-                                work["work_short_description"]
-                                if work["work_short_description"]
-                                else "",
-                                normal_style,
-                            ),
-                            Paragraph(
-                                work["work_status_text"]
-                                if work["work_status_text"]
-                                else "",
-                                normal_style,
-                            ),
-                            Paragraph(
-                                event_description if event_description else "",
-                                normal_style,
-                            ),
-                        ],
-                    ]
-                )
-                row_index += 1
+        data, styles = self._get_table_data_and_styles(data, normal_style)
+        table_data.extend(data)
         table = Table(table_data)
         table.setStyle(
             TableStyle(
@@ -353,3 +255,152 @@ class ThirtySixtyNinetyReport(ReportFactory):
             f"Last updated: {last_updated:%B %d, %Y}",
         )
         canvas.restoreState()
+
+    def _get_next_pcp_query(self, start_date, end_date):
+        """Create and return the subquery for next PCP event based on start and end dates"""
+        next_pcp_min_date_query = (
+            db.session.query(
+                Event.work_id,
+                func.min(
+                    func.coalesce(Event.actual_date, Event.anticipated_date)
+                ).label("min_pcp_date"),
+            )
+            .filter(
+                func.coalesce(Event.actual_date, Event.anticipated_date).between(
+                    start_date.date(), end_date.date()
+                ),
+                Event.event_configuration_id.in_(self.pecp_configuration_ids),
+            )
+            .group_by(Event.work_id)
+            .subquery()
+        )
+
+        next_pecp_query = (
+            db.session.query(
+                Event,
+            )
+            .join(
+                next_pcp_min_date_query,
+                and_(
+                    next_pcp_min_date_query.c.work_id == Event.work_id,
+                    func.coalesce(Event.actual_date, Event.anticipated_date) == next_pcp_min_date_query.c.min_pcp_date,
+                ),
+            )
+            .filter(
+                Event.event_configuration_id.in_(self.pecp_configuration_ids),
+            )
+            .subquery()
+        )
+        return next_pecp_query
+
+    def _get_valid_event_ids(self, start_date, end_date):
+        """Find and return set of valid decision or high priority event ids"""
+        valid_events = db.session.query(Event).filter(
+            func.coalesce(Event.actual_date, Event.anticipated_date).between(
+                start_date.date(), end_date.date()
+            ),
+            or_(
+                Event.event_configuration_id.in_(self.decision_configuration_ids),
+                and_(Work.is_high_priority.is_(True), Event.high_priority.is_(True)),
+            ),
+        )
+        valid_events = {x.id for x in valid_events}
+        return valid_events
+
+    def _get_next_major_decision_event(self, work_id, anticipated_decision_date):
+        """Find and return the next major decision event based on work id and anticipated decision date"""
+        next_major_decision_event_query = (
+            db.session.query(
+                Event.work_id,
+                func.min(Event.anticipated_date).label("min_anticipated_start_date"),
+            )
+            .filter(
+                Event.anticipated_date >= anticipated_decision_date,
+                Event.event_configuration_id.in_(self.decision_configuration_ids),
+            )
+            .group_by(Event.work_id)
+            .subquery()
+        )
+        next_major_decision_event = (
+            Event.query.filter(Event.work_id == work_id)
+            .join(
+                next_major_decision_event_query,
+                and_(
+                    Event.work_id == next_major_decision_event_query.c.work_id,
+                    Event.anticipated_date == next_major_decision_event_query.c.min_anticipated_start_date,
+                ),
+            )
+            .first()
+        )
+        return next_major_decision_event
+
+    def _format_table_data(self, period_data, row_index, style):
+        """Generates styled table rows for the given period data"""
+        data = []
+        for work in period_data:
+            event_description = ""
+            if work["is_decision_event"] and work["decision_information"]:
+                event_description = work["decision_information"]
+            elif work["is_pecp_event"] and work["pecp_explanation"]:
+                event_description = work["pecp_explanation"]
+            elif work["event_description"]:
+                event_description = work["event_description"]
+            data.append(
+                [
+                    [
+                        Paragraph(
+                            f"{work['project_name']} - {work['work_report_title']}",
+                            style,
+                        ),
+                        Paragraph(
+                            f"{work['anticipated_decision_date']: %B %d, %Y}",
+                            style,
+                        ),
+                    ],
+                    [
+                        Paragraph(
+                            work["work_short_description"]
+                            if work["work_short_description"]
+                            else "",
+                            style,
+                        ),
+                        Paragraph(
+                            work["work_status_text"]
+                            if work["work_status_text"]
+                            else "",
+                            style,
+                        ),
+                        Paragraph(
+                            event_description if event_description else "",
+                            style,
+                        ),
+                    ],
+                ]
+            )
+            row_index += 1
+        return data, row_index
+
+    def _get_table_data_and_styles(self, data, normal_style):
+        """Create and return table data and styles"""
+        table_data = []
+        styles = []
+        row_index = 1
+        for period, item in data.items():
+            table_data.append([f"{period} days", ""])
+            styles.append(
+                (
+                    "SPAN",
+                    (0, row_index),
+                    (-1, row_index),
+                )
+            )
+            styles.append(("ALIGN", (0, row_index), (-1, row_index), "LEFT"))
+            styles.append(
+                ("FONTNAME", (0, row_index), (-1, row_index), "Helvetica-Bold"),
+            )
+            row_index += 1
+            period_data, row_index = self._format_table_data(
+                item, row_index, normal_style
+            )
+            table_data.extend(period_data)
+        return table_data, styles
