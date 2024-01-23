@@ -164,7 +164,7 @@ class StaffService:
 
         existing_staffs = existing_staffs_qry.all()
         # Create set of existing staff emails
-        existing_staffs = {x.email for x in existing_staffs}
+        existing_staffs = {x.email.lower() for x in existing_staffs}
         # Mark removed entries as inactive
         to_delete = existing_staffs - staff_emails
         disabled_count = existing_staffs_qry.filter(
