@@ -16,6 +16,8 @@ import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
 export default function ProponentList() {
   const [proponentId, setProponentId] = useState<number>();
@@ -119,9 +121,15 @@ export default function ProponentList() {
   );
 
   const getStaffs = async () => {
-    const staffsResult = await staffService.getAll();
-    if (staffsResult.status === 200) {
-      setStaffs(staffsResult.data as never);
+    try {
+      const staffsResult = await staffService.getAll();
+      if (staffsResult.status === 200) {
+        setStaffs(staffsResult.data as never);
+      }
+    } catch (error) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   };
   useEffect(() => {

@@ -14,9 +14,6 @@
 
 """Common setup and fixtures for the py-test suite used by this service."""
 
-from functools import wraps
-from unittest.mock import patch
-
 import pytest
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
@@ -26,6 +23,8 @@ from api import create_app
 from api import jwt as _jwt
 from api.models import Project, Staff
 from api.models import db as _db
+from tests.utilities.factory_scenarios import TestJwtClaims
+from tests.utilities.factory_utils import factory_auth_header
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -159,14 +158,9 @@ def session(app, db):
         yield sess
 
 
-def mock_decorator(f, *args, **kwargs):
-    """Function to mock a decorator. Used to mock auth.require"""
-
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        return f(*args, **kwargs)
-
-    return decorated_function
-
-
-patch("api.utils.auth.require", mock_decorator, spec=True).start()
+@pytest.fixture()
+def auth_header(client, jwt, request):
+    """Create a basic admin header for tests."""
+    staff_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=staff_user)
+    return headers
