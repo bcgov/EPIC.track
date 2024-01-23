@@ -88,7 +88,7 @@ def test_create_and_update_work_issues(client, auth_header):
 
     work_issue_update = factory_work_issue_updates_model(work_issue.id, update_data)
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
-    result_get = client.get(url)
+    result_get = client.get(url, headers=auth_header)
     assert work_issue_update.description == result_get.json[0].get('updates')[0]['description']
 
     updates_id = result_get.json[0].get('updates')[0]['id']
