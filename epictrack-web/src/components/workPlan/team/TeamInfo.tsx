@@ -57,15 +57,16 @@ const TeamInfoBox = (props: TeamInfoBoxProps) => {
               cursor: "pointer",
             }}
           >
-            <EditIcon fill={Palette.primary.accent.main} />
-            <ETCaption2
+            {/* Commenting this out as this has to bring back when we finalize what to do with this feature */}
+            {/* <EditIcon fill={Palette.primary.accent.main} /> */}
+            {/* <ETCaption2
               bold
               sx={{
                 color: Palette.primary.accent.main,
               }}
             >
               Edit
-            </ETCaption2>
+            </ETCaption2> */}
           </Grid>
         </Grid>
       </Grid>

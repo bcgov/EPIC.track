@@ -22,8 +22,18 @@ from sqlalchemy import and_, extract, func, or_
 from api.actions.action_handler import ActionHandler
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
-    PRIMARY_CATEGORIES, CalendarEvent, Event, EventCategoryEnum, EventConfiguration, EventTypeEnum, Work,
-    WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
+    PRIMARY_CATEGORIES,
+    CalendarEvent,
+    Event,
+    EventCategoryEnum,
+    EventConfiguration,
+    EventTypeEnum,
+    Work,
+    WorkCalendarEvent,
+    WorkPhase,
+    WorkStateEnum,
+    db,
+)
 from api.models.action import Action, ActionEnum
 from api.models.action_configuration import ActionConfiguration
 from api.models.event_template import EventPositionEnum
@@ -56,7 +66,9 @@ class EventService:
             Membership.TEAM_MEMBER.name,
             KeycloakRole.CREATE.value,
         )
-        authorisation.check_auth(one_of_roles=one_of_roles, work_id=current_work_phase.work_id)
+        authorisation.check_auth(
+            one_of_roles=one_of_roles, work_id=current_work_phase.work_id
+        )
 
         all_work_events = cls.find_events(
             current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
@@ -87,7 +99,9 @@ class EventService:
             Membership.TEAM_MEMBER.name,
             KeycloakRole.EDIT.value,
         )
-        authorisation.check_auth(one_of_roles=one_of_roles, work_id=current_work_phase.work_id)
+        authorisation.check_auth(
+            one_of_roles=one_of_roles, work_id=current_work_phase.work_id
+        )
 
         all_work_events = cls.find_events(
             current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
@@ -290,7 +304,9 @@ class EventService:
         cls._handle_work_phase_for_end_phase_end_event(
             all_work_phases, current_work_phase_index, event, current_work_phase
         )
-        cls._handle_work_phase_for_start_event(event, current_work_phase)
+        cls._handle_work_phase_for_start_event(
+            event, current_work_phase, number_of_days_to_be_pushed, push_events
+        )
         cls._handle_work_phase_for_suspension(event, current_work_phase)
         cls._handle_work_phase_for_resumption(
             event, current_work_phase, number_of_days_to_be_pushed
@@ -369,7 +385,11 @@ class EventService:
 
     @classmethod
     def _handle_work_phase_for_start_event(
-        cls, event: Event, current_work_phase: WorkPhase
+        cls,
+        event: Event,
+        current_work_phase: WorkPhase,
+        number_of_days_to_be_pushed: int,
+        push_events: bool,
     ) -> None:
         """Update the work phase's start date if the start event's date changed"""
         if (
@@ -377,6 +397,10 @@ class EventService:
             == EventPositionEnum.START.value
         ):
             current_work_phase.start_date = cls._find_event_date(event)
+            if current_work_phase.legislated and not push_events:
+                current_work_phase.end_date = current_work_phase.end_date + timedelta(
+                    days=number_of_days_to_be_pushed
+                )
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
             )

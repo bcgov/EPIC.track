@@ -1,7 +1,6 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Grid, IconButton } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
@@ -51,7 +50,11 @@ const StaffList = () => {
   React.useEffect(() => {
     if (staff) {
       const positions = staff
-        .map((p) => p.position?.name)
+        .map((staff) => staff.position)
+        .sort(
+          (positionA, positionB) => positionA.sort_order - positionB.sort_order
+        )
+        .map((position) => position.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
       setPositions(positions);
     }
