@@ -159,7 +159,7 @@ def session(app, db):
 
 
 @pytest.fixture()
-def staff_admin_headers(client, jwt, request):
+def auth_header(client, jwt, request):
     """Create a basic admin header for tests."""
     staff_user = TestJwtClaims.staff_admin_role
     headers = factory_auth_header(jwt=jwt, claims=staff_user)

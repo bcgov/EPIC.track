@@ -27,11 +27,11 @@ API_BASE_URL = "/api/v1/"
 fake = Faker()
 
 
-def test_get_empty_work(client):
+def test_get_empty_work(client, auth_header):
     """Test get empty project."""
     work = factory_work_model()
     url = urljoin(API_BASE_URL, f'work/{work.id}/statuses')
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
 
 
