@@ -88,7 +88,7 @@ def test_approve_work_status(client, jwt):
 
     # Fetch the updated work status
     url_get = urljoin(API_BASE_URL, f'work/{work.id}/statuses')
-    result_get = client.get(url_get)
+    result_get = client.get(url_get, headers=headers)
     approved_work_status = result_get.json[0]
     # Assert that the WorkStatus is now approved and approved_by and approved_date are set
     assert approved_work_status["is_approved"]

@@ -85,9 +85,13 @@ def test_create_and_update_work_issues(client, jwt):
     issue_data = TestWorkIssuesInfo.issue1.value
     update_data = TestWorkIssueUpdatesInfo.update1.value
     work_issue = factory_work_issues_model(work.id, issue_data)
+
+    staff_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=staff_user)
+
     work_issue_update = factory_work_issue_updates_model(work_issue.id, update_data)
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
-    result_get = client.get(url)
+    result_get = client.get(url, headers=headers)
     assert work_issue_update.description == result_get.json[0].get('updates')[0]['description']
 
     updates_id = result_get.json[0].get('updates')[0]['id']
@@ -97,14 +101,13 @@ def test_create_and_update_work_issues(client, jwt):
         "description": new_description,
         "posted_date": fake.date_time_this_decade(tzinfo=None).isoformat()
     }
-    staff_user = TestJwtClaims.staff_admin_role
-    headers = factory_auth_header(jwt=jwt, claims=staff_user)
+
     url_update = urljoin(API_BASE_URL, f'work/{work.id}/issues/{work_issue.id}/update/{updates_id}')
     result_update = client.patch(url_update, headers=headers, json=updated_update_data)
     assert result_update.status_code == HTTPStatus.OK
 
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
-    result_get = client.get(url)
+    result_get = client.get(url, headers=headers)
     assert new_description == result_get.json[0].get('updates')[0]['description']
 
 
@@ -131,7 +134,7 @@ def test_approve_work_issue_update(client, jwt):
     assert result_approve.status_code == HTTPStatus.OK
 
     url = urljoin(API_BASE_URL, f'work/{work.id}/issues')
-    result_get = client.get(url)
+    result_get = client.get(url, headers=headers)
 
     # Assert that the WorkIssueUpdate is now approved and approved_by is set
     updated_update = result_get.json[0].get('updates')[0]
