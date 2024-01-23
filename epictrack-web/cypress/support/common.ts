@@ -33,7 +33,7 @@ export function createMockMasterContext(defaultItem: any, _data?: any) {
     setTitle: cy.stub(),
     setId: cy.stub(),
     onSave: cy.stub(),
-    title: "",
+    title: "Data",
     data: [..._data],
     loading: false,
     setItem: cy.stub(),
