@@ -458,7 +458,6 @@ export default function ProjectForm({ ...props }) {
             <Restricted
               allowed={[ROLES.EXTENDED_EDIT]}
               errorProps={{ disabled: true }}
-              exception={!abbreviation}
             >
               <ControlledTextField
                 name={"abbreviation"}
