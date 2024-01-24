@@ -12,7 +12,9 @@ import { Palette } from "../../../styles/theme";
 import { Staff } from "../../../models/staff";
 import { WorkplanContext } from "../WorkPlanContext";
 import workService from "../../../services/workService/workService";
-import taskEventService from "../../../services/taskEventService/taskEventService";
+import taskEventService, {
+  TaskEventMutationRequest,
+} from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import { ListType } from "../../../models/code";
 import codeService from "../../../services/codeService";
@@ -35,6 +37,15 @@ const schema = yup.object().shape({
   assignee_ids: yup.array().required("Please select assignee"),
 });
 
+type TaskEventForm = {
+  name: string;
+  start_date: string;
+  number_of_days: number;
+  assignee_ids: string[];
+  responsibility_ids: string[];
+  status: string;
+};
+
 interface TaskFormProps {
   onSave: () => void;
   taskEvent?: TaskEvent;
@@ -47,18 +58,25 @@ const TaskForm = ({
 }: TaskFormProps) => {
   const [assignees, setAssignees] = useState<Staff[]>([]);
   const [responsibilities, setResponsibilities] = useState<ListType[]>([]);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState(taskEvent?.notes || "");
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const endDateRef = useRef();
-  const startDateRef = useRef();
-  const numberOfDaysRef = useRef();
   const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
   const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.id]);
 
-  const methods = useForm({
+  const defaultValues: TaskEventForm = {
+    name: taskEvent?.name || "",
+    start_date: taskEvent?.start_date || dayjs().format(),
+    status: taskEvent?.status || "",
+    number_of_days: taskEvent?.number_of_days || 0,
+    responsibility_ids: taskEvent?.responsibility_ids || [],
+    assignee_ids: taskEvent?.assignee_ids || [],
+  };
+
+  const methods = useForm<TaskEventForm>({
     resolver: yupResolver(schema),
-    defaultValues: taskEvent,
+    defaultValues: defaultValues,
     mode: "onBlur",
   });
 
@@ -66,7 +84,6 @@ const TaskForm = ({
     register,
     handleSubmit,
     formState: { errors },
-    reset,
     setValue,
     watch,
   } = methods;
@@ -78,13 +95,6 @@ const TaskForm = ({
   useEffect(() => {
     getWorkTeamMembers();
   }, [ctx.work?.id]);
-
-  useEffect(() => {
-    reset(taskEvent);
-    if (taskEvent) {
-      setNotes(taskEvent?.notes);
-    }
-  }, [taskEvent]);
 
   const getResponsibilites = async () => {
     const result = await codeService.getCodes("responsibilities");
@@ -98,13 +108,13 @@ const TaskForm = ({
       true
     );
     if (assigneeResult.status === 200) {
-      const staff = (assigneeResult.data as any[]).map((p) => p.staff);
+      const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
       setAssignees(staff);
     }
   };
   const statuses = useMemo(() => statusOptions, []);
 
-  const createTask = async (data: TaskEvent) => {
+  const createTask = async (data: TaskEventMutationRequest) => {
     const createResult = await taskEventService.create(data);
     showNotification("Task details inserted", {
       type: "success",
@@ -118,7 +128,9 @@ const TaskForm = ({
     return createResult;
   };
 
-  const updateTask = async (data: TaskEvent) => {
+  const updateTask = async (data: TaskEventMutationRequest) => {
+    if (!taskEvent?.id) return;
+
     const updateResult = await taskEventService.update(
       data,
       Number(taskEvent?.id)
@@ -135,14 +147,14 @@ const TaskForm = ({
     return updateResult;
   };
 
-  const saveTask = async (data: TaskEvent) => {
+  const saveTask = async (data: TaskEventMutationRequest) => {
     if (taskEvent) {
       return updateTask(data);
     }
     return createTask(data);
   };
 
-  const onSubmitHandler = async (data: TaskEvent) => {
+  const onSubmitHandler = async (data: TaskEventForm) => {
     try {
       const dataToSave = {
         ...data,
@@ -166,28 +178,37 @@ const TaskForm = ({
   const number_of_days = watch("number_of_days");
   const startDate = watch("start_date");
 
-  useEffect(() => {
-    const handleNDaysChange = () => {
-      const endDate = dayjs(
-        dateUtils.add(startDate, number_of_days, "days").toString()
-      );
-      setEndDate(endDate);
-    };
+  const handleNDaysChange = (days: number) => {
+    const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
+    setEndDate(endDate);
+  };
 
-    handleNDaysChange();
-  }, [number_of_days]);
+  const handleEndDateChange = (newEndDate: Dayjs | null) => {
+    if (!newEndDate) {
+      return;
+    }
+    const startDateDayjs = dayjs(startDate);
+    const numberOfDays = newEndDate.diff(startDateDayjs, "day");
+
+    console.log("set numberOfDays ", numberOfDays);
+    setValue("number_of_days", numberOfDays);
+  };
+
+  const handleDaysEndDateChange = (
+    newNumberOfDays: number,
+    newEndDate: Dayjs | null
+  ) => {
+    if (newNumberOfDays !== Number(number_of_days)) {
+      handleNDaysChange(newNumberOfDays);
+    } else if (newEndDate?.date() || -1 !== endDate?.date() || -1) {
+      setEndDate(newEndDate);
+      handleEndDateChange(newEndDate);
+    }
+  };
 
   useEffect(() => {
-    const handleEndDateChange = () => {
-      if (!endDate) {
-        return;
-      }
-      const startDate = dayjs(watch("start_date"));
-      const numberOfDays = endDate.diff(startDate, "day");
-      setValue("number_of_days", numberOfDays);
-    };
-    handleEndDateChange();
-  }, [endDate]);
+    handleNDaysChange(Number(number_of_days));
+  }, [startDate]);
 
   return (
     <>
@@ -225,29 +246,23 @@ const TaskForm = ({
               <ControlledDatePicker
                 name="start_date"
                 defaultValue={Moment(taskEvent?.start_date).format()}
-                datePickerProps={{
-                  onDateChange: (event: any, defaultOnChange: any) => {
-                    defaultOnChange(event);
-                  },
-                }}
-                datePickerSlotProps={{
-                  inputRef: startDateRef,
-                }}
               />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Number of Days</ETFormLabel>
               <ControlledTextField
                 name="number_of_days"
-                defaultValue={taskEvent?.number_of_days || 0}
                 fullWidth
                 InputProps={{
                   inputProps: {
                     min: 0,
                   },
                 }}
-                inputRef={numberOfDaysRef}
                 type="number"
+                onChange={(e) => {
+                  const newNumberOfDays = Number(e.target.value);
+                  handleDaysEndDateChange(newNumberOfDays, endDate);
+                }}
               />
             </Grid>
             <Grid item xs={4}>
@@ -267,6 +282,7 @@ const TaskForm = ({
                 onChange={(value: any) => {
                   const newValue = dayjs(value["$d"]);
                   setEndDate(newValue);
+                  handleDaysEndDateChange(Number(number_of_days), newValue);
                 }}
                 minDate={dayjs(startDate)}
               />

@@ -2,14 +2,25 @@ import { TaskEvent } from "../../models/taskEvent";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 
+export type TaskEventMutationRequest = {
+  name: string;
+  start_date: string;
+  number_of_days: number;
+  assignee_ids: string[];
+  responsibility_ids: string[];
+  status: string;
+  work_phase_id: number;
+  notes: string;
+};
+
 class TaskEventService {
-  async create(taskEvent: TaskEvent) {
+  async create(taskEvent: TaskEventMutationRequest) {
     return await http.PostRequest<TaskEvent>(
       Endpoints.TaskEvents.EVENTS,
       JSON.stringify(taskEvent)
     );
   }
-  async update(taskEvent: TaskEvent, eventId: number) {
+  async update(taskEvent: TaskEventMutationRequest, eventId: number) {
     return await http.PutRequest<TaskEvent>(
       `${Endpoints.TaskEvents.EVENTS}/${eventId}`,
       JSON.stringify(taskEvent)
