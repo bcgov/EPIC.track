@@ -41,6 +41,8 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
     @classmethod
     def create_work_status(cls, work_id, work_status: Dict):
         """Creates a work status."""
+        cls._check_create_auth(work_id)
+
         work_status = WorkStatusModel(
             **work_status,
             posted_by=TokenInfo.get_username(),
@@ -51,14 +53,19 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         return work_status
 
     @classmethod
+    def _check_create_auth(cls, work_id):
+        """Check if user can create"""
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
+
+    @classmethod
     def update_work_status(cls, work_status: WorkStatusModel, work_status_data: dict):
         """Update an existing work status."""
         # TODO Add Super user check
-        if work_status.is_approved:
-            one_of_roles = (
-                KeycloakRole.EXTENDED_EDIT.value,
-            )
-            authorisation.check_auth(one_of_roles=one_of_roles)
+        cls._check_update_work_status_auth(work_status)
 
         work_status.update(work_status_data)
 
@@ -67,16 +74,23 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         return work_status
 
     @classmethod
+    def _check_update_work_status_auth(cls, work_status):
+        """Check if user can edit work status"""
+        if work_status.is_approved:
+            one_of_roles = (
+                KeycloakRole.EXTENDED_EDIT.value,
+            )
+            authorisation.check_auth(one_of_roles=one_of_roles)
+        else:
+            cls._check_edit_auth(work_status.work_id)
+
+    @classmethod
     def approve_work_status(cls, work_status):
         """Approve a work status."""
         if work_status.is_approved:
             return work_status
 
-        one_of_roles = (
-            Membership.TEAM_MEMBER.name,
-            KeycloakRole.EDIT.value
-        )
-        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_status.work_id)
+        cls._check_edit_auth(work_status.work_id)
 
         work_status.is_approved = True
         work_status.approved_by = TokenInfo.get_username()
@@ -85,3 +99,12 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         work_status.save()
 
         return work_status
+
+    @classmethod
+    def _check_edit_auth(cls, work_id):
+        """Check if user has edit role or is team member"""
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)

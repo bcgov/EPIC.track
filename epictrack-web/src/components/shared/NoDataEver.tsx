@@ -1,6 +1,6 @@
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Container } from "@mui/material";
+import { Box, Button, ButtonProps, Container, SxProps } from "@mui/material";
 import { ETHeading2, ETHeading3 } from ".";
 import FolderIcon from "../../assets/images/folder.svg";
 import { Palette } from "../../styles/theme";
@@ -18,6 +18,7 @@ interface NoDataEverProps {
   importButtonText?: string;
   onImportClickHandler?: () => void;
   isImportDisabled?: boolean;
+  buttonProps?: ButtonProps;
 }
 
 const NoDataEver = ({
@@ -29,7 +30,10 @@ const NoDataEver = ({
   importButtonText,
   onImportClickHandler,
   isImportDisabled,
+  buttonProps = {},
 }: NoDataEverProps) => {
+  const { sx: buttonSx = {} } = buttonProps;
+
   return (
     <>
       <Container
@@ -91,10 +95,12 @@ const NoDataEver = ({
               <Button
                 sx={{
                   mt: "3rem",
+                  ...buttonSx,
                 }}
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={onAddNewClickHandler}
+                {...buttonProps}
               >
                 {addNewButtonText}
               </Button>

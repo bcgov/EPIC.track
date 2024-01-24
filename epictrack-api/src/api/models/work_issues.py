@@ -41,7 +41,7 @@ class WorkIssues(BaseModelVersioned):
         "WorkIssueUpdates",
         back_populates="work_issue",
         lazy="joined",
-        order_by="desc(WorkIssueUpdates.posted_date)",
+        order_by="desc(WorkIssueUpdates.created_at)",
     )
 
     @classmethod
