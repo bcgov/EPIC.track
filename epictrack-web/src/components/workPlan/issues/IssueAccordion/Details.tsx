@@ -16,12 +16,16 @@ import {
   ROLES,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
+import { useAppSelector } from "hooks";
+import { WorkplanContext } from "components/workPlan/WorkPlanContext";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
+
+  const { team } = React.useContext(WorkplanContext);
 
   const {
     setEditIssueUpdateFormIsOpen,
@@ -32,6 +36,9 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     setUpdateToEdit,
     setNewIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
+
+  const { email } = useAppSelector((state) => state.user.userDetail);
+  const isTeamMember = team?.some((member) => member.staff.email === email);
 
   const handleApproveIssue = () => {
     approveIssue(issue.id, latestUpdate.id);
@@ -88,87 +95,79 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               <If condition={!latestUpdate.is_approved}>
                 <Then>
                   <Grid item>
-                    <Button
-                      data-cy="approve-issue-update-button"
-                      variant="text"
-                      startIcon={<CheckCircleIcon />}
-                      sx={{
-                        backgroundColor: "inherit",
-                        borderColor: "transparent",
-                      }}
-                      onClick={() => {
-                        setIssueToApproveId(issue.id);
-                      }}
+                    <Restricted
+                      allowed={[ROLES.EDIT]}
+                      exception={isTeamMember}
+                      errorProps={{ disabled: true }}
                     >
-                      Approve
-                    </Button>
+                      <Button
+                        data-cy="approve-issue-update-button"
+                        variant="text"
+                        startIcon={<CheckCircleIcon />}
+                        sx={{
+                          backgroundColor: "inherit",
+                          borderColor: "transparent",
+                        }}
+                        onClick={() => {
+                          setIssueToApproveId(issue.id);
+                        }}
+                      >
+                        Approve
+                      </Button>
+                    </Restricted>
                   </Grid>
                 </Then>
                 <Else>
                   <Grid item>
-                    <Button
-                      data-cy="new-issue-update-button"
-                      variant="text"
-                      startIcon={
-                        <AddIcon
-                          style={{ fill: Palette.primary.accent.main }}
-                        />
-                      }
-                      sx={{
-                        backgroundColor: "inherit",
-                        borderColor: "transparent",
-                      }}
-                      onClick={() => {
-                        setUpdateToClone(latestUpdate);
-                        setNewIssueUpdateFormIsOpen(true);
-                      }}
+                    <Restricted
+                      allowed={[ROLES.CREATE]}
+                      exception={isTeamMember}
+                      errorProps={{ disabled: true }}
                     >
-                      New Update
-                    </Button>
+                      <Button
+                        data-cy="new-issue-update-button"
+                        variant="text"
+                        startIcon={<AddIcon />}
+                        sx={{
+                          backgroundColor: "inherit",
+                          borderColor: "transparent",
+                        }}
+                        onClick={() => {
+                          setUpdateToClone(latestUpdate);
+                          setNewIssueUpdateFormIsOpen(true);
+                        }}
+                      >
+                        New Update
+                      </Button>
+                    </Restricted>
                   </Grid>
                 </Else>
               </If>
 
               <Grid item>
-                <If condition={latestUpdate.is_approved}>
-                  <Restricted
-                    allowed={[ROLES.EXTENDED_EDIT]}
-                    errorProps={{ disabled: true }}
+                <Restricted
+                  allowed={[
+                    latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
+                  ]}
+                  exception={!latestUpdate.is_approved && isTeamMember}
+                  errorProps={{ disabled: true }}
+                >
+                  <Button
+                    data-cy="edit-issue-update-button"
+                    variant="text"
+                    startIcon={<PencilEditIcon />}
+                    sx={{
+                      backgroundColor: "inherit",
+                      borderColor: "transparent",
+                    }}
+                    onClick={() => {
+                      setUpdateToEdit(latestUpdate);
+                      setEditIssueUpdateFormIsOpen(true);
+                    }}
                   >
-                    <Button
-                      data-cy="edit-issue-update-button"
-                      variant="text"
-                      startIcon={<PencilEditIcon />}
-                      sx={{
-                        backgroundColor: "inherit",
-                        borderColor: "transparent",
-                      }}
-                      onClick={() => {
-                        setUpdateToEdit(latestUpdate);
-                        setEditIssueUpdateFormIsOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </Restricted>
-                  <Else>
-                    <Button
-                      data-cy="edit-issue-update-button"
-                      variant="text"
-                      startIcon={<PencilEditIcon />}
-                      sx={{
-                        backgroundColor: "inherit",
-                        borderColor: "transparent",
-                      }}
-                      onClick={() => {
-                        setUpdateToEdit(latestUpdate);
-                        setEditIssueUpdateFormIsOpen(true);
-                      }}
-                    >
-                      Edit
-                    </Button>
-                  </Else>
-                </If>
+                    Edit
+                  </Button>
+                </Restricted>
               </Grid>
             </Grid>
           </GrayBox>

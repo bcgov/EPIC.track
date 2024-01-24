@@ -20,7 +20,6 @@ from flask_restx import Namespace, Resource, cors
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services import WorkIssuesService
-from api.utils.roles import Role
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
@@ -90,8 +89,8 @@ class EditIssues(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.has_one_of_roles([Role.CREATE.value])
     @profiletime
+    @auth.require
     # pylint: disable=unused-argument
     def patch(work_id, issue_id, update_id):
         """Approve a work status."""
@@ -108,8 +107,8 @@ class ApproveIssueUpdate(Resource):
 
     @staticmethod
     @cors.crossdomain(origin="*")
-    @auth.has_one_of_roles([Role.CREATE.value])
     @profiletime
+    @auth.require
     # pylint: disable=unused-argument
     def patch(work_id, issue_id, update_id):
         """Approve a work status."""
