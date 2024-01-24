@@ -30,6 +30,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
             padding: "4px 8px",
             backgroundColor: Palette.secondary.bg.light,
             color: Palette.secondary.dark,
+            whiteSpace: "nowrap",
           }}
         >
           {formatWorkStateString()}
@@ -42,6 +43,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
             padding: "4px 8px",
             backgroundColor: Palette.success.bg.light,
             color: Palette.success.dark,
+            whiteSpace: "nowrap",
           }}
         >
           {formatWorkStateString()}
@@ -58,6 +60,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
             padding: "4px 8px",
             backgroundColor: Palette.error.bg.light,
             color: Palette.error.dark,
+            whiteSpace: "nowrap",
           }}
         >
           {formatWorkStateString()}
@@ -70,6 +73,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
             padding: "4px 8px",
             backgroundColor: Palette.primary.bg.main,
             color: Palette.primary.main,
+            whiteSpace: "nowrap",
           }}
         >
           {formatWorkStateString()}
@@ -82,6 +86,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
             padding: "4px 8px",
             backgroundColor: Palette.neutral.bg.main,
             color: Palette.neutral.main,
+            whiteSpace: "nowrap",
           }}
         >
           {formatWorkStateString()}

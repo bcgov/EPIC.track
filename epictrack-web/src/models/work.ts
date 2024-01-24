@@ -6,6 +6,7 @@ import { MasterBase } from "./type";
 export interface Work extends MasterBase {
   id: number;
   title: string;
+  simple_title: string;
   report_description: string;
   epic_description: string;
   is_cac_recommended: boolean;

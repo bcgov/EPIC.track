@@ -31,7 +31,6 @@ const ControlledTextField: FC<IFormInputProps> = ({
       render={({ field }) => (
         <TextField
           {...field}
-          {...otherProps}
           inputProps={{
             maxLength: maxLength,
           }}
@@ -45,7 +44,8 @@ const ControlledTextField: FC<IFormInputProps> = ({
             field.onChange(e.target.value);
           }}
           error={!!errors[name]}
-          helperText={String(errors[name]?.message || "")}
+          helperText={String(errors[name]?.message ?? "")}
+          {...otherProps}
         />
       )}
     />

@@ -110,6 +110,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "federal_involvement",
                 "eao_team",
                 "title",
+                "simple_title",
                 "is_active",
                 "project.name"
             )
