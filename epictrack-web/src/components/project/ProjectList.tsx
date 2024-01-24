@@ -176,6 +176,7 @@ const ProjectList = () => {
               column={column}
               variant="inline"
               name="rolesFilter"
+              maxWidth="328px"
             />
           );
         },

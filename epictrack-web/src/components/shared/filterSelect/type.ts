@@ -24,6 +24,7 @@ declare module "react-select/dist/declarations/src/Select" {
       getOptionLabel?: (option: any) => string;
       getOptionValue?: (option: any) => string;
       label?: string;
+      maxWidth?: string;
     };
     filterAppliedCallback?: (value?: string[] | string) => void;
     filterClearedCallback?: (value?: [] | "") => void;
@@ -33,6 +34,7 @@ declare module "react-select/dist/declarations/src/Select" {
 export type SelectProps = {
   variant: "inline" | "bar" | "inline-standalone";
   info?: boolean;
+  maxWidth?: string;
 } & Props<OptionType>;
 
 export type TableFilterProps = {
