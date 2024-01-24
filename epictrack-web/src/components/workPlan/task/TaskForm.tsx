@@ -190,7 +190,6 @@ const TaskForm = ({
     const startDateDayjs = dayjs(startDate);
     const numberOfDays = newEndDate.diff(startDateDayjs, "day");
 
-    console.log("set numberOfDays ", numberOfDays);
     setValue("number_of_days", numberOfDays);
   };
 
