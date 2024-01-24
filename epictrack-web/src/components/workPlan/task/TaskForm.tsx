@@ -194,18 +194,6 @@ const TaskForm = ({
     setValue("number_of_days", numberOfDays);
   };
 
-  const handleDaysEndDateChange = (
-    newNumberOfDays: number,
-    newEndDate: Dayjs | null
-  ) => {
-    if (newNumberOfDays !== Number(number_of_days)) {
-      handleNDaysChange(newNumberOfDays);
-    } else if (newEndDate?.date() || -1 !== endDate?.date() || -1) {
-      setEndDate(newEndDate);
-      handleEndDateChange(newEndDate);
-    }
-  };
-
   useEffect(() => {
     handleNDaysChange(Number(number_of_days));
   }, [startDate]);
@@ -261,7 +249,7 @@ const TaskForm = ({
                 type="number"
                 onChange={(e) => {
                   const newNumberOfDays = Number(e.target.value);
-                  handleDaysEndDateChange(newNumberOfDays, endDate);
+                  handleNDaysChange(newNumberOfDays);
                 }}
               />
             </Grid>
@@ -282,7 +270,7 @@ const TaskForm = ({
                 onChange={(value: any) => {
                   const newValue = dayjs(value["$d"]);
                   setEndDate(newValue);
-                  handleDaysEndDateChange(Number(number_of_days), newValue);
+                  handleEndDateChange(newValue);
                 }}
                 minDate={dayjs(startDate)}
               />
