@@ -138,8 +138,7 @@ export default function WorkForm({ ...props }) {
     reset(ctx.item ?? defaultWork);
   }, [ctx.item]);
 
-  useEffect(() => {
-    // Find the object where name is 'None'
+  React.useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
       ({ name }) => name === "None"
     );
@@ -153,7 +152,7 @@ export default function WorkForm({ ...props }) {
     ) {
       setValue("substitution_act_id", noneSubstitutionAct?.id);
     }
-  }, [federal_involvement_id, setValue]);
+  }, [federal_involvement_id]);
 
   const codeTypes: { [x: string]: any } = {
     ea_acts: setEAActs,
