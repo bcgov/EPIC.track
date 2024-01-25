@@ -100,8 +100,8 @@ export default function WorkForm({ ...props }) {
     watch,
   } = methods;
 
-  const work_type_id = watch("work_type_id");
-  const project_id = watch("project_id");
+  const workTypeId = watch("work_type_id");
+  const projectId = watch("project_id");
 
   const work = ctx?.item as Work;
 
@@ -206,16 +206,14 @@ export default function WorkForm({ ...props }) {
   const titleSeparator = " - ";
   const getTitlePrefix = () => {
     let prefix = "";
-    if (project_id) {
+    if (projectId) {
       const project = projects.find(
-        (project) => project.id === Number(project_id)
+        (project) => project.id === Number(projectId)
       );
       prefix += `${project?.name}${titleSeparator}`;
     }
-    if (work_type_id) {
-      const workType = workTypes.find(
-        (type) => type.id === Number(work_type_id)
-      );
+    if (workTypeId) {
+      const workType = workTypes.find((type) => type.id === Number(workTypeId));
       prefix += `${workType?.name}${titleSeparator}`;
     }
     return prefix;
@@ -224,7 +222,7 @@ export default function WorkForm({ ...props }) {
   useEffect(() => {
     const prefix = getTitlePrefix();
     setTitlePrefix(prefix);
-  }, [work_type_id, project_id]);
+  }, [workTypeId, projectId, projects, workTypes]);
 
   React.useEffect(() => {
     setValue("title", `${titlePrefix}${simple_title}`);
