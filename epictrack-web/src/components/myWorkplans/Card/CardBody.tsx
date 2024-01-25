@@ -1,4 +1,4 @@
-import { Grid, Stack } from "@mui/material";
+import { Grid, Stack, Tooltip } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -37,6 +37,10 @@ const CardBody = ({ workplan }: CardProps) => {
     return `${daysOver} day${daysOver > 1 ? "s" : ""} over`;
   };
 
+  const workTitle = `${workplan.work_type.name}${
+    workplan.simple_title ? ` - ${workplan.simple_title}` : ""
+  }`;
+
   return (
     <Grid
       container
@@ -49,26 +53,30 @@ const CardBody = ({ workplan }: CardProps) => {
       }}
       gap={1}
     >
-      <Grid item container spacing={1}>
-        <Grid item xs={6}>
+      <Grid item container spacing={2}>
+        <Grid item xs={9}>
           <ETHeading4
             bold
             color={Palette.neutral.dark}
+            xs
             sx={{
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
             }}
           >
-            {workplan.work_type.name}
+            <Tooltip title={workTitle} placement="top-start">
+              <span>{workTitle}</span>
+            </Tooltip>
           </ETHeading4>
         </Grid>
-        <Grid item container xs={6} justifyContent={"flex-end"}>
+        <Grid item xs={3} container justifyContent={"flex-end"}>
           <ETCaption1 bold>
             <WorkState work_state={workplan.work_state} />
           </ETCaption1>
         </Grid>
       </Grid>
+
       <Grid item container direction="row" spacing={1} sx={{ height: "26px" }}>
         <When condition={"phase_info" in workplan}>
           <Grid item xs={12}>
