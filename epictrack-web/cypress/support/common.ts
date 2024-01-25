@@ -1,5 +1,5 @@
 import { Staff } from "models/staff";
-
+import Sinon, { SinonStub } from "cypress/types/sinon";
 export const mockStaffs: Staff[] = [
   {
     id: 1,
@@ -63,3 +63,8 @@ export function testTableFiltering(
         .type(`${propertyToTest}{enter}`); // Type into the input field and press Enter
     });
 }
+
+export type CypressStubFunction =
+  | Cypress.Agent<Sinon.SinonStub>
+  | (() => void)
+  | undefined;
