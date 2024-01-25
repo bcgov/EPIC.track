@@ -14,8 +14,6 @@
 """Indigenous nation resource's input validations"""
 from marshmallow import fields, validate
 
-from api.models.indigenous_work import PinEnum
-
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
 
@@ -102,19 +100,20 @@ class IndigenousWorkBodyParameterSchema(RequestBodyParameterSchema):
         validate=validate.Range(min=1)
     )
 
-    indigenous_category_id = fields.Int(
-        metadata={"description": "Indigenous Category ID"},
+    indigenous_consultation_level_id = fields.Int(
+        metadata={"description": "Indigenous Consultation level ID"},
         required=False,
         allow_none=True,
         missing=None,
         validate=validate.Range(min=1)
     )
 
-    pin = fields.Str(
-        metadata={"description": "First nation PIN status"},
+    indigenous_category_id = fields.Int(
+        metadata={"description": "Indigenous Category ID"},
         required=False,
-        validate=validate.OneOf([x.value for x in PinEnum.__iter__()]),
-        allow_none=True
+        allow_none=True,
+        missing=None,
+        validate=validate.Range(min=1)
     )
 
     is_active = fields.Bool(
