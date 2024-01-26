@@ -13,10 +13,32 @@
 # limitations under the License.
 """Model to handle all operations related to Payment Disbursement status code."""
 
+import enum
+
 from sqlalchemy import Column, Integer, String
 
 from .code_table import CodeTableVersioned
 from .db import db
+
+
+class WorkTypeEnum(enum.Enum):
+    """Enum for work type"""
+
+    # pylint: disable=C0103
+    PROJECT_NOTIFICATION = 1
+    MINISTERS_DESIGNATION = 2
+    CEAOS_DESIGNATION = 3
+    INTAKE_PRE_EA = 4
+    EXEMPTION_ORDER = 5
+    ASSESSMENT = 6
+    AMENDMENT = 7
+    POST_EAC_DOCUMENT_REVIEW = 8
+    EAC_EXTENSION = 9
+    SUBSTANTIAL_START_DECISION = 10
+    EAC_ORDER_TRANSFER = 11
+    EAC_ORDER_SUSPENSION = 12
+    EAC_ORDER_CANCELLATION = 13
+    OTHER = 14
 
 
 class WorkType(db.Model, CodeTableVersioned):
