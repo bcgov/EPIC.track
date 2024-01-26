@@ -21,6 +21,13 @@ class IndigenousConsultationLevelService:
 
 
     @classmethod
+    def find_consultation_levels(cls, id: int):
+        """Find all active consultation levels"""
+        consultation_level = IndigenousConsultationLevel.find_by_id(id)
+
+        return consultation_level
+
+    @classmethod
     def find_all_consultation_levels(cls, is_active):
         """Find all active consultation levels"""
         consultation_levels = IndigenousConsultationLevel.find_all(default_filters=is_active)

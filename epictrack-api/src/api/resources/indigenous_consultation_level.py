@@ -17,7 +17,6 @@ from http import HTTPStatus
 from flask_restx import Namespace, Resource, cors
 
 from api import AppCache
-from api.schemas import response as res
 from api.services import IndigenousConsultationLevelService
 from api.utils import auth, profiletime, constants
 from api.utils.util import cors_preflight

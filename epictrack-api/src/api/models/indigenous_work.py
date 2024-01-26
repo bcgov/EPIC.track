@@ -13,8 +13,6 @@
 # limitations under the License.
 """Model to handle all operations related to Indigenous Work."""
 
-import enum
-
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
