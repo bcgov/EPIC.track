@@ -1,10 +1,9 @@
-import { POSITION_ENUM } from "./position";
-import { Staff } from "./staff";
 import { WorkType } from "./workType";
 
 export interface WorkPlan {
   id: number;
   title: string;
+  simple_title: string;
   is_active: boolean;
   work_type: WorkType;
   work_state: string;

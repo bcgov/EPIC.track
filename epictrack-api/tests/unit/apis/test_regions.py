@@ -20,14 +20,14 @@ from urllib.parse import urljoin
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_regions_by_type(client):
+def test_get_regions_by_type(client, auth_header):
     """Test get regions by type."""
     # type = ENV
     url = urljoin(API_BASE_URL, 'regions?type=ENV')
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
 
     # type = FLNR
     url = urljoin(API_BASE_URL, 'regions?type=FLNR')
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK

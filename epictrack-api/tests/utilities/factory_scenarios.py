@@ -31,7 +31,7 @@ class TestProjectInfo(Enum):
         "name": fake.word(),
         "description": fake.sentence(),
         "address": fake.address(),
-        "type_id": fake.random_int(min=1, max=10),
+        "type_id": fake.random_int(min=1, max=9),
         "sub_type_id": fake.random_int(min=1, max=10),
         "proponent_id": fake.random_int(min=1, max=10),
         "region_id_env": fake.random_int(min=1, max=10),
@@ -142,7 +142,8 @@ class TestJwtClaims(dict, Enum):
             'roles': [
                 'staff',
                 'create',
-                'edit'
+                'edit',
+                'extended_edit'
 
             ]
         }

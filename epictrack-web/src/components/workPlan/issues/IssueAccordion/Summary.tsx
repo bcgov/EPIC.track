@@ -9,15 +9,25 @@ import {
 } from "../../../shared/chip/ETChip";
 import { ETParagraph } from "../../../shared";
 import moment from "moment";
-import { MONTH_DAY_YEAR } from "../../../../constants/application-constant";
+import {
+  MONTH_DAY_YEAR,
+  ROLES,
+} from "../../../../constants/application-constant";
 import { Else, If, Then, When } from "react-if";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { IssuesContext } from "../IssuesContext";
+import { Restricted } from "components/shared/restricted";
+import { WorkplanContext } from "components/workPlan/WorkPlanContext";
+import { useAppSelector } from "hooks";
 
 const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
   const { setEditIssueFormIsOpen, setIssueToEdit } =
     React.useContext(IssuesContext);
+  const { team } = React.useContext(WorkplanContext);
+  const { email } = useAppSelector((state) => state.user.userDetail);
+  const isTeamMember = team?.some((member) => member.staff.email === email);
+
   const EditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   return (
     <Grid
@@ -59,23 +69,29 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
 
         <Grid item xs={"auto"} container justifyContent={"flex-end"}>
           <AccordionSummaryItem title="Actions" enableTooltip={true}>
-            <Button
-              variant="text"
-              startIcon={<EditIcon />}
-              sx={{
-                backgroundColor: "inherit",
-                borderColor: "transparent",
-                textAlign: "start",
-                height: "fit-content",
-                paddingTop: 0,
-                paddingBottom: 0,
-              }}
-              onClick={(event) => {
-                event.stopPropagation();
-                setIssueToEdit(issue);
-                setEditIssueFormIsOpen(true);
-              }}
-            />
+            <Restricted
+              allowed={[ROLES.EDIT]}
+              errorProps={{ disabled: true }}
+              exception={isTeamMember}
+            >
+              <Button
+                variant="text"
+                startIcon={<EditIcon />}
+                sx={{
+                  backgroundColor: "inherit",
+                  borderColor: "transparent",
+                  textAlign: "start",
+                  height: "fit-content",
+                  paddingTop: 0,
+                  paddingBottom: 0,
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setIssueToEdit(issue);
+                  setEditIssueFormIsOpen(true);
+                }}
+              />
+            </Restricted>
           </AccordionSummaryItem>
         </Grid>
       </Grid>

@@ -20,16 +20,16 @@ from urllib.parse import urljoin
 API_BASE_URL = '/api/v1/'
 
 
-def test_get_phases(client):
+def test_get_phases(client, auth_header):
     """Test GET phases."""
     url = urljoin(API_BASE_URL, 'phases')
     url = f'{url}/ea_acts/3/work_types/6'
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
 
 
-def test_get_all_phases(client):
+def test_get_all_phases(client, auth_header):
     """Test GET all phases."""
     url = urljoin(API_BASE_URL, 'phases/')
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK

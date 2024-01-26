@@ -1,5 +1,5 @@
 import { Staff } from "models/staff";
-
+import Sinon, { SinonStub } from "cypress/types/sinon";
 export const mockStaffs: Staff[] = [
   {
     id: 1,
@@ -33,7 +33,7 @@ export function createMockMasterContext(defaultItem: any, _data?: any) {
     setTitle: cy.stub(),
     setId: cy.stub(),
     onSave: cy.stub(),
-    title: "",
+    title: "Data",
     data: [..._data],
     loading: false,
     setItem: cy.stub(),
@@ -63,3 +63,8 @@ export function testTableFiltering(
         .type(`${propertyToTest}{enter}`); // Type into the input field and press Enter
     });
 }
+
+export type CypressStubFunction =
+  | Cypress.Agent<Sinon.SinonStub>
+  | (() => void)
+  | undefined;

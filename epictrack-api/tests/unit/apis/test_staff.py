@@ -20,22 +20,22 @@ from urllib.parse import urljoin
 API_BASE_URL = "/api/v1/"
 
 
-def test_get_staff_by_positions(client):
+def test_get_staff_by_positions(client, auth_header):
     """Test get staff by position."""
     url = urljoin(API_BASE_URL, "staffs?positions=3")
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
 
 
-def test_get_all_active_staff(client):
+def test_get_all_active_staff(client, auth_header):
     """Test get all active staff."""
     url = urljoin(API_BASE_URL, "staffs")
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
 
 
-def test_get_staff_details(client, new_staff):
+def test_get_staff_details(client, new_staff, auth_header):
     """Test get staff details."""
     url = urljoin(API_BASE_URL, f"staffs/{new_staff.id}")
-    result = client.get(url)
+    result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK

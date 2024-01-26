@@ -1,5 +1,5 @@
-import React from "react";
-import { Grid, Divider, Tooltip, Box } from "@mui/material";
+import React, { useEffect, useMemo } from "react";
+import { Grid, Divider, Tooltip, Box, InputAdornment } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import Moment from "moment";
@@ -27,6 +27,7 @@ import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
 import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
 import { Project } from "../../../models/project";
 
+const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
   ea_act_id: yup.number().required("EA Act is required"),
   work_type_id: yup.number().required("Work type is required"),
@@ -40,7 +41,7 @@ const schema = yup.object<Work>().shape({
   title: yup
     .string()
     .required("Title is required")
-    .max(150, "Title should not exceed 150 characters")
+    .max(maxTitleLength, "Title should not exceed 150 characters")
     .test({
       name: "checkDuplicateWork",
       exclusive: true,
@@ -58,7 +59,8 @@ const schema = yup.object<Work>().shape({
         return true;
       },
     }),
-  substitution_act_id: yup.number(),
+  simple_title: yup.string(),
+  substitution_act_id: yup.number().required("Federal Act is required"),
   eao_team_id: yup.number().required("EAO team is required"),
   responsible_epd_id: yup.number().required("Responsible EPD is required"),
   work_lead_id: yup.number().required("Work Lead is required."),
@@ -81,9 +83,27 @@ export default function WorkForm({ ...props }) {
   const [leads, setLeads] = React.useState<Staff[]>([]);
   const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
   const ctx = React.useContext(MasterContext);
-  const [selectedWorktype, setSelectedWorkType] = React.useState<any>();
-  const [selectedProject, setSelectedProject] = React.useState<any>();
-  const maxTitleLength = 150;
+  const [titlePrefix, setTitlePrefix] = React.useState<string>("");
+
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: ctx.item as Work,
+    mode: "onBlur",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    setValue,
+    watch,
+  } = methods;
+
+  const work_type_id = watch("work_type_id");
+  const project_id = watch("project_id");
+  const federal_involvement_id = watch("federal_involvement_id");
+  const title = watch("title");
   const work = ctx?.item as Work;
 
   const [isEpdFieldLocked, setIsEpdFieldLocked] =
@@ -114,26 +134,25 @@ export default function WorkForm({ ...props }) {
     ctx.setTitle(ctx.item ? work?.title : "Create Work");
   }, [ctx.title, ctx.item]);
 
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: ctx.item as Work,
-    mode: "onBlur",
-  });
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setValue,
-    watch,
-  } = methods;
-
-  const title = watch("title");
-
   React.useEffect(() => {
     reset(ctx.item ?? defaultWork);
   }, [ctx.item]);
+
+  React.useEffect(() => {
+    const noneFederalInvolvement = federalInvolvements.find(
+      ({ name }) => name === "None"
+    );
+    const noneSubstitutionAct = substitutionActs.find(
+      ({ name }) => name === "None"
+    );
+
+    if (
+      noneSubstitutionAct &&
+      Number(federal_involvement_id) === noneFederalInvolvement?.id
+    ) {
+      setValue("substitution_act_id", noneSubstitutionAct?.id);
+    }
+  }, [federal_involvement_id]);
 
   const codeTypes: { [x: string]: any } = {
     ea_acts: setEAActs,
@@ -198,26 +217,40 @@ export default function WorkForm({ ...props }) {
     });
   };
 
-  React.useEffect(() => {
-    if (selectedProject && selectedWorktype) {
-      setValue("title", `${selectedProject?.name} - ${selectedWorktype?.name}`);
+  const simple_title = watch("simple_title");
+  const titleSeparator = " - ";
+  const getTitlePrefix = () => {
+    let prefix = "";
+    if (project_id) {
+      const project = projects.find(
+        (project) => project.id === Number(project_id)
+      );
+      prefix += `${project?.name}${titleSeparator}`;
     }
-  }, [selectedProject, selectedWorktype]);
+    if (work_type_id) {
+      const workType = workTypes.find(
+        (type) => type.id === Number(work_type_id)
+      );
+      prefix += `${workType?.name}${titleSeparator}`;
+    }
+    return prefix;
+  };
+
+  useEffect(() => {
+    const prefix = getTitlePrefix();
+    setTitlePrefix(prefix);
+  }, [work_type_id, project_id]);
+
+  React.useEffect(() => {
+    setValue("title", `${titlePrefix}${simple_title}`);
+  }, [titlePrefix, simple_title]);
 
   const handleProjectChange = async (id: string) => {
     const selectedProject: any = projects.filter((project) => {
       return project.id.toString() === id;
     });
     const project = await getProject(selectedProject[0].id);
-    setSelectedProject(project);
     setValue("epic_description", String(project?.description));
-  };
-
-  const handleWorktypeChange = async (id: string) => {
-    const selectedWorktype: any = workTypes.filter((worktype) => {
-      return worktype.id.toString() === id;
-    });
-    setSelectedWorkType(selectedWorktype[0]);
   };
 
   return (
@@ -245,7 +278,6 @@ export default function WorkForm({ ...props }) {
         <Grid item xs={4}>
           <ETFormLabel required>Worktype</ETFormLabel>
           <ControlledSelectV2
-            onHandleChange={handleWorktypeChange}
             placeholder="Select Worktype"
             helperText={errors?.ea_act_id?.message?.toString()}
             defaultValue={work?.ea_act_id}
@@ -331,10 +363,19 @@ export default function WorkForm({ ...props }) {
             Title
           </ETFormLabelWithCharacterLimit>
           <ControlledTextField
-            name="title"
+            name="simple_title"
             fullWidth
-            maxLength={maxTitleLength}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  {titlePrefix ? `${titlePrefix}` : ""}
+                </InputAdornment>
+              ),
+            }}
+            maxLength={maxTitleLength - titlePrefix.length}
             disabled={isSpecialFieldLocked}
+            error={Boolean(errors.title)}
+            helperText={errors?.title?.message?.toString()}
           />
         </Grid>
         <Grid item xs={12}>

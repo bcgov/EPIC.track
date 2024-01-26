@@ -41,7 +41,6 @@ const NewIssueUpdate = () => {
   const { handleSubmit, watch } = methods;
 
   const watchedDescription = watch("description");
-  const descriptionCharacterLimit = 250;
 
   const onSubmitHandler = async (data: CloneForm) => {
     const validData = await schema.validate(data);
