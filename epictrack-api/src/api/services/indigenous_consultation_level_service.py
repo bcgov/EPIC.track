@@ -19,7 +19,6 @@ from api.models import IndigenousConsultationLevel
 class IndigenousConsultationLevelService:
     """Service to manage indigenous consultation level related operations."""
 
-
     @classmethod
     def find_consultation_levels(cls, consultation_id: int):
         """Find all active consultation levels"""
