@@ -1,0 +1,74 @@
+import { ETCaption3 } from "..";
+import { SpecialFieldGrid } from "../specialField";
+import {
+  SpecialFieldEntityEnum,
+  SPECIAL_FIELDS,
+} from "../../../constants/application-constant";
+
+import { setupIntercepts } from "../../../../cypress/support/utils";
+
+const endpoints = [
+  {
+    method: "OPTIONS",
+    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+  },
+  {
+    method: "OPTIONS",
+    url: "http://localhost:3200/api/v1/special-fields?entity=PROJECT&entity_id=1&field_name=name",
+  },
+  {
+    method: "OPTIONS",
+    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+  },
+  { method: "OPTIONS", url: "http://localhost:3200/api/v1/first_nations" },
+  {
+    method: "GET",
+    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    body: [],
+  },
+  {
+    method: "GET",
+    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    body: [],
+  },
+  {
+    method: "GET",
+    url: "http://localhost:3200/api/v1/first_nations",
+    body: [],
+  },
+];
+
+describe("SpecialFieldGrid Component Tests", () => {
+  beforeEach(() => {
+    setupIntercepts(endpoints);
+    cy.mount(
+      <SpecialFieldGrid
+        entity={SpecialFieldEntityEnum.PROJECT}
+        entity_id={1}
+        fieldName={SPECIAL_FIELDS.PROJECT.NAME}
+        fieldLabel={"Name"}
+        fieldType={"text"}
+        title={"Title"}
+        description={
+          <ETCaption3>Testing Description for test field</ETCaption3>
+        }
+        onSave={cy.stub()}
+      />
+    );
+  });
+
+  it("should render the component", () => {
+    cy.get('[data-cy="special-field-grid"]').should("be.visible");
+  });
+
+  it("should display the correct title", () => {
+    cy.get('[data-cy="title"]').should("have.text", "Title");
+  });
+
+  it("should display the correct description", () => {
+    cy.get('[data-cy="description"]').should(
+      "have.text",
+      "Testing Description for test field"
+    );
+  });
+});
