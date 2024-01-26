@@ -1,7 +1,7 @@
 """Indigenous nation model schema"""
 from marshmallow import EXCLUDE, fields
 
-from api.models import IndigenousNation
+from api.models import IndigenousNation, IndigenousConsultationLevel
 from api.models.indigenous_work import IndigenousWork
 from api.schemas.base import AutoSchemaBase
 from api.schemas.response.pip_org_type import PIPOrgTypeSchema
@@ -42,3 +42,15 @@ class WorkIndigenousNationResponseSchema(
         unknown = EXCLUDE
 
     indigenous_nation = fields.Nested(IndigenousResponseNationSchema, dump_only=True)
+
+
+class IndigenousNationConsultationResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work indigenous nation consultation level schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = IndigenousConsultationLevel
+        unknown = EXCLUDE

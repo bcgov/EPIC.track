@@ -41,6 +41,7 @@ const schema = yup.object().shape({
         return true;
       },
     }),
+  consultation_level_id: yup.number()
 });
 
 const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
@@ -237,13 +238,13 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
         <Grid item xs={12}>
           <ETFormLabel>PIN</ETFormLabel>
           <ControlledSelectV2
+            name='consultation_level_id'
             placeholder="Select / Confirm PIN Status"
             helperText={errors?.pin?.message?.toString()}
             defaultValue={workFirstNation?.pin}
             options={pinOptions || []}
             getOptionValue={(o: OptionType) => o?.value}
             getOptionLabel={(o: OptionType) => o.label}
-            {...register("pin")}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
