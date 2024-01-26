@@ -16,10 +16,11 @@ from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors
 
-from api import AppCache
 from api.services import IndigenousConsultationLevelService
-from api.utils import auth, profiletime, constants
+from api.utils import auth, constants, profiletime
+from api.utils.caching import AppCache
 from api.utils.util import cors_preflight
+
 
 API = Namespace("indigenous-nations-consultation-levels", description="Indigenous Nations Consultation Levels")
 
