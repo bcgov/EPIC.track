@@ -15,17 +15,10 @@
 
 import enum
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
-
-
-class PinEnum(enum.Enum):
-    """Pin enum"""
-
-    YES = 'Yes'
-    NO = 'No'
 
 
 class IndigenousWork(BaseModelVersioned):

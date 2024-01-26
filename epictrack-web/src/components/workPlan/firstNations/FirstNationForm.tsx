@@ -12,7 +12,11 @@ import { sort } from "../../../utils";
 import workService from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
-import { FirstNation, WorkFirstNation } from "../../../models/firstNation";
+import {
+  ConsultationLevel,
+  FirstNation,
+  WorkFirstNation,
+} from "../../../models/firstNation";
 import { OptionType } from "../../shared/filterSelect/type";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
@@ -66,12 +70,14 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
     try {
       const result = await IndigenousNationsConsultationLevels.getAll();
       if (result.status === 200) {
-        const consultationLevels = result.data.map((level) => {
-          return {
-            value: String(level.id),
-            label: level.name,
-          };
-        });
+        const consultationLevels = result.data.map(
+          (level: ConsultationLevel) => {
+            return {
+              value: String(level.id),
+              label: level.name,
+            };
+          }
+        );
         setConsultationLevels(consultationLevels);
       }
     } catch (e) {
