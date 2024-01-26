@@ -16,17 +16,17 @@ from http import HTTPStatus
 
 from flask_restx import Namespace, Resource, cors
 
+from api import AppCache
 from api.schemas import response as res
 from api.services import IndigenousConsultationLevelService
-from api.utils import auth, profiletime
+from api.utils import auth, profiletime, constants
 from api.utils.util import cors_preflight
 
-
-API = Namespace("indigenous_consultation_level", description="Indigenous Consultation Levels")
+API = Namespace("indigenous-nations-consultation-levels", description="Indigenous Nations Consultation Levels")
 
 
 @cors_preflight("GET")
-@API.route("", methods=["GET"])
+@API.route("", methods=["GET", "OPTIONS"])
 class ConsultationLevel(Resource):
     """Endpoint resource to manage an consultation level."""
 
@@ -34,10 +34,8 @@ class ConsultationLevel(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return all consultation levels."""
         levels = IndigenousConsultationLevelService.find_all_consultation_levels(is_active=True)
-        return (
-            res.IndigenousNationConsultationResponseSchema().dump(levels),
-            HTTPStatus.OK)
-    
+        return [{"id": level.id, "name": level.name} for level in levels], HTTPStatus.OK

@@ -24,4 +24,5 @@ class IndigenousConsultationLevelService:
     def find_all_consultation_levels(cls, is_active):
         """Find all active consultation levels"""
         consultation_levels = IndigenousConsultationLevel.find_all(default_filters=is_active)
+
         return consultation_levels

@@ -24,7 +24,7 @@ const Endpoints = {
     INDIGENOUS_NATIONS: "indigenous-nations",
   },
   IndigenousNationsConsultationLevels: {
-    GET_ALL: "indigenous-nations-consulation-levels",
+    GET_ALL: "indigenous-nations-consultation-levels",
   },
   Proponents: {
     PROPONENTS: "proponents",

@@ -29,6 +29,19 @@ class IndigenousResponseNationSchema(
     )
 
 
+class IndigenousNationConsultationResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work indigenous nation consultation level schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = IndigenousConsultationLevel
+        include_fk = True
+        unknown = EXCLUDE
+
+
 class WorkIndigenousNationResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
@@ -42,15 +55,4 @@ class WorkIndigenousNationResponseSchema(
         unknown = EXCLUDE
 
     indigenous_nation = fields.Nested(IndigenousResponseNationSchema, dump_only=True)
-
-
-class IndigenousNationConsultationResponseSchema(
-    AutoSchemaBase
-):  # pylint: disable=too-many-ancestors,too-few-public-methods
-    """Work indigenous nation consultation level schema class"""
-
-    class Meta(AutoSchemaBase.Meta):
-        """Meta information"""
-
-        model = IndigenousConsultationLevel
-        unknown = EXCLUDE
+    indigenous_consultation_level = fields.Nested(IndigenousNationConsultationResponseSchema, dump_only=True)

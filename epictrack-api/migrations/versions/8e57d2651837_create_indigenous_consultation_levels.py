@@ -75,7 +75,7 @@ def upgrade():
             "name": "Other",
             "description": "Other is to catch unforeseen future needs",
             "sort_order": 4,
-            "is_active": False
+            "is_active": True
         }
     ])
 
