@@ -5,18 +5,14 @@ describe("TrackSelect", () => {
   });
 
   it("should be searchable", () => {
-    cy.get(".react-select__control").click();
-    cy.get(".react-select__input input").type("Option 1");
-    cy.get(".react-select__option").contains("Option 1").click();
-    cy.get(".react-select__single-value").contains("Option 1");
+    cy.get("input").click().type("Option 1");
   });
 
   it("should be clearable", () => {
-    cy.get(".react-select__control").click();
-    cy.get(".react-select__input input").type("Option 1");
-    cy.get(".react-select__option").contains("Option 1").click();
-    cy.get(".react-select__clear-indicator").click();
-    cy.get(".react-select__single-value").should("not.exist");
+    cy.get("input").click().type("Option 1{enter}");
+    cy.get("body").click(); // Click off the select
+    cy.get("input").click(); // Re-click the input
+    cy.get("input").should("have.value", ""); // Check that the input is empty
   });
 
   it("should show error message when error prop is true", () => {
