@@ -302,6 +302,7 @@ export const SpecialFieldGrid = ({
 
   return (
     <Box
+      data-cy="special-field-grid"
       sx={{
         ...Styles.flexStart,
         flexDirection: "column",
@@ -320,10 +321,10 @@ export const SpecialFieldGrid = ({
           flexDirection: "column",
         }}
       >
-        <ETParagraph bold color={Palette.neutral.accent.dark}>
+        <ETParagraph data-cy="title" bold color={Palette.neutral.accent.dark}>
           {title}
         </ETParagraph>
-        <ETCaption3>{description}</ETCaption3>
+        <ETCaption3 data-cy="description">{description}</ETCaption3>
       </Box>
       <Box
         sx={{
