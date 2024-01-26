@@ -39,6 +39,7 @@ const WarningBox = (props?: WarningBoxProps) => {
         </Box>
         <Box sx={{ flex: "1 0 0" }}>
           <ETHeading4
+            data-cy="warning-box-title"
             bold={props?.isTitleBold}
             sx={{
               ...(!props?.isTitleBold && {
@@ -63,7 +64,9 @@ const WarningBox = (props?: WarningBoxProps) => {
       </Grid>
       <When condition={props?.subTitle}>
         <Grid item>
-          <ETParagraph>{props?.subTitle}</ETParagraph>
+          <ETParagraph data-cy="warning-box-subtitle">
+            {props?.subTitle}
+          </ETParagraph>
         </Grid>
       </When>
     </Grid>
