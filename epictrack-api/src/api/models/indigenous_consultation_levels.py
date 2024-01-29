@@ -38,8 +38,3 @@ class IndigenousConsultationLevel(db.Model, CodeTableVersioned):
             'sort_order': self.sort_order,
             'is_active': self.is_active
         }
-
-    @classmethod
-    def find_all_active_consultation_levels(cls):
-        """Find all active consultation_levels."""
-        return cls.query.filter_by(is_active=True).all()
