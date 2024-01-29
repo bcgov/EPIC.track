@@ -426,10 +426,13 @@ export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
   );
 };
 
-export const ETPreviewText = styled(Typography)(() => ({
+export const ETPreviewText = styled(Typography)((props) => ({
   fontSize: "14px",
   fontStyle: "normal",
-  fontWeight: "400",
+  fontWeight:
+    props.fontWeight === "bold"
+      ? MET_Header_Font_Weight_Bold
+      : MET_Header_Font_Weight_Regular,
   lineHeight: "21px",
 }));
 
