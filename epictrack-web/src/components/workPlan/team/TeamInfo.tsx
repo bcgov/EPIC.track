@@ -47,7 +47,7 @@ const TeamInfoBox = (props: TeamInfoBoxProps) => {
               {props.value}
             </ETSubhead>
           </Grid>
-          <Grid
+          {/* <Grid
             item
             xs={2}
             sx={{
@@ -56,10 +56,10 @@ const TeamInfoBox = (props: TeamInfoBoxProps) => {
               justifyContent: "space-evenly",
               cursor: "pointer",
             }}
-          >
-            {/* Commenting this out as this has to bring back when we finalize what to do with this feature */}
-            {/* <EditIcon fill={Palette.primary.accent.main} /> */}
-            {/* <ETCaption2
+          > */}
+          {/* Commenting this out as this has to bring back when we finalize what to do with this feature */}
+          {/* <EditIcon fill={Palette.primary.accent.main} /> */}
+          {/* <ETCaption2
               bold
               sx={{
                 color: Palette.primary.accent.main,
@@ -67,7 +67,7 @@ const TeamInfoBox = (props: TeamInfoBoxProps) => {
             >
               Edit
             </ETCaption2> */}
-          </Grid>
+          {/* </Grid> */}
         </Grid>
       </Grid>
     </Grid>

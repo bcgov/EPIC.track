@@ -100,9 +100,10 @@ export default function WorkForm({ ...props }) {
     watch,
   } = methods;
 
-  const work_type_id = watch("work_type_id");
-  const project_id = watch("project_id");
-  const federal_involvement_id = watch("federal_involvement_id");
+  const workTypeId = watch("work_type_id");
+  const projectId = watch("project_id");
+
+  const federalInvolvementId = watch("federal_involvement_id");
   const title = watch("title");
   const work = ctx?.item as Work;
 
@@ -148,11 +149,11 @@ export default function WorkForm({ ...props }) {
 
     if (
       noneSubstitutionAct &&
-      Number(federal_involvement_id) === noneFederalInvolvement?.id
+      Number(federalInvolvementId) === noneFederalInvolvement?.id
     ) {
       setValue("substitution_act_id", noneSubstitutionAct?.id);
     }
-  }, [federal_involvement_id]);
+  }, [federalInvolvementId, substitutionActs, federalInvolvements]);
 
   const codeTypes: { [x: string]: any } = {
     ea_acts: setEAActs,
@@ -221,25 +222,25 @@ export default function WorkForm({ ...props }) {
   const titleSeparator = " - ";
   const getTitlePrefix = () => {
     let prefix = "";
-    if (project_id) {
+    if (projectId) {
       const project = projects.find(
-        (project) => project.id === Number(project_id)
+        (project) => project.id === Number(projectId)
       );
       prefix += `${project?.name}${titleSeparator}`;
     }
-    if (work_type_id) {
-      const workType = workTypes.find(
-        (type) => type.id === Number(work_type_id)
-      );
+    if (workTypeId) {
+      const workType = workTypes.find((type) => type.id === Number(workTypeId));
       prefix += `${workType?.name}${titleSeparator}`;
     }
     return prefix;
   };
 
   useEffect(() => {
-    const prefix = getTitlePrefix();
-    setTitlePrefix(prefix);
-  }, [work_type_id, project_id]);
+    if (projects.length > 0 && workTypes.length > 0) {
+      const prefix = getTitlePrefix();
+      setTitlePrefix(prefix);
+    }
+  }, [workTypeId, projectId, projects, workTypes]);
 
   React.useEffect(() => {
     setValue("title", `${titlePrefix}${simple_title}`);

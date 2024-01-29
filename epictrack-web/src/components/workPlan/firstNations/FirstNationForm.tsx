@@ -6,12 +6,17 @@ import { FormControlLabel, Grid, TextField } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { showNotification } from "../../shared/notificationProvider";
+import IndigenousNationsConsultationLevels from "../../../services/indigenousNationConsultationLevel";
 import indigenousNationService from "../../../services/indigenousNationService/indigenousNationService";
 import { sort } from "../../../utils";
 import workService from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
-import { FirstNation, WorkFirstNation } from "../../../models/firstNation";
+import {
+  ConsultationLevel,
+  FirstNation,
+  WorkFirstNation,
+} from "../../../models/firstNation";
 import { OptionType } from "../../shared/filterSelect/type";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
@@ -41,34 +46,46 @@ const schema = yup.object().shape({
         return true;
       },
     }),
+  indigenous_consultation_level_id: yup.number(),
 });
 
 const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
   const [firstNations, setFirstNations] = React.useState<FirstNation[]>([]);
   const [workFirstNation, setWorkFirstNation] =
     React.useState<WorkFirstNation>();
+  const [consultationLevels, setConsultationLevels] = React.useState<
+    OptionType[]
+  >([]);
 
   const relationShipHolderRef = React.useRef(null);
   const pipLinkRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
 
-  const pinOptions = React.useMemo(() => {
-    return [
-      {
-        value: "Yes",
-        label: "Yes",
-      },
-      {
-        value: "No",
-        label: "No",
-      },
-    ];
-  }, []);
-
   React.useEffect(() => {
     getAllFirstNations();
-    // getAllRoles();
+    getAllConsultationLevels();
   }, []);
+
+  const getAllConsultationLevels = async () => {
+    try {
+      const result = await IndigenousNationsConsultationLevels.getAll();
+      if (result.status === 200) {
+        const consultationLevels = result.data.map(
+          (level: ConsultationLevel) => {
+            return {
+              value: String(level.id),
+              label: level.name,
+            };
+          }
+        );
+        setConsultationLevels(consultationLevels);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
 
   React.useEffect(() => {
     reset({
@@ -194,6 +211,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
         <Grid item xs={12}>
           <ETFormLabel required>Nation</ETFormLabel>
           <ControlledSelectV2
+            name="indigenous_nation_id"
             placeholder="Search for a first nation"
             helperText={errors?.indigenous_nation_id?.message?.toString()}
             defaultValue={workFirstNation?.indigenous_nation_id}
@@ -201,7 +219,6 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
             disabled={!!workNationId}
             getOptionValue={(o: FirstNation) => o?.id?.toString()}
             getOptionLabel={(o: FirstNation) => o?.name}
-            {...register("indigenous_nation_id")}
             onHandleChange={(staffId: number) =>
               onFirstNationChangeHandler(staffId)
             }
@@ -235,15 +252,13 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
           />
         </Grid>
         <Grid item xs={12}>
-          <ETFormLabel>PIN</ETFormLabel>
+          <ETFormLabel>Consultation Level</ETFormLabel>
           <ControlledSelectV2
+            name="indigenous_consultation_level_id"
             placeholder="Select / Confirm PIN Status"
-            helperText={errors?.pin?.message?.toString()}
-            defaultValue={workFirstNation?.pin}
-            options={pinOptions || []}
+            options={consultationLevels || []}
             getOptionValue={(o: OptionType) => o?.value}
             getOptionLabel={(o: OptionType) => o.label}
-            {...register("pin")}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>

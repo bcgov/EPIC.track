@@ -72,3 +72,4 @@ from .work_issues import WorkIssues
 from .work_phase import WorkPhase
 from .work_status import WorkStatus
 from .work_type import WorkType
+from .indigenous_consultation_levels import IndigenousConsultationLevel

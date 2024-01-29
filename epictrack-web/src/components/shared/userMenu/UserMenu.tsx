@@ -81,7 +81,10 @@ const UserMenu = (props: UserMenuProps) => {
       disablePortal
       {...rest}
     >
-      <Box sx={{ display: "flex", flexDirection: "column" }}>
+      <Box
+        sx={{ display: "flex", flexDirection: "column" }}
+        data-cy={"user-menu"}
+      >
         <Box
           sx={{
             ...menuItemWrapper,
@@ -109,8 +112,11 @@ const UserMenu = (props: UserMenuProps) => {
               gap: "8px",
             }}
           >
-            <ETCaption2 bold>{`${firstName} ${lastName}`}</ETCaption2>
-            <ETCaption2>{position}</ETCaption2>
+            <ETCaption2
+              bold
+              data-cy="user-name"
+            >{`${firstName} ${lastName}`}</ETCaption2>
+            <ETCaption2 data-cy="user-position">{position}</ETCaption2>
           </Box>
         </Box>
         <Box
@@ -134,6 +140,7 @@ const UserMenu = (props: UserMenuProps) => {
                 color={Palette.primary.accent.main}
                 sx={{ flexGrow: 1 }}
                 noWrap
+                data-cy="user-email"
               >
                 {email}
               </ETCaption2>
@@ -146,6 +153,7 @@ const UserMenu = (props: UserMenuProps) => {
                 }}
               >
                 <ETCaption2
+                  data-cy="user-phone"
                   color={Palette.primary.accent.main}
                   sx={{ flexGrow: 1 }}
                   noWrap
