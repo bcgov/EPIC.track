@@ -17,7 +17,8 @@ from .action_template_response import ActionTemplateResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_response import EventDateChangePosibilityCheckResponseSchema, EventResponseSchema
 from .event_template_response import EventTemplateResponseSchema
-from .indigenous_nation_response import IndigenousResponseNationSchema, WorkIndigenousNationResponseSchema
+from .indigenous_nation_response import IndigenousResponseNationSchema, WorkIndigenousNationResponseSchema, \
+    IndigenousNationConsultationResponseSchema
 from .list_type_response import ListTypeResponseSchema
 from .outcome_configuration_response import OutcomeConfigurationResponseSchema
 from .outcome_template_response import OutcomeTemplateResponseSchema

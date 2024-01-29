@@ -635,7 +635,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "work_id": work_id,
                 "indigenous_nation_id": data.get("indigenous_nation_id"),
                 "indigenous_category_id": data.get("indigenous_category_id", None),
-                "pin": data.get("pin", None),
+                "indigenous_consultation_level_id": data.get("indigenous_consultation_level_id", None),
                 "is_active": data.get("is_active"),
             }
         )
@@ -666,7 +666,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work_indigenous_nation.indigenous_category_id = data.get(
             "indigenous_category_id"
         )
-        work_indigenous_nation.pin = data.get("pin")
+        work_indigenous_nation.indigenous_consultation_level_id = data.get("indigenous_consultation_level_id")
         work_indigenous_nation.flush()
         db.session.commit()
         return work_indigenous_nation
@@ -686,14 +686,14 @@ class WorkService:  # pylint: disable=too-many-public-methods
         file_buffer = BytesIO()
         columns = [
             "nation",
-            "pin",
+            "consultation_level",
             "relationship_holder",
             "pip_link",
             "active",
         ]
         headers = [
             "Nation",
-            "PIN",
+            "Consultation Level",
             "Relationship Holder",
             "PIP Link",
             "Active",

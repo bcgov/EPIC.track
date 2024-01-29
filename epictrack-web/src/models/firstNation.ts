@@ -13,10 +13,18 @@ export interface FirstNation extends ListType, MasterBase {
   pip_org_type?: PIPOrgType;
 }
 
+export type ConsultationLevel = {
+  id: number;
+  name: string;
+  description: string;
+  is_active: boolean;
+};
+
 export interface WorkFirstNation extends ListType, MasterBase {
   indigenous_nation: FirstNation;
   indigenous_nation_id: number;
-  pin: string;
+  indigenous_consultation_level: ConsultationLevel;
+  consultation_level_id: number;
   work_id: number;
   is_active: boolean;
   status: string;

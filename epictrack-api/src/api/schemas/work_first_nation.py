@@ -8,7 +8,7 @@ class WorkFirstNationSchema(Schema):
     """Work first nation schema"""
 
     nation = fields.Method("get_nation")
-    pin = fields.Method("get_pin")
+    consultation_level = fields.Method("get_consultation_level")
     relationship_holder = fields.Method("get_relationship_holder")
     pip_link = fields.Method("get_pip_link")
     active = fields.Method("get_active_status")
@@ -17,9 +17,9 @@ class WorkFirstNationSchema(Schema):
         """Return the name of first nation"""
         return instance.indigenous_nation.name
 
-    def get_pin(self, instance: IndigenousWork) -> str:
-        """Return PIN status of first nation work"""
-        return instance.pin
+    def get_consultation_level(self, instance: IndigenousWork) -> str:
+        """Return relationship holder name of first nation"""
+        return instance.indigenous_nation.indigenous_consultation_level.name
 
     def get_relationship_holder(self, instance: IndigenousWork) -> str:
         """Return relationship holder name of first nation"""

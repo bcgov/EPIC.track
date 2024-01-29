@@ -27,7 +27,10 @@ import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 import TrackDialog from "../../shared/TrackDialog";
 import NoDataEver from "../../shared/NoDataEver";
 import TableFilter from "../../shared/filterSelect/TableFilter";
-import { WorkFirstNation } from "../../../models/firstNation";
+import {
+  ConsultationLevel,
+  WorkFirstNation,
+} from "../../../models/firstNation";
 import FirstNationForm from "./FirstNationForm";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
@@ -67,6 +70,9 @@ const FirstNationList = () => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showNationForm, setShowNationForm] = React.useState<boolean>(false);
   const [modalTitle, setModalTitle] = React.useState<string>("Add Nation");
+  const [consultationLevels, setConsultationLevels] = React.useState<
+    ConsultationLevel[]
+  >([]);
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -84,8 +90,6 @@ const FirstNationList = () => {
   const [firstNationAvailable, setFirstNationAvailable] =
     React.useState<boolean>(false);
 
-  const [menuRowIndex, setMenuRowIndex] = React.useState<number>(-1);
-
   React.useEffect(() => {
     if (workFirstNationId === undefined) {
       setModalTitle("Add Nation");
@@ -95,19 +99,6 @@ const FirstNationList = () => {
     setModalTitle(firstNation?.indigenous_nation?.name || "");
   }, [workFirstNationId]);
 
-  const pinOptions = React.useMemo(() => {
-    return [
-      {
-        value: "Yes",
-        label: "Yes",
-      },
-      {
-        value: "No",
-        label: "No",
-      },
-    ];
-  }, []);
-
   React.useEffect(() => {
     setLoading(ctx.loading);
   }, []);
@@ -116,11 +107,27 @@ const FirstNationList = () => {
     React.useState<null | HTMLElement>(null);
 
   React.useEffect(() => {
+    getStatusOptions();
+    getConsultationLevels();
+  }, [firstNations]);
+
+  const getStatusOptions = () => {
     const statuses = firstNations
       .map((p) => p.status)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setStatusOptions(statuses);
-  }, [firstNations]);
+  };
+
+  const getConsultationLevels = () => {
+    const levelMap = new Map();
+    firstNations
+      .map((firstNation) => firstNation.indigenous_consultation_level)
+      .forEach((level) => {
+        levelMap.set(level.id, level);
+      });
+
+    setConsultationLevels(Array.from(levelMap.values()));
+  };
 
   const getFirstNationAvailability = React.useCallback(async () => {
     const response = await projectService.checkFirstNationAvailability(
@@ -172,8 +179,8 @@ const FirstNationList = () => {
         sortingFn: "sortFn",
       },
       {
-        accessorFn: (row) => row.pin,
-        header: "PIN",
+        accessorFn: (row) => row.indigenous_consultation_level.name,
+        header: "Consultation",
         size: 150,
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
@@ -183,11 +190,11 @@ const FirstNationList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="pinFilter"
+              name="consultationFilter"
             />
           );
         },
-        filterSelectOptions: pinOptions.map((p) => p.value),
+        filterSelectOptions: consultationLevels.map((level) => level.name),
         filterFn: "multiSelectFilter",
       },
       {
@@ -316,7 +323,7 @@ const FirstNationList = () => {
         },
       },
     ],
-    [firstNations, userMenuAnchorEl, relationshipHolder]
+    [firstNations, userMenuAnchorEl, relationshipHolder, consultationLevels]
   );
 
   const onCancelHandler = () => {

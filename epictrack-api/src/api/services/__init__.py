@@ -41,3 +41,4 @@ from .work_phase import WorkPhaseService
 from .work_status import WorkStatusService
 from .region import RegionService
 from .eao_team_service import EAOTeamService
+from .indigenous_consultation_level_service import IndigenousConsultationLevelService
