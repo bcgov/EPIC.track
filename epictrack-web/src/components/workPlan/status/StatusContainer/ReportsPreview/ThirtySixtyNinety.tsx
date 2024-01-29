@@ -107,10 +107,7 @@ export const ThirtySixtyNinety = () => {
             <Stack spacing={2} direction="column">
               {issueUpdates.map((issueUpdate) => (
                 <>
-                  <ETPreviewText
-                    key={`title-${issueUpdate?.id}`}
-                    fontWeight={"bold"}
-                  >
+                  <ETPreviewText key={`title-${issueUpdate?.id}`} bold>
                     {issueUpdate?.issueTitle}
                   </ETPreviewText>
                   <ETPreviewText key={`description-${issueUpdate?.id}`}>

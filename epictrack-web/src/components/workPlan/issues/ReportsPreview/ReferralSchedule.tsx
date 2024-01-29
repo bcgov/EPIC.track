@@ -96,7 +96,7 @@ export const ReferralSchedule = () => {
                       <ETPreviewText
                         key={`title-${issueUpdate?.id}`}
                         color={Palette.neutral.dark}
-                        fontWeight={"bold"}
+                        bold
                       >
                         {issueUpdate?.issueTitle}
                       </ETPreviewText>
