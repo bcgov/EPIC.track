@@ -456,7 +456,7 @@ export default function ProjectForm({ ...props }) {
           <Grid item xs={6}>
             <ETFormLabel>Abbreviation</ETFormLabel>
             <Restricted
-              allowed={[ROLES.EXTENDED_EDIT]}
+              allowed={[ROLES.EDIT]}
               errorProps={{ disabled: true }}
               exception={!abbreviation}
             >

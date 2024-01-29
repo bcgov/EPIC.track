@@ -60,7 +60,7 @@ const schema = yup.object<Work>().shape({
       },
     }),
   simple_title: yup.string(),
-  substitution_act_id: yup.number(),
+  substitution_act_id: yup.number().required("Federal Act is required"),
   eao_team_id: yup.number().required("EAO team is required"),
   responsible_epd_id: yup.number().required("Responsible EPD is required"),
   work_lead_id: yup.number().required("Work Lead is required."),
@@ -103,6 +103,8 @@ export default function WorkForm({ ...props }) {
   const workTypeId = watch("work_type_id");
   const projectId = watch("project_id");
 
+  const federalInvolvementId = watch("federal_involvement_id");
+  const title = watch("title");
   const work = ctx?.item as Work;
 
   const [isEpdFieldLocked, setIsEpdFieldLocked] =
@@ -133,11 +135,25 @@ export default function WorkForm({ ...props }) {
     ctx.setTitle(ctx.item ? work?.title : "Create Work");
   }, [ctx.title, ctx.item]);
 
-  const title = watch("title");
-
   React.useEffect(() => {
     reset(ctx.item ?? defaultWork);
   }, [ctx.item]);
+
+  React.useEffect(() => {
+    const noneFederalInvolvement = federalInvolvements.find(
+      ({ name }) => name === "None"
+    );
+    const noneSubstitutionAct = substitutionActs.find(
+      ({ name }) => name === "None"
+    );
+
+    if (
+      noneSubstitutionAct &&
+      Number(federalInvolvementId) === noneFederalInvolvement?.id
+    ) {
+      setValue("substitution_act_id", noneSubstitutionAct?.id);
+    }
+  }, [federalInvolvementId, substitutionActs, federalInvolvements]);
 
   const codeTypes: { [x: string]: any } = {
     ea_acts: setEAActs,
@@ -220,8 +236,10 @@ export default function WorkForm({ ...props }) {
   };
 
   useEffect(() => {
-    const prefix = getTitlePrefix();
-    setTitlePrefix(prefix);
+    if (projects.length > 0 && workTypes.length > 0) {
+      const prefix = getTitlePrefix();
+      setTitlePrefix(prefix);
+    }
   }, [workTypeId, projectId, projects, workTypes]);
 
   React.useEffect(() => {

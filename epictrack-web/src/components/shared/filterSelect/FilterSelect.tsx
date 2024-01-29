@@ -165,9 +165,9 @@ const FilterSelect = (props: SelectProps) => {
       onBlur={() => setMenuIsOpen(false)}
       ref={selectRef}
       styles={{
-        option: (base, props) => ({
+        option: (base, provided) => ({
           ...base,
-          whiteSpace: "nowrap",
+          whiteSpace: "normal",
           overflow: "hidden",
           textOverflow: "ellipsis",
           display: "flex",
@@ -175,11 +175,14 @@ const FilterSelect = (props: SelectProps) => {
           padding: ".5rem .75rem .5rem 0px",
           fontWeight: "normal",
           fontSize: "1rem",
-          background: props.isFocused ? Palette.neutral.bg.main : "transparent",
-          color: props.isSelected
+          maxWidth: props.maxWidth ?? "100%",
+          background: provided.isFocused
+            ? Palette.neutral.bg.main
+            : "transparent",
+          color: provided.isSelected
             ? Palette.primary.accent.main
             : Palette.neutral.accent.dark,
-          cursor: props.isFocused ? "pointer" : "default",
+          cursor: provided.isFocused ? "pointer" : "default",
         }),
         control: (base, props) => ({
           ...base,
