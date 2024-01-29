@@ -233,14 +233,6 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
             .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
-            .filter(
-                Work.work_state.in_(
-                    [
-                        WorkStateEnum.IN_PROGRESS.value,
-                        WorkStateEnum.SUSPENDED.value,
-                    ]
-                )
-            )
             .add_columns(
                 Work.title.label("work_title"),
                 Project.capital_investment.label("capital_investment"),
