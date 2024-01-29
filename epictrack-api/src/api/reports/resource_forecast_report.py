@@ -4,7 +4,7 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import IO, List, Set, Tuple
+from typing import IO, List, Tuple
 
 from dateutil import rrule
 from reportlab.lib import colors
@@ -15,17 +15,33 @@ from reportlab.lib.units import inch
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import and_, func, or_, select
+from sqlalchemy import and_, func, or_
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
 from api.models import (
-    EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
-    WorkPhase, WorkType, db)
+    EAAct,
+    EAOTeam,
+    Event,
+    FederalInvolvement,
+    PhaseCode,
+    Project,
+    Region,
+    Staff,
+    StaffWorkRole,
+    SubType,
+    Type,
+    Work,
+    WorkPhase,
+    WorkType,
+    db,
+)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
+from api.models.event_type import EventTypeEnum
+from api.models.phase_code import PhaseVisibilityEnum
 
 from .report_factory import ReportFactory
 
@@ -68,22 +84,6 @@ class EAResourceForeCastReport(ReportFactory):
         if self.filters and "exclude" in self.filters:
             self.excluded_items = self.filters["exclude"]
         self.report_title = "EAO Resource Forecast"
-        start_event_configurations = (
-            db.session.query(
-                func.min(EventConfiguration.id).label("event_configuration_id"),
-                EventConfiguration.work_phase_id,
-            )
-            .filter(
-                EventConfiguration.visibility
-                == EventTemplateVisibilityEnum.MANDATORY.value,
-                EventConfiguration.event_position == EventPositionEnum.START.value,
-            )
-            .group_by(EventConfiguration.work_phase_id)
-            .all()
-        )
-        self.start_event_configurations = [
-            x.event_configuration_id for x in start_event_configurations
-        ]
         self.months = []
         self.month_labels = []
         self.report_cells = {
@@ -137,11 +137,12 @@ class EAResourceForeCastReport(ReportFactory):
         }
         self.end_date = None
 
-    def _filter_work_events(self, work_id, events):
-        work_events = list(filter(lambda x: work_id == x.work_id, events))
-        return work_events
+    def _filter_work_events(self, work_id: int, events: [Event]) -> [Event]:
+        """Filter the events based on given work id"""
+        return [event for event in events if event["work_id"] == work_id]
 
-    def _get_report_meta_data(self, report_date: datetime, available_width: float):
+    def _get_pdf_output_layout(self, report_date: datetime, available_width: float):
+        """Returns the pdf output layout"""
         section_headings = []
         cell_headings = []
         styles = []
@@ -183,15 +184,138 @@ class EAResourceForeCastReport(ReportFactory):
         return headers, cell_keys, styles, cell_widths
 
     def _fetch_data(self, report_date: datetime):
-        """Fetches the relevant data for EA Resource Forecast Report"""
-        self._set_month_labels(report_date)
-        works = self._get_works(report_date)
-        work_ids = set((work.work_id for work in works))
-        works = super()._format_data(works)
-        events = self._get_events(work_ids)
-        events = {y: self._filter_work_events(y, events) for y in work_ids}
-        results = self._prepare_fetch_results(works, events)
-        return results
+        """Find and return works that are started before end date and did not end before report date"""
+        env_region = aliased(Region)
+        nrs_region = aliased(Region)
+        responsible_epd = aliased(Staff)
+        work_lead = aliased(Staff)
+        less_than_end_date_query = self._get_less_than_end_date_query()
+        greater_than_report_date_query = self._get_greater_than_report_date_query(report_date)
+
+        works = (
+            Project.query.filter(
+                Project.is_project_closed.is_(False),
+                Project.is_deleted.is_(False),
+                Project.is_active.is_(True),
+            )
+            .join(
+                Work,
+                and_(
+                    Work.project_id == Project.id,
+                    Work.work_state.in_(
+                        [
+                            WorkStateEnum.IN_PROGRESS.value,
+                            WorkStateEnum.SUSPENDED.value,
+                        ]
+                    ),
+                    Work.is_active.is_(True),
+                    Work.is_deleted.is_(False),
+                ),
+            )
+            .join(WorkPhase, WorkPhase.id == Work.current_work_phase_id)
+            .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
+            .join(WorkType, Work.work_type_id == WorkType.id)
+            .join(EAAct, Work.ea_act_id == EAAct.id)
+            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
+            .join(
+                FederalInvolvement, Work.federal_involvement_id == FederalInvolvement.id
+            )
+            .join(SubType, Project.sub_type_id == SubType.id)
+            .join(Type, Project.type_id == Type.id)
+            .join(env_region, env_region.id == Project.region_id_env)
+            .join(nrs_region, nrs_region.id == Project.region_id_flnro)
+            .join(
+                less_than_end_date_query, Work.id == less_than_end_date_query.c.work_id
+            )
+            .join(
+                greater_than_report_date_query,
+                Work.id == greater_than_report_date_query.c.work_id,
+            )
+            .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
+            .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
+            .add_columns(
+                Work.title.label("work_title"),
+                Project.capital_investment.label("capital_investment"),
+                WorkType.name.label("ea_type"),
+                WorkType.report_title.label("ea_type_label"),
+                WorkType.sort_order.label("ea_type_sort_order"),
+                PhaseCode.name.label("project_phase"),
+                EAAct.name.label("ea_act"),
+                FederalInvolvement.name.label("iaac"),
+                SubType.short_name.label("sub_type"),
+                Type.short_name.label("type"),
+                EAOTeam.name.label("eao_team"),
+                env_region.name.label("env_region"),
+                nrs_region.name.label("nrs_region"),
+                Work.id.label("work_id"),
+                responsible_epd.full_name.label("responsible_epd"),
+                work_lead.full_name.label("work_lead"),
+                Work.id.label("work_id"),
+                func.concat(SubType.short_name, " (", Type.short_name, ")").label(
+                    "sector(sub)"
+                ),
+                Project.fte_positions_operation.label("fte_positions_operation"),
+                Project.fte_positions_construction.label("fte_positions_construction"),
+                WorkType.id.label("work_type_id"),
+            )
+            .all()
+        )
+        return works
+
+    def _get_less_than_end_date_query(self):
+        """Returns subquery which returns work_ids which matches the less than end_date condition"""
+        return (
+            db.session.query(Event.work_id)
+            .join(
+                EventConfiguration,
+                and_(
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.event_position == EventPositionEnum.START.value,
+                ),
+            )
+            .join(
+                WorkPhase,
+                and_(
+                    WorkPhase.id == EventConfiguration.work_phase_id,
+                    WorkPhase.is_active.is_(True),
+                    WorkPhase.sort_order
+                    == 1,  # indicate the work phase is the first one
+                    WorkPhase.is_deleted.is_(False),
+                ),
+            )
+            .filter(
+                func.coalesce(Event.actual_date, Event.anticipated_date)
+                <= self.end_date
+            )
+            .subquery()
+        )
+
+    def _get_greater_than_report_date_query(self, report_date):
+        """Returns work_ids matches event actual >= report date"""
+        end_work_phase_query = (
+            db.session.query(
+                func.max(WorkPhase.id).label("end_phase_id"),
+            )
+            .filter(WorkPhase.is_active.is_(True), WorkPhase.is_deleted.is_(False))
+            .group_by(WorkPhase.work_id)
+            .subquery()
+        )
+        return (
+            db.session.query(Event.work_id)
+            .join(
+                EventConfiguration,
+                and_(
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.event_position == EventPositionEnum.END.value,
+                ),
+            )
+            .join(
+                end_work_phase_query,
+                end_work_phase_query.c.end_phase_id == EventConfiguration.work_phase_id,
+            )
+            .filter(or_(Event.actual_date.is_(None), Event.actual_date >= report_date))
+            .subquery()
+        )
 
     def _filter_data(self, data_items):
         """Filter the data based on applied filters"""
@@ -242,12 +366,18 @@ class EAResourceForeCastReport(ReportFactory):
 
     def generate_report(self, report_date, return_type):
         """Generates a report and returns it"""
-        data = self._fetch_data(report_date)
-        data = self._format_data(data)
+        self._set_month_labels(report_date)
+        works = self._fetch_data(report_date)
+        work_ids = set((work.work_id for work in works))
+        works = super()._format_data(works)
+        events = self._get_events(work_ids)
+        start_events = self._filter_start_events(events)
+        start_events = {y: self._filter_work_events(y, start_events) for y in work_ids}
+        work_data = self._update_month_labels(works, start_events)
+        data = self._format_data(work_data)
         if not data:
             return {}, None
-        valid_work_ids = self._get_valid_work_ids(report_date)
-        second_phases = self._fetch_second_phases(valid_work_ids)
+        second_phases = self._fetch_second_phases(events)
         data = self._sort_data(data, second_phases)
         if return_type == "json" and data:
             return data, None
@@ -256,6 +386,57 @@ class EAResourceForeCastReport(ReportFactory):
             formatted_data[item["ea_type_label"]].append(item)
         pdf_stream = self._generate_pdf(formatted_data, report_date)
         return pdf_stream.getvalue(), f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
+
+    def _update_month_labels(self, works, start_events):
+        """Update month labels in the work result"""
+        results = defaultdict(list)
+        for work_id, work_data in works.items():
+            work = work_data[0]
+            for index, month in enumerate(self.months[1:]):
+                month_events = list(
+                    filter(
+                        lambda x: x["start_date"].date() <= month,
+                        start_events[work_id],
+                    )
+                )
+                if month_events:
+                    month_events = sorted(month_events, key=lambda x: x["start_date"])
+                    latest_event = month_events[-1]
+                    work.update(
+                        {
+                            self.month_labels[index]: latest_event["event_phase"],
+                            f"{self.month_labels[index]}_color": latest_event[
+                                "phase_color"
+                            ],
+                        }
+                    )
+                else:
+                    work.update(
+                        {
+                            self.month_labels[index]: "",
+                            f"{self.month_labels[index]}_color": "#FFFFFF",
+                        }
+                    )
+            work_data[0] = work
+            results[work_id] = work_data
+        return results
+
+    def _filter_start_events(self, events: [Event]) -> [Event]:
+        """Filter the start events of each phase per work"""
+        start_events = [
+            {
+                "work_id": event.work_id,
+                "start_date": event.actual_date
+                if event.actual_date
+                else event.anticipated_date,
+                "event_phase": event.event_configuration.work_phase.name,
+                "phase_color": event.event_configuration.work_phase.phase.color,
+            }
+            for event in events
+            if event.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+        ]
+        return start_events
 
     def _add_months(
         self, start: datetime, months: int, set_to_last: bool = True
@@ -268,76 +449,6 @@ class EAResourceForeCastReport(ReportFactory):
         if set_to_last:
             result = result.replace(day=monthrange(start.year + year_offset, month)[1])
         return result
-
-    def _get_valid_work_ids(self, report_date: datetime) -> Set[int]:
-        """Find and return works that are started before end date and did not end before report date"""
-        end_work_phase_query = (
-            db.session.query(
-                func.max(WorkPhase.id).label("end_phase_id"),
-            )
-            .group_by(WorkPhase.work_id)
-            .subquery()
-        )
-        works_started = (
-            db.session.execute(
-                select(WorkPhase.work_id)
-                .join(
-                    EventConfiguration,
-                    and_(
-                        EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.event_position == EventPositionEnum.START.value,
-                        WorkPhase.sort_order == 1,
-                    ),
-                )
-                .join(Event, Event.event_configuration_id == EventConfiguration.id)
-                .where(
-                    and_(
-                        func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
-                        WorkPhase.sort_order == 1,
-                        Work.work_state.in_(
-                            [
-                                WorkStateEnum.IN_PROGRESS.value,
-                                WorkStateEnum.SUSPENDED.value,
-                            ]
-                        ),
-                    )
-                )
-                .order_by(WorkPhase.work_id, WorkPhase.phase_id.asc())
-                .distinct(WorkPhase.work_id)
-            )
-            .scalars()
-            .all()
-        )
-
-        works_not_finished = (
-            db.session.execute(
-                select(WorkPhase.work_id)
-                .join(
-                    EventConfiguration,
-                    and_(
-                        EventConfiguration.work_phase_id == WorkPhase.id,
-                        EventConfiguration.event_position == EventPositionEnum.END.value,
-                    ),
-                )
-                .join(Event, Event.event_configuration_id == EventConfiguration.id)
-                .join(
-                    end_work_phase_query,
-                    WorkPhase.id == end_work_phase_query.c.end_phase_id,
-                )
-                .where(
-                    or_(Event.actual_date.is_(None), Event.actual_date >= report_date),
-                    Work.work_state.in_(
-                        [WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]
-                    ),
-                )
-                .order_by(WorkPhase.work_id, WorkPhase.phase_id.desc())
-                .distinct(WorkPhase.work_id)
-            )
-            .scalars()
-            .all()
-        )
-        valid_work_ids = set(works_not_finished) & set(works_started)
-        return valid_work_ids
 
     def _set_month_labels(self, report_date: datetime) -> None:
         """Calculate and set month related attributes to the self"""
@@ -405,37 +516,59 @@ class EAResourceForeCastReport(ReportFactory):
         )
         others = self._sort_data_by_work_type(data, WorkTypeEnum.OTHER.value)
 
-        sorted_data = assessments + exemption_orders + amendments + order_transfers + minister_designations
-        sorted_data += ceao_designations + project_notifications + extensions + substantial_start_decisions
+        sorted_data = (
+            assessments
+            + exemption_orders
+            + amendments
+            + order_transfers
+            + minister_designations
+        )
+        sorted_data += (
+            ceao_designations
+            + project_notifications
+            + extensions
+            + substantial_start_decisions
+        )
         sorted_data += order_suspensions + order_cancellations + others
         return sorted_data
 
-    def _fetch_second_phases(self, work_ids) -> List[WorkPhase]:
+    def _fetch_second_phases(self, events) -> List[WorkPhase]:
         """Fetch the second work phases for given work ids"""
-        second_work_phases = (
-            db.session.query(WorkPhase)
-            .join(Event, Event.work_id == WorkPhase.work_id)
-            .join(
-                EventConfiguration,
-                EventConfiguration.id == Event.event_configuration_id,
-            )
-            .filter(
-                WorkPhase.work_id.in_(work_ids),
-                WorkPhase.sort_order == 2,
-                EventConfiguration.event_position == EventPositionEnum.START.value,
-            )
-            .add_columns(
-                Event.actual_date.label("actual_date"),
-                Event.anticipated_date.label("anticipated_date"),
-            )
-            .all()
-        )
+        # second_work_phases = (
+        #     db.session.query(WorkPhase)
+        #     .join(Event, Event.work_id == WorkPhase.work_id)
+        #     .join(
+        #         EventConfiguration,
+        #         EventConfiguration.id == Event.event_configuration_id,
+        #     )
+        #     .filter(
+        #         WorkPhase.work_id.in_(work_ids),
+        #         WorkPhase.sort_order == 2,
+        #         EventConfiguration.event_position == EventPositionEnum.START.value,
+        #     )
+        #     .add_columns(
+        #         Event.actual_date.label("actual_date"),
+        #         Event.anticipated_date.label("anticipated_date"),
+        #     )
+        #     .all()
+        # )
+        second_work_phases = [
+            {
+                "work_phase": event.event_configuration.work_phase,
+                "actual_date": event.actual_date,
+                "anticipated_date": event.anticipated_date,
+            }
+            for event in events
+            if event.event_configuration.work_phase.sort_order == 2
+            and event.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+        ]
         return second_work_phases
 
     def _find_work_second_phase(self, second_phases, work_id) -> WorkPhase:
         """Find the second work phase for given work id"""
         second_phase = next(
-            (x for x in second_phases if x.WorkPhase.work_id == work_id), None
+            (x for x in second_phases if x["work_phase"].work_id == work_id), None
         )
         return second_phase
 
@@ -446,13 +579,17 @@ class EAResourceForeCastReport(ReportFactory):
             high_priority = [
                 x
                 for x in temp_data
-                if self._find_work_second_phase(second_phases, x["work_id"]).actual_date
+                if self._find_work_second_phase(second_phases, x["work_id"])[
+                    "actual_date"
+                ]
             ]
             high_priority = sorted(high_priority, key=lambda k: k["work_title"])
             rest = [
                 x
                 for x in temp_data
-                if self._find_work_second_phase(second_phases, x["work_id"]).actual_date
+                if self._find_work_second_phase(second_phases, x["work_id"])[
+                    "actual_date"
+                ]
                 is None
             ]
             rest = sorted(rest, key=lambda k: k["work_title"])
@@ -462,94 +599,44 @@ class EAResourceForeCastReport(ReportFactory):
             sorted_data = sorted(sorted_data, key=lambda k: k["work_title"])
         return sorted_data
 
-    def _get_works(self, report_date) -> List[Work]:
-        """Fetch relevant works for the given report date."""
-        env_region = aliased(Region)
-        nrs_region = aliased(Region)
-        responsible_epd = aliased(Staff)
-        work_lead = aliased(Staff)
-        valid_work_ids = self._get_valid_work_ids(report_date)
-        works = (
-            Project.query.filter(
-                Project.is_project_closed.is_(False),
-                Project.is_deleted.is_(False),
-                Project.is_active.is_(True),
-            )
-            .join(Work, Work.project_id == Project.id)
-            .join(WorkPhase, WorkPhase.id == Work.current_work_phase_id)
-            .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
-            .join(WorkType, Work.work_type_id == WorkType.id)
-            .join(EAAct, Work.ea_act_id == EAAct.id)
-            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
-            .join(
-                FederalInvolvement, Work.federal_involvement_id == FederalInvolvement.id
-            )
-            .join(SubType, Project.sub_type_id == SubType.id)
-            .join(Type, Project.type_id == Type.id)
-            .join(env_region, env_region.id == Project.region_id_env)
-            .join(nrs_region, nrs_region.id == Project.region_id_flnro)
-            .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
-            .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
-            .filter(
-                Work.is_active.is_(True),
-                Work.is_deleted.is_(False),
-                Work.id.in_(valid_work_ids),
-            )
-            .add_columns(
-                Work.title.label("work_title"),
-                Project.capital_investment.label("capital_investment"),
-                WorkType.name.label("ea_type"),
-                WorkType.report_title.label("ea_type_label"),
-                WorkType.sort_order.label("ea_type_sort_order"),
-                PhaseCode.name.label("project_phase"),
-                EAAct.name.label("ea_act"),
-                FederalInvolvement.name.label("iaac"),
-                SubType.short_name.label("sub_type"),
-                Type.short_name.label("type"),
-                EAOTeam.name.label("eao_team"),
-                env_region.name.label("env_region"),
-                nrs_region.name.label("nrs_region"),
-                Work.id.label("work_id"),
-                responsible_epd.full_name.label("responsible_epd"),
-                work_lead.full_name.label("work_lead"),
-                Work.id.label("work_id"),
-                func.concat(SubType.short_name, " (", Type.short_name, ")").label(
-                    "sector(sub)"
-                ),
-                Project.fte_positions_operation.label("fte_positions_operation"),
-                Project.fte_positions_construction.label("fte_positions_construction"),
-                WorkType.id.label("work_type_id"),
-            )
-            .all()
-        )
-        return works
-
-    def _get_events(self, work_ids) -> List[Event]:
-        """Fetch event information for given work ids"""
-        events = (
+    def _get_events(self, work_ids: [int]) -> List[Event]:
+        """Returns the start event of each of the work phases for the works"""
+        return (
             Event.query.filter(
                 Event.work_id.in_(work_ids),
-                Event.event_configuration_id.in_(self.start_event_configurations),
-                func.coalesce(Event.actual_date, Event.anticipated_date) <= self.end_date,
+                # func.coalesce(Event.actual_date, Event.anticipated_date)
+                # <= self.end_date,
             )
             .join(
                 EventConfiguration,
-                Event.event_configuration_id == EventConfiguration.id,
+                and_(
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.visibility
+                    == EventTemplateVisibilityEnum.MANDATORY.value,
+                    EventConfiguration.is_active.is_(True),
+                    EventConfiguration.is_deleted.is_(False),
+                ),
             )
-            .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+            .join(
+                WorkPhase,
+                and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.is_active.is_(True),
+                    WorkPhase.is_deleted.is_(False),
+                ),
+            )
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .order_by(func.coalesce(Event.actual_date, Event.anticipated_date))
-            .add_columns(
-                Event.work_id.label("work_id"),
-                func.coalesce(Event.actual_date, Event.anticipated_date).label(
-                    "start_date"
-                ),
-                PhaseCode.name.label("event_phase"),
-                PhaseCode.color.label("phase_color"),
-            )
+            # .add_columns(
+            #     Event.work_id.label("work_id"),
+            #     func.coalesce(Event.actual_date, Event.anticipated_date).label(
+            #         "start_date"
+            #     ),
+            #     PhaseCode.name.label("event_phase"),
+            #     PhaseCode.color.label("phase_color"),
+            # )
             .all()
         )
-        return events
 
     def _prepare_fetch_results(self, works, events) -> dict:
         """Matches events with corresponding works and returns formatted data"""
@@ -585,51 +672,33 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _get_referral_timing(self, work_id) -> Event:
         """Find the referral event for given work id"""
-        referral_timing_query = (
-            db.session.query(PhaseCode)
-            .join(
-                WorkPhase,
-                and_(
-                    PhaseCode.id == WorkPhase.phase_id,
-                    WorkPhase.work_id == work_id,
-                ),
-            )
-            .join(WorkType, PhaseCode.work_type_id == WorkType.id)
+        referral_date = (
+            db.session.query(func.coalesce(Event.actual_date, Event.anticipated_date))
             .join(
                 EventConfiguration,
                 and_(
-                    EventConfiguration.work_phase_id == WorkPhase.id,
-                    EventConfiguration.visibility == EventTemplateVisibilityEnum.MANDATORY,
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                    EventConfiguration.visibility
+                    == EventTemplateVisibilityEnum.MANDATORY.value,
                 ),
             )
-            .join(Event, EventConfiguration.id == Event.event_configuration_id)
-            .filter(
+            .join(
+                WorkPhase,
                 and_(
-                    WorkType.id == PhaseCode.work_type_id,
-                    Event.work_id == work_id,
-                )
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.is_active.is_(True),
+                    WorkPhase.is_deleted.is_(False),
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                    WorkPhase.is_completed.is_(False),
+                    WorkPhase.work_id == work_id,
+                ),
             )
-            .add_columns(EventConfiguration.id.label("event_configuration_id"))
-            .group_by(PhaseCode.id, EventConfiguration.id)
-            .order_by(PhaseCode.id.desc())
+            .order_by(WorkPhase.sort_order.desc())
+            .limit(1)
+            .scalar()
         )
-
-        if referral_timing_query.count() > 1:
-            referral_timing_obj = referral_timing_query.offset(1).first()
-        else:
-            referral_timing_obj = referral_timing_query.first()
-        referral_timing = (
-            Event.query.filter(
-                Event.event_configuration_id == referral_timing_obj.event_configuration_id
-            )
-            .add_columns(
-                func.coalesce(Event.actual_date, Event.anticipated_date).label(
-                    "event_start_date"
-                )
-            )
-            .first()
-        )
-        return referral_timing
+        return referral_date
 
     def _get_work_team_members(self, work_id) -> Tuple[List[str], str]:
         """Fetch and return team members by work id"""
@@ -684,7 +753,8 @@ class EAResourceForeCastReport(ReportFactory):
                     Paragraph(
                         f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style
                     )
-                ] + [""] * (column_count - 1)
+                ]
+                + [""] * (column_count - 1)
             )
             normal_style.textColor = colors.black
             styles.append(("SPAN", (0, row_index), (-1, row_index)))
@@ -728,12 +798,12 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _handle_months(self, work_data) -> dict:
         """Update the work data to include relevant month information."""
-        referral_timing = self._get_referral_timing(work_data["work_id"])
-        work_data["referral_timing"] = f"{referral_timing.event_start_date:%B %d, %Y}"
+        referral_date = self._get_referral_timing(work_data["work_id"])
+        work_data["referral_timing"] = f"{referral_date:%B %d, %Y}"
         months = []
         referral_month_index = len(self.month_labels)
         referral_month = next(
-            (x for x in self.months if referral_timing.event_start_date.date() <= x),
+            (x for x in self.months if referral_date.date() <= x),
             None,
         )
         if referral_month:
@@ -763,7 +833,9 @@ class EAResourceForeCastReport(ReportFactory):
             id="large_table",
         )
         page_template = PageTemplate(
-            id="LaterPages", frames=[page_table_frame], onPage=self._on_every_page(report_date)
+            id="LaterPages",
+            frames=[page_table_frame],
+            onPage=self._on_every_page(report_date),
         )
         doc.addPageTemplates(page_template)
         story = [NextPageTemplate(["*", "LaterPages"])]
@@ -786,7 +858,9 @@ class EAResourceForeCastReport(ReportFactory):
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ] + styles + table_styles
+                ]
+                + styles
+                + table_styles
             )
         )
         story.append(table)
@@ -796,6 +870,7 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _on_every_page(self, report_date: datetime):
         """Adds default information for each page."""
+
         def add_default_info(canvas, doc):
             """Adds default information to the page."""
             normal_style, _ = self._get_styles()
@@ -822,6 +897,7 @@ class EAResourceForeCastReport(ReportFactory):
             subheading.wrap(doc.width, inch * 0.5)
             subheading.drawOn(canvas, doc.leftMargin, doc.height + inch * 1)
             canvas.restoreState()
+
         return add_default_info
 
     def _get_quarter_section_meta_data(
