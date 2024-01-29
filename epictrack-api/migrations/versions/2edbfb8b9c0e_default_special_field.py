@@ -7,6 +7,7 @@ Create Date: 2024-01-17 16:33:49.371022
 """
 from alembic import op
 from flask import current_app, g
+from sqlalchemy import text
 from sqlalchemy.dialects.postgresql.ranges import Range
 
 from api.models import Work, SpecialField, Proponent, Project
@@ -24,23 +25,23 @@ def upgrade():
 
     entities = [
         # the third key start_date_attr is used if they model has a field which can be used as a start date of the special history field
-        {'model': Work, 'entity_name': 'WORK', 'field_names': ['responsible_epd_id', 'work_lead_id'],
+        {'model_query': "SELECT * FROM works WHERE is_active=True AND is_deleted=False", 'entity_name': 'WORK', 'field_names': ['responsible_epd_id', 'work_lead_id'],
          'start_date_attr': 'start_date'},
-        {'model': Proponent, 'entity_name': 'PROPONENT', 'field_names': ['name']},
-        {'model': Project, 'entity_name': 'PROJECT', 'field_names': ['name', 'proponent_id']}
+        {'model_query': "SELECT * FROM proponents WHERE is_active=True AND is_deleted=False", 'entity_name': 'PROPONENT', 'field_names': ['name']},
+        {'model_query': "SELECT * FROM projects WHERE is_active=True AND is_deleted=False", 'entity_name': 'PROJECT', 'field_names': ['name', 'proponent_id']}
     ]
 
     # the dict wil look like (WORK,54) = ['responsible_epd_id']
     special_histories_map = _get_special_history_map()
     upper_limit = None
     g.jwt_oidc_token_info = {"email": 'system'}
-
+    conn = op.get_bind()
     for entity_info in entities:
-        entity_model = entity_info['model']
+        model_query = entity_info['model_query']
         field_names = entity_info['field_names']
         start_date_attr = entity_info.get('start_date_attr', '')
-
-        for entity in entity_model.find_all():
+        res = conn.execute(text(model_query))
+        for entity in res.fetchall():
             for field_name in field_names:
                 special_field_entity = entity_info.get('entity_name')
                 key = (special_field_entity, entity.id)
