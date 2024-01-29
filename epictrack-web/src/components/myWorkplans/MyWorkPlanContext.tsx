@@ -3,6 +3,8 @@ import { WorkPlan } from "../../models/workplan";
 import workplanService from "../../services/workplanService";
 import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
@@ -92,7 +94,9 @@ export const MyWorkplansProvider = ({
       setTotalWorkplans(result.data.total);
       setLoadingWorkplans(false);
     } catch (error) {
-      console.log(error);
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   };
 
