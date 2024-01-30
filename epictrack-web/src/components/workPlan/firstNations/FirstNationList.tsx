@@ -8,18 +8,17 @@ import {
   Typography,
 } from "@mui/material";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { styled } from "@mui/system";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
-import { ETCaption2, ETGridTitle } from "../../shared";
+import { ETCaption2, ETGridTitle, IButton } from "../../shared";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { showNotification } from "../../shared/notificationProvider";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
-  GROUPS,
   ROLES,
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
@@ -48,22 +47,8 @@ const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const basePIPUrl =
   "https://apps.nrs.gov.bc.ca/int/fnp/FirstNationDetail.xhtml?name=";
 
-const IButton = styled(IconButton)({
-  "& .icon": {
-    fill: Palette.primary.accent.main,
-  },
-  "&:hover": {
-    backgroundColor: Palette.neutral.bg.main,
-    borderRadius: "4px",
-  },
-  "&.Mui-disabled": {
-    pointerEvents: "auto",
-    "& .icon": {
-      fill: Palette.neutral.light,
-    },
-  },
-});
 const FirstNationList = () => {
+  const ctx = React.useContext(WorkplanContext);
   const [workFirstNationId, setWorkFirstNationId] = React.useState<
     number | undefined
   >();
@@ -74,10 +59,17 @@ const FirstNationList = () => {
     ConsultationLevel[]
   >([]);
 
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const { roles, email } = useAppSelector((state) => state.user.userDetail);
+  const userIsTeamMember = useMemo(
+    () => ctx.team.some((member) => member.staff.email === email),
+    [ctx.team, email]
+  );
+  const canEdit =
+    userIsTeamMember || hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  const ctx = React.useContext(WorkplanContext);
+  const canCreate =
+    userIsTeamMember || hasPermission({ roles, allowed: [ROLES.CREATE] });
+
   const firstNations = React.useMemo(
     () => ctx.firstNations,
     [ctx.firstNations]
@@ -423,6 +415,7 @@ const FirstNationList = () => {
           <Grid item xs={6}>
             <Restricted
               allowed={[ROLES.CREATE]}
+              exception={userIsTeamMember}
               errorProps={{ disabled: true }}
             >
               <Button
@@ -444,17 +437,33 @@ const FirstNationList = () => {
             }}
           >
             <Tooltip title={"Import Nations from existing Works"}>
-              <IButton
-                onClick={() => setShowImportNationForm(true)}
-                disabled={!firstNationAvailable}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                exception={userIsTeamMember}
+                errorProps={{
+                  disabled: true,
+                }}
               >
-                <ImportFileIcon className="icon" />
-              </IButton>
+                <IButton
+                  onClick={() => setShowImportNationForm(true)}
+                  disabled={!firstNationAvailable}
+                >
+                  <ImportFileIcon className="icon" />
+                </IButton>
+              </Restricted>
             </Tooltip>
             <Tooltip title="Export first nations to excel">
-              <IButton onClick={downloadPDFReport}>
-                <DownloadIcon className="icon" />
-              </IButton>
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                exception={userIsTeamMember}
+                errorProps={{
+                  disabled: true,
+                }}
+              >
+                <IButton onClick={downloadPDFReport}>
+                  <DownloadIcon className="icon" />
+                </IButton>
+              </Restricted>
             </Tooltip>
           </Grid>
           <Grid item xs={12}>

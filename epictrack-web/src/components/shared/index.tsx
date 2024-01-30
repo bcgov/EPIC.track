@@ -10,6 +10,7 @@ import {
   FormLabelBaseProps,
   Box,
   styled,
+  IconButton,
 } from "@mui/material";
 import {
   MET_Header_Font_Family,
@@ -462,3 +463,22 @@ export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
     </Box>
   );
 };
+
+export const IButton = styled(IconButton)({
+  "& .icon": {
+    fill: Palette.primary.accent.main,
+  },
+  "&:hover": {
+    backgroundColor: Palette.neutral.bg.main,
+    borderRadius: "4px",
+  },
+  "&.Mui-disabled": {
+    pointerEvents: "auto",
+    "& .icon": {
+      fill: Palette.neutral.light,
+    },
+  },
+  "&.Mui-disabled:hover": {
+    backgroundColor: "transparent",
+  },
+});
