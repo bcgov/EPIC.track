@@ -1,5 +1,5 @@
 import { Button, Grid } from "@mui/material";
-import React from "react";
+import React, { useMemo } from "react";
 import { StaffWorkRole } from "../../../models/staff";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -10,6 +10,7 @@ import { showNotification } from "../../shared/notificationProvider";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
+  ROLES,
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
 import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
@@ -17,7 +18,8 @@ import TrackDialog from "../../shared/TrackDialog";
 import TeamForm from "./TeamForm";
 import NoDataEver from "../../shared/NoDataEver";
 import TableFilter from "../../shared/filterSelect/TableFilter";
-
+import { useAppSelector } from "hooks";
+import { Restricted, hasPermission } from "components/shared/restricted";
 const TeamList = () => {
   const [roles, setRoles] = React.useState<string[]>([]);
   const [statuses, setStatuses] = React.useState<string[]>([]);
@@ -25,7 +27,18 @@ const TeamList = () => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
-  const teamMembers = React.useMemo(() => ctx.team, [ctx.team]);
+  const teamMembers = useMemo(() => ctx.team, [ctx.team]);
+
+  const { email, roles: givenUserAuthRoles } = useAppSelector(
+    (state) => state.user.userDetail
+  );
+  const userIsTeamMember = useMemo(
+    () => teamMembers.some((member) => member.staff.email === email),
+    [teamMembers, email]
+  );
+  const canEdit =
+    userIsTeamMember ||
+    hasPermission({ roles: givenUserAuthRoles, allowed: [ROLES.EDIT] });
 
   React.useEffect(() => {
     setLoading(ctx.loading);
@@ -52,17 +65,19 @@ const TeamList = () => {
         header: "Name",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 250,
-        Cell: ({ cell, row }) => (
-          <ETGridTitle
-            to="#"
-            enableEllipsis
-            onClick={(event: any) => onRowClick(event, row.original)}
-            enableTooltip={true}
-            tooltip={cell.getValue<string>()}
-          >
-            {cell.getValue<string>()}
-          </ETGridTitle>
-        ),
+        Cell: canEdit
+          ? ({ cell, row }) => (
+              <ETGridTitle
+                to="#"
+                enableEllipsis
+                onClick={(event: any) => onRowClick(event, row.original)}
+                enableTooltip={true}
+                tooltip={cell.getValue<string>()}
+              >
+                {cell.getValue<string>()}
+              </ETGridTitle>
+            )
+          : undefined,
         sortingFn: "sortFn",
       },
       {
@@ -176,13 +191,21 @@ const TeamList = () => {
       {teamMembers.length > 0 && (
         <Grid container rowSpacing={1}>
           <Grid item xs={12}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => setShowTeamForm(true)}
+            <Restricted
+              allowed={[ROLES.CREATE]}
+              exception={userIsTeamMember}
+              errorProps={{
+                disabled: true,
+              }}
             >
-              Team Member
-            </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setShowTeamForm(true)}
+              >
+                Team Member
+              </Button>
+            </Restricted>
           </Grid>
           <Grid item xs={12}>
             <MasterTrackTable
