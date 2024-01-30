@@ -56,14 +56,13 @@ export const ReferralSchedule = () => {
           </ETSubhead>
         </Grid>
         <Grid item xs={12}>
-          <Stack spacing={1}>
+          <Stack spacing={1} direction="column">
             <ETCaption2 bold color={Palette.neutral.light}>
               Project Description (Auto-System Generated)
             </ETCaption2>
             <ETPreviewText>{work?.project.description}</ETPreviewText>
           </Stack>
         </Grid>
-        <Grid item xs={12}></Grid>
         <Grid item xs={12}>
           <ETPreviewText>
             {work?.project.name} is in {currentWorkPhase?.work_phase.name}
@@ -97,6 +96,7 @@ export const ReferralSchedule = () => {
                       <ETPreviewText
                         key={`title-${issueUpdate?.id}`}
                         color={Palette.neutral.dark}
+                        bold
                       >
                         {issueUpdate?.issueTitle}
                       </ETPreviewText>
