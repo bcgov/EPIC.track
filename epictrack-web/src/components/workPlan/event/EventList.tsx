@@ -848,9 +848,15 @@ const EventList = () => {
             </Tooltip>
           )}
           <Tooltip title="Export workplan to excel">
-            <IButton onClick={downloadPDFReport}>
-              <DownloadIcon className="icon" />
-            </IButton>
+            <Restricted
+              allowed={[ROLES.EDIT]}
+              errorProps={{ disabled: true }}
+              exception={userIsTeamMember}
+            >
+              <IButton onClick={downloadPDFReport}>
+                <DownloadIcon className="icon" />
+              </IButton>
+            </Restricted>
           </Tooltip>
         </Grid>
       </Grid>

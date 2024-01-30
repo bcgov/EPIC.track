@@ -466,7 +466,10 @@ const EventListTable = ({
     <MasterTrackTable
       enableSorting={false}
       enableRowSelection={(row) => row.original.type !== "Milestone"}
-      enableSelectAll={canEdit}
+      enableSelectAll={true}
+      muiSelectAllCheckboxProps={{
+        disabled: !canEdit,
+      }}
       enablePagination
       onPaginationChange={setPagination}
       muiPaginationProps={{
