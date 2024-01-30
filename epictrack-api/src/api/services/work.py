@@ -929,4 +929,3 @@ class WorkService:  # pylint: disable=too-many-public-methods
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
-
