@@ -1,5 +1,4 @@
 import TrackDatePicker from "../DatePicker/index";
-import React from "react";
 
 describe("TrackDatePicker", () => {
   it("renders correctly and opens when clicked", () => {
