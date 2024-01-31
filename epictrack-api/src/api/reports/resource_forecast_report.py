@@ -475,7 +475,7 @@ class EAResourceForeCastReport(ReportFactory):
         exemption_orders = self._sort_data_by_work_type(
             data, WorkTypeEnum.EXEMPTION_ORDER.value
         )
-        amendments = self._sort_data_by_work_type(data, WorkTypeEnum.AMENDMENT.value)
+        amendments = self._sort_data_by_work_type(data, WorkTypeEnum.AMENDMENT.value, second_phases)
         order_transfers = self._sort_data_by_work_type(
             data, WorkTypeEnum.EAC_ORDER_TRANSFER.value
         )
@@ -542,25 +542,29 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _sort_data_by_work_type(self, data, work_type_id, second_phases=None) -> List:
         """Filter data based on work type and do natural sort"""
-        work_type_data = [x for x in data if x["work_type_id"] == work_type_id]
-        with_actual_date = [
-            x
-            for x in work_type_data
-            if self._find_work_second_phase(second_phases, x["work_id"])[
-                "actual_date"
+        if work_type_id == WorkTypeEnum.ASSESSMENT.value:
+            temp_data = [x for x in data if x["work_type_id"] == work_type_id]
+            high_priority = [
+                x
+                for x in temp_data
+                if self._find_work_second_phase(second_phases, x["work_id"])[
+                    "actual_date"
+                ]
             ]
-        ]
-        with_actual_date = sorted(with_actual_date, key=lambda k: k["work_title"])
-        without_actual_date = [
-            x
-            for x in work_type_data
-            if self._find_work_second_phase(second_phases, x["work_id"])[
-                "actual_date"
+            high_priority = sorted(high_priority, key=lambda k: k["work_title"])
+            rest = [
+                x
+                for x in temp_data
+                if self._find_work_second_phase(second_phases, x["work_id"])[
+                    "actual_date"
+                ]
+                is None
             ]
-            is None
-        ]
-        without_actual_date = sorted(without_actual_date, key=lambda k: k["work_title"])
-        sorted_data = with_actual_date + without_actual_date
+            rest = sorted(rest, key=lambda k: k["work_title"])
+            sorted_data = high_priority + rest
+        else:
+            sorted_data = [x for x in data if x["work_type_id"] == work_type_id]
+            sorted_data = sorted(sorted_data, key=lambda k: k["work_title"])
         return sorted_data
 
     def _get_events(self, work_ids: [int]) -> List[Event]:
@@ -568,8 +572,6 @@ class EAResourceForeCastReport(ReportFactory):
         return (
             Event.query.filter(
                 Event.work_id.in_(work_ids),
-                # func.coalesce(Event.actual_date, Event.anticipated_date)
-                # <= self.end_date,
             )
             .join(
                 EventConfiguration,
