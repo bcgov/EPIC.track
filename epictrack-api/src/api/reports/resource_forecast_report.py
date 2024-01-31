@@ -534,24 +534,6 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _fetch_second_phases(self, events) -> List[WorkPhase]:
         """Fetch the second work phases for given work ids"""
-        # second_work_phases = (
-        #     db.session.query(WorkPhase)
-        #     .join(Event, Event.work_id == WorkPhase.work_id)
-        #     .join(
-        #         EventConfiguration,
-        #         EventConfiguration.id == Event.event_configuration_id,
-        #     )
-        #     .filter(
-        #         WorkPhase.work_id.in_(work_ids),
-        #         WorkPhase.sort_order == 2,
-        #         EventConfiguration.event_position == EventPositionEnum.START.value,
-        #     )
-        #     .add_columns(
-        #         Event.actual_date.label("actual_date"),
-        #         Event.anticipated_date.label("anticipated_date"),
-        #     )
-        #     .all()
-        # )
         second_work_phases = [
             {
                 "work_phase": event.event_configuration.work_phase,
@@ -627,14 +609,6 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .order_by(func.coalesce(Event.actual_date, Event.anticipated_date))
-            # .add_columns(
-            #     Event.work_id.label("work_id"),
-            #     func.coalesce(Event.actual_date, Event.anticipated_date).label(
-            #         "start_date"
-            #     ),
-            #     PhaseCode.name.label("event_phase"),
-            #     PhaseCode.color.label("phase_color"),
-            # )
             .all()
         )
 
