@@ -16,6 +16,7 @@ import RichTextEditor from "../shared/richTextEditor";
 import codeService, { Code } from "../../services/codeService";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import ControlledRichTextEditor from "components/shared/controlledInputComponents/ControlledRichTextEditor";
 
 const schema = yup.object().shape({
   name: yup
@@ -46,13 +47,7 @@ const schema = yup.object().shape({
 export default function IndigenousNationForm({ ...props }) {
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const [pipOrgTypes, setPipOrgTypes] = React.useState<PIPOrgType[]>([]);
-  const [notes, setNotes] = React.useState("");
   const ctx = React.useContext(MasterContext);
-
-  const initialNotes = React.useMemo(
-    () => (ctx.item as FirstNation)?.notes,
-    [(ctx?.item as FirstNation)?.id]
-  );
 
   React.useEffect(() => {
     ctx.setFormId("indigenous-nation-form");
@@ -81,9 +76,6 @@ export default function IndigenousNationForm({ ...props }) {
 
   React.useEffect(() => {
     reset(ctx.item ?? defaultFirstNation);
-    if (ctx.item) {
-      setNotes((ctx.item as FirstNation)?.notes || "");
-    }
   }, [ctx.item]);
 
   const getStaffs = async () => {
@@ -126,7 +118,6 @@ export default function IndigenousNationForm({ ...props }) {
   }, []);
 
   const onSubmitHandler = async (data: any) => {
-    data.notes = notes;
     ctx.onSave(data, () => {
       reset();
     });
@@ -187,10 +178,7 @@ export default function IndigenousNationForm({ ...props }) {
           </Grid>
           <Grid item xs={12}>
             <ETFormLabel>Notes</ETFormLabel>
-            <RichTextEditor
-              handleEditorStateChange={setNotes}
-              initialRawEditorState={initialNotes}
-            />
+            <ControlledRichTextEditor name="notes" />
           </Grid>
         </Grid>
       </FormProvider>
