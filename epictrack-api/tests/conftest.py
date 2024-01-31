@@ -67,7 +67,7 @@ def client_ctx(app):
 
 
 @pytest.fixture(scope='session')
-def db(app, jwt):  # pylint: disable=redefined-outer-name, invalid-name
+def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     """Return a session-wide initialised database.
 
     Drops schema, and recreate.
