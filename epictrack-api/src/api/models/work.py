@@ -47,7 +47,7 @@ class Work(BaseModelVersioned):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(150), nullable=False)
-    simple_title = Column(String(50), nullable=True)
+    simple_title = Column(String(), nullable=True)
     report_description = Column(String(2000))
     epic_description = Column(Text)
     is_cac_recommended = Column(Boolean, default=False, nullable=False)
