@@ -77,9 +77,9 @@ const WorkPlanContainer = () => {
           />
           <ETTab label="Status" icon={statusOutOfDate && <IndicatorIcon />} />
           <ETTab label="Issues" />
-          <ETTab label="About Project" />
+          <ETTab label="About" />
           <ETTab
-            label="Teams"
+            label="Team"
             identifier={activeStaff.length.toString()}
             data-title="dddd"
           />

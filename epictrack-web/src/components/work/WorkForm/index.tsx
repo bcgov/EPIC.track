@@ -394,7 +394,7 @@ export default function WorkForm({ ...props }) {
           <ETFormLabel>Project Description</ETFormLabel>
           <ControlledTextField
             name="epic_description"
-            placeholder="Provide the description if differs from the report"
+            placeholder=""
             fullWidth
             multiline
             rows={4}

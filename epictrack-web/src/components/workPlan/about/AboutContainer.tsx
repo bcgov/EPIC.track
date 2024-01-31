@@ -42,7 +42,7 @@ const AboutContainer = () => {
             label="Details"
           />
           <ETTab
-            label="Calender"
+            label="Calendar"
             sx={{
               ...tabStyle,
             }}
