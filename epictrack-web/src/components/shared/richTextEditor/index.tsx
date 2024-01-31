@@ -16,6 +16,15 @@ const styles = {
   },
 };
 
+export type RichTextEditorProps = {
+  setRawText?: (rawText: string) => void;
+  handleEditorStateChange?: (stringifiedEditorState: string) => void;
+  initialRawEditorState?: string;
+  initialHTMLText?: string;
+  error?: boolean;
+  helperText?: string;
+};
+
 const RichTextEditor = ({
   setRawText = (_rawText: string) => {
     /* empty default method  */
@@ -27,7 +36,7 @@ const RichTextEditor = ({
   initialHTMLText = "",
   error = false,
   helperText = "",
-}) => {
+}: RichTextEditorProps) => {
   const getStateFromInitialValue = () => {
     if (initialRawEditorState) {
       setEditorState(getEditorStateFromRaw(initialRawEditorState));

@@ -20,28 +20,14 @@ from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
 from api.models import (
-    EAAct,
-    EAOTeam,
-    Event,
-    FederalInvolvement,
-    PhaseCode,
-    Project,
-    Region,
-    Staff,
-    StaffWorkRole,
-    SubType,
-    Type,
-    Work,
-    WorkPhase,
-    WorkType,
-    db,
-)
+    EAAct, EAOTeam, Event, FederalInvolvement, PhaseCode, Project, Region, Staff, StaffWorkRole, SubType, Type, Work,
+    WorkPhase, WorkType, db)
 from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
-from api.models.work import WorkStateEnum
-from api.models.work_type import WorkTypeEnum
 from api.models.event_type import EventTypeEnum
 from api.models.phase_code import PhaseVisibilityEnum
+from api.models.work import WorkStateEnum
+from api.models.work_type import WorkTypeEnum
 
 from .report_factory import ReportFactory
 
@@ -556,29 +542,25 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _sort_data_by_work_type(self, data, work_type_id, second_phases=None) -> List:
         """Filter data based on work type and do natural sort"""
-        if work_type_id == WorkTypeEnum.ASSESSMENT.value:
-            temp_data = [x for x in data if x["work_type_id"] == work_type_id]
-            high_priority = [
-                x
-                for x in temp_data
-                if self._find_work_second_phase(second_phases, x["work_id"])[
-                    "actual_date"
-                ]
+        work_type_data = [x for x in data if x["work_type_id"] == work_type_id]
+        with_actual_date = [
+            x
+            for x in work_type_data
+            if self._find_work_second_phase(second_phases, x["work_id"])[
+                "actual_date"
             ]
-            high_priority = sorted(high_priority, key=lambda k: k["work_title"])
-            rest = [
-                x
-                for x in temp_data
-                if self._find_work_second_phase(second_phases, x["work_id"])[
-                    "actual_date"
-                ]
-                is None
+        ]
+        with_actual_date = sorted(with_actual_date, key=lambda k: k["work_title"])
+        without_actual_date = [
+            x
+            for x in work_type_data
+            if self._find_work_second_phase(second_phases, x["work_id"])[
+                "actual_date"
             ]
-            rest = sorted(rest, key=lambda k: k["work_title"])
-            sorted_data = high_priority + rest
-        else:
-            sorted_data = [x for x in data if x["work_type_id"] == work_type_id]
-            sorted_data = sorted(sorted_data, key=lambda k: k["work_title"])
+            is None
+        ]
+        without_actual_date = sorted(without_actual_date, key=lambda k: k["work_title"])
+        sorted_data = with_actual_date + without_actual_date
         return sorted_data
 
     def _get_events(self, work_ids: [int]) -> List[Event]:

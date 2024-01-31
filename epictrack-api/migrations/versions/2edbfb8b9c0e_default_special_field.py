@@ -10,7 +10,8 @@ from flask import current_app, g
 from sqlalchemy import text
 from sqlalchemy.dialects.postgresql.ranges import Range
 
-from api.models import Work, SpecialField, Proponent, Project
+from api.models import Project, Proponent, SpecialField, Work
+
 
 # revision identifiers, used by Alembic.
 revision = '2edbfb8b9c0e'
@@ -35,6 +36,7 @@ def upgrade():
     special_histories_map = _get_special_history_map()
     upper_limit = None
     g.jwt_oidc_token_info = {"email": 'system'}
+    special_field_table = SpecialField.metadata.tables["special_fields"]
     conn = op.get_bind()
     for entity_info in entities:
         model_query = entity_info['model_query']
@@ -54,15 +56,18 @@ def upgrade():
                         start_date, upper_limit, bounds="[)"
                     )
                     if special_field_value:
-                        special_history = SpecialField(
-                            entity=special_field_entity,
-                            entity_id=entity.id,
-                            field_name=field_name,
-                            field_value=special_field_value,
-                            time_range=time_range
+                        special_field_data = {
+                            "entity":special_field_entity,
+                            "entity_id":entity.id,
+                            "field_name":field_name,
+                            "field_value":special_field_value,
+                            "time_range":time_range
+                        }
+                        conn.execute(
+                            special_field_table.insert().values(special_field_data).returning(
+                                (special_field_table.c.id).label("id")
+                            )
                         )
-                        special_history.save()
-
 
 def downgrade():
     # Delete records from SpecialField where created_by is 'system'
@@ -71,11 +76,16 @@ def downgrade():
 
 
 def _get_special_history_map():
-    special_histories = SpecialField.find_all()
+
+    # special_histories = SpecialField.find_all()
+    conn = op.get_bind()
+    special_field_query = "SELECT * FROM special_fields WHERE is_active = true AND is_deleted = false"
+    res = conn.execute(text(special_field_query))
+    special_histories = res.fetchall()
     special_histories_map = {}
 
     for special_history in special_histories:
-        key = (special_history.entity.name, special_history.entity_id)
+        key = (special_history.entity, special_history.entity_id)
         if key not in special_histories_map:
             special_histories_map[key] = [special_history.field_name]
         else:
