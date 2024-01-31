@@ -7,8 +7,10 @@ export interface CustomAction {
   callback: () => any;
 }
 
+export type NotificationType = "success" | "warning" | "error" | "info";
+
 export interface NotificationOptions {
-  type: "success" | "warning" | "error" | "info";
+  type: NotificationType;
   duration?: number | null;
   message?: string | React.ReactElement;
   actions?: CustomAction[];
@@ -18,5 +20,5 @@ export interface NotificationOptions {
 export interface ETNotificationProps extends CustomContentProps {
   helpText?: string;
   actions?: CustomAction[];
-  type: "success" | "warning" | "error" | "info";
+  type: NotificationType;
 }
