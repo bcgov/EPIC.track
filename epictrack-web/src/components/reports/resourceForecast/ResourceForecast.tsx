@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -32,22 +32,36 @@ import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { showNotification } from "components/shared/notificationProvider";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 
 export default function ResourceForecast() {
-  const [reportDate, setReportDate] = React.useState<string>("");
+  const [reportDate, setReportDate] = useState<string>("");
   const [showReportDateBanner, setShowReportDateBanner] =
-    React.useState<boolean>(false);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [rfData, setRFData] = React.useState<ResourceForecastModel[]>([]);
-  const [columnFilters, setColumnFilters] =
-    React.useState<MRT_ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<MRT_VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = React.useState();
-  const [filters, setFilters] = React.useState({});
+    useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [rfData, setRFData] = useState<ResourceForecastModel[]>([]);
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
+    {}
+  );
+  const [globalFilter, setGlobalFilter] = useState();
+  const [filters, setFilters] = useState({});
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10, //customize the default page size
+  });
 
   const FILENAME_PREFIX = "EAO_Resource_Forecast";
 
+  useEffect(() => {
+    const options = rowsPerPageOptions(rfData.length);
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: options[options.length - 1].value,
+    }));
+  }, [rfData]);
   React.useEffect(() => {
     const hiddenColumns = Object.keys(columnVisibility).filter(
       (p) => !columnVisibility[p]
@@ -389,12 +403,18 @@ export default function ResourceForecast() {
       <Grid item sm={12}>
         <MasterTrackTable
           columns={columns}
+          enablePagination
+          onPaginationChange={setPagination}
+          muiPaginationProps={{
+            rowsPerPageOptions: rowsPerPageOptions(rfData.length),
+          }}
           state={{
             columnFilters,
             columnVisibility,
             globalFilter,
             isLoading: isLoading,
             showGlobalFilter: true,
+            pagination,
           }}
           positionGlobalFilter="left"
           muiSearchTextFieldProps={{
