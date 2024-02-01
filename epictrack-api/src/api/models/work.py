@@ -158,7 +158,7 @@ class Work(BaseModelVersioned):
 
     @classmethod
     def _filter_by_staff_id(cls, query, staff_id):
-        if staff_id:
+        if staff_id is not None:
             subquery = exists().where(and_(Work.id == StaffWorkRole.work_id, StaffWorkRole.staff_id == staff_id))
             query = query.filter(subquery)
         return query

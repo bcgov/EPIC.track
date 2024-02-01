@@ -80,7 +80,12 @@ const FilterSelect = (props: SelectProps) => {
 
   const applyFilters = () => {
     if (props.filterAppliedCallback) {
-      props.filterAppliedCallback(selectedOptions);
+      const options = isMulti
+        ? (selectedOptions as string[]).filter(
+            (p) => p !== selectAllOption.value
+          )
+        : selectedOptions;
+      props.filterAppliedCallback(options);
     }
     if (selectedOptions.length === 0) {
       selectRef.current?.clearValue();
