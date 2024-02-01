@@ -36,20 +36,22 @@ def upgrade():
     conn = op.get_bind()
     phase_query = f"SELECT id FROM phase_codes WHERE name = 'Amendment Procedures' and work_type_id={WorkTypeEnum.AMENDMENT.value}"
     phase = conn.execute(sa.text(phase_query)).fetchone()
-    work_phases_query = f"SELECT id from work_phases WHERE phase_id = {phase.id}"
-    work_phases = conn.execute(sa.text(work_phases_query)).scalars().all()
-    event_configuration_table = tables["event_configurations"]
-    replace_func = sa.func.regexp_replace(
-        event_configuration_table.c.name, "Assessment", "Amendment"
-    )
-    op.execute(
-        event_configuration_table.update()
-        .values({event_configuration_table.c.name: replace_func})
-        .where(
-            event_configuration_table.c.name.ilike(r"%assessment%"),
-            event_configuration_table.c.work_phase_id.in_(work_phases),
+    if phase:
+        # To avoid test case failing because event templates for amendment are not configured
+        work_phases_query = f"SELECT id from work_phases WHERE phase_id = {phase.id}"
+        work_phases = conn.execute(sa.text(work_phases_query)).scalars().all()
+        event_configuration_table = tables["event_configurations"]
+        replace_func = sa.func.regexp_replace(
+            event_configuration_table.c.name, "Assessment", "Amendment"
         )
-    )
+        op.execute(
+            event_configuration_table.update()
+            .values({event_configuration_table.c.name: replace_func})
+            .where(
+                event_configuration_table.c.name.ilike(r"%assessment%"),
+                event_configuration_table.c.work_phase_id.in_(work_phases),
+            )
+        )
     # ### end Alembic commands ###
 
 
