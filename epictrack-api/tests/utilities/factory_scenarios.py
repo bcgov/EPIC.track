@@ -16,9 +16,11 @@
 Test Utility for creating test scenarios.
 """
 from enum import Enum
+
 from faker import Faker
 
 from api.config import get_named_config
+
 
 fake = Faker()
 CONFIG = get_named_config('testing')
@@ -147,4 +149,16 @@ class TestJwtClaims(dict, Enum):
 
             ]
         }
+    }
+
+
+class TestProponent(Enum):
+    """Test scenarios for proponents"""
+
+    proponent1 = {
+        "name": fake.word()
+    }
+
+    proponent2 = {
+        "name": fake.word()
     }

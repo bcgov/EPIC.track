@@ -60,7 +60,7 @@ class Proponent(Resource):
     def get(proponent_id):
         """Return details of a proponent."""
         req.ProponentIdPathParameterSchema().load(request.view_args)
-        proponent = ProponentService.find_by_id(proponent_id)
+        proponent = ProponentService.find_by_id(proponent_id, exclude_deleted=True)
         return res.ProponentResponseSchema().dump(proponent), HTTPStatus.OK
 
     @staticmethod

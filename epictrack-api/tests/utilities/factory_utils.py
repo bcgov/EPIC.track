@@ -18,10 +18,16 @@ Test Utility for creating model factory.
 from datetime import datetime
 
 from api.config import get_named_config
-from api.models import Work as WorkModel, Staff, WorkIssues, WorkIssueUpdates, WorkStatus
-from api.models.project import Project as ProjectModel, ProjectStateEnum
+from api.models import Staff
+from api.models import Work as WorkModel
+from api.models import WorkIssues, WorkIssueUpdates, WorkStatus
+from api.models.project import Project as ProjectModel
+from api.models.project import ProjectStateEnum
+from api.models.proponent import Proponent
 from tests.utilities.factory_scenarios import (
-    TestProjectInfo, TestWorkInfo, TestStaffInfo, TestWorkIssuesInfo, TestWorkIssueUpdatesInfo, TestStatus)
+    TestProjectInfo, TestProponent, TestStaffInfo, TestStatus, TestWorkInfo, TestWorkIssuesInfo,
+    TestWorkIssueUpdatesInfo)
+
 
 CONFIG = get_named_config('testing')
 
@@ -142,3 +148,14 @@ def factory_auth_header(jwt, claims):
     return {
         'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)
     }
+
+
+def factory_proponent_model(proponent_data=TestProponent.proponent1.value):
+    """Produce a Proponent model."""
+    relationship_holder = factory_staff_model()
+    proponent = Proponent(
+        name=proponent_data["name"],
+        relationship_holder_id=relationship_holder.id,
+    )
+    proponent.save()
+    return proponent
