@@ -162,3 +162,29 @@ class TestProponent(Enum):
     proponent2 = {
         "name": fake.word()
     }
+
+
+class TestFirstNation(Enum):
+    """Test scenarios for first nations"""
+
+    first_nation1 = {
+        "name": fake.word(),
+        "is_active": False,
+        "notes": fake.sentence(),
+        "pip_link": fake.domain_word(),
+    }
+
+    first_nation2 = {
+        "name": fake.word(),
+        "is_active": True,
+        "notes": fake.sentence(),
+        "pip_link": fake.domain_word(),
+    }
+
+
+class TestPipOrgType(Enum):
+    """Test scenarios for PIP Org Types"""
+
+    pip_org_type1 = {
+        "name": fake.word()
+    }

@@ -21,12 +21,14 @@ from api.config import get_named_config
 from api.models import Staff
 from api.models import Work as WorkModel
 from api.models import WorkIssues, WorkIssueUpdates, WorkStatus
+from api.models.indigenous_nation import IndigenousNation
+from api.models.pip_org_type import PIPOrgType
 from api.models.project import Project as ProjectModel
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from tests.utilities.factory_scenarios import (
-    TestProjectInfo, TestProponent, TestStaffInfo, TestStatus, TestWorkInfo, TestWorkIssuesInfo,
-    TestWorkIssueUpdatesInfo)
+    TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestStaffInfo, TestStatus, TestWorkInfo,
+    TestWorkIssuesInfo, TestWorkIssueUpdatesInfo)
 
 
 CONFIG = get_named_config('testing')
@@ -159,3 +161,27 @@ def factory_proponent_model(proponent_data=TestProponent.proponent1.value):
     )
     proponent.save()
     return proponent
+
+
+def factory_pip_org_type_model(org_type_data=TestPipOrgType.pip_org_type1.value):
+    """Produce a PIP OrgType model."""
+    pip_org_type = PIPOrgType(name=org_type_data["name"])
+    pip_org_type.save()
+    return pip_org_type
+
+
+def factory_first_nation_model(first_nation_data=TestFirstNation.first_nation1.value):
+    """Produce a First nation model."""
+    print(first_nation_data)
+    pip_org_type = factory_pip_org_type_model()
+    relationship_holder = factory_staff_model()
+    first_nation = IndigenousNation(
+        name=first_nation_data["name"],
+        notes=first_nation_data["notes"],
+        pip_link=first_nation_data["pip_link"],
+        pip_org_type_id=pip_org_type.id,
+        relationship_holder_id=relationship_holder.id,
+        is_active=first_nation_data["is_active"],
+    )
+    first_nation.save()
+    return first_nation

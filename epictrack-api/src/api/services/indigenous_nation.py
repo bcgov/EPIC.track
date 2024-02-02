@@ -41,14 +41,15 @@ class IndigenousNationService:
         return indigenous_nations
 
     @classmethod
-    def find(cls, indigenous_nation_id):
+    def find(cls, indigenous_nation_id, exclude_deleted=False):
         """Find by indigenous nation id."""
-        indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
-        if not indigenous_nation:
-            raise ResourceNotFoundError(
-                f"Indigenous nation with id '{indigenous_nation_id}' not found."
-            )
-        return indigenous_nation
+        query = db.session.query(IndigenousNation).filter(IndigenousNation.id == indigenous_nation_id)
+        if exclude_deleted:
+            query = query.filter(IndigenousNation.is_deleted.is_(False))
+        indigenous_nation = query.one_or_none()
+        if indigenous_nation:
+            return indigenous_nation
+        raise ResourceNotFoundError(f"IndigenousNation with id '{indigenous_nation_id}' not found.")
 
     @classmethod
     def create_indigenous_nation(cls, payload: dict):
@@ -86,7 +87,7 @@ class IndigenousNationService:
     def import_indigenous_nations(cls, file: IO):
         """Import indigenous nations"""
         data = cls._read_excel(file)
-        data["relationship_holder_id"] = data.apply(lambda x: x["relationship_holder_id"].lower(), axis=1)
+        data["relationship_holder_id"] = data["relationship_holder_id"].str.lower()
         relationship_holders = data["relationship_holder_id"].to_list()
         pip_org_types = data["pip_org_type_id"].to_list()
         staffs = (
@@ -130,6 +131,8 @@ class IndigenousNationService:
     @classmethod
     def _find_staff_id(cls, email: str, staffs: List[Staff]) -> int:
         """Find and return the id of staff from given list"""
+        if email is None:
+            return None
         staff = next((x for x in staffs if x.email.lower() == email), None)
         if staff is None:
             raise ResourceNotFoundError(f"Staff with email {email} does not exist")
@@ -138,6 +141,8 @@ class IndigenousNationService:
     @classmethod
     def _find_org_type_id(cls, name: str, org_types: List[PIPOrgType]) -> int:
         """Find and return the id of org_type from given list"""
+        if name is None:
+            return None
         org_type = next((x for x in org_types if x.name == name), None)
         if org_type is None:
             raise ResourceNotFoundError(f"Org type with name {name} does not exist")

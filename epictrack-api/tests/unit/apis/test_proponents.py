@@ -13,19 +13,23 @@
 # limitations under the License.
 
 """Test suite for Proponents."""
+from copy import copy
 from http import HTTPStatus
+from pathlib import Path
 from urllib.parse import urljoin
+
+from werkzeug.datastructures import FileStorage
 
 from tests.utilities.factory_scenarios import TestProponent
 from tests.utilities.factory_utils import factory_proponent_model, factory_staff_model
 
 
-API_BASE_URL = '/api/v1/'
+API_BASE_URL = "/api/v1/"
 
 
 def test_get_proponents(client, auth_header):
     """Test get proponents."""
-    url = urljoin(API_BASE_URL, 'proponents')
+    url = urljoin(API_BASE_URL, "proponents")
     result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
 
@@ -33,10 +37,11 @@ def test_get_proponents(client, auth_header):
 def test_create_proponent(client, auth_header):
     """Test create new proponent."""
     url = urljoin(API_BASE_URL, "proponents")
-    payload = TestProponent.proponent1.value
+    payload = copy(TestProponent.proponent1.value)
     relationship_holder = factory_staff_model()
     payload["relationship_holder_id"] = relationship_holder.id
 
+    # Scenario 1: Valid payload
     response = client.post(url, json=payload, headers=auth_header)
     response_json = response.json
     assert response.status_code == HTTPStatus.CREATED
@@ -45,6 +50,12 @@ def test_create_proponent(client, auth_header):
     assert payload["name"] == response_json["name"]
     assert response_json["is_active"]
 
+    # Scenario 2: Missing required fields
+    del payload["name"]
+    response = client.post(url, json=payload, headers=auth_header)
+    response_json = response.json
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+
 
 def test_validate_proponent(client, auth_header):
     """Test validate proponent"""
@@ -52,10 +63,7 @@ def test_validate_proponent(client, auth_header):
 
     # Scenario 1: Updating an existing proponent
     proponent = factory_proponent_model()
-    payload = {
-        "name": proponent.name,
-        "proponent_id": proponent.id
-    }
+    payload = {"name": proponent.name, "proponent_id": proponent.id}
     response = client.get(url, query_string=payload, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
     assert not response.json["exists"]
@@ -93,7 +101,7 @@ def test_update_proponent(client, auth_header):
 
     updated_data = {
         "name": "New Proponent Name",
-        "relationship_holder_id": relationship_holder.id
+        "relationship_holder_id": relationship_holder.id,
     }
     url = urljoin(API_BASE_URL, f"proponents/{proponent.id}")
     response = client.put(url, headers=auth_header, json=updated_data)
@@ -102,7 +110,10 @@ def test_update_proponent(client, auth_header):
     assert response.status_code == HTTPStatus.OK
     assert response_json["id"] == proponent.id
     assert response_json["name"] == updated_data["name"]
-    assert response_json["relationship_holder_id"] == updated_data["relationship_holder_id"]
+    assert (
+        response_json["relationship_holder_id"]
+        == updated_data["relationship_holder_id"]
+    )
 
 
 def test_delete_proponent(client, auth_header):
@@ -113,6 +124,23 @@ def test_delete_proponent(client, auth_header):
     assert response.status_code == HTTPStatus.OK
     assert response.text == "Proponent successfully deleted"
 
-    url = urljoin(API_BASE_URL, f"proponents/{proponent.id}")
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+def test_import_proponent(client, auth_header):
+    """Test import proponent"""
+    url = urljoin(API_BASE_URL, "proponents/import")
+    file_path = Path("./src/api/templates/master_templates/Proponents.xlsx")
+    file_path = file_path.resolve()
+    file = FileStorage(
+        stream=open(file_path, "rb"),
+        filename="Proponents.xlsx",
+    )
+    response = client.post(
+        url,
+        data={"file": file},
+        content_type="multipart/form-data",
+        headers=auth_header
+    )
+    assert response.status_code == HTTPStatus.CREATED

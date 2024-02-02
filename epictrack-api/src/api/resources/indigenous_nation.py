@@ -62,7 +62,7 @@ class IndigenousNation(Resource):
     def get(indigenous_nation_id):
         """Return details of an indigenous nation."""
         req.IndigenousNationIdPathParameterSchema().load(request.view_args)
-        indigenous_nation = IndigenousNationService.find(indigenous_nation_id)
+        indigenous_nation = IndigenousNationService.find(indigenous_nation_id, exclude_deleted=True)
         return (
             res.IndigenousResponseNationSchema().dump(indigenous_nation),
             HTTPStatus.OK,
