@@ -76,7 +76,9 @@ export const ReferralSchedule = () => {
                 .format("MMM.DD YYYY")
                 .toUpperCase()})`}
             </ETCaption2>
-            <ETPreviewText sx={{ whiteSpace: "pre-wrap" }}>{currentStatus?.description}</ETPreviewText>
+            <ETPreviewText sx={{ whiteSpace: "pre-wrap" }}>
+              {currentStatus?.description}
+            </ETPreviewText>
           </Grid>
         </When>
 
