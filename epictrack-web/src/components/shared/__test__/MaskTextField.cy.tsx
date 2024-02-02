@@ -1,19 +1,24 @@
-import React, { ChangeEvent } from "react";
+import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import { ControlledMaskTextField } from "../maskTextField";
 
 interface TestComponentProps {
-  onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const TestComponent: React.FC<TestComponentProps> = ({ onChange }) => {
   const methods = useForm();
   return (
     <FormProvider {...methods}>
-      <ControlledMaskTextField name="test" mask="####" onChange={onChange} />
+      <ControlledMaskTextField
+        name="test"
+        mask="####-####"
+        onChange={onChange}
+      />
     </FormProvider>
   );
 };
+
 describe("ControlledMaskTextField", () => {
   it("renders correctly", () => {
     cy.mount(<TestComponent />);
