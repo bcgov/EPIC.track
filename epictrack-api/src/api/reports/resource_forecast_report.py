@@ -797,7 +797,7 @@ class EAResourceForeCastReport(ReportFactory):
         )
         doc.addPageTemplates(page_template)
         story = [NextPageTemplate(["*", "LaterPages"])]
-        table_headers, table_cells, styles, cell_widths = self._get_report_meta_data(
+        table_headers, table_cells, styles, cell_widths = self._get_pdf_output_layout(
             report_date, doc.width
         )
 
