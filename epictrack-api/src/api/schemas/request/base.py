@@ -24,9 +24,9 @@ from api.exceptions import BadRequestError
 class Schema(MarshmallowSchema):
     """Base Schema"""
 
-    def handle_error(self, exc, data, **kwargs):
+    def handle_error(self, error, data, **kwargs):
         """Log and raise our custom exception when validation fails."""
-        raise BadRequestError(json.dumps(exc.messages))
+        raise BadRequestError(json.dumps(error.messages))
 
 
 class RequestPathParameterSchema(Schema):
