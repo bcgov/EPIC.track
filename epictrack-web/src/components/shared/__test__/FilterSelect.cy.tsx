@@ -24,18 +24,17 @@ describe("FilterSelect", () => {
     // Type 'Option 1' into the select
     cy.get("input").click().type("Option 1");
 
-    // Check that 'Option 1' is visible and 'Option 2' is not
-    cy.get("input").contains("Option 1").should("be.visible");
-    cy.get("input").contains("Option 2").should("not.exist");
+    // Check that 'Option 1' is visible and 'Option 2' is not within the MuiBox-root
+    cy.get(".MuiBox-root").contains("Option 1").should("be.visible");
+    cy.get(".MuiBox-root").contains("Option 2").should("not.exist");
 
-    // Clear the input
-    cy.get("input").click().clear();
-
+    // Simulate clicking away from the input and then clicking back onto it
+    cy.get("input").first().blur();
     // Type 'Option 2' into the select
     cy.get("input").click().type("Option 2");
 
-    // Check that 'Option 2' is visible and 'Option 1' is not
-    cy.get("input").contains("Option 2").should("be.visible");
-    cy.get("input").contains("Option 1").should("not.exist");
+    // Check that 'Option 2' is visible and 'Option 1' is not within the MuiBox-root
+    cy.get(".MuiBox-root").contains("Option 2").should("be.visible");
+    cy.get(".MuiBox-root").contains("Option 1").should("not.exist");
   });
 });
