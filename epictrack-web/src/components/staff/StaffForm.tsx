@@ -121,8 +121,8 @@ export default function StaffForm({ ...props }) {
           <ETFormLabel>Position</ETFormLabel>
           <ControlledSelectV2
             helperText={errors?.position_id?.message?.toString()}
-            getOptionValue={(o: ListType) => o.id.toString()}
-            getOptionLabel={(o: ListType) => o.name}
+            getOptionValue={(o: ListType) => o?.id?.toString()}
+            getOptionLabel={(o: ListType) => o?.name}
             defaultValue={(ctx.item as Staff)?.position_id}
             options={positions}
             {...register("position_id")}
