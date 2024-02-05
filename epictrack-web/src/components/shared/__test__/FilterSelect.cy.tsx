@@ -37,4 +37,20 @@ describe("FilterSelect", () => {
     cy.get(".MuiBox-root").contains("Option 2").should("be.visible");
     cy.get(".MuiBox-root").contains("Option 1").should("not.exist");
   });
+
+  it("can select multiple options and clear selection", () => {
+    const options = [
+      { label: "Option 1", value: "1" },
+      { label: "Option 2", value: "2" },
+    ];
+
+    cy.mount(
+      <FilterSelect options={options} variant={"inline"} isMulti={true} />
+    );
+    cy.get("input").click();
+    // Check that 'Option 1' and 'Option 2' are visible within the MuiBox-root
+    cy.get(".MuiBox-root").contains("Option 1").should("be.visible");
+    cy.get(".MuiBox-root").contains("Option 2").should("be.visible");
+    cy.get(".MuiBox-root").contains("Select All").should("be.visible");
+  });
 });
