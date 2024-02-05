@@ -44,9 +44,13 @@ const TrackSelect: React.FC<TrackSelectProps> = ({
               },
             };
           },
-          menuPortal: (base: CSSObjectWithLabel) => ({
+          indicatorsContainer: (base) => ({
             ...base,
             zIndex: 99999,
+          }),
+          menuPortal: (base: CSSObjectWithLabel) => ({
+            ...base,
+            zIndex: 99998,
             fontSize: "1rem",
           }),
         }}
