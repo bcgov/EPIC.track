@@ -14,6 +14,7 @@ import ControlledTextField from "../shared/controlledInputComponents/ControlledT
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { ControlledMaskTextField } from "../shared/maskTextField";
 import positionService from "../../services/positionService";
+
 const schema = yup.object().shape({
   email: yup
     .string()
@@ -24,13 +25,20 @@ const schema = yup.object().shape({
       exclusive: true,
       message: "Staff with same email already exists",
       test: async (value, { parent }) => {
-        if (value) {
-          const result = await staffService.validateEmail(value, parent["id"]);
-          if (result.status === 200) {
-            return !(result.data as never)["exists"];
+        try {
+          if (value) {
+            const result = await staffService.validateEmail(
+              value,
+              parent["id"]
+            );
+            if (result.status === 200) {
+              return !(result.data as never)["exists"];
+            }
           }
+          return true;
+        } catch (e) {
+          return false;
         }
-        return true;
       },
     }),
   phone: yup.string().required("Phone number is required"),
