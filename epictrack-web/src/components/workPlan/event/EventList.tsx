@@ -58,26 +58,11 @@ import {
   ROLES,
 } from "../../../constants/application-constant";
 import { Restricted } from "components/shared/restricted";
+import { IButton } from "components/shared";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
-
-const IButton = styled(IconButton)({
-  "& .icon": {
-    fill: Palette.primary.accent.main,
-  },
-  "&:hover": {
-    backgroundColor: Palette.neutral.bg.main,
-    borderRadius: "4px",
-  },
-  "&.Mui-disabled": {
-    pointerEvents: "auto",
-    "& .icon": {
-      fill: Palette.neutral.light,
-    },
-  },
-});
 
 const EventList = () => {
   const dispatch = useAppDispatch();
@@ -848,9 +833,15 @@ const EventList = () => {
             </Tooltip>
           )}
           <Tooltip title="Export workplan to excel">
-            <IButton onClick={downloadPDFReport}>
-              <DownloadIcon className="icon" />
-            </IButton>
+            <Restricted
+              allowed={[ROLES.EDIT]}
+              errorProps={{ disabled: true }}
+              exception={userIsTeamMember}
+            >
+              <IButton onClick={downloadPDFReport}>
+                <DownloadIcon className="icon" />
+              </IButton>
+            </Restricted>
           </Tooltip>
         </Grid>
       </Grid>

@@ -8,18 +8,17 @@ import {
   Typography,
 } from "@mui/material";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { styled } from "@mui/system";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
-import { ETCaption2, ETGridTitle } from "../../shared";
+import { ETCaption2, ETGridTitle, IButton } from "../../shared";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { showNotification } from "../../shared/notificationProvider";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
-  GROUPS,
   ROLES,
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
@@ -27,7 +26,10 @@ import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
 import TrackDialog from "../../shared/TrackDialog";
 import NoDataEver from "../../shared/NoDataEver";
 import TableFilter from "../../shared/filterSelect/TableFilter";
-import { WorkFirstNation } from "../../../models/firstNation";
+import {
+  ConsultationLevel,
+  WorkFirstNation,
+} from "../../../models/firstNation";
 import FirstNationForm from "./FirstNationForm";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
@@ -45,33 +47,29 @@ const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const basePIPUrl =
   "https://apps.nrs.gov.bc.ca/int/fnp/FirstNationDetail.xhtml?name=";
 
-const IButton = styled(IconButton)({
-  "& .icon": {
-    fill: Palette.primary.accent.main,
-  },
-  "&:hover": {
-    backgroundColor: Palette.neutral.bg.main,
-    borderRadius: "4px",
-  },
-  "&.Mui-disabled": {
-    pointerEvents: "auto",
-    "& .icon": {
-      fill: Palette.neutral.light,
-    },
-  },
-});
 const FirstNationList = () => {
+  const ctx = React.useContext(WorkplanContext);
   const [workFirstNationId, setWorkFirstNationId] = React.useState<
     number | undefined
   >();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showNationForm, setShowNationForm] = React.useState<boolean>(false);
   const [modalTitle, setModalTitle] = React.useState<string>("Add Nation");
+  const [consultationLevels, setConsultationLevels] = React.useState<
+    ConsultationLevel[]
+  >([]);
 
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const { roles, email } = useAppSelector((state) => state.user.userDetail);
+  const userIsTeamMember = useMemo(
+    () => ctx.team.some((member) => member.staff.email === email),
+    [ctx.team, email]
+  );
+  const canEdit =
+    userIsTeamMember || hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  const ctx = React.useContext(WorkplanContext);
+  const canCreate =
+    userIsTeamMember || hasPermission({ roles, allowed: [ROLES.CREATE] });
+
   const firstNations = React.useMemo(
     () => ctx.firstNations,
     [ctx.firstNations]
@@ -84,8 +82,6 @@ const FirstNationList = () => {
   const [firstNationAvailable, setFirstNationAvailable] =
     React.useState<boolean>(false);
 
-  const [menuRowIndex, setMenuRowIndex] = React.useState<number>(-1);
-
   React.useEffect(() => {
     if (workFirstNationId === undefined) {
       setModalTitle("Add Nation");
@@ -95,19 +91,6 @@ const FirstNationList = () => {
     setModalTitle(firstNation?.indigenous_nation?.name || "");
   }, [workFirstNationId]);
 
-  const pinOptions = React.useMemo(() => {
-    return [
-      {
-        value: "Yes",
-        label: "Yes",
-      },
-      {
-        value: "No",
-        label: "No",
-      },
-    ];
-  }, []);
-
   React.useEffect(() => {
     setLoading(ctx.loading);
   }, []);
@@ -116,11 +99,27 @@ const FirstNationList = () => {
     React.useState<null | HTMLElement>(null);
 
   React.useEffect(() => {
+    getStatusOptions();
+    getConsultationLevels();
+  }, [firstNations]);
+
+  const getStatusOptions = () => {
     const statuses = firstNations
       .map((p) => p.status)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setStatusOptions(statuses);
-  }, [firstNations]);
+  };
+
+  const getConsultationLevels = () => {
+    const levelMap = new Map();
+    firstNations
+      .map((firstNation) => firstNation.indigenous_consultation_level)
+      .forEach((level) => {
+        levelMap.set(level.id, level);
+      });
+
+    setConsultationLevels(Array.from(levelMap.values()));
+  };
 
   const getFirstNationAvailability = React.useCallback(async () => {
     const response = await projectService.checkFirstNationAvailability(
@@ -172,8 +171,8 @@ const FirstNationList = () => {
         sortingFn: "sortFn",
       },
       {
-        accessorFn: (row) => row.pin,
-        header: "PIN",
+        accessorFn: (row) => row.indigenous_consultation_level.name,
+        header: "Consultation",
         size: 150,
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
@@ -183,11 +182,11 @@ const FirstNationList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="pinFilter"
+              name="consultationFilter"
             />
           );
         },
-        filterSelectOptions: pinOptions.map((p) => p.value),
+        filterSelectOptions: consultationLevels.map((level) => level.name),
         filterFn: "multiSelectFilter",
       },
       {
@@ -316,7 +315,7 @@ const FirstNationList = () => {
         },
       },
     ],
-    [firstNations, userMenuAnchorEl, relationshipHolder]
+    [firstNations, userMenuAnchorEl, relationshipHolder, consultationLevels]
   );
 
   const onCancelHandler = () => {
@@ -416,6 +415,7 @@ const FirstNationList = () => {
           <Grid item xs={6}>
             <Restricted
               allowed={[ROLES.CREATE]}
+              exception={userIsTeamMember}
               errorProps={{ disabled: true }}
             >
               <Button
@@ -437,17 +437,33 @@ const FirstNationList = () => {
             }}
           >
             <Tooltip title={"Import Nations from existing Works"}>
-              <IButton
-                onClick={() => setShowImportNationForm(true)}
-                disabled={!firstNationAvailable}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                exception={userIsTeamMember}
+                errorProps={{
+                  disabled: true,
+                }}
               >
-                <ImportFileIcon className="icon" />
-              </IButton>
+                <IButton
+                  onClick={() => setShowImportNationForm(true)}
+                  disabled={!firstNationAvailable}
+                >
+                  <ImportFileIcon className="icon" />
+                </IButton>
+              </Restricted>
             </Tooltip>
             <Tooltip title="Export first nations to excel">
-              <IButton onClick={downloadPDFReport}>
-                <DownloadIcon className="icon" />
-              </IButton>
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                exception={userIsTeamMember}
+                errorProps={{
+                  disabled: true,
+                }}
+              >
+                <IButton onClick={downloadPDFReport}>
+                  <DownloadIcon className="icon" />
+                </IButton>
+              </Restricted>
             </Tooltip>
           </Grid>
           <Grid item xs={12}>

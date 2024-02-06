@@ -13,19 +13,10 @@
 # limitations under the License.
 """Model to handle all operations related to Indigenous Work."""
 
-import enum
-
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
-
-
-class PinEnum(enum.Enum):
-    """Pin enum"""
-
-    YES = 'Yes'
-    NO = 'No'
 
 
 class IndigenousWork(BaseModelVersioned):
@@ -39,8 +30,10 @@ class IndigenousWork(BaseModelVersioned):
     indigenous_category_id = Column(
         ForeignKey("indigenous_categories.id"), nullable=True, default=None
     )
+    indigenous_consultation_level_id = Column(
+        ForeignKey("indigenous_consultation_levels.id"), nullable=False, default=None
+    )
     is_deleted = Column(Boolean(), default=False, nullable=False)
-    pin = Column(String(100))
 
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     indigenous_nation = relationship(
@@ -48,6 +41,9 @@ class IndigenousWork(BaseModelVersioned):
     )
     indigenous_category = relationship(
         "IndigenousCategory", foreign_keys=[indigenous_category_id], lazy="select"
+    )
+    indigenous_consultation_level = relationship(
+        "IndigenousConsultationLevel", foreign_keys=[indigenous_consultation_level_id], lazy="select"
     )
 
     def as_dict(self):  # pylint:disable=arguments-differ
@@ -57,6 +53,7 @@ class IndigenousWork(BaseModelVersioned):
             "work_id": self.work_id,
             "indigenous_nation": self.indigenous_nation.as_dict(),
             "indigenous_category": self.indigenous_category.as_dict(),
+            "indigenous_consultation_level": self.indigenous_consultation_level.as_dict(),
         }
 
     @classmethod

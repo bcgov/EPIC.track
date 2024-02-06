@@ -7,9 +7,11 @@ Create Date: 2024-01-17 16:33:49.371022
 """
 from alembic import op
 from flask import current_app, g
+from sqlalchemy import text
 from sqlalchemy.dialects.postgresql.ranges import Range
 
-from api.models import Work, SpecialField, Proponent, Project
+from api.models import Project, Proponent, SpecialField, Work
+
 
 # revision identifiers, used by Alembic.
 revision = '2edbfb8b9c0e'
@@ -24,23 +26,24 @@ def upgrade():
 
     entities = [
         # the third key start_date_attr is used if they model has a field which can be used as a start date of the special history field
-        {'model': Work, 'entity_name': 'WORK', 'field_names': ['responsible_epd_id', 'work_lead_id'],
+        {'model_query': "SELECT * FROM works WHERE is_active=True AND is_deleted=False", 'entity_name': 'WORK', 'field_names': ['responsible_epd_id', 'work_lead_id'],
          'start_date_attr': 'start_date'},
-        {'model': Proponent, 'entity_name': 'PROPONENT', 'field_names': ['name']},
-        {'model': Project, 'entity_name': 'PROJECT', 'field_names': ['name', 'proponent_id']}
+        {'model_query': "SELECT * FROM proponents WHERE is_active=True AND is_deleted=False", 'entity_name': 'PROPONENT', 'field_names': ['name']},
+        {'model_query': "SELECT * FROM projects WHERE is_active=True AND is_deleted=False", 'entity_name': 'PROJECT', 'field_names': ['name', 'proponent_id']}
     ]
 
     # the dict wil look like (WORK,54) = ['responsible_epd_id']
     special_histories_map = _get_special_history_map()
     upper_limit = None
     g.jwt_oidc_token_info = {"email": 'system'}
-
+    special_field_table = SpecialField.metadata.tables["special_fields"]
+    conn = op.get_bind()
     for entity_info in entities:
-        entity_model = entity_info['model']
+        model_query = entity_info['model_query']
         field_names = entity_info['field_names']
         start_date_attr = entity_info.get('start_date_attr', '')
-
-        for entity in entity_model.find_all():
+        res = conn.execute(text(model_query))
+        for entity in res.fetchall():
             for field_name in field_names:
                 special_field_entity = entity_info.get('entity_name')
                 key = (special_field_entity, entity.id)
@@ -53,15 +56,18 @@ def upgrade():
                         start_date, upper_limit, bounds="[)"
                     )
                     if special_field_value:
-                        special_history = SpecialField(
-                            entity=special_field_entity,
-                            entity_id=entity.id,
-                            field_name=field_name,
-                            field_value=special_field_value,
-                            time_range=time_range
+                        special_field_data = {
+                            "entity":special_field_entity,
+                            "entity_id":entity.id,
+                            "field_name":field_name,
+                            "field_value":special_field_value,
+                            "time_range":time_range
+                        }
+                        conn.execute(
+                            special_field_table.insert().values(special_field_data).returning(
+                                (special_field_table.c.id).label("id")
+                            )
                         )
-                        special_history.save()
-
 
 def downgrade():
     # Delete records from SpecialField where created_by is 'system'
@@ -70,11 +76,16 @@ def downgrade():
 
 
 def _get_special_history_map():
-    special_histories = SpecialField.find_all()
+
+    # special_histories = SpecialField.find_all()
+    conn = op.get_bind()
+    special_field_query = "SELECT * FROM special_fields WHERE is_active = true AND is_deleted = false"
+    res = conn.execute(text(special_field_query))
+    special_histories = res.fetchall()
     special_histories_map = {}
 
     for special_history in special_histories:
-        key = (special_history.entity.name, special_history.entity_id)
+        key = (special_history.entity, special_history.entity_id)
         if key not in special_histories_map:
             special_histories_map[key] = [special_history.field_name]
         else:

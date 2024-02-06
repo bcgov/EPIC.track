@@ -47,7 +47,7 @@ class Work(BaseModelVersioned):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(150), nullable=False)
-    simple_title = Column(String(50), nullable=True)
+    simple_title = Column(String(), nullable=True)
     report_description = Column(String(2000))
     epic_description = Column(Text)
     is_cac_recommended = Column(Boolean, default=False, nullable=False)
@@ -158,7 +158,7 @@ class Work(BaseModelVersioned):
 
     @classmethod
     def _filter_by_staff_id(cls, query, staff_id):
-        if staff_id:
+        if staff_id is not None:
             subquery = exists().where(and_(Work.id == StaffWorkRole.work_id, StaffWorkRole.staff_id == staff_id))
             query = query.filter(subquery)
         return query

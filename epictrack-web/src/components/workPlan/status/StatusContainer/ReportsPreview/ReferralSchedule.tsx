@@ -56,41 +56,21 @@ export const ReferralSchedule = () => {
             Referral Schedule
           </ETSubhead>
         </Grid>
+
         <Grid item xs={12}>
-          <Stack spacing={1}>
+          <Stack spacing={1} direction="column">
             <ETCaption2 bold color={Palette.neutral.light}>
               Project Description (Auto-System Generated)
             </ETCaption2>
             <ETPreviewText>{work?.project.description}</ETPreviewText>
           </Stack>
         </Grid>
+
         <Grid item xs={12}>
           <ETPreviewText>
             {work?.project.name} is in {currentWorkPhase?.work_phase.name}
           </ETPreviewText>
         </Grid>
-
-        <When condition={Boolean(issueUpdates.length > 0)}>
-          <Grid item xs={12}>
-            <ETCaption2 bold color={Palette.neutral.light}>
-              {`Issue (${moment(latestIssue?.updated_at)
-                .format("MMM.DD YYYY")
-                .toUpperCase()})`}
-            </ETCaption2>
-            <Stack spacing={2} direction="column">
-              {issueUpdates.map((issueUpdate) => (
-                <>
-                  <ETPreviewText key={`title-${issueUpdate?.id}`}>
-                    {issueUpdate?.issueTitle}
-                  </ETPreviewText>
-                  <ETPreviewText key={`description-${issueUpdate?.id}`}>
-                    {issueUpdate?.description}
-                  </ETPreviewText>
-                </>
-              ))}
-            </Stack>
-          </Grid>
-        </When>
 
         <Grid item xs={12}>
           <ETCaption2 bold mb={"0.5em"}>
@@ -114,6 +94,28 @@ export const ReferralSchedule = () => {
             </If>
           </ETPreviewBox>
         </Grid>
+
+        <When condition={Boolean(issueUpdates.length > 0)}>
+          <Grid item xs={12}>
+            <ETCaption2 bold color={Palette.neutral.light}>
+              {`Issue (${moment(latestIssue?.updated_at)
+                .format("MMM.DD YYYY")
+                .toUpperCase()})`}
+            </ETCaption2>
+            <Stack spacing={2} direction="column">
+              {issueUpdates.map((issueUpdate) => (
+                <>
+                  <ETPreviewText key={`title-${issueUpdate?.id}`} bold>
+                    {issueUpdate?.issueTitle}
+                  </ETPreviewText>
+                  <ETPreviewText key={`description-${issueUpdate?.id}`}>
+                    {issueUpdate?.description}
+                  </ETPreviewText>
+                </>
+              ))}
+            </Stack>
+          </Grid>
+        </When>
       </Grid>
     </GrayBox>
   );

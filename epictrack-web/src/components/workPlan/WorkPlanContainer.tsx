@@ -15,7 +15,6 @@ import Icons from "../icons";
 import { IconProps } from "../icons/type";
 import Issues from "./issues";
 import WorkState from "./WorkState";
-import ComingSoon from "../../routes/ComingSoon";
 import { isStatusOutOfDate } from "./status/shared";
 import About from "./about";
 
@@ -78,9 +77,9 @@ const WorkPlanContainer = () => {
           />
           <ETTab label="Status" icon={statusOutOfDate && <IndicatorIcon />} />
           <ETTab label="Issues" />
-          <ETTab label="About Project" />
+          <ETTab label="About" />
           <ETTab
-            label="Teams"
+            label="Team"
             identifier={activeStaff.length.toString()}
             data-title="dddd"
           />

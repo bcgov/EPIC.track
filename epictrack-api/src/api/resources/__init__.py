@@ -57,6 +57,7 @@ from .work_status import API as WORK_STATUS_API
 from .work_type import API as WORK_TYPES_API
 from .region import API as REGION_API
 from .eao_team import API as EAO_TEAM_API
+from .indigenous_consultation_level import API as INDIGENOUS_CONSULTATION_LEVEL_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -120,3 +121,4 @@ API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')
 API.add_namespace(POSITION_API, path='/positions')
 API.add_namespace(REGION_API, path='/regions')
 API.add_namespace(EAO_TEAM_API, path='/eao-teams')
+API.add_namespace(INDIGENOUS_CONSULTATION_LEVEL_API, path='/indigenous-nations-consultation-levels')

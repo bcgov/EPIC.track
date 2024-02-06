@@ -41,9 +41,13 @@ class ProponentService:
         return proponents
 
     @classmethod
-    def find_by_id(cls, proponent_id):
-        """Find by indigenous nation id."""
-        proponent = Proponent.find_by_id(proponent_id)
+    def find_by_id(cls, proponent_id, exclude_deleted=False):
+        """Find by proponent id."""
+        query = db.session.query(Proponent).filter(Proponent.id == proponent_id)
+        if exclude_deleted:
+            query = query.filter(Proponent.is_deleted.is_(False))
+        print(query.statement.compile(compile_kwargs={"literal_binds": True}))
+        proponent = query.one_or_none()
         if proponent:
             return proponent
         raise ResourceNotFoundError(f"Proponent with id '{proponent_id}' not found.")
@@ -73,7 +77,7 @@ class ProponentService:
         exists = cls.check_existence(payload["name"], proponent_id)
         if exists:
             raise ResourceExistsError("Proponent with same name exists")
-        proponent = Proponent.find_by_id(proponent_id)
+        proponent = cls.find_by_id(proponent_id, exclude_deleted=True)
         if not proponent:
             raise ResourceNotFoundError(
                 f"Proponent with id '{proponent_id}' not found."

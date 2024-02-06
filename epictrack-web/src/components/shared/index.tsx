@@ -10,6 +10,7 @@ import {
   FormLabelBaseProps,
   Box,
   styled,
+  IconButton,
 } from "@mui/material";
 import {
   MET_Header_Font_Family,
@@ -426,12 +427,26 @@ export const GrayBox = ({ children, sx, ...rest }: GrayBoxProps) => {
   );
 };
 
-export const ETPreviewText = styled(Typography)(() => ({
-  fontSize: "14px",
-  fontStyle: "normal",
-  fontWeight: "400",
-  lineHeight: "21px",
-}));
+export const ETPreviewText = ({ bold, children, sx, ...rest }: HeaderProps) => {
+  return (
+    <Typography
+      sx={{
+        ...sx,
+        fontSize: "14px",
+        fontStyle: "normal",
+        lineHeight: "21px",
+        fontWeight: bold
+          ? MET_Header_Font_Weight_Bold
+          : MET_Header_Font_Weight_Regular,
+        fontFamily: MET_Header_Font_Family,
+      }}
+      variant="body1"
+      {...rest}
+    >
+      {children}
+    </Typography>
+  );
+};
 
 export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
   return (
@@ -448,3 +463,22 @@ export const ETPreviewBox = ({ children, sx, ...rest }: HeaderProps) => {
     </Box>
   );
 };
+
+export const IButton = styled(IconButton)({
+  "& .icon": {
+    fill: Palette.primary.accent.main,
+  },
+  "&:hover": {
+    backgroundColor: Palette.neutral.bg.main,
+    borderRadius: "4px",
+  },
+  "&.Mui-disabled": {
+    pointerEvents: "auto",
+    "& .icon": {
+      fill: Palette.neutral.light,
+    },
+  },
+  "&.Mui-disabled:hover": {
+    backgroundColor: "transparent",
+  },
+});

@@ -13,8 +13,10 @@
 # limitations under the License.
 
 """Common setup and fixtures for the py-test suite used by this service."""
+import os
 
 import pytest
+from flask import g
 from flask_migrate import Migrate, upgrade
 from sqlalchemy import event, text
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -23,6 +25,7 @@ from api import create_app
 from api import jwt as _jwt
 from api.models import Project, Staff
 from api.models import db as _db
+from api.services import EventTemplateService
 from tests.utilities.factory_scenarios import TestJwtClaims
 from tests.utilities.factory_utils import factory_auth_header
 
@@ -83,7 +86,19 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
         Migrate(app, _db)
         upgrade()
 
+        _load_templates()
+
         return _db
+
+
+def _load_templates():
+    # Call the import_events_template method after database setup to populate init data
+    templates_folder = os.path.join(os.path.dirname(__file__), '../../epictrack-api/src/api/templates/event_templates')
+    g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
+    for root, dirs, files in os.walk(templates_folder):
+        for file_name in files:
+            file_path = os.path.join(root, file_name)
+            EventTemplateService.import_events_template(file_path)
 
 
 @pytest.fixture(scope="session")

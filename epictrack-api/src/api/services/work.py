@@ -44,6 +44,7 @@ from api.schemas.response import (
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.schemas.work_type import WorkTypeSchema
+from api.services import authorisation
 from api.services.code import CodeService
 from api.services.event import EventService
 from api.services.event_template import EventTemplateService
@@ -53,6 +54,7 @@ from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
+from api.utils.roles import Membership, Role as KeycloakRole
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -353,6 +355,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_id, data.get("staff_id"), data.get("role_id")
         ):
             raise ResourceExistsError("Staff Work association already exists")
+
+        cls._check_can_create_or_team_member_auth(work_id)
+
         work_staff = StaffWorkRole(
             **{
                 "work_id": work_id,
@@ -380,6 +385,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
         ):
             raise ResourceExistsError("Staff Work association already exists")
+
+        cls._check_can_edit_or_team_member_auth(work_staff.work_id)
+
         work_staff.is_active = data.get("is_active")
         work_staff.role_id = data.get("role_id")
         work_staff.flush()
@@ -630,12 +638,15 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Create Indigenous Work"""
         if cls.check_work_nation_existence(work_id, data.get("indigenous_nation_id")):
             raise ResourceExistsError("First nation Work association already exists")
+
+        cls._check_can_create_or_team_member_auth(work_id)
+
         indigenous_work = IndigenousWork(
             **{
                 "work_id": work_id,
                 "indigenous_nation_id": data.get("indigenous_nation_id"),
                 "indigenous_category_id": data.get("indigenous_category_id", None),
-                "pin": data.get("pin", None),
+                "indigenous_consultation_level_id": data.get("indigenous_consultation_level_id", None),
                 "is_active": data.get("is_active"),
             }
         )
@@ -662,11 +673,14 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_indigenous_nation_id,
         ):
             raise ResourceExistsError("First nation Work association already exists")
+
+        cls._check_can_edit_or_team_member_auth(work_indigenous_nation.work_id)
+
         work_indigenous_nation.is_active = data.get("is_active")
         work_indigenous_nation.indigenous_category_id = data.get(
             "indigenous_category_id"
         )
-        work_indigenous_nation.pin = data.get("pin")
+        work_indigenous_nation.indigenous_consultation_level_id = data.get("indigenous_consultation_level_id")
         work_indigenous_nation.flush()
         db.session.commit()
         return work_indigenous_nation
@@ -676,6 +690,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
+        cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
 
         schema = WorkFirstNationSchema(many=True)
@@ -686,14 +701,14 @@ class WorkService:  # pylint: disable=too-many-public-methods
         file_buffer = BytesIO()
         columns = [
             "nation",
-            "pin",
+            "consultation_level",
             "relationship_holder",
             "pip_link",
             "active",
         ]
         headers = [
             "Nation",
-            "PIN",
+            "Consultation Level",
             "Relationship Holder",
             "PIP Link",
             "Active",
@@ -705,6 +720,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def import_first_nations(cls, work_id: int, indigenous_nation_ids: [int]):
         """Create associations for given work and first nations"""
+        cls._check_can_create_or_team_member_auth(work_id)
         existing_first_nations_qry = db.session.query(IndigenousWork).filter(
             IndigenousWork.work_id == work_id,
             IndigenousWork.is_deleted.is_(False),
@@ -895,3 +911,21 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Get all work types"""
         work_types = WorkType.find_all()
         return WorkTypeSchema(many=True).dump(work_types)
+
+    @classmethod
+    def _check_can_edit_or_team_member_auth(cls, work_id: int):
+        """Check if user has edit role or is team member"""
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
+
+    @classmethod
+    def _check_can_create_or_team_member_auth(cls, work_id: int):
+        """Check if user has create role or is team member"""
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)

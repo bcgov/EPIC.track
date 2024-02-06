@@ -12,7 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Base schema for path parameter validation"""
-from marshmallow import EXCLUDE, Schema, fields, pre_load
+import json
+
+from marshmallow import EXCLUDE
+from marshmallow import Schema as MarshmallowSchema
+from marshmallow import fields, pre_load
+
+from api.exceptions import BadRequestError
+
+
+class Schema(MarshmallowSchema):
+    """Base Schema"""
+
+    def handle_error(self, error, data, **kwargs):
+        """Log and raise our custom exception when validation fails."""
+        raise BadRequestError(json.dumps(error.messages))
 
 
 class RequestPathParameterSchema(Schema):

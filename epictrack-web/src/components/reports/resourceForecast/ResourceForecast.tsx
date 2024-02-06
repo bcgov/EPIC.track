@@ -1,16 +1,13 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Alert,
   Autocomplete,
   Box,
-  Container,
   Grid,
   IconButton,
   TextField,
   Tooltip,
 } from "@mui/material";
 import {
-  MaterialReactTable,
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
   MRT_ToggleFullScreenButton,
@@ -24,6 +21,7 @@ import {
   RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
+  COMMON_ERROR_MESSAGE,
 } from "../../../constants/application-constant";
 import ReportService from "../../../services/reportService";
 import { dateUtils } from "../../../utils";
@@ -32,22 +30,38 @@ import ClearAllIcon from "@mui/icons-material/ClearAll";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
+import MasterTrackTable from "components/shared/MasterTrackTable";
+import { showNotification } from "components/shared/notificationProvider";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 
 export default function ResourceForecast() {
-  const [reportDate, setReportDate] = React.useState<string>("");
+  const [reportDate, setReportDate] = useState<string>("");
   const [showReportDateBanner, setShowReportDateBanner] =
-    React.useState<boolean>(false);
-  const [resultStatus, setResultStatus] = React.useState<string>();
-  const [rfData, setRFData] = React.useState<ResourceForecastModel[]>([]);
-  const [columnFilters, setColumnFilters] =
-    React.useState<MRT_ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] =
-    React.useState<MRT_VisibilityState>({});
-  const [globalFilter, setGlobalFilter] = React.useState();
-  const [filters, setFilters] = React.useState({});
+    useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [rfData, setRFData] = useState<ResourceForecastModel[]>([]);
+  const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
+    {}
+  );
+  const [globalFilter, setGlobalFilter] = useState();
+  const [filters, setFilters] = useState({});
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10, //customize the default page size
+  });
 
   const FILENAME_PREFIX = "EAO_Resource_Forecast";
 
+  useEffect(() => {
+    const options = rowsPerPageOptions(rfData.length);
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: options[options.length - 1].value,
+    }));
+  }, [rfData]);
   React.useEffect(() => {
     const hiddenColumns = Object.keys(columnVisibility).filter(
       (p) => !columnVisibility[p]
@@ -138,6 +152,7 @@ export default function ResourceForecast() {
                 flexWrap: "wrap",
                 alignContent: "center",
                 justifyContent: "center",
+                textWrap: "wrap",
                 padding: "1rem",
               }}
             >
@@ -312,7 +327,7 @@ export default function ResourceForecast() {
     ]
   );
   const fetchReportData = React.useCallback(async () => {
-    setResultStatus(RESULT_STATUS.LOADING);
+    setIsLoading(true);
     try {
       const reportData = await ReportService.fetchReportData(
         REPORT_TYPE.RESOURCE_FORECAST,
@@ -320,8 +335,8 @@ export default function ResourceForecast() {
           report_date: reportDate,
         }
       );
-      setResultStatus(RESULT_STATUS.LOADED);
-      if (reportData.status === 200) {
+      setIsLoading(false);
+      if (reportData.status && reportData.status === 200) {
         const data = reportData.data as never[];
         data.forEach((element) => {
           Object.keys(element).forEach(
@@ -329,13 +344,14 @@ export default function ResourceForecast() {
           );
         });
         setRFData(data);
-      }
-      if (reportData.status === 204) {
-        setResultStatus(RESULT_STATUS.NO_RECORD);
+      } else {
         setRFData([]);
       }
     } catch (error) {
-      setResultStatus(RESULT_STATUS.ERROR);
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+      setRFData([]);
     }
   }, [reportDate]);
   const downloadPDFReport = React.useCallback(async () => {
@@ -362,7 +378,9 @@ export default function ResourceForecast() {
       document.body.appendChild(link);
       link.click();
     } catch (error) {
-      setResultStatus(RESULT_STATUS.ERROR);
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
     }
   }, [reportDate, filters, fetchReportData]);
   return (
@@ -383,65 +401,61 @@ export default function ResourceForecast() {
         />
       </Grid>
       <Grid item sm={12}>
-        {resultStatus !== RESULT_STATUS.ERROR && (
-          <MaterialReactTable
-            initialState={{
-              density: "compact",
-            }}
-            columns={columns}
-            globalFilterFn="contains"
-            enableDensityToggle={false}
-            enableStickyHeader={true}
-            state={{
-              columnFilters,
-              columnVisibility,
-              globalFilter,
-              isLoading: resultStatus === RESULT_STATUS.LOADING,
-              showGlobalFilter: true,
-            }}
-            positionGlobalFilter="left"
-            muiSearchTextFieldProps={{
-              placeholder: "Search",
-              sx: { minWidth: "300px" },
-              variant: "outlined",
-            }}
-            onColumnFiltersChange={setColumnFilters}
-            onColumnVisibilityChange={setColumnVisibility}
-            onGlobalFilterChange={setGlobalFilter}
-            renderToolbarInternalActions={({ table }) => (
-              <>
-                <MRT_ToggleFiltersButton table={table} />
-                <MRT_ShowHideColumnsButton table={table} />
-                {/* add your own custom print button or something */}
-                <Tooltip title="Clear all filters">
-                  <IconButton
-                    onClick={() => {
-                      setColumnFilters([]);
-                      setColumnVisibility({});
-                      setGlobalFilter(undefined);
-                    }}
-                  >
-                    <ClearAllIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Export to csv">
-                  <IconButton onClick={() => exportToCsv(table)}>
-                    <FileDownloadIcon />
-                  </IconButton>
-                </Tooltip>
-                <MRT_ToggleFullScreenButton table={table} />
-              </>
-            )}
-            data={rfData}
-          />
-        )}
-        {resultStatus === RESULT_STATUS.ERROR && (
-          <Container>
-            <Alert severity="error">
-              Error occured during processing. Please try again after some time.
-            </Alert>
-          </Container>
-        )}
+        <MasterTrackTable
+          columns={columns}
+          enablePagination
+          onPaginationChange={setPagination}
+          muiPaginationProps={{
+            rowsPerPageOptions: rowsPerPageOptions(rfData.length),
+          }}
+          state={{
+            columnFilters,
+            columnVisibility,
+            globalFilter,
+            isLoading: isLoading,
+            showGlobalFilter: true,
+            pagination,
+          }}
+          positionGlobalFilter="left"
+          muiSearchTextFieldProps={{
+            placeholder: "Search",
+            sx: { minWidth: "300px" },
+            variant: "outlined",
+          }}
+          muiTableBodyCellProps={{
+            sx: {
+              paddingRight: "2px",
+            },
+          }}
+          onColumnFiltersChange={setColumnFilters}
+          onColumnVisibilityChange={setColumnVisibility}
+          onGlobalFilterChange={setGlobalFilter}
+          renderToolbarInternalActions={({ table }) => (
+            <>
+              <MRT_ToggleFiltersButton table={table} />
+              <MRT_ShowHideColumnsButton table={table} />
+              {/* add your own custom print button or something */}
+              <Tooltip title="Clear all filters">
+                <IconButton
+                  onClick={() => {
+                    setColumnFilters([]);
+                    setColumnVisibility({});
+                    setGlobalFilter(undefined);
+                  }}
+                >
+                  <ClearAllIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Export to csv">
+                <IconButton onClick={() => exportToCsv(table)}>
+                  <FileDownloadIcon />
+                </IconButton>
+              </Tooltip>
+              <MRT_ToggleFullScreenButton table={table} />
+            </>
+          )}
+          data={rfData}
+        />
       </Grid>
     </ETPageContainer>
   );
