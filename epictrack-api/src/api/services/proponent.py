@@ -46,7 +46,6 @@ class ProponentService:
         query = db.session.query(Proponent).filter(Proponent.id == proponent_id)
         if exclude_deleted:
             query = query.filter(Proponent.is_deleted.is_(False))
-        print(query.statement.compile(compile_kwargs={"literal_binds": True}))
         proponent = query.one_or_none()
         if proponent:
             return proponent

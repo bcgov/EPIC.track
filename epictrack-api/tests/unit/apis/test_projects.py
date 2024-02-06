@@ -13,13 +13,16 @@
 # limitations under the License.
 """Test suite for projects."""
 
+from decimal import Decimal
 from http import HTTPStatus
+from pathlib import Path
 from urllib.parse import urljoin
 
-from decimal import Decimal
+from werkzeug.datastructures import FileStorage
 
-from tests.utilities.factory_scenarios import (TestProjectInfo)
+from tests.utilities.factory_scenarios import TestProjectInfo
 from tests.utilities.factory_utils import factory_project_model
+
 
 API_BASE_URL = "/api/v1/"
 
@@ -57,9 +60,8 @@ def test_delete_project(client, auth_header):
     project = factory_project_model()
     url = urljoin(API_BASE_URL, f'projects/{project.id}')
     client.delete(url, headers=auth_header)
-    projects_url = urljoin(API_BASE_URL, "projects")
-    response = client.get(projects_url, headers=auth_header)
-    assert len(response.json) == 0
+    response = client.get(url, headers=auth_header)
+    assert response.status_code == HTTPStatus.NOT_FOUND
 
 
 def test_project_detail(client, auth_header):
@@ -77,3 +79,45 @@ def test_project_detail(client, auth_header):
             response_value = Decimal(response_value)
         assert expected_value == response_value, \
             f"Value mismatch for key {key}: expected {expected_value}, got {response_value}"
+
+
+def test_import_project(client, auth_header):
+    """Test import project"""
+    url = urljoin(API_BASE_URL, "projects/import")
+    file_path = Path("./src/api/templates/master_templates/Projects.xlsx")
+    file_path = file_path.resolve()
+    file = FileStorage(
+        stream=open(file_path, "rb"),
+        filename="projects.xlsx",
+    )
+    response = client.post(
+        url,
+        data={"file": file},
+        content_type="multipart/form-data",
+        headers=auth_header
+    )
+    assert response.status_code == HTTPStatus.CREATED
+
+
+def test_validate_project(client, auth_header):
+    """Test validate project"""
+    url = urljoin(API_BASE_URL, "projects/exists")
+
+    # Scenario 1: Updating an existing project
+    project = factory_project_model()
+    payload = {"name": project.name, "project_id": project.id}
+    response = client.get(url, query_string=payload, headers=auth_header)
+    assert response.status_code == HTTPStatus.OK
+    assert not response.json["exists"]
+
+    # Scenario 2: Creating new project with existing name
+    del payload["project_id"]
+    response = client.get(url, query_string=payload, headers=auth_header)
+    assert response.status_code == HTTPStatus.OK
+    assert response.json["exists"]
+
+    # Scenario 3: Creating new project with new name
+    payload = TestProjectInfo.project2.value
+    response = client.get(url, query_string=payload, headers=auth_header)
+    assert response.status_code == HTTPStatus.OK
+    assert not response.json["exists"]
