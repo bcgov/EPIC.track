@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Grid } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -62,13 +62,24 @@ const schema = yup.object().shape({
   abbreviation: yup.string(),
 });
 
-export default function ProjectForm({ ...props }) {
+type ProjectFormProps = {
+  project: Project | null;
+  fetchProject: () => void;
+  saveProject: (data: any) => void;
+};
+
+export default function ProjectForm({
+  project,
+  fetchProject,
+  saveProject,
+}: ProjectFormProps) {
   const [envRegions, setEnvRegions] = React.useState<Region[]>();
   const [nrsRegions, setNRSRegions] = React.useState<Region[]>();
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
-  const [disabled, setDisabled] = React.useState<boolean>();
+
+  const disabled = Boolean(project);
 
   const [isProponentFieldLocked, setIsProponentFieldLocked] =
     React.useState<boolean>(false);
@@ -76,32 +87,19 @@ export default function ProjectForm({ ...props }) {
   const [isNameFieldLocked, setIsNameFieldLocked] =
     React.useState<boolean>(false);
 
-  const ctx = React.useContext(MasterContext);
-
-  const project = ctx?.item as Project;
-
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
 
-  React.useEffect(() => {
-    ctx.setDialogProps({
-      saveButtonProps: {
-        disabled: isSpecialFieldLocked,
-      },
-    });
-  }, [isSpecialFieldLocked]);
-
-  React.useEffect(() => {
-    ctx.setFormId("project-form");
-  }, []);
-
-  React.useEffect(() => {
-    setDisabled(props.projectId ? true : false);
-    ctx.setId(props.projectId);
-  }, [ctx.id]);
+  // React.useEffect(() => {
+  //   ctx.setDialogProps({
+  //     saveButtonProps: {
+  //       disabled: isSpecialFieldLocked,
+  //     },
+  //   });
+  // }, [isSpecialFieldLocked])
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as Project,
+    defaultValues: project ?? undefined,
     mode: "onBlur",
   });
 
@@ -116,16 +114,12 @@ export default function ProjectForm({ ...props }) {
     resetField,
     watch,
   } = methods;
+
+  useEffect(() => {
+    reset(project ?? defaultProject);
+  }, [project]);
+
   const formValues = useWatch({ control });
-
-  React.useEffect(() => {
-    reset(ctx.item ?? defaultProject);
-  }, [ctx.item]);
-
-  React.useEffect(() => {
-    const name = (ctx?.item as Project)?.name;
-    ctx.setTitle(name || "Create Project");
-  }, [ctx.title, ctx.item]);
 
   const setRegions = (regions: Region[]) => {
     const envRegions = regions.filter((p) => p.entity === "ENV");
@@ -153,7 +147,7 @@ export default function ProjectForm({ ...props }) {
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
       // The subtype select box wasn't resetting when type changes
-      if (formValues.sub_type_id !== (ctx.item as Project)?.sub_type_id) {
+      if (formValues.sub_type_id !== project?.sub_type_id) {
         reset({
           ...formValues,
           sub_type_id: undefined,
@@ -166,7 +160,7 @@ export default function ProjectForm({ ...props }) {
     if (formValues.type_id) {
       getSubTypesByType();
     }
-  }, [formValues.type_id, ctx.item]);
+  }, [formValues.type_id, project]);
 
   React.useEffect(() => {
     const promises: any[] = [];
@@ -181,13 +175,11 @@ export default function ProjectForm({ ...props }) {
   };
 
   const onSubmitHandler = async (data: any) => {
-    ctx.onSave(data, () => {
-      reset();
-    });
+    saveProject(data);
   };
 
   const onBlurProjectName = async () => {
-    if (!formValues.name || Boolean(props.projectId)) return;
+    if (!formValues.name || Boolean(project)) return;
 
     try {
       const response = await projectService.createProjectAbbreviation(
@@ -236,9 +228,9 @@ export default function ProjectForm({ ...props }) {
             onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
             open={isNameFieldLocked}
             onSave={() => {
-              ctx.getById(project?.id.toString());
+              fetchProject();
             }}
-            title={project?.name}
+            title={project?.name || ""}
           >
             <ControlledTextField
               name="name"
@@ -254,7 +246,7 @@ export default function ProjectForm({ ...props }) {
             onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
             open={isProponentFieldLocked}
             onSave={() => {
-              ctx.getById(project?.id.toString());
+              fetchProject();
             }}
             options={proponents || []}
           >
@@ -263,7 +255,7 @@ export default function ProjectForm({ ...props }) {
               disabled={disabled}
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.proponent_id}
+              defaultValue={project?.proponent_id}
               options={proponents || []}
               getOptionValue={(o: Proponent) => o?.id?.toString()}
               getOptionLabel={(o: Proponent) => o.name}
@@ -277,7 +269,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`type_select_${formValues.type_id}`}
               helperText={errors?.type_id?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.type_id}
+              defaultValue={project?.type_id}
               options={types || []}
               getOptionValue={(o: Type) => o?.id?.toString()}
               getOptionLabel={(o: Type) => o.name}
@@ -291,7 +283,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`subtype_select_${formValues.sub_type_id}`}
               helperText={errors?.sub_type_id?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.sub_type_id}
+              defaultValue={project?.sub_type_id}
               options={subTypes || []}
               getOptionValue={(o: SubType) => o?.id?.toString()}
               getOptionLabel={(o: SubType) => o.name}
@@ -364,7 +356,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`env_select_${formValues.region_id_env}`}
               helperText={errors?.region_id_env?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.region_id_env}
+              defaultValue={project?.region_id_env}
               options={envRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o?.name}
@@ -378,7 +370,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`nrs_select_${formValues.region_id_flnro}`}
               helperText={errors?.region_id_flnro?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.region_id_flnro}
+              defaultValue={project?.region_id_flnro}
               options={nrsRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o?.name}

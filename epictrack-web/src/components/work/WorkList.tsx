@@ -41,6 +41,7 @@ const WorkList = () => {
   // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
 
   const loadWorks = async () => {
+    setLoadingWorks(true);
     try {
       const response = await workService.getAll();
       setWorks(response.data);

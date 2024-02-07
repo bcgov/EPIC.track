@@ -9,8 +9,16 @@ type WorkDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
   workId?: number;
+  saveWorkCallback?: () => void;
 };
-export const WorkDialog = ({ workId, open, setOpen }: WorkDialogProps) => {
+export const WorkDialog = ({
+  workId,
+  open,
+  setOpen,
+  saveWorkCallback = () => {
+    return;
+  },
+}: WorkDialogProps) => {
   const [work, setWork] = useState<Work | null>(null);
 
   const fetchWork = async () => {
@@ -60,6 +68,7 @@ export const WorkDialog = ({ workId, open, setOpen }: WorkDialogProps) => {
       await createWork(data);
     }
     setOpen(false);
+    saveWorkCallback();
   };
 
   useEffect(() => {
