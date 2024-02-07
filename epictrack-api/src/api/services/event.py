@@ -16,6 +16,7 @@ import copy
 import functools
 from datetime import datetime, timedelta
 from typing import List
+import pytz
 
 from sqlalchemy import and_, extract, func, or_
 
@@ -42,6 +43,7 @@ from api.models.project import Project
 from api.models.work_type import WorkType
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
+from api.application_constants import MIN_WORK_START_DATE
 
 from ..utils.roles import Membership
 from ..utils.roles import Role as KeycloakRole
@@ -295,6 +297,7 @@ class EventService:
         current_work_phase_index = util.find_index_in_array(
             all_work_phases, current_work_phase
         )
+        cls._validate_dates(event, current_work_phase, all_work_phases)
         cls._previous_event_acutal_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old
         )
@@ -382,6 +385,88 @@ class EventService:
                     current_work_phase,
                     current_event_index,
                 )
+
+    @classmethod
+    def _validate_dates(
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+    ):
+        """Perform date validations for the min and max dates for events"""
+        if event.actual_date:
+            actual_min_date = cls._find_actual_date_min(
+                event, current_work_phase, all_work_phases
+            )
+            actual_max_date = cls._find_actual_date_max(current_work_phase)
+            if (
+                event.actual_date < actual_min_date
+                or event.actual_date > actual_max_date
+            ):
+                raise UnprocessableEntityError(
+                    f"Actual date should be between {actual_min_date} and {actual_max_date}"
+                )
+        if not event.actual_date:
+            anticipated_min_date = cls._find_anticipated_date_min(
+                event, current_work_phase, all_work_phases
+            )
+            if event.anticipated_date < anticipated_min_date:
+                raise UnprocessableEntityError(
+                    f"Anticipdated date should be greater than {anticipated_min_date}"
+                )
+
+    @classmethod
+    def _find_anticipated_date_min(
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+    ):
+        """Return the min date of anticipated date"""
+        anticipated_date_min = (
+            datetime.strptime(MIN_WORK_START_DATE, "%Y-%m-%d").replace(tzinfo=pytz.utc)
+            if cls._is_start_event(event)
+            and cls._is_start_phase(current_work_phase, all_work_phases)
+            else current_work_phase.work.start_date
+        )
+        return anticipated_date_min
+
+    @classmethod
+    def _find_actual_date_min(
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+    ):
+        """Return the min date of actual date"""
+        actual_date_min = (
+            datetime.strptime(MIN_WORK_START_DATE, "%Y-%m-%d").replace(tzinfo=pytz.utc)
+            if cls._is_start_event(event)
+            and cls._is_start_phase(current_work_phase, all_work_phases)
+            else current_work_phase.start_date
+        )
+        return actual_date_min
+
+    @classmethod
+    def _find_actual_date_max(cls, current_work_phase: WorkPhase):
+        """Return the max date of actual date"""
+        date_diff_days = (
+            (current_work_phase.end_date - current_work_phase.start_date).days
+            if current_work_phase.legislated
+            else 0
+        )
+        actual_date_max = (
+            current_work_phase.start_date + timedelta(days=date_diff_days)
+            if current_work_phase.legislated
+            else datetime.utcnow().replace(tzinfo=pytz.utc)
+        )
+        return actual_date_max
+
+    @classmethod
+    def _is_start_event(cls, event):
+        """Return true if the given event is start event"""
+        return (
+            event.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+        )
+
+    @classmethod
+    def _is_start_phase(
+        cls, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+    ):
+        """Return true if the current phase is start phase"""
+        return all_work_phases[0].id == current_work_phase.id
 
     @classmethod
     def _handle_work_phase_for_start_event(
