@@ -397,8 +397,8 @@ class EventService:
             )
             actual_max_date = cls._find_actual_date_max(current_work_phase)
             if (
-                event.actual_date <= actual_min_date
-                or event.actual_date >= actual_max_date
+                event.actual_date < actual_min_date
+                or event.actual_date > actual_max_date
             ):
                 raise UnprocessableEntityError(
                     f"Actual date should be between {actual_min_date} and {actual_max_date}"
