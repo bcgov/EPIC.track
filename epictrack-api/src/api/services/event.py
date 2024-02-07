@@ -14,9 +14,9 @@
 """Service to manage Event."""
 import copy
 import functools
-import pytz
 from datetime import datetime, timedelta
 from typing import List
+import pytz
 
 from sqlalchemy import and_, extract, func, or_
 
