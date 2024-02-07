@@ -44,6 +44,10 @@ class TestProjectInfo(Enum):
 
     }
 
+    project2 = {
+        "name": fake.word(),
+    }
+
 
 class TestWorkInfo(Enum):
     """Test scenarios of Project Creation."""
