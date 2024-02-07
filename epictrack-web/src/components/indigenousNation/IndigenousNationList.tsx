@@ -59,6 +59,17 @@ export default function IndigenousNationList() {
     [indigenousNations]
   );
 
+  const orgTypes = useMemo(
+    () =>
+      getSelectFilterOptions(
+        indigenousNations,
+        "pip_org_type",
+        (value) => value?.name,
+        (value) => value?.name
+      ),
+    [indigenousNations]
+  );
+
   const columns = React.useMemo<MRT_ColumnDef<FirstNation>[]>(
     () => [
       {
@@ -82,6 +93,20 @@ export default function IndigenousNationList() {
       {
         accessorKey: "pip_org_type.name",
         header: "Organization Type",
+        filterVariant: "multi-select",
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="positionsFilter"
+            />
+          );
+        },
+        filterSelectOptions: orgTypes,
+        filterFn: "multiSelectFilter",
       },
       {
         accessorKey: "relationship_holder.full_name",
