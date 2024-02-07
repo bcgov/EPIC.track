@@ -199,5 +199,5 @@ class TestSpecialField(Enum):
         "entity": EntityEnum.PROPONENT.value,
         "field_name": "name",
         "field_value": fake.word(),
-        "active_from": (prev_from_date := fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE)).isoformat()
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
     }
