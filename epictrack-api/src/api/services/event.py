@@ -14,6 +14,7 @@
 """Service to manage Event."""
 import copy
 import functools
+import pytz
 from datetime import datetime, timedelta
 from typing import List
 
@@ -394,7 +395,7 @@ class EventService:
             actual_min_date = cls._find_actual_date_min(
                 event, current_work_phase, all_work_phases
             )
-            actual_max_date = cls._find_actual_date_max(event, current_work_phase)
+            actual_max_date = cls._find_actual_date_max(current_work_phase)
             if (
                 event.actual_date <= actual_min_date
                 or event.actual_date >= actual_max_date
@@ -417,7 +418,7 @@ class EventService:
     ):
         """Return the min date of anticipated date"""
         anticipated_date_min = (
-            datetime.strptime(MIN_WORK_START_DATE, "%Y-%m-%d")
+            datetime.strptime(MIN_WORK_START_DATE, "%Y-%m-%d").replace(tzinfo=pytz.utc)
             if cls._is_start_event(event)
             and cls._is_start_phase(current_work_phase, all_work_phases)
             else current_work_phase.work.start_date
@@ -430,7 +431,7 @@ class EventService:
     ):
         """Return the min date of actual date"""
         actual_date_min = (
-            datetime.strptime(MIN_WORK_START_DATE, "%Y-%m-%d")
+            datetime.strptime(MIN_WORK_START_DATE, "%Y-%m-%d").replace(tzinfo=pytz.utc)
             if cls._is_start_event(event)
             and cls._is_start_phase(current_work_phase, all_work_phases)
             else current_work_phase.start_date
@@ -438,7 +439,7 @@ class EventService:
         return actual_date_min
 
     @classmethod
-    def _find_actual_date_max(cls, event: Event, current_work_phase: WorkPhase):
+    def _find_actual_date_max(cls, current_work_phase: WorkPhase):
         """Return the max date of actual date"""
         date_diff_days = (
             (current_work_phase.end_date - current_work_phase.start_date).days
@@ -448,14 +449,17 @@ class EventService:
         actual_date_max = (
             current_work_phase.start_date + timedelta(days=date_diff_days)
             if current_work_phase.legislated
-            else datetime.utcnow().replace(tzinfo=event.anticipated_date.tzinfo)
+            else datetime.utcnow().replace(tzinfo=pytz.utc)
         )
         return actual_date_max
 
     @classmethod
     def _is_start_event(cls, event):
         """Return true if the given event is start event"""
-        return event.event_configuration.event_position == EventPositionEnum.START.value
+        return (
+            event.event_configuration.event_position.value
+            == EventPositionEnum.START.value
+        )
 
     @classmethod
     def _is_start_phase(

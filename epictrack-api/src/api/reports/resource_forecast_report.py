@@ -225,7 +225,7 @@ class EAResourceForeCastReport(ReportFactory):
                 WorkType.name.label("ea_type"),
                 WorkType.report_title.label("ea_type_label"),
                 WorkType.sort_order.label("ea_type_sort_order"),
-                PhaseCode.name.label("project_phase"),
+                WorkPhase.name.label("project_phase"),
                 EAAct.name.label("ea_act"),
                 FederalInvolvement.name.label("iaac"),
                 SubType.short_name.label("sub_type"),

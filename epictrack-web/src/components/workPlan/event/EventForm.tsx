@@ -243,7 +243,8 @@ const EventForm = ({
     }
     return dayjs(new Date());
   }, [ctx.selectedWorkPhase]);
-
+  console.log("actual date min ", actualDateMin);
+  console.log("actual date max", actualDateMax);
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
