@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { Grid, Divider, Tooltip, Box, InputAdornment } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -14,7 +14,6 @@ import staffService from "../../../services/staffService/staffService";
 import dayjs from "dayjs";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import workService from "../../../services/workService/workService";
-import { MasterContext } from "../../shared/MasterContext";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { IconProps } from "../../icons/type";
 import projectService from "../../../services/projectService/projectService";
@@ -69,7 +68,13 @@ const schema = yup.object<Work>().shape({
 
 const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
 
-export default function WorkForm({ ...props }) {
+type WorkFormProps = {
+  work: Work | null;
+  fetchWork: () => void;
+  saveWork: (data: any) => void;
+};
+
+export default function WorkForm({ work, fetchWork, saveWork }: WorkFormProps) {
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
   const [projects, setProjects] = React.useState<ListType[]>([]);
@@ -82,12 +87,11 @@ export default function WorkForm({ ...props }) {
   const [epds, setEPDs] = React.useState<Staff[]>([]);
   const [leads, setLeads] = React.useState<Staff[]>([]);
   const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
-  const ctx = React.useContext(MasterContext);
   const [titlePrefix, setTitlePrefix] = React.useState<string>("");
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as Work,
+    defaultValues: work ?? undefined,
     mode: "onBlur",
   });
 
@@ -105,7 +109,6 @@ export default function WorkForm({ ...props }) {
 
   const federalInvolvementId = watch("federal_involvement_id");
   const title = watch("title");
-  const work = ctx?.item as Work;
 
   const [isEpdFieldLocked, setIsEpdFieldLocked] =
     React.useState<boolean>(false);
@@ -115,29 +118,17 @@ export default function WorkForm({ ...props }) {
 
   const isSpecialFieldLocked = isEpdFieldLocked || isWorkLeadFieldLocked;
 
-  React.useEffect(() => {
-    ctx.setDialogProps({
-      saveButtonProps: {
-        disabled: isSpecialFieldLocked,
-      },
-    });
-  }, [isSpecialFieldLocked]);
+  useEffect(() => {
+    reset(work ?? defaultWork);
+  }, [work]);
 
-  React.useEffect(() => {
-    ctx.setFormId("work-form");
-  }, []);
-
-  React.useEffect(() => {
-    ctx.setId(props.workId);
-  }, [ctx.id]);
-
-  React.useEffect(() => {
-    ctx.setTitle(ctx.item ? work?.title : "Create Work");
-  }, [ctx.title, ctx.item]);
-
-  React.useEffect(() => {
-    reset(ctx.item ?? defaultWork);
-  }, [ctx.item]);
+  // React.useEffect(() => {
+  //   ctx.setDialogProps({
+  //     saveButtonProps: {
+  //       disabled: isSpecialFieldLocked,
+  //     },
+  //   });
+  // }, [isSpecialFieldLocked]);
 
   React.useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
@@ -213,9 +204,7 @@ export default function WorkForm({ ...props }) {
 
   const onSubmitHandler = async (data: any) => {
     data.start_date = Moment(data.start_date).format();
-    ctx.onSave(data, () => {
-      reset();
-    });
+    saveWork(data);
   };
 
   const simple_title = watch("simple_title");
@@ -437,7 +426,7 @@ export default function WorkForm({ ...props }) {
           onLockClick={() => setIsEpdFieldLocked((prev) => !prev)}
           open={isEpdFieldLocked}
           onSave={() => {
-            ctx.getById(props.workId);
+            fetchWork();
           }}
           options={epds || []}
         >
@@ -458,7 +447,7 @@ export default function WorkForm({ ...props }) {
           onLockClick={() => setIsWorkLeadFieldLocked((prev) => !prev)}
           open={isWorkLeadFieldLocked}
           onSave={() => {
-            ctx.getById(props.workId);
+            fetchWork();
           }}
           options={leads || []}
         >
