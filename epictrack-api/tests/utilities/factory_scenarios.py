@@ -20,6 +20,8 @@ from enum import Enum
 from faker import Faker
 
 from api.config import get_named_config
+from api.models.special_field import EntityEnum
+from api.utils.constants import CANADA_TIMEZONE
 
 
 fake = Faker()
@@ -187,4 +189,15 @@ class TestPipOrgType(Enum):
 
     pip_org_type1 = {
         "name": fake.word()
+    }
+
+
+class TestSpecialField(Enum):
+    """Test scenarios for Special fields"""
+
+    special_field1 = {
+        "entity": EntityEnum.PROPONENT.value,
+        "field_name": "name",
+        "field_value": fake.word(),
+        "active_from": (prev_from_date := fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE)).isoformat()
     }
