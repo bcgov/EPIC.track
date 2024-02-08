@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Button, Grid, Stack } from "@mui/material";
+import { Button, Grid, Stack, Box } from "@mui/material";
 import { ThirtySixtyNinety } from "./ThirtySixtyNinety";
 import { ReferralSchedule } from "./ReferralSchedule";
 import { PreviewSkeleton } from "./PreviewSkeleton";
@@ -41,22 +41,34 @@ export const ReportsPreview = () => {
       <Grid item xs={12}>
         <Stack direction={{ lg: "row", xs: "column" }} spacing={2}>
           <Button
-            variant={
-              selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
-                ? "contained"
-                : "outlined"
-            }
+            variant="outlined"
             onClick={() => setSelectedTabIndex(TAB.THIRTY_SIXTY_NINETY)}
+            sx={{
+              backgroundColor:
+                selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
+                  ? "primary.main"
+                  : "background.paper",
+              color:
+                selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
+                  ? "background.paper"
+                  : "primary.main",
+            }}
           >
             30-60-90
           </Button>
           <Button
-            variant={
-              selectedTabIndex === TAB.REFERRAL_SCHEDULE
-                ? "contained"
-                : "outlined"
-            }
+            variant="outlined"
             onClick={() => setSelectedTabIndex(TAB.REFERRAL_SCHEDULE)}
+            sx={{
+              backgroundColor:
+                selectedTabIndex === TAB.REFERRAL_SCHEDULE
+                  ? "primary.main"
+                  : "background.paper",
+              color:
+                selectedTabIndex === TAB.REFERRAL_SCHEDULE
+                  ? "background.paper"
+                  : "primary.main",
+            }}
           >
             Referral Schedule
           </Button>
