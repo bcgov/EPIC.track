@@ -16,6 +16,8 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { useAppSelector } from "../../hooks";
+import UserMenu from "components/shared/userMenu/UserMenu";
+import { debounce } from "lodash";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
@@ -23,6 +25,9 @@ export default function IndigenousNationList() {
   const ctx = React.useContext(MasterContext);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const [staffPreviewAnchorEl, setStaffPreviewAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const [staff, setStaff] = React.useState<Staff>({} as Staff);
 
   React.useEffect(() => {
     ctx.setForm(
@@ -70,6 +75,19 @@ export default function IndigenousNationList() {
     [indigenousNations]
   );
 
+  const handleOpenStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
+    setStaff(
+      staffs.find((s) => s.full_name === event.currentTarget.textContent) ||
+        ({} as Staff)
+    );
+    setStaffPreviewAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
+    setStaff({} as Staff);
+    setStaffPreviewAnchorEl(null);
+  };
+
   const columns = React.useMemo<MRT_ColumnDef<FirstNation>[]>(
     () => [
       {
@@ -112,6 +130,21 @@ export default function IndigenousNationList() {
         accessorKey: "relationship_holder.full_name",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
+        Cell: (cell) => {
+          const staff = cell.row.original?.relationship_holder;
+          if (!staff) {
+            return "";
+          }
+          return (
+            <Box
+              onMouseEnter={handleOpenStaffPreview}
+              onMouseLeave={handleCloseStaffPreview}
+              sx={{ width: "fit-content" }}
+            >
+              {staff.full_name}
+            </Box>
+          );
+        },
       },
       {
         accessorKey: "is_active",
@@ -219,6 +252,16 @@ export default function IndigenousNationList() {
             )}
           />
         </Grid>
+        <UserMenu
+          data-testid={`user-menu-${staff.full_name}`}
+          anchorEl={staffPreviewAnchorEl}
+          email={staff.email || ""}
+          phone={staff.phone || ""}
+          position={staff.position?.name || ""}
+          firstName={staff.first_name || ""}
+          lastName={staff.last_name || ""}
+          onClose={handleCloseStaffPreview}
+        />
       </ETPageContainer>
     </>
   );
