@@ -204,9 +204,7 @@ describe("WorkForm", () => {
   });
 
   it("The title is created from project name and work type", () => {
-    cy.wait("@getWorkTypes")
-      .its("response.statusCode")
-      .should("be.oneOf", [200]);
+    cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
     const workTypeSelect = cy
       .get("label")
       .contains("Worktype")
@@ -221,7 +219,8 @@ describe("WorkForm", () => {
 
     cy.wait("@getProjectsListType")
       .its("response.statusCode")
-      .should("be.oneOf", [200]);
+      .should("eq", 200);
+
     const projectSelect = cy
       .get("label")
       .contains("Project")
