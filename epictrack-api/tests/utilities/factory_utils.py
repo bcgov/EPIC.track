@@ -17,6 +17,8 @@ Test Utility for creating model factory.
 """
 from datetime import datetime
 
+from psycopg2.extras import DateTimeTZRange
+
 from api.config import get_named_config
 from api.models import Staff
 from api.models import Work as WorkModel
@@ -26,17 +28,15 @@ from api.models.pip_org_type import PIPOrgType
 from api.models.project import Project as ProjectModel
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
+from api.models.special_field import SpecialField
 from tests.utilities.factory_scenarios import (
-    TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestStaffInfo, TestStatus, TestWorkInfo,
-    TestWorkIssuesInfo, TestWorkIssueUpdatesInfo)
+    TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestSpecialField, TestStaffInfo, TestStatus,
+    TestWorkInfo, TestWorkIssuesInfo, TestWorkIssueUpdatesInfo)
 
 
-CONFIG = get_named_config('testing')
+CONFIG = get_named_config("testing")
 
-JWT_HEADER = {
-    'typ': 'JWT',
-    'kid': 'epictrack'
-}
+JWT_HEADER = {"typ": "JWT", "kid": "epictrack"}
 
 
 def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
@@ -53,7 +53,7 @@ def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
         latitude=project_data["latitude"],
         longitude=project_data["longitude"],
         abbreviation=project_data["abbreviation"],
-        project_state=ProjectStateEnum.PRE_WORK.value
+        project_state=ProjectStateEnum.PRE_WORK.value,
     )
     project.save()
     return project
@@ -67,7 +67,9 @@ def factory_work_status_model(work_id, status_data: dict = TestStatus.status1.va
         work_id=work_id,
         is_approved=status_data["is_approved"],
         approved_by=status_data["approved_by"],
-        approved_date=datetime.fromisoformat(status_data["approved_date"]) if status_data["approved_date"] else None,
+        approved_date=datetime.fromisoformat(status_data["approved_date"])
+        if status_data["approved_date"]
+        else None,
     )
     status.save()
     return status
@@ -92,7 +94,7 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
         work_lead_id=epd.id,
         work_type_id=work_data["work_type_id"],
         substitution_act_id=work_data["substitution_act_id"],
-        decision_by_id=epd.id
+        decision_by_id=epd.id,
     )
     work.save()
     return work
@@ -106,7 +108,7 @@ def factory_staff_model(staff_data: dict = TestStaffInfo.staff1.value):
         phone=staff_data["phone"],
         email=staff_data["email"],
         is_active=staff_data["is_active"],
-        position_id=1
+        position_id=1,
     )
     staff.save()
     return staff
@@ -148,7 +150,7 @@ def factory_work_issue_updates_model(work_issue_id, update_data=None):
 def factory_auth_header(jwt, claims):
     """Produce JWT tokens for use in tests."""
     return {
-        'Authorization': 'Bearer ' + jwt.create_jwt(claims=claims, header=JWT_HEADER)
+        "Authorization": "Bearer " + jwt.create_jwt(claims=claims, header=JWT_HEADER)
     }
 
 
@@ -185,3 +187,22 @@ def factory_first_nation_model(first_nation_data=TestFirstNation.first_nation1.v
     )
     first_nation.save()
     return first_nation
+
+
+def factory_special_field_model(
+    special_field_data=TestSpecialField.special_field1.value,
+):
+    """Produce a special field model."""
+    proponent = factory_proponent_model()
+    time_range = DateTimeTZRange(
+        special_field_data.get("active_from"), None, bounds="[)"
+    )
+    special_field = SpecialField(
+        entity=special_field_data["entity"],
+        field_name=special_field_data["field_name"],
+        field_value=special_field_data["field_value"],
+        entity_id=proponent.id,
+        time_range=time_range
+    )
+    special_field.save()
+    return special_field

@@ -1,5 +1,7 @@
 """File representing constants used in the application"""
 
+from pytz import timezone
+
 from api.models.project import Project, ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.special_field import EntityEnum
@@ -36,3 +38,5 @@ SPECIAL_FIELD_ENTITY_MODEL_MAPS = {
     EntityEnum.WORK: Work,
     EntityEnum.PROPONENT: Proponent,
 }
+
+CANADA_TIMEZONE = timezone("US/Pacific")
