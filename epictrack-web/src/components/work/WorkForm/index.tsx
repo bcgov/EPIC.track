@@ -72,9 +72,15 @@ type WorkFormProps = {
   work: Work | null;
   fetchWork: () => void;
   saveWork: (data: any) => void;
+  setDisableDialogSave?: (disable: boolean) => void;
 };
 
-export default function WorkForm({ work, fetchWork, saveWork }: WorkFormProps) {
+export default function WorkForm({
+  work,
+  fetchWork,
+  saveWork,
+  setDisableDialogSave,
+}: WorkFormProps) {
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
   const [projects, setProjects] = React.useState<ListType[]>([]);
@@ -122,13 +128,11 @@ export default function WorkForm({ work, fetchWork, saveWork }: WorkFormProps) {
     reset(work ?? defaultWork);
   }, [work]);
 
-  // React.useEffect(() => {
-  //   ctx.setDialogProps({
-  //     saveButtonProps: {
-  //       disabled: isSpecialFieldLocked,
-  //     },
-  //   });
-  // }, [isSpecialFieldLocked]);
+  React.useEffect(() => {
+    if (setDisableDialogSave) {
+      setDisableDialogSave(isSpecialFieldLocked);
+    }
+  }, [isSpecialFieldLocked, setDisableDialogSave]);
 
   React.useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(

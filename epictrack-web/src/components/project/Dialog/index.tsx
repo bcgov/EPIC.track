@@ -20,6 +20,7 @@ export const ProjectDialog = ({
   },
 }: ProjectDialogProps) => {
   const [project, setProject] = useState<Project | null>(null);
+  const [disableSave, setDisableSave] = useState(false);
 
   const fetchProject = async () => {
     if (!projectId) return;
@@ -96,11 +97,15 @@ export const ProjectDialog = ({
         setOpen(false);
       }}
       formId={"project-form"}
+      saveButtonProps={{
+        disabled: disableSave,
+      }}
     >
       <ProjectForm
         project={project}
         fetchProject={fetchProject}
         saveProject={saveProject}
+        setDisableDialogSave={setDisableSave}
       />
     </TrackDialog>
   );

@@ -20,6 +20,7 @@ export const WorkDialog = ({
   },
 }: WorkDialogProps) => {
   const [work, setWork] = useState<Work | null>(null);
+  const [disableSave, setDisableSave] = useState(false);
 
   const fetchWork = async () => {
     if (!workId) return;
@@ -96,8 +97,16 @@ export const WorkDialog = ({
         setOpen(false);
       }}
       formId={"work-form"}
+      saveButtonProps={{
+        disabled: disableSave,
+      }}
     >
-      <WorkForm work={work} fetchWork={fetchWork} saveWork={saveWork} />
+      <WorkForm
+        work={work}
+        fetchWork={fetchWork}
+        saveWork={saveWork}
+        setDisableDialogSave={setDisableSave}
+      />
     </TrackDialog>
   );
 };

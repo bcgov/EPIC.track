@@ -66,12 +66,14 @@ type ProjectFormProps = {
   project: Project | null;
   fetchProject: () => void;
   saveProject: (data: any) => void;
+  setDisableDialogSave?: (disable: boolean) => void;
 };
 
 export default function ProjectForm({
   project,
   fetchProject,
   saveProject,
+  setDisableDialogSave,
 }: ProjectFormProps) {
   const [envRegions, setEnvRegions] = React.useState<Region[]>();
   const [nrsRegions, setNRSRegions] = React.useState<Region[]>();
@@ -89,13 +91,11 @@ export default function ProjectForm({
 
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
 
-  // React.useEffect(() => {
-  //   ctx.setDialogProps({
-  //     saveButtonProps: {
-  //       disabled: isSpecialFieldLocked,
-  //     },
-  //   });
-  // }, [isSpecialFieldLocked])
+  React.useEffect(() => {
+    if (setDisableDialogSave) {
+      setDisableDialogSave(isSpecialFieldLocked);
+    }
+  }, [isSpecialFieldLocked]);
 
   const methods = useForm({
     resolver: yupResolver(schema),
