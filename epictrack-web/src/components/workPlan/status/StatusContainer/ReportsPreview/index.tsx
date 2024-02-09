@@ -5,6 +5,7 @@ import { ReferralSchedule } from "./ReferralSchedule";
 import { PreviewSkeleton } from "./PreviewSkeleton";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import TabPanel from "../../../../shared/tab/TabPanel";
+import { Palette } from "styles/theme";
 
 const TAB = {
   THIRTY_SIXTY_NINETY: 0,
@@ -46,12 +47,12 @@ export const ReportsPreview = () => {
             sx={{
               backgroundColor:
                 selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
-                  ? "primary.main"
-                  : "background.paper",
+                  ? Palette.primary.main
+                  : Palette.white,
               color:
                 selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
-                  ? "background.paper"
-                  : "primary.main",
+                  ? Palette.white
+                  : Palette.primary.main,
             }}
           >
             30-60-90
@@ -62,12 +63,12 @@ export const ReportsPreview = () => {
             sx={{
               backgroundColor:
                 selectedTabIndex === TAB.REFERRAL_SCHEDULE
-                  ? "primary.main"
-                  : "background.paper",
+                  ? Palette.primary.main
+                  : Palette.white,
               color:
                 selectedTabIndex === TAB.REFERRAL_SCHEDULE
-                  ? "background.paper"
-                  : "primary.main",
+                  ? Palette.white
+                  : Palette.primary.main,
             }}
           >
             Referral Schedule
