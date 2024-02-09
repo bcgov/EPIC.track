@@ -8,10 +8,24 @@ import StatusHistory from "./StatusHistory";
 import WarningBox from "../../../shared/warningBox";
 import { When } from "react-if";
 import { isStatusOutOfDate } from "../shared";
+import { useAppSelector } from "hooks";
+import { hasPermission } from "components/shared/restricted";
+import { ROLES } from "constants/application-constant";
 
 const StatusView = () => {
-  const { statuses } = React.useContext(WorkplanContext);
+  const { statuses, team } = React.useContext(WorkplanContext);
   const { setShowStatusForm } = React.useContext(StatusContext);
+
+  const { email, roles: currentRoles } = useAppSelector(
+    (state) => state.user.userDetail
+  );
+  const isTeamMember = team?.find((member) => member.staff.email === email);
+  const canAddStatus =
+    isTeamMember ||
+    hasPermission({
+      roles: currentRoles,
+      allowed: [ROLES.CREATE],
+    });
 
   const onAddButtonClickHandler = () => {
     setShowStatusForm(true);
@@ -29,6 +43,9 @@ const StatusView = () => {
           subTitle="Create your first Status"
           addNewButtonText="Add Status"
           onAddNewClickHandler={() => onAddButtonClickHandler()}
+          buttonProps={{
+            disabled: !canAddStatus,
+          }}
         />
       </When>
       <When condition={statusOutOfDate}>
