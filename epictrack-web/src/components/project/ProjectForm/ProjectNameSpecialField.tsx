@@ -4,19 +4,20 @@ import {
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
-import { ETCaption3 } from "../../shared";
+import { ETCaption3, ETFormLabel } from "../../shared";
 import { Grid } from "@mui/material";
 import { When } from "react-if";
 import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
 
 interface ProjectNameSpecialFieldProps {
-  id: number;
+  id?: number;
   onSave: () => void;
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
   title: string;
 }
+const LABEL = "Name";
 export const ProjectNameSpecialField = ({
   id,
   onSave,
@@ -25,6 +26,15 @@ export const ProjectNameSpecialField = ({
   children,
   title,
 }: ProjectNameSpecialFieldProps) => {
+  if (!id) {
+    return (
+      <Grid item xs={6}>
+        <ETFormLabel>{LABEL}</ETFormLabel>
+        {children}
+      </Grid>
+    );
+  }
+
   return (
     <>
       <Grid item xs={6}>
@@ -32,7 +42,7 @@ export const ProjectNameSpecialField = ({
           id={id}
           open={open}
           onLockClick={onLockClick}
-          label={"Name"}
+          label={LABEL}
           required
         />
         {children}

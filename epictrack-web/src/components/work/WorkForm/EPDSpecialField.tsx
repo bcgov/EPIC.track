@@ -4,19 +4,20 @@ import {
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
-import { ETCaption3 } from "../../shared";
+import { ETCaption3, ETFormLabel } from "../../shared";
 import { Grid } from "@mui/material";
 import { When } from "react-if";
 import { Staff } from "../../../models/staff";
 import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
 interface EPDSpecialFieldProps {
-  id: number;
+  id?: number;
   options: Staff[];
   onSave: () => void;
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
 }
+const TITLE = "Responsible EPD";
 export const EPDSpecialField = ({
   id,
   onSave,
@@ -32,6 +33,14 @@ export const EPDSpecialField = ({
     }));
   }, [options]);
 
+  if (!id)
+    return (
+      <Grid item xs={6}>
+        <ETFormLabel required>{TITLE}</ETFormLabel>
+        {children}
+      </Grid>
+    );
+
   return (
     <>
       <Grid item xs={6}>
@@ -39,7 +48,7 @@ export const EPDSpecialField = ({
           id={id}
           open={open}
           onLockClick={onLockClick}
-          label={"Responsible EPD"}
+          label={TITLE}
           required
         />
         {children}
