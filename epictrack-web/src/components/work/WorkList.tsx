@@ -1,11 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Box, Button, Grid } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
-import WorkForm from "./WorkForm";
 import workService from "../../services/workService/workService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
@@ -17,37 +16,45 @@ import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
+import { WorkDialog } from "./Dialog";
+import { showNotification } from "components/shared/notificationProvider";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
+  const [showWorkDialogForm, setShowWorkDialogForm] = React.useState(false);
+
   const [phases, setPhases] = React.useState<string[]>([]);
   const [eaActs, setEAActs] = React.useState<string[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [projects, setProjects] = React.useState<string[]>([]);
   const [ministries, setMinistries] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-  const ctx = React.useContext(MasterContext);
+
+  const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
+  const [works, setWorks] = React.useState<Work[]>([]);
+
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-  React.useEffect(() => {
-    ctx.setForm(<WorkForm workId={workId} />);
-  }, [workId]);
 
-  React.useEffect(() => {
-    ctx.setTitle("Work");
-  }, [ctx.title]);
+  // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
 
-  const onEdit = (id: number) => {
-    setWorkId(id);
-    ctx.setShowModalForm(true);
+  const loadWorks = async () => {
+    setLoadingWorks(true);
+    try {
+      const response = await workService.getAll();
+      setWorks(response.data);
+      setLoadingWorks(false);
+    } catch (error) {
+      showNotification("Could not load works", { type: "error" });
+    }
   };
 
-  React.useEffect(() => {
-    ctx.setService(workService);
+  useEffect(() => {
+    loadWorks();
   }, []);
-  const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
+
   const codeTypes: { [x: string]: any } = {
     ea_act: setEAActs,
     work_type: setWorkTypes,
@@ -102,7 +109,10 @@ const WorkList = () => {
           ? ({ row, renderedCellValue }) => (
               <ETGridTitle
                 to="#"
-                onClick={() => onEdit(row.original.id)}
+                onClick={() => {
+                  setWorkId(row.original.id);
+                  setShowWorkDialogForm(true);
+                }}
                 titleText={row.original.title}
               >
                 {renderedCellValue}
@@ -324,7 +334,7 @@ const WorkList = () => {
               ],
             }}
             state={{
-              isLoading: ctx.loading,
+              isLoading: loadingWorks,
               showGlobalFilter: true,
             }}
             renderTopToolbarCustomActions={() => (
@@ -341,7 +351,7 @@ const WorkList = () => {
                 >
                   <Button
                     onClick={() => {
-                      ctx.setShowModalForm(true);
+                      setShowWorkDialogForm(true);
                       setWorkId(undefined);
                     }}
                     variant="contained"
@@ -354,6 +364,11 @@ const WorkList = () => {
           />
         </Grid>
       </ETPageContainer>
+      <WorkDialog
+        workId={workId}
+        open={showWorkDialogForm}
+        setOpen={setShowWorkDialogForm}
+      />
     </>
   );
 };

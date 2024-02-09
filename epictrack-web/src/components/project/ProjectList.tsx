@@ -1,12 +1,9 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
-import { Box, Button, Chip, Grid, IconButton } from "@mui/material";
-import ProjectForm from "./ProjectForm";
+import { Box, Button, Grid } from "@mui/material";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
-import { MasterContext } from "../shared/MasterContext";
 import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
@@ -15,6 +12,8 @@ import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
+import { ProjectDialog } from "./Dialog";
+import { showNotification } from "components/shared/notificationProvider";
 
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
@@ -22,33 +21,36 @@ const ProjectList = () => {
   const [proponents, setProponents] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
   const [projectId, setProjectId] = React.useState<number>();
-  const ctx = React.useContext(MasterContext);
+  const [showFormDialog, setShowFormDialog] = React.useState(false);
+  const [projects, setProjects] = React.useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = React.useState(true);
+
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  React.useEffect(() => {
-    ctx.setForm(<ProjectForm projectId={projectId} />);
-  }, [projectId]);
+  // React.useEffect(() => {
+  //   ctx.setService(projectService);
+  //   ctx.setFormStyle({
+  //     "& .MuiDialogContent-root": {
+  //       padding: 0,
+  //     },
+  //   });
+  // }, []);
 
-  const onEdit = (id: number) => {
-    setProjectId(id);
-    ctx.setShowModalForm(true);
+  const fetchProjects = async () => {
+    setLoadingProjects(true);
+    try {
+      const response = await projectService.getAll();
+      setProjects(response.data);
+      setLoadingProjects(false);
+    } catch (error) {
+      showNotification("Could not load Projects", { type: "error" });
+    }
   };
 
-  React.useEffect(() => {
-    ctx.setService(projectService);
-    ctx.setFormStyle({
-      "& .MuiDialogContent-root": {
-        padding: 0,
-      },
-    });
+  useEffect(() => {
+    fetchProjects();
   }, []);
-
-  React.useEffect(() => {
-    ctx.setTitle("Project");
-  }, [ctx.title]);
-
-  const projects = React.useMemo(() => ctx.data as Project[], [ctx.data]);
 
   React.useEffect(() => {
     const types = projects
@@ -94,7 +96,10 @@ const ProjectList = () => {
           ? ({ cell, row, renderedCellValue }) => (
               <ETGridTitle
                 to={"#"}
-                onClick={() => onEdit(row.original.id)}
+                onClick={() => {
+                  setProjectId(row.original.id);
+                  setShowFormDialog(true);
+                }}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
               >
@@ -288,7 +293,7 @@ const ProjectList = () => {
               ],
             }}
             state={{
-              isLoading: ctx.loading,
+              isLoading: loadingProjects,
               showGlobalFilter: true,
             }}
             renderTopToolbarCustomActions={() => (
@@ -305,7 +310,7 @@ const ProjectList = () => {
                 >
                   <Button
                     onClick={() => {
-                      ctx.setShowModalForm(true);
+                      setShowFormDialog(true);
                       setProjectId(undefined);
                     }}
                     variant="contained"
@@ -318,6 +323,12 @@ const ProjectList = () => {
           />
         </Grid>
       </ETPageContainer>
+      <ProjectDialog
+        projectId={projectId}
+        open={showFormDialog}
+        setOpen={setShowFormDialog}
+        saveProjectCallback={fetchProjects}
+      />
     </>
   );
 };
