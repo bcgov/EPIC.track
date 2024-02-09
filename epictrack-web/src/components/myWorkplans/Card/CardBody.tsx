@@ -15,7 +15,7 @@ const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
 
 const CardBody = ({ workplan }: CardProps) => {
-  const phase_color = workplan?.phase_info?.work_phase?.phase?.color;
+  const phase_color = "#003366";
   const statusOutOfDate =
     isStatusOutOfDate(workplan.status_info as Status) ||
     !workplan.status_info?.posted_date;
