@@ -1,7 +1,4 @@
-import { MasterContext } from "components/shared/MasterContext";
-import { MasterBase } from "models/type";
 import WorkForm from "..";
-import { defaultWork } from "models/work";
 import { faker } from "@faker-js/faker";
 
 const generateFakePosition = () => {
@@ -37,6 +34,7 @@ const mockProject = {
 
 const endpoints = [
   {
+    name: "getEaActs",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/ea_acts",
     response: {
@@ -52,6 +50,7 @@ const endpoints = [
     },
   },
   {
+    name: "getMinistries",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/ministries",
     response: {
@@ -70,6 +69,7 @@ const endpoints = [
     },
   },
   {
+    name: "getWorkTypes",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/work_types",
     response: {
@@ -79,6 +79,7 @@ const endpoints = [
     },
   },
   {
+    name: "getFederalActs",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/federal_involvements",
     response: {
@@ -94,6 +95,7 @@ const endpoints = [
     },
   },
   {
+    name: "getEaoTeams",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/eao_teams",
     response: {
@@ -109,6 +111,7 @@ const endpoints = [
     },
   },
   {
+    name: "getSubstitutionActs",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/substitution_acts",
     response: {
@@ -124,6 +127,7 @@ const endpoints = [
     },
   },
   {
+    name: "getStaffs4And3",
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?positions=4,3",
     response: {
@@ -131,6 +135,7 @@ const endpoints = [
     },
   },
   {
+    name: "getStaffs1And2And8",
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?positions=1,2,8",
     response: {
@@ -142,6 +147,7 @@ const endpoints = [
     },
   },
   {
+    name: "getProjectsListType",
     method: "GET",
     url: "http://localhost:3200/api/v1/projects?return_type=list_type",
     response: {
@@ -149,6 +155,7 @@ const endpoints = [
     },
   },
   {
+    name: "getStaffsPosition3",
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?positions=3",
     response: {
@@ -156,6 +163,7 @@ const endpoints = [
     },
   },
   {
+    name: "getProjectsAll",
     method: "GET",
     url: "http://localhost:3200/api/v1/projects/*",
     response: {
@@ -165,6 +173,7 @@ const endpoints = [
     },
   },
   {
+    name: "checkWorkExists ",
     method: "GET",
     url: "http://localhost:3200/api/v1/works/exists*",
     response: {
@@ -175,43 +184,18 @@ const endpoints = [
   },
 ];
 
-function createMockContext() {
-  return {
-    item: defaultWork,
-    setFormId: cy.stub(),
-    setTitle: cy.stub(),
-    setId: cy.stub(),
-    onSave: cy.stub(),
-    title: "",
-    data: [] as MasterBase[],
-    loading: false,
-    setItem: cy.stub(),
-    setShowDeleteDialog: cy.stub(),
-    setShowModalForm: cy.stub(),
-    getData: cy.stub(),
-    setService: cy.stub(),
-    setForm: cy.stub(),
-    onDialogClose: cy.stub(),
-    setFormStyle: cy.stub(),
-    getById: cy.stub(),
-    setDialogProps: cy.stub(),
-  };
-}
 function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, response }) => {
-    cy.intercept(method, url, response);
+  endpoints.forEach(({ method, url, response, name }) => {
+    cy.intercept(method, url, response).as(name);
   });
 }
 
 describe("WorkForm", () => {
   beforeEach(() => {
-    const mockContext = createMockContext();
     setupIntercepts(endpoints);
 
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <WorkForm />
-      </MasterContext.Provider>
+      <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
     );
   });
 
@@ -220,6 +204,7 @@ describe("WorkForm", () => {
   });
 
   it("The title is created from project name and work type", () => {
+    cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
     const workTypeSelect = cy
       .get("label")
       .contains("Worktype")
@@ -231,6 +216,10 @@ describe("WorkForm", () => {
     const workTypeOption = cy.get("div").contains(mockWorkType.name);
     workTypeOption.should("be.visible");
     workTypeOption.click({ force: true });
+
+    cy.wait("@getProjectsListType")
+      .its("response.statusCode")
+      .should("eq", 200);
 
     const projectSelect = cy
       .get("label")
