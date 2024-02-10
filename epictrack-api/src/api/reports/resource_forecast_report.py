@@ -28,6 +28,7 @@ from api.models.event_type import EventTypeEnum
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
+from api.services.work_phase import WorkPhaseService
 
 from .report_factory import ReportFactory
 
@@ -123,7 +124,7 @@ class EAResourceForeCastReport(ReportFactory):
         }
         self.end_date = None
 
-    def _filter_work_events(self, work_id: int, events: [Event]) -> [Event]:
+    def _filter_work_events(self, work_id: int, events: List[Event]) -> List[Event]:
         """Filter the events based on given work id"""
         return [event for event in events if event["work_id"] == work_id]
 
@@ -363,7 +364,7 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._format_data(work_data)
         if not data:
             return {}, None
-        second_phases = self._fetch_second_phases(events)
+        second_phases = self._fetch_second_phases(events, work_ids)
         data = self._sort_data(data, second_phases)
         if return_type == "json" and data:
             return data, None
@@ -518,8 +519,9 @@ class EAResourceForeCastReport(ReportFactory):
         sorted_data += order_suspensions + order_cancellations + others
         return sorted_data
 
-    def _fetch_second_phases(self, events) -> List[WorkPhase]:
+    def _fetch_second_phases(self, events, work_ids) -> List[WorkPhase]:
         """Fetch the second work phases for given work ids"""
+        work_phases = WorkPhaseService.find_work_phases_by_work_ids(work_ids)
         second_work_phases = [
             {
                 "work_phase": event.event_configuration.work_phase,
@@ -527,11 +529,16 @@ class EAResourceForeCastReport(ReportFactory):
                 "anticipated_date": event.anticipated_date,
             }
             for event in events
-            if event.event_configuration.work_phase.sort_order == 2
+            if self._is_second_work_phase(event, work_phases[0])
             and event.event_configuration.event_position.value
             == EventPositionEnum.START.value
         ]
         return second_work_phases
+
+    def _is_second_work_phase(self, event: Event, work_phases):
+        """Return true if the given event belongs to the second phase"""
+        w_phases = work_phases[event.work_id]
+        return event.event_configuration.work_phase_id == w_phases[1].id
 
     def _find_work_second_phase(self, second_phases, work_id) -> WorkPhase:
         """Find the second work phase for given work id"""
