@@ -52,6 +52,7 @@ export default function ResourceForecast() {
     pageIndex: 0,
     pageSize: 10, //customize the default page size
   });
+  const [colorIntensity, setColorIntensity] = useState<number>(100);
 
   const FILENAME_PREFIX = "EAO_Resource_Forecast";
 
@@ -333,6 +334,7 @@ export default function ResourceForecast() {
         REPORT_TYPE.RESOURCE_FORECAST,
         {
           report_date: reportDate,
+          color_intensity: colorIntensity,
         }
       );
       setIsLoading(false);
@@ -353,7 +355,7 @@ export default function ResourceForecast() {
       });
       setRFData([]);
     }
-  }, [reportDate]);
+  }, [reportDate, colorIntensity]);
   const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
@@ -362,6 +364,7 @@ export default function ResourceForecast() {
         {
           report_date: reportDate,
           filters,
+          color_intensity: colorIntensity,
         }
       );
       const url = window.URL.createObjectURL(
@@ -395,6 +398,7 @@ export default function ResourceForecast() {
       <Grid item sm={12}>
         <ReportHeader
           setReportDate={setReportDate}
+          setColorIntensity={setColorIntensity}
           fetchReportData={fetchReportData}
           downloadPDFReport={downloadPDFReport}
           showReportDateBanner={showReportDateBanner}

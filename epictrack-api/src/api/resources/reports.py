@@ -58,9 +58,16 @@ class Report(Resource):
     @profiletime
     def post(report_type):
         """Generate report from given date."""
-        report_date = datetime.strptime(API.payload['report_date'], '%Y-%m-%d')
-        filters = API.payload.get('filters', None)
-        report = ReportService.generate_report(report_type, report_date, 'json', filters=filters)
+        report_date = datetime.strptime(API.payload["report_date"], "%Y-%m-%d")
+        color_intensity = API.payload.get("color_intensity", None)
+        filters = API.payload.get("filters", None)
+        report = ReportService.generate_report(
+            report_type,
+            report_date,
+            "json",
+            filters=filters,
+            color_intensity=color_intensity,
+        )
         if report:
             return jsonify(report), HTTPStatus.OK
         return report, HTTPStatus.NO_CONTENT
@@ -77,9 +84,18 @@ class FileReport(Resource):
     @profiletime
     def post(report_type):
         """Generate report from given date."""
-        report_date = datetime.strptime(API.payload['report_date'], '%Y-%m-%d')
-        filters = API.payload.get('filters', None)
-        report, file_name = ReportService.generate_report(report_type, report_date, 'file', filters=filters)
+        report_date = datetime.strptime(API.payload["report_date"], "%Y-%m-%d")
+        color_intensity = API.payload.get("color_intensity", None)
+        filters = API.payload.get("filters", None)
+        report, file_name = ReportService.generate_report(
+            report_type,
+            report_date,
+            "file",
+            filters=filters,
+            color_intensity=color_intensity,
+        )
         if report:
-            return send_file(BytesIO(report), as_attachment=True, download_name=file_name)
+            return send_file(
+                BytesIO(report), as_attachment=True, download_name=file_name
+            )
         return report, HTTPStatus.NO_CONTENT
