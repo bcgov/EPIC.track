@@ -1,12 +1,7 @@
 import React from "react";
-import { Alert, Button, FormLabel, Grid, TextField } from "@mui/material";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { DATE_FORMAT } from "../../../../constants/application-constant";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Alert, Button, FormLabel, Grid } from "@mui/material";
 import { dateUtils } from "../../../../utils";
 import TrackDatePicker from "../../../shared/DatePicker";
-import ControlledTextField from "components/shared/controlledInputComponents/ControlledTextField";
-import { Else, If, Then } from "react-if";
 
 const ReportHeader = ({ ...props }) => {
   const STALE_DATE_BANNER =
@@ -35,29 +30,7 @@ const ReportHeader = ({ ...props }) => {
             }}
           />
         </Grid>
-        <If condition={Boolean(props.setColorIntensity)}>
-          <Then>
-            <Grid item sm={2}>
-              <FormLabel>Color Intensity</FormLabel>
-            </Grid>
-            <Grid item sm={2}>
-              <TextField
-                name="color_intensity"
-                placeholder="Color Intensity"
-                fullWidth
-                type="number"
-                onChange={(event: any) =>
-                  props.setColorIntensity(event.target.value)
-                }
-              />
-            </Grid>
-          </Then>
-          <Else>
-            <Then>
-              <Grid item sm={4}></Grid>
-            </Then>
-          </Else>
-        </If>
+        <Grid item sm={4}></Grid>
         <Grid item sm={2}>
           <Button
             variant="contained"
