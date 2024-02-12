@@ -6,6 +6,7 @@ from io import BytesIO
 from pathlib import Path
 
 
+# pylint: disable=too-many-arguments
 class ReportFactory(ABC):
     """Basic representation of report generator."""
 

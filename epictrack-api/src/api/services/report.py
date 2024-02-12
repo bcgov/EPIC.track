@@ -16,7 +16,7 @@
 from api.reports import get_report_generator
 
 
-class ReportService:  # pylint: disable=too-few-public-methods
+class ReportService:  # pylint: disable=too-few-public-methods, too-many-arguments
     """Service to manage report related operations."""
 
     @classmethod
