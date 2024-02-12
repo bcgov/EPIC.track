@@ -26,8 +26,8 @@ def color_with_opacity(color_code: str, opacity: int) -> str:
     Returns:
         str -- Returns the hexadecimal color code after adding opacity
     """
-    # TODO: Decide whether to take percentage(1-100) as argument or alpha(0-1) value
-    alpha = opacity / 100
+    alpha = int(opacity) / 100
+    # Assuming background to be white
     bg_color = hex2color("#FFFFFF")
     # Convert to numpy array so that multiplication will work
     bg_color = np.array(bg_color)

@@ -33,7 +33,7 @@ from .report_factory import ReportFactory
 class EAAnticipatedScheduleReport(ReportFactory):
     """EA Anticipated Schedule Report Generator"""
 
-    def __init__(self, filters):
+    def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
             "phase_name",
@@ -58,7 +58,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
-        super().__init__(data_keys, group_by, template_name, filters)
+        super().__init__(data_keys, group_by, template_name, filters, color_intensity)
         self.report_title = "Anticipated EA Referral Schedule"
 
     def _fetch_data(self, report_date):

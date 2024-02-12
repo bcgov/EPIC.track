@@ -1,4 +1,5 @@
 """Classes for specific report types."""
+
 from calendar import monthrange
 from collections import defaultdict
 from datetime import datetime
@@ -28,6 +29,7 @@ from api.models.event_type import EventTypeEnum
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
+from api.utils.color_utils import color_with_opacity
 
 from .report_factory import ReportFactory
 
@@ -40,7 +42,7 @@ daterange = partial(func.daterange, type_=DATERANGE)
 class EAResourceForeCastReport(ReportFactory):
     """EA Resource Forecast Report Generator"""
 
-    def __init__(self, filters):
+    def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
             "work_title",
@@ -65,7 +67,7 @@ class EAResourceForeCastReport(ReportFactory):
             "work_type_id",
         ]
         group_by = "work_id"
-        super().__init__(data_keys, group_by, None, filters)
+        super().__init__(data_keys, group_by, None, filters, color_intensity)
         self.excluded_items = []
         if self.filters and "exclude" in self.filters:
             self.excluded_items = self.filters["exclude"]
@@ -176,7 +178,9 @@ class EAResourceForeCastReport(ReportFactory):
         responsible_epd = aliased(Staff)
         work_lead = aliased(Staff)
         less_than_end_date_query = self._get_less_than_end_date_query()
-        greater_than_report_date_query = self._get_greater_than_report_date_query(report_date)
+        greater_than_report_date_query = self._get_greater_than_report_date_query(
+            report_date
+        )
 
         works = (
             Project.query.filter(
@@ -343,9 +347,9 @@ class EAResourceForeCastReport(ReportFactory):
             work_data["cairt_lead"] = cairt_lead
             work_data["work_team_members"] = "; ".join(staffs)
             if work_data.get("capital_investment", None):
-                work_data[
-                    "capital_investment"
-                ] = f"{work_data['capital_investment']:,.0f}"
+                work_data["capital_investment"] = (
+                    f"{work_data['capital_investment']:,.0f}"
+                )
             work_data = self._handle_months(work_data)
             response.append(work_data)
         return response
@@ -391,9 +395,9 @@ class EAResourceForeCastReport(ReportFactory):
                     work.update(
                         {
                             self.month_labels[index]: latest_event["event_phase"],
-                            f"{self.month_labels[index]}_color": latest_event[
-                                "phase_color"
-                            ],
+                            f"{self.month_labels[index]}_color": color_with_opacity(
+                                latest_event["phase_color"], self.color_intensity
+                            ),
                         }
                     )
                 else:
@@ -412,9 +416,9 @@ class EAResourceForeCastReport(ReportFactory):
         start_events = [
             {
                 "work_id": event.work_id,
-                "start_date": event.actual_date
-                if event.actual_date
-                else event.anticipated_date,
+                "start_date": (
+                    event.actual_date if event.actual_date else event.anticipated_date
+                ),
                 "event_phase": event.event_configuration.work_phase.name,
                 "phase_color": event.event_configuration.work_phase.phase.color,
             }
@@ -475,7 +479,9 @@ class EAResourceForeCastReport(ReportFactory):
         exemption_orders = self._sort_data_by_work_type(
             data, WorkTypeEnum.EXEMPTION_ORDER.value
         )
-        amendments = self._sort_data_by_work_type(data, WorkTypeEnum.AMENDMENT.value, second_phases)
+        amendments = self._sort_data_by_work_type(
+            data, WorkTypeEnum.AMENDMENT.value, second_phases
+        )
         order_transfers = self._sort_data_by_work_type(
             data, WorkTypeEnum.EAC_ORDER_TRANSFER.value
         )
