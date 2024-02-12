@@ -1,4 +1,5 @@
 """Classes for specific report types."""
+
 from calendar import monthrange
 from collections import defaultdict
 from datetime import datetime
@@ -28,6 +29,8 @@ from api.models.event_type import EventTypeEnum
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
+from api.services.work_phase import WorkPhaseService
+from api.utils.color_utils import color_with_opacity
 
 from .report_factory import ReportFactory
 
@@ -40,7 +43,7 @@ daterange = partial(func.daterange, type_=DATERANGE)
 class EAResourceForeCastReport(ReportFactory):
     """EA Resource Forecast Report Generator"""
 
-    def __init__(self, filters):
+    def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
             "work_title",
@@ -65,7 +68,7 @@ class EAResourceForeCastReport(ReportFactory):
             "work_type_id",
         ]
         group_by = "work_id"
-        super().__init__(data_keys, group_by, None, filters)
+        super().__init__(data_keys, group_by, None, filters, color_intensity)
         self.excluded_items = []
         if self.filters and "exclude" in self.filters:
             self.excluded_items = self.filters["exclude"]
@@ -123,7 +126,7 @@ class EAResourceForeCastReport(ReportFactory):
         }
         self.end_date = None
 
-    def _filter_work_events(self, work_id: int, events: [Event]) -> [Event]:
+    def _filter_work_events(self, work_id: int, events: List[Event]) -> List[Event]:
         """Filter the events based on given work id"""
         return [event for event in events if event["work_id"] == work_id]
 
@@ -176,7 +179,9 @@ class EAResourceForeCastReport(ReportFactory):
         responsible_epd = aliased(Staff)
         work_lead = aliased(Staff)
         less_than_end_date_query = self._get_less_than_end_date_query()
-        greater_than_report_date_query = self._get_greater_than_report_date_query(report_date)
+        greater_than_report_date_query = self._get_greater_than_report_date_query(
+            report_date
+        )
 
         works = (
             Project.query.filter(
@@ -343,9 +348,9 @@ class EAResourceForeCastReport(ReportFactory):
             work_data["cairt_lead"] = cairt_lead
             work_data["work_team_members"] = "; ".join(staffs)
             if work_data.get("capital_investment", None):
-                work_data[
-                    "capital_investment"
-                ] = f"{work_data['capital_investment']:,.0f}"
+                work_data["capital_investment"] = (
+                    f"{work_data['capital_investment']:,.0f}"
+                )
             work_data = self._handle_months(work_data)
             response.append(work_data)
         return response
@@ -363,7 +368,7 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._format_data(work_data)
         if not data:
             return {}, None
-        second_phases = self._fetch_second_phases(events)
+        second_phases = self._fetch_second_phases(events, work_ids)
         data = self._sort_data(data, second_phases)
         if return_type == "json" and data:
             return data, None
@@ -391,9 +396,9 @@ class EAResourceForeCastReport(ReportFactory):
                     work.update(
                         {
                             self.month_labels[index]: latest_event["event_phase"],
-                            f"{self.month_labels[index]}_color": latest_event[
-                                "phase_color"
-                            ],
+                            f"{self.month_labels[index]}_color": color_with_opacity(
+                                latest_event["phase_color"], self.color_intensity
+                            ),
                         }
                     )
                 else:
@@ -412,9 +417,9 @@ class EAResourceForeCastReport(ReportFactory):
         start_events = [
             {
                 "work_id": event.work_id,
-                "start_date": event.actual_date
-                if event.actual_date
-                else event.anticipated_date,
+                "start_date": (
+                    event.actual_date if event.actual_date else event.anticipated_date
+                ),
                 "event_phase": event.event_configuration.work_phase.name,
                 "phase_color": event.event_configuration.work_phase.phase.color,
             }
@@ -475,7 +480,9 @@ class EAResourceForeCastReport(ReportFactory):
         exemption_orders = self._sort_data_by_work_type(
             data, WorkTypeEnum.EXEMPTION_ORDER.value
         )
-        amendments = self._sort_data_by_work_type(data, WorkTypeEnum.AMENDMENT.value, second_phases)
+        amendments = self._sort_data_by_work_type(
+            data, WorkTypeEnum.AMENDMENT.value, second_phases
+        )
         order_transfers = self._sort_data_by_work_type(
             data, WorkTypeEnum.EAC_ORDER_TRANSFER.value
         )
@@ -518,8 +525,9 @@ class EAResourceForeCastReport(ReportFactory):
         sorted_data += order_suspensions + order_cancellations + others
         return sorted_data
 
-    def _fetch_second_phases(self, events) -> List[WorkPhase]:
+    def _fetch_second_phases(self, events, work_ids) -> List[WorkPhase]:
         """Fetch the second work phases for given work ids"""
+        work_phases = WorkPhaseService.find_work_phases_by_work_ids(work_ids)
         second_work_phases = [
             {
                 "work_phase": event.event_configuration.work_phase,
@@ -527,11 +535,16 @@ class EAResourceForeCastReport(ReportFactory):
                 "anticipated_date": event.anticipated_date,
             }
             for event in events
-            if event.event_configuration.work_phase.sort_order == 2
+            if self._is_second_work_phase(event, work_phases[0])
             and event.event_configuration.event_position.value
             == EventPositionEnum.START.value
         ]
         return second_work_phases
+
+    def _is_second_work_phase(self, event: Event, work_phases):
+        """Return true if the given event belongs to the second phase"""
+        w_phases = work_phases[event.work_id]
+        return event.event_configuration.work_phase_id == w_phases[1].id
 
     def _find_work_second_phase(self, second_phases, work_id) -> WorkPhase:
         """Find the second work phase for given work id"""

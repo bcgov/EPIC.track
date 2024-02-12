@@ -16,13 +16,13 @@
 from api.reports import get_report_generator
 
 
-class ReportService:  # pylint: disable=too-few-public-methods
+class ReportService:  # pylint: disable=too-few-public-methods, too-many-arguments
     """Service to manage report related operations."""
 
     @classmethod
-    def generate_report(cls, report_type, report_date, return_type='json', filters=None):
+    def generate_report(cls, report_type, report_date, return_type='json', filters=None, color_intensity=None):
         """Generate a report"""
-        report_generator = get_report_generator(report_type, filters)
+        report_generator = get_report_generator(report_type, filters, color_intensity)
         report, file_name = report_generator.generate_report(report_date, return_type)
         if return_type == 'json':
             return report
