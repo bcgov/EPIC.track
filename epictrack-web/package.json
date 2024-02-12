@@ -20,6 +20,7 @@
     "@types/react-dom": "^18.0.11",
     "@types/react-draft-wysiwyg": "^1.13.4",
     "axios": "^1.4.0",
+    "canvas-confetti": "^1.9.2",
     "dayjs": "^1.11.7",
     "draft-js": "^0.11.7",
     "json-2-csv": "^4.0.0",
@@ -72,6 +73,7 @@
   },
   "devDependencies": {
     "@faker-js/faker": "^8.3.1",
+    "@types/canvas-confetti": "^1.6.4",
     "@types/node": "^20.10.6",
     "@typescript-eslint/eslint-plugin": "^5.59.2",
     "@typescript-eslint/parser": "^5.59.2",
