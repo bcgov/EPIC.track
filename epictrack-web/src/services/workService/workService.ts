@@ -10,7 +10,7 @@ import { WorkType } from "../../models/workType";
 
 class WorkService implements ServiceBase {
   async getAll() {
-    return await http.GetRequest(Endpoints.Works.WORKS);
+    return await http.GetRequest<Work[]>(Endpoints.Works.WORKS);
   }
 
   async create(data: MasterBase) {
@@ -25,7 +25,7 @@ class WorkService implements ServiceBase {
   }
 
   async getById(id: string) {
-    return await http.GetRequest(Endpoints.Works.WORKS + `/${id}`);
+    return await http.GetRequest<Work>(Endpoints.Works.WORKS + `/${id}`);
   }
 
   async delete(id?: string) {
