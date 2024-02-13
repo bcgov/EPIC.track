@@ -333,6 +333,7 @@ export default function ResourceForecast() {
         REPORT_TYPE.RESOURCE_FORECAST,
         {
           report_date: reportDate,
+          color_intensity: "25",
         }
       );
       setIsLoading(false);
@@ -362,6 +363,7 @@ export default function ResourceForecast() {
         {
           report_date: reportDate,
           filters,
+          color_intensity: "25",
         }
       );
       const url = window.URL.createObjectURL(
