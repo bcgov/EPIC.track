@@ -17,7 +17,7 @@ export const MyWorkplanGantt = () => {
         {
           id: "1.5",
           name: "Task 11.5",
-          start: new Date("2023-02-02"),
+          start: new Date("2023-03-02"),
           end: new Date("2023-04-28"),
           progress: 0.5,
         },
@@ -45,6 +45,13 @@ export const MyWorkplanGantt = () => {
           name: "Task 3",
           start: new Date("2023-10-11"),
           end: new Date("2023-11-15"),
+          progress: 0.5,
+        },
+        {
+          id: "32",
+          name: "Task 32",
+          start: new Date("2023-12-11"),
+          end: new Date("2024-01-15"),
           progress: 0.5,
         },
       ],

@@ -2,7 +2,7 @@
 import React from "react";
 import TaskBar from "./TaskBar";
 import { TaskParent } from "./types";
-import moment from "moment";
+import { barHeight, rowHeight } from "./constants";
 
 type TaskBarSectionProps = {
   parents: TaskParent[];
@@ -12,15 +12,16 @@ type TaskBarSectionProps = {
 
 const TaskBarSection = ({ parents, start, end }: TaskBarSectionProps) => {
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "200px" }}>
+    <div style={{ display: "flex", flexDirection: "column" }}>
       {parents.map((parent) => (
         <div
           key={`parent-${parent.id}`}
           style={{
             display: "flex",
-            flexDirection: "row",
+            flexDirection: "column",
             position: "relative",
             width: "100%",
+            height: barHeight,
           }}
         >
           {parent.tasks.map((task) => {

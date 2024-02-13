@@ -1,7 +1,7 @@
 // TaskBar.js
 import moment from "moment";
 import React from "react";
-import { dayWidth } from "./constants";
+import { barHeight, dayWidth } from "./constants";
 import { Task } from "./types";
 
 type TaskBar = {
@@ -24,7 +24,7 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
         left: `${daysDiff * dayWidth}px`,
         width: `${taskSpan * dayWidth}px`,
         backgroundColor: color ?? "black",
-        height: "30px",
+        height: "100%",
         position: "absolute",
       }}
     />

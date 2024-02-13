@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
-import { ETCaption2 } from "components/shared";
-import { dayWidth } from "./constants";
+import { ETCaption2, ETCaption3 } from "components/shared";
+import { dayWidth, rowHeight } from "./constants";
 import moment from "moment";
+import { Palette } from "styles/theme";
 
 type TimeScaleProps = {
   start: Date;
@@ -60,7 +61,14 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
   }, [monthsInfo]);
 
   return (
-    <div style={{ overflow: "scroll", display: "flex", flexDirection: "row" }}>
+    <div
+      style={{
+        overflow: "scroll",
+        display: "flex",
+        flexDirection: "row",
+        height: "100%",
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -71,6 +79,7 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
           style={{
             display: "flex",
             flexDirection: "row",
+            height: rowHeight,
           }}
         >
           {yearsInfo.map((year, index) => (
@@ -78,12 +87,11 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
               key={year.year}
               style={{
                 textAlign: "center",
-                // width: year.days * dayWidth,
                 width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
-                backgroundColor: "#F9F9FB",
+                backgroundColor: Palette.neutral.bg.light,
               }}
             >
-              <ETCaption2>{year.year}</ETCaption2>
+              <ETCaption3 bold>{year.year}</ETCaption3>
             </div>
           ))}
         </div>
@@ -91,20 +99,21 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
           style={{
             display: "flex",
             flexDirection: "row",
+            height: rowHeight,
           }}
         >
-          {monthsInfo.map((month, index) => (
+          {monthsInfo.map((month) => (
             <div
               key={month.start.format("YYYY-MM")}
               style={{
                 // width: month.days * dayWidth,
                 width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
                 textAlign: "center",
-                backgroundColor: "#F9F9FB",
+                backgroundColor: Palette.neutral.bg.light,
                 position: "relative",
               }}
             >
-              <ETCaption2>{month.month}</ETCaption2>
+              <ETCaption3>{month.month}</ETCaption3>
             </div>
           ))}
         </div>
