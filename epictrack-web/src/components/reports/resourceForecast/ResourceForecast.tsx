@@ -29,7 +29,7 @@ import { ResourceForecastModel } from "./type";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer } from "../../shared";
+import { ETPageContainer, ETParagraph } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
@@ -190,7 +190,6 @@ export default function ResourceForecast() {
   const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
       {
-        accessorKey: "work_title",
         header: "Work",
         enableHiding: false,
         filterVariant: "multi-select",
@@ -217,6 +216,15 @@ export default function ResourceForecast() {
         filterFn: (row, id, filterValue) => {
           return !filterValue.includes(row.getValue(id));
         },
+        Cell: ({ row }: any) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={row.original.work_title}
+          >
+            {row.original.work_title}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "capital_investment",
@@ -238,10 +246,18 @@ export default function ResourceForecast() {
         filterSelectOptions: eaTypeFilter,
       },
       {
-        accessorKey: "project_phase",
         header: "Project Phase",
         filterVariant: "select",
         filterSelectOptions: projectPhaseFilter,
+        Cell: ({ row }: any) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={row.original.project_phase}
+          >
+            {row.original.project_phase}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "ea_act",
@@ -298,8 +314,16 @@ export default function ResourceForecast() {
         filterSelectOptions: workLeadFilter,
       },
       {
-        accessorKey: "work_team_members",
         header: "Work Team Members",
+        Cell: ({ row }: any) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={row.original.work_team_members}
+          >
+            {row.original.work_team_members}
+          </ETParagraph>
+        ),
       },
       ...setMonthColumns(),
       {
