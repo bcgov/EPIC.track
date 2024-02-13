@@ -5,3 +5,9 @@ export type Task = {
   end: Date;
   progress: number;
 };
+
+export type TaskParent = {
+  id: string;
+  name: string;
+  tasks: Task[];
+};

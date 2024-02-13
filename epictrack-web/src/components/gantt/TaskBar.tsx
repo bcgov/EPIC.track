@@ -1,25 +1,33 @@
 // TaskBar.js
+import moment from "moment";
 import React from "react";
+import { dayWidth } from "./constants";
+import { Task } from "./types";
 
 type TaskBar = {
-  task: any;
+  task: Task;
+  start: Date;
+  end: Date;
+  color: string;
 };
 
-const TaskBar = ({ task }: TaskBar) => {
-  const { start, end } = task;
+const TaskBar = ({ task, start, color }: TaskBar) => {
   // Calculate the total duration of the Gantt chart in milliseconds
-  const totalDuration = end - start;
+  const momentStart = moment(start);
+  const momentTaskStart = moment(task.start);
+  const daysDiff = momentTaskStart.diff(momentStart, "days");
 
-  // Calculate the start position and duration of the task in milliseconds
-  const taskStart = task.start - start;
-  const taskDuration = task.end - task.start;
-
-  // Calculate the relative start position and width of the task as a percentage
-  const left = (taskStart / totalDuration) * 100;
-  const width = (taskDuration / totalDuration) * 100;
-
+  const taskSpan = moment(task.end).diff(moment(task.start), "days");
   return (
-    <div style={{ left: `${left}%`, width: `${width}%` }}>{task.name}</div>
+    <div
+      style={{
+        left: `${daysDiff * dayWidth}px`,
+        width: `${taskSpan * dayWidth}px`,
+        backgroundColor: color ?? "black",
+        height: "30px",
+        position: "absolute",
+      }}
+    />
   );
 };
 

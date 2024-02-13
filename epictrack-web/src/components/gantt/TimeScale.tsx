@@ -1,15 +1,14 @@
-import { ETCaption2 } from "components/shared";
 import React, { useMemo } from "react";
+import { ETCaption2 } from "components/shared";
 import { dayWidth } from "./constants";
 import moment from "moment";
-import { get } from "lodash";
-import { Palette } from "styles/theme";
 
 type TimeScaleProps = {
   start: Date;
   end: Date;
+  children?: React.ReactNode;
 };
-export const TimeScale = ({ start, end }: TimeScaleProps) => {
+export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
   const dates: Date[] = [];
 
   for (
@@ -61,52 +60,55 @@ export const TimeScale = ({ start, end }: TimeScaleProps) => {
   }, [monthsInfo]);
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-      }}
-    >
+    <div style={{ overflow: "scroll", display: "flex", flexDirection: "row" }}>
       <div
         style={{
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
         }}
       >
-        {yearsInfo.map((year, index) => (
-          <div
-            key={year.year}
-            style={{
-              textAlign: "center",
-              // width: year.days * dayWidth,
-              width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
-              backgroundColor: "#F9F9FB",
-            }}
-          >
-            <ETCaption2>{year.year}</ETCaption2>
-          </div>
-        ))}
-      </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-        }}
-      >
-        {monthsInfo.map((month, index) => (
-          <div
-            key={month.start.format("YYYY-MM")}
-            style={{
-              // width: month.days * dayWidth,
-              width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
-              textAlign: "center",
-              backgroundColor: "#F9F9FB",
-              position: "relative",
-            }}
-          >
-            <ETCaption2>{month.month}</ETCaption2>
-          </div>
-        ))}
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          {yearsInfo.map((year, index) => (
+            <div
+              key={year.year}
+              style={{
+                textAlign: "center",
+                // width: year.days * dayWidth,
+                width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                backgroundColor: "#F9F9FB",
+              }}
+            >
+              <ETCaption2>{year.year}</ETCaption2>
+            </div>
+          ))}
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+          }}
+        >
+          {monthsInfo.map((month, index) => (
+            <div
+              key={month.start.format("YYYY-MM")}
+              style={{
+                // width: month.days * dayWidth,
+                width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                textAlign: "center",
+                backgroundColor: "#F9F9FB",
+                position: "relative",
+              }}
+            >
+              <ETCaption2>{month.month}</ETCaption2>
+            </div>
+          ))}
+        </div>
+        {children}
       </div>
     </div>
   );
