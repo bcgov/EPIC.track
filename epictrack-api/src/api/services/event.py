@@ -14,6 +14,7 @@
 """Service to manage Event."""
 import copy
 import functools
+from flask import current_app
 from datetime import datetime, timedelta
 from typing import List
 import pytz
@@ -45,6 +46,7 @@ from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.application_constants import MIN_WORK_START_DATE
 
+from api.config import _Config
 from ..utils.roles import Membership
 from ..utils.roles import Role as KeycloakRole
 from . import authorisation
@@ -52,8 +54,6 @@ from .event_configuration import EventConfigurationService
 
 
 # pylint:disable=not-callable, too-many-lines
-
-
 class EventService:
     """Service to manage event related operations."""
 
@@ -78,9 +78,11 @@ class EventService:
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
         event = event.flush()
-        cls._process_events(
-            current_work_phase, event, all_work_events, push_events, None
-        )
+        current_app.logger.debug(f"Creating event: {event}")
+        if not _Config.SKIP_EVENT_LOGIC:
+            cls._process_events(
+                current_work_phase, event, all_work_events, push_events, None
+            )
         cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
@@ -112,16 +114,19 @@ class EventService:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
+        if current_work_phase.is_completed:
+            raise UnprocessableEntityError("Events cannot be added to completed phase")
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
-            cls._process_events(
-                current_work_phase,
-                event,
-                all_work_events,
-                push_events,
-                event_old,
-            )
+            if not _Config.SKIP_EVENT_LOGIC:
+                cls._process_events(
+                    current_work_phase,
+                    event,
+                    all_work_events,
+                    push_events,
+                    event_old,
+                )
             cls._process_actions(event, data.get("outcome_id", None))
         if commit:
             db.session.commit()
@@ -130,16 +135,18 @@ class EventService:
     @classmethod
     def check_event(cls, data: dict, event_id: int = None):
         """Check to see if the event goes beyond the existing phase end dates"""
-        event_old = None
-        if event_id:
-            event = Event.find_by_id(event_id)
-            event_old = copy.copy(event)
-        event_to_check = Event(**data)
         result = {
             "subsequent_event_push_required": False,
             "phase_end_push_required": False,
             "days_pushed": 0,
         }
+        if _Config.SKIP_EVENT_LOGIC:
+            return result
+        event_old = None
+        if event_id:
+            event = Event.find_by_id(event_id)
+            event_old = copy.copy(event)
+        event_to_check = Event(**data)
         if event_id:
             event_to_check.event_configuration = event.event_configuration
         else:
@@ -324,65 +331,62 @@ class EventService:
         cls._handle_work_phase_for_extension_without_push_events(
             event, current_work_phase, push_events, number_of_days_to_be_pushed
         )
+        if number_of_days_to_be_pushed != 0 and push_events:
+            cls._push_subsequent_events(
+                event,
+                all_work_phases,
+                all_work_events,
+                current_work_phase_index,
+                current_work_phase,
+                number_of_days_to_be_pushed,
+                event_old,
+            )
 
+    @classmethod
+    def _push_subsequent_events(
+        cls,
+        event: Event,
+        all_work_phases: List[WorkPhase],
+        all_work_events: List[Event],
+        current_work_phase_index: int,
+        current_work_phase: WorkPhase,
+        number_of_days_to_be_pushed: int,
+        event_old: Event = None,
+    ):
+        """Push the subsequent events or phases if push_events flag is set"""
+        all_work_event_configurations = (
+            EventConfigurationService.find_all_configurations_by_work(event.work_id)
+        )
         current_event_index = cls.find_event_index(
             all_work_events, event_old if event_old else event, current_work_phase
         )
-        if number_of_days_to_be_pushed != 0 and push_events:
-            all_work_event_configurations = (
-                EventConfigurationService.find_all_configurations_by_work(event.work_id)
+        cls._handle_child_events(all_work_event_configurations, event)
+        current_future_work_phases = all_work_phases[current_work_phase_index:]
+        if current_work_phase.legislated:
+            phase_events = cls._find_work_phase_events(
+                all_work_events, current_work_phase.id
             )
-            cls._handle_child_events(all_work_event_configurations, event)
-            current_future_work_phases = all_work_phases[current_work_phase_index:]
-            if current_work_phase.legislated:
-                phase_events = cls._find_work_phase_events(
-                    all_work_events, current_work_phase.id
-                )
-                if (
-                    event.event_configuration.event_position.value
-                    == EventPositionEnum.START.value
-                    or event.event_configuration.event_category_id
-                    in [
-                        EventCategoryEnum.EXTENSION.value,
-                        EventCategoryEnum.SUSPENSION.value,
-                    ]
-                ):
-                    end_event_index = None
-                    if cls._find_event_date(event) >= current_work_phase.end_date:
-                        end_event = next(
-                            filter(
-                                lambda x: x.event_configuration.event_position.value
-                                == EventPositionEnum.END.value,
-                                phase_events,
-                            )
-                        )
-                        end_event_index = util.find_index_in_array(
-                            phase_events, end_event
-                        )
-                    cls._push_work_phases(
-                        current_future_work_phases,
-                        all_work_events,
-                        all_work_event_configurations,
-                        number_of_days_to_be_pushed,
-                        event,
-                        current_work_phase,
-                        end_event_index if end_event_index else current_event_index,
-                    )
-                else:
-                    phase_events = list(
+            if (
+                event.event_configuration.event_position.value
+                == EventPositionEnum.START.value
+                or event.event_configuration.event_category_id
+                in [
+                    EventCategoryEnum.EXTENSION.value,
+                    EventCategoryEnum.SUSPENSION.value,
+                ]
+            ):
+                end_event_index = None
+                if cls._find_event_date(event) >= current_work_phase.end_date:
+                    end_event = next(
                         filter(
                             lambda x: x.event_configuration.event_position.value
-                            != EventPositionEnum.END.value,
+                            == EventPositionEnum.END.value,
                             phase_events,
                         )
                     )
-                    cls._push_events(
-                        phase_events[current_event_index:],
-                        number_of_days_to_be_pushed,
-                        event,
-                        all_work_event_configurations,
+                    end_event_index = util.find_index_in_array(
+                        phase_events, end_event
                     )
-            if not current_work_phase.legislated:
                 cls._push_work_phases(
                     current_future_work_phases,
                     all_work_events,
@@ -390,8 +394,32 @@ class EventService:
                     number_of_days_to_be_pushed,
                     event,
                     current_work_phase,
-                    current_event_index,
+                    end_event_index if end_event_index else current_event_index,
                 )
+            else:
+                phase_events = list(
+                    filter(
+                        lambda x: x.event_configuration.event_position.value
+                        != EventPositionEnum.END.value,
+                        phase_events,
+                    )
+                )
+                cls._push_events(
+                    phase_events[current_event_index:],
+                    number_of_days_to_be_pushed,
+                    event,
+                    all_work_event_configurations,
+                )
+        if not current_work_phase.legislated:
+            cls._push_work_phases(
+                current_future_work_phases,
+                all_work_events,
+                all_work_event_configurations,
+                number_of_days_to_be_pushed,
+                event,
+                current_work_phase,
+                current_event_index,
+            )
 
     @classmethod
     def _validate_dates(
