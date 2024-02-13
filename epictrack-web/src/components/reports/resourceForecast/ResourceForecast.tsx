@@ -143,21 +143,21 @@ export default function ResourceForecast() {
           header: rfMonth["label"],
           accessorFn: (row: any) => `${row.months[index].phase}`,
           enableHiding: false,
+          size: 200,
           enableColumnFilter: false,
           Cell: ({ row }: any) => (
-            <Box
-              sx={{
-                bgcolor: row.original.months[index].color,
-                display: "flex",
-                flexWrap: "wrap",
-                alignContent: "center",
-                justifyContent: "center",
-                textWrap: "wrap",
-                padding: "1rem",
-              }}
-            >
-              {row.original.months[index].phase}
-            </Box>
+            <Tooltip title={row.original.months[index].phase}>
+              <Box
+                sx={{
+                  bgcolor: row.original.months[index].color,
+                  overflow: "hidden",
+                  padding: "0.5rem 0.5rem 0.5rem 1rem",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {row.original.months[index].phase}
+              </Box>
+            </Tooltip>
           ),
         } as MRT_ColumnDef<ResourceForecastModel>;
       });

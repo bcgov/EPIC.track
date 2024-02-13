@@ -173,7 +173,7 @@ class EventService:
         cls,
         current_work_phase: WorkPhase,
         event: Event,
-        all_work_events: [Event],
+        all_work_events: List[Event],
         event_old: Event,
         number_of_days_to_be_pushed: int,
     ):
@@ -307,6 +307,13 @@ class EventService:
         cls._handle_work_phase_for_end_phase_end_event(
             all_work_phases, current_work_phase_index, event, current_work_phase
         )
+        cls._handle_end_event_date_when_start_event_changed(
+            current_work_phase,
+            event,
+            all_work_events,
+            number_of_days_to_be_pushed,
+            push_events,
+        )
         cls._handle_work_phase_for_start_event(
             event, current_work_phase, number_of_days_to_be_pushed, push_events
         )
@@ -427,7 +434,7 @@ class EventService:
 
     @classmethod
     def _find_actual_date_min(
-        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Return the min date of actual date"""
         actual_date_min = (
@@ -463,7 +470,7 @@ class EventService:
 
     @classmethod
     def _is_start_phase(
-        cls, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+        cls, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Return true if the current phase is start phase"""
         return all_work_phases[0].id == current_work_phase.id
@@ -487,6 +494,47 @@ class EventService:
                 )
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+    @classmethod
+    def _handle_end_event_date_when_start_event_changed(
+        cls,
+        current_work_phase: WorkPhase,
+        event: Event,
+        all_work_events: List[Event],
+        number_of_days_to_be_pushed: int,
+        push_events: bool,
+    ):
+        # pylint: disable=too-many-arguments
+        """END event date change according to start event when the no-push subsequent events requested"""
+        # The date of the END event of a phase should be adjusted according to the number of days
+        # changed in the START event of the phase in the leslated phase. The total number of days
+        # in legislated phase should always remains the same unless and extension/suspension happened.
+        # This section of the code will work only if the push_events turned false.
+
+        if (
+            current_work_phase.legislated
+            and event.event_position == EventPositionEnum.START.value
+            and not push_events
+        ):
+            phase_events = cls._find_work_phase_events(
+                all_work_events, event.event_configuration.work_phase_id
+            )
+            end_event = next(
+                (
+                    phase_event
+                    for phase_event in phase_events
+                    if phase_event.event_position == EventPositionEnum.END.value
+                ),
+                None,
+            )
+            end_event_from_db = Event.find_by_id(end_event.id)
+            end_event_from_db.anticipated_date = (
+                end_event_from_db.anticipated_date
+                + timedelta(days=number_of_days_to_be_pushed)
+            )
+            end_event_from_db.update(
+                end_event_from_db.as_dict(recursive=False), commit=False
             )
 
     @classmethod
