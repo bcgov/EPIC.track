@@ -59,6 +59,7 @@ import {
 } from "../../../constants/application-constant";
 import { Restricted } from "components/shared/restricted";
 import { IButton } from "components/shared";
+import Confetti from "components/confetti/Confetti";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -71,6 +72,7 @@ const EventList = () => {
   const [taskEvent, setTaskEvent] = React.useState<TaskEvent>();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
+  const [showConfetti, setShowConfetti] = React.useState(false);
   const [showMilestoneForm, setShowMilestoneForm] =
     React.useState<boolean>(false);
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
@@ -293,6 +295,18 @@ const EventList = () => {
             ? EVENT_STATUS.INPROGRESS
             : EVENT_STATUS.NOT_STARTED;
           element.visibility = element.event_configuration.visibility;
+          if (
+            element.event_configuration.event_position === EventPosition.END &&
+            element.is_complete &&
+            element.work_phase_id === ctx.selectedWorkPhase?.work_phase.phase.id
+          ) {
+            setShowConfetti(true);
+
+            // Assuming the confetti animation lasts for 5 seconds
+            setTimeout(() => {
+              setShowConfetti(false);
+            }, 5000);
+          }
           return element;
         });
       }
@@ -457,7 +471,6 @@ const EventList = () => {
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
       setTemplateAvailable(templateUploadStatus);
-
       if (
         templateUploadStatus.template_available &&
         !templateUploadStatus.task_added
@@ -692,6 +705,9 @@ const EventList = () => {
 
   return (
     <Grid container rowSpacing={1}>
+      <When condition={showConfetti}>
+        <Confetti />
+      </When>
       <Grid container>
         <When
           condition={

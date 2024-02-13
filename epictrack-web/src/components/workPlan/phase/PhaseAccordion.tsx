@@ -14,8 +14,6 @@ import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import { When } from "react-if";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
-import FireworksListener from "components/fireworks/FireworksListener";
-
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
 const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
@@ -102,7 +100,6 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   );
   return (
     <>
-      <FireworksListener progress={phase.milestone_progress} />
       <Box
         sx={{
           display: "flex",
