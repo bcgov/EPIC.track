@@ -21,8 +21,6 @@ depends_on = None
 
 
 def upgrade():
-    if current_app.config.get('TESTING'):
-        return
 
     entities = [
         # the third key start_date_attr is used if they model has a field which can be used as a start date of the special history field
