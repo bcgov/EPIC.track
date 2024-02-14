@@ -29,15 +29,13 @@ const TestComponent: React.FC<TestComponentProps> = ({ onChange }) => {
 describe("ControlledSelectV2", () => {
   it("renders correctly", () => {
     cy.mount(<TestComponent />);
-    cy.get("#react-select-3-input").should("exist");
+    cy.get("input").first().should("exist");
   });
 
   it("handles selection correctly", () => {
     const handleChange = cy.stub();
     cy.mount(<TestComponent onChange={handleChange} />);
-    cy.get("#react-select-3-input").click().type("Option 1{enter}");
-    cy.wrap(handleChange).should("have.been.calledWithMatch", {
-      target: { name: "test", value: "option1" },
-    });
+    cy.get("input").first().click().type("Option 1{enter}");
+    cy.wrap(handleChange).should("have.been.calledWith", "option1");
   });
 });
