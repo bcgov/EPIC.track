@@ -14,9 +14,10 @@
 """Service to manage Event."""
 import copy
 import functools
-from flask import current_app
 from datetime import datetime, timedelta
 from typing import List
+from flask import current_app
+
 import pytz
 
 from sqlalchemy import and_, extract, func, or_
@@ -46,7 +47,6 @@ from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.application_constants import MIN_WORK_START_DATE
 
-from api.config import _Config
 from ..utils.roles import Membership
 from ..utils.roles import Role as KeycloakRole
 from . import authorisation
@@ -79,7 +79,7 @@ class EventService:
         event = Event(**data)
         event = event.flush()
         current_app.logger.debug(f"Creating event: {event}")
-        if not _Config.SKIP_EVENT_LOGIC:
+        if not current_app.config["SKIP_EVENT_LOGIC"]:
             cls._process_events(
                 current_work_phase, event, all_work_events, push_events, None
             )
@@ -119,7 +119,7 @@ class EventService:
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
-            if not _Config.SKIP_EVENT_LOGIC:
+            if not current_app.config["SKIP_EVENT_LOGIC"]:
                 cls._process_events(
                     current_work_phase,
                     event,
@@ -140,7 +140,7 @@ class EventService:
             "phase_end_push_required": False,
             "days_pushed": 0,
         }
-        if _Config.SKIP_EVENT_LOGIC:
+        if current_app.config["SKIP_EVENT_LOGIC"]:
             return result
         event_old = None
         if event_id:
@@ -353,6 +353,7 @@ class EventService:
         number_of_days_to_be_pushed: int,
         event_old: Event = None,
     ):
+        # pylint: disable=too-many-arguments
         """Push the subsequent events or phases if push_events flag is set"""
         all_work_event_configurations = (
             EventConfigurationService.find_all_configurations_by_work(event.work_id)
