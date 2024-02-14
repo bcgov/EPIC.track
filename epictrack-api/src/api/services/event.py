@@ -173,7 +173,7 @@ class EventService:
         cls,
         current_work_phase: WorkPhase,
         event: Event,
-        all_work_events: [Event],
+        all_work_events: List[Event],
         event_old: Event,
         number_of_days_to_be_pushed: int,
     ):
@@ -280,7 +280,7 @@ class EventService:
         cls,
         current_work_phase: WorkPhase,
         event: Event,
-        all_work_events: [Event],
+        all_work_events: List[Event],
         push_events: bool,
         event_old: Event = None,
     ) -> None:
@@ -306,6 +306,13 @@ class EventService:
         )
         cls._handle_work_phase_for_end_phase_end_event(
             all_work_phases, current_work_phase_index, event, current_work_phase
+        )
+        cls._handle_end_event_date_when_start_event_changed(
+            current_work_phase,
+            event,
+            all_work_events,
+            number_of_days_to_be_pushed,
+            push_events,
         )
         cls._handle_work_phase_for_start_event(
             event, current_work_phase, number_of_days_to_be_pushed, push_events
@@ -388,7 +395,7 @@ class EventService:
 
     @classmethod
     def _validate_dates(
-        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Perform date validations for the min and max dates for events"""
         if event.actual_date:
@@ -414,7 +421,7 @@ class EventService:
 
     @classmethod
     def _find_anticipated_date_min(
-        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Return the min date of anticipated date"""
         anticipated_date_min = (
@@ -427,7 +434,7 @@ class EventService:
 
     @classmethod
     def _find_actual_date_min(
-        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+        cls, event: Event, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Return the min date of actual date"""
         actual_date_min = (
@@ -463,7 +470,7 @@ class EventService:
 
     @classmethod
     def _is_start_phase(
-        cls, current_work_phase: WorkPhase, all_work_phases: [WorkPhase]
+        cls, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Return true if the current phase is start phase"""
         return all_work_phases[0].id == current_work_phase.id
@@ -477,17 +484,57 @@ class EventService:
         push_events: bool,
     ) -> None:
         """Update the work phase's start date if the start event's date changed"""
-        if (
-            event.event_configuration.event_position.value
-            == EventPositionEnum.START.value
-        ):
+        if event.event_position == EventPositionEnum.START.value:
             current_work_phase.start_date = cls._find_event_date(event)
+            # Adjust the phase end date when START event's date changed in a legislated phase
+            # This section executes if the user opt not to push the events
             if current_work_phase.legislated and not push_events:
                 current_work_phase.end_date = current_work_phase.end_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
+            )
+
+    @classmethod
+    def _handle_end_event_date_when_start_event_changed(
+        cls,
+        current_work_phase: WorkPhase,
+        event: Event,
+        all_work_events: List[Event],
+        number_of_days_to_be_pushed: int,
+        push_events: bool,
+    ):
+        # pylint: disable=too-many-arguments
+        """END event date change according to start event when the no-push subsequent events requested"""
+        # The date of the END event of a phase should be adjusted according to the number of days
+        # changed in the START event of the phase in the leslated phase. The total number of days
+        # in legislated phase should always remains the same unless and extension/suspension happened.
+        # This section of the code will work only if the push_events turned false.
+
+        if (
+            current_work_phase.legislated
+            and event.event_position == EventPositionEnum.START.value
+            and not push_events
+        ):
+            phase_events = cls._find_work_phase_events(
+                all_work_events, event.event_configuration.work_phase_id
+            )
+            end_event = next(
+                (
+                    phase_event
+                    for phase_event in phase_events
+                    if phase_event.event_position == EventPositionEnum.END.value
+                ),
+                None,
+            )
+            end_event_from_db = Event.find_by_id(end_event.id)
+            end_event_from_db.anticipated_date = (
+                end_event_from_db.anticipated_date
+                + timedelta(days=number_of_days_to_be_pushed)
+            )
+            end_event_from_db.update(
+                end_event_from_db.as_dict(recursive=False), commit=False
             )
 
     @classmethod
@@ -529,7 +576,7 @@ class EventService:
     @classmethod
     def _handle_work_phase_for_end_phase_end_event(
         cls,
-        all_work_phases: [WorkPhase],
+        all_work_phases: List[WorkPhase],
         current_work_phase_index: int,
         event: Event,
         current_work_phase: WorkPhase,
@@ -580,17 +627,13 @@ class EventService:
     def event_compare_func(cls, event_x, event_y):
         """Compare function for event sort"""
         if (
-            event_x.event_configuration.event_position.value
-            == EventPositionEnum.START.value
-            or event_y.event_configuration.event_position.value
-            == EventPositionEnum.END.value
+            event_x.event_position == EventPositionEnum.START.value
+            or event_y.event_position == EventPositionEnum.END.value
         ):
             return -1
         if (
-            event_y.event_configuration.event_position.value
-            == EventPositionEnum.START.value
-            or event_x.event_configuration.event_position.value
-            == EventPositionEnum.END.value
+            event_y.event_position == EventPositionEnum.START.value
+            or event_x.event_position == EventPositionEnum.END.value
         ):
             return 1
         if (
@@ -609,7 +652,7 @@ class EventService:
 
     @classmethod
     def find_event_index(
-        cls, all_work_events: [Event], event: Event, current_work_phase: WorkPhase
+        cls, all_work_events: List[Event], event: Event, current_work_phase: WorkPhase
     ):
         """Find the index of given event in the list of existing events"""
         all_phase_events = list(
@@ -626,7 +669,7 @@ class EventService:
         )
         if event_index_if_existing != -1:
             return event_index_if_existing
-        copy_of_all_phase_events: [Event] = copy.copy(all_phase_events)
+        copy_of_all_phase_events: List[Event] = copy.copy(all_phase_events)
         copy_of_all_phase_events.append(event)
         copy_of_all_phase_events = sorted(
             copy_of_all_phase_events, key=functools.cmp_to_key(cls.event_compare_func)
@@ -634,7 +677,7 @@ class EventService:
         return cls._find_event_index_in_array(copy_of_all_phase_events, event)
 
     @classmethod
-    def _find_event_index_in_array(cls, events: [Event], event_to_find: Event):
+    def _find_event_index_in_array(cls, events: List[Event], event_to_find: Event):
         """Find the index of the event in the given array"""
         index = -1
         for i, event in enumerate(events):
@@ -693,10 +736,10 @@ class EventService:
     @classmethod
     def _push_events(
         cls,
-        phase_events: [Event],
+        phase_events: List[Event],
         number_of_days_to_be_pushed: int,
         event: Event,
-        all_work_event_configurations: [EventConfiguration],
+        all_work_event_configurations: List[EventConfiguration],
     ) -> None:
         """Push events the given number of days"""
         for event_to_update in phase_events:
@@ -719,9 +762,9 @@ class EventService:
     @classmethod
     def _push_work_phases(
         cls,
-        work_phases: [WorkPhase],
-        all_work_events: [Event],
-        all_work_event_configurations: [EventConfiguration],
+        work_phases: List[WorkPhase],
+        all_work_events: List[Event],
+        all_work_event_configurations: List[EventConfiguration],
         number_of_days_to_be_pushed: int,
         event: Event,
         current_work_phase: WorkPhase,
@@ -757,8 +800,8 @@ class EventService:
 
     @classmethod
     def _find_work_phase_events(
-        cls, all_work_events: [Event], work_phase_id: int
-    ) -> [Event]:
+        cls, all_work_events: List[Event], work_phase_id: int
+    ) -> List[Event]:
         """Filter the work events to find the phase event"""
         phase_events = list(
             filter(
@@ -775,11 +818,10 @@ class EventService:
     def _end_event_anticipated_change_rule(
         cls, event: Event, event_old: Event, current_work_phase: WorkPhase
     ) -> None:
-        """Anticipated date of end event cannot be changed"""
+        """Anticipated date of end event of legislated phase cannot be changed"""
         if (
             current_work_phase.legislated
-            and event.event_configuration.event_position.value
-            == EventPositionEnum.END.value
+            and event.event_position == EventPositionEnum.END.value
             and (event_old.anticipated_date.date() - event.anticipated_date.date()).days
             != 0
         ):
@@ -790,8 +832,8 @@ class EventService:
     @classmethod
     def _previous_event_acutal_date_rule(  # pylint: disable=too-many-arguments
         cls,
-        all_work_events: [Event],
-        all_work_phases: [WorkPhase],
+        all_work_events: List[Event],
+        all_work_phases: List[WorkPhase],
         current_work_phase_index: int,
         event: Event,
         event_old,
@@ -803,8 +845,7 @@ class EventService:
         """
         if event.actual_date:
             if (
-                event.event_configuration.event_position.value
-                == EventPositionEnum.START.value
+                event.event_position == EventPositionEnum.START.value
                 and current_work_phase_index > 0
             ):
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
@@ -826,9 +867,7 @@ class EventService:
             if (
                 event_index > 0
                 and not phase_events[event_index - 1].actual_date
-                and not phase_events[
-                    event_index - 1
-                ].event_configuration.event_position.value
+                and not phase_events[event_index - 1].event_position
                 == EventPositionEnum.END.value
             ):
                 raise UnprocessableEntityError(
@@ -837,7 +876,7 @@ class EventService:
 
     @classmethod
     def _handle_child_events(
-        cls, event_configurations: [EventConfiguration], event: [Event]
+        cls, event_configurations: List[EventConfiguration], event: List[Event]
     ) -> None:
         """Create events based on the child event configurations"""
         child_configurations = list(
@@ -913,9 +952,9 @@ class EventService:
         cls,
         work_id: int,
         work_phase_id: int = None,
-        event_categories: [EventCategoryEnum] = [],
+        event_categories: List[EventCategoryEnum] = [],
         scoped: bool = False,
-    ) -> [Event]:
+    ) -> List[Event]:
         # pylint: disable=dangerous-default-value
         """Find all events by work"""
         events_query = (
@@ -1060,7 +1099,7 @@ class EventService:
             action_handler.apply(event, action_configuration.additional_params)
 
     @classmethod
-    def find_events_by_date(cls, from_date: datetime) -> [Event]:
+    def find_events_by_date(cls, from_date: datetime) -> List[Event]:
         """Returns the future events based on given date.
 
         To be used for event calendar.
