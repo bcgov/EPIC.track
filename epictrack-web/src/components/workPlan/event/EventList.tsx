@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -12,16 +12,7 @@ import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_RowSelectionState } from "material-react-table";
 import { dateUtils } from "../../../utils";
-import {
-  Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { styled } from "@mui/system";
+import { Box, Button, Divider, Grid, Tooltip, Typography } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
 import workService from "../../../services/workService/workService";
@@ -249,7 +240,7 @@ const EventList = () => {
     }
     setRowSelection({});
   }, [ctx.work, ctx.selectedWorkPhase?.work_phase.id]);
-  
+
   const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {

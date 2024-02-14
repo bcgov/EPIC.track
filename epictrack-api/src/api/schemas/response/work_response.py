@@ -151,7 +151,6 @@ class WorkPhaseTemplateAvailableResponse(Schema):
     task_added = fields.Boolean(
         metadata={"description": "Is task added already"}, required=True
     )
-    
     work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
 
 
