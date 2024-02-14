@@ -4,18 +4,32 @@ import { TimeScale } from "./TimeScale";
 import TaskList from "./TaskList";
 import TaskBarSection from "./TaskBarSection";
 import { barHeight, rowHeight } from "./constants";
+import moment from "moment";
 
 type GanttProps = {
   parents: TaskParent[];
 };
+
+const TASK_LIST_WIDTH = 300;
 
 export const Gantt = ({ parents }: GanttProps) => {
   const tasks = parents.map((parent) => parent.tasks).flat();
 
   tasks.sort((a: Task, b: Task) => a.start.getTime() - b.start.getTime());
 
-  const start = tasks[0]?.start;
-  const end = tasks[tasks.length - 1]?.end;
+  const earliestStart = tasks.reduce(
+    (prev: Date, task: Task) =>
+      task.start.getTime() < prev.getTime() ? task.start : prev,
+    tasks[0].start
+  );
+  const latestEnd = tasks.reduce(
+    (prev: Date, task: Task) =>
+      task.end.getTime() > prev.getTime() ? task.end : prev,
+    tasks[0].end
+  );
+
+  const start = moment(earliestStart).startOf("month").toDate();
+  const end = moment(latestEnd).endOf("month").toDate();
 
   return (
     <div
@@ -26,10 +40,12 @@ export const Gantt = ({ parents }: GanttProps) => {
         height: parents.length * barHeight + 2 * rowHeight,
       }}
     >
-      <div style={{ width: "200px", height: "100%" }}>
+      <div style={{ width: TASK_LIST_WIDTH, height: "100%" }}>
         <TaskList parents={parents} />
       </div>
-      <div style={{ width: "calc(100% - 200px)", height: "100%" }}>
+      <div
+        style={{ width: `calc(100% - ${TASK_LIST_WIDTH}px)`, height: "100%" }}
+      >
         <TimeScale start={start} end={end}>
           <TaskBarSection parents={parents} start={start} end={end} />
         </TimeScale>

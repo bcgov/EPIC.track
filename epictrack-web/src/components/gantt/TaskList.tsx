@@ -41,9 +41,16 @@ const TaskList = ({ parents }: TaskListProps) => {
             justifyContent: "flex-start",
             alignItems: "center",
             paddingLeft: "1em",
+            width: "100%",
           }}
         >
-          <ETParagraph color={Palette.primary.accent.main}>
+          <ETParagraph
+            color={Palette.primary.accent.main}
+            sx={{
+              textOverflow: "ellipsis",
+              overflow: "hidden",
+            }}
+          >
             {parent.name}
           </ETParagraph>
         </div>

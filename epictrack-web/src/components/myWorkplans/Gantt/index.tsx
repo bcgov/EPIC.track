@@ -1,101 +1,33 @@
 import { Gantt } from "components/Gantt";
-import { TaskParent } from "components/Gantt/types";
+import { useContext } from "react";
+import { MyWorkplansContext } from "../MyWorkPlanContext";
+import moment from "moment";
 
 export const MyWorkplanGantt = () => {
-  const mockTasks: TaskParent[] = [
-    {
-      id: "1",
-      name: "Task 1",
-      tasks: [
-        {
-          id: "1",
-          name: "Task 1",
-          start: new Date("2023-02-02"),
-          end: new Date("2023-02-28"),
-          progress: 0.5,
-        },
-        {
-          id: "1.5",
-          name: "Task 11.5",
-          start: new Date("2023-03-02"),
-          end: new Date("2023-04-28"),
-          progress: 0.5,
-        },
-      ],
-    },
-    {
-      id: "2",
-      name: "Task 2",
-      tasks: [
-        {
-          id: "2",
-          name: "Task 2",
-          start: new Date("2023-09-06"),
-          end: new Date("2023-10-10"),
-          progress: 0.5,
-        },
-      ],
-    },
-    {
-      id: "3",
-      name: "Task 3",
-      tasks: [
-        {
-          id: "3",
-          name: "Task 3",
-          start: new Date("2023-10-11"),
-          end: new Date("2023-11-15"),
-          progress: 0.5,
-        },
-        {
-          id: "32",
-          name: "Task 32",
-          start: new Date("2023-12-11"),
-          end: new Date("2024-01-15"),
-          progress: 0.5,
-        },
-      ],
-    },
-    {
-      id: "4",
-      name: "Task 4",
-      tasks: [
-        {
-          id: "4",
-          name: "Task 4",
-          start: new Date("2024-02-11"),
-          end: new Date("2024-07-15"),
-          progress: 0.5,
-        },
-      ],
-    },
-    {
-      id: "5",
-      name: "Task 5",
-      tasks: [
-        {
-          id: "5",
-          name: "Task 5",
-          start: new Date("2024-03-11"),
-          end: new Date("2024-04-15"),
-          progress: 0.5,
-        },
-      ],
-    },
-    {
-      id: "6",
-      name: "Task 6",
-      tasks: [
-        {
-          id: "6",
-          name: "Task 6",
-          start: new Date("2025-03-11"),
-          end: new Date("2025-04-15"),
-          progress: 0.5,
-        },
-      ],
-    },
-  ];
+  const { workplans } = useContext(MyWorkplansContext);
 
-  return <Gantt parents={mockTasks} />;
+  const tasks = workplans.map((workplan) => {
+    let phaseInfo: any;
+    if (!Array.isArray(workplan.phase_info)) {
+      phaseInfo = [workplan.phase_info];
+    } else {
+      phaseInfo = workplan.phase_info;
+    }
+
+    return {
+      id: String(workplan.id),
+      name: workplan.title,
+      tasks: phaseInfo.map((phase: any) => {
+        return {
+          id: phase.work_phase.name,
+          name: phase.work_phase.name,
+          start: moment(phase.work_phase.start_date).toDate(),
+          end: moment(phase.work_phase.end_date).toDate(),
+          progress: phase.milestone_progress,
+        };
+      }),
+    };
+  });
+
+  return <Gantt parents={tasks} />;
 };

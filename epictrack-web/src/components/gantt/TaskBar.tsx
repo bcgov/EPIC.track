@@ -22,12 +22,21 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
     <div
       style={{
         left: `${daysDiff * dayWidth}px`,
-        width: `${taskSpan * dayWidth}px`,
-        backgroundColor: color ?? "black",
         height: "100%",
         position: "absolute",
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
       }}
-    />
+    >
+      <div
+        style={{
+          width: `${taskSpan * dayWidth}px`,
+          backgroundColor: color ?? "black",
+          height: "50%",
+        }}
+      />
+    </div>
   );
 };
 
