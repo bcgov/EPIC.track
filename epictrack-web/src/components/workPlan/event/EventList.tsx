@@ -249,6 +249,7 @@ const EventList = () => {
     }
     setRowSelection({});
   }, [ctx.work, ctx.selectedWorkPhase?.work_phase.id]);
+  
   const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
@@ -295,18 +296,6 @@ const EventList = () => {
             ? EVENT_STATUS.INPROGRESS
             : EVENT_STATUS.NOT_STARTED;
           element.visibility = element.event_configuration.visibility;
-          if (
-            element.event_configuration.event_position === EventPosition.END &&
-            element.is_complete &&
-            element.work_phase_id === ctx.selectedWorkPhase?.work_phase.phase.id
-          ) {
-            setShowConfetti(true);
-
-            // Assuming the confetti animation lasts for 5 seconds
-            setTimeout(() => {
-              setShowConfetti(false);
-            }, 5000);
-          }
           return element;
         });
       }
@@ -497,6 +486,15 @@ const EventList = () => {
           key: `template-available-${ctx.selectedWorkPhase.work_phase.name}`,
         });
         notificationId.current = notification;
+
+        if (templateUploadStatus.work_phase.is_completed) {
+          setShowConfetti(true);
+
+          // Assuming the confetti animation lasts for 5 seconds
+          setTimeout(() => {
+            setShowConfetti(false);
+          }, 5000);
+        }
       }
     }
   }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
