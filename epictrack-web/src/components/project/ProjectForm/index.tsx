@@ -4,7 +4,6 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../../shared/index";
-import codeService, { Code } from "../../../services/codeService";
 import { Project, defaultProject } from "../../../models/project";
 import { Proponent } from "../../../models/proponent";
 import { Region } from "../../../models/region";
@@ -22,6 +21,11 @@ import { ProponentSpecialField } from "./ProponentSpecialField";
 import { ProjectNameSpecialField } from "./ProjectNameSpecialField";
 import { Restricted } from "../../shared/restricted";
 import { ROLES } from "../../../constants/application-constant";
+import { ListType } from "models/code";
+import RegionService from "services/regionService";
+import { REGIONS } from "../../../components/shared/constants";
+import typeService from "services/typeService";
+import proponentService from "services/proponentService/proponentService";
 
 const schema = yup.object().shape({
   name: yup
@@ -75,8 +79,8 @@ export default function ProjectForm({
   saveProject,
   setDisableDialogSave,
 }: ProjectFormProps) {
-  const [envRegions, setEnvRegions] = React.useState<Region[]>();
-  const [nrsRegions, setNRSRegions] = React.useState<Region[]>();
+  const [envRegions, setEnvRegions] = React.useState<ListType[]>();
+  const [nrsRegions, setNRSRegions] = React.useState<ListType[]>();
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
@@ -121,25 +125,6 @@ export default function ProjectForm({
 
   const formValues = useWatch({ control });
 
-  const setRegions = (regions: Region[]) => {
-    const envRegions = regions.filter((p) => p.entity === "ENV");
-    const nrsRegions = regions.filter((p) => p.entity === "FLNR");
-    setEnvRegions(envRegions);
-    setNRSRegions(nrsRegions);
-  };
-  const codeTypes: { [x: string]: any } = {
-    regions: setRegions,
-    types: setTypes,
-    proponents: setProponents,
-  };
-
-  const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
-    }
-  };
-
   const getSubTypesByType = async () => {
     const subTypeResult = await subTypeService.getSubTypeByType(
       formValues.type_id
@@ -163,11 +148,9 @@ export default function ProjectForm({
   }, [formValues.type_id, project]);
 
   React.useEffect(() => {
-    const promises: any[] = [];
-    Object.keys(codeTypes).forEach(async (key) => {
-      promises.push(getCodes(key as Code));
-    });
-    Promise.all(promises);
+    getRegions();
+    getTypes();
+    getProponents();
   }, []);
 
   const typeChange = () => {
@@ -201,6 +184,35 @@ export default function ProjectForm({
   };
 
   const abbreviation = watch("abbreviation");
+
+  const getRegions = async () => {
+    const envRegionsResult = await RegionService.getRegions(REGIONS.ENV);
+    if (envRegionsResult.status === 200) {
+      const envRegions = envRegionsResult.data as ListType[];
+      setEnvRegions(envRegions);
+    }
+    const nrsRegionsResult = await RegionService.getRegions(REGIONS.FLNR);
+    if (nrsRegionsResult.status === 200) {
+      const nrsRegions = nrsRegionsResult.data as ListType[];
+      setNRSRegions(nrsRegions);
+    }
+  };
+
+  const getTypes = async () => {
+    const typesResult = await typeService.getAll();
+    if (typesResult.status === 200) {
+      const types = typesResult.data as ListType[];
+      setTypes(types);
+    }
+  };
+
+  const getProponents = async () => {
+    const proponentsResult = await proponentService.getAll();
+    if (proponentsResult.status === 200) {
+      const proponents = proponentsResult.data as Proponent[];
+      setProponents(proponents);
+    }
+  };
 
   return (
     <FormProvider {...methods}>
