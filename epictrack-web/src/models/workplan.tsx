@@ -23,7 +23,7 @@ export interface WorkPlan {
         color: string;
       };
     };
-  };
+  }[];
 
   federal_involvement: {
     name: string;
