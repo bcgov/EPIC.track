@@ -4,6 +4,7 @@ export type Task = {
   start: Date;
   end: Date;
   progress: number;
+  progressProps: React.CSSProperties;
 };
 
 export type TaskParent = {

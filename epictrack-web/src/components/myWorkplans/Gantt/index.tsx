@@ -2,6 +2,7 @@ import { Gantt } from "components/Gantt";
 import { useContext } from "react";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import moment from "moment";
+import { Palette } from "styles/theme";
 
 export const MyWorkplanGantt = () => {
   const { workplans } = useContext(MyWorkplansContext);
@@ -23,7 +24,13 @@ export const MyWorkplanGantt = () => {
           name: phase.work_phase.name,
           start: moment(phase.work_phase.start_date).toDate(),
           end: moment(phase.work_phase.end_date).toDate(),
-          progress: phase.milestone_progress,
+          progress: `${Math.abs(phase.days_left)}/${
+            phase.total_number_of_days
+          }`,
+          progressProps: {
+            color:
+              phase.days_left > 0 ? Palette.success.main : Palette.error.main,
+          },
         };
       }),
     };
