@@ -136,6 +136,14 @@ const EventList = () => {
     setStaffSelectOptions(options);
   }, [ctx.team]);
 
+  React.useEffect(() => {
+    if (showConfetti) {
+      setTimeout(() => {
+        setShowConfetti(false);
+      }, 5000);
+    }
+  }, [showConfetti]);
+
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
     if (ctx.work?.id && ctx.selectedWorkPhase?.work_phase.id) {
@@ -318,9 +326,20 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-    getTemplateUploadStatus();
+    getTemplateUploadStatus()
+      .then(() => {
+        return getWorkById();
+      })
+      .then(() => {
+        if (
+          milestoneEvent &&
+          milestoneEvent.event_configuration.event_position ===
+            EventPosition.END
+        ) {
+          setShowConfetti(true);
+        }
+      });
     getWorkPhases();
-    getWorkById();
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
   };
@@ -477,15 +496,6 @@ const EventList = () => {
           key: `template-available-${ctx.selectedWorkPhase.work_phase.name}`,
         });
         notificationId.current = notification;
-
-        if (templateUploadStatus.work_phase.is_completed) {
-          setShowConfetti(true);
-
-          // Assuming the confetti animation lasts for 5 seconds
-          setTimeout(() => {
-            setShowConfetti(false);
-          }, 5000);
-        }
       }
     }
   }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
