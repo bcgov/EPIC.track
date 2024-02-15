@@ -75,6 +75,10 @@ class _Config():  # pylint: disable=too-few-public-methods
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # added to skip the event logic for the purpose of entering historical data without
+    # much hurdles
+    SKIP_EVENT_LOGIC = _get_config('SKIP_EVENT_LOGIC', default=False) == 'True'
+
     ALEMBIC_INI = 'migrations/alembic.ini'
 
     # POSTGRESQL
