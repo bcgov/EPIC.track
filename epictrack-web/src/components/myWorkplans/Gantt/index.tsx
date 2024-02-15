@@ -1,8 +1,8 @@
-import { Gantt } from "components/Gantt";
 import { useContext } from "react";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import moment from "moment";
 import { Palette } from "styles/theme";
+import { Gantt } from "components/gantt";
 
 export const MyWorkplanGantt = () => {
   const { workplans } = useContext(MyWorkplansContext);
