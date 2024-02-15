@@ -1,4 +1,4 @@
-import { Gantt } from "components/Gantt";
+import { Gantt } from "components/gantt";
 import { useContext } from "react";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import moment from "moment";
