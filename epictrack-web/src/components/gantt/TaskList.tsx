@@ -17,7 +17,6 @@ const TaskList = ({ parents }: TaskListProps) => {
         flexDirection: "column",
         position: "relative",
         backgroundColor: Palette.neutral.bg.light,
-        height: "100%",
       }}
     >
       <div

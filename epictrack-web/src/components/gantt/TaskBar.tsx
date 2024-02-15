@@ -45,8 +45,8 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
         <div
           style={{
             width: `${taskSpan * dayWidth}px`,
-            backgroundColor: "#EDEAF2",
-            borderBottom: `2px solid #8775A9`,
+            backgroundColor: `${task.style.bar.backgroundColor}`,
+            borderBottom: `2px solid ${task.style.bar.backgroundColor}`,
             height: "70%",
             display: "flex",
             flexDirection: "row",
@@ -69,7 +69,7 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
           </ETCaption3>
           <ETCaption3
             sx={{
-              ...(task.progressProps || {}),
+              ...(task.style.progress || {}),
             }}
             bold
           >

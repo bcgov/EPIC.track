@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { ETCaption2, ETCaption3 } from "components/shared";
-import { dayWidth, rowHeight } from "./constants";
+import { barHeight, dayWidth, rowHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
 
@@ -62,11 +62,14 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
 
   return (
     <div
+      id="time-scale"
       style={{
-        overflow: "scroll",
         display: "flex",
         flexDirection: "row",
-        height: "100%",
+        overflowX: "scroll",
+        overflowY: "hidden",
+        backgroundColor: Palette.neutral.bg.light,
+
       }}
     >
       <div
@@ -96,6 +99,7 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
           ))}
         </div>
         <div
+          id="months"
           style={{
             display: "flex",
             flexDirection: "row",
@@ -117,7 +121,7 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
             </div>
           ))}
         </div>
-        {children}
+        <div id="bars">{children}</div>
       </div>
     </div>
   );
