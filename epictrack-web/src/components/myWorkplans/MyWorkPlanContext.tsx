@@ -5,7 +5,7 @@ import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
-import { MyWorkPlanView } from "./type";
+import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
@@ -58,7 +58,7 @@ export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
   setLoadingMoreWorkplans: () => {
     return;
   },
-  myWorkPlanView: "Cards",
+  myWorkPlanView: MY_WORKPLAN_VIEW.CARDS,
   setMyWorkPlanView: () => {
     return;
   },
@@ -83,7 +83,9 @@ export const MyWorkplansProvider = ({
     staff_id: user.staffId,
   });
 
-  const [myWorkPlanView, setMyWorkPlanView] = useState<MyWorkPlanView>("Cards");
+  const [myWorkPlanView, setMyWorkPlanView] = useState<MyWorkPlanView>(
+    MY_WORKPLAN_VIEW.CARDS
+  );
 
   const fetchWorkplans = async (page: number, shouldAppend = false) => {
     try {
