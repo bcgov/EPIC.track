@@ -6,6 +6,7 @@ const initialState: UIState = {
   drawerWidth: 260,
   showEnvBanner: false,
   toggleDrawerMarginTop: "5rem",
+  showConfetti: false,
 };
 
 export const uiStateSlice = createSlice({
@@ -20,9 +21,12 @@ export const uiStateSlice = createSlice({
       state.showEnvBanner = action.payload;
       state.toggleDrawerMarginTop = state.showEnvBanner ? "3rem" : "1rem";
     },
+    showConfetti: (state, action: PayloadAction<boolean>) => {
+      state.showConfetti = action.payload;
+    },
   },
 });
 
-export const { toggleDrawer, envBanner } = uiStateSlice.actions;
+export const { toggleDrawer, envBanner, showConfetti } = uiStateSlice.actions;
 
 export default uiStateSlice.reducer;

@@ -51,6 +51,7 @@ import {
 import { Restricted } from "components/shared/restricted";
 import { IButton } from "components/shared";
 import Confetti from "components/confetti/Confetti";
+import { showConfetti } from "styles/uiStateSlice";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -63,7 +64,6 @@ const EventList = () => {
   const [taskEvent, setTaskEvent] = React.useState<TaskEvent>();
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
-  const [showConfetti, setShowConfetti] = React.useState(false);
   const [showMilestoneForm, setShowMilestoneForm] =
     React.useState<boolean>(false);
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
@@ -135,14 +135,6 @@ const EventList = () => {
       );
     setStaffSelectOptions(options);
   }, [ctx.team]);
-
-  React.useEffect(() => {
-    if (showConfetti) {
-      setTimeout(() => {
-        setShowConfetti(false);
-      }, 5000);
-    }
-  }, [showConfetti]);
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
@@ -326,6 +318,9 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
+    getWorkPhases();
+    setTaskEvent(undefined);
+    setMilestoneEvent(undefined);
     getTemplateUploadStatus()
       .then(() => {
         return getWorkById();
@@ -336,12 +331,12 @@ const EventList = () => {
           milestoneEvent.event_configuration.event_position ===
             EventPosition.END
         ) {
-          setShowConfetti(true);
+          dispatch(showConfetti(true));
+          setTimeout(() => {
+            dispatch(showConfetti(false));
+          }, 5000);
         }
       });
-    getWorkPhases();
-    setTaskEvent(undefined);
-    setMilestoneEvent(undefined);
   };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -704,9 +699,6 @@ const EventList = () => {
 
   return (
     <Grid container rowSpacing={1}>
-      <When condition={showConfetti}>
-        <Confetti />
-      </When>
       <Grid container>
         <When
           condition={
