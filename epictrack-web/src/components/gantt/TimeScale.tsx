@@ -1,9 +1,8 @@
-import React, { useMemo, useRef, useState } from "react";
-import { ETCaption2, ETCaption3 } from "components/shared";
-import { barHeight, dayWidth, rowHeight, sectionHeight } from "./constants";
+import React, { useMemo } from "react";
+import { ETCaption3 } from "components/shared";
+import { dayWidth, rowHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
-import { ScrollSyncPane } from "react-scroll-sync";
 
 type TimeScaleProps = {
   start: Date;
@@ -67,73 +66,65 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
       style={{
         display: "flex",
         flexDirection: "row",
-        overflowY: "hidden",
         backgroundColor: Palette.neutral.bg.light,
       }}
     >
-      <ScrollSyncPane group="horizontal">
+      <div>
         <div
           style={{
-            height: sectionHeight + 2 * rowHeight,
-            overflowY: "auto",
+            display: "flex",
+            flexDirection: "row",
+            height: rowHeight,
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              height: rowHeight,
-              position: "sticky",
-              top: 0,
-              zIndex: 10,
-            }}
-          >
-            {yearsInfo.map((year) => (
-              <div
-                key={year.year}
-                style={{
-                  flexShrink: 0,
-                  textAlign: "center",
-                  width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
-                  backgroundColor: Palette.neutral.bg.light,
-                }}
-              >
-                <ETCaption3 bold>{year.year}</ETCaption3>
-              </div>
-            ))}
-          </div>
-          <div
-            id="months"
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              height: rowHeight,
-              position: "sticky",
-              top: rowHeight,
-              backgroundColor: Palette.neutral.bg.light,
-              zIndex: 10,
-            }}
-          >
-            {monthsInfo.map((month) => (
-              <div
-                key={month.start.format("YYYY-MM")}
-                style={{
-                  flexShrink: 0,
-                  // width: month.days * dayWidth,
-                  width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
-                  textAlign: "center",
-                  backgroundColor: Palette.neutral.bg.light,
-                  position: "relative",
-                }}
-              >
-                <ETCaption3>{month.month}</ETCaption3>
-              </div>
-            ))}
-          </div>
-
-          <div id="bars">{children}</div>
+          {yearsInfo.map((year) => (
+            <div
+              key={year.year}
+              style={{
+                flexShrink: 0,
+                textAlign: "center",
+                width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                backgroundColor: Palette.neutral.bg.light,
+              }}
+            >
+              <ETCaption3 bold>{year.year}</ETCaption3>
+            </div>
+          ))}
         </div>
-      </ScrollSyncPane>
+        <div
+          id="months"
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            height: rowHeight,
+            position: "sticky",
+            top: rowHeight,
+            backgroundColor: Palette.neutral.bg.light,
+            zIndex: 10,
+          }}
+        >
+          {monthsInfo.map((month) => (
+            <div
+              key={month.start.format("YYYY-MM")}
+              style={{
+                flexShrink: 0,
+                // width: month.days * dayWidth,
+                width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                textAlign: "center",
+                backgroundColor: Palette.neutral.bg.light,
+                position: "relative",
+              }}
+            >
+              <ETCaption3>{month.month}</ETCaption3>
+            </div>
+          ))}
+        </div>
+
+        <div id="bars">{children}</div>
+      </div>
     </div>
   );
 };

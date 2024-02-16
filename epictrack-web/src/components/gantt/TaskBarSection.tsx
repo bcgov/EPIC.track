@@ -2,9 +2,8 @@
 import React from "react";
 import TaskBar from "./TaskBar";
 import { TaskParent } from "./types";
-import { barHeight, rowHeight, sectionHeight } from "./constants";
+import { barHeight } from "./constants";
 import { Palette } from "styles/theme";
-import { ScrollSyncPane } from "react-scroll-sync";
 
 type TaskBarSectionProps = {
   parents: TaskParent[];
@@ -17,7 +16,6 @@ const TaskBarSection = ({ parents, start, end }: TaskBarSectionProps) => {
     <div
       style={{
         backgroundColor: Palette.neutral.bg.light,
-        height: sectionHeight,
       }}
     >
       {parents.map((parent) => (

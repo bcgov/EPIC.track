@@ -3,7 +3,12 @@ import { Task, TaskParent } from "./types";
 import { TimeScale } from "./TimeScale";
 import TaskList from "./TaskList";
 import TaskBarSection from "./TaskBarSection";
-import { barHeight, rowHeight, taskListWidth } from "./constants";
+import {
+  barHeight,
+  rowHeight,
+  sectionHeight,
+  taskListWidth,
+} from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
 import { ScrollSync } from "react-scroll-sync";
@@ -39,13 +44,17 @@ export const Gantt = ({ parents }: GanttProps) => {
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-start",
-          height: parents.length * barHeight + rowHeight * 2,
+          height: sectionHeight + rowHeight * 2,
+          overflowY: "auto",
+          backgroundColor: Palette.neutral.bg.light,
         }}
       >
         <div
           style={{
             width: taskListWidth,
-            height: "100%",
+            position: "sticky",
+            left: 0,
+            zIndex: 5,
           }}
         >
           <TaskList parents={parents} />
@@ -55,6 +64,7 @@ export const Gantt = ({ parents }: GanttProps) => {
           style={{
             width: `calc(100% - ${taskListWidth}px)`,
             height: "100%",
+            zIndex: 4,
           }}
         >
           <TimeScale start={start} end={end}>

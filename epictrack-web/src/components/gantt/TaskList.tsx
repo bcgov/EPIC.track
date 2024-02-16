@@ -1,10 +1,9 @@
 // TaskList.js
 import React from "react";
 import { TaskParent } from "./types";
-import { barHeight, rowHeight, sectionHeight } from "./constants";
+import { barHeight, rowHeight } from "./constants";
 import { ETParagraph } from "components/shared";
 import { Palette } from "styles/theme";
-import { ScrollSyncPane } from "react-scroll-sync";
 
 type TaskListProps = {
   parents: TaskParent[];
@@ -16,7 +15,8 @@ const TaskList = ({ parents }: TaskListProps) => {
       style={{
         display: "flex",
         flexDirection: "column",
-        position: "relative",
+        position: "sticky",
+        left: 0,
         backgroundColor: Palette.neutral.bg.light,
       }}
     >
@@ -27,38 +27,44 @@ const TaskList = ({ parents }: TaskListProps) => {
           flexDirection: "row",
           alignItems: "center",
           paddingLeft: "1em",
+          position: "sticky",
+          top: 0,
+          zIndex: 2,
+          backgroundColor: Palette.neutral.bg.light,
         }}
       >
         <ETParagraph bold>Works</ETParagraph>
       </div>
-      <ScrollSyncPane group="horizontal">
-        <div style={{ height: sectionHeight, overflow: "hidden" }}>
-          {parents.map((parent) => (
-            <div
-              key={parent.id}
-              style={{
-                height: barHeight,
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "flex-start",
-                alignItems: "center",
-                paddingLeft: "1em",
-                width: "100%",
+      <div
+        style={{
+          zIndex: 1,
+        }}
+      >
+        {parents.map((parent) => (
+          <div
+            key={parent.id}
+            style={{
+              height: barHeight,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              paddingLeft: "1em",
+              width: "100%",
+            }}
+          >
+            <ETParagraph
+              color={Palette.primary.accent.main}
+              sx={{
+                textOverflow: "ellipsis",
+                overflow: "hidden",
               }}
             >
-              <ETParagraph
-                color={Palette.primary.accent.main}
-                sx={{
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                }}
-              >
-                {parent.name}
-              </ETParagraph>
-            </div>
-          ))}
-        </div>
-      </ScrollSyncPane>
+              {parent.name}
+            </ETParagraph>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
