@@ -77,7 +77,6 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             ea_act_id=work_phase.work.ea_act_id,
         )
         result["template_available"] = template_available
-        result["work_phase"] = work_phase
         return result
 
     @classmethod

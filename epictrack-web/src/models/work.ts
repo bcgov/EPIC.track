@@ -88,7 +88,6 @@ export interface WorkPhaseAdditionalInfo {
 export interface TemplateStatus extends MasterBase {
   template_available: boolean;
   task_added: boolean;
-  work_phase: WorkPhase;
 }
 
 export const defaultWork = {

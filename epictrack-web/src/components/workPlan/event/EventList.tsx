@@ -329,7 +329,8 @@ const EventList = () => {
         if (
           milestoneEvent &&
           milestoneEvent.event_configuration.event_position ===
-            EventPosition.END
+            EventPosition.END &&
+          milestoneEvent.actual_date
         ) {
           dispatch(showConfetti(true));
           setTimeout(() => {
