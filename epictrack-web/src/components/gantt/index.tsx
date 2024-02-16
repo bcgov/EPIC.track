@@ -25,12 +25,12 @@ export const Gantt = ({ parents }: GanttProps) => {
   const earliestStart = tasks.reduce(
     (prev: Date, task: Task) =>
       task.start.getTime() < prev.getTime() ? task.start : prev,
-    tasks[0].start,
+    tasks[0].start
   );
   const latestEnd = tasks.reduce(
     (prev: Date, task: Task) =>
       task.end.getTime() > prev.getTime() ? task.end : prev,
-    tasks[0].end,
+    tasks[0].end
   );
 
   const start = moment(earliestStart).startOf("month").toDate();
