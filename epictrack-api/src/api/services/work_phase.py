@@ -111,9 +111,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
         work_phases_dict = cls.find_work_phases_by_work_ids(work_ids)[0]
 
-        for work_id, work_phase_id in work_params_dict.items():
+        for work_id, _work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls._find_work_phase_status(
-                work_id, work_phase_id, work_phases_dict.get(work_id, [])
+                work_id, None, work_phases_dict.get(work_id, [])
             )
 
         return result_dict
