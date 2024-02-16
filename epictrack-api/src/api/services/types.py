@@ -23,6 +23,6 @@ class TypeService:  # pylint:disable=too-few-public-methods
     @classmethod
     def find_all(cls):
         """Find all types"""
-        current_app.logger.debug(f"find all types")
+        current_app.logger.debug("find all types")
         types = Type.find_all()
         return types

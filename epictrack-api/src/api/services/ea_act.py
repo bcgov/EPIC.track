@@ -16,7 +16,7 @@
 from api.models.ea_act import EAAct
 
 
-class EAActService:
+class EAActService:  # pylint: disable=too-few-public-methods
     """Service to manage EA Act related operations."""
 
     @staticmethod
