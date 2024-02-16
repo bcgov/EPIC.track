@@ -2,8 +2,9 @@
 import React from "react";
 import TaskBar from "./TaskBar";
 import { TaskParent } from "./types";
-import { barHeight, rowHeight } from "./constants";
+import { barHeight, rowHeight, sectionHeight } from "./constants";
 import { Palette } from "styles/theme";
+import { ScrollSyncPane } from "react-scroll-sync";
 
 type TaskBarSectionProps = {
   parents: TaskParent[];
@@ -15,20 +16,18 @@ const TaskBarSection = ({ parents, start, end }: TaskBarSectionProps) => {
   return (
     <div
       style={{
-        display: "flex",
-        flexDirection: "column",
         backgroundColor: Palette.neutral.bg.light,
+        height: sectionHeight,
       }}
     >
       {parents.map((parent) => (
         <div
           key={`parent-${parent.id}`}
           style={{
-            display: "flex",
-            flexDirection: "column",
             position: "relative",
             width: "100%",
             height: barHeight,
+            zIndex: 1,
           }}
         >
           {parent.tasks.map((task) => {

@@ -1,9 +1,10 @@
 // TaskList.js
 import React from "react";
 import { TaskParent } from "./types";
-import { barHeight, rowHeight } from "./constants";
+import { barHeight, rowHeight, sectionHeight } from "./constants";
 import { ETParagraph } from "components/shared";
 import { Palette } from "styles/theme";
+import { ScrollSyncPane } from "react-scroll-sync";
 
 type TaskListProps = {
   parents: TaskParent[];
@@ -30,30 +31,34 @@ const TaskList = ({ parents }: TaskListProps) => {
       >
         <ETParagraph bold>Works</ETParagraph>
       </div>
-      {parents.map((parent) => (
-        <div
-          key={parent.id}
-          style={{
-            height: barHeight,
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            paddingLeft: "1em",
-            width: "100%",
-          }}
-        >
-          <ETParagraph
-            color={Palette.primary.accent.main}
-            sx={{
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-            }}
-          >
-            {parent.name}
-          </ETParagraph>
+      <ScrollSyncPane group="horizontal">
+        <div style={{ height: sectionHeight, overflow: "hidden" }}>
+          {parents.map((parent) => (
+            <div
+              key={parent.id}
+              style={{
+                height: barHeight,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                paddingLeft: "1em",
+                width: "100%",
+              }}
+            >
+              <ETParagraph
+                color={Palette.primary.accent.main}
+                sx={{
+                  textOverflow: "ellipsis",
+                  overflow: "hidden",
+                }}
+              >
+                {parent.name}
+              </ETParagraph>
+            </div>
+          ))}
         </div>
-      ))}
+      </ScrollSyncPane>
     </div>
   );
 };

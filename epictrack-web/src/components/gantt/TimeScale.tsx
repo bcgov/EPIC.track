@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ETCaption2, ETCaption3 } from "components/shared";
-import { barHeight, dayWidth, rowHeight } from "./constants";
+import { barHeight, dayWidth, rowHeight, sectionHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
+import { ScrollSyncPane } from "react-scroll-sync";
 
 type TimeScaleProps = {
   start: Date;
@@ -66,63 +67,73 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
       style={{
         display: "flex",
         flexDirection: "row",
-        overflowX: "scroll",
         overflowY: "hidden",
         backgroundColor: Palette.neutral.bg.light,
-
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <ScrollSyncPane group="horizontal">
         <div
           style={{
-            display: "flex",
-            flexDirection: "row",
-            height: rowHeight,
+            height: sectionHeight + 2 * rowHeight,
+            overflowY: "auto",
           }}
         >
-          {yearsInfo.map((year, index) => (
-            <div
-              key={year.year}
-              style={{
-                textAlign: "center",
-                width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
-                backgroundColor: Palette.neutral.bg.light,
-              }}
-            >
-              <ETCaption3 bold>{year.year}</ETCaption3>
-            </div>
-          ))}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              height: rowHeight,
+              position: "sticky",
+              top: 0,
+              zIndex: 10,
+            }}
+          >
+            {yearsInfo.map((year) => (
+              <div
+                key={year.year}
+                style={{
+                  flexShrink: 0,
+                  textAlign: "center",
+                  width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                  backgroundColor: Palette.neutral.bg.light,
+                }}
+              >
+                <ETCaption3 bold>{year.year}</ETCaption3>
+              </div>
+            ))}
+          </div>
+          <div
+            id="months"
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              height: rowHeight,
+              position: "sticky",
+              top: rowHeight,
+              backgroundColor: Palette.neutral.bg.light,
+              zIndex: 10,
+            }}
+          >
+            {monthsInfo.map((month) => (
+              <div
+                key={month.start.format("YYYY-MM")}
+                style={{
+                  flexShrink: 0,
+                  // width: month.days * dayWidth,
+                  width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                  textAlign: "center",
+                  backgroundColor: Palette.neutral.bg.light,
+                  position: "relative",
+                }}
+              >
+                <ETCaption3>{month.month}</ETCaption3>
+              </div>
+            ))}
+          </div>
+
+          <div id="bars">{children}</div>
         </div>
-        <div
-          id="months"
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            height: rowHeight,
-          }}
-        >
-          {monthsInfo.map((month) => (
-            <div
-              key={month.start.format("YYYY-MM")}
-              style={{
-                // width: month.days * dayWidth,
-                width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
-                textAlign: "center",
-                backgroundColor: Palette.neutral.bg.light,
-                position: "relative",
-              }}
-            >
-              <ETCaption3>{month.month}</ETCaption3>
-            </div>
-          ))}
-        </div>
-        <div id="bars">{children}</div>
-      </div>
+      </ScrollSyncPane>
     </div>
   );
 };
