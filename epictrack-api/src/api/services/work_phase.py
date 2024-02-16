@@ -113,7 +113,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
         for work_id, work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls._find_work_phase_status(
-                work_id, work_phase_id, work_phases_dict.get(work_id, [])
+                work_id, None, work_phases_dict.get(work_id, [])
             )
 
         return result_dict
@@ -145,8 +145,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         """Find work phase status for the work Id.If work_phase_id is passed , only that phase is considered."""
         result = []
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
-        # if work_phase_id is not None:
-        #     work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
+        if work_phase_id is not None:
+            work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
         for index, work_phase in enumerate(work_phases, start=1):
             result_item = {"work_phase": work_phase}
             total_days = (
