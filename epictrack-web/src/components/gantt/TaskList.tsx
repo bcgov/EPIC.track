@@ -15,9 +15,9 @@ const TaskList = ({ parents }: TaskListProps) => {
       style={{
         display: "flex",
         flexDirection: "column",
-        position: "relative",
+        position: "sticky",
+        left: 0,
         backgroundColor: Palette.neutral.bg.light,
-        height: "100%",
       }}
     >
       <div
@@ -27,34 +27,44 @@ const TaskList = ({ parents }: TaskListProps) => {
           flexDirection: "row",
           alignItems: "center",
           paddingLeft: "1em",
+          position: "sticky",
+          top: 0,
+          zIndex: 2,
+          backgroundColor: Palette.neutral.bg.light,
         }}
       >
         <ETParagraph bold>Works</ETParagraph>
       </div>
-      {parents.map((parent) => (
-        <div
-          key={parent.id}
-          style={{
-            height: barHeight,
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            alignItems: "center",
-            paddingLeft: "1em",
-            width: "100%",
-          }}
-        >
-          <ETParagraph
-            color={Palette.primary.accent.main}
-            sx={{
-              textOverflow: "ellipsis",
-              overflow: "hidden",
+      <div
+        style={{
+          zIndex: 1,
+        }}
+      >
+        {parents.map((parent) => (
+          <div
+            key={parent.id}
+            style={{
+              height: barHeight,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              paddingLeft: "1em",
+              width: "100%",
             }}
           >
-            {parent.name}
-          </ETParagraph>
-        </div>
-      ))}
+            <ETParagraph
+              color={Palette.primary.accent.main}
+              sx={{
+                textOverflow: "ellipsis",
+                overflow: "hidden",
+              }}
+            >
+              {parent.name}
+            </ETParagraph>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

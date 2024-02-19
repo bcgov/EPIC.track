@@ -3,14 +3,19 @@ import { Task, TaskParent } from "./types";
 import { TimeScale } from "./TimeScale";
 import TaskList from "./TaskList";
 import TaskBarSection from "./TaskBarSection";
-import { barHeight, rowHeight } from "./constants";
+import {
+  barHeight,
+  rowHeight,
+  sectionHeight,
+  taskListWidth,
+} from "./constants";
 import moment from "moment";
+import { Palette } from "styles/theme";
+import { ScrollSync } from "react-scroll-sync";
 
 type GanttProps = {
   parents: TaskParent[];
 };
-
-const TASK_LIST_WIDTH = 300;
 
 export const Gantt = ({ parents }: GanttProps) => {
   const tasks = parents.map((parent) => parent.tasks).flat();
@@ -32,24 +37,41 @@ export const Gantt = ({ parents }: GanttProps) => {
   const end = moment(latestEnd).endOf("month").toDate();
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        alignItems: "flex-start",
-        height: parents.length * barHeight + 2 * rowHeight,
-      }}
-    >
-      <div style={{ width: TASK_LIST_WIDTH, height: "100%" }}>
-        <TaskList parents={parents} />
-      </div>
+    <ScrollSync>
       <div
-        style={{ width: `calc(100% - ${TASK_LIST_WIDTH}px)`, height: "100%" }}
+        id="gantt-chart"
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "flex-start",
+          height: sectionHeight + rowHeight * 2,
+          overflowY: "auto",
+          backgroundColor: Palette.neutral.bg.light,
+        }}
       >
-        <TimeScale start={start} end={end}>
-          <TaskBarSection parents={parents} start={start} end={end} />
-        </TimeScale>
+        <div
+          style={{
+            width: taskListWidth,
+            position: "sticky",
+            left: 0,
+            zIndex: 5,
+          }}
+        >
+          <TaskList parents={parents} />
+        </div>
+        <div
+          id="time-scale-section"
+          style={{
+            width: `calc(100% - ${taskListWidth}px)`,
+            height: "100%",
+            zIndex: 4,
+          }}
+        >
+          <TimeScale start={start} end={end}>
+            <TaskBarSection parents={parents} start={start} end={end} />
+          </TimeScale>
+        </div>
       </div>
-    </div>
+    </ScrollSync>
   );
 };

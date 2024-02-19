@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { ETCaption2, ETCaption3 } from "components/shared";
+import { ETCaption3 } from "components/shared";
 import { dayWidth, rowHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
@@ -62,30 +62,29 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
 
   return (
     <div
+      id="time-scale"
       style={{
-        overflow: "scroll",
         display: "flex",
         flexDirection: "row",
-        height: "100%",
+        backgroundColor: Palette.neutral.bg.light,
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+      <div>
         <div
           style={{
             display: "flex",
             flexDirection: "row",
             height: rowHeight,
+            position: "sticky",
+            top: 0,
+            zIndex: 10,
           }}
         >
-          {yearsInfo.map((year, index) => (
+          {yearsInfo.map((year) => (
             <div
               key={year.year}
               style={{
+                flexShrink: 0,
                 textAlign: "center",
                 width: `${year.days * dayWidth}px`, // subtract 1px to account for the border of the div
                 backgroundColor: Palette.neutral.bg.light,
@@ -96,16 +95,22 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
           ))}
         </div>
         <div
+          id="months"
           style={{
             display: "flex",
             flexDirection: "row",
             height: rowHeight,
+            position: "sticky",
+            top: rowHeight,
+            backgroundColor: Palette.neutral.bg.light,
+            zIndex: 10,
           }}
         >
           {monthsInfo.map((month) => (
             <div
               key={month.start.format("YYYY-MM")}
               style={{
+                flexShrink: 0,
                 // width: month.days * dayWidth,
                 width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
                 textAlign: "center",
@@ -117,7 +122,8 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
             </div>
           ))}
         </div>
-        {children}
+
+        <div id="bars">{children}</div>
       </div>
     </div>
   );
