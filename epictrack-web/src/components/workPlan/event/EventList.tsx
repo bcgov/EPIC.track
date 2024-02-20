@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -12,16 +12,7 @@ import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_RowSelectionState } from "material-react-table";
 import { dateUtils } from "../../../utils";
-import {
-  Box,
-  Button,
-  Divider,
-  Grid,
-  IconButton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
-import { styled } from "@mui/system";
+import { Box, Button, Divider, Grid, Tooltip, Typography } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
 import workService from "../../../services/workService/workService";
@@ -59,6 +50,8 @@ import {
 } from "../../../constants/application-constant";
 import { Restricted } from "components/shared/restricted";
 import { IButton } from "components/shared";
+import Confetti from "components/confetti/Confetti";
+import { showConfetti } from "styles/uiStateSlice";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
@@ -247,6 +240,7 @@ const EventList = () => {
     }
     setRowSelection({});
   }, [ctx.work, ctx.selectedWorkPhase?.work_phase.id]);
+
   const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
@@ -324,11 +318,26 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-    getTemplateUploadStatus();
     getWorkPhases();
-    getWorkById();
     setTaskEvent(undefined);
     setMilestoneEvent(undefined);
+    getTemplateUploadStatus()
+      .then(() => {
+        return getWorkById();
+      })
+      .then(() => {
+        if (
+          milestoneEvent &&
+          milestoneEvent.event_configuration.event_position ===
+            EventPosition.END &&
+          milestoneEvent.actual_date
+        ) {
+          dispatch(showConfetti(true));
+          setTimeout(() => {
+            dispatch(showConfetti(false));
+          }, 5000);
+        }
+      });
   };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -457,7 +466,6 @@ const EventList = () => {
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
       setTemplateAvailable(templateUploadStatus);
-
       if (
         templateUploadStatus.template_available &&
         !templateUploadStatus.task_added
