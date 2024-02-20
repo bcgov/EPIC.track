@@ -107,5 +107,26 @@ const Endpoints = {
     SPECIAL_FIELDS: "/special-fields",
     UPDATE: "/special-fields/:specialFieldId",
   },
+  Ministry: {
+    GET_ALL: "/ministries",
+  },
+  EAAct: {
+    GET_ALL: "/ea-acts",
+  },
+  Type: {
+    GET_ALL: "/types",
+  },
+  FederalInvolvement: {
+    GET_ALL: "/federal-involvements",
+  },
+  Roles: {
+    GET_ALL: "/roles",
+  },
+  SubstitutionActs: {
+    GET_ALL: "/substitution-acts",
+  },
+  PIPOrgTypes: {
+    GET_ALL: "/pip-org-types",
+  },
 };
 export default Endpoints;

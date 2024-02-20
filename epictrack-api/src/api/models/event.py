@@ -86,3 +86,8 @@ class Event(BaseModelVersioned):
             )
             .all()
         )
+
+    @property
+    def event_position(self):
+        """Returns the event position of the event"""
+        return self.event_configuration.event_position.value

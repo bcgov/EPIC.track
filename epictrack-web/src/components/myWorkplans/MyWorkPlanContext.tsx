@@ -5,6 +5,7 @@ import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
@@ -15,6 +16,8 @@ interface MyWorkplanContextProps {
   setSearchOptions: React.Dispatch<React.SetStateAction<WorkPlanSearchOptions>>;
   loadingMoreWorkplans: boolean;
   setLoadingMoreWorkplans: React.Dispatch<React.SetStateAction<boolean>>;
+  myWorkPlanView: MyWorkPlanView;
+  setMyWorkPlanView: React.Dispatch<React.SetStateAction<MyWorkPlanView>>;
 }
 
 export interface WorkPlanSearchOptions {
@@ -55,6 +58,10 @@ export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
   setLoadingMoreWorkplans: () => {
     return;
   },
+  myWorkPlanView: MY_WORKPLAN_VIEW.CARDS,
+  setMyWorkPlanView: () => {
+    return;
+  },
 });
 
 const PAGE_SIZE = 6;
@@ -75,6 +82,10 @@ export const MyWorkplansProvider = ({
     ...defaultSearchOptions,
     staff_id: user.staffId,
   });
+
+  const [myWorkPlanView, setMyWorkPlanView] = useState<MyWorkPlanView>(
+    MY_WORKPLAN_VIEW.CARDS
+  );
 
   const fetchWorkplans = async (page: number, shouldAppend = false) => {
     try {
@@ -132,6 +143,8 @@ export const MyWorkplansProvider = ({
       setSearchOptions,
       loadingMoreWorkplans,
       setLoadingMoreWorkplans,
+      myWorkPlanView,
+      setMyWorkPlanView,
     }),
     [
       workplans,
@@ -142,6 +155,8 @@ export const MyWorkplansProvider = ({
       setSearchOptions,
       loadingMoreWorkplans,
       setLoadingMoreWorkplans,
+      myWorkPlanView,
+      setMyWorkPlanView,
     ]
   );
 

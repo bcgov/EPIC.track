@@ -239,9 +239,14 @@ const TemplateList = () => {
             enableRowActions={true}
             renderRowActions={({ row }: any) => (
               <Box>
-                <IconButton onClick={() => handleDelete(row.original.id)}>
-                  <DeleteIcon />
-                </IconButton>
+                <Restricted
+                  allowed={[ROLES.DELETE]}
+                  errorProps={{ disabled: true }}
+                >
+                  <IconButton onClick={() => handleDelete(row.original.id)}>
+                    <DeleteIcon />
+                  </IconButton>
+                </Restricted>
               </Box>
             )}
             renderTopToolbarCustomActions={() => (

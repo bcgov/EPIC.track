@@ -17,7 +17,6 @@ import taskEventService, {
 } from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
 import { ListType } from "../../../models/code";
-import codeService from "../../../services/codeService";
 import RichTextEditor from "../../shared/richTextEditor";
 import { dateUtils } from "../../../utils";
 import { EVENT_TYPE } from "../phase/type";
@@ -27,6 +26,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import TrackDatePicker from "../../shared/DatePicker";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
+import responsibilityService from "services/responsibilityService/responsibilityService";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -97,9 +97,10 @@ const TaskForm = ({
   }, [ctx.work?.id]);
 
   const getResponsibilites = async () => {
-    const result = await codeService.getCodes("responsibilities");
-    if (result.status === 200) {
-      setResponsibilities((result.data as any)["codes"] as ListType[]);
+    const responsibilities = await responsibilityService.getResponsibilities();
+    if (responsibilities.status === 200) {
+      const result = responsibilities.data as ListType[];
+      setResponsibilities(result);
     }
   };
   const getWorkTeamMembers = async () => {

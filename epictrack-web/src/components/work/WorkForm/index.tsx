@@ -4,7 +4,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import Moment from "moment";
 import { yupResolver } from "@hookform/resolvers/yup";
-import codeService, { Code } from "../../../services/codeService";
 import { Work, defaultWork } from "../../../models/work";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
@@ -25,6 +24,11 @@ import icons from "../../icons";
 import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
 import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
 import { Project } from "../../../models/project";
+import ministryService from "services/ministryService";
+import eaActService from "services/eaActService";
+import EAOTeamService from "services/eao_team";
+import federalInvolvementService from "services/federalInvolvementService";
+import substitutionActService from "services/substitutionActService";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -84,11 +88,13 @@ export default function WorkForm({
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
   const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
   const [projects, setProjects] = React.useState<ListType[]>([]);
-  const [ministries, setMinistries] = React.useState<Ministry[]>([]);
+  const [ministries, setMinistries] = React.useState<ListType[]>([]);
   const [federalInvolvements, setFederalInvolvements] = React.useState<
     ListType[]
   >([]);
-  const [substitutionActs, setSubtitutionActs] = React.useState<ListType[]>([]);
+  const [substitutionActs, setSubstitutionActs] = React.useState<ListType[]>(
+    []
+  );
   const [teams, setTeams] = React.useState<ListType[]>([]);
   const [epds, setEPDs] = React.useState<Staff[]>([]);
   const [leads, setLeads] = React.useState<Staff[]>([]);
@@ -150,25 +156,10 @@ export default function WorkForm({
     }
   }, [federalInvolvementId, substitutionActs, federalInvolvements]);
 
-  const codeTypes: { [x: string]: any } = {
-    ea_acts: setEAActs,
-    work_types: setWorkTypes,
-    ministries: setMinistries,
-    federal_involvements: setFederalInvolvements,
-    substitution_acts: setSubtitutionActs,
-    eao_teams: setTeams,
-  };
-
   const staffByRoles: { [x: string]: any } = {
     "4,3": setLeads,
     "3": setEPDs,
     "1,2,8": setDecisionMakers,
-  };
-  const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
-    }
   };
 
   const getStaffByPosition = async (position: string) => {
@@ -194,16 +185,68 @@ export default function WorkForm({
     }
   };
 
+  const getMinistries = async () => {
+    const ministryResult = await ministryService.getAll();
+    if (ministryResult.status === 200) {
+      let ministries = ministryResult.data as ListType[];
+      ministries = sort(ministries, "name");
+      setMinistries(ministries);
+    }
+  };
+
+  const getEAActs = async () => {
+    const eaActResult = await eaActService.getAll();
+    if (eaActResult.status === 200) {
+      const eaActs = eaActResult.data as ListType[];
+      setEAActs(eaActs);
+    }
+  };
+
+  const getWorkTypes = async () => {
+    const workTypeResult = await workService.getWorkTypes();
+    if (workTypeResult.status === 200) {
+      const workType = workTypeResult.data as ListType[];
+      setWorkTypes(workType);
+    }
+  };
+
+  const getEAOTeams = async () => {
+    const eaoTeamsResult = await EAOTeamService.getEaoTeams();
+    if (eaoTeamsResult.status === 200) {
+      const eaoTeams = eaoTeamsResult.data as ListType[];
+      setTeams(eaoTeams);
+    }
+  };
+
+  const getFederalInvolvements = async () => {
+    const federalInvolvementResult = await federalInvolvementService.getAll();
+    if (federalInvolvementResult.status === 200) {
+      const federalInvolvements = federalInvolvementResult.data as ListType[];
+      setFederalInvolvements(federalInvolvements);
+    }
+  };
+
+  const getSubstitutionActs = async () => {
+    const substitutionActResult = await substitutionActService.getAll();
+    if (substitutionActResult.status === 200) {
+      const substitutionActs = substitutionActResult.data as ListType[];
+      setSubstitutionActs(substitutionActs);
+    }
+  };
+
   React.useEffect(() => {
     const promises: any[] = [];
-    Object.keys(codeTypes).forEach(async (key) => {
-      promises.push(getCodes(key as Code));
-    });
     Object.keys(staffByRoles).forEach(async (key) => {
       promises.push(getStaffByPosition(key));
     });
     Promise.all(promises);
     getProjects();
+    getMinistries();
+    getEAActs();
+    getWorkTypes();
+    getEAOTeams();
+    getFederalInvolvements();
+    getSubstitutionActs();
   }, []);
 
   const onSubmitHandler = async (data: any) => {

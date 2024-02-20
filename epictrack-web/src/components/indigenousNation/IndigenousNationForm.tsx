@@ -13,10 +13,11 @@ import { MasterContext } from "../shared/MasterContext";
 import { PIPOrgType } from "../../models/pipOrgType";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import RichTextEditor from "../shared/richTextEditor";
-import codeService, { Code } from "../../services/codeService";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import ControlledRichTextEditor from "components/shared/controlledInputComponents/ControlledRichTextEditor";
+import pipOrgTypeService from "services/pipOrgTypeService";
+import { ListType } from "models/code";
 
 const schema = yup.object().shape({
   name: yup
@@ -95,11 +96,11 @@ export default function IndigenousNationForm({ ...props }) {
     pip_org_types: setPipOrgTypes,
   };
 
-  const getCodes = async (code: Code) => {
+  const getPIPOrgTypes = async () => {
     try {
-      const codeResult = await codeService.getCodes(code);
-      if (codeResult.status === 200) {
-        codeTypes[code]((codeResult.data as never)["codes"]);
+      const pipOrgTypeResult = await pipOrgTypeService.getAll();
+      if (pipOrgTypeResult.status === 200) {
+        setPipOrgTypes(pipOrgTypeResult.data as ListType[]);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
@@ -110,11 +111,7 @@ export default function IndigenousNationForm({ ...props }) {
 
   React.useEffect(() => {
     getStaffs();
-    const promises: any[] = [];
-    Object.keys(codeTypes).forEach(async (key) => {
-      promises.push(getCodes(key as Code));
-    });
-    Promise.all(promises);
+    getPIPOrgTypes();
   }, []);
 
   const onSubmitHandler = async (data: any) => {

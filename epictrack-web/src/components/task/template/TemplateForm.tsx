@@ -4,9 +4,7 @@ import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import codeService from "../../../services/codeService";
 import phaseService from "../../../services/phaseService";
-import { Code } from "../../../services/codeService";
 import { Template } from "../../../models/template";
 import { ETFormLabel } from "../../shared";
 import { ListType } from "../../../models/code";
@@ -15,6 +13,8 @@ import TrackDialog from "../../shared/TrackDialog";
 import { showNotification } from "../../shared/notificationProvider";
 import templateService from "../../../services/taskService/templateService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
+import eaActService from "services/eaActService";
+import workService from "services/workService/workService";
 
 export default function TemplateForm({ ...props }) {
   const [eaActs, setEAActs] = React.useState<ListType[]>([]);
@@ -49,16 +49,6 @@ export default function TemplateForm({ ...props }) {
     control,
   } = methods;
   const formValues = useWatch({ control });
-  const codeTypes: { [x: string]: any } = {
-    ea_acts: setEAActs,
-    work_types: setWorkTypes,
-  };
-  const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
-    }
-  };
 
   const getPhaseByWorkTypeEAact = async () => {
     const phaseResult = await phaseService.getPhaseByWorkTypeEAact(
@@ -70,6 +60,22 @@ export default function TemplateForm({ ...props }) {
     }
   };
 
+  const getEAActs = async () => {
+    const eaActResult = await eaActService.getAll();
+    if (eaActResult.status === 200) {
+      const eaActs = eaActResult.data as ListType[];
+      setEAActs(eaActs);
+    }
+  };
+
+  const getWorkTypes = async () => {
+    const workTypeResult = await workService.getWorkTypes();
+    if (workTypeResult.status === 200) {
+      const workType = workTypeResult.data as ListType[];
+      setWorkTypes(workType);
+    }
+  };
+
   React.useEffect(() => {
     if (formValues.ea_act_id && formValues.work_type_id) {
       getPhaseByWorkTypeEAact();
@@ -77,11 +83,8 @@ export default function TemplateForm({ ...props }) {
   }, [formValues.ea_act_id, formValues.work_type_id]);
 
   React.useEffect(() => {
-    const promises: any[] = [];
-    Object.keys(codeTypes).forEach(async (key) => {
-      promises.push(getCodes(key as Code));
-    });
-    Promise.all(promises);
+    getEAActs();
+    getWorkTypes();
   }, []);
 
   const onSubmitHandler = async (data: any) => {

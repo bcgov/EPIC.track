@@ -25,8 +25,8 @@ const CardBody = ({ workplan }: CardProps) => {
   );
 
   const daysLeft = () => {
-    const daysLeft = workplan?.phase_info?.days_left;
-    const totalDays = workplan?.phase_info?.total_number_of_days;
+    const daysLeft = workplan?.phase_info[0]?.days_left;
+    const totalDays = workplan?.phase_info[0]?.total_number_of_days;
 
     if (daysLeft >= 0) {
       return `${daysLeft}/${totalDays} days left`;
@@ -99,11 +99,11 @@ const CardBody = ({ workplan }: CardProps) => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {workplan?.phase_info?.work_phase.name}
+                {workplan?.phase_info[0]?.work_phase.name}
               </ETCaption2>
               <ClockIcon
                 fill={
-                  workplan?.phase_info?.days_left > 0
+                  workplan?.phase_info[0]?.days_left > 0
                     ? Palette.neutral.main
                     : Palette.error.main
                 }
@@ -112,7 +112,7 @@ const CardBody = ({ workplan }: CardProps) => {
                 bold
                 enableEllipsis
                 color={
-                  workplan?.phase_info?.days_left > 0
+                  workplan?.phase_info[0]?.days_left > 0
                     ? Palette.neutral.main
                     : Palette.error.main
                 }
@@ -128,7 +128,7 @@ const CardBody = ({ workplan }: CardProps) => {
         </When>
       </Grid>
       <Grid container sx={{ height: "64px" }} spacing={1}>
-        <When condition={Boolean(workplan?.phase_info)}>
+        <When condition={Boolean(workplan?.phase_info[0])}>
           <Grid item container direction="row" spacing={1}>
             <Grid
               item
@@ -140,7 +140,7 @@ const CardBody = ({ workplan }: CardProps) => {
             >
               <ETCaption1 color={Palette.neutral.main}>
                 {`UPCOMING MILESTONE ${dayjs(new Date())
-                  .add(workplan?.phase_info?.days_left, "days")
+                  .add(workplan?.phase_info[0]?.days_left, "days")
                   .format(MONTH_DAY_YEAR)
                   .toUpperCase()}`}
               </ETCaption1>
@@ -157,7 +157,7 @@ const CardBody = ({ workplan }: CardProps) => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {workplan.phase_info?.next_milestone}
+                {workplan.phase_info[0]?.next_milestone}
               </ETParagraph>
             </Grid>
           </Grid>

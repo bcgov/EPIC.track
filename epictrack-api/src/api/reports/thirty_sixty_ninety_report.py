@@ -28,7 +28,7 @@ from .report_factory import ReportFactory
 class ThirtySixtyNinetyReport(ReportFactory):
     """EA 30-60-90 Report Generator"""
 
-    def __init__(self, filters):
+    def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
             "project_name",
@@ -45,7 +45,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "event_title",
             "event_date",
         ]
-        super().__init__(data_keys, filters=filters)
+        super().__init__(data_keys, filters=filters, color_intensity=color_intensity)
         self.report_date = None
         self.report_title = "30-60-90"
         self.pecp_configuration_ids = (

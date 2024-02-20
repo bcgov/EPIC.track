@@ -18,7 +18,7 @@ from api.models import Responsibility, db
 
 
 class ResponsibilityService:  # pylint:disable=too-few-public-methods
-    """Service to manage sub type related operations"""
+    """Service to manage responsibility related operations"""
 
     @classmethod
     def find_by_id(cls, _id: int):
