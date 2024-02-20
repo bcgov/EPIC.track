@@ -37,7 +37,7 @@ const endpoints = [
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    url: "http://localhost:3200/api/v1/pip-org-types",
   },
   { method: "OPTIONS", url: "http://localhost:3200/api/v1/first_nations" },
   {
@@ -47,7 +47,7 @@ const endpoints = [
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    url: "http://localhost:3200/api/v1/pip-org-types",
     body: [],
   },
   {

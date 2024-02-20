@@ -129,7 +129,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "work_phase.start_date",
                     "work_phase.end_date",
                 ),
-            ).dump(work_phase[0])
+                many=True
+            ).dump(work_phase)
 
             serialized_work["phase_info"] = serialised_phase
 

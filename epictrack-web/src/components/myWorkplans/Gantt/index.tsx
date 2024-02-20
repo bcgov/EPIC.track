@@ -1,7 +1,9 @@
-import { Gantt } from "components/gantt";
 import { useContext } from "react";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import moment from "moment";
+import { Palette } from "styles/theme";
+import { Gantt } from "components/gantt";
+import Color from "color";
 
 export const MyWorkplanGantt = () => {
   const { workplans } = useContext(MyWorkplansContext);
@@ -17,13 +19,29 @@ export const MyWorkplanGantt = () => {
     return {
       id: String(workplan.id),
       name: workplan.title,
-      tasks: phaseInfo.map((phase: any) => {
+      tasks: phaseInfo.map((phaseInfo: any) => {
         return {
-          id: phase.work_phase.name,
-          name: phase.work_phase.name,
-          start: moment(phase.work_phase.start_date).toDate(),
-          end: moment(phase.work_phase.end_date).toDate(),
-          progress: phase.milestone_progress,
+          id: phaseInfo.work_phase.name,
+          name: phaseInfo.work_phase.name,
+          start: moment(phaseInfo.work_phase.start_date).toDate(),
+          end: moment(phaseInfo.work_phase.end_date).toDate(),
+          progress: `${Math.abs(phaseInfo.days_left)}/${
+            phaseInfo.total_number_of_days
+          }`,
+          style: {
+            bar: {
+              backgroundColor: Color(phaseInfo.work_phase.phase.color)
+                .alpha(0.25)
+                .string(),
+              borderBottom: `2px solid ${phaseInfo.work_phase.phase.color}`,
+            },
+            progress: {
+              color:
+                phaseInfo.days_left > 0
+                  ? Palette.success.main
+                  : Palette.error.main,
+            },
+          },
         };
       }),
     };
