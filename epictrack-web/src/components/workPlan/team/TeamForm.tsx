@@ -10,12 +10,12 @@ import { ListType } from "../../../models/code";
 import { showNotification } from "../../shared/notificationProvider";
 import staffService from "../../../services/staffService/staffService";
 import { sort } from "../../../utils";
-import codeService from "../../../services/codeService";
 import workService from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import roleService from "services/roleService";
 
 interface TeamFormProps {
   workStaffId?: number;
@@ -109,9 +109,9 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
 
   const getAllRoles = async () => {
     try {
-      const result = await codeService.getCodes("roles");
+      const result = await roleService.getAll();
       if (result.status === 200) {
-        const roles = (result.data as any)["codes"] as ListType[];
+        const roles = result.data as ListType[];
         setRoles(sort(roles, "name"));
       }
     } catch (e) {

@@ -36,7 +36,7 @@ const endpoints = [
   {
     name: "getEaActs",
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/ea_acts",
+    url: "http://localhost:3200/api/v1/ea-acts",
     response: {
       body: {
         codes: faker.lorem
@@ -52,7 +52,7 @@ const endpoints = [
   {
     name: "getMinistries",
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/ministries",
+    url: "http://localhost:3200/api/v1/ministries",
     response: {
       body: {
         codes: faker.lorem
@@ -71,7 +71,7 @@ const endpoints = [
   {
     name: "getWorkTypes",
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/work_types",
+    url: "http://localhost:3200/api/v1/work_types",
     response: {
       body: {
         codes: [mockWorkType],
@@ -81,7 +81,7 @@ const endpoints = [
   {
     name: "getFederalActs",
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/federal_involvements",
+    url: "http://localhost:3200/api/v1/federal-involvements",
     response: {
       body: {
         codes: faker.lorem
@@ -97,7 +97,7 @@ const endpoints = [
   {
     name: "getEaoTeams",
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/eao_teams",
+    url: "http://localhost:3200/api/v1/eao-teams",
     response: {
       body: {
         codes: faker.lorem
@@ -113,7 +113,7 @@ const endpoints = [
   {
     name: "getSubstitutionActs",
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/substitution_acts",
+    url: "http://localhost:3200/api/v1/substitution-acts",
     response: {
       body: {
         codes: faker.lorem

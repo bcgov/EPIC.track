@@ -9,8 +9,8 @@ from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
 from api.schemas.federal_involvement import FederalInvolvementSchema
 from api.schemas.ministry import MinistrySchema
-from api.schemas.response.project_response import ProjectResponseSchema
 from api.schemas.response.phase_response import PhaseResponseSchema
+from api.schemas.response.project_response import ProjectResponseSchema
 from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
@@ -99,9 +99,9 @@ class WorkStaffRoleReponseSchema(
     @pre_dump()
     def convert(self, instance, many):  # pylint: disable=unused-argument
         """Convert the incoming object in to json"""
-        staff = StaffResponseSchema().dump(instance.staff)
+        staff = StaffResponseSchema().dump(instance.Staff)
         if staff:
-            staff["role"] = instance.role
+            staff["role"] = instance.Role
         return staff
 
 
