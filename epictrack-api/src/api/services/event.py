@@ -108,7 +108,7 @@ class EventService:
         )
 
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, True
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, scoped=True
         )
         if not event:
             raise ResourceNotFoundError("Event not found")

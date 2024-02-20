@@ -22,6 +22,7 @@ from faker import Faker
 from api.config import get_named_config
 from api.models.special_field import EntityEnum
 from api.utils.constants import CANADA_TIMEZONE
+from tests.constants import ASSESSMENT_WORK_TYPE
 
 
 fake = Faker()
@@ -68,6 +69,24 @@ class TestWorkInfo(Enum):
         "responsible_epd_id": 55,
         "work_lead_id": 30,
         "work_type_id": 1,
+        "substitution_act_id": 1,
+        "decision_by_id": 171
+    }
+
+    assessment_work = {
+        "title": f"{fake.word()}-Assessment",
+        "report_description": fake.sentence(),
+        "epic_description": fake.paragraph(),
+        "is_active": True,
+        "start_date": "2024-01-01T00:00:00-08:00",
+        "project_id": 1,
+        "ministry_id": 1,
+        "ea_act_id": 3,
+        "eao_team_id": 1,
+        "federal_involvement_id": 1,
+        "responsible_epd_id": 55,
+        "work_lead_id": 30,
+        "work_type_id": ASSESSMENT_WORK_TYPE,
         "substitution_act_id": 1,
         "decision_by_id": 171
     }
