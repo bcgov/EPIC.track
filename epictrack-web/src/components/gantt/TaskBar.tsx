@@ -43,7 +43,7 @@ const TaskBar = ({ task, start }: TaskBar) => {
           style={{
             width: `${taskSpan * dayWidth}px`,
             backgroundColor: `${task.style.bar.backgroundColor}`,
-            borderBottom: `2px solid`,
+            borderBottom: `${task.style.bar.borderBottom}`,
             height: "70%",
             display: "flex",
             flexDirection: "row",
