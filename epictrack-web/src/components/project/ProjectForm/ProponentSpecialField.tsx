@@ -4,20 +4,21 @@ import {
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
-import { ETCaption3 } from "../../shared";
+import { ETCaption3, ETFormLabel } from "../../shared";
 import { Grid } from "@mui/material";
 import { When } from "react-if";
 import { Proponent } from "../../../models/proponent";
 import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
 
 interface ProponentSpecialFieldProps {
-  id: number;
+  id?: number;
   options: Proponent[];
   onSave: () => void;
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
 }
+const LABEL = "Proponent";
 export const ProponentSpecialField = ({
   id,
   onSave,
@@ -33,6 +34,15 @@ export const ProponentSpecialField = ({
     }));
   }, [options]);
 
+  if (!id) {
+    return (
+      <Grid item xs={6}>
+        <ETFormLabel>{LABEL}</ETFormLabel>
+        {children}
+      </Grid>
+    );
+  }
+
   return (
     <>
       <Grid item xs={6}>
@@ -40,7 +50,7 @@ export const ProponentSpecialField = ({
           id={id}
           open={open}
           onLockClick={onLockClick}
-          label={"Proponent"}
+          label={LABEL}
           required
         />
         {children}

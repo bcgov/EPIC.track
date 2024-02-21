@@ -18,9 +18,13 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import UserMenu from "components/shared/userMenu/UserMenu";
 
 export default function ProponentList() {
   const [proponentId, setProponentId] = useState<number>();
+  const [staffPreviewAnchorEl, setStaffPreviewAnchorEl] =
+    React.useState<null | HTMLElement>(null);
+  const [staff, setStaff] = React.useState<Staff>({} as Staff);
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const ctx = useContext(MasterContext);
 
@@ -39,6 +43,19 @@ export default function ProponentList() {
   useEffect(() => {
     ctx.setService(proponentService);
   }, []);
+
+  const handleOpenStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
+    setStaff(
+      staffs.find((s) => s.full_name === event.currentTarget.textContent) ||
+        ({} as Staff)
+    );
+    setStaffPreviewAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
+    setStaff({} as Staff);
+    setStaffPreviewAnchorEl(null);
+  };
 
   const proponents = useMemo(() => ctx.data as Proponent[], [ctx.data]);
   const statusesOptions = getSelectFilterOptions(
@@ -72,7 +89,24 @@ export default function ProponentList() {
         accessorKey: "relationship_holder.full_name",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
-        Cell: ({ renderedCellValue }) => <Box>{renderedCellValue}</Box>,
+        Cell: (cell) => {
+          const staff = cell.row.original?.relationship_holder;
+          if (!staff) {
+            return "";
+          }
+          return (
+            <ETGridTitle
+              to={"#"}
+              onMouseEnter={handleOpenStaffPreview}
+              onMouseLeave={handleCloseStaffPreview}
+              enableTooltip={true}
+              tooltip={staff.full_name}
+              style={{ width: "fit-content" }}
+            >
+              {staff.full_name}
+            </ETGridTitle>
+          );
+        },
       },
       {
         accessorKey: "is_active",
@@ -186,6 +220,16 @@ export default function ProponentList() {
             )}
           />
         </Grid>
+        <UserMenu
+          data-testid={`user-menu-${staff.full_name}`}
+          anchorEl={staffPreviewAnchorEl}
+          email={staff.email || ""}
+          phone={staff.phone || ""}
+          position={staff.position?.name || ""}
+          firstName={staff.first_name || ""}
+          lastName={staff.last_name || ""}
+          onClose={handleCloseStaffPreview}
+        />
       </ETPageContainer>
     </>
   );

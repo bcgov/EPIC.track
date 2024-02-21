@@ -14,7 +14,6 @@ import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import { When } from "react-if";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
-
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
 const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];

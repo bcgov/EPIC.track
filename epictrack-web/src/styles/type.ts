@@ -3,6 +3,7 @@ export interface UIState {
   drawerWidth: number;
   showEnvBanner: boolean;
   toggleDrawerMarginTop: string;
+  showConfetti: boolean;
 }
 
 declare module "@mui/material/styles" {

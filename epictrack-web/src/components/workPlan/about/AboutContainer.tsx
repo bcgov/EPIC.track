@@ -71,6 +71,7 @@ const AboutContainer = () => {
           value={selectedTabIndex}
           sx={{
             ...tabPanelStyle,
+            padding: "0 0 2rem 0",
           }}
         >
           <AboutDetails />

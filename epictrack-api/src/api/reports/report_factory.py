@@ -6,16 +6,18 @@ from io import BytesIO
 from pathlib import Path
 
 
+# pylint: disable=too-many-arguments
 class ReportFactory(ABC):
     """Basic representation of report generator."""
 
-    def __init__(self, data_keys, group_by=None, template_name=None, filters=None):
+    def __init__(self, data_keys, group_by=None, template_name=None, filters=None, color_intensity=None):
         """Constructor"""
         self.data_keys = data_keys
         self.group_by = group_by
         if template_name is not None:
             self.template_path = Path(__file__, f"../report_templates/{template_name}")
         self.filters = filters
+        self.color_intensity = color_intensity
 
     @abstractmethod
     def _fetch_data(self, report_date):

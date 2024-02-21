@@ -21,7 +21,7 @@ from api.schemas.base import AutoSchemaBase
 class OutcomeConfigurationResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
-    """Task model schema class"""
+    """Outcome configuration model schema class"""
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""

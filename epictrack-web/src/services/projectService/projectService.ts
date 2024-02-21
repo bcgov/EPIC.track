@@ -3,17 +3,20 @@ import http from "../../apiManager/http-request-handler";
 import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 import { ListType } from "../../models/code";
+import { Project } from "models/project";
 
 class ProjectService implements ServiceBase {
   async getAll(return_type?: string, with_works?: boolean) {
-    return await http.GetRequest(Endpoints.Projects.PROJECTS, {
+    return await http.GetRequest<Project[]>(Endpoints.Projects.PROJECTS, {
       return_type,
       with_works,
     });
   }
 
   async getById(id: string) {
-    return await http.GetRequest(Endpoints.Projects.PROJECTS + `/${id}`);
+    return await http.GetRequest<Project>(
+      Endpoints.Projects.PROJECTS + `/${id}`
+    );
   }
 
   async create(data: MasterBase) {

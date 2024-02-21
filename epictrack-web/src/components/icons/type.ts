@@ -1,4 +1,4 @@
-import { SxProps } from "@mui/material";
+import { SvgIconProps, SxProps } from "@mui/material";
 
 export type Icon =
   | "AllIcon"
@@ -10,7 +10,7 @@ export type Icon =
   | "GridIcon"
   | "UserIcon";
 
-export interface IconProps {
+export interface IconProps extends SvgIconProps {
   className?: string;
   width?: string;
   height?: string;

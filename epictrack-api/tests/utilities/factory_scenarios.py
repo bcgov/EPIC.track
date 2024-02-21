@@ -20,6 +20,9 @@ from enum import Enum
 from faker import Faker
 
 from api.config import get_named_config
+from api.models.special_field import EntityEnum
+from api.utils.constants import CANADA_TIMEZONE
+from tests.constants import ASSESSMENT_WORK_TYPE
 
 
 fake = Faker()
@@ -44,6 +47,10 @@ class TestProjectInfo(Enum):
 
     }
 
+    project2 = {
+        "name": fake.word(),
+    }
+
 
 class TestWorkInfo(Enum):
     """Test scenarios of Project Creation."""
@@ -62,6 +69,24 @@ class TestWorkInfo(Enum):
         "responsible_epd_id": 55,
         "work_lead_id": 30,
         "work_type_id": 1,
+        "substitution_act_id": 1,
+        "decision_by_id": 171
+    }
+
+    assessment_work = {
+        "title": f"{fake.word()}-Assessment",
+        "report_description": fake.sentence(),
+        "epic_description": fake.paragraph(),
+        "is_active": True,
+        "start_date": "2024-01-01T00:00:00-08:00",
+        "project_id": 1,
+        "ministry_id": 1,
+        "ea_act_id": 3,
+        "eao_team_id": 1,
+        "federal_involvement_id": 1,
+        "responsible_epd_id": 55,
+        "work_lead_id": 30,
+        "work_type_id": ASSESSMENT_WORK_TYPE,
         "substitution_act_id": 1,
         "decision_by_id": 171
     }
@@ -187,4 +212,15 @@ class TestPipOrgType(Enum):
 
     pip_org_type1 = {
         "name": fake.word()
+    }
+
+
+class TestSpecialField(Enum):
+    """Test scenarios for Special fields"""
+
+    special_field1 = {
+        "entity": EntityEnum.PROPONENT.value,
+        "field_name": "name",
+        "field_value": fake.word(),
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
     }

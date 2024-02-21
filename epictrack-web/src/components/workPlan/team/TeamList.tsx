@@ -230,11 +230,11 @@ const TeamList = () => {
       )}
       <TrackDialog
         open={showTeamForm}
-        dialogTitle="Add Team Member"
+        dialogTitle={workStaffId ? "Update Team Member" : "Add Team Member"}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
-        okButtonText="Add"
+        okButtonText={workStaffId ? "Update" : "Add"}
         formId="team-form"
         onCancel={() => onCancelHandler()}
         isActionsRequired

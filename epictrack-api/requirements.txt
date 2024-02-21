@@ -37,7 +37,7 @@ jsonschema==4.20.0
 marshmallow-sqlalchemy==0.29.0
 marshmallow==3.17.0
 numpy==1.24.4
-openpyxl==3.1.2
+openpyxl==3.0.10
 packaging==23.2
 pandas==2.0.2
 pillow==10.2.0
@@ -59,3 +59,4 @@ typing_extensions==4.9.0
 tzdata==2023.4
 urllib3==2.1.0
 zipp==3.17.0
+matplotlib==3.7.4

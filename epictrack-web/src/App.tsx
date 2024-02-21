@@ -9,6 +9,7 @@ import AxiosErrorHandler from "./components/axiosErrorHandler/AxiosErrorHandler"
 import ETNotificationProvider from "./components/shared/notificationProvider/ETNotificationProvider";
 import "./styles/App.scss";
 import { Loader } from "./components/shared/loader";
+import Confetti from "components/confetti/Confetti";
 
 export function App() {
   const dispatch = useAppDispatch();
@@ -26,6 +27,7 @@ export function App() {
       <AxiosErrorHandler>
         {isLoggedIn && (
           <Router>
+            {uiState.showConfetti && <Confetti />}
             <Box sx={{ display: "flex" }}>
               <Header />
               <Box
@@ -37,10 +39,10 @@ export function App() {
                 }}
               >
                 <ETNotificationProvider preventDuplicate>
-                  <React.StrictMode>
-                    <AuthenticatedRoutes />
-                    <Loader />
-                  </React.StrictMode>
+                  {/* <React.StrictMode> */}
+                  <AuthenticatedRoutes />
+                  <Loader />
+                  {/* </React.StrictMode> */}
                 </ETNotificationProvider>
               </Box>
             </Box>

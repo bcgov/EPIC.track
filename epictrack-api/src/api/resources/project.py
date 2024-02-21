@@ -76,7 +76,7 @@ class Project(Resource):
     def get(project_id):
         """Return details of a project."""
         req.ProjectIdPathParameterSchema().load(request.view_args)
-        project = ProjectService.find(project_id)
+        project = ProjectService.find(project_id, exclude_deleted=True)
         return res.ProjectResponseSchema().dump(project), HTTPStatus.OK
 
     @staticmethod

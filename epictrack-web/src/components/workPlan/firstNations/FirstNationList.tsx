@@ -489,6 +489,9 @@ const FirstNationList = () => {
           importButtonText="Import Nations"
           onImportClickHandler={() => setShowImportNationForm(true)}
           isImportDisabled={!firstNationAvailable}
+          buttonProps={{
+            disabled: !canCreate,
+          }}
         />
       )}
       <TrackDialog

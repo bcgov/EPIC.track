@@ -109,17 +109,17 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         result_dict = {}
         work_ids = list(work_params_dict.keys())
 
-        work_phases_dict = cls._query_work_phases(work_ids)[0]
+        work_phases_dict = cls.find_work_phases_by_work_ids(work_ids)[0]
 
-        for work_id, work_phase_id in work_params_dict.items():
+        for work_id, _work_phase_id in work_params_dict.items():
             result_dict[work_id] = cls._find_work_phase_status(
-                work_id, work_phase_id, work_phases_dict.get(work_id, [])
+                work_id, None, work_phases_dict.get(work_id, [])
             )
 
         return result_dict
 
     @classmethod
-    def _query_work_phases(cls, work_ids):
+    def find_work_phases_by_work_ids(cls, work_ids):
         """Query work phases for given work_ids."""
         work_phases_dict = (
             db.session.query(WorkPhase.work_id, WorkPhase)

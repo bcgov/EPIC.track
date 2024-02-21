@@ -41,6 +41,7 @@ interface WorkplanContextProps {
   issues: WorkIssue[];
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
   loadIssues: () => Promise<void>;
+  getWorkById: () => Promise<void>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -64,6 +65,7 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   setIssues: () => ({}),
   getWorkStatuses: () => new Promise((resolve) => resolve),
   loadIssues: () => new Promise((resolve) => resolve),
+  getWorkById: () => new Promise((resolve) => resolve),
 });
 
 export const WorkplanProvider = ({
@@ -201,6 +203,7 @@ export const WorkplanProvider = ({
         issues,
         setIssues,
         loadIssues,
+        getWorkById,
       }}
     >
       {children}

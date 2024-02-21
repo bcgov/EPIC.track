@@ -42,10 +42,15 @@ class ProjectService:
     """Service to manage project related operations."""
 
     @classmethod
-    def find(cls, project_id):
+    def find(cls, project_id, exclude_deleted=False):
         """Find by project id."""
-        project = Project.find_by_id(project_id)
-        return project
+        query = db.session.query(Project).filter(Project.id == project_id)
+        if exclude_deleted:
+            query = query.filter(Project.is_deleted.is_(False))
+        project = query.one_or_none()
+        if project:
+            return project
+        raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
 
     @classmethod
     def find_all(cls, with_works=False):

@@ -1,10 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Grid } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../../shared/index";
-import codeService, { Code } from "../../../services/codeService";
 import { Project, defaultProject } from "../../../models/project";
 import { Proponent } from "../../../models/proponent";
 import { Region } from "../../../models/region";
@@ -22,6 +21,11 @@ import { ProponentSpecialField } from "./ProponentSpecialField";
 import { ProjectNameSpecialField } from "./ProjectNameSpecialField";
 import { Restricted } from "../../shared/restricted";
 import { ROLES } from "../../../constants/application-constant";
+import { ListType } from "models/code";
+import RegionService from "services/regionService";
+import { REGIONS } from "../../../components/shared/constants";
+import typeService from "services/typeService";
+import proponentService from "services/proponentService/proponentService";
 
 const schema = yup.object().shape({
   name: yup
@@ -62,13 +66,26 @@ const schema = yup.object().shape({
   abbreviation: yup.string(),
 });
 
-export default function ProjectForm({ ...props }) {
-  const [envRegions, setEnvRegions] = React.useState<Region[]>();
-  const [nrsRegions, setNRSRegions] = React.useState<Region[]>();
+type ProjectFormProps = {
+  project: Project | null;
+  fetchProject: () => void;
+  saveProject: (data: any) => void;
+  setDisableDialogSave?: (disable: boolean) => void;
+};
+
+export default function ProjectForm({
+  project,
+  fetchProject,
+  saveProject,
+  setDisableDialogSave,
+}: ProjectFormProps) {
+  const [envRegions, setEnvRegions] = React.useState<ListType[]>();
+  const [nrsRegions, setNRSRegions] = React.useState<ListType[]>();
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
-  const [disabled, setDisabled] = React.useState<boolean>();
+
+  const disabled = Boolean(project);
 
   const [isProponentFieldLocked, setIsProponentFieldLocked] =
     React.useState<boolean>(false);
@@ -76,32 +93,17 @@ export default function ProjectForm({ ...props }) {
   const [isNameFieldLocked, setIsNameFieldLocked] =
     React.useState<boolean>(false);
 
-  const ctx = React.useContext(MasterContext);
-
-  const project = ctx?.item as Project;
-
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
 
   React.useEffect(() => {
-    ctx.setDialogProps({
-      saveButtonProps: {
-        disabled: isSpecialFieldLocked,
-      },
-    });
+    if (setDisableDialogSave) {
+      setDisableDialogSave(isSpecialFieldLocked);
+    }
   }, [isSpecialFieldLocked]);
-
-  React.useEffect(() => {
-    ctx.setFormId("project-form");
-  }, []);
-
-  React.useEffect(() => {
-    setDisabled(props.projectId ? true : false);
-    ctx.setId(props.projectId);
-  }, [ctx.id]);
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as Project,
+    defaultValues: project ?? undefined,
     mode: "onBlur",
   });
 
@@ -116,35 +118,12 @@ export default function ProjectForm({ ...props }) {
     resetField,
     watch,
   } = methods;
+
+  useEffect(() => {
+    reset(project ?? defaultProject);
+  }, [project]);
+
   const formValues = useWatch({ control });
-
-  React.useEffect(() => {
-    reset(ctx.item ?? defaultProject);
-  }, [ctx.item]);
-
-  React.useEffect(() => {
-    const name = (ctx?.item as Project)?.name;
-    ctx.setTitle(name || "Create Project");
-  }, [ctx.title, ctx.item]);
-
-  const setRegions = (regions: Region[]) => {
-    const envRegions = regions.filter((p) => p.entity === "ENV");
-    const nrsRegions = regions.filter((p) => p.entity === "FLNR");
-    setEnvRegions(envRegions);
-    setNRSRegions(nrsRegions);
-  };
-  const codeTypes: { [x: string]: any } = {
-    regions: setRegions,
-    types: setTypes,
-    proponents: setProponents,
-  };
-
-  const getCodes = async (code: Code) => {
-    const codeResult = await codeService.getCodes(code);
-    if (codeResult.status === 200) {
-      codeTypes[code]((codeResult.data as never)["codes"]);
-    }
-  };
 
   const getSubTypesByType = async () => {
     const subTypeResult = await subTypeService.getSubTypeByType(
@@ -153,7 +132,7 @@ export default function ProjectForm({ ...props }) {
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
       // The subtype select box wasn't resetting when type changes
-      if (formValues.sub_type_id !== (ctx.item as Project)?.sub_type_id) {
+      if (formValues.sub_type_id !== project?.sub_type_id) {
         reset({
           ...formValues,
           sub_type_id: undefined,
@@ -166,14 +145,12 @@ export default function ProjectForm({ ...props }) {
     if (formValues.type_id) {
       getSubTypesByType();
     }
-  }, [formValues.type_id, ctx.item]);
+  }, [formValues.type_id, project]);
 
   React.useEffect(() => {
-    const promises: any[] = [];
-    Object.keys(codeTypes).forEach(async (key) => {
-      promises.push(getCodes(key as Code));
-    });
-    Promise.all(promises);
+    getRegions();
+    getTypes();
+    getProponents();
   }, []);
 
   const typeChange = () => {
@@ -181,13 +158,11 @@ export default function ProjectForm({ ...props }) {
   };
 
   const onSubmitHandler = async (data: any) => {
-    ctx.onSave(data, () => {
-      reset();
-    });
+    saveProject(data);
   };
 
   const onBlurProjectName = async () => {
-    if (!formValues.name || Boolean(props.projectId)) return;
+    if (!formValues.name || Boolean(project)) return;
 
     try {
       const response = await projectService.createProjectAbbreviation(
@@ -209,6 +184,35 @@ export default function ProjectForm({ ...props }) {
   };
 
   const abbreviation = watch("abbreviation");
+
+  const getRegions = async () => {
+    const envRegionsResult = await RegionService.getRegions(REGIONS.ENV);
+    if (envRegionsResult.status === 200) {
+      const envRegions = envRegionsResult.data as ListType[];
+      setEnvRegions(envRegions);
+    }
+    const nrsRegionsResult = await RegionService.getRegions(REGIONS.FLNR);
+    if (nrsRegionsResult.status === 200) {
+      const nrsRegions = nrsRegionsResult.data as ListType[];
+      setNRSRegions(nrsRegions);
+    }
+  };
+
+  const getTypes = async () => {
+    const typesResult = await typeService.getAll();
+    if (typesResult.status === 200) {
+      const types = typesResult.data as ListType[];
+      setTypes(types);
+    }
+  };
+
+  const getProponents = async () => {
+    const proponentsResult = await proponentService.getAll();
+    if (proponentsResult.status === 200) {
+      const proponents = proponentsResult.data as Proponent[];
+      setProponents(proponents);
+    }
+  };
 
   return (
     <FormProvider {...methods}>
@@ -236,9 +240,9 @@ export default function ProjectForm({ ...props }) {
             onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
             open={isNameFieldLocked}
             onSave={() => {
-              ctx.getById(project?.id.toString());
+              fetchProject();
             }}
-            title={project?.name}
+            title={project?.name || ""}
           >
             <ControlledTextField
               name="name"
@@ -254,7 +258,7 @@ export default function ProjectForm({ ...props }) {
             onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
             open={isProponentFieldLocked}
             onSave={() => {
-              ctx.getById(project?.id.toString());
+              fetchProject();
             }}
             options={proponents || []}
           >
@@ -263,7 +267,7 @@ export default function ProjectForm({ ...props }) {
               disabled={disabled}
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.proponent_id}
+              defaultValue={project?.proponent_id}
               options={proponents || []}
               getOptionValue={(o: Proponent) => o?.id?.toString()}
               getOptionLabel={(o: Proponent) => o.name}
@@ -277,7 +281,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`type_select_${formValues.type_id}`}
               helperText={errors?.type_id?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.type_id}
+              defaultValue={project?.type_id}
               options={types || []}
               getOptionValue={(o: Type) => o?.id?.toString()}
               getOptionLabel={(o: Type) => o.name}
@@ -291,7 +295,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`subtype_select_${formValues.sub_type_id}`}
               helperText={errors?.sub_type_id?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.sub_type_id}
+              defaultValue={project?.sub_type_id}
               options={subTypes || []}
               getOptionValue={(o: SubType) => o?.id?.toString()}
               getOptionLabel={(o: SubType) => o.name}
@@ -364,7 +368,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`env_select_${formValues.region_id_env}`}
               helperText={errors?.region_id_env?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.region_id_env}
+              defaultValue={project?.region_id_env}
               options={envRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o?.name}
@@ -378,7 +382,7 @@ export default function ProjectForm({ ...props }) {
               placeholder="Select"
               key={`nrs_select_${formValues.region_id_flnro}`}
               helperText={errors?.region_id_flnro?.message?.toString()}
-              defaultValue={(ctx.item as Project)?.region_id_flnro}
+              defaultValue={project?.region_id_flnro}
               options={nrsRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o?.name}
