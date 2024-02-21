@@ -23,7 +23,6 @@ from api.services.event import EventService
 from api.services.event_configuration import EventConfigurationService
 from api.services.phaseservice import PhaseService
 from api.services.role import RoleService
-from api.utils.constants import CANADA_TIMEZONE
 from tests.utilities.factory_scenarios import TestWorkInfo
 from tests.utilities.factory_utils import factory_project_model, factory_staff_model, factory_work_model
 
