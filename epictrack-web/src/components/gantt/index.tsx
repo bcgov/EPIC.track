@@ -70,7 +70,7 @@ export const Gantt = ({ parents }: GanttProps) => {
             width: taskListWidth,
             position: "sticky",
             left: 0,
-            zIndex: 5,
+            zIndex: 2,
             // borderRight: `1px solid ${Palette.neutral.accent.dark}`,
             height: "100%",
           }}
@@ -82,7 +82,7 @@ export const Gantt = ({ parents }: GanttProps) => {
           style={{
             width: `calc(100% - ${taskListWidth}px)`,
             height: "100%",
-            zIndex: 4,
+            zIndex: 1,
             boxShadow: "1px 1px 4px 0px rgba(0, 0, 0, 0.10)",
           }}
         >

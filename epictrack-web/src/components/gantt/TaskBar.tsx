@@ -1,21 +1,17 @@
 // TaskBar.js
 import moment from "moment";
-import React from "react";
-import { barHeight, dayWidth } from "./constants";
+import { dayWidth } from "./constants";
 import { Task } from "./types";
-import { Palette } from "styles/theme";
 import { ETCaption3 } from "components/shared";
-import { over } from "lodash";
 import { Tooltip } from "@mui/material";
 
 type TaskBar = {
   task: Task;
   start: Date;
   end: Date;
-  color: string;
 };
 
-const TaskBar = ({ task, start, color }: TaskBar) => {
+const TaskBar = ({ task, start }: TaskBar) => {
   // Calculate the total duration of the Gantt chart in milliseconds
   const momentStart = moment(start);
   const momentTaskStart = moment(task.start);
@@ -43,10 +39,11 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
         followCursor
       >
         <div
+          id="task-bar"
           style={{
             width: `${taskSpan * dayWidth}px`,
             backgroundColor: `${task.style.bar.backgroundColor}`,
-            borderBottom: `${task.style.bar.borderBottom}`,
+            borderBottom: `2px solid`,
             height: "70%",
             display: "flex",
             flexDirection: "row",

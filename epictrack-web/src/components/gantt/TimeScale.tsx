@@ -77,7 +77,7 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
             height: rowHeight,
             position: "sticky",
             top: 0,
-            zIndex: 10,
+            zIndex: 2,
           }}
         >
           {yearsInfo.map((year) => (
@@ -103,7 +103,7 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
             position: "sticky",
             top: rowHeight,
             backgroundColor: Palette.neutral.bg.light,
-            zIndex: 10,
+            zIndex: 2,
           }}
         >
           {monthsInfo.map((month) => (

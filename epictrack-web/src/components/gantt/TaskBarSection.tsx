@@ -35,7 +35,6 @@ const TaskBarSection = ({ parents, start, end }: TaskBarSectionProps) => {
                 task={task}
                 start={start}
                 end={end}
-                color={`#${Math.floor(Math.random() * 16777215).toString(16)}`}
               />
             );
           })}
