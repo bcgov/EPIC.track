@@ -214,6 +214,7 @@ export default function AnticipatedEAOSchedule() {
                     sx={{ mt: "15px", bgcolor: "rgba(0, 0, 0, .03)" }}
                     square
                     disableGutters
+                    defaultExpanded
                     elevation={0}
                   >
                     <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
