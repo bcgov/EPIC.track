@@ -1,25 +1,21 @@
 import React, { useMemo } from "react";
 import { ETCaption3 } from "components/shared";
-import { dayWidth, rowHeight } from "./constants";
+import { dayWidth, rowHeight, maxSectionHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
 
 type TimeScaleProps = {
   start: Date;
   end: Date;
+  sectionHeight?: number;
   children?: React.ReactNode;
 };
-export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
-  const dates: Date[] = [];
-
-  for (
-    let date = new Date(start);
-    date.getTime() <= end.getTime();
-    date.setDate(date.getDate() + 1)
-  ) {
-    dates.push(new Date(date));
-  }
-
+export const TimeScale = ({
+  start,
+  end,
+  sectionHeight = maxSectionHeight,
+  children = null,
+}: TimeScaleProps) => {
   const monthsInfo = useMemo(() => {
     const months = [];
     const startDate = moment(start);
@@ -106,21 +102,43 @@ export const TimeScale = ({ start, end, children = null }: TimeScaleProps) => {
             zIndex: 2,
           }}
         >
-          {monthsInfo.map((month) => (
-            <div
-              key={month.start.format("YYYY-MM")}
-              style={{
-                flexShrink: 0,
-                // width: month.days * dayWidth,
-                width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
-                textAlign: "center",
-                backgroundColor: Palette.neutral.bg.light,
-                position: "relative",
-              }}
-            >
-              <ETCaption3>{month.month}</ETCaption3>
-            </div>
-          ))}
+          {monthsInfo.map((month) => {
+            // check if current
+            const today = moment();
+            const startToCurrentSpan = today.diff(month.start, "days");
+            const isCurrentMonth = month.start.isSame(today, "month");
+            return (
+              <div
+                key={month.start.format("YYYY-MM")}
+                style={{
+                  flexShrink: 0,
+                  // width: month.days * dayWidth,
+                  width: `${month.days * dayWidth}px`, // subtract 1px to account for the border of the div
+                  textAlign: "center",
+                  backgroundColor: isCurrentMonth
+                    ? Palette.primary.accent.light
+                    : Palette.neutral.bg.light,
+                  color: isCurrentMonth ? "white" : "inherit",
+                  borderRadius: "4px",
+                  position: "relative",
+                }}
+              >
+                <ETCaption3>{month.month}</ETCaption3>
+                {isCurrentMonth && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: startToCurrentSpan * dayWidth,
+                      height: sectionHeight,
+                      borderLeft: `${dayWidth}px solid ${Palette.primary.accent.light}`,
+                      width: `${dayWidth}px`,
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
 
         <div id="bars">{children}</div>

@@ -1,12 +1,12 @@
 // TaskBar.js
 import moment from "moment";
 import { dayWidth } from "./constants";
-import { Task } from "./types";
+import { GanttItem } from "./types";
 import { ETCaption3 } from "components/shared";
 import { Tooltip } from "@mui/material";
 
 type TaskBar = {
-  task: Task;
+  task: GanttItem;
   start: Date;
   end: Date;
 };
@@ -17,7 +17,7 @@ const TaskBar = ({ task, start }: TaskBar) => {
   const momentTaskStart = moment(task.start);
   const daysDiff = momentTaskStart.diff(momentStart, "days");
 
-  const taskSpan = moment(task.end).diff(moment(task.start), "days");
+  const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
   return (
     <div
       style={{
@@ -53,6 +53,7 @@ const TaskBar = ({ task, start }: TaskBar) => {
             paddingRight: "8px",
             gap: 2,
             overflow: "hidden",
+            borderRadius: "4px",
           }}
         >
           <ETCaption3

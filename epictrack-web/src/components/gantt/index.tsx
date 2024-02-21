@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Task, TaskParent } from "./types";
+import { GanttItem, GanttRow } from "./types";
 import { TimeScale } from "./TimeScale";
 import TaskList from "./TaskList";
 import TaskBarSection from "./TaskBarSection";
@@ -7,7 +7,7 @@ import {
   barHeight,
   dayWidth,
   rowHeight,
-  sectionHeight,
+  maxSectionHeight,
   taskListWidth,
 } from "./constants";
 import moment from "moment";
@@ -16,23 +16,25 @@ import { ScrollSync } from "react-scroll-sync";
 import { getDefaultScrollDays } from "./utils";
 
 type GanttProps = {
-  parents: TaskParent[];
+  rows: GanttRow[];
 };
 
 const DEFAULT_SCROLL_BACK_MONTHS = 3;
 
-export const Gantt = ({ parents }: GanttProps) => {
-  const tasks = parents.map((parent) => parent.tasks).flat();
+export const Gantt = ({ rows }: GanttProps) => {
+  const tasks = rows.map((row) => row.tasks).flat();
 
-  tasks.sort((a: Task, b: Task) => a.start.getTime() - b.start.getTime());
+  tasks.sort(
+    (a: GanttItem, b: GanttItem) => a.start.getTime() - b.start.getTime()
+  );
 
   const earliestStart = tasks.reduce(
-    (prev: Date, task: Task) =>
+    (prev: Date, task: GanttItem) =>
       task.start.getTime() < prev.getTime() ? task.start : prev,
     tasks?.[0].start || new Date()
   );
   const latestEnd = tasks.reduce(
-    (prev: Date, task: Task) =>
+    (prev: Date, task: GanttItem) =>
       task.end.getTime() > prev.getTime() ? task.end : prev,
     tasks?.[0].end || new Date()
   );
@@ -47,8 +49,9 @@ export const Gantt = ({ parents }: GanttProps) => {
       ganttChartRef.current.scrollLeft =
         getDefaultScrollDays(start, DEFAULT_SCROLL_BACK_MONTHS) * dayWidth;
     }
-  }, [ganttChartRef]);
+  }, [ganttChartRef, start]);
 
+  const sectionHeight = Math.min(maxSectionHeight, rows.length * barHeight);
   return (
     <ScrollSync>
       <div
@@ -58,7 +61,7 @@ export const Gantt = ({ parents }: GanttProps) => {
           display: "flex",
           flexDirection: "row",
           alignItems: "flex-start",
-          height: sectionHeight + rowHeight * 2,
+          height: `${sectionHeight + rowHeight * 2}px`,
           overflow: "auto",
           backgroundColor: Palette.neutral.bg.light,
           boxShadow:
@@ -71,11 +74,10 @@ export const Gantt = ({ parents }: GanttProps) => {
             position: "sticky",
             left: 0,
             zIndex: 2,
-            // borderRight: `1px solid ${Palette.neutral.accent.dark}`,
             height: "100%",
           }}
         >
-          <TaskList parents={parents} />
+          <TaskList rows={rows} />
         </div>
         <div
           id="time-scale-section"
@@ -86,8 +88,8 @@ export const Gantt = ({ parents }: GanttProps) => {
             boxShadow: "1px 1px 4px 0px rgba(0, 0, 0, 0.10)",
           }}
         >
-          <TimeScale start={start} end={end}>
-            <TaskBarSection parents={parents} start={start} end={end} />
+          <TimeScale start={start} end={end} sectionHeight={sectionHeight}>
+            <TaskBarSection rows={rows} start={start} end={end} />
           </TimeScale>
         </div>
       </div>

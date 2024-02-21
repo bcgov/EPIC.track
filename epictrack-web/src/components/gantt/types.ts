@@ -1,4 +1,4 @@
-export type Task = {
+export type GanttItem = {
   id: string;
   name: string;
   start: Date;
@@ -10,8 +10,8 @@ export type Task = {
   };
 };
 
-export type TaskParent = {
+export type GanttRow = {
   id: string;
   name: string;
-  tasks: Task[];
+  tasks: GanttItem[];
 };
