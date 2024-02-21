@@ -59,17 +59,18 @@ class TestWorkInfo(Enum):
         "report_description": fake.sentence(),
         "epic_description": fake.paragraph(),
         "is_active": True,
-        "start_date": "2024-01-11T00:00:00-08:00",
-        "project_id": 1,
+        "start_date": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
         "ministry_id": 1,
         "ea_act_id": 3,
         "eao_team_id": 1,
         "federal_involvement_id": 1,
-        "responsible_epd_id": 55,
-        "work_lead_id": 30,
         "work_type_id": 1,
         "substitution_act_id": 1,
-        "decision_by_id": 171
+        "simple_title": fake.word()
+    }
+
+    validation_work = {
+        "title": fake.word(),
     }
 
 

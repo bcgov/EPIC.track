@@ -79,6 +79,8 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
     """Produce a work model."""
     project = factory_project_model()
     epd = factory_staff_model()
+    work_lead = factory_staff_model()
+    decision_maker = factory_staff_model()
     work = WorkModel(
         title=work_data["title"],
         report_description=work_data["report_description"],
@@ -91,10 +93,10 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
         eao_team_id=work_data["eao_team_id"],
         federal_involvement_id=work_data["federal_involvement_id"],
         responsible_epd_id=epd.id,
-        work_lead_id=epd.id,
+        work_lead_id=work_lead.id,
         work_type_id=work_data["work_type_id"],
         substitution_act_id=work_data["substitution_act_id"],
-        decision_by_id=epd.id,
+        decision_by_id=decision_maker.id,
     )
     work.save()
     return work
