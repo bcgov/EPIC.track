@@ -47,5 +47,5 @@ export const MyWorkplanGantt = () => {
     };
   });
 
-  return <Gantt parents={tasks} />;
+  return <Gantt rows={tasks} />;
 };
