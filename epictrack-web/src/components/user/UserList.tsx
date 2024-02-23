@@ -30,6 +30,7 @@ const UserList = () => {
     new Date().getMilliseconds()
   );
   const userDetails = useAppSelector((state) => state.user.userDetail);
+
   const getUsers = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -43,6 +44,7 @@ const UserList = () => {
       setResultStatus(RESULT_STATUS.LOADED);
     }
   }, []);
+
   const getGroups = React.useCallback(async () => {
     try {
       const groupResult = await UserService.getGroups();
@@ -61,6 +63,7 @@ const UserList = () => {
   React.useEffect(() => {
     getGroups();
   }, []);
+
   const [groups, setGroups] = React.useState<Group[]>([]);
   const [users, setUsers] = React.useState<User[]>([]);
   const [resultStatus, setResultStatus] = React.useState<string>();
@@ -73,6 +76,7 @@ const UserList = () => {
       .filter((p) => userDetails.groups.includes(p.name))
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
+
   const columns = React.useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {

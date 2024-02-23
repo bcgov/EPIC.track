@@ -1,27 +1,23 @@
 // TaskBar.js
 import moment from "moment";
-import React from "react";
-import { barHeight, dayWidth } from "./constants";
-import { Task } from "./types";
-import { Palette } from "styles/theme";
+import { dayWidth } from "./constants";
+import { GanttItem } from "./types";
 import { ETCaption3 } from "components/shared";
-import { over } from "lodash";
 import { Tooltip } from "@mui/material";
 
 type TaskBar = {
-  task: Task;
+  task: GanttItem;
   start: Date;
   end: Date;
-  color: string;
 };
 
-const TaskBar = ({ task, start, color }: TaskBar) => {
+const TaskBar = ({ task, start }: TaskBar) => {
   // Calculate the total duration of the Gantt chart in milliseconds
   const momentStart = moment(start);
   const momentTaskStart = moment(task.start);
   const daysDiff = momentTaskStart.diff(momentStart, "days");
 
-  const taskSpan = moment(task.end).diff(moment(task.start), "days");
+  const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
   return (
     <div
       style={{
@@ -43,10 +39,11 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
         followCursor
       >
         <div
+          id="task-bar"
           style={{
             width: `${taskSpan * dayWidth}px`,
             backgroundColor: `${task.style.bar.backgroundColor}`,
-            borderBottom: `2px solid ${task.style.bar.backgroundColor}`,
+            borderBottom: `${task.style.bar.borderBottom}`,
             height: "70%",
             display: "flex",
             flexDirection: "row",
@@ -56,6 +53,7 @@ const TaskBar = ({ task, start, color }: TaskBar) => {
             paddingRight: "8px",
             gap: 2,
             overflow: "hidden",
+            borderRadius: "4px",
           }}
         >
           <ETCaption3

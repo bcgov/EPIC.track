@@ -1,15 +1,15 @@
 // TaskList.js
 import React from "react";
-import { TaskParent } from "./types";
+import { GanttRow } from "./types";
 import { barHeight, rowHeight } from "./constants";
 import { ETParagraph } from "components/shared";
 import { Palette } from "styles/theme";
 
 type TaskListProps = {
-  parents: TaskParent[];
+  rows: GanttRow[];
 };
 
-const TaskList = ({ parents }: TaskListProps) => {
+const TaskList = ({ rows }: TaskListProps) => {
   return (
     <div
       style={{
@@ -40,9 +40,9 @@ const TaskList = ({ parents }: TaskListProps) => {
           zIndex: 1,
         }}
       >
-        {parents.map((parent) => (
+        {rows.map((row) => (
           <div
-            key={parent.id}
+            key={row.id}
             style={{
               height: barHeight,
               display: "flex",
@@ -60,7 +60,7 @@ const TaskList = ({ parents }: TaskListProps) => {
                 overflow: "hidden",
               }}
             >
-              {parent.name}
+              {row.name}
             </ETParagraph>
           </div>
         ))}

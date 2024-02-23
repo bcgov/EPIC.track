@@ -54,7 +54,8 @@ from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
-from api.utils.roles import Membership, Role as KeycloakRole
+from api.utils.roles import Membership
+from api.utils.roles import Role as KeycloakRole
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -484,9 +485,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @classmethod
-    def find_by_id(cls, work_id):
+    def find_by_id(cls, work_id, exclude_deleted=False):
         """Find work by id."""
-        work = Work.find_by_id(work_id)
+        query = db.session.query(Work).filter(Work.id == work_id)
+        if exclude_deleted:
+            query = query.filter(Work.is_deleted.is_(False))
+        work = query.one_or_none()
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
         return work
