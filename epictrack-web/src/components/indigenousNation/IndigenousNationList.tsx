@@ -1,10 +1,10 @@
 import React, { useMemo } from "react";
-import { Box, Button, Grid } from "@mui/material";
+import { Avatar, Box, Button, Grid, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer } from "../shared";
+import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
 import IndigenousNationForm from "./IndigenousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
@@ -18,6 +18,7 @@ import { ROLES } from "../../constants/application-constant";
 import { useAppSelector } from "../../hooks";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { debounce } from "lodash";
+import { Palette } from "styles/theme";
 
 export default function IndigenousNationList() {
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
@@ -25,9 +26,9 @@ export default function IndigenousNationList() {
   const ctx = React.useContext(MasterContext);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-  const [staffPreviewAnchorEl, setStaffPreviewAnchorEl] =
+  const [userMenuAnchorEl, setUserMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
-  const [staff, setStaff] = React.useState<Staff>({} as Staff);
+  const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
 
   React.useEffect(() => {
     ctx.setForm(
@@ -75,17 +76,19 @@ export default function IndigenousNationList() {
     [indigenousNations]
   );
 
-  const handleOpenStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
-    setStaff(
-      staffs.find((s) => s.full_name === event.currentTarget.textContent) ||
-        ({} as Staff)
-    );
-    setStaffPreviewAnchorEl(event.currentTarget);
+  const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchorEl(null);
+    setRelationshipHolder(undefined);
   };
 
-  const handleCloseStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
-    setStaff({} as Staff);
-    setStaffPreviewAnchorEl(null);
+  const handleOpenUserMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    staff: Staff
+  ) => {
+    console.log("staff", staff);
+    console.log("event", event);
+    setRelationshipHolder(staff);
+    setUserMenuAnchorEl(event.currentTarget);
   };
 
   const columns = React.useMemo<MRT_ColumnDef<FirstNation>[]>(
@@ -130,18 +133,72 @@ export default function IndigenousNationList() {
         accessorKey: "relationship_holder.full_name",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
-        Cell: (cell) => {
-          const staff = cell.row.original?.relationship_holder;
-          if (!staff) {
-            return "";
-          }
+        Cell: ({ row }) => {
+          const user = row.original.relationship_holder;
+          if (user === undefined || user === null) return <></>;
           return (
             <Box
-              onMouseEnter={handleOpenStaffPreview}
-              onMouseLeave={handleCloseStaffPreview}
-              sx={{ width: "fit-content" }}
+              sx={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: ".5rem",
+                flex: "1 0 0",
+                "&:hover": {
+                  "& $avatar": {
+                    backgroundColor: Palette.primary.main,
+                    color: Palette.white,
+                  },
+                },
+              }}
             >
-              {staff.full_name}
+              <Avatar
+                sx={{
+                  backgroundColor: Palette.neutral.bg.main,
+                  color: Palette.neutral.accent.dark,
+                  fontSize: "1rem",
+                  lineHeight: "1.3rem",
+                  fontWeight: 700,
+                  width: "2rem",
+                  height: "2rem",
+                }}
+                onMouseEnter={(event) => {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  handleOpenUserMenu(event, user);
+                }}
+                onMouseLeave={handleCloseUserMenu}
+              >
+                <ETCaption2
+                  bold
+                >{`${user?.first_name[0]}${user?.last_name[0]}`}</ETCaption2>
+                <UserMenu
+                  anchorEl={userMenuAnchorEl}
+                  email={relationshipHolder?.email || ""}
+                  phone={relationshipHolder?.phone || ""}
+                  position={relationshipHolder?.position?.name || ""}
+                  firstName={relationshipHolder?.first_name || ""}
+                  lastName={relationshipHolder?.last_name || ""}
+                  onClose={handleCloseUserMenu}
+                  origin={{ vertical: "top", horizontal: "left" }}
+                  sx={{
+                    marginTop: "2.1em",
+                    pointerEvents: "none",
+                  }}
+                  id={`relationship_holder_${row.original.id}`}
+                />
+              </Avatar>
+              <Typography
+                style={{
+                  fontWeight: "400",
+                  fontSize: "1rem",
+                  lineHeight: "1.5rem",
+                  color: Palette.neutral.dark,
+                }}
+                component="span"
+              >
+                {user.full_name}
+              </Typography>
             </Box>
           );
         },
@@ -189,7 +246,7 @@ export default function IndigenousNationList() {
         ),
       },
     ],
-    [staffs, indigenousNations]
+    [staffs, indigenousNations, userMenuAnchorEl, relationshipHolder]
   );
 
   const getStaffs = async () => {
@@ -252,16 +309,6 @@ export default function IndigenousNationList() {
             )}
           />
         </Grid>
-        <UserMenu
-          data-testid={`user-menu-${staff.full_name}`}
-          anchorEl={staffPreviewAnchorEl}
-          email={staff.email || ""}
-          phone={staff.phone || ""}
-          position={staff.position?.name || ""}
-          firstName={staff.first_name || ""}
-          lastName={staff.last_name || ""}
-          onClose={handleCloseStaffPreview}
-        />
       </ETPageContainer>
     </>
   );

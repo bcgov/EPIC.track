@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Box, Button, Grid } from "@mui/material";
+import { Avatar, Box, Button, Grid, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer } from "../shared";
+import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
 import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
@@ -19,15 +19,18 @@ import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import UserMenu from "components/shared/userMenu/UserMenu";
+import { Palette } from "styles/theme";
+import { WorkFirstNation } from "models/firstNation";
 
 export default function ProponentList() {
   const [proponentId, setProponentId] = useState<number>();
   const [staffPreviewAnchorEl, setStaffPreviewAnchorEl] =
     React.useState<null | HTMLElement>(null);
-  const [staff, setStaff] = React.useState<Staff>({} as Staff);
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const ctx = useContext(MasterContext);
-
+  const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
+  const [userMenuAnchorEl, setUserMenuAnchorEl] =
+    React.useState<null | HTMLElement>(null);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
@@ -44,17 +47,17 @@ export default function ProponentList() {
     ctx.setService(proponentService);
   }, []);
 
-  const handleOpenStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
-    setStaff(
-      staffs.find((s) => s.full_name === event.currentTarget.textContent) ||
-        ({} as Staff)
-    );
-    setStaffPreviewAnchorEl(event.currentTarget);
+  const handleOpenUserMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    staff: Staff
+  ) => {
+    setRelationshipHolder(staff);
+    setUserMenuAnchorEl(event.currentTarget);
   };
 
-  const handleCloseStaffPreview = (event: React.MouseEvent<HTMLElement>) => {
-    setStaff({} as Staff);
-    setStaffPreviewAnchorEl(null);
+  const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setUserMenuAnchorEl(null);
+    setRelationshipHolder(undefined);
   };
 
   const proponents = useMemo(() => ctx.data as Proponent[], [ctx.data]);
@@ -89,22 +92,59 @@ export default function ProponentList() {
         accessorKey: "relationship_holder.full_name",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
-        Cell: (cell) => {
-          const staff = cell.row.original?.relationship_holder;
-          if (!staff) {
-            return "";
-          }
+        Cell: ({ row }) => {
+          const user = row.original.relationship_holder;
+          if (user === undefined || user === null) return <></>;
           return (
-            <ETGridTitle
-              to={"#"}
-              onMouseEnter={handleOpenStaffPreview}
-              onMouseLeave={handleCloseStaffPreview}
-              enableTooltip={true}
-              tooltip={staff.full_name}
-              style={{ width: "fit-content" }}
+            <Box
+              sx={{
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                gap: ".5rem",
+                flex: "1 0 0",
+                "&:hover": {
+                  "& $avatar": {
+                    backgroundColor: Palette.primary.main,
+                    color: Palette.white,
+                  },
+                },
+              }}
             >
-              {staff.full_name}
-            </ETGridTitle>
+              <Avatar
+                sx={{
+                  backgroundColor: Palette.neutral.bg.main,
+                  color: Palette.neutral.accent.dark,
+                  fontSize: "1rem",
+                  lineHeight: "1.3rem",
+                  fontWeight: 700,
+                  width: "2rem",
+                  height: "2rem",
+                }}
+                onMouseEnter={(event) => {
+                  event.stopPropagation();
+                  event.preventDefault();
+                  handleOpenUserMenu(event, user);
+                }}
+                onMouseLeave={handleCloseUserMenu}
+              >
+                <ETCaption2
+                  bold
+                >{`${user?.first_name[0]}${user?.last_name[0]}`}</ETCaption2>
+                c:\Users\david\AppData\Local\Packages\Microsoft.ScreenSketch_8wekyb3d8bbwe\TempState\Recordings\20240223-1659-31.9749877.mp4
+              </Avatar>
+              <Typography
+                style={{
+                  fontWeight: "400",
+                  fontSize: "1rem",
+                  lineHeight: "1.5rem",
+                  color: Palette.neutral.dark,
+                }}
+                component="span"
+              >
+                {user.full_name}
+              </Typography>
+            </Box>
           );
         },
       },
@@ -151,7 +191,7 @@ export default function ProponentList() {
         ),
       },
     ],
-    [staffs, proponents]
+    [staffs, proponents, userMenuAnchorEl, relationshipHolder]
   );
 
   const getStaffs = async () => {
@@ -220,16 +260,6 @@ export default function ProponentList() {
             )}
           />
         </Grid>
-        <UserMenu
-          data-testid={`user-menu-${staff.full_name}`}
-          anchorEl={staffPreviewAnchorEl}
-          email={staff.email || ""}
-          phone={staff.phone || ""}
-          position={staff.position?.name || ""}
-          firstName={staff.first_name || ""}
-          lastName={staff.last_name || ""}
-          onClose={handleCloseStaffPreview}
-        />
       </ETPageContainer>
     </>
   );
