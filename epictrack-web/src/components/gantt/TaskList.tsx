@@ -1,12 +1,13 @@
 // TaskList.js
 import React from "react";
 import { GanttRow } from "./types";
-import { barHeight, rowHeight } from "./constants";
+import { barHeight, rowHeight, taskListWidth } from "./constants";
 import { ETParagraph } from "components/shared";
 import { Palette } from "styles/theme";
 import TaskListSkeleton from "./TaskListSkeleton";
 import { useGanttContext } from "./GanttContext";
 import TriggerOnViewed from "components/shared/DummyElement";
+import { Tooltip } from "@mui/material";
 
 const TaskList = () => {
   const { rows } = useGanttContext();
@@ -60,16 +61,19 @@ const TaskList = () => {
               paddingLeft: "1em",
             }}
           >
-            <ETParagraph
-              color={Palette.primary.accent.main}
-              sx={{
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-              }}
-            >
-              {row.name}
-            </ETParagraph>
+            <Tooltip title={row.name}>
+              <ETParagraph
+                color={Palette.primary.accent.main}
+                sx={{
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  width: 0.8 * taskListWidth,
+                }}
+              >
+                {row.name}
+              </ETParagraph>
+            </Tooltip>
           </div>
         ))}
       </div>
