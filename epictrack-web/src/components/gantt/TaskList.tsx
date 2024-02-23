@@ -4,12 +4,20 @@ import { GanttRow } from "./types";
 import { barHeight, rowHeight } from "./constants";
 import { ETParagraph } from "components/shared";
 import { Palette } from "styles/theme";
+import TaskListSkeleton from "./TaskListSkeleton";
+import { useGanttContext } from "./GanttContext";
+import TriggerOnViewed from "components/shared/DummyElement";
 
-type TaskListProps = {
-  rows: GanttRow[];
-};
-
-const TaskList = ({ rows }: TaskListProps) => {
+const TaskList = () => {
+  const { rows } = useGanttContext();
+  const {
+    enableLazyLoading,
+    totalRows,
+    onLazyLoad = () => {
+      return;
+    },
+    isLoadingMore,
+  } = useGanttContext();
   return (
     <div
       style={{
@@ -50,13 +58,13 @@ const TaskList = ({ rows }: TaskListProps) => {
               justifyContent: "flex-start",
               alignItems: "center",
               paddingLeft: "1em",
-              width: "100%",
             }}
           >
             <ETParagraph
               color={Palette.primary.accent.main}
               sx={{
                 textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
                 overflow: "hidden",
               }}
             >
@@ -65,6 +73,23 @@ const TaskList = ({ rows }: TaskListProps) => {
           </div>
         ))}
       </div>
+
+      {enableLazyLoading && (
+        <>
+          {!isLoadingMore && totalRows !== rows.length && (
+            <TriggerOnViewed callbackFn={() => onLazyLoad()} />
+          )}
+          {totalRows !== rows.length && (
+            <div
+              style={{
+                zIndex: 1,
+              }}
+            >
+              <TaskListSkeleton />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

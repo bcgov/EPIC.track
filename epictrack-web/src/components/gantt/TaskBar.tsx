@@ -4,15 +4,14 @@ import { dayWidth } from "./constants";
 import { GanttItem } from "./types";
 import { ETCaption3 } from "components/shared";
 import { Tooltip } from "@mui/material";
+import { useGanttContext } from "./GanttContext";
 
 type TaskBar = {
   task: GanttItem;
-  start: Date;
-  end: Date;
 };
 
-const TaskBar = ({ task, start }: TaskBar) => {
-  // Calculate the total duration of the Gantt chart in milliseconds
+const TaskBar = ({ task }: TaskBar) => {
+  const { start } = useGanttContext();
   const momentStart = moment(start);
   const momentTaskStart = moment(task.start);
   const daysDiff = momentTaskStart.diff(momentStart, "days");

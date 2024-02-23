@@ -1,17 +1,12 @@
 // TaskBarSection.js
 import React from "react";
 import TaskBar from "./TaskBar";
-import { GanttRow } from "./types";
 import { barHeight } from "./constants";
 import { Palette } from "styles/theme";
+import { useGanttContext } from "./GanttContext";
 
-type TaskBarSectionProps = {
-  rows: GanttRow[];
-  start: Date;
-  end: Date;
-};
-
-const TaskBarSection = ({ rows, start, end }: TaskBarSectionProps) => {
+const TaskBarSection = () => {
+  const { rows } = useGanttContext();
   return (
     <div
       style={{
@@ -29,14 +24,7 @@ const TaskBarSection = ({ rows, start, end }: TaskBarSectionProps) => {
           }}
         >
           {row.tasks.map((task) => {
-            return (
-              <TaskBar
-                key={`task-${task.id}`}
-                task={task}
-                start={start}
-                end={end}
-              />
-            );
+            return <TaskBar key={`task-${task.id}`} task={task} />;
           })}
         </div>
       ))}
