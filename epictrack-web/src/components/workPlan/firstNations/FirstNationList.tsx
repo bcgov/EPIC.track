@@ -58,7 +58,6 @@ const FirstNationList = () => {
   const [consultationLevels, setConsultationLevels] = React.useState<
     ConsultationLevel[]
   >([]);
-
   const { roles, email } = useAppSelector((state) => state.user.userDetail);
   const userIsTeamMember = useMemo(
     () => ctx.team.some((member) => member.staff.email === email),
@@ -74,7 +73,7 @@ const FirstNationList = () => {
     () => ctx.firstNations,
     [ctx.firstNations]
   );
-
+  const firstNation = firstNations.find((fN) => fN.id === workFirstNationId);
   const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
   const [statusOptions, setStatusOptions] = React.useState<string[]>([]);
   const [showImportNationForm, setShowImportNationForm] =
@@ -87,7 +86,6 @@ const FirstNationList = () => {
       setModalTitle("Add Nation");
       return;
     }
-    const firstNation = firstNations.find((fN) => fN.id === workFirstNationId);
     setModalTitle(firstNation?.indigenous_nation?.name || "");
   }, [workFirstNationId]);
 
@@ -500,7 +498,7 @@ const FirstNationList = () => {
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
-        okButtonText="Add"
+        okButtonText={firstNation ? "Save" : "Add"}
         formId="work-first-nation-form"
         onCancel={() => onCancelHandler()}
         isActionsRequired
