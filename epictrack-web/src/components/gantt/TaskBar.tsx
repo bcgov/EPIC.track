@@ -65,6 +65,7 @@ const TaskBar = ({ task }: TaskBar) => {
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
               overflow: "hidden",
+              width: isFutureTask ? "100%" : "50%",
             }}
           >
             {task.name}
@@ -75,6 +76,7 @@ const TaskBar = ({ task }: TaskBar) => {
                 textOverflow: "ellipsis",
                 whiteSpace: "nowrap",
                 overflow: "hidden",
+
                 ...(task.style.progress || {}),
               }}
               bold

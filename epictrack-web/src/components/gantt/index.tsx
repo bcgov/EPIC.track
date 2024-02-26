@@ -1,7 +1,9 @@
 import React from "react";
 import { GanttRow } from "./types";
 import { GanttProvider } from "./GanttContext";
-import { Main } from "./main";
+import Toolbar from "./ControlBar";
+import { Chart } from "./Chart";
+import Main from "./main";
 
 type GanttProps = {
   rows: GanttRow[];

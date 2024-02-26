@@ -4,10 +4,13 @@ import moment from "moment";
 import { Palette } from "styles/theme";
 import { Gantt } from "components/gantt";
 import Color from "color";
+import { useNavigate } from "react-router-dom";
+import { WORKPLAN_TAB_INDEX } from "components/workPlan/constants";
 
 export const MyWorkplanGantt = () => {
   const { workplans, setLoadingMoreWorkplans, totalWorkplans } =
     useContext(MyWorkplansContext);
+  const navigate = useNavigate();
 
   const tasks = workplans.map((workplan) => {
     let phaseInfo: any;
@@ -45,6 +48,11 @@ export const MyWorkplanGantt = () => {
           },
         };
       }),
+      onClick: () => {
+        navigate(`/work-plan?work_id=${workplan.id}`, {
+          state: { tabIndex: WORKPLAN_TAB_INDEX.ABOUT },
+        });
+      },
     };
   });
 
