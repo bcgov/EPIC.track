@@ -6,7 +6,8 @@ import { Gantt } from "components/gantt";
 import Color from "color";
 
 export const MyWorkplanGantt = () => {
-  const { workplans } = useContext(MyWorkplansContext);
+  const { workplans, setLoadingMoreWorkplans, totalWorkplans } =
+    useContext(MyWorkplansContext);
 
   const tasks = workplans.map((workplan) => {
     let phaseInfo: any;
@@ -47,5 +48,12 @@ export const MyWorkplanGantt = () => {
     };
   });
 
-  return <Gantt rows={tasks} />;
+  return (
+    <Gantt
+      rows={tasks}
+      enableLazyLoading
+      onLazyLoad={() => setLoadingMoreWorkplans(true)}
+      totalRows={totalWorkplans}
+    />
+  );
 };
