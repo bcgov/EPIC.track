@@ -16,7 +16,8 @@ import { When } from "react-if";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
-const ExclamationIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
+const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
+
 const summaryContentStyle: SxProps = {
   minHeight: "1.5rem",
   color: `${Palette.neutral.dark}`,
@@ -91,6 +92,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
     setExpanded(expand);
     ctx.setSelectedWorkPhase(phase);
   };
+
   const fromDate = React.useMemo(
     () =>
       Moment(phase.work_phase.start_date).isSameOrAfter(Moment())
@@ -98,6 +100,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
         : Moment(),
     [phase]
   );
+
   return (
     <>
       <Box
@@ -160,7 +163,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                           ...summaryContentStyle,
                           color:
                             phase.days_left < 0
-                              ? Palette.secondary.dark
+                              ? Palette.error.dark
                               : Palette.neutral.dark,
                         }}
                       >
@@ -176,7 +179,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                             ml: "4px",
                           }}
                         >
-                          <ExclamationIcon />
+                          <IndicatorIcon />
                         </Box>
                       </When>
                       <When condition={phase.work_phase.is_suspended}>
