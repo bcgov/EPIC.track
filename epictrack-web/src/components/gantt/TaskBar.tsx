@@ -17,6 +17,9 @@ const TaskBar = ({ task }: TaskBar) => {
   const daysDiff = momentTaskStart.diff(momentStart, "days");
 
   const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
+
+  const today = moment().startOf("day");
+  const isFutureTask = moment(task.start).isAfter(today);
   return (
     <div
       style={{
@@ -53,6 +56,8 @@ const TaskBar = ({ task }: TaskBar) => {
             gap: 2,
             overflow: "hidden",
             borderRadius: "4px",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
           <ETCaption3
@@ -64,14 +69,19 @@ const TaskBar = ({ task }: TaskBar) => {
           >
             {task.name}
           </ETCaption3>
-          <ETCaption3
-            sx={{
-              ...(task.style.progress || {}),
-            }}
-            bold
-          >
-            {task.progress}
-          </ETCaption3>
+          {!isFutureTask && (
+            <ETCaption3
+              sx={{
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                ...(task.style.progress || {}),
+              }}
+              bold
+            >
+              {task.progress}
+            </ETCaption3>
+          )}
         </div>
       </Tooltip>
     </div>

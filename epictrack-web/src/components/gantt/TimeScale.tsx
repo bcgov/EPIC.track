@@ -58,6 +58,7 @@ export const TimeScale = ({ children }: TimeScaleProps) => {
         display: "flex",
         flexDirection: "row",
         backgroundColor: Palette.neutral.bg.light,
+        zIndex: 3,
       }}
     >
       <div>
@@ -68,7 +69,7 @@ export const TimeScale = ({ children }: TimeScaleProps) => {
             height: rowHeight,
             position: "sticky",
             top: 0,
-            zIndex: 2,
+            zIndex: 3,
           }}
         >
           {yearsInfo.map((year) => (
@@ -95,6 +96,8 @@ export const TimeScale = ({ children }: TimeScaleProps) => {
             top: rowHeight,
             backgroundColor: Palette.neutral.bg.light,
             zIndex: 2,
+            // add box shadow only to the bottom of the months
+            boxShadow: "rgba(0, 0, 0, 0.2) 0px 3px 3px -3px",
           }}
         >
           {monthsInfo.map((month) => {
