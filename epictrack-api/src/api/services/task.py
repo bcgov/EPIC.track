@@ -124,7 +124,7 @@ class TaskService:
     @classmethod
     def create_task_events_from_template(
         cls, params: dict, template_id: int
-    ) -> [TaskEvent]:
+    ) -> List[TaskEvent]:
         """Create a list of task events from the given task template"""
         work_phase = WorkPhase.find_by_id(params.get("work_phase_id"))
 
@@ -151,7 +151,7 @@ class TaskService:
             task_event_dic = {
                 "name": task.name,
                 "work_phase_id": params.get("work_phase_id"),
-                "start_date": work_phase.start_date + timedelta(days=task.start_at + task.number_of_days),
+                "start_date": work_phase.start_date + timedelta(days=task.start_at),
                 "number_of_days": task.number_of_days,
                 "tips": task.tips,
                 "status": StatusEnum.NOT_STARTED,
