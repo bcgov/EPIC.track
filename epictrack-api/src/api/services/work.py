@@ -54,7 +54,8 @@ from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
-from api.utils.roles import Membership, Role as KeycloakRole
+from api.utils.roles import Membership
+from api.utils.roles import Role as KeycloakRole
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -329,7 +330,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .scalar()
         )
         if not work_staff:
-            raise ResourceExistsError("No work staff association found")
+            raise ResourceNotFoundError("No work staff association found")
         return work_staff
 
     @classmethod
@@ -484,9 +485,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @classmethod
-    def find_by_id(cls, work_id):
+    def find_by_id(cls, work_id, exclude_deleted=False):
         """Find work by id."""
-        work = Work.find_by_id(work_id)
+        query = db.session.query(Work).filter(Work.id == work_id)
+        if exclude_deleted:
+            query = query.filter(Work.is_deleted.is_(False))
+        work = query.one_or_none()
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
         return work
@@ -615,7 +619,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             mapped_column = note_type_mapping.get(note_type)
             if mapped_column is None:
                 raise ResourceExistsError(
-                    f"No work note type {note_type}  nation association found"
+                    f"No work note type {note_type} nation association found"
                 )
             setattr(work, mapped_column, notes)
 
@@ -695,7 +699,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-
+        print(":" * 100)
+        print(first_nations)
+        print(":" * 100)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 

@@ -64,7 +64,7 @@ export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
   },
 });
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 12;
 
 export const MyWorkplansProvider = ({
   children,

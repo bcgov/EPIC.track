@@ -42,6 +42,8 @@ interface WorkplanContextProps {
   setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
   loadIssues: () => Promise<void>;
   getWorkById: () => Promise<void>;
+  selectedStaff?: StaffWorkRole;
+  setSelectedStaff: Dispatch<SetStateAction<StaffWorkRole | undefined>>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -66,6 +68,8 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   getWorkStatuses: () => new Promise((resolve) => resolve),
   loadIssues: () => new Promise((resolve) => resolve),
   getWorkById: () => new Promise((resolve) => resolve),
+  selectedStaff: undefined,
+  setSelectedStaff: () => ({}),
 });
 
 export const WorkplanProvider = ({
@@ -83,7 +87,7 @@ export const WorkplanProvider = ({
   const [workPhases, setWorkPhases] = useState<WorkPhaseAdditionalInfo[]>([]);
   const [firstNations, setFirstNations] = useState<WorkFirstNation[]>([]);
   const workId = useMemo(() => query.get("work_id"), [query]);
-
+  const [selectedStaff, setSelectedStaff] = useState<StaffWorkRole>();
   const [issues, setIssues] = useState<WorkIssue[]>([]);
 
   const loadIssues = async () => {
@@ -186,6 +190,8 @@ export const WorkplanProvider = ({
   return (
     <WorkplanContext.Provider
       value={{
+        selectedStaff,
+        setSelectedStaff,
         setStatuses,
         getWorkStatuses,
         selectedWorkPhase,
