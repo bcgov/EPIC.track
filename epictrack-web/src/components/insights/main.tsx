@@ -19,7 +19,7 @@ const Main = () => {
             onClick={() => setExpanded(!expanded)}
           >
             <InsightsAccordionSummary>
-              <Stack direction="row" spacing={1}>
+              <Stack direction="row" spacing={1} alignItems={"center"}>
                 <ETParagraph bold>Work Dashboard</ETParagraph>
                 <ETCaption3>
                   (visualization of every in progress EAO Work)

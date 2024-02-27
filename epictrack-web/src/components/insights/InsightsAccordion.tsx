@@ -44,7 +44,7 @@ export const InsightsAccordion = ({
 };
 
 export const InsightsAccordionSummary = ({ children, ...rest }: GridProps) => {
-  const { onClick } = useInsightsAccordionContext();
+  const { onClick, expanded } = useInsightsAccordionContext();
   return (
     <Grid
       container
@@ -73,7 +73,7 @@ export const InsightsAccordionSummary = ({ children, ...rest }: GridProps) => {
               cursor: "pointer",
             }}
           >
-            Show More
+            {expanded ? "Show Less" : "Show More"}
           </Link>
         </ETDescription>
       </Grid>
