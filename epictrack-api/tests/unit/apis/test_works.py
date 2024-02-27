@@ -561,6 +561,6 @@ def test_import_first_nations(client, auth_header):
 
 def test_get_work_types(client, auth_header):
     """Test get work types"""
-    url = urljoin(API_BASE_URL, f'works/types')
+    url = urljoin(API_BASE_URL, 'works/types')
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
