@@ -4,6 +4,7 @@ import {
   Button,
   Grid,
   IconButton,
+  Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -201,21 +202,7 @@ const FirstNationList = () => {
           const user = row.original.indigenous_nation.relationship_holder;
           if (user === undefined || user === null) return <></>;
           return (
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: ".5rem",
-                flex: "1 0 0",
-                "&:hover": {
-                  "& $avatar": {
-                    backgroundColor: Palette.primary.main,
-                    color: Palette.white,
-                  },
-                },
-              }}
-            >
+            <Stack direction="row" alignItems="center" spacing={0.5}>
               <Avatar
                 sx={{
                   backgroundColor: Palette.neutral.bg.main,
@@ -249,7 +236,7 @@ const FirstNationList = () => {
               >
                 {user.full_name}
               </Typography>
-            </Box>
+            </Stack>
           );
         },
       },

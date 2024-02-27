@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Avatar, Box, Button, Grid, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
@@ -137,21 +137,7 @@ export default function IndigenousNationList() {
           const user = row.original.relationship_holder;
           if (user === undefined || user === null) return <></>;
           return (
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: ".5rem",
-                flex: "1 0 0",
-                "&:hover": {
-                  "& $avatar": {
-                    backgroundColor: Palette.primary.main,
-                    color: Palette.white,
-                  },
-                },
-              }}
-            >
+            <Stack direction="row" alignItems="center" spacing={0.5}>
               <Avatar
                 sx={{
                   backgroundColor: Palette.neutral.bg.main,
@@ -185,7 +171,7 @@ export default function IndigenousNationList() {
               >
                 {user.full_name}
               </Typography>
-            </Box>
+            </Stack>
           );
         },
       },

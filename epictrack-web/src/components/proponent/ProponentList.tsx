@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Avatar, Box, Button, Grid, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
@@ -96,21 +96,7 @@ export default function ProponentList() {
           const user = row.original.relationship_holder;
           if (user === undefined || user === null) return <></>;
           return (
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: ".5rem",
-                flex: "1 0 0",
-                "&:hover": {
-                  "& $avatar": {
-                    backgroundColor: Palette.primary.main,
-                    color: Palette.white,
-                  },
-                },
-              }}
-            >
+            <Stack direction="row" alignItems="center" spacing={0.5}>
               <Avatar
                 sx={{
                   backgroundColor: Palette.neutral.bg.main,
@@ -129,10 +115,9 @@ export default function ProponentList() {
                 }}
                 onMouseLeave={handleCloseUserMenu}
               >
-                <ETCaption2
-                  bold
-                >{`${user?.first_name[0]}${user?.last_name[0]}`}</ETCaption2>
-                c:\Users\david\AppData\Local\Packages\Microsoft.ScreenSketch_8wekyb3d8bbwe\TempState\Recordings\20240223-1659-31.9749877.mp4
+                <ETCaption2 bold>
+                  {`${user?.first_name[0]}${user?.last_name[0]}`}
+                </ETCaption2>
               </Avatar>
               <Typography
                 style={{
@@ -145,7 +130,7 @@ export default function ProponentList() {
               >
                 {user.full_name}
               </Typography>
-            </Box>
+            </Stack>
           );
         },
       },
