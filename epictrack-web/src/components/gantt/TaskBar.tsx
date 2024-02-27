@@ -19,7 +19,6 @@ const TaskBar = ({ task }: TaskBar) => {
   const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
 
   const today = moment().startOf("day");
-  const isFutureTask = moment(task.start).isAfter(today);
   return (
     <div
       style={{
@@ -65,12 +64,12 @@ const TaskBar = ({ task }: TaskBar) => {
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
               overflow: "hidden",
-              width: isFutureTask ? "100%" : "50%",
+              width: !task.progress ? "100%" : "50%",
             }}
           >
             {task.name}
           </ETCaption3>
-          {!isFutureTask && (
+          {Boolean(task.progress) && (
             <ETCaption3
               sx={{
                 textOverflow: "ellipsis",

@@ -10,6 +10,7 @@ import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
 import { isStatusOutOfDate } from "../../workPlan/status/shared";
 import { Status } from "../../../models/status";
 import { When } from "react-if";
+import { daysLeft } from "./util";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
@@ -23,19 +24,6 @@ const CardBody = ({ workplan }: CardProps) => {
   const lastStatusUpdate = dayjs(workplan.status_info.posted_date).format(
     MONTH_DAY_YEAR
   );
-
-  const daysLeft = () => {
-    const daysLeft = workplan?.phase_info[0]?.days_left;
-    const totalDays = workplan?.phase_info[0]?.total_number_of_days;
-
-    if (daysLeft >= 0) {
-      return `${daysLeft}/${totalDays} days left`;
-    }
-
-    const daysOver = Math.abs(daysLeft);
-
-    return `${daysOver} day${daysOver > 1 ? "s" : ""} over`;
-  };
 
   const workTitle = `${workplan.work_type.name}${
     workplan.simple_title ? ` - ${workplan.simple_title}` : ""
@@ -121,7 +109,10 @@ const CardBody = ({ workplan }: CardProps) => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {daysLeft()}
+                {daysLeft(
+                  workplan?.phase_info[0]?.days_left,
+                  workplan?.phase_info[0]?.total_number_of_days
+                )}
               </ETCaption2>
             </Stack>
           </Grid>
