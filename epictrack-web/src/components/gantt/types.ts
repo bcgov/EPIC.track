@@ -13,5 +13,6 @@ export type GanttItem = {
 export type GanttRow = {
   id: string;
   name: string;
+  onClick?: () => void;
   tasks: GanttItem[];
 };

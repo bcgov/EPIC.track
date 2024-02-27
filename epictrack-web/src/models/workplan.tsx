@@ -22,6 +22,8 @@ export interface WorkPlan {
       phase: {
         color: string;
       };
+      start_date: string;
+      end_date: string;
     };
   }[];
 
