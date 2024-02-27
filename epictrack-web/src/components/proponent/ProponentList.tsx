@@ -20,12 +20,9 @@ import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { Palette } from "styles/theme";
-import { WorkFirstNation } from "models/firstNation";
-
+import { debounce } from "lodash";
 export default function ProponentList() {
   const [proponentId, setProponentId] = useState<number>();
-  const [staffPreviewAnchorEl, setStaffPreviewAnchorEl] =
-    React.useState<null | HTMLElement>(null);
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const ctx = useContext(MasterContext);
   const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
@@ -33,6 +30,7 @@ export default function ProponentList() {
     React.useState<null | HTMLElement>(null);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const menuHoverRef = React.useRef(false);
 
   useEffect(() => {
     ctx.setForm(<ProponentForm proponentId={proponentId} />);
@@ -55,10 +53,12 @@ export default function ProponentList() {
     setUserMenuAnchorEl(event.currentTarget);
   };
 
-  const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setUserMenuAnchorEl(null);
-    setRelationshipHolder(undefined);
-  };
+  const handleCloseUserMenu = debounce(() => {
+    if (!menuHoverRef.current) {
+      setUserMenuAnchorEl(null);
+      setRelationshipHolder(undefined);
+    }
+  }, 100);
 
   const proponents = useMemo(() => ctx.data as Proponent[], [ctx.data]);
   const statusesOptions = getSelectFilterOptions(
@@ -124,6 +124,7 @@ export default function ProponentList() {
                 onMouseEnter={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
+                  handleCloseUserMenu.cancel();
                   handleOpenUserMenu(event, user);
                 }}
                 onMouseLeave={handleCloseUserMenu}
@@ -260,6 +261,31 @@ export default function ProponentList() {
             )}
           />
         </Grid>
+        <UserMenu
+          anchorEl={userMenuAnchorEl}
+          email={relationshipHolder?.email || ""}
+          phone={relationshipHolder?.phone || ""}
+          position={relationshipHolder?.position?.name || ""}
+          firstName={relationshipHolder?.first_name || ""}
+          lastName={relationshipHolder?.last_name || ""}
+          onClose={handleCloseUserMenu}
+          onMouseEnter={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            handleCloseUserMenu.cancel();
+            menuHoverRef.current = true;
+          }}
+          onMouseLeave={() => {
+            menuHoverRef.current = false;
+            handleCloseUserMenu();
+          }}
+          origin={{ vertical: "top", horizontal: "left" }}
+          sx={{
+            marginTop: "2.1em",
+            pointerEvents: "none",
+          }}
+          id={`relationship_holder_${relationshipHolder?.id || ""}`}
+        />
       </ETPageContainer>
     </>
   );

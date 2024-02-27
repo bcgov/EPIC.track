@@ -29,7 +29,7 @@ export default function IndigenousNationList() {
   const [userMenuAnchorEl, setUserMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
   const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
-
+  const menuHoverRef = React.useRef(false);
   React.useEffect(() => {
     ctx.setForm(
       <IndigenousNationForm indigenousNationID={indigenousNationID} />
@@ -76,10 +76,12 @@ export default function IndigenousNationList() {
     [indigenousNations]
   );
 
-  const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setUserMenuAnchorEl(null);
-    setRelationshipHolder(undefined);
-  };
+  const handleCloseUserMenu = debounce(() => {
+    if (!menuHoverRef.current) {
+      setUserMenuAnchorEl(null);
+      setRelationshipHolder(undefined);
+    }
+  }, 100); // 100ms delay
 
   const handleOpenUserMenu = (
     event: React.MouseEvent<HTMLElement>,
@@ -165,6 +167,7 @@ export default function IndigenousNationList() {
                 onMouseEnter={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
+                  handleCloseUserMenu.cancel();
                   handleOpenUserMenu(event, user);
                 }}
                 onMouseLeave={handleCloseUserMenu}
@@ -172,21 +175,6 @@ export default function IndigenousNationList() {
                 <ETCaption2
                   bold
                 >{`${user?.first_name[0]}${user?.last_name[0]}`}</ETCaption2>
-                <UserMenu
-                  anchorEl={userMenuAnchorEl}
-                  email={relationshipHolder?.email || ""}
-                  phone={relationshipHolder?.phone || ""}
-                  position={relationshipHolder?.position?.name || ""}
-                  firstName={relationshipHolder?.first_name || ""}
-                  lastName={relationshipHolder?.last_name || ""}
-                  onClose={handleCloseUserMenu}
-                  origin={{ vertical: "top", horizontal: "left" }}
-                  sx={{
-                    marginTop: "2.1em",
-                    pointerEvents: "none",
-                  }}
-                  id={`relationship_holder_${row.original.id}`}
-                />
               </Avatar>
               <Typography
                 style={{
@@ -309,6 +297,31 @@ export default function IndigenousNationList() {
             )}
           />
         </Grid>
+        <UserMenu
+          anchorEl={userMenuAnchorEl}
+          email={relationshipHolder?.email || ""}
+          phone={relationshipHolder?.phone || ""}
+          position={relationshipHolder?.position?.name || ""}
+          firstName={relationshipHolder?.first_name || ""}
+          lastName={relationshipHolder?.last_name || ""}
+          onClose={handleCloseUserMenu}
+          onMouseEnter={(event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            handleCloseUserMenu.cancel();
+            menuHoverRef.current = true;
+          }}
+          onMouseLeave={() => {
+            menuHoverRef.current = false;
+            handleCloseUserMenu();
+          }}
+          origin={{ vertical: "top", horizontal: "left" }}
+          sx={{
+            marginTop: "2.1em",
+            pointerEvents: "none",
+          }}
+          id={`relationship_holder_${relationshipHolder?.id || ""}`}
+        />
       </ETPageContainer>
     </>
   );
