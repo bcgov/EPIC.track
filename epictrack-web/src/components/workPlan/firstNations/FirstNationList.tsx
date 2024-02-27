@@ -4,6 +4,7 @@ import {
   Button,
   Grid,
   IconButton,
+  Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -41,6 +42,7 @@ import projectService from "../../../services/projectService/projectService";
 import { Restricted, hasPermission } from "../../shared/restricted";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { useAppSelector } from "../../../hooks";
+import { debounce } from "lodash";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -80,6 +82,7 @@ const FirstNationList = () => {
     React.useState<boolean>(false);
   const [firstNationAvailable, setFirstNationAvailable] =
     React.useState<boolean>(false);
+  const menuHoverRef = React.useRef(false);
 
   React.useEffect(() => {
     if (workFirstNationId === undefined) {
@@ -141,10 +144,12 @@ const FirstNationList = () => {
     setUserMenuAnchorEl(event.currentTarget);
   };
 
-  const handleCloseUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setUserMenuAnchorEl(null);
-    setRelationshipHolder(undefined);
-  };
+  const handleCloseUserMenu = debounce(() => {
+    if (!menuHoverRef.current) {
+      setUserMenuAnchorEl(null);
+      setRelationshipHolder(undefined);
+    }
+  }, 100);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkFirstNation>[]>(
     () => [
@@ -195,21 +200,7 @@ const FirstNationList = () => {
           const user = row.original.indigenous_nation.relationship_holder;
           if (user === undefined || user === null) return <></>;
           return (
-            <Box
-              sx={{
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                gap: ".5rem",
-                flex: "1 0 0",
-                "&:hover": {
-                  "& $avatar": {
-                    backgroundColor: Palette.primary.main,
-                    color: Palette.white,
-                  },
-                },
-              }}
-            >
+            <Stack direction="row" alignItems="center" spacing={0.5}>
               <Avatar
                 sx={{
                   backgroundColor: Palette.neutral.bg.main,
@@ -223,6 +214,7 @@ const FirstNationList = () => {
                 onMouseEnter={(event) => {
                   event.stopPropagation();
                   event.preventDefault();
+                  handleCloseUserMenu.cancel();
                   handleOpenUserMenu(event, row.original);
                 }}
                 onMouseLeave={handleCloseUserMenu}
@@ -230,21 +222,6 @@ const FirstNationList = () => {
                 <ETCaption2
                   bold
                 >{`${user?.first_name[0]}${user?.last_name[0]}`}</ETCaption2>
-                <UserMenu
-                  anchorEl={userMenuAnchorEl}
-                  email={relationshipHolder?.email || ""}
-                  phone={relationshipHolder?.phone || ""}
-                  position={relationshipHolder?.position?.name || ""}
-                  firstName={relationshipHolder?.first_name || ""}
-                  lastName={relationshipHolder?.last_name || ""}
-                  onClose={handleCloseUserMenu}
-                  origin={{ vertical: "top", horizontal: "left" }}
-                  sx={{
-                    marginTop: "2.1em",
-                    pointerEvents: "none",
-                  }}
-                  id={`relationship_holder_${row.original.id}`}
-                />
               </Avatar>
               <Typography
                 style={{
@@ -257,7 +234,7 @@ const FirstNationList = () => {
               >
                 {user.full_name}
               </Typography>
-            </Box>
+            </Stack>
           );
         },
       },
@@ -525,6 +502,31 @@ const FirstNationList = () => {
       >
         <ImportFirstNation onSave={onTemplateFormSaveHandler} />
       </TrackDialog>
+      <UserMenu
+        anchorEl={userMenuAnchorEl}
+        email={relationshipHolder?.email || ""}
+        phone={relationshipHolder?.phone || ""}
+        position={relationshipHolder?.position?.name || ""}
+        firstName={relationshipHolder?.first_name || ""}
+        lastName={relationshipHolder?.last_name || ""}
+        onClose={handleCloseUserMenu}
+        onMouseEnter={(event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          handleCloseUserMenu.cancel();
+          menuHoverRef.current = true;
+        }}
+        onMouseLeave={() => {
+          menuHoverRef.current = false;
+          handleCloseUserMenu();
+        }}
+        origin={{ vertical: "top", horizontal: "left" }}
+        sx={{
+          marginTop: "2.1em",
+          pointerEvents: "none",
+        }}
+        id={`relationship_holder_${relationshipHolder?.id || ""}`}
+      />
     </>
   );
 };
