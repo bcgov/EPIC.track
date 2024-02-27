@@ -12,8 +12,6 @@ interface GanttContextProps {
   isLoadingMore?: boolean;
   totalRows?: number;
   onLazyLoad?: () => void;
-  scrollingToToday: boolean;
-  setScrollingToToday: (value: boolean) => void;
   ganttChartRef?: React.RefObject<HTMLDivElement> | null;
 }
 
@@ -28,10 +26,6 @@ export const GanttContext = createContext<GanttContextProps>({
     return;
   },
   isLoadingMore: false,
-  scrollingToToday: false,
-  setScrollingToToday: (_value: boolean) => {
-    return;
-  },
   ganttChartRef: null,
 });
 
@@ -53,8 +47,6 @@ export const GanttProvider = ({
 }: GanttProviderProps) => {
   const tasks = useMemo(() => rows.map((row) => row.tasks).flat(), [rows]);
   const ganttChartRef = useRef<HTMLDivElement>(null);
-
-  const [scrollingToToday, setScrollingToToday] = React.useState(false);
 
   const start = useMemo(() => {
     const earliestStart = tasks.reduce(
@@ -88,8 +80,6 @@ export const GanttProvider = ({
       totalRows,
       onLazyLoad,
       isLoadingMore,
-      scrollingToToday,
-      setScrollingToToday,
       ganttChartRef,
     }),
     [
@@ -101,8 +91,6 @@ export const GanttProvider = ({
       totalRows,
       onLazyLoad,
       isLoadingMore,
-      scrollingToToday,
-      setScrollingToToday,
       ganttChartRef,
     ]
   );
