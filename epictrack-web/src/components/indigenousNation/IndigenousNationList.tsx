@@ -87,8 +87,6 @@ export default function IndigenousNationList() {
     event: React.MouseEvent<HTMLElement>,
     staff: Staff
   ) => {
-    console.log("staff", staff);
-    console.log("event", event);
     setRelationshipHolder(staff);
     setUserMenuAnchorEl(event.currentTarget);
   };
