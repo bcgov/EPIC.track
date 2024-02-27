@@ -4,9 +4,15 @@ import moment from "moment";
 import { Palette } from "styles/theme";
 import { Gantt } from "components/gantt";
 import Color from "color";
+import { useNavigate } from "react-router-dom";
+import { WORKPLAN_TAB_INDEX } from "components/workPlan/constants";
+import { WorkPlan } from "models/workplan";
+import { getDaysLeft } from "./util";
 
 export const MyWorkplanGantt = () => {
-  const { workplans } = useContext(MyWorkplansContext);
+  const { workplans, setLoadingMoreWorkplans, totalWorkplans } =
+    useContext(MyWorkplansContext);
+  const navigate = useNavigate();
 
   const tasks = workplans.map((workplan) => {
     let phaseInfo: any;
@@ -25,9 +31,7 @@ export const MyWorkplanGantt = () => {
           name: phaseInfo.work_phase.name,
           start: moment(phaseInfo.work_phase.start_date).toDate(),
           end: moment(phaseInfo.work_phase.end_date).toDate(),
-          progress: `${Math.abs(phaseInfo.days_left)}/${
-            phaseInfo.total_number_of_days
-          }`,
+          progress: getDaysLeft(phaseInfo),
           style: {
             bar: {
               backgroundColor: Color(phaseInfo.work_phase.phase.color)
@@ -44,8 +48,20 @@ export const MyWorkplanGantt = () => {
           },
         };
       }),
+      onClick: () => {
+        navigate(`/work-plan?work_id=${workplan.id}`, {
+          state: { tabIndex: WORKPLAN_TAB_INDEX.ABOUT },
+        });
+      },
     };
   });
 
-  return <Gantt rows={tasks} />;
+  return (
+    <Gantt
+      rows={tasks}
+      enableLazyLoading
+      onLazyLoad={() => setLoadingMoreWorkplans(true)}
+      totalRows={totalWorkplans}
+    />
+  );
 };

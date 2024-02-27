@@ -4,20 +4,21 @@ import { dayWidth } from "./constants";
 import { GanttItem } from "./types";
 import { ETCaption3 } from "components/shared";
 import { Tooltip } from "@mui/material";
+import { useGanttContext } from "./GanttContext";
 
 type TaskBar = {
   task: GanttItem;
-  start: Date;
-  end: Date;
 };
 
-const TaskBar = ({ task, start }: TaskBar) => {
-  // Calculate the total duration of the Gantt chart in milliseconds
+const TaskBar = ({ task }: TaskBar) => {
+  const { start } = useGanttContext();
   const momentStart = moment(start);
   const momentTaskStart = moment(task.start);
   const daysDiff = momentTaskStart.diff(momentStart, "days");
 
   const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
+
+  const today = moment().startOf("day");
   return (
     <div
       style={{
@@ -54,6 +55,8 @@ const TaskBar = ({ task, start }: TaskBar) => {
             gap: 2,
             overflow: "hidden",
             borderRadius: "4px",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
           }}
         >
           <ETCaption3
@@ -61,18 +64,25 @@ const TaskBar = ({ task, start }: TaskBar) => {
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
               overflow: "hidden",
+              width: !task.progress ? "100%" : "50%",
             }}
           >
             {task.name}
           </ETCaption3>
-          <ETCaption3
-            sx={{
-              ...(task.style.progress || {}),
-            }}
-            bold
-          >
-            {task.progress}
-          </ETCaption3>
+          {Boolean(task.progress) && (
+            <ETCaption3
+              sx={{
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+
+                ...(task.style.progress || {}),
+              }}
+              bold
+            >
+              {task.progress}
+            </ETCaption3>
+          )}
         </div>
       </Tooltip>
     </div>

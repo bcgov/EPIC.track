@@ -3,19 +3,14 @@ import { ETCaption3 } from "components/shared";
 import { dayWidth, rowHeight, maxSectionHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
+import { useGanttContext } from "./GanttContext";
 
 type TimeScaleProps = {
-  start: Date;
-  end: Date;
-  sectionHeight?: number;
-  children?: React.ReactNode;
+  children: React.ReactNode;
 };
-export const TimeScale = ({
-  start,
-  end,
-  sectionHeight = maxSectionHeight,
-  children = null,
-}: TimeScaleProps) => {
+export const TimeScale = ({ children }: TimeScaleProps) => {
+  const { start, end, sectionHeight } = useGanttContext();
+
   const monthsInfo = useMemo(() => {
     const months = [];
     const startDate = moment(start);
@@ -63,6 +58,7 @@ export const TimeScale = ({
         display: "flex",
         flexDirection: "row",
         backgroundColor: Palette.neutral.bg.light,
+        zIndex: 3,
       }}
     >
       <div>
@@ -73,7 +69,7 @@ export const TimeScale = ({
             height: rowHeight,
             position: "sticky",
             top: 0,
-            zIndex: 2,
+            zIndex: 3,
           }}
         >
           {yearsInfo.map((year) => (
@@ -100,6 +96,8 @@ export const TimeScale = ({
             top: rowHeight,
             backgroundColor: Palette.neutral.bg.light,
             zIndex: 2,
+            // add box shadow only to the bottom of the months
+            boxShadow: "rgba(0, 0, 0, 0.2) 0px 3px 3px -3px",
           }}
         >
           {monthsInfo.map((month) => {

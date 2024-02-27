@@ -47,12 +47,12 @@ const schema = yup.object().shape({
 });
 
 const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
-  const [staffWorkRole, setStaffWorkRole] = React.useState<StaffWorkRole>();
   const [staff, setStaff] = React.useState<Staff[]>([]);
   const [roles, setRoles] = React.useState<ListType[]>([]);
   const emailRef = React.useRef(null);
   const phoneRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
+  const staffWorkRole = ctx.selectedStaff;
 
   React.useEffect(() => {
     getAllStaff();
@@ -84,7 +84,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       const result = await workService.getWorkTeamMember(Number(workStaffId));
       if (result.status === 200) {
         const staff = result.data as StaffWorkRole;
-        setStaffWorkRole(staff);
+        ctx.setSelectedStaff(staff);
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {

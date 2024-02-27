@@ -330,7 +330,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .scalar()
         )
         if not work_staff:
-            raise ResourceExistsError("No work staff association found")
+            raise ResourceNotFoundError("No work staff association found")
         return work_staff
 
     @classmethod
@@ -619,7 +619,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             mapped_column = note_type_mapping.get(note_type)
             if mapped_column is None:
                 raise ResourceExistsError(
-                    f"No work note type {note_type}  nation association found"
+                    f"No work note type {note_type} nation association found"
                 )
             setattr(work, mapped_column, notes)
 
@@ -699,7 +699,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-
+        print(":" * 100)
+        print(first_nations)
+        print(":" * 100)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 

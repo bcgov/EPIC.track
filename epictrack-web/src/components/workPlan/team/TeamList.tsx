@@ -28,7 +28,7 @@ const TeamList = () => {
   const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
   const teamMembers = useMemo(() => ctx.team, [ctx.team]);
-
+  const staff = ctx.selectedStaff?.staff;
   const { email, roles: givenUserAuthRoles } = useAppSelector(
     (state) => state.user.userDetail
   );
@@ -145,6 +145,7 @@ const TeamList = () => {
 
   const onCancelHandler = () => {
     setShowTeamForm(false);
+    ctx.setSelectedStaff(undefined);
     setWorkStaffId(undefined);
   };
 
@@ -230,11 +231,11 @@ const TeamList = () => {
       )}
       <TrackDialog
         open={showTeamForm}
-        dialogTitle={workStaffId ? "Update Team Member" : "Add Team Member"}
+        dialogTitle={staff ? `${staff.full_name}` : "Add Team Member"}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
-        okButtonText={workStaffId ? "Update" : "Add"}
+        okButtonText={workStaffId ? "Save" : "Add"}
         formId="team-form"
         onCancel={() => onCancelHandler()}
         isActionsRequired

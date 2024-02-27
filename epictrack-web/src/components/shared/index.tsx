@@ -177,9 +177,8 @@ export const ETParagraph = React.forwardRef(
     { bold, color, children, sx, ...rest }: HeaderProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
-    // const classes = useStyle();
     return (
-      <div ref={ref} {...rest}>
+      <div ref={ref}>
         <Tooltip
           title={rest.tooltip as string}
           disableHoverListener={!rest.enableTooltip}
@@ -195,6 +194,7 @@ export const ETParagraph = React.forwardRef(
               ...(rest.enableEllipsis && useStyle.textEllipsis),
             }}
             variant="body1"
+            {...rest}
           >
             {children}
           </Typography>

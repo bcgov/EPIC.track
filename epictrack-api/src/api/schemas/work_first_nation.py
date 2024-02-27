@@ -19,7 +19,7 @@ class WorkFirstNationSchema(Schema):
 
     def get_consultation_level(self, instance: IndigenousWork) -> str:
         """Return relationship holder name of first nation"""
-        return instance.indigenous_nation.indigenous_consultation_level.name
+        return instance.indigenous_consultation_level.name
 
     def get_relationship_holder(self, instance: IndigenousWork) -> str:
         """Return relationship holder name of first nation"""
