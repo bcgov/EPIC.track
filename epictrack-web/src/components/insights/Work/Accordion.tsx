@@ -36,6 +36,7 @@ const WorkAccordion = () => {
         </Grid>
       </InsightsAccordionDetails>
       <InsightsAccordionCollapsableDetails sx={{ marginTop: "1em" }}>
+        // TODO: This is a placeholder for the actual content
         <ETParagraph>
           The Work Dashboard is a visualization of every in progress EAO Work.
           It is a tool that allows EAO to track the progress of ongoing work,
