@@ -141,6 +141,10 @@ const TrackDialog: FC<TrackDialogProps> = ({
               sx={{
                 minWidth: "124px",
                 marginRight: externalSubmitButtonUsed ? "140px" : "",
+                "&:focus": {
+                  backgroundColor: Palette.primary.main,
+                  color: Palette.neutral.bg.light,
+                },
               }}
             >
               {cancelButtonText || "Cancel"}
@@ -150,6 +154,9 @@ const TrackDialog: FC<TrackDialogProps> = ({
             <Button
               sx={{
                 minWidth: "124px",
+                "&:focus": {
+                  backgroundColor: Palette.primary.light,
+                },
               }}
               onClick={formId ? undefined : onOk}
               autoFocus
