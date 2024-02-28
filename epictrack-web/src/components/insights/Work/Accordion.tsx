@@ -6,14 +6,12 @@ import {
   InsightsAccordionSummary,
 } from "../InsightsAccordion";
 import { ETCaption3, ETParagraph } from "components/shared";
-import { ButtonGroup, Grid, Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import ButtonBar from "./ButtonBar";
-import WorkByTeam from "./Tabs/Staff/Charts/WorkByTeam";
-import Staff from "./Tabs/Staff";
 import WorkInsightsTabs from "./Tabs";
 
 const WorkAccordion = () => {
-  const [expanded, setExpanded] = React.useState(true);
+  const [expanded, setExpanded] = React.useState(false);
   return (
     <InsightsAccordion
       expanded={expanded}
@@ -35,15 +33,6 @@ const WorkAccordion = () => {
           </Grid>
         </Grid>
       </InsightsAccordionDetails>
-      <InsightsAccordionCollapsableDetails sx={{ marginTop: "1em" }}>
-        // TODO: This is a placeholder for the actual content
-        <ETParagraph>
-          The Work Dashboard is a visualization of every in progress EAO Work.
-          It is a tool that allows EAO to track the progress of ongoing work,
-          and to identify where resources may need to be shifted to meet
-          deadlines.
-        </ETParagraph>
-      </InsightsAccordionCollapsableDetails>
     </InsightsAccordion>
   );
 };
