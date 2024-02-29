@@ -1,7 +1,5 @@
 """Contains all insight generator related resources"""
 
-from typing import Dict
-
 from api.insights.insight_protocol import InsightGenerator
 from api.insights.work_lead_insight import WorkLeadInsightGenerator
 from api.insights.work_team_insight import WorkTeamInsightGenerator

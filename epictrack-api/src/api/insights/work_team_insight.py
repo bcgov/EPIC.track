@@ -45,6 +45,7 @@ class WorkTeamInsightGenerator:
                 EAOTeam.id.label("eao_team_id"),
                 partition_query.c.count.label("work_count"),
             )
+            .order_by(partition_query.c.count.desc())
             .all()
         )
         return self._format_data(team_insights)

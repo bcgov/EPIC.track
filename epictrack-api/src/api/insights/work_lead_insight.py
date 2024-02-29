@@ -19,7 +19,7 @@ class WorkLeadInsightGenerator:
         """Generates the group by subquery."""
         partition_query = (
             db.session.query(
-                SpecialField.work_lead_id,
+                Work.work_lead_id,
                 func.count()
                 .over(order_by=Work.work_lead_id, partition_by=Work.work_lead_id)
                 .label("count"),
@@ -46,6 +46,7 @@ class WorkLeadInsightGenerator:
                 Staff.id.label("work_lead_id"),
                 partition_query.c.count.label("work_count"),
             )
+            .order_by(partition_query.c.count.desc())
             .all()
         )
         return self._format_data(lead_insights)
