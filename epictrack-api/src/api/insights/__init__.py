@@ -2,6 +2,7 @@
 
 from api.insights.insight_protocol import InsightGenerator
 from api.insights.work_lead_insight import WorkLeadInsightGenerator
+from api.insights.work_staff_insight import WorkStaffInsightGenerator
 from api.insights.work_team_insight import WorkTeamInsightGenerator
 
 
@@ -11,6 +12,7 @@ def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
         "works": {
             "team": WorkTeamInsightGenerator,
             "lead": WorkLeadInsightGenerator,
+            "staff": WorkStaffInsightGenerator
         }
     }
 
