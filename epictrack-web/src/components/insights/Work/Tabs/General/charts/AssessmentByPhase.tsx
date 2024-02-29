@@ -2,14 +2,13 @@ import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+import { getChartColor } from "components/insights/utils";
 
 const AssessmentByPhase = () => {
   const data = [
     { name: "EAO Assessment Intake", value: 21 },
     { name: "Early Engagement", value: 1 },
   ];
-
-  const COLORS = ["#4F81BD", "#C0504D"];
 
   return (
     <GrayBox>
@@ -33,12 +32,10 @@ const AssessmentByPhase = () => {
               fill="#8884d8"
               dataKey="value"
               label
+              isAnimationActive={false}
             >
               {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+                <Cell key={`cell-${index}`} fill={getChartColor(index)} />
               ))}
             </Pie>
             <Legend
@@ -50,6 +47,7 @@ const AssessmentByPhase = () => {
                 fontSize: "16px",
               }}
             />
+            <Tooltip />
           </PieChart>
         </Grid>
       </Grid>

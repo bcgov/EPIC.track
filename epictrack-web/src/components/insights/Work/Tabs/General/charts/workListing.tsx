@@ -34,12 +34,11 @@ const WorkList = () => {
       setWorks(response.data);
       setLoadingWorks(false);
     } catch (error) {
-      //   showNotification("Could not load works", { type: "error" });
+      showNotification("Could not load works", { type: "error" });
     }
   };
 
   useEffect(() => {
-    console.log("loading works");
     loadWorks();
   }, []);
 
@@ -244,6 +243,7 @@ const WorkList = () => {
         isLoading: loadingWorks,
         showGlobalFilter: true,
       }}
+      enablePagination
     />
   );
 };

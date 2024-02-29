@@ -2,6 +2,7 @@ import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+import { getChartColor } from "components/insights/utils";
 
 const WorkByType = () => {
   const data = [
@@ -12,7 +13,6 @@ const WorkByType = () => {
     { name: "Exemption Order", value: 1 },
   ];
 
-  const COLORS = ["#4F81BD", "#C0504D", "#8064A2", "#4BACC6", "#9BBB59"];
   return (
     <GrayBox>
       <Grid container spacing={1}>
@@ -34,12 +34,10 @@ const WorkByType = () => {
               fill="#8884d8"
               dataKey="value"
               label
+              isAnimationActive={false}
             >
               {data.map((entry, index) => (
-                <Cell
-                  key={`cell-${index}`}
-                  fill={COLORS[index % COLORS.length]}
-                />
+                <Cell key={`cell-${index}`} fill={getChartColor(index)} />
               ))}
             </Pie>
             <Legend
@@ -51,6 +49,7 @@ const WorkByType = () => {
                 fontSize: "16px",
               }}
             />
+            <Tooltip />
           </PieChart>
         </Grid>
       </Grid>
