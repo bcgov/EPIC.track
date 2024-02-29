@@ -8,12 +8,9 @@ class InsightGenerator(Protocol):
 
     def generate_partition_query(self):
         """Generates the group by subquery."""
-        ...
 
     def fetch_data(self) -> List[dict]:
         """Fetch data from db"""
-        ...
 
     def _format_data(self, data: List) -> List[dict]:
         """Format data to the response format"""
-        ...

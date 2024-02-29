@@ -11,6 +11,7 @@ from api.models.staff import Staff
 from api.models.work import Work
 
 
+# pylint: disable=not-callable
 class WorkLeadInsightGenerator:
     """Insight generator for work resource grouped by work lead"""
 

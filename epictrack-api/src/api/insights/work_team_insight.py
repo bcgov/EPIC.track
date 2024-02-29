@@ -10,6 +10,7 @@ from api.models.eao_team import EAOTeam
 from api.models.work import Work
 
 
+# pylint: disable=not-callable
 class WorkTeamInsightGenerator:
     """Insight generator for work resource grouped by EAO team"""
 
