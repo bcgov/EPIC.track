@@ -94,7 +94,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(Region, Region.id == Project.region_id_env)
             .join(EAAct, EAAct.id == Work.ea_act_id)
             .join(Ministry)
-            .join(latest_status_updates, latest_status_updates.c.work_id == Work.id)
+            .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
             .outerjoin(eac_decision_by, Work.eac_decision_by)
             .outerjoin(decision_by, Work.decision_by)
             .outerjoin(SubstitutionAct)
