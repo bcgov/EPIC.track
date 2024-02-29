@@ -1,7 +1,10 @@
 """Contains all insight generator related resources"""
 
 from api.insights.insight_protocol import InsightGenerator
+from api.insights.work_federal_involvement_insght import WorkFederalInvolvementInsightGenerator
+from api.insights.work_first_nation_insght import WorkFirstNationInsightGenerator
 from api.insights.work_lead_insight import WorkLeadInsightGenerator
+from api.insights.work_ministry_insght import WorkMinistryInsightGenerator
 from api.insights.work_staff_insight import WorkStaffInsightGenerator
 from api.insights.work_team_insight import WorkTeamInsightGenerator
 
@@ -12,7 +15,10 @@ def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
         "works": {
             "team": WorkTeamInsightGenerator,
             "lead": WorkLeadInsightGenerator,
-            "staff": WorkStaffInsightGenerator
+            "staff": WorkStaffInsightGenerator,
+            "ministry": WorkMinistryInsightGenerator,
+            "federal_involvement": WorkFederalInvolvementInsightGenerator,
+            "first_nation": WorkFirstNationInsightGenerator,
         }
     }
 
