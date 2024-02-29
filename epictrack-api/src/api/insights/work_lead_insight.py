@@ -6,7 +6,6 @@ from typing import List
 from sqlalchemy import func
 
 from api.models import db
-from api.models.special_field import SpecialField
 from api.models.staff import Staff
 from api.models.work import Work
 
