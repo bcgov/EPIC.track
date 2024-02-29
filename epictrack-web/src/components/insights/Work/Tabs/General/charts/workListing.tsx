@@ -30,7 +30,8 @@ const WorkList = () => {
   const loadWorks = async () => {
     setLoadingWorks(true);
     try {
-      const response = await workService.getAll();
+      const isActive = true;
+      const response = await workService.getAll(isActive);
       setWorks(response.data);
       setLoadingWorks(false);
     } catch (error) {

@@ -96,7 +96,9 @@ class Works(Resource):
     @profiletime
     def get():
         """Return all active works."""
-        works = WorkService.find_all_works()
+        args = request.args
+        is_active = args.get("is_active", False, bool)
+        works = WorkService.find_all_works(is_active)
         return jsonify(res.WorkResponseSchema(many=True).dump(works)), HTTPStatus.OK
 
     @staticmethod

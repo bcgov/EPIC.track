@@ -67,9 +67,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return Work.check_existence(title=title, work_id=work_id)
 
     @classmethod
-    def find_all_works(cls):
+    def find_all_works(cls, default_filters=False):
         """Find all non-deleted works"""
-        works = Work.find_all(default_filters=False)
+        works = Work.find_all(default_filters)
         return works
 
     @classmethod
