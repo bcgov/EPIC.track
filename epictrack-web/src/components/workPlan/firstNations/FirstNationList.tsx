@@ -463,9 +463,11 @@ const FirstNationList = () => {
           onAddNewClickHandler={() => onAddButtonClickHandler()}
           importButtonText="Import Nations"
           onImportClickHandler={() => setShowImportNationForm(true)}
-          isImportDisabled={!firstNationAvailable}
-          buttonProps={{
+          addButtonProps={{
             disabled: !canCreate,
+          }}
+          importButtonProps={{
+            disabled: !firstNationAvailable || !canCreate,
           }}
         />
       )}
