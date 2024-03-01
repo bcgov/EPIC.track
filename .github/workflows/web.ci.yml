@@ -63,10 +63,10 @@ jobs:
         run: |
           npm install --legacy-peer-deps
 
-      # - name: Test with jest
-      #   id: test
-      #   run: |
-      #     npm test -- --coverage
+      - name: Test with Cypress
+        id: test
+        run: |
+          npx cypress run --component --headless --browser chrome
 
       # # Set codecov branch name with prefix if pull request
       # - name: Sets Codecov branch name
