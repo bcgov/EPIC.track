@@ -1,17 +1,47 @@
-import React from "react";
-import { Grid } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Grid, Skeleton } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
+import { getWorkByType } from "services/insightService";
+import { PieChartData } from "models/insights";
+import PieChartSkeleton from "./PieChartSkeleton";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
 const WorkByType = () => {
-  const data = [
-    { name: "Assessment", value: 22 },
-    { name: "Amendment", value: 13 },
-    { name: "Minister's Designation", value: 3 },
-    { name: "Project Notification", value: 1 },
-    { name: "Exemption Order", value: 1 },
-  ];
+  const [chartData, setChartData] = useState<PieChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const response = await getWorkByType();
+      if (response) {
+        const data = response.data.map((item) => {
+          return {
+            name: item.work_type,
+            value: item.count,
+          };
+        });
+        setChartData(data);
+        setLoading(false);
+      }
+    } catch (error) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (loading) {
+    return <PieChartSkeleton />;
+  }
 
   return (
     <GrayBox>
@@ -27,7 +57,7 @@ const WorkByType = () => {
         <Grid item xs={12} container justifyContent={"center"}>
           <PieChart width={500} height={300}>
             <Pie
-              data={data}
+              data={chartData}
               cx="50%"
               cy="50%"
               outerRadius={80}
@@ -36,7 +66,7 @@ const WorkByType = () => {
               label
               isAnimationActive={false}
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getChartColor(index)} />
               ))}
             </Pie>

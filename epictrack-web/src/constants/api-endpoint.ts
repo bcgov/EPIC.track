@@ -128,5 +128,9 @@ const Endpoints = {
   PIPOrgTypes: {
     GET_ALL: "/pip-org-types",
   },
+  Insights: {
+    WORK_BY_TYPE: "/insights/works?group_by=type",
+    ASSESSMENT_BY_PHASE: "/insights/works?group_by=assessment_by_phase",
+  },
 };
 export default Endpoints;

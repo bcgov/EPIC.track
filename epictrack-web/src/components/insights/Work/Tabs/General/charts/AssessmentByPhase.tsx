@@ -1,14 +1,48 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
+import { PieChartData } from "models/insights";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import { getAssessmentByPhase } from "services/insightService";
+import PieChartSkeleton from "./PieChartSkeleton";
 
 const AssessmentByPhase = () => {
-  const data = [
-    { name: "EAO Assessment Intake", value: 21 },
-    { name: "Early Engagement", value: 1 },
-  ];
+  const [chartData, setChartData] = useState<PieChartData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const response = await getAssessmentByPhase();
+      if (response) {
+        console.log(response.data);
+        const data = response.data.map((item) => {
+          return {
+            name: item.phase,
+            value: item.count,
+          };
+        });
+        setChartData(data);
+        setLoading(false);
+      }
+    } catch (error) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  if (loading) {
+    return <PieChartSkeleton />;
+  }
 
   return (
     <GrayBox>
@@ -25,7 +59,7 @@ const AssessmentByPhase = () => {
         <Grid item xs={12} container justifyContent={"center"}>
           <PieChart width={500} height={300}>
             <Pie
-              data={data}
+              data={chartData}
               cx="50%"
               cy="50%"
               outerRadius={80}
@@ -34,7 +68,7 @@ const AssessmentByPhase = () => {
               label
               isAnimationActive={false}
             >
-              {data.map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={getChartColor(index)} />
               ))}
             </Pie>
