@@ -28,7 +28,11 @@ const TrackDatePicker: React.FC<TrackDatePickerProps> = ({
           textField: {
             fullWidth: true,
             placeholder: placeholder ?? DATE_FORMAT,
-            onKeyDown: (e) => e.preventDefault(),
+            onKeyDown: (e) => {
+              if (e.key !== "Tab") {
+                e.preventDefault();
+              }
+            },
             onBlur: (e) => {
               if (rest.onBlur) {
                 rest.onBlur(e);
