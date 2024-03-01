@@ -1,10 +1,10 @@
 """Contains all insight generator related resources"""
 
 from api.insights.insight_protocol import InsightGenerator
-from api.insights.work_federal_involvement_insght import WorkFederalInvolvementInsightGenerator
-from api.insights.work_first_nation_insght import WorkFirstNationInsightGenerator
+from api.insights.work_federal_involvement_insight import WorkFederalInvolvementInsightGenerator
+from api.insights.work_first_nation_insight import WorkFirstNationInsightGenerator
 from api.insights.work_lead_insight import WorkLeadInsightGenerator
-from api.insights.work_ministry_insght import WorkMinistryInsightGenerator
+from api.insights.work_ministry_insight import WorkMinistryInsightGenerator
 from api.insights.work_staff_insight import WorkStaffInsightGenerator
 from api.insights.work_team_insight import WorkTeamInsightGenerator
 
