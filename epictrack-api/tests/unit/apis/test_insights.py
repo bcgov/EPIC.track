@@ -16,7 +16,7 @@
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-# from tests.utilities.factory_scenarios import TestWorkInfo
+from tests.utilities.factory_scenarios import TestWorkInfo
 from tests.utilities.factory_utils import factory_work_first_nation_model, factory_work_model
 from tests.utilities.helpers import prepare_work_payload
 
@@ -103,32 +103,32 @@ def test_get_works_by_first_nation(client, auth_header):
     assert first_nation_insight["count"] == 1
 
 
-# def test_get_works_by_type(client, auth_header):
-#     """Test get works grouped by work type."""
-#     work = factory_work_model()
-#     url = urljoin(API_BASE_URL, "insights/works?group_by=type")
-#     result = client.get(url, headers=auth_header)
-#     assert result.status_code == HTTPStatus.OK
-#     assert len(result.json) == 1
-#     type_insight = result.json[0]
-#     assert type_insight["work_type_id"] == work.work_type_id
-#     assert type_insight["count"] == 1
+def test_get_works_by_type(client, auth_header):
+    """Test get works grouped by work type."""
+    work = factory_work_model()
+    url = urljoin(API_BASE_URL, "insights/works?group_by=type")
+    result = client.get(url, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert len(result.json) == 1
+    type_insight = result.json[0]
+    assert type_insight["work_type_id"] == work.work_type_id
+    assert type_insight["count"] == 1
 
 
-# def test_get_assessment_works_by_phase(client, auth_header):
-#     """Test get assessment works grouped by phase."""
-#     # Create work
-#     payload = prepare_work_payload(TestWorkInfo.assessment_work.value)
+def test_get_assessment_works_by_phase(client, auth_header):
+    """Test get assessment works grouped by phase."""
+    # Create work
+    payload = prepare_work_payload(TestWorkInfo.assessment_work.value)
 
-#     # Create the work
-#     url = urljoin(API_BASE_URL, "works")
-#     work_response = client.post(url, json=payload, headers=auth_header)
-#     work_response_json = work_response.json
+    # Create the work
+    url = urljoin(API_BASE_URL, "works")
+    work_response = client.post(url, json=payload, headers=auth_header)
+    work_response_json = work_response.json
 
-#     url = urljoin(API_BASE_URL, "insights/works/assessment?group_by=phase")
-#     result = client.get(url, headers=auth_header)
-#     assert result.status_code == HTTPStatus.OK
-#     assert len(result.json) == 1
-#     assessment_insight = result.json[0]
-#     assert assessment_insight["count"] == 1
-#     assert work_response_json["current_work_phase"]["phase_id"] == assessment_insight["phase_id"]
+    url = urljoin(API_BASE_URL, "insights/works/assessment?group_by=phase")
+    result = client.get(url, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert len(result.json) == 1
+    assessment_insight = result.json[0]
+    assert assessment_insight["count"] == 1
+    assert work_response_json["current_work_phase"]["phase_id"] == assessment_insight["phase_id"]
