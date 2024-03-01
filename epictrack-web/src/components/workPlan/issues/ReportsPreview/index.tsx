@@ -27,16 +27,14 @@ export const ReportsPreview = () => {
       <Grid item xs={12}>
         <Stack direction={{ lg: "row", xs: "column" }} spacing={2}>
           <TabButton
-            tabIndex={TAB.THIRTY_SIXTY_NINETY}
-            selectedTabIndex={selectedTabIndex}
-            setSelectedTabIndex={setSelectedTabIndex}
+            active={selectedTabIndex === TAB.THIRTY_SIXTY_NINETY}
+            onClick={() => setSelectedTabIndex(TAB.THIRTY_SIXTY_NINETY)}
           >
             30-60-90
           </TabButton>
           <TabButton
-            tabIndex={TAB.REFERRAL_SCHEDULE}
-            selectedTabIndex={selectedTabIndex}
-            setSelectedTabIndex={setSelectedTabIndex}
+            active={selectedTabIndex === TAB.REFERRAL_SCHEDULE}
+            onClick={() => setSelectedTabIndex(TAB.REFERRAL_SCHEDULE)}
           >
             Referral Schedule
           </TabButton>
