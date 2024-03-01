@@ -45,6 +45,7 @@ const WorkList = () => {
     try {
       const response = await workService.getAll();
       setWorks(response.data);
+      console.log("RESPONSE:::" + response.data);
       setLoadingWorks(false);
     } catch (error) {
       showNotification("Could not load works", { type: "error" });
@@ -368,6 +369,7 @@ const WorkList = () => {
         workId={workId}
         open={showWorkDialogForm}
         setOpen={setShowWorkDialogForm}
+        saveWorkCallback={loadWorks}
       />
     </>
   );

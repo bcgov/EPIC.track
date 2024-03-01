@@ -1,7 +1,7 @@
 import WorkForm from "..";
 import { faker } from "@faker-js/faker";
 
-const generateFakePosition = () => {
+export const generateFakePosition = () => {
   return {
     email: faker.internet.email(),
     first_name: faker.person.firstName(),
@@ -20,14 +20,14 @@ const generateFakePosition = () => {
   };
 };
 
-const mockWorkType = {
+export const mockWorkType = {
   id: faker.number.int(),
   name: faker.lorem.word(),
   report_title: faker.lorem.lines(1),
   sort_order: faker.number.int(),
 };
 
-const mockProject = {
+export const mockProject = {
   id: faker.number.int(),
   name: faker.lorem.word(),
 };
