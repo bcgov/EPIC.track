@@ -21,7 +21,7 @@ const TrackDatePicker: React.FC<TrackDatePickerProps> = ({
   const { textField: textFieldProps, ...restSlotProps } = slotProps || {};
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DatePicker
+      {/* <DatePicker
         views={["year", "month", "day"]}
         format={DATE_FORMAT}
         slotProps={{
@@ -40,7 +40,7 @@ const TrackDatePicker: React.FC<TrackDatePickerProps> = ({
         }}
         sx={{ display: "block" }}
         {...rest}
-      />
+      /> */}
     </LocalizationProvider>
   );
 };
