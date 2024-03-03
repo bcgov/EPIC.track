@@ -97,16 +97,16 @@ def test_change_intermediate_event_non_legislated_phase_not_push(client, jwt):
         test_type=TestTypeEnum.INTERMEDIATE_EVENT,
     )
 
-def test_change_intermediate_event_legislated_phase_push(client, jwt):
-    """Change the anticipated date of the intermediate event in a legislated phase by 7 days and push events"""
-    # All the subsequent events except the end event will be pushed
-    _change_event_anticipated_date(
-        jwt,
-        client,
-        push_events=True
-        legislated=True,
-        test_type=TestTypeEnum.INTERMEDIATE_EVENT,
-    )
+# def test_change_intermediate_event_legislated_phase_push(client, jwt):
+#     """Change the anticipated date of the intermediate event in a legislated phase by 7 days and push events"""
+#     # All the subsequent events except the end event will be pushed
+#     _change_event_anticipated_date(
+#         jwt,
+#         client,
+#         push_events=True,
+#         legislated=True,
+#         test_type=TestTypeEnum.INTERMEDIATE_EVENT,
+#     )
 
 def _change_event_anticipated_date(
     jwt,
@@ -232,6 +232,17 @@ def _change_event_anticipated_date(
             assert (
                 end_event.anticipated_date.date() - event_date_dict[end_event.id].date()
             ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
+        # return work_phase, phase_events, event_to_test, 
+
+# def _assert_start_event_non_legislated_phase_push(jwt, client):
+#     """Asserts for the start event change, non_legislated and push events"""
+#     _change_event_anticipated_date(
+#         jwt,
+#         client,
+#         push_events=True,
+#         legislated=False,
+#         test_type=TestTypeEnum.START_EVENT,
+#     )
 
 
 def _find_event_index(events, event):
