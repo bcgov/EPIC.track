@@ -51,7 +51,7 @@ class TestTypeEnum(enum.Enum):
 # def test_change_date_start_event_non_legislated_phase_push(client, jwt):
 #     """Change the date of start event in a non-legislated phase by 7 days and choose to push subsequent events"""
 #     # If you change the anticipated date of the start event in a non-legislated phase, the number of days will
-#    be added
+#     # be added
 #     # to all the events in the current phase as well as all the subsequent phase
 #     _change_event_anticipated_date(jwt, client, push_events=True)
 
@@ -130,8 +130,12 @@ def _change_event_anticipated_date(
     # Create an assessment work. This will create all the events
     # event_configuration, outcome_configuration and action_configurations
     work_data = _set_up_work_object()
-    work = WorkService.create_work(work_data)
-    work_phases = WorkPhase.find_by_params({"work_id": work.id})
+    url = urljoin(API_BASE_URL, "works")
+    work_response = client.post(url, json=work_data, headers=headers)
+    work_response_json = work_response.json
+    print(work_response_json)
+    work_id = work_response_json["id"]
+    work_phases = WorkPhase.find_by_params({"work_id": work_id})
     # first work phase in the assessment would be non-legislated and second is legislated
     # according to the ea act 2018
     work_phase_id_to_test = work_phases[0].id if not legislated else work_phases[1].id
@@ -140,10 +144,10 @@ def _change_event_anticipated_date(
     work_phase_start_date = work_phase.start_date
     work_phase_end_date = work_phase.end_date
 
-    assert work is not None
+    assert work_id is not None
     # Act
     phase_events = EventService.find_events(
-        work_id=work.id, work_phase_id=work_phase_id_to_test
+        work_id=work_id, work_phase_id=work_phase_id_to_test
     )
     # Storing the anticipated dates of all events for the purpose of validating it after
     # the date change

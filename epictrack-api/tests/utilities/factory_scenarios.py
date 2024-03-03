@@ -58,6 +58,7 @@ class TestWorkInfo(Enum):
 
     work1 = {
         "title": fake.word(),
+        "simple_title": "",
         "report_description": fake.sentence(),
         "epic_description": fake.paragraph(),
         "is_active": True,
@@ -76,10 +77,11 @@ class TestWorkInfo(Enum):
 
     assessment_work = {
         "title": f"{fake.word()}-Assessment",
+        "simple_title": "",
         "report_description": fake.sentence(),
         "epic_description": fake.paragraph(),
         "is_active": True,
-        "start_date": datetime.strptime("2024-01-01T00:00:00-08:00", "%Y-%m-%dT%H:%M:%S%z"),
+        "start_date": "2024-01-01T00:00:00-08:00",
         "project_id": 1,
         "ministry_id": 1,
         "ea_act_id": 3,

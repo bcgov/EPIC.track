@@ -48,8 +48,10 @@ def test_create_special_field(client, auth_header):
     payload["entity_id"] = entity_obj.id
 
     # Scenario 1: Valid payload
+    print(payload)
     response = client.post(url, json=payload, headers=auth_header)
     response_json = response.json
+    print(response_json)
     assert response.status_code == HTTPStatus.CREATED
     assert "id" in response_json
     assert payload["entity_id"] == response_json["entity_id"]
