@@ -1,4 +1,4 @@
-import React, { createContext, useMemo } from "react";
+import React, { createContext, useMemo, useRef } from "react";
 import { GanttItem, GanttRow } from "./types";
 import moment from "moment";
 import { barHeight, maxSectionHeight } from "./constants";
@@ -12,6 +12,7 @@ interface GanttContextProps {
   isLoadingMore?: boolean;
   totalRows?: number;
   onLazyLoad?: () => void;
+  ganttChartRef?: React.RefObject<HTMLDivElement> | null;
 }
 
 export const GanttContext = createContext<GanttContextProps>({
@@ -25,6 +26,7 @@ export const GanttContext = createContext<GanttContextProps>({
     return;
   },
   isLoadingMore: false,
+  ganttChartRef: null,
 });
 
 type GanttProviderProps = {
@@ -44,6 +46,7 @@ export const GanttProvider = ({
   isLoadingMore,
 }: GanttProviderProps) => {
   const tasks = useMemo(() => rows.map((row) => row.tasks).flat(), [rows]);
+  const ganttChartRef = useRef<HTMLDivElement>(null);
 
   const start = useMemo(() => {
     const earliestStart = tasks.reduce(
@@ -77,6 +80,7 @@ export const GanttProvider = ({
       totalRows,
       onLazyLoad,
       isLoadingMore,
+      ganttChartRef,
     }),
     [
       start,
@@ -87,6 +91,7 @@ export const GanttProvider = ({
       totalRows,
       onLazyLoad,
       isLoadingMore,
+      ganttChartRef,
     ]
   );
   return (

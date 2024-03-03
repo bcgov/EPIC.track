@@ -89,7 +89,8 @@ class TestWorkInfo(Enum):
         "work_lead_id": 30,
         "work_type_id": ASSESSMENT_WORK_TYPE,
         "substitution_act_id": 1,
-        "decision_by_id": 171
+        "decision_by_id": 171,
+        "simple_title": fake.word()
     }
 
 
@@ -224,4 +225,38 @@ class TestSpecialField(Enum):
         "field_name": "name",
         "field_value": fake.word(),
         "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
+    }
+
+
+class TestRoleEnum(Enum):
+    """Test scenarios for roles"""
+
+    RESPONSIBLE_EPD = 1
+    TEAM_LEAD = 2
+    OFFICER_ANALYST = 3
+    FN_CAIRT = 4
+    OTHER = 5
+
+
+class TestWorkFirstNationEnum(Enum):
+    """Test scenarios for work first nation"""
+
+    work_first_nation1 = {
+        "indigenous_category_id": fake.random_int(min=1, max=8),
+        "indigenous_consultation_level_id": fake.random_int(min=1, max=4),
+        "is_active": True
+    }
+
+
+class TestWorkNotesEnum(Enum):
+    """Test scenarios for work notes"""
+
+    work_notes1 = {
+        "notes": fake.sentence(),
+        "note_type": "status_notes"
+    }
+
+    work_notes2 = {
+        "notes": fake.sentence(),
+        "note_type": "issue_notes"
     }

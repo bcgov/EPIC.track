@@ -6,7 +6,8 @@ import { Palette } from "styles/theme";
 import TaskListSkeleton from "./TaskListSkeleton";
 import { useGanttContext } from "./GanttContext";
 import TriggerOnViewed from "components/shared/DummyElement";
-import { Tooltip } from "@mui/material";
+import { Link as MuiLink, Tooltip } from "@mui/material";
+import { Link } from "react-router-dom";
 
 const TaskList = () => {
   const { rows } = useGanttContext();
@@ -40,7 +41,6 @@ const TaskList = () => {
           top: 0,
           zIndex: 2,
           backgroundColor: Palette.neutral.bg.light,
-          // add a box shadow to the bottom of the div
           boxShadow: "rgba(0, 0, 0, 0.2) 0px 3px 3px -3px",
         }}
       >
@@ -72,7 +72,9 @@ const TaskList = () => {
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   width: 0.8 * taskListWidth,
+                  cursor: row.onClick ? "pointer" : "default",
                 }}
+                onClick={row.onClick}
               >
                 {row.name}
               </ETParagraph>
