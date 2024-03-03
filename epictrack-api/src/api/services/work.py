@@ -234,6 +234,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
         work = work.flush()
         cls.create_special_fields(work)
+        print(type(work.start_date))
+        print(work.start_date)
         phase_start_date = work.start_date
         sort_order = 1
         for phase in phases:
