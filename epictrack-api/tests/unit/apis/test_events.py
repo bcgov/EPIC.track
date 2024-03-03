@@ -50,9 +50,11 @@ class TestTypeEnum(enum.Enum):
 
 # def test_change_date_start_event_non_legislated_phase_push(client, jwt):
 #     """Change the date of start event in a non-legislated phase by 7 days and choose to push subsequent events"""
-#     # If you change the anticipated date of the start event in a non-legislated phase, the number of days will be added
+#     # If you change the anticipated date of the start event in a non-legislated phase, the number of days will
+#    be added
 #     # to all the events in the current phase as well as all the subsequent phase
 #     _change_event_anticipated_date(jwt, client, push_events=True)
+
 
 def test_change_date_start_event_non_legislated_phase_not_push(client, jwt):
     """Change the date of start event in a non-legislated phase by 7 days and choose not to push subsequent events"""
@@ -60,22 +62,26 @@ def test_change_date_start_event_non_legislated_phase_not_push(client, jwt):
     # push the subsequent event Only the currrent event will be changed
     _change_event_anticipated_date(jwt, client, push_events=False)
 
+
 # def test_change_date_start_event_legislated_phase_push(client, jwt):
 #     """Change the date of start event in a legislated phase by 7 days and choose to push subsequent events"""
-#     # Change the aniticipated date of the start event in a legislated phase, then choose to push the subsequent events
+#     # Change the aniticipated date of the start event in a legislated phase, then choose to push the subsequent
+#     events
 #     # all the events will be pushed till the end event in the last phase
 #     _change_event_anticipated_date(jwt, client, push_events=True, legislated=True)
 
 # def test_change_date_start_event_legislated_phase_not_push(client, jwt):
 #     """Change the date of start event in a legislated phase by 7 days and choose not to push subsequent events"""
-#     # Change the aniticipated date of the start event in a legislated phaes, then choose to push the subsequent events
+#     # Change the aniticipated date of the start event in a legislated phaes, then choose to push the subsequent
+#     events
 #     # Only the current event and the end event will be changed
 #     _change_event_anticipated_date(
 #         jwt, client, push_events=False, legislated=True
 #     )
 
 # def test_change_intermediate_event_non_legislated_phase_push(client, jwt):
-#     """Change the date of the intermediate event in a legislated phase by 7 days and chosee to push subsequent events"""
+#     """Change the date of the intermediate event in a legislated phase by 7 days and chosee to push subsequent
+#     events"""
 #     # All the subsequent events plus the current event date should be pushed by the number of days to be pushed
 #     # since it is a non-legislated phase, the date push will continue all the way over to the end phase end event
 #     _change_event_anticipated_date(
@@ -87,7 +93,8 @@ def test_change_date_start_event_non_legislated_phase_not_push(client, jwt):
 #     )
 
 # def test_change_intermediate_event_non_legislated_phase_not_push(client, jwt):
-#     """Change the anticipated date of the intermediate event in a nonlegislated phase by 7 days and choose not to push events"""
+#     """Change the anticipated date of the intermediate event in a nonlegislated phase by 7 days and choose not
+#      to push events"""
 #     # Only the current event will change no other events will change
 #     _change_event_anticipated_date(
 #         jwt,
@@ -107,6 +114,7 @@ def test_change_date_start_event_non_legislated_phase_not_push(client, jwt):
 #         legislated=True,
 #         test_type=TestTypeEnum.INTERMEDIATE_EVENT,
 #     )
+
 
 def _change_event_anticipated_date(
     jwt,
@@ -174,9 +182,7 @@ def _change_event_anticipated_date(
         API_BASE_URL,
         f"milestones/events/{event_to_test.id}?push_events={push_events}",
     )
-    result_update_event = client.put(
-        url_event_update, headers=headers, json=event_data
-    )
+    result_update_event = client.put(url_event_update, headers=headers, json=event_data)
     # Assert
     assert result_update_event.status_code == HTTPStatus.OK
     # WorkPhase start date will change when start_event anticipated date changed
@@ -232,7 +238,8 @@ def _change_event_anticipated_date(
             assert (
                 end_event.anticipated_date.date() - event_date_dict[end_event.id].date()
             ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
-        # return work_phase, phase_events, event_to_test, 
+        # return work_phase, phase_events, event_to_test,
+
 
 # def _assert_start_event_non_legislated_phase_push(jwt, client):
 #     """Asserts for the start event change, non_legislated and push events"""

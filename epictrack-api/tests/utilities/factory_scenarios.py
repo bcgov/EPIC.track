@@ -131,6 +131,14 @@ class TestWorkIssuesInfo(Enum):
     }
 
 
+class TestWorkNotesEnum(Enum):
+    """Test scenarios for work notes"""
+
+    work_notes1 = {"notes": fake.sentence(), "note_type": "status_notes"}
+
+    work_notes2 = {"notes": fake.sentence(), "note_type": "issue_notes"}
+
+
 class TestStatus(Enum):
     """Test scenarios of WorkStatus."""
 
@@ -225,6 +233,7 @@ class TestSpecialField(Enum):
         "field_value": fake.word(),
         "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
     }
+
 
 class TestRoleEnum(Enum):
     """Test scenarios for roles"""
