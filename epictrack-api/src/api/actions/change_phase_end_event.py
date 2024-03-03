@@ -5,9 +5,8 @@ from api.actions.base import ActionFactory
 from api.models import Event, EventConfiguration, PhaseCode, WorkPhase, db
 from api.models.event_configuration import EventPositionEnum
 from api.models.phase_code import PhaseVisibilityEnum
-from api.models.work_phase import WorkPhase
-from .set_events_status import SetEventsStatus
 from api.utils import util
+from .set_events_status import SetEventsStatus
 
 
 class ChangePhaseEndEvent(ActionFactory):
@@ -15,7 +14,7 @@ class ChangePhaseEndEvent(ActionFactory):
 
     def run(self, source_event: Event, params) -> None:
         """Change the phase end event to another one"""
-        from api.services.event import EventService
+        from api.services.event import EventService  # pylint: disable=import-outside-toplevel
 
         work_phase = self.get_additional_params(source_event, params)
         current_end_event_config = (

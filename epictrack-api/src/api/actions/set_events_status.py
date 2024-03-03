@@ -1,4 +1,5 @@
 """Set events status action handler"""
+
 from api.actions.base import ActionFactory
 from api.models import db, PRIMARY_CATEGORIES
 from api.models.event import Event
@@ -27,7 +28,9 @@ class SetEventsStatus(ActionFactory):
                 source_event.event_configuration.work_phase_id,
                 PRIMARY_CATEGORIES,
             )
-            event_index = EventService.find_event_index(events, source_event, source_event.event_configuration.work_phase)
+            event_index = EventService.find_event_index(
+                events, source_event, source_event.event_configuration.work_phase
+            )
             events_to_be_updated = events[(event_index + 1):]
             for event in events_to_be_updated:
                 event_configuration_ids.append(event.event_configuration_id)
