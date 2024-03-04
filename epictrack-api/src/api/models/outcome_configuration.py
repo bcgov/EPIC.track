@@ -27,9 +27,11 @@ class OutcomeConfiguration(BaseModelVersioned):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     event_configuration_id = Column(ForeignKey('event_configurations.id'), nullable=False)
+    outcome_template_id = Column(ForeignKey('outcome_templates.id'), nullable=True)
     sort_order = Column(Integer, nullable=False)
 
     event_configuration = relationship('EventConfiguration', foreign_keys=[event_configuration_id], lazy='select')
+    outcome_template = relationship('OutcomeTemplate', foreign_keys=[outcome_template_id])
 
     @classmethod
     def find_by_configuration_ids(cls, configuration_ids):

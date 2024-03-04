@@ -57,7 +57,7 @@ def test_get_works_by_staff(client, auth_header):
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=payload, headers=auth_header)
     work_response_json = work_response.json
-
+    print(work_response_json)
     url = urljoin(API_BASE_URL, "insights/works?group_by=staff")
     result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
@@ -124,7 +124,6 @@ def test_get_assessment_works_by_phase(client, auth_header):
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=payload, headers=auth_header)
     work_response_json = work_response.json
-
     url = urljoin(API_BASE_URL, "insights/works/assessment?group_by=phase")
     result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
