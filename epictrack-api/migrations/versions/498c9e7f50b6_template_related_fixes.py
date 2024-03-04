@@ -118,7 +118,8 @@ def upgrade():
                 for action_config in action_configurations:
                     matched_action_template = next(iter([action for action in action_templates if action.sort_order == action_config.sort_order]), None)
                     if matched_action_template:
-                        op.execute(f"UPDATE action_configurations SET additional_params='{json.dumps(matched_action_template.additional_params)}', action_template_id={matched_action_template.id} WHERE id = {action_config.id}")
+                        additional_params = json.dumps(matched_action_template.additional_params).replace("'", "''")
+                        op.execute(f"UPDATE action_configurations SET additional_params='{additional_params}', action_template_id={matched_action_template.id} WHERE id = {action_config.id}")
                     else:
                         print(f"Action configuration Id {action_config.id}")
                         print(f"Event configuration Id {config.id}")
