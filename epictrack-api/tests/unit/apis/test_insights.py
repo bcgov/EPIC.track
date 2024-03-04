@@ -17,7 +17,7 @@ from http import HTTPStatus
 from urllib.parse import urljoin
 
 from tests.utilities.factory_scenarios import TestWorkInfo
-from tests.utilities.factory_utils import factory_work_first_nation_model, factory_work_model
+from tests.utilities.factory_utils import factory_project_model, factory_work_first_nation_model, factory_work_model
 from tests.utilities.helpers import prepare_work_payload
 
 
@@ -132,3 +132,39 @@ def test_get_assessment_works_by_phase(client, auth_header):
     assessment_insight = result.json[0]
     assert assessment_insight["count"] == 1
     assert work_response_json["current_work_phase"]["phase_id"] == assessment_insight["phase_id"]
+
+
+def test_get_projects_by_region(client, auth_header):
+    """Test get projects grouped by ENV regions."""
+    project = factory_project_model()
+    url = urljoin(API_BASE_URL, "insights/projects?group_by=region")
+    result = client.get(url, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert len(result.json) == 1
+    project_insight = result.json[0]
+    assert project_insight["region_id"] == project.region_id_env
+    assert project_insight["count"] == 1
+
+
+def test_get_projects_by_type(client, auth_header):
+    """Test get projects grouped by type."""
+    project = factory_project_model()
+    url = urljoin(API_BASE_URL, "insights/projects?group_by=type")
+    result = client.get(url, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert len(result.json) == 1
+    project_insight = result.json[0]
+    assert project_insight["type_id"] == project.type_id
+    assert project_insight["count"] == 1
+
+
+def test_get_projects_by_subtype(client, auth_header):
+    """Test get projects grouped by subtype."""
+    project = factory_project_model()
+    url = urljoin(API_BASE_URL, f"insights/projects?type_id={project.type_id}&group_by=subtype")
+    result = client.get(url, headers=auth_header)
+    assert result.status_code == HTTPStatus.OK
+    assert len(result.json) == 1
+    project_insight = result.json[0]
+    assert project_insight["sub_type_id"] == project.sub_type_id
+    assert project_insight["count"] == 1
