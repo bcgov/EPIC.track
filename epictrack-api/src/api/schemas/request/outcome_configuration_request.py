@@ -40,6 +40,10 @@ class OutcomeConfigurationBodyParameterSchema(RequestBodyParameterSchema):
         required=True
     )
 
+    outcome_template_id = fields.Int(
+        metadata={"description": "Template id correspnding to the configuration"}
+    )
+
     sort_order = fields.Int(
         metadata={"description": "Sort order of the event template item"}
     )

@@ -27,10 +27,11 @@ const tabPanel: SxProps = {
 };
 const WorkPlanContainer = () => {
   const location = useLocation();
-  const { tabIndex } = location.state;
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(
-    tabIndex ?? WORKPLAN_TAB_INDEX.WORKPLAN
-  );
+
+  const tabIndex = location.state?.tabIndex ?? WORKPLAN_TAB_INDEX.WORKPLAN;
+
+  const [selectedTabIndex, setSelectedTabIndex] = React.useState(tabIndex);
+
   const ctx = useContext(WorkplanContext);
 
   const activeStaff = ctx.team.filter(

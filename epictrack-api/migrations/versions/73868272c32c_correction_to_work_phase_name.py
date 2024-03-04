@@ -52,20 +52,21 @@ def upgrade():
                 event_configuration_table.c.work_phase_id.in_(work_phases),
             )
         )
-        event_query = f"SELECT id FROM event_configurations WHERE work_phase_id in ({','.join([str(phase) for phase in work_phases])})"
-        event_configurations = conn.execute(sa.text(event_query)).scalars().all()
-        events = tables["events"]
-        replace_func = sa.func.regexp_replace(
-            events.c.name, "Assessment", "Amendment"
-        )
-        op.execute(
-            events.update()
-            .values({events.c.name: replace_func})
-            .where(
-                events.c.name.ilike(r"%assessment%"),
-                events.c.event_configuration_id.in_(event_configurations),
+        if len(work_phases) > 0:
+            event_query = f"SELECT id FROM event_configurations WHERE work_phase_id in ({','.join([str(phase) for phase in work_phases])})"
+            event_configurations = conn.execute(sa.text(event_query)).scalars().all()
+            events = tables["events"]
+            replace_func = sa.func.regexp_replace(
+                events.c.name, "Assessment", "Amendment"
             )
-        )
+            op.execute(
+                events.update()
+                .values({events.c.name: replace_func})
+                .where(
+                    events.c.name.ilike(r"%assessment%"),
+                    events.c.event_configuration_id.in_(event_configurations),
+                )
+            )
     # ### end Alembic commands ###
 
 

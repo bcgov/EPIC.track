@@ -1,29 +1,28 @@
 import React from "react";
-import { Button } from "@mui/material";
+import { Button, ButtonProps } from "@mui/material";
 import { Palette } from "styles/theme";
 
-type TabButtonProps = {
-  children: React.ReactNode;
-  tabIndex: number;
-  selectedTabIndex: number;
-  setSelectedTabIndex: (index: number) => void;
+type TabButtonProps = ButtonProps & {
+  active?: boolean;
 };
-
 const TabButton: React.FC<TabButtonProps> = ({
   children,
-  tabIndex,
-  selectedTabIndex,
-  setSelectedTabIndex,
+  active = true,
+  ...rest
 }) => (
   <Button
     variant="outlined"
-    onClick={() => setSelectedTabIndex(tabIndex)}
-    sx={{
-      backgroundColor:
-        selectedTabIndex === tabIndex ? Palette.primary.main : Palette.white,
-      color:
-        selectedTabIndex === tabIndex ? Palette.white : Palette.primary.main,
-    }}
+    sx={[
+      active && {
+        backgroundColor: Palette.primary.main,
+        color: Palette.white,
+      },
+      !active && {
+        backgroundColor: Palette.white,
+        color: Palette.primary.main,
+      },
+    ]}
+    {...rest}
   >
     {children}
   </Button>

@@ -34,6 +34,7 @@ from .event_template import API as EVENT_TEMPLATE_API
 from .federal_involvement import API as FEDERAL_INVOLVEMENT_API
 from .indigenous_consultation_level import API as INDIGENOUS_CONSULTATION_LEVEL_API
 from .indigenous_nation import API as INDIGENOUS_NATION_API
+from .insights import API as INSIGHTS_API
 from .inspection import API as INSPECTION_API
 from .lookup_data_generator import API as LOOKUP_API
 from .meta import API as META_API
@@ -136,3 +137,4 @@ API.add_namespace(FEDERAL_INVOLVEMENT_API, path='/federal-involvements')
 API.add_namespace(ROLES_API, path='/roles')
 API.add_namespace(SUBSTITUTION_ACTS_API, path='/substitution-acts')
 API.add_namespace(PIP_ORG_TYPES_API, path='/pip-org-types')
+API.add_namespace(INSIGHTS_API, path='/insights')
