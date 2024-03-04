@@ -35,7 +35,7 @@ const IssuesView = () => {
             subTitle="Start adding your Issues"
             addNewButtonText="Add Issue"
             onAddNewClickHandler={() => setCreateIssueFormIsOpen(true)}
-            buttonProps={{
+            addButtonProps={{
               disabled: !canCreate && !isTeamMember,
             }}
           />

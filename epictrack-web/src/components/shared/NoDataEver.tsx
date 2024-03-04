@@ -18,7 +18,8 @@ interface NoDataEverProps {
   importButtonText?: string;
   onImportClickHandler?: () => void;
   isImportDisabled?: boolean;
-  buttonProps?: ButtonProps;
+  addButtonProps?: ButtonProps;
+  importButtonProps?: ButtonProps;
 }
 
 const NoDataEver = ({
@@ -30,98 +31,98 @@ const NoDataEver = ({
   importButtonText,
   onImportClickHandler,
   isImportDisabled,
-  buttonProps = {},
+  addButtonProps = {},
+  importButtonProps = {},
 }: NoDataEverProps) => {
-  const { sx: buttonSx = {} } = buttonProps;
+  const { sx: buttonSx = {} } = addButtonProps;
 
   return (
-    <>
-      <Container
+    <Container
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "400px",
+      }}
+    >
+      <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
+          gap: "2rem",
           alignItems: "center",
-          justifyContent: "center",
-          minHeight: "400px",
         }}
       >
         <Box
           sx={{
+            padding: "0.5rem",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: "4px",
+            backgroundColor: Palette.neutral.bg.light,
+            width: "64px",
+          }}
+          component="img"
+          src={FolderIcon}
+          alt="Search"
+          width="32px"
+        />
+        <Box
+          sx={{
             display: "flex",
             flexDirection: "column",
-            gap: "2rem",
+            gap: "1rem",
             alignItems: "center",
           }}
         >
-          <Box
+          <ETHeading2
+            bold
             sx={{
-              padding: "0.5rem",
-              justifyContent: "center",
-              alignItems: "center",
-              borderRadius: "4px",
-              backgroundColor: Palette.neutral.bg.light,
-              width: "64px",
-            }}
-            component="img"
-            src={FolderIcon}
-            alt="Search"
-            width="32px"
-          />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-              alignItems: "center",
+              color: Palette.neutral.accent.dark,
+              lineHeight: "2.25rem",
             }}
           >
-            <ETHeading2
-              bold
+            {title}
+          </ETHeading2>
+          <ETHeading3
+            sx={{
+              color: Palette.neutral.main,
+              lineHeight: "2rem",
+            }}
+          >
+            {subTitle}
+          </ETHeading3>
+          <Box sx={{ display: "flex", gap: "1.5rem" }}>
+            <Button
               sx={{
-                color: Palette.neutral.accent.dark,
-                lineHeight: "2.25rem",
+                mt: "3rem",
+                ...buttonSx,
               }}
+              variant="contained"
+              startIcon={<AddIcon />}
+              onClick={onAddNewClickHandler}
+              {...addButtonProps}
             >
-              {title}
-            </ETHeading2>
-            <ETHeading3
-              sx={{
-                color: Palette.neutral.main,
-                lineHeight: "2rem",
-              }}
-            >
-              {subTitle}
-            </ETHeading3>
-            <Box sx={{ display: "flex", gap: "1.5rem" }}>
+              {addNewButtonText}
+            </Button>
+            {isImportRequired && (
               <Button
                 sx={{
                   mt: "3rem",
-                  ...buttonSx,
                 }}
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={onAddNewClickHandler}
-                {...buttonProps}
+                variant="outlined"
+                startIcon={<ImportFileIcon fill="currentcolor" />}
+                onClick={onImportClickHandler}
+                disabled={isImportDisabled}
+                {...importButtonProps}
               >
-                {addNewButtonText}
+                {importButtonText}
               </Button>
-              {isImportRequired && (
-                <Button
-                  sx={{
-                    mt: "3rem",
-                  }}
-                  variant="outlined"
-                  startIcon={<ImportFileIcon fill="currentcolor" />}
-                  onClick={onImportClickHandler}
-                  disabled={isImportDisabled}
-                >
-                  {importButtonText}
-                </Button>
-              )}
-            </Box>
+            )}
           </Box>
         </Box>
-      </Container>
-    </>
+      </Box>
+    </Container>
   );
 };
 

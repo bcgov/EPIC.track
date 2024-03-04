@@ -40,6 +40,11 @@ const TeamList = () => {
     userIsTeamMember ||
     hasPermission({ roles: givenUserAuthRoles, allowed: [ROLES.EDIT] });
 
+  const canCreate = hasPermission({
+    roles: givenUserAuthRoles,
+    allowed: [ROLES.CREATE],
+  });
+
   React.useEffect(() => {
     setLoading(ctx.loading);
   }, []);
@@ -227,6 +232,9 @@ const TeamList = () => {
           subTitle="Start adding your Team"
           addNewButtonText="Team Member"
           onAddNewClickHandler={() => onAddButtonClickHandler()}
+          addButtonProps={{
+            disabled: !canCreate,
+          }}
         />
       )}
       <TrackDialog
