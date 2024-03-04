@@ -217,6 +217,7 @@ export default function AnticipatedEAOSchedule() {
                     square
                     disableGutters
                     defaultExpanded
+                    expanded
                     elevation={0}
                   >
                     <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
