@@ -5,7 +5,6 @@ import {
   SPECIAL_FIELDS,
 } from "../../../constants/application-constant";
 
-
 describe("SpecialFieldGrid Component Tests", () => {
   beforeEach(() => {
     cy.mount(
