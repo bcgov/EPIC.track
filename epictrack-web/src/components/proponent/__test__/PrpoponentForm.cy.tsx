@@ -40,7 +40,7 @@ const endpoints = [
   {
     name: "getPipOrgTypes",
     method: "GET",
-    url: "http://localhost:3200/api/v1/pip-org-types",
+    url: "http://localhost:3200/api/v1/codes/pip_org_types",
     body: [],
   },
   {

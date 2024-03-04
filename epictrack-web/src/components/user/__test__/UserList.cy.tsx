@@ -37,46 +37,35 @@ const users = [user1, user2];
 
 const endpoints = [
   {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
-  },
-  {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
-  },
-  {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/first_nations",
-  },
-  {
+    name: "getStaffs",
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?is_active=false",
     body: { data: mockStaffs },
   },
   {
+    name: "getPipOrgTypes",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/pip_org_types",
     body: [],
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: "http://localhost:3200/api/v1/first_nations",
     body: [],
   },
   {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/users/groups",
-  },
-  {
+    name: "getUsers",
     method: "GET",
     url: "http://localhost:3200/api/v1/users",
-    body: { data: users },
+    response: { body: users },
   },
   {
+    name: "getGroups",
     method: "GET",
     url: "http://localhost:3200/api/v1/users/groups",
-    body: {
-      data: [user1.group, user2.group],
+    response: {
+      body: [user1.group, user2.group],
     },
   },
 ];

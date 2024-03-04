@@ -5,18 +5,9 @@ import {
   SPECIAL_FIELDS,
 } from "../../../constants/application-constant";
 
-import { setupIntercepts } from "../../../../cypress/support/utils";
-
-const endpoints = [
-  {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/special-fields?entity=PROJECT&entity_id=1&field_name=name",
-  },
-];
 
 describe("SpecialFieldGrid Component Tests", () => {
   beforeEach(() => {
-    setupIntercepts(endpoints);
     cy.mount(
       <SpecialFieldGrid
         entity={SpecialFieldEntityEnum.PROJECT}

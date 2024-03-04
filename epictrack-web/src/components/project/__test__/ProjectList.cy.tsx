@@ -5,6 +5,8 @@ import {
   createMockMasterContext,
   generateMockProject,
 } from "../../../../cypress/support/common";
+import { setupIntercepts } from "../../../../cypress/support/utils";
+import { SnackbarProvider } from "notistack";
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
@@ -24,17 +26,30 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
     });
 }
 
+const endpoints = [
+  {
+    name: "getProjectsAll",
+    method: "GET",
+    url: "http://localhost:3200/api/v1/projects",
+    response: { body: projects },
+  },
+];
+
 describe("ProjectList", () => {
   beforeEach(() => {
     // This assumes you have a route set up for your projects in your commands.js
+    setupIntercepts(endpoints);
+
     cy.mount(
-      <Router>
-        <MasterContext.Provider
-          value={createMockMasterContext(projects, projects)}
-        >
-          <ProjectList />
-        </MasterContext.Provider>
-      </Router>
+      <SnackbarProvider maxSnack={3}>
+        <Router>
+          <MasterContext.Provider
+            value={createMockMasterContext(projects, projects)}
+          >
+            <ProjectList />
+          </MasterContext.Provider>
+        </Router>
+      </SnackbarProvider>
     );
   });
 

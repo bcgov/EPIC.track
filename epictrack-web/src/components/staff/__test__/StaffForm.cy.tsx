@@ -9,25 +9,19 @@ import { setupIntercepts } from "../../../../cypress/support/utils";
 
 const endpoints = [
   {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
-  },
-  {
-    method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
-  },
-  { method: "OPTIONS", url: "http://localhost:3200/api/v1/first_nations" },
-  {
+    name: "getStaffs",
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?is_active=false",
     body: { data: mockStaffs },
   },
   {
+    name: "getPipOrgTypes",
     method: "GET",
     url: "http://localhost:3200/api/v1/codes/pip_org_types",
     body: [],
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: "http://localhost:3200/api/v1/first_nations",
     body: [],

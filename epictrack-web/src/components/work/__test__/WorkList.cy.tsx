@@ -266,9 +266,7 @@ const endpoints = [
     name: "getWorks",
     method: "GET",
     url: "http://localhost:3200/api/v1/works",
-    response: {
-      body: { data: works },
-    },
+    response: { body: works },
   },
 ];
 describe("WorkList", () => {

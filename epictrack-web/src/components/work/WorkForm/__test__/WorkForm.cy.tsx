@@ -173,7 +173,7 @@ const endpoints = [
     },
   },
   {
-    name: "checkWorkExists ",
+    name: "checkWorkExists",
     method: "GET",
     url: "http://localhost:3200/api/v1/works/exists*",
     response: {
