@@ -35,20 +35,21 @@ class SpecialFieldService:  # pylint:disable=too-few-public-methods
         return SpecialField.find_by_params(args)
 
     @classmethod
-    def create_special_field_entry(cls, payload: dict):
+    def create_special_field_entry(cls, payload: dict, commit: bool = True):
         """Create special field entry"""
         upper_limit = cls._get_upper_limit(payload)
         payload["time_range"] = DateTimeTZRange(
             payload.pop("active_from"), upper_limit, bounds="[)"
         )
         special_field = SpecialField(**payload)
-        special_field.save()
+        special_field.flush()
         cls._update_original_model(special_field)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return special_field
 
     @classmethod
-    def update_special_field_entry(cls, special_field_id: int, payload: dict):
+    def update_special_field_entry(cls, special_field_id: int, payload: dict, commit: bool = True):
         """Create special field entry"""
         special_field = SpecialField.find_by_id(special_field_id)
         upper_limit = cls._get_upper_limit(payload, special_field_id)
@@ -60,9 +61,10 @@ class SpecialFieldService:  # pylint:disable=too-few-public-methods
         payload["time_range"] = Range(
             payload.pop("active_from"), upper_limit, bounds="[)"
         )
-        special_field = special_field.update(payload)
+        special_field = special_field.update(payload, commit=commit)
         cls._update_original_model(special_field)
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return special_field
 
     @classmethod

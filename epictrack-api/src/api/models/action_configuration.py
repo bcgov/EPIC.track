@@ -27,11 +27,13 @@ class ActionConfiguration(BaseModelVersioned):
     id = Column(Integer, primary_key=True, autoincrement=True)
     outcome_configuration_id = Column(ForeignKey('outcome_configurations.id'), nullable=False)
     action_id = Column(ForeignKey('actions.id'), nullable=False)
+    action_template_id = Column(ForeignKey('action_templates.id'), nullable=True)
     additional_params = Column(JSONB)
     sort_order = Column(Integer, nullable=False)
 
     outcome_configuration = relationship('OutcomeConfiguration', foreign_keys=[outcome_configuration_id], lazy='select')
     action = relationship('Action', foreign_keys=[action_id], lazy='select')
+    action_template = relationship('ActionTemplate', foreign_keys=[action_template_id])
 
     @classmethod
     def find_by_outcome_ids(cls, outcome_ids):

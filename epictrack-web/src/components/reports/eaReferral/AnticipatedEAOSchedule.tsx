@@ -32,6 +32,7 @@ import { dateUtils } from "../../../utils";
 import moment from "moment";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
+import { Palette } from "styles/theme";
 
 export default function AnticipatedEAOSchedule() {
   const [reports, setReports] = React.useState({});
@@ -112,22 +113,23 @@ export default function AnticipatedEAOSchedule() {
   };
 
   const staleLevel = React.useCallback((date: string) => {
-    const dateObj = moment(date);
-    const diff = dateObj.diff(moment(), "days");
-    if (diff >= 0) {
+    if (date === null || date === undefined)
       return {
-        backgroundColor: "rgba(19, 129, 10, 0.1)",
-        color: "rgba(19, 129, 10)",
+        background: Palette.error.main,
       };
-    } else if (diff === -1) {
+    const date_updated = moment(date);
+    const diff = moment().diff(date_updated, "days");
+    if (diff > 10) {
       return {
-        backgroundColor: "rgba(240, 134, 11, 0.1)",
-        color: "rgba(240, 134, 11)",
+        background: Palette.error.main,
+      };
+    } else if (diff >= 6) {
+      return {
+        background: Palette.secondary.main,
       };
     } else {
       return {
-        backgroundColor: "rgba(213, 4, 4, 0.1)",
-        color: "rgba(213, 4, 4)",
+        background: Palette.success.main,
       };
     }
   }, []);
@@ -237,10 +239,12 @@ export default function AnticipatedEAOSchedule() {
                                   label={
                                     <>
                                       <b>
-                                        {dateUtils.formatDate(
-                                          item["date_updated"],
-                                          DISPLAY_DATE_FORMAT
-                                        )}
+                                        {item["date_updated"]
+                                          ? dateUtils.formatDate(
+                                              item["date_updated"],
+                                              DISPLAY_DATE_FORMAT
+                                            )
+                                          : "Needs Status"}
                                       </b>
                                     </>
                                   }
@@ -328,10 +332,12 @@ export default function AnticipatedEAOSchedule() {
                                     <TableRow>
                                       <TableCell>Updated Date</TableCell>
                                       <TableCell>
-                                        {dateUtils.formatDate(
-                                          item["date_updated"],
-                                          DISPLAY_DATE_FORMAT
-                                        )}
+                                        {item["date_updated"]
+                                          ? dateUtils.formatDate(
+                                              item["date_updated"],
+                                              DISPLAY_DATE_FORMAT
+                                            )
+                                          : ""}
                                       </TableCell>
                                     </TableRow>
                                     {item["next_pecp_date"] && (

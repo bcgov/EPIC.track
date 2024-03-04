@@ -20,6 +20,7 @@ import { ROLES } from "../constants/application-constant";
 import AuthGate from "./AuthGate";
 import Unauthorized from "./Unauthorized";
 import MyWorkPlans from "../components/myWorkplans";
+import Insights from "components/insights";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -79,7 +80,7 @@ const AuthenticatedRoutes = () => {
       </Route>
       <Route path="/admin/users" element={<UserList />} />
       <Route path="/" element={<MyWorkPlans />} />
-      <Route path="/insights" element={<ComingSoon />} />
+      <Route path="/insights" element={<Insights />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

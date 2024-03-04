@@ -89,7 +89,8 @@ class TestWorkInfo(Enum):
         "work_lead_id": 30,
         "work_type_id": ASSESSMENT_WORK_TYPE,
         "substitution_act_id": 1,
-        "decision_by_id": 171
+        "decision_by_id": 171,
+        "simple_title": fake.word()
     }
 
 
