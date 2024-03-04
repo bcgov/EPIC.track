@@ -5,12 +5,11 @@ import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Work } from "../../models/work";
-import { ListType } from "../../models/code";
 import { WorkType } from "../../models/workType";
 
 class WorkService implements ServiceBase {
-  async getAll() {
-    return await http.GetRequest<Work[]>(Endpoints.Works.WORKS);
+  async getAll(is_active = false) {
+    return await http.GetRequest<Work[]>(Endpoints.Works.WORKS, { is_active });
   }
 
   async create(data: MasterBase) {
