@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
-import { Button, Grid, Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { ThirtySixtyNinety } from "./ThirtySixtyNinety";
 import { ReferralSchedule } from "./ReferralSchedule";
 import { PreviewSkeleton } from "./PreviewSkeleton";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import TabPanel from "../../../../shared/tab/TabPanel";
-import { Palette } from "styles/theme";
+import TabButton from "components/shared/TabButton";
 
 const TAB = {
   THIRTY_SIXTY_NINETY: 0,
@@ -41,38 +41,18 @@ export const ReportsPreview = () => {
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <Stack direction={{ lg: "row", xs: "column" }} spacing={2}>
-          <Button
-            variant="outlined"
+          <TabButton
+            active={selectedTabIndex === TAB.THIRTY_SIXTY_NINETY}
             onClick={() => setSelectedTabIndex(TAB.THIRTY_SIXTY_NINETY)}
-            sx={{
-              backgroundColor:
-                selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
-                  ? Palette.primary.main
-                  : Palette.white,
-              color:
-                selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
-                  ? Palette.white
-                  : Palette.primary.main,
-            }}
           >
             30-60-90
-          </Button>
-          <Button
-            variant="outlined"
+          </TabButton>
+          <TabButton
+            active={selectedTabIndex === TAB.REFERRAL_SCHEDULE}
             onClick={() => setSelectedTabIndex(TAB.REFERRAL_SCHEDULE)}
-            sx={{
-              backgroundColor:
-                selectedTabIndex === TAB.REFERRAL_SCHEDULE
-                  ? Palette.primary.main
-                  : Palette.white,
-              color:
-                selectedTabIndex === TAB.REFERRAL_SCHEDULE
-                  ? Palette.white
-                  : Palette.primary.main,
-            }}
           >
             Referral Schedule
-          </Button>
+          </TabButton>
         </Stack>
       </Grid>
 

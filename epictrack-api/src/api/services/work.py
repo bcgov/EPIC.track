@@ -23,10 +23,29 @@ from flask import current_app
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
-from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
+from api.exceptions import (
+    ResourceExistsError,
+    ResourceNotFoundError,
+    UnprocessableEntityError,
+)
 from api.models import (
-    ActionConfiguration, ActionTemplate, CalendarEvent, EAOTeam, Event, EventConfiguration, OutcomeConfiguration,
-    Project, Role, Staff, StaffWorkRole, Work, WorkCalendarEvent, WorkPhase, WorkStateEnum, db)
+    ActionConfiguration,
+    ActionTemplate,
+    CalendarEvent,
+    EAOTeam,
+    Event,
+    EventConfiguration,
+    OutcomeConfiguration,
+    Project,
+    Role,
+    Staff,
+    StaffWorkRole,
+    Work,
+    WorkCalendarEvent,
+    WorkPhase,
+    WorkStateEnum,
+    db,
+)
 from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
@@ -37,10 +56,19 @@ from api.models.phase_code import PhaseVisibilityEnum
 from api.models.special_field import EntityEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
-from api.schemas.request import ActionConfigurationBodyParameterSchema, OutcomeConfigurationBodyParameterSchema
+from api.schemas.request import (
+    ActionConfigurationBodyParameterSchema,
+    OutcomeConfigurationBodyParameterSchema,
+)
 from api.schemas.response import (
-    ActionTemplateResponseSchema, EventTemplateResponseSchema, OutcomeTemplateResponseSchema,
-    StaffWorkRoleResponseSchema, WorkPhaseAdditionalInfoResponseSchema, WorkResponseSchema, WorkStatusResponseSchema)
+    ActionTemplateResponseSchema,
+    EventTemplateResponseSchema,
+    OutcomeTemplateResponseSchema,
+    StaffWorkRoleResponseSchema,
+    WorkPhaseAdditionalInfoResponseSchema,
+    WorkResponseSchema,
+    WorkStatusResponseSchema,
+)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.schemas.work_type import WorkTypeSchema
@@ -54,7 +82,8 @@ from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
-from api.utils.roles import Membership, Role as KeycloakRole
+from api.utils.roles import Membership
+from api.utils.roles import Role as KeycloakRole
 
 
 class WorkService:  # pylint: disable=too-many-public-methods
@@ -66,15 +95,16 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return Work.check_existence(title=title, work_id=work_id)
 
     @classmethod
-    def find_all_works(cls):
+    def find_all_works(cls, default_filters=False):
         """Find all non-deleted works"""
-        works = Work.find_all(default_filters=False)
+        works = Work.find_all(default_filters)
         return works
 
     @classmethod
     def fetch_all_work_plans(
-        cls, pagination_options: PaginationOptions,
-        search_options: WorkplanDashboardSearchOptions
+        cls,
+        pagination_options: PaginationOptions,
+        search_options: WorkplanDashboardSearchOptions,
     ):
         """Fetch all workplans"""
         works, total = Work.fetch_all_works(pagination_options, search_options)
@@ -114,7 +144,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "title",
                 "simple_title",
                 "is_active",
-                "project.name"
+                "project.name",
             )
         ).dump(work)
         if work_phase and len(work_phase) > 0:
@@ -129,7 +159,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "work_phase.start_date",
                     "work_phase.end_date",
                 ),
-                many=True
+                many=True,
             ).dump(work_phase)
 
             serialized_work["phase_info"] = serialised_phase
@@ -180,11 +210,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .all()
         )
         for work in works:
-            staffs = list(
-                filter(
-                    lambda x, _work_id=work["id"]: x.work_id == _work_id, staff_result
-                )
-            )
+            staffs = [staff for staff in staff_result if staff.work_id == work["id"]]
             work["staff"] = staffs
         return works
 
@@ -195,7 +221,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if cls.check_existence(payload["title"]):
             raise ResourceExistsError("Work with same title already exists")
         work = Work(**payload)
-        cls.create_special_fields(work)
         work.work_state = WorkStateEnum.IN_PROGRESS
         phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
             work.ea_act_id, work.work_type_id
@@ -208,6 +233,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             event_templates
         )
         work = work.flush()
+        cls.create_special_fields(work)
+        print(type(work.start_date))
+        print(work.start_date)
         phase_start_date = work.start_date
         sort_order = 1
         for phase in phases:
@@ -223,12 +251,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "sort_order": sort_order,
                 "visibility": phase.visibility,
             }
-            phase_event_templates = list(
-                filter(
-                    lambda x, _phase_id=phase.id: x["phase_id"] == _phase_id,
-                    event_template_json,
-                )
-            )
+            phase_event_templates = [
+                template
+                for template in event_template_json
+                if template["phase_id"] == phase.id
+            ]
             work_phase_id = cls.create_events_by_template(
                 work_phase, phase_event_templates
             )
@@ -237,6 +264,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             if sort_order == 1:
                 work.current_work_phase_id = work_phase_id
             sort_order = sort_order + 1
+        # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
         role_id = (
             CodeService.find_code_values_by_type("roles", {"name": "Team Lead"})
             .get("codes")[0]
@@ -257,27 +285,30 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def create_special_fields(cls, work: Work):
         """Create work special fields"""
-        work.flush()
         work_epd_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
             "field_name": "responsible_epd_id",
             "field_value": work.responsible_epd_id,
-            "active_from": work.created_at
+            "active_from": work.created_at,
         }
         work_team_lead_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
             "field_name": "work_lead_id",
             "field_value": work.work_lead_id,
-            "active_from": work.created_at
+            "active_from": work.created_at,
         }
 
-        SpecialFieldService.create_special_field_entry(work_epd_special_field_data)
-        SpecialFieldService.create_special_field_entry(work_team_lead_special_field_data)
+        SpecialFieldService.create_special_field_entry(
+            work_epd_special_field_data, commit=False
+        )
+        SpecialFieldService.create_special_field_entry(
+            work_team_lead_special_field_data, commit=False
+        )
 
     @classmethod
-    def find_staff(cls, work_id: int, is_active) -> [Staff]:
+    def find_staff(cls, work_id: int, is_active) -> List[Staff]:
         """Active staff assigned on a work"""
         query = (
             db.session.query(StaffWorkRole)
@@ -329,7 +360,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .scalar()
         )
         if not work_staff:
-            raise ResourceExistsError("No work staff association found")
+            raise ResourceNotFoundError("No work staff association found")
         return work_staff
 
     @classmethod
@@ -375,7 +406,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return work_staff
 
     @classmethod
-    def update_work_staff(cls, work_staff_id: int, data: dict) -> StaffWorkRole:
+    def update_work_staff(
+        cls, work_staff_id: int, data: dict, commit: bool = True
+    ) -> StaffWorkRole:
         """Update work staff"""
         work_staff = (
             db.session.query(StaffWorkRole)
@@ -394,7 +427,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work_staff.is_active = data.get("is_active")
         work_staff.role_id = data.get("role_id")
         work_staff.flush()
-        db.session.commit()
+        if commit:
+            db.session.commit()
         return work_staff
 
     @classmethod
@@ -415,20 +449,32 @@ class WorkService:  # pylint: disable=too-many-public-methods
         for outcome in outcomes:
             outcome_json = OutcomeTemplateResponseSchema().dump(outcome)
             outcome_json["event_configuration_id"] = config.id
+            outcome_json["outcome_template_id"] = (
+                outcome.id if from_template else outcome.outcome_template_id
+            )
+
             outcome_result = OutcomeConfiguration(
                 **OutcomeConfigurationBodyParameterSchema().load(outcome_json)
             ).flush()
             outcome_actions = list(
                 filter(
-                    lambda x, _outcome_id=outcome.id: x.outcome_id == _outcome_id
-                    if from_template
-                    else x.outcome_configuration_id == _outcome_id,
+                    lambda x, _outcome_id=outcome.id: (
+                        x.outcome_id == _outcome_id
+                        if from_template
+                        else x.outcome_configuration_id == _outcome_id
+                    ),
                     actions,
                 )
             )
             for outcome_action in outcome_actions:
                 action_json = ActionTemplateResponseSchema().dump(outcome_action)
                 action_json["outcome_configuration_id"] = outcome_result.id
+                action_json["action_template_id"] = (
+                    outcome_action.id
+                    if from_template
+                    else outcome_action.action_template_id
+                )
+
                 ActionConfiguration(
                     **ActionConfigurationBodyParameterSchema().load(action_json)
                 ).flush()
@@ -484,9 +530,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @classmethod
-    def find_by_id(cls, work_id):
+    def find_by_id(cls, work_id, exclude_deleted=False):
         """Find work by id."""
-        work = Work.find_by_id(work_id)
+        query = db.session.query(Work).filter(Work.id == work_id)
+        if exclude_deleted:
+            query = query.filter(Work.is_deleted.is_(False))
+        work = query.one_or_none()
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
         return work
@@ -569,7 +618,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return file_buffer.getvalue()
 
     @classmethod
-    def find_first_nations(cls, work_id: int, is_active) -> [IndigenousNation]:
+    def find_first_nations(cls, work_id: int, is_active) -> List[IndigenousNation]:
         """Active first nations assigned on a work"""
         query = (
             db.session.query(IndigenousWork)
@@ -615,7 +664,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             mapped_column = note_type_mapping.get(note_type)
             if mapped_column is None:
                 raise ResourceExistsError(
-                    f"No work note type {note_type}  nation association found"
+                    f"No work note type {note_type} nation association found"
                 )
             setattr(work, mapped_column, notes)
 
@@ -649,7 +698,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "work_id": work_id,
                 "indigenous_nation_id": data.get("indigenous_nation_id"),
                 "indigenous_category_id": data.get("indigenous_category_id", None),
-                "indigenous_consultation_level_id": data.get("indigenous_consultation_level_id", None),
+                "indigenous_consultation_level_id": data.get(
+                    "indigenous_consultation_level_id", None
+                ),
                 "is_active": data.get("is_active"),
             }
         )
@@ -683,7 +734,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work_indigenous_nation.indigenous_category_id = data.get(
             "indigenous_category_id"
         )
-        work_indigenous_nation.indigenous_consultation_level_id = data.get("indigenous_consultation_level_id")
+        work_indigenous_nation.indigenous_consultation_level_id = data.get(
+            "indigenous_consultation_level_id"
+        )
         work_indigenous_nation.flush()
         db.session.commit()
         return work_indigenous_nation
@@ -695,7 +748,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-
+        print(":" * 100)
+        print(first_nations)
+        print(":" * 100)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 
@@ -788,7 +843,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_template(
-        cls, work_phase: WorkPhase, phase_event_templates: [dict]
+        cls, work_phase: WorkPhase, phase_event_templates: List[dict]
     ) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))
@@ -800,10 +855,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_configurations(
-        cls, work_phase: WorkPhase, event_configs: [dict], from_template: bool = True
-    ) -> [EventConfiguration]:
+        cls,
+        work_phase: WorkPhase,
+        event_configs: List[dict],
+        from_template: bool = True,
+    ) -> List[EventConfiguration]:
         """Create event configurations from existing configurations/templates"""
-        event_configurations: [EventConfiguration] = []
+        event_configurations: List[EventConfiguration] = []
         for parent_config in list(filter(lambda x: not x["parent_id"], event_configs)):
             parent_config["work_phase_id"] = work_phase.id
             p_result = EventConfiguration(
@@ -812,13 +870,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
             p_result.flush()
             event_configurations.append(p_result)
             cls.copy_outcome_and_actions(parent_config, p_result, from_template)
-            for child in list(
-                filter(
-                    lambda x, _parent_config_id=parent_config["id"]: x["parent_id"]
-                    == _parent_config_id,
-                    event_configs,
-                )
-            ):
+            child_configs = [
+                child
+                for child in event_configs
+                if child["parent_id"] == parent_config["id"]
+            ]
+            for child in child_configs:
                 child["parent_id"] = p_result.id
                 child["work_phase_id"] = work_phase.id
                 c_result = EventConfiguration.flush(
@@ -832,18 +889,17 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_configuration(
-        cls, work_phase: WorkPhase, event_configurations: [EventConfiguration]
+        cls, work_phase: WorkPhase, event_configurations: List[EventConfiguration]
     ) -> None:
         """Create events by given event configurations"""
         if work_phase.visibility.value == PhaseVisibilityEnum.REGULAR.value:
-            parent_event_configs = list(
-                filter(
-                    lambda x, _work_phase_id=work_phase.id: not x.parent_id
-                    and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
-                    and x.work_phase_id == _work_phase_id,
-                    event_configurations,
-                )
-            )
+            parent_event_configs = [
+                parent_config
+                for parent_config in event_configurations
+                if parent_config.visibility
+                == EventTemplateVisibilityEnum.MANDATORY.value
+                and parent_config.work_phase_id == work_phase.id
+            ]
             for p_event_conf in parent_event_configs:
                 days = cls._find_start_at_value(p_event_conf.start_at, 0)
                 p_event_start_date = datetime.fromisoformat(
@@ -860,15 +916,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         )
                     )
                 )
-                c_events = list(
-                    filter(
-                        lambda x, _parent_id=p_event_conf.id, _work_phase_id=work_phase.id: x.parent_id
-                        == _parent_id
-                        and x.visibility == EventTemplateVisibilityEnum.MANDATORY.value
-                        and x.work_phase_id == _work_phase_id,
-                        event_configurations,
-                    )
-                )
+                c_events = [
+                    c_event
+                    for c_event in event_configurations
+                    if c_event.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                    and c_event.work_phase_id == work_phase.id
+                    and c_event.parent_id == p_event_conf.id
+                ]
                 for c_event_conf in c_events:
                     c_event_start_date = p_event_start_date + timedelta(
                         days=cls._find_start_at_value(c_event_conf.start_at, 0)

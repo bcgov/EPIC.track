@@ -1,0 +1,8 @@
+export const WORKPLAN_TAB_INDEX = {
+  WORKPLAN: 0,
+  STATUS: 1,
+  ISSUES: 2,
+  ABOUT: 3,
+  TEAM: 4,
+  FIRST_NATIONS: 5,
+};

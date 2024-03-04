@@ -24,14 +24,16 @@ from api.models import Staff
 from api.models import Work as WorkModel
 from api.models import WorkIssues, WorkIssueUpdates, WorkStatus
 from api.models.indigenous_nation import IndigenousNation
+from api.models.indigenous_work import IndigenousWork
 from api.models.pip_org_type import PIPOrgType
 from api.models.project import Project as ProjectModel
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.special_field import SpecialField
+from api.models.staff_work_role import StaffWorkRole
 from tests.utilities.factory_scenarios import (
-    TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestSpecialField, TestStaffInfo, TestStatus,
-    TestWorkInfo, TestWorkIssuesInfo, TestWorkIssueUpdatesInfo)
+    TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestRoleEnum, TestSpecialField, TestStaffInfo,
+    TestStatus, TestWorkFirstNationEnum, TestWorkInfo, TestWorkIssuesInfo, TestWorkIssueUpdatesInfo)
 
 
 CONFIG = get_named_config("testing")
@@ -67,9 +69,11 @@ def factory_work_status_model(work_id, status_data: dict = TestStatus.status1.va
         work_id=work_id,
         is_approved=status_data["is_approved"],
         approved_by=status_data["approved_by"],
-        approved_date=datetime.fromisoformat(status_data["approved_date"])
-        if status_data["approved_date"]
-        else None,
+        approved_date=(
+            datetime.fromisoformat(status_data["approved_date"])
+            if status_data["approved_date"]
+            else None
+        ),
     )
     status.save()
     return status
@@ -79,6 +83,8 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
     """Produce a work model."""
     project = factory_project_model()
     epd = factory_staff_model()
+    work_lead = factory_staff_model()
+    decision_maker = factory_staff_model()
     work = WorkModel(
         title=work_data["title"],
         report_description=work_data["report_description"],
@@ -91,10 +97,10 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
         eao_team_id=work_data["eao_team_id"],
         federal_involvement_id=work_data["federal_involvement_id"],
         responsible_epd_id=epd.id,
-        work_lead_id=epd.id,
+        work_lead_id=work_lead.id,
         work_type_id=work_data["work_type_id"],
         substitution_act_id=work_data["substitution_act_id"],
-        decision_by_id=epd.id,
+        decision_by_id=decision_maker.id,
     )
     work.save()
     return work
@@ -174,7 +180,6 @@ def factory_pip_org_type_model(org_type_data=TestPipOrgType.pip_org_type1.value)
 
 def factory_first_nation_model(first_nation_data=TestFirstNation.first_nation1.value):
     """Produce a First nation model."""
-    print(first_nation_data)
     pip_org_type = factory_pip_org_type_model()
     relationship_holder = factory_staff_model()
     first_nation = IndigenousNation(
@@ -202,7 +207,42 @@ def factory_special_field_model(
         field_name=special_field_data["field_name"],
         field_value=special_field_data["field_value"],
         entity_id=proponent.id,
-        time_range=time_range
+        time_range=time_range,
     )
     special_field.save()
     return special_field
+
+
+def factory_staff_work_role_model(
+    work_id=None, role_id=TestRoleEnum.OFFICER_ANALYST.value
+):
+    """Produce a Staff work role model"""
+    if work_id is None:
+        work_id = factory_work_model().id
+    staff_work_role = StaffWorkRole(
+        staff_id=factory_staff_model().id, work_id=work_id, role_id=role_id
+    )
+    staff_work_role.save()
+    return staff_work_role
+
+
+def factory_work_first_nation_model(
+    work_id=None,
+    work_first_nation_data=TestWorkFirstNationEnum.work_first_nation1.value,
+):
+    """Produce a work first nation model"""
+    if work_id is None:
+        work_id = factory_work_model().id
+    work_first_nation = IndigenousWork(
+        work_id=work_id,
+        indigenous_nation_id=factory_first_nation_model(
+            TestFirstNation.first_nation2.value
+        ).id,
+        indigenous_category_id=work_first_nation_data["indigenous_category_id"],
+        indigenous_consultation_level_id=work_first_nation_data[
+            "indigenous_consultation_level_id"
+        ],
+        is_active=work_first_nation_data["is_active"],
+    )
+    work_first_nation.save()
+    return work_first_nation

@@ -26,8 +26,12 @@ class ActionConfigurationBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     outcome_configuration_id = fields.Int(
-        metadata={"description": "outcome configuration id item"},
+        metadata={"description": "Outcome configuration id item"},
         required=True
+    )
+
+    action_template_id = fields.Int(
+        metadata={"description": "Action template Id corresponding to the configuration"}
     )
 
     additional_params = fields.Raw(

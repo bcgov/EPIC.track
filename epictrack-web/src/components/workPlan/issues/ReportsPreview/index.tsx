@@ -1,10 +1,11 @@
 import React from "react";
-import { Button, Grid, Stack } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import TabPanel from "../../../shared/tab/TabPanel";
 import { ThirtySixtyNinety } from "./ThirtySixtyNinety";
 import { ReferralSchedule } from "./ReferralSchedule";
 import { PreviewSkeleton } from "./PreviewSkeleton";
 import { WorkplanContext } from "../../WorkPlanContext";
+import TabButton from "components/shared/TabButton";
 
 const TAB = {
   THIRTY_SIXTY_NINETY: 0,
@@ -25,26 +26,18 @@ export const ReportsPreview = () => {
     <Grid container spacing={2}>
       <Grid item xs={12}>
         <Stack direction={{ lg: "row", xs: "column" }} spacing={2}>
-          <Button
-            variant={
-              selectedTabIndex === TAB.THIRTY_SIXTY_NINETY
-                ? "contained"
-                : "outlined"
-            }
+          <TabButton
+            active={selectedTabIndex === TAB.THIRTY_SIXTY_NINETY}
             onClick={() => setSelectedTabIndex(TAB.THIRTY_SIXTY_NINETY)}
           >
             30-60-90
-          </Button>
-          <Button
-            variant={
-              selectedTabIndex === TAB.REFERRAL_SCHEDULE
-                ? "contained"
-                : "outlined"
-            }
+          </TabButton>
+          <TabButton
+            active={selectedTabIndex === TAB.REFERRAL_SCHEDULE}
             onClick={() => setSelectedTabIndex(TAB.REFERRAL_SCHEDULE)}
           >
             Referral Schedule
-          </Button>
+          </TabButton>
         </Stack>
       </Grid>
 

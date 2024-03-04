@@ -43,7 +43,7 @@ const StatusView = () => {
           subTitle="Create your first Status"
           addNewButtonText="Add Status"
           onAddNewClickHandler={() => onAddButtonClickHandler()}
-          buttonProps={{
+          addButtonProps={{
             disabled: !canAddStatus,
           }}
         />

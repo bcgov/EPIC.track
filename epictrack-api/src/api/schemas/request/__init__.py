@@ -13,6 +13,7 @@
 # limitations under the License.
 """Exposes all the request validation schemas"""
 from api.schemas.request.region_request import RegionTypePathParameterSchema
+
 from .act_section_request import ActSectionQueryParameterSchema
 from .action_configuration_request import ActionConfigurationBodyParameterSchema
 from .action_template_request import ActionTemplateBodyParameterSchema
@@ -27,6 +28,7 @@ from .indigenous_nation_request import (
     IndigenousNationBodyParameterSchema, IndigenousNationExistenceQueryParamSchema,
     IndigenousNationIdPathParameterSchema, IndigenousWorkBodyParameterSchema, WorkIndigenousNationIdPathParameterSchema,
     WorkNationExistenceCheckQueryParamSchema)
+from .insight_request import ProjectInsightRequestQueryParameterSchema, WorkInsightRequestQueryParameterSchema
 from .outcome_configuration_request import (
     OutcomeConfigurationBodyParameterSchema, OutcomeConfigurationQueryParameterSchema)
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
@@ -52,18 +54,7 @@ from .task_request import (
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (
-    WorkBodyParameterSchema,
-    WorkExistenceQueryParamSchema,
-    WorkFirstNationImportBodyParamSchema,
-    WorkFirstNationNotesBodySchema,
-    WorkIdPathParameterSchema,
-    WorkIdPhaseIdPathParameterSchema,
-    WorkIssuesCreateParameterSchema,
-    WorkIssuesParameterSchema,
-    WorkIssuesUpdateCloneSchema,
-    WorkNotesBodySchema,
-    WorkPlanDownloadQueryParamSchema,
-    WorkStatusParameterSchema,
-    WorkTypeIdQueryParamSchema,
-    WorkIssuesUpdateEditSchema
-)
+    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkFirstNationImportBodyParamSchema,
+    WorkFirstNationNotesBodySchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
+    WorkIssuesCreateParameterSchema, WorkIssuesParameterSchema, WorkIssuesUpdateCloneSchema, WorkIssuesUpdateEditSchema,
+    WorkNotesBodySchema, WorkPlanDownloadQueryParamSchema, WorkStatusParameterSchema, WorkTypeIdQueryParamSchema)

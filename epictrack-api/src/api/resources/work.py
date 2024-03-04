@@ -96,7 +96,9 @@ class Works(Resource):
     @profiletime
     def get():
         """Return all active works."""
-        works = WorkService.find_all_works()
+        args = request.args
+        is_active = args.get("is_active", False, bool)
+        works = WorkService.find_all_works(is_active)
         return jsonify(res.WorkResponseSchema(many=True).dump(works)), HTTPStatus.OK
 
     @staticmethod
@@ -141,7 +143,7 @@ class Work(Resource):
     def get(work_id):
         """Return a work detail based on id."""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        work = WorkService.find_by_id(work_id)
+        work = WorkService.find_by_id(work_id, exclude_deleted=True)
         return res.WorkResponseSchema().dump(work), HTTPStatus.OK
 
     @staticmethod

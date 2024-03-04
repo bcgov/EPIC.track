@@ -17,6 +17,8 @@ import Issues from "./issues";
 import WorkState from "./WorkState";
 import { isStatusOutOfDate } from "./status/shared";
 import About from "./about";
+import { useLocation } from "react-router-dom";
+import { WORKPLAN_TAB_INDEX } from "./constants";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -24,7 +26,12 @@ const tabPanel: SxProps = {
   paddingTop: "2rem",
 };
 const WorkPlanContainer = () => {
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
+  const location = useLocation();
+
+  const tabIndex = location.state?.tabIndex ?? WORKPLAN_TAB_INDEX.WORKPLAN;
+
+  const [selectedTabIndex, setSelectedTabIndex] = React.useState(tabIndex);
+
   const ctx = useContext(WorkplanContext);
 
   const activeStaff = ctx.team.filter(
@@ -90,7 +97,7 @@ const WorkPlanContainer = () => {
         </ETTabs>
       </Box>
       <TabPanel
-        index={0}
+        index={WORKPLAN_TAB_INDEX.WORKPLAN}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -99,7 +106,7 @@ const WorkPlanContainer = () => {
         <PhaseContainer />
       </TabPanel>
       <TabPanel
-        index={1}
+        index={WORKPLAN_TAB_INDEX.STATUS}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -108,7 +115,7 @@ const WorkPlanContainer = () => {
         <Status />
       </TabPanel>
       <TabPanel
-        index={2}
+        index={WORKPLAN_TAB_INDEX.ISSUES}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -117,17 +124,16 @@ const WorkPlanContainer = () => {
         <Issues />
       </TabPanel>
       <TabPanel
-        index={3}
+        index={WORKPLAN_TAB_INDEX.ABOUT}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
         }}
       >
-        {/* <ComingSoon /> */}
         <About />
       </TabPanel>
       <TabPanel
-        index={4}
+        index={WORKPLAN_TAB_INDEX.TEAM}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -136,7 +142,7 @@ const WorkPlanContainer = () => {
         <TeamContainer />
       </TabPanel>
       <TabPanel
-        index={5}
+        index={WORKPLAN_TAB_INDEX.FIRST_NATIONS}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,

@@ -456,6 +456,7 @@ export default function ResourceForecast() {
           onColumnFiltersChange={setColumnFilters}
           onColumnVisibilityChange={setColumnVisibility}
           onGlobalFilterChange={setGlobalFilter}
+          enableHiding={true}
           renderToolbarInternalActions={({ table }) => (
             <>
               <MRT_ToggleFiltersButton table={table} />

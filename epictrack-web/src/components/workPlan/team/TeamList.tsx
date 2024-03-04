@@ -28,7 +28,7 @@ const TeamList = () => {
   const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
   const teamMembers = useMemo(() => ctx.team, [ctx.team]);
-
+  const staff = ctx.selectedStaff?.staff;
   const { email, roles: givenUserAuthRoles } = useAppSelector(
     (state) => state.user.userDetail
   );
@@ -39,6 +39,11 @@ const TeamList = () => {
   const canEdit =
     userIsTeamMember ||
     hasPermission({ roles: givenUserAuthRoles, allowed: [ROLES.EDIT] });
+
+  const canCreate = hasPermission({
+    roles: givenUserAuthRoles,
+    allowed: [ROLES.CREATE],
+  });
 
   React.useEffect(() => {
     setLoading(ctx.loading);
@@ -145,6 +150,7 @@ const TeamList = () => {
 
   const onCancelHandler = () => {
     setShowTeamForm(false);
+    ctx.setSelectedStaff(undefined);
     setWorkStaffId(undefined);
   };
 
@@ -226,15 +232,18 @@ const TeamList = () => {
           subTitle="Start adding your Team"
           addNewButtonText="Team Member"
           onAddNewClickHandler={() => onAddButtonClickHandler()}
+          addButtonProps={{
+            disabled: !canCreate,
+          }}
         />
       )}
       <TrackDialog
         open={showTeamForm}
-        dialogTitle={workStaffId ? "Update Team Member" : "Add Team Member"}
+        dialogTitle={staff ? `${staff.full_name}` : "Add Team Member"}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
-        okButtonText={workStaffId ? "Update" : "Add"}
+        okButtonText={workStaffId ? "Save" : "Add"}
         formId="team-form"
         onCancel={() => onCancelHandler()}
         isActionsRequired
