@@ -123,8 +123,7 @@ def test_get_assessment_works_by_phase(client, auth_header):
     # Create the work
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=payload, headers=auth_header)
-    work_response_json = work_response.json
- 
+    work_response_json = work_response.json 
     url = urljoin(API_BASE_URL, "insights/works/assessment?group_by=phase")
     result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK

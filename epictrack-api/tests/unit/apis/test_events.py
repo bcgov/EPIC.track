@@ -30,7 +30,6 @@ from tests.utilities.factory_utils import (
 )
 from tests.utilities.factory_scenarios import TestWorkInfo
 from api.services.event import EventService
-from api.services.work import WorkService
 from api.services.work_phase import WorkPhase
 from api.models.event_configuration import EventPositionEnum
 from api.schemas.response import EventResponseSchema

@@ -14,12 +14,10 @@
 
 """Test suite for SpecialFields."""
 from copy import copy
-from datetime import datetime
 from http import HTTPStatus
 from urllib.parse import urljoin
 
 from api.models.special_field import EntityEnum
-from api.utils.constants import CANADA_TIMEZONE
 from tests.utilities.factory_scenarios import TestSpecialField
 from tests.utilities.factory_utils import factory_proponent_model, factory_special_field_model
 
