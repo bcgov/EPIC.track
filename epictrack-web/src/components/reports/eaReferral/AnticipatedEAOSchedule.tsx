@@ -234,6 +234,7 @@ export default function AnticipatedEAOSchedule() {
                                     marginRight: "0.5rem",
                                     borderRadius: "4px",
                                     fontSize: "12px",
+                                    width: "100px",
                                     ...staleLevel(item["date_updated"]),
                                   }}
                                   label={
