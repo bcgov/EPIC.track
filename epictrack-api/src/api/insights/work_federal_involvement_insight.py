@@ -37,7 +37,7 @@ class WorkFederalInvolvementInsightGenerator:
         """Fetch data from db"""
         partition_query = self.generate_partition_query()
 
-        team_insights = (
+        federal_involvement_insights = (
             db.session.query(FederalInvolvement)
             .join(partition_query, partition_query.c.federal_involvement_id == FederalInvolvement.id)
             .add_columns(
@@ -48,11 +48,11 @@ class WorkFederalInvolvementInsightGenerator:
             .order_by(partition_query.c.count.desc())
             .all()
         )
-        return self._format_data(team_insights)
+        return self._format_data(federal_involvement_insights)
 
     def _format_data(self, data) -> List[dict]:
         """Format data to the response format"""
-        team_insights = [
+        federal_involvement_insights = [
             {
                 "federal_involvement": row.federal_involvement,
                 "federal_involvement_id": row.federal_involvement_id,
@@ -60,4 +60,4 @@ class WorkFederalInvolvementInsightGenerator:
             }
             for row in data
         ]
-        return team_insights
+        return federal_involvement_insights

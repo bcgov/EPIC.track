@@ -24,3 +24,18 @@ class WorkInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
         metadata={"description": "Group by field name"},
         required=True,
     )
+
+
+class ProjectInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
+    """Project insight query parameter schema"""
+
+    group_by = fields.Str(
+        metadata={"description": "Group by field name"},
+        required=True,
+    )
+
+    type_id = fields.Int(
+        metadata={"description": "Type id to filter by (optional)"},
+        required=False,
+        missing=None
+    )
