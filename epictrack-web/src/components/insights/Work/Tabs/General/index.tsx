@@ -1,24 +1,26 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import WorkByTeam from "./Charts/WorkByTeam";
 import { InsightsAccordionCollapsableDetails } from "components/insights/InsightsAccordion";
+import WorkByType from "./charts/WorkByType";
+import AssessmentByPhase from "./charts/AssessmentByPhase";
+import WorkList from "./charts/workListing";
 
-const Staff = () => {
+const General = () => {
   return (
     <Grid container spacing={2}>
-      <Grid item xs={4}>
-        <WorkByTeam />
+      <Grid item xs={6}>
+        <WorkByType />
+      </Grid>
+      <Grid item xs={6}>
+        <AssessmentByPhase />
       </Grid>
       <Grid item xs={12}>
         <InsightsAccordionCollapsableDetails>
-          <p>
-            This is the staff tab. It will contain information about the staff
-            and their work.
-          </p>
+          <WorkList />
         </InsightsAccordionCollapsableDetails>
       </Grid>
     </Grid>
   );
 };
 
-export default Staff;
+export default General;

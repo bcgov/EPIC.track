@@ -105,7 +105,6 @@ export const InsightsAccordionCollapsableDetails = ({
     <Box
       sx={{
         ...sx,
-        padding: "0 24px 0 24px",
       }}
       {...otherProps}
     >
