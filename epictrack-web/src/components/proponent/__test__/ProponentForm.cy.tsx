@@ -2,40 +2,27 @@ import { MasterContext } from "components/shared/MasterContext";
 import { MasterBase } from "models/type";
 import ProponentForm from "../ProponentForm";
 import { Staff } from "models/staff";
-import { defaultProponent } from "models/proponent";
+import { Proponent, defaultProponent } from "models/proponent";
+import { mockStaffs } from "../../../../cypress/support/common";
+import { setupIntercepts } from "../../../../cypress/support/utils";
+import { ROLES } from "constants/application-constant";
 
-const staffs: Staff[] = [
-  {
+function createProponent(): Proponent {
+  return {
     id: 1,
-    full_name: "John Doe",
-    first_name: "", // Add the missing property
-    last_name: "", // Add the missing property
-    phone: "",
-    email: "",
-    is_active: false,
-    position_id: 2 /* add more missing properties here */,
-    position: { name: "test", id: 1, sort_order: 0 }, // Add the missing property
-  },
-  {
-    id: 2,
-    full_name: "John Doe",
-    first_name: "", // Add the missing property
-    last_name: "", // Add the missing property
-    phone: "",
-    email: "",
-    is_active: false,
-    position_id: 2 /* add more missing properties here */,
-    position: { name: "test", id: 1, sort_order: 1 }, // Add the missing property
-  },
-  // Add more mock Staff objects as needed
-];
+    name: "Test Proponent",
+    is_active: true, // or false, depending on your needs
+    relationship_holder_id: Math.floor(Math.random() * 100), // or any other method to generate an ID
+    relationship_holder: mockStaffs[0],
+  };
+}
 
 const endpoints = [
   {
     name: "getStaffs",
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?is_active=false",
-    body: { data: staffs },
+    response: { body: mockStaffs },
   },
   {
     name: "getPipOrgTypes",
@@ -51,42 +38,42 @@ const endpoints = [
   },
 ];
 
+const proponent = createProponent();
+
 function createMockContext() {
   return {
-    item: defaultProponent,
+    item: proponent,
+    formId: "proponent-form", // Add the missing property 'formId'
     setFormId: cy.stub(),
     setTitle: cy.stub(),
     setId: cy.stub(),
     onSave: cy.stub(),
-    title: "",
-    data: [] as MasterBase[],
+    title: proponent.name,
+    data: [proponent] as MasterBase[],
     loading: false,
     setItem: cy.stub(),
+    showModalForm: true,
     setShowDeleteDialog: cy.stub(),
     setShowModalForm: cy.stub(),
     getData: cy.stub(),
     setService: cy.stub(),
     setForm: cy.stub(),
+    form: <ProponentForm proponentId={proponent.id} />,
     onDialogClose: cy.stub(),
     setFormStyle: cy.stub(),
     getById: cy.stub(),
     setDialogProps: cy.stub(),
   };
 }
-function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, body }) => {
-    cy.intercept(method, url, { body });
-  });
-}
 
 describe("ProponentForm", () => {
   beforeEach(() => {
+    cy.setupUser([ROLES.EDIT]);
     const mockContext = createMockContext();
     setupIntercepts(endpoints);
-
     cy.mount(
       <MasterContext.Provider value={mockContext}>
-        <ProponentForm />
+        <ProponentForm proponentId={proponent.id} />
       </MasterContext.Provider>
     );
   });
@@ -97,6 +84,10 @@ describe("ProponentForm", () => {
 
   it("renders the name field", () => {
     cy.get('input[name="name"]');
+  });
+
+  it("Form title is proponent name", () => {
+    cy.get("h2").contains("Proponent");
   });
 
   it("renders the relationship holder field", () => {

@@ -12,25 +12,7 @@ declare global {
 
 describe("Restricted Component", () => {
   beforeEach(() => {
-    if (window.Cypress) {
-      // expose the store to the Cypress window object when running Cypress tests
-      window.store = store;
-    }
-
-    const fakeUserDetail = {
-      sub: "fakeSub",
-      groups: ["fakeGroup1", "fakeGroup2"],
-      preferred_username: "fakeUsername",
-      firstName: "fakeFirstName",
-      lastName: "fakeLastName",
-      email: "fakeEmail@example.com",
-      staffId: 123,
-      phone: "1234567890",
-      position: "fakePosition",
-      roles: [ROLES.CREATE, "fakeRole1", "fakeRole2"],
-    };
-
-    cy.window().its("store").invoke("dispatch", userDetails(fakeUserDetail));
+    cy.setupUser([ROLES.CREATE]);
   });
 
   it("renders children when user has required permissions", () => {

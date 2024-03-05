@@ -35,3 +35,46 @@
 //     }
 //   }
 // }
+import { userDetails } from "services/userService/userSlice";
+import { ROLES } from "constants/application-constant";
+import { store } from "store";
+
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace Cypress {
+    interface Chainable<Subject> {
+      setupUser: (
+        this: Chainable<Subject>,
+        roles: string[]
+      ) => Chainable<Subject>;
+    }
+  }
+}
+
+declare global {
+  interface Window {
+    store: any; // replace 'any' with the type of your Redux store if you have one
+  }
+}
+
+Cypress.Commands.add("setupUser", (roles: string[]) => {
+  if (window.Cypress) {
+    // expose the store to the Cypress window object when running Cypress tests
+    window.store = store;
+  }
+
+  const fakeUserDetail = {
+    sub: "fakeSub",
+    groups: ["fakeGroup1", "fakeGroup2"],
+    preferred_username: "fakeUsername",
+    firstName: "fakeFirstName",
+    lastName: "fakeLastName",
+    email: "fakeEmail@example.com",
+    staffId: 123,
+    phone: "1234567890",
+    position: "fakePosition",
+    roles: roles,
+  };
+
+  cy.window().its("store").invoke("dispatch", userDetails(fakeUserDetail));
+});
