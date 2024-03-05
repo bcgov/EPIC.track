@@ -54,7 +54,7 @@ export const insightsApi = createApi({
           : [{ type: "Works", id: "LIST" }],
     }),
   }),
-  keepUnusedDataFor: 300, // in seconds, 300 seconds = 5 minutes
+  refetchOnMountOrArgChange: 300,
 });
 
 // Export hooks for usage in functional components, which are
