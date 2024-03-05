@@ -5,7 +5,10 @@ import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 import { Work } from "models/work";
-import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
+import {
+  getSelectFilterOptions,
+  rowsPerPageOptions,
+} from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
@@ -18,6 +21,10 @@ const WorkList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [projects, setProjects] = React.useState<string[]>([]);
   const [ministries, setMinistries] = React.useState<string[]>([]);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -25,6 +32,13 @@ const WorkList = () => {
   const { data, error, isLoading } = useGetWorksQuery();
 
   const works = data || [];
+
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      pageSize: works.length,
+    }));
+  }, [works]);
 
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
@@ -232,8 +246,13 @@ const WorkList = () => {
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
+        pagination: pagination,
       }}
       enablePagination
+      muiPaginationProps={{
+        rowsPerPageOptions: rowsPerPageOptions(works.length),
+      }}
+      onPaginationChange={setPagination}
     />
   );
 };
