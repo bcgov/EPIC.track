@@ -3,7 +3,6 @@ import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
-import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -70,7 +69,7 @@ const WorkList = () => {
       },
       {
         accessorKey: "ministry.name",
-        header: "Ministry",
+        header: "Other Ministry",
         size: 200,
         filterVariant: "multi-select",
         filterSelectOptions: ministries,

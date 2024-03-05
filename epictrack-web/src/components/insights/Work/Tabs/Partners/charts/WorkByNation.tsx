@@ -16,6 +16,7 @@ import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import BarChartSkeleton from "components/insights/BarChartSkeleton";
 
 const WorkByNationChart = () => {
   const { data, error, isLoading: isChartLoading } = useGetWorksByNationQuery();
@@ -31,7 +32,7 @@ const WorkByNationChart = () => {
   };
 
   if (isChartLoading) {
-    return <PieChartSkeleton />;
+    return <BarChartSkeleton />;
   }
 
   if (error) {

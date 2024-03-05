@@ -49,7 +49,7 @@ const WorkByFederalInvolvementChart = () => {
     <GrayBox>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <ETCaption1 bold>WORK BY Federal Involvement</ETCaption1>
+          <ETCaption1 bold>WORK BY FEDERAL INVOLVEMENT</ETCaption1>
         </Grid>
         <Grid item xs={12}>
           <ETCaption3>
