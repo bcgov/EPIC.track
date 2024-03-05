@@ -4,6 +4,7 @@ import { InsightsAccordionCollapsableDetails } from "components/insights/Insight
 import WorkByOtherMinistryChart from "./charts/WorkByOtherMinistry";
 import WorkByFederalInvolvementChart from "./charts/WorkByFederalInvolvement";
 import WorkByNationChart from "./charts/WorkByNation";
+import WorkList from "./charts/WorkList";
 
 const Partners = () => {
   return (
@@ -19,7 +20,7 @@ const Partners = () => {
       </Grid>
       <Grid item xs={12}>
         <InsightsAccordionCollapsableDetails>
-          {/* <WorkList /> */}
+          <WorkList />
         </InsightsAccordionCollapsableDetails>
       </Grid>
     </Grid>

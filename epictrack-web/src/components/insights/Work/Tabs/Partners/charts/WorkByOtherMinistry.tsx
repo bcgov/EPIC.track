@@ -10,8 +10,11 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { AssessmentByPhase } from "models/insights";
-import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/insights";
+import { AssessmentByPhase, WorkByMinistry } from "models/insights";
+import {
+  useGetAssessmentsByPhaseQuery,
+  useGetWorkByMinistryQuery,
+} from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
@@ -21,15 +24,15 @@ const WorkByOtherMinistryChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetAssessmentsByPhaseQuery();
+  } = useGetWorkByMinistryQuery();
 
-  const formatData = (data?: AssessmentByPhase[]) => {
+  const formatData = (data?: WorkByMinistry[]) => {
     if (!data) return [];
     return data.map((item) => {
       return {
-        name: item.phase,
+        name: item.ministry,
         value: item.count,
-        id: item.phase_id,
+        id: item.ministry_id,
       };
     });
   };
@@ -80,7 +83,9 @@ const WorkByOtherMinistryChart = () => {
                 align="right"
                 iconSize={16}
                 wrapperStyle={{
-                  fontSize: "16px",
+                  fontSize: "12px",
+                  maxWidth: "200px", // Add this line to limit the width of the legend
+                  overflow: "hidden",
                 }}
               />
               <Tooltip />

@@ -10,35 +10,56 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
+import { BAR_COLOR } from "components/insights/utils";
+import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { WorkByNation } from "models/insights";
+import { useGetWorksByNationQuery } from "services/rtkQuery/insights";
+import { showNotification } from "components/shared/notificationProvider";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 
 const WorkByNationChart = () => {
-  const data = [
-    { nation: "Nation 1", count: 10 },
-    { nation: "Nation 2", count: 20 },
-    { nation: "Nation 3", count: 15 },
-    { nation: "Nation 4", count: 5 },
-  ];
+  const { data, error, isLoading: isChartLoading } = useGetWorksByNationQuery();
+
+  const formatData = (data?: WorkByNation[]) => {
+    if (!data) return [];
+    return data.map((item) => {
+      return {
+        nation: item.first_nation,
+        count: item.count,
+      };
+    });
+  };
+
+  if (isChartLoading) {
+    return <PieChartSkeleton />;
+  }
+
+  if (error) {
+    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    return <div>Error</div>;
+  }
+
+  const chartData = formatData(data);
 
   return (
-    <GrayBox>
-      <Grid container spacing={1}>
+    <GrayBox sx={{ height: "100%" }}>
+      <Grid container spacing={1} sx={{ height: "100%" }}>
         <Grid item xs={12}>
-          <ETCaption1 bold>WORK BY Federal Involvement</ETCaption1>
+          <ETCaption1 bold>WORK BY NATION</ETCaption1>
         </Grid>
         <Grid item xs={12}>
           <ETCaption3>
-            The proportion of active Works categorized by the involvement of the
-            Federal Government
+            The number of active Works a Nation is associated with
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart layout="vertical" data={data}>
+            <BarChart layout="vertical" data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
-              <YAxis dataKey="nation" type="category" />
+              <YAxis dataKey="nation" type="category" tick={{ fontSize: 12 }} />
               <Tooltip />
-              <Bar dataKey="count" fill="#8884d8" />
+              <Bar dataKey="count" fill={BAR_COLOR} barSize={10} />
             </BarChart>
           </ResponsiveContainer>
         </Grid>

@@ -2,22 +2,16 @@ import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import {
-  getSelectFilterOptions,
-  rowsPerPageOptions,
-} from "components/shared/MasterTrackTable/utils";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
-import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/insights";
 
 const WorkList = () => {
-  const [phases, setPhases] = React.useState<string[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<string[]>([]);
-  const [projects, setProjects] = React.useState<string[]>([]);
   const [ministries, setMinistries] = React.useState<string[]>([]);
+
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -35,10 +29,7 @@ const WorkList = () => {
   }, [works]);
 
   const codeTypes: { [x: string]: any } = {
-    work_type: setWorkTypes,
-    project: setProjects,
     ministry: setMinistries,
-    current_work_phase: setPhases,
   };
 
   React.useEffect(() => {
@@ -58,18 +49,15 @@ const WorkList = () => {
     });
   }, [works]);
 
-  const statuses = getSelectFilterOptions(
-    works,
-    "is_active",
-    (value) => (value ? "Active" : "Inactive"),
-    (value) => value
-  );
-
   useEffect(() => {
     if (error) {
       showNotification("Error fetching works", { type: "error" });
     }
   }, [error]);
+
+  const federalInvolvements = Array.from(
+    new Set(works.map((w) => w.federal_involvement.name))
+  );
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
@@ -81,11 +69,11 @@ const WorkList = () => {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "project.name",
-        header: "Project",
+        accessorKey: "ministry.name",
+        header: "Ministry",
         size: 200,
         filterVariant: "multi-select",
-        filterSelectOptions: projects,
+        filterSelectOptions: ministries,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -100,7 +88,7 @@ const WorkList = () => {
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length > projects.length // select all is selected
+            filterValue.length > ministries.length // select all is selected
           ) {
             return true;
           }
@@ -111,10 +99,10 @@ const WorkList = () => {
         },
       },
       {
-        accessorKey: "work_type.name",
-        header: "Work type",
-        filterVariant: "multi-select",
-        filterSelectOptions: workTypes,
+        accessorKey: "federal_involvement.name",
+        header: "Federal Involvement",
+        size: 200,
+        filterSelectOptions: federalInvolvements,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -129,7 +117,7 @@ const WorkList = () => {
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length > workTypes.length // select all is selected
+            filterValue.length > federalInvolvements.length // select all is selected
           ) {
             return true;
           }
@@ -138,78 +126,9 @@ const WorkList = () => {
 
           return filterValue.includes(value);
         },
-      },
-      {
-        accessorKey: "current_work_phase.name",
-        header: "Current Phase",
-        filterVariant: "multi-select",
-        filterSelectOptions: phases,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > phases.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
-        },
-      },
-      {
-        accessorKey: "is_active",
-        header: "Status",
-        size: 80,
-        filterVariant: "multi-select",
-        filterSelectOptions: statuses,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statuses.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
-        Cell: ({ cell }) => (
-          <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
-          </span>
-        ),
       },
     ],
-    [projects, phases, workTypes]
+    [ministries, works]
   );
   return (
     <MasterTrackTable

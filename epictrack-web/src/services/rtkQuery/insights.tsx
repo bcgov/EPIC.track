@@ -1,7 +1,13 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
-import { AssessmentByPhase, WorkByType } from "models/insights";
+import {
+  AssessmentByPhase,
+  WorkByFederalInvolvement,
+  WorkByMinistry,
+  WorkByNation,
+  WorkByType,
+} from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
 
@@ -53,6 +59,48 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
+    getWorkByMinistry: builder.query<WorkByMinistry[], void>({
+      query: () => `insights/works?group_by=ministry`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ ministry_id }) => ({
+                type: "Works" as const,
+                id: ministry_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByFederalInvolvement: builder.query<
+      WorkByFederalInvolvement[],
+      void
+    >({
+      query: () => `insights/works?group_by=federal_involvement`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ federal_involvement_id }) => ({
+                type: "Works" as const,
+                id: federal_involvement_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByNation: builder.query<WorkByNation[], void>({
+      query: () => `insights/works?group_by=first_nation`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ first_nation_id }) => ({
+                type: "Works" as const,
+                id: first_nation_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
   }),
   refetchOnMountOrArgChange: 300,
 });
@@ -63,4 +111,7 @@ export const {
   useGetWorksByTypeQuery,
   useGetAssessmentsByPhaseQuery,
   useGetWorksQuery,
+  useGetWorkByMinistryQuery,
+  useGetWorksByFederalInvolvementQuery,
+  useGetWorksByNationQuery,
 } = insightsApi;

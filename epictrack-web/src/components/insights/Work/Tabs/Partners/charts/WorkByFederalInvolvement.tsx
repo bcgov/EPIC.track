@@ -10,8 +10,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { AssessmentByPhase } from "models/insights";
-import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/insights";
+import { WorkByFederalInvolvement } from "models/insights";
+import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
@@ -21,15 +21,15 @@ const WorkByFederalInvolvementChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetAssessmentsByPhaseQuery();
+  } = useGetWorksByFederalInvolvementQuery();
 
-  const formatData = (data?: AssessmentByPhase[]) => {
+  const formatData = (data?: WorkByFederalInvolvement[]) => {
     if (!data) return [];
     return data.map((item) => {
       return {
-        name: item.phase,
+        name: item.federal_involvement,
         value: item.count,
-        id: item.phase_id,
+        id: item.federal_involvement_id,
       };
     });
   };
@@ -81,6 +81,8 @@ const WorkByFederalInvolvementChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
+                  maxWidth: "200px", // Add this line to limit the width of the legend
+                  overflow: "hidden",
                 }}
               />
               <Tooltip />

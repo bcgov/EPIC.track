@@ -71,6 +71,8 @@ const WorkByTypeChart = () => {
               iconSize={16}
               wrapperStyle={{
                 fontSize: "16px",
+                maxWidth: "200px", // Add this line to limit the width of the legend
+                overflow: "hidden",
               }}
             />
             <Tooltip />
