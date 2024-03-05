@@ -3,17 +3,19 @@ import userSlice from "./services/userService/userSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import uiStateSlice from "./styles/uiStateSlice";
 import loadingSlice from "./services/loadingService";
+import { insightsApi } from "services/rtkQuery/insights";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
     uiState: uiStateSlice,
     loadingState: loadingSlice,
+    [insightsApi.reducerPath]: insightsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+    }).concat(insightsApi.middleware),
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors

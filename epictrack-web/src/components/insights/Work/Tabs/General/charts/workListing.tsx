@@ -5,13 +5,13 @@ import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 import { Work } from "models/work";
-import workService from "services/workService/workService";
 import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import MasterTrackTable from "components/shared/MasterTrackTable";
+import { useGetWorksQuery } from "services/rtkQuery/insights";
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
@@ -19,29 +19,12 @@ const WorkList = () => {
   const [projects, setProjects] = React.useState<string[]>([]);
   const [ministries, setMinistries] = React.useState<string[]>([]);
 
-  const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
-  const [works, setWorks] = React.useState<Work[]>([]);
-
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
+  const { data, error, isLoading } = useGetWorksQuery();
 
-  const loadWorks = async () => {
-    setLoadingWorks(true);
-    try {
-      const isActive = true;
-      const response = await workService.getAll(isActive);
-      setWorks(response.data);
-      setLoadingWorks(false);
-    } catch (error) {
-      showNotification("Could not load works", { type: "error" });
-    }
-  };
-
-  useEffect(() => {
-    loadWorks();
-  }, []);
+  const works = data || [];
 
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
@@ -73,6 +56,12 @@ const WorkList = () => {
     (value) => (value ? "Active" : "Inactive"),
     (value) => value
   );
+
+  useEffect(() => {
+    if (error) {
+      showNotification("Error fetching works", { type: "error" });
+    }
+  }, [error]);
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
@@ -241,7 +230,7 @@ const WorkList = () => {
         ],
       }}
       state={{
-        isLoading: loadingWorks,
+        isLoading: isLoading,
         showGlobalFilter: true,
       }}
       enablePagination
