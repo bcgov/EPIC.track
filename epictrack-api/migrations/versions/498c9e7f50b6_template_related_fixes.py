@@ -116,8 +116,21 @@ def upgrade():
                 action_templates = conn.execute(sa.text(f"SELECT id, sort_order, additional_params FROM action_templates WHERE outcome_id={matched_outcome_template.id}")).all()
                 action_configurations = conn.execute(sa.text(f"SELECT id, sort_order, additional_params FROM action_configurations WHERE outcome_configuration_id={outcome_config.id}")).all()
                 for action_config in action_configurations:
-                    matched_action_template = next(iter([action for action in action_templates if action.sort_order == action_config.sort_order]))
-                    op.execute(f"UPDATE action_configurations SET additional_params='{json.dumps(matched_action_template.additional_params)}', action_template_id={matched_action_template.id} WHERE id = {action_config.id}")
+                    matched_action_template = next(iter([action for action in action_templates if action.sort_order == action_config.sort_order]), None)
+                    if matched_action_template:
+                        additional_params = json.dumps(matched_action_template.additional_params).replace("'", "''")
+                        op.execute(f"UPDATE action_configurations SET additional_params='{additional_params}', action_template_id={matched_action_template.id} WHERE id = {action_config.id}")
+                    else:
+                        print(f"Action configuration Id {action_config.id}")
+                        print(f"Event configuration Id {config.id}")
+                        print(f"Outcome template Id {matched_outcome_template.id}")
+                        print(f"Template Id {config.template_id}")
+                        print("Templates")
+                        for t in action_templates:
+                            print(f"{t.id} {t.sort_order}")
+                        print("Configurations")
+                        for c in action_configurations:
+                            print(f"{c.id} {c.sort_order}")
 
     # ### end Alembic commands ###
 

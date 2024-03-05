@@ -1,6 +1,9 @@
 """Contains all insight generator related resources"""
 
 from api.insights.insight_protocol import InsightGenerator
+from api.insights.project_region_insight import ProjectByRegionInsightGenerator
+from api.insights.project_subtype_insight import ProjectBySubTypeInsightGenerator
+from api.insights.project_type_insight import ProjectByTypeInsightGenerator
 from api.insights.work_assessment_phase_insight import AssessmentWorksByPhaseInsightGenerator
 from api.insights.work_federal_involvement_insight import WorkFederalInvolvementInsightGenerator
 from api.insights.work_first_nation_insight import WorkFirstNationInsightGenerator
@@ -23,6 +26,11 @@ def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
             "first_nation": WorkFirstNationInsightGenerator,
             "type": WorkByTypeInsightGenerator,
             "assessment_by_phase": AssessmentWorksByPhaseInsightGenerator,
+        },
+        "projects": {
+            "region": ProjectByRegionInsightGenerator,
+            "type": ProjectByTypeInsightGenerator,
+            "subtype": ProjectBySubTypeInsightGenerator,
         }
     }
 

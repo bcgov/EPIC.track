@@ -37,7 +37,7 @@ class WorkMinistryInsightGenerator:
         """Fetch data from db"""
         partition_query = self.generate_partition_query()
 
-        team_insights = (
+        ministry_insights = (
             db.session.query(Ministry)
             .join(partition_query, partition_query.c.ministry_id == Ministry.id)
             .add_columns(
@@ -48,11 +48,11 @@ class WorkMinistryInsightGenerator:
             .order_by(partition_query.c.count.desc())
             .all()
         )
-        return self._format_data(team_insights)
+        return self._format_data(ministry_insights)
 
     def _format_data(self, data) -> List[dict]:
         """Format data to the response format"""
-        team_insights = [
+        ministry_insights = [
             {
                 "ministry": row.ministry,
                 "ministry_id": row.ministry_id,
@@ -60,4 +60,4 @@ class WorkMinistryInsightGenerator:
             }
             for row in data
         ]
-        return team_insights
+        return ministry_insights

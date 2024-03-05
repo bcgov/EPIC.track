@@ -28,7 +28,7 @@ from .indigenous_nation_request import (
     IndigenousNationBodyParameterSchema, IndigenousNationExistenceQueryParamSchema,
     IndigenousNationIdPathParameterSchema, IndigenousWorkBodyParameterSchema, WorkIndigenousNationIdPathParameterSchema,
     WorkNationExistenceCheckQueryParamSchema)
-from .insight_request import WorkInsightRequestQueryParameterSchema
+from .insight_request import ProjectInsightRequestQueryParameterSchema, WorkInsightRequestQueryParameterSchema
 from .outcome_configuration_request import (
     OutcomeConfigurationBodyParameterSchema, OutcomeConfigurationQueryParameterSchema)
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema

@@ -216,6 +216,8 @@ export default function AnticipatedEAOSchedule() {
                     sx={{ mt: "15px", bgcolor: "rgba(0, 0, 0, .03)" }}
                     square
                     disableGutters
+                    defaultExpanded
+                    expanded
                     elevation={0}
                   >
                     <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
@@ -234,6 +236,7 @@ export default function AnticipatedEAOSchedule() {
                                     marginRight: "0.5rem",
                                     borderRadius: "4px",
                                     fontSize: "12px",
+                                    width: "100px",
                                     ...staleLevel(item["date_updated"]),
                                   }}
                                   label={

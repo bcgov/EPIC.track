@@ -59,3 +59,20 @@ class AssessmentWorks(Resource):
         args = req.WorkInsightRequestQueryParameterSchema().load(request.args)
         work_insights = InsightService.fetch_assessment_work_insights(args["group_by"])
         return jsonify(work_insights), HTTPStatus.OK
+
+
+@cors_preflight("GET")
+@API.route("/projects", methods=["GET", "OPTIONS"])
+class Projects(Resource):
+    """Endpoint resource to return project insights"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
+    def get():
+        """Return project insights based on group by param."""
+        args = req.ProjectInsightRequestQueryParameterSchema().load(request.args)
+        project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"])
+        return jsonify(project_insights), HTTPStatus.OK

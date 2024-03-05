@@ -42,7 +42,7 @@ class WorkFirstNationInsightGenerator:
         """Fetch data from db"""
         partition_query = self.generate_partition_query()
 
-        team_insights = (
+        first_nation_insights = (
             db.session.query(IndigenousNation)
             .join(partition_query, partition_query.c.indigenous_nation_id == IndigenousNation.id)
             .add_columns(
@@ -53,11 +53,11 @@ class WorkFirstNationInsightGenerator:
             .order_by(partition_query.c.count.desc())
             .all()
         )
-        return self._format_data(team_insights)
+        return self._format_data(first_nation_insights)
 
     def _format_data(self, data) -> List[dict]:
         """Format data to the response format"""
-        team_insights = [
+        first_nation_insights = [
             {
                 "first_nation": row.first_nation,
                 "first_nation_id": row.first_nation_id,
@@ -65,4 +65,4 @@ class WorkFirstNationInsightGenerator:
             }
             for row in data
         ]
-        return team_insights
+        return first_nation_insights
