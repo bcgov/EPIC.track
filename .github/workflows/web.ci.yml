@@ -8,7 +8,7 @@ on:
       - "epictrack-web/**"
   push:
     branches:
-      - develop    
+      - develop
 
 defaults:
   run:
@@ -63,10 +63,10 @@ jobs:
         run: |
           npm install --legacy-peer-deps
 
-      # - name: Test with jest
-      #   id: test
-      #   run: |
-      #     npm test -- --coverage
+      - name: Test with Cypress
+        id: test
+        run: |
+          npx cypress run --component --headless --browser chrome
 
       # # Set codecov branch name with prefix if pull request
       # - name: Sets Codecov branch name
@@ -79,7 +79,7 @@ jobs:
       #   with:
       #     flags: epictrackweb
       #     name: codecov-epictrack-web
-      #     fail_ci_if_error: true    
+      #     fail_ci_if_error: true
       #     verbose: true
       #     override_branch: ${{env.CODECOV_BRANCH}}
       #     token: ${{ secrets.CODECOV_TOKEN }}
