@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import PieChartSkeleton from "./PieChartSkeleton";
 import { useGetWorksByTypeQuery } from "services/rtkQuery/insights";
 import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
 const WorkByTypeChart = () => {
   const {

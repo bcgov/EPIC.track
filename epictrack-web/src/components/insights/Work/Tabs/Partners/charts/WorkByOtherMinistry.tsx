@@ -1,7 +1,14 @@
 import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
-import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 import { getChartColor } from "components/insights/utils";
 import { AssessmentByPhase } from "models/insights";
 import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/insights";
@@ -9,7 +16,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
-const AssessmentByPhaseChart = () => {
+const WorkByOtherMinistryChart = () => {
   const {
     data,
     error,
@@ -42,45 +49,47 @@ const AssessmentByPhaseChart = () => {
     <GrayBox>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <ETCaption1 bold>ASSESSMENT BY PHASE</ETCaption1>
+          <ETCaption1 bold>WORK BY OTHER MINISTRY</ETCaption1>
         </Grid>
         <Grid item xs={12}>
           <ETCaption3>
-            The proportion of active Assessments categorized by which Phase they
-            are in
+            The proportion of active Works categorized by the involvement of
+            other ministries
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <PieChart width={600} height={300}>
-            <Pie
-              data={chartData}
-              cx="50%"
-              cy="50%"
-              outerRadius={80}
-              fill="#8884d8"
-              dataKey="value"
-              label
-              isAnimationActive={false}
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
-              ))}
-            </Pie>
-            <Legend
-              layout="vertical"
-              verticalAlign="middle"
-              align="right"
-              iconSize={16}
-              wrapperStyle={{
-                fontSize: "16px",
-              }}
-            />
-            <Tooltip />
-          </PieChart>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart width={600} height={300}>
+              <Pie
+                data={chartData}
+                cx="50%"
+                cy="50%"
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label
+                isAnimationActive={false}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
+                ))}
+              </Pie>
+              <Legend
+                layout="vertical"
+                verticalAlign="middle"
+                align="right"
+                iconSize={16}
+                wrapperStyle={{
+                  fontSize: "16px",
+                }}
+              />
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
         </Grid>
       </Grid>
     </GrayBox>
   );
 };
 
-export default AssessmentByPhaseChart;
+export default WorkByOtherMinistryChart;
