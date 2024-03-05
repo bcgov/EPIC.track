@@ -1,48 +1,42 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { PieChartData } from "models/insights";
+import { AssessmentByPhase } from "models/insights";
+import PieChartSkeleton from "./PieChartSkeleton";
+import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
-import { getAssessmentByPhase } from "services/insightService";
-import PieChartSkeleton from "./PieChartSkeleton";
 
-const AssessmentByPhase = () => {
-  const [chartData, setChartData] = useState<PieChartData[]>([]);
-  const [loading, setLoading] = useState(true);
+const AssessmentByPhaseChart = () => {
+  const {
+    data,
+    error,
+    isLoading: isChartLoading,
+  } = useGetAssessmentsByPhaseQuery();
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const response = await getAssessmentByPhase();
-      if (response) {
-        console.log(response.data);
-        const data = response.data.map((item) => {
-          return {
-            name: item.phase,
-            value: item.count,
-          };
-        });
-        setChartData(data);
-        setLoading(false);
-      }
-    } catch (error) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-      setLoading(false);
-    }
+  const formatData = (data?: AssessmentByPhase[]) => {
+    if (!data) return [];
+    return data.map((item) => {
+      return {
+        name: item.phase,
+        value: item.count,
+        id: item.phase_id,
+      };
+    });
   };
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  if (loading) {
+  if (isChartLoading) {
     return <PieChartSkeleton />;
   }
+
+  if (error) {
+    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    return <div>Error</div>;
+  }
+
+  const chartData = formatData(data);
 
   return (
     <GrayBox>
@@ -57,7 +51,7 @@ const AssessmentByPhase = () => {
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <PieChart width={500} height={300}>
+          <PieChart width={600} height={300}>
             <Pie
               data={chartData}
               cx="50%"
@@ -69,7 +63,7 @@ const AssessmentByPhase = () => {
               isAnimationActive={false}
             >
               {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getChartColor(index)} />
+                <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
               ))}
             </Pie>
             <Legend
@@ -89,4 +83,4 @@ const AssessmentByPhase = () => {
   );
 };
 
-export default AssessmentByPhase;
+export default AssessmentByPhaseChart;

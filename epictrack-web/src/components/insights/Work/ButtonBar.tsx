@@ -15,16 +15,16 @@ const ButtonBar = () => {
       width="100%"
     >
       <TabButton
-        active={activeTab === WORK_INSIGHTS_TAB.Staff}
-        onClick={() => setActiveTab(WORK_INSIGHTS_TAB.Staff)}
-      >
-        Staff
-      </TabButton>
-      <TabButton
         active={activeTab === WORK_INSIGHTS_TAB.General}
         onClick={() => setActiveTab(WORK_INSIGHTS_TAB.General)}
       >
         General
+      </TabButton>
+      <TabButton
+        active={activeTab === WORK_INSIGHTS_TAB.Staff}
+        onClick={() => setActiveTab(WORK_INSIGHTS_TAB.Staff)}
+      >
+        Staff
       </TabButton>
       <TabButton
         active={activeTab === WORK_INSIGHTS_TAB.Partners}
