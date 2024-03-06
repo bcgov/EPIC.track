@@ -195,10 +195,9 @@ def factory_first_nation_model(first_nation_data=TestFirstNation.first_nation1.v
 
 
 def factory_special_field_model(
-    special_field_data=TestSpecialField.special_field1.value,
+    special_field_data=TestSpecialField.proponent_entity.value,
 ):
     """Produce a special field model."""
-    proponent = factory_proponent_model()
     time_range = DateTimeTZRange(
         special_field_data.get("active_from"), None, bounds="[)"
     )
@@ -206,7 +205,7 @@ def factory_special_field_model(
         entity=special_field_data["entity"],
         field_name=special_field_data["field_name"],
         field_value=special_field_data["field_value"],
-        entity_id=proponent.id,
+        entity_id=special_field_data.get("entity_id") if special_field_data.get("entity_id") else 1,
         time_range=time_range,
     )
     special_field.save()
