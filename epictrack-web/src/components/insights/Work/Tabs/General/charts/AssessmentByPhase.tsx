@@ -4,10 +4,10 @@ import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
 import { AssessmentByPhase } from "models/insights";
-import PieChartSkeleton from "./PieChartSkeleton";
 import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
 const AssessmentByPhaseChart = () => {
   const {
@@ -73,6 +73,8 @@ const AssessmentByPhaseChart = () => {
               iconSize={16}
               wrapperStyle={{
                 fontSize: "16px",
+                maxWidth: "200px", // Add this line to limit the width of the legend
+                overflow: "hidden",
               }}
             />
             <Tooltip />
