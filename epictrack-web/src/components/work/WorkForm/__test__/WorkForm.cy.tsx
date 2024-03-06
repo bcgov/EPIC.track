@@ -38,15 +38,13 @@ const endpoints = [
     method: "GET",
     url: "http://localhost:3200/api/v1/ea-acts",
     response: {
-      body: {
-        codes: faker.lorem
-          .words(10)
-          .split(" ")
-          .map((word) => ({
-            id: faker.number.int(),
-            name: word,
-          })),
-      },
+      body: faker.lorem
+        .words(10)
+        .split(" ")
+        .map((word) => ({
+          id: faker.number.int(),
+          name: word,
+        })),
     },
   },
   {
@@ -54,28 +52,24 @@ const endpoints = [
     method: "GET",
     url: "http://localhost:3200/api/v1/ministries",
     response: {
-      body: {
-        codes: faker.lorem
-          .words(10)
-          .split(" ")
-          .map((word) => ({
-            id: faker.number.int(),
-            name: word,
-            minister: null,
-            abbreviation: word,
-            combined: word,
-          })),
-      },
+      body: faker.lorem
+        .words(10)
+        .split(" ")
+        .map((word) => ({
+          id: faker.number.int(),
+          name: word,
+          minister: null,
+          abbreviation: word,
+          combined: word,
+        })),
     },
   },
   {
     name: "getWorkTypes",
     method: "GET",
-    url: "http://localhost:3200/api/v1/work_types",
+    url: "http://localhost:3200/api/v1/work-types",
     response: {
-      body: {
-        codes: [mockWorkType],
-      },
+      body: [mockWorkType],
     },
   },
   {
@@ -83,15 +77,13 @@ const endpoints = [
     method: "GET",
     url: "http://localhost:3200/api/v1/federal-involvements",
     response: {
-      body: {
-        codes: faker.lorem
-          .words(10)
-          .split(" ")
-          .map((word) => ({
-            id: faker.number.int(),
-            name: word,
-          })),
-      },
+      body: faker.lorem
+        .words(10)
+        .split(" ")
+        .map((word) => ({
+          id: faker.number.int(),
+          name: word,
+        })),
     },
   },
   {
@@ -99,15 +91,13 @@ const endpoints = [
     method: "GET",
     url: "http://localhost:3200/api/v1/eao-teams",
     response: {
-      body: {
-        codes: faker.lorem
-          .words(10)
-          .split(" ")
-          .map((word) => ({
-            id: faker.number.int(),
-            name: word,
-          })),
-      },
+      body: faker.lorem
+        .words(10)
+        .split(" ")
+        .map((word) => ({
+          id: faker.number.int(),
+          name: word,
+        })),
     },
   },
   {
@@ -115,15 +105,13 @@ const endpoints = [
     method: "GET",
     url: "http://localhost:3200/api/v1/substitution-acts",
     response: {
-      body: {
-        codes: faker.lorem
-          .words(10)
-          .split(" ")
-          .map((word) => ({
-            id: faker.number.int(),
-            name: word,
-          })),
-      },
+      body: faker.lorem
+        .words(10)
+        .split(" ")
+        .map((word) => ({
+          id: faker.number.int(),
+          name: word,
+        })),
     },
   },
   {
