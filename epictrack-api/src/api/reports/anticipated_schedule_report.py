@@ -237,8 +237,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 WorkStatus.work_id,
                 func.max(WorkStatus.posted_date).label("max_posted_date"),
             )
-            .filter(WorkStatus.is_approved.is_(True),
-                    WorkStatus.posted_date >= start_date)
+            .filter(WorkStatus.is_approved.is_(True))
             .group_by(WorkStatus.work_id)
             .subquery()
         )
