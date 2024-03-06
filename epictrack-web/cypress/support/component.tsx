@@ -14,12 +14,12 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import "./commands"
+import "./commands";
 import { Provider } from "react-redux";
 import { MemoryRouterProps } from "react-router-dom";
 import { EnhancedStore } from "@reduxjs/toolkit";
 import { RootState, store } from "../../src/store";
-
+import { SnackbarProvider } from "notistack";
 // Alternatively you can use CommonJS syntax:
 // require("./commands")
 
@@ -41,25 +41,33 @@ declare global {
        */
       mount(
         component: React.ReactNode,
-        options?: MountOptions & { routerProps?: MemoryRouterProps } & { reduxStore?: EnhancedStore<RootState> }
-      ): Cypress.Chainable<MountReturn>
+        options?: MountOptions & { routerProps?: MemoryRouterProps } & {
+          reduxStore?: EnhancedStore<RootState>;
+        }
+      ): Cypress.Chainable<MountReturn>;
     }
   }
 }
 
 Cypress.Commands.add("mount", (component, options = {}) => {
-  const { routerProps = { initialEntries: ["/"] }, reduxStore = store, ...mountOptions } = options
+  const {
+    routerProps = { initialEntries: ["/"] },
+    reduxStore = store,
+    ...mountOptions
+  } = options;
 
-  const wrapped = <Provider store={reduxStore}>
-    <ThemeProvider theme={BaseTheme}>
-      <StyledEngineProvider injectFirst>
-        {component}
-      </StyledEngineProvider>
-    </ThemeProvider>
-  </Provider>
+  const wrapped = (
+    <Provider store={reduxStore}>
+      <ThemeProvider theme={BaseTheme}>
+        <StyledEngineProvider injectFirst>
+          <SnackbarProvider maxSnack={3}>{component}</SnackbarProvider>
+        </StyledEngineProvider>
+      </ThemeProvider>
+    </Provider>
+  );
 
-  return mount(wrapped, mountOptions)
-})
+  return mount(wrapped, mountOptions);
+});
 
 // Example use:
 // cy.mount(<MyComponent />)
