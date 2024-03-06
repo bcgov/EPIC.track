@@ -2,6 +2,8 @@ import React from "react";
 import { Grid } from "@mui/material";
 import WorkByTeam from "./Charts/WorkByTeam";
 import { InsightsAccordionCollapsableDetails } from "components/insights/InsightsAccordion";
+import WorkList from "./Charts/workListing";
+import WorkByLead from "./Charts/WorkByLead";
 
 const Staff = () => {
   return (
@@ -9,12 +11,15 @@ const Staff = () => {
       <Grid item xs={4}>
         <WorkByTeam />
       </Grid>
+      <Grid item xs={4}>
+        <WorkByLead />
+      </Grid>
+      <Grid item xs={4}>
+        <WorkByTeam />
+      </Grid>
       <Grid item xs={12}>
         <InsightsAccordionCollapsableDetails>
-          <p>
-            This is the staff tab. It will contain information about the staff
-            and their work.
-          </p>
+          <WorkList />
         </InsightsAccordionCollapsableDetails>
       </Grid>
     </Grid>

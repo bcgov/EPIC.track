@@ -14,3 +14,15 @@ export type AssessmentByPhase = {
   phase: string;
   phase_id: number;
 };
+
+export type WorkByTeam = {
+  count: number;
+  eao_team: string;
+  eao_team_id: number;
+};
+
+export type WorkByLead = {
+  count: number;
+  work_lead: string;
+  work_lead_id: number;
+};

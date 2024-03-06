@@ -1,7 +1,12 @@
 // Need to use the React-specific entry point to import createApi
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
-import { AssessmentByPhase, WorkByType } from "models/insights";
+import {
+  AssessmentByPhase,
+  WorkByLead,
+  WorkByTeam,
+  WorkByType,
+} from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
 
@@ -53,6 +58,32 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
+    getWorksByTeam: builder.query<WorkByTeam[], void>({
+      query: () => `insights/works?group_by=team`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ eao_team_id }) => ({
+                type: "Works" as const,
+                id: eao_team_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByLead: builder.query<WorkByLead[], void>({
+      query: () => `insights/works?group_by=lead`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ work_lead_id }) => ({
+                type: "Works" as const,
+                id: work_lead_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
   }),
   refetchOnMountOrArgChange: 300,
 });
@@ -63,4 +94,6 @@ export const {
   useGetWorksByTypeQuery,
   useGetAssessmentsByPhaseQuery,
   useGetWorksQuery,
+  useGetWorksByTeamQuery,
+  useGetWorksByLeadQuery,
 } = insightsApi;
