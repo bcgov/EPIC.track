@@ -19,7 +19,7 @@ const WorkInsightsContextProvider: React.FC<
   WorkInsightsContextProviderProps
 > = ({ children }) => {
   const [activeTab, setActiveTab] = useState<WorkInsightsTab>(
-    WORK_INSIGHTS_TAB.Staff
+    WORK_INSIGHTS_TAB.General
   );
 
   return (
