@@ -17,7 +17,7 @@ const schema = yup.object().shape({
   description: yup.string().required("Description is required"),
 });
 
-const CHARACTER_LIMIT = 500;
+const CHARACTER_LIMIT = 1000;
 
 const StatusForm = () => {
   const [description, setDescription] = React.useState<string>("");

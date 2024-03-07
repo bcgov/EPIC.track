@@ -13,10 +13,7 @@ import { descriptionCharacterLimit } from "./constants";
 
 const schema = yup.object().shape({
   posted_date: yup.string().required("Date is required"),
-  description: yup
-    .string()
-    .required("Description is required")
-    .max(descriptionCharacterLimit),
+  description: yup.string().required("Description is required"),
 });
 
 const NewIssueUpdate = () => {

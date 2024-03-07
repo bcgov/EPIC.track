@@ -198,7 +198,7 @@ class WorkStatusParameterSchema(RequestBodyParameterSchema):
 
     description = fields.Str(
         metadata={"description": "description of status"},
-        validate=validate.Length(max=500),
+        validate=validate.Length(max=1000),
         required=True,
     )
 
@@ -260,7 +260,7 @@ class WorkIssuesUpdateEditSchema(RequestBodyParameterSchema):
 
     description = fields.Str(
         metadata={"description": "Description of the update"},
-        validate=validate.Length(max=500),
+        validate=validate.Length(max=1000),
         required=True
     )
 
