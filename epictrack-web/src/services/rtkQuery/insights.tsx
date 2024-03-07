@@ -5,14 +5,20 @@ import {
   AssessmentByPhase,
   WorkByLead,
   WorkByTeam,
+  ProjectBySubtype,
+  ProjectByType,
+  WorkByFederalInvolvement,
+  WorkByMinistry,
+  WorkByNation,
   WorkByType,
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
+import { Project } from "models/project";
 
 // Define a service using a base URL and expected endpoints
 export const insightsApi = createApi({
-  tagTypes: ["Works"],
+  tagTypes: ["Works", "Projects"],
   reducerPath: "insightsApi",
   baseQuery: fetchBaseQuery({
     baseUrl: AppConfig.apiUrl,
@@ -58,31 +64,87 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
-    getWorksByTeam: builder.query<WorkByTeam[], void>({
-      query: () => `insights/works?group_by=team`,
+    getWorkByMinistry: builder.query<WorkByMinistry[], void>({
+      query: () => `insights/works?group_by=ministry`,
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ eao_team_id }) => ({
+              ...result.map(({ ministry_id }) => ({
                 type: "Works" as const,
-                id: eao_team_id,
+                id: ministry_id,
               })),
               { type: "Works", id: "LIST" },
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
-    getWorksByLead: builder.query<WorkByLead[], void>({
-      query: () => `insights/works?group_by=lead`,
+    getWorksByFederalInvolvement: builder.query<
+      WorkByFederalInvolvement[],
+      void
+    >({
+      query: () => `insights/works?group_by=federal_involvement`,
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ work_lead_id }) => ({
+              ...result.map(({ federal_involvement_id }) => ({
                 type: "Works" as const,
-                id: work_lead_id,
+                id: federal_involvement_id,
               })),
               { type: "Works", id: "LIST" },
             ]
           : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByNation: builder.query<WorkByNation[], void>({
+      query: () => `insights/works?group_by=first_nation`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ first_nation_id }) => ({
+                type: "Works" as const,
+                id: first_nation_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
+    getProjects: builder.query<Project[], void>({
+      query: () => `projects`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({
+                type: "Projects" as const,
+                id,
+              })),
+              { type: "Projects", id: "LIST" },
+            ]
+          : [{ type: "Projects", id: "LIST" }],
+    }),
+    getProjectByType: builder.query<ProjectByType[], void>({
+      query: () => `insights/projects?group_by=type`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ type_id }) => ({
+                type: "Projects" as const,
+                id: type_id,
+              })),
+              { type: "Projects", id: "LIST" },
+            ]
+          : [{ type: "Projects", id: "LIST" }],
+    }),
+    getProjectBySubType: builder.query<ProjectBySubtype[], number>({
+      query: (type_id: number) =>
+        `insights/projects?group_by=subtype&type_id=${type_id}`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ sub_type_id }) => ({
+                type: "Projects" as const,
+                id: sub_type_id,
+              })),
+              { type: "Projects", id: "LIST" },
+            ]
+          : [{ type: "Projects", id: "LIST" }],
     }),
   }),
   refetchOnMountOrArgChange: 300,
@@ -96,4 +158,10 @@ export const {
   useGetWorksQuery,
   useGetWorksByTeamQuery,
   useGetWorksByLeadQuery,
+  useGetWorkByMinistryQuery,
+  useGetWorksByFederalInvolvementQuery,
+  useGetWorksByNationQuery,
+  useGetProjectByTypeQuery,
+  useGetProjectBySubTypeQuery,
+  useGetProjectsQuery,
 } = insightsApi;

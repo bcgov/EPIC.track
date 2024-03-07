@@ -956,8 +956,12 @@ class EventService:
                         )
                     )
             else:
-                existing_event = db.session.query(Event).filter(
-                    Event.source_event_id == event.id, Event.is_active.is_(True)
+                existing_event = (
+                    db.session.query(Event)
+                    .filter(
+                        Event.source_event_id == event.id, Event.is_active.is_(True)
+                    )
+                    .first()
                 )
                 if existing_event:
                     existing_event.anticipated_date = c_event_start_date

@@ -1,1 +1,1 @@
-export const descriptionCharacterLimit = 500;
+export const descriptionCharacterLimit = 1000;

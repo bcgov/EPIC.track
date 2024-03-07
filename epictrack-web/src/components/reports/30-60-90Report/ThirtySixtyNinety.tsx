@@ -207,10 +207,10 @@ export default function ThirtySixtyNinety() {
                             <TabPanel value={selectedTab} index={1}>
                               {item["work_short_description"]}
                             </TabPanel>
-                            <TabPanel value={selectedTab} index={1}>
+                            <TabPanel value={selectedTab} index={2}>
                               {item["work_status_text"]}
                             </TabPanel>
-                            <TabPanel value={selectedTab} index={1}>
+                            <TabPanel value={selectedTab} index={3}>
                               {item["decision_information"]}
                             </TabPanel>
                           </AccordionDetails>
