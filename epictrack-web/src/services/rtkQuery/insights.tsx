@@ -11,6 +11,7 @@ import {
   WorkByMinistry,
   WorkByNation,
   WorkByType,
+  WorkByStaff,
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
@@ -106,6 +107,45 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
+    getWorksByTeam: builder.query<WorkByTeam[], void>({
+      query: () => `insights/works?group_by=team`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ eao_team_id }) => ({
+                type: "Works" as const,
+                id: eao_team_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByLead: builder.query<WorkByLead[], void>({
+      query: () => `insights/works?group_by=lead`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ work_lead_id }) => ({
+                type: "Works" as const,
+                id: work_lead_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByStaff: builder.query<WorkByStaff[], void>({
+      query: () => `insights/works?group_by=staff`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ staff_id }) => ({
+                type: "Works" as const,
+                id: staff_id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
     getProjects: builder.query<Project[], void>({
       query: () => `projects`,
       providesTags: (result) =>
@@ -147,6 +187,7 @@ export const insightsApi = createApi({
           : [{ type: "Projects", id: "LIST" }],
     }),
   }),
+
   refetchOnMountOrArgChange: 300,
 });
 
@@ -161,6 +202,7 @@ export const {
   useGetWorkByMinistryQuery,
   useGetWorksByFederalInvolvementQuery,
   useGetWorksByNationQuery,
+  useGetWorksByStaffQuery,
   useGetProjectByTypeQuery,
   useGetProjectBySubTypeQuery,
   useGetProjectsQuery,

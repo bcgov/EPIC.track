@@ -49,8 +49,8 @@ const WorkList = () => {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "ministry") {
-        accessor = "abbreviation";
+      if (key == "work_lead") {
+        accessor = "full_name";
       }
       const codes = works
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -62,13 +62,6 @@ const WorkList = () => {
       codeTypes[key](codes);
     });
   }, [works]);
-
-  const statuses = getSelectFilterOptions(
-    works,
-    "is_active",
-    (value) => (value ? "Active" : "Inactive"),
-    (value) => value
-  );
 
   useEffect(() => {
     if (error) {
@@ -130,7 +123,7 @@ const WorkList = () => {
         },
       },
       {
-        accessorKey: "work_lead.name",
+        accessorKey: "work_lead.full_name",
         header: "Lead",
         filterVariant: "multi-select",
         filterSelectOptions: leads,

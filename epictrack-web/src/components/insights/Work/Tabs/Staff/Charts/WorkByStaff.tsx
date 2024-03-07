@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
-import { useGetWorksByLeadQuery } from "services/rtkQuery/insights";
+import { useGetWorksByStaffQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import {
@@ -17,17 +17,17 @@ import {
   YAxis,
 } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import type { WorkByLead, WorkByTeam } from "models/insights";
+import type { WorkByStaff, WorkByTeam } from "models/insights";
 import { Palette } from "styles/theme";
 import CustomAxisTick from "./CustomAxisTick";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 
-const WorkByLeadChart = () => {
+const WorkByStaffChart = () => {
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByLeadQuery();
+  } = useGetWorksByStaffQuery();
 
   if (isChartLoading || !chartData) {
     return <BarChartSkeleton />;
@@ -39,13 +39,13 @@ const WorkByLeadChart = () => {
     return <div>Error</div>;
   }
 
-  const formatData = (data: WorkByLead[]) => {
+  const formatData = (data: WorkByStaff[]) => {
     if (!data) return [];
     return data.map((item) => {
       return {
-        name: item.work_lead,
+        name: item.staff,
         value: item.count,
-        id: item.work_lead_id,
+        id: item.staff_id,
       };
     });
   };
@@ -54,7 +54,7 @@ const WorkByLeadChart = () => {
     <GrayBox>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <ETCaption1 bold>WORK BY LEAD</ETCaption1>
+          <ETCaption1 bold>WORK BY STAFF</ETCaption1>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <BarChart
@@ -90,4 +90,4 @@ const WorkByLeadChart = () => {
   );
 };
 
-export default WorkByLeadChart;
+export default WorkByStaffChart;

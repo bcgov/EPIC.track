@@ -45,6 +45,12 @@ export type WorkByNation = {
   first_nation_id: number;
 };
 
+export type WorkByStaff = {
+  count: number;
+  staff: string;
+  staff_id: number;
+};
+
 export type ProjectByType = {
   count: number;
   type: string;

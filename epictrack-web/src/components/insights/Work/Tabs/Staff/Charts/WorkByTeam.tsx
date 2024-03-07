@@ -6,7 +6,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { Cell, Legend, Pie, PieChart, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import PieChartSkeleton from "../../General/charts/PieChartSkeleton";
+import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import type { WorkByTeam } from "models/insights";
 
 const WorkByTeamChart = () => {

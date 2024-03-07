@@ -4,6 +4,7 @@ import WorkByTeam from "./Charts/WorkByTeam";
 import { InsightsAccordionCollapsableDetails } from "components/insights/InsightsAccordion";
 import WorkList from "./Charts/workListing";
 import WorkByLead from "./Charts/WorkByLead";
+import WorkByStaff from "./Charts/WorkByStaff";
 
 const Staff = () => {
   return (
@@ -15,7 +16,7 @@ const Staff = () => {
         <WorkByLead />
       </Grid>
       <Grid item xs={4}>
-        <WorkByTeam />
+        <WorkByStaff />
       </Grid>
       <Grid item xs={12}>
         <InsightsAccordionCollapsableDetails>
