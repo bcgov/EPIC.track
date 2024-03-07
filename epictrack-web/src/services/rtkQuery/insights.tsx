@@ -3,6 +3,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
 import {
   AssessmentByPhase,
+  ProjectBySubtype,
+  ProjectByType,
   WorkByFederalInvolvement,
   WorkByMinistry,
   WorkByNation,
@@ -10,10 +12,11 @@ import {
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
+import { Project } from "models/project";
 
 // Define a service using a base URL and expected endpoints
 export const insightsApi = createApi({
-  tagTypes: ["Works"],
+  tagTypes: ["Works", "Projects"],
   reducerPath: "insightsApi",
   baseQuery: fetchBaseQuery({
     baseUrl: AppConfig.apiUrl,
@@ -101,6 +104,46 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
+    getProjects: builder.query<Project[], void>({
+      query: () => `projects`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({
+                type: "Projects" as const,
+                id,
+              })),
+              { type: "Projects", id: "LIST" },
+            ]
+          : [{ type: "Projects", id: "LIST" }],
+    }),
+    getProjectByType: builder.query<ProjectByType[], void>({
+      query: () => `insights/projects?group_by=type`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ type_id }) => ({
+                type: "Projects" as const,
+                id: type_id,
+              })),
+              { type: "Projects", id: "LIST" },
+            ]
+          : [{ type: "Projects", id: "LIST" }],
+    }),
+    getProjectBySubType: builder.query<ProjectBySubtype[], number>({
+      query: (type_id: number) =>
+        `insights/projects?group_by=subtype&type_id=${type_id}`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ sub_type_id }) => ({
+                type: "Projects" as const,
+                id: sub_type_id,
+              })),
+              { type: "Projects", id: "LIST" },
+            ]
+          : [{ type: "Projects", id: "LIST" }],
+    }),
   }),
   refetchOnMountOrArgChange: 300,
 });
@@ -114,4 +157,7 @@ export const {
   useGetWorkByMinistryQuery,
   useGetWorksByFederalInvolvementQuery,
   useGetWorksByNationQuery,
+  useGetProjectByTypeQuery,
+  useGetProjectBySubTypeQuery,
+  useGetProjectsQuery,
 } = insightsApi;
