@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
+import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByStaffQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
@@ -9,16 +9,11 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  Legend,
-  Pie,
-  PieChart,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { getChartColor } from "components/insights/utils";
-import type { WorkByStaff, WorkByTeam } from "models/insights";
-import { Palette } from "styles/theme";
+import type { WorkByStaff } from "models/insights";
 import CustomAxisTick from "./CustomAxisTick";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 
