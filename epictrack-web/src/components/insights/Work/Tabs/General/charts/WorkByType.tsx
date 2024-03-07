@@ -1,47 +1,41 @@
-import React, { useEffect, useState } from "react";
-import { Grid, Skeleton } from "@mui/material";
+import React from "react";
+import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { getWorkByType } from "services/insightService";
-import { PieChartData } from "models/insights";
-import PieChartSkeleton from "./PieChartSkeleton";
+import { useGetWorksByTypeQuery } from "services/rtkQuery/insights";
+import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
-const WorkByType = () => {
-  const [chartData, setChartData] = useState<PieChartData[]>([]);
-  const [loading, setLoading] = useState(true);
+const WorkByTypeChart = () => {
+  const {
+    data: chartData,
+    error,
+    isLoading: isChartLoading,
+  } = useGetWorksByTypeQuery();
 
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const response = await getWorkByType();
-      if (response) {
-        const data = response.data.map((item) => {
-          return {
-            name: item.work_type,
-            value: item.count,
-          };
-        });
-        setChartData(data);
-        setLoading(false);
-      }
-    } catch (error) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  if (loading) {
+  if (isChartLoading || !chartData) {
     return <PieChartSkeleton />;
   }
+
+  // TODO: handle error
+  if (error) {
+    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    return <div>Error</div>;
+  }
+
+  const formatData = (data: WorkByType[]) => {
+    if (!data) return [];
+    return data.map((item) => {
+      return {
+        name: item.work_type,
+        value: item.count,
+        id: item.work_type_id,
+      };
+    });
+  };
 
   return (
     <GrayBox>
@@ -55,9 +49,9 @@ const WorkByType = () => {
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <PieChart width={500} height={300}>
+          <PieChart width={600} height={300}>
             <Pie
-              data={chartData}
+              data={formatData(chartData)}
               cx="50%"
               cy="50%"
               outerRadius={80}
@@ -66,8 +60,8 @@ const WorkByType = () => {
               label
               isAnimationActive={false}
             >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={getChartColor(index)} />
+              {formatData(chartData).map((entry, index) => (
+                <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
               ))}
             </Pie>
             <Legend
@@ -77,6 +71,8 @@ const WorkByType = () => {
               iconSize={16}
               wrapperStyle={{
                 fontSize: "16px",
+                maxWidth: "200px", // Add this line to limit the width of the legend
+                overflow: "hidden",
               }}
             />
             <Tooltip />
@@ -87,4 +83,4 @@ const WorkByType = () => {
   );
 };
 
-export default WorkByType;
+export default WorkByTypeChart;

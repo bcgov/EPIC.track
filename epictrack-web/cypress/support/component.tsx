@@ -17,6 +17,7 @@
 import "./commands";
 import { Provider } from "react-redux";
 import { MemoryRouterProps } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
 import { EnhancedStore } from "@reduxjs/toolkit";
 import { RootState, store } from "../../src/store";
 import { SnackbarProvider } from "notistack";

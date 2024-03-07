@@ -1,12 +1,6 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import ProjectList from "../ProjectList";
-import { MasterContext } from "components/shared/MasterContext";
-import {
-  createMockMasterContext,
-  generateMockProject,
-} from "../../../../cypress/support/common";
-import { setupIntercepts } from "../../../../cypress/support/utils";
-import { SnackbarProvider } from "notistack";
+import { generateMockProject } from "../../../../cypress/support/common";
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
@@ -28,25 +22,28 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
 
 const endpoints = [
   {
-    name: "getProjectsAll",
+    name: "getProjectsListType",
     method: "GET",
     url: "http://localhost:3200/api/v1/projects",
-    response: { body: projects },
+    response: {
+      body: projects,
+    },
   },
 ];
+
+function setupIntercepts(endpoints: any[]) {
+  endpoints.forEach(({ method, url, response, name }) => {
+    cy.intercept(method, url, response).as(name);
+  });
+}
 
 describe("ProjectList", () => {
   beforeEach(() => {
     // This assumes you have a route set up for your projects in your commands.js
     setupIntercepts(endpoints);
-
     cy.mount(
       <Router>
-        <MasterContext.Provider
-          value={createMockMasterContext(projects, projects)}
-        >
-          <ProjectList />
-        </MasterContext.Provider>
+        <ProjectList />
       </Router>
     );
   });

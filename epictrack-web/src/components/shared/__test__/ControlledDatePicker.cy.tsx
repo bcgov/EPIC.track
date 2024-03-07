@@ -1,7 +1,6 @@
 import React from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import ControlledDatePicker from "../controlledInputComponents/ControlledDatePicker";
-import dayjs from "dayjs";
 
 const TestComponent: React.FC = () => {
   const methods = useForm();
