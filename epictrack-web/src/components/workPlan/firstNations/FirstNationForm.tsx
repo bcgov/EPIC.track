@@ -257,7 +257,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
             name="indigenous_consultation_level_id"
             placeholder="Select / Confirm PIN Status"
             options={consultationLevels || []}
-            getOptionValue={(o: OptionType) => o?.value}
+            getOptionValue={(o: OptionType) => String(o?.value)}
             getOptionLabel={(o: OptionType) => o.label}
           ></ControlledSelectV2>
         </Grid>
