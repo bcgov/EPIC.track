@@ -28,15 +28,6 @@ const ProjectList = () => {
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  // React.useEffect(() => {
-  //   ctx.setService(projectService);
-  //   ctx.setFormStyle({
-  //     "& .MuiDialogContent-root": {
-  //       padding: 0,
-  //     },
-  //   });
-  // }, []);
-
   const fetchProjects = async () => {
     setLoadingProjects(true);
     try {

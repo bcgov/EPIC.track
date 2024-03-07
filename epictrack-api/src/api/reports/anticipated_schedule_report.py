@@ -69,7 +69,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
         next_pecp_query = self._get_next_pcp_query(start_date)
         referral_event_query = self._get_referral_event_query(start_date)
-        latest_status_updates = self._get_latest_status_update_query(start_date)
+        latest_status_updates = self._get_latest_status_update_query()
 
         results_qry = (
             db.session.query(Work)
@@ -230,15 +230,14 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .subquery()
         )
 
-    def _get_latest_status_update_query(self, start_date):
-        """Create and return the subquery to find latest status update based on start date"""
+    def _get_latest_status_update_query(self):
+        """Create and return the subquery to find latest status update."""
         status_update_max_date_query = (
             db.session.query(
                 WorkStatus.work_id,
                 func.max(WorkStatus.posted_date).label("max_posted_date"),
             )
-            .filter(WorkStatus.is_approved.is_(True),
-                    WorkStatus.posted_date >= start_date)
+            .filter(WorkStatus.is_approved.is_(True))
             .group_by(WorkStatus.work_id)
             .subquery()
         )

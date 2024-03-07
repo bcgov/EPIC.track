@@ -22,6 +22,7 @@ from sqlalchemy.dialects.postgresql.ranges import Range
 
 from api.exceptions import ResourceNotFoundError
 from api.models import SpecialField, db
+from api.models.special_field import EntityEnum
 from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
 
 
@@ -109,7 +110,7 @@ class SpecialFieldService:  # pylint:disable=too-few-public-methods
     def _update_original_model(cls, special_field_entry: SpecialField) -> None:
         """If `special_field_entry` is latest, update original table with new value"""
         if special_field_entry.time_range.upper is None:
-            model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[special_field_entry.entity]
+            model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[EntityEnum(special_field_entry.entity)]
             model_class.query.filter(
                 model_class.id == special_field_entry.entity_id
             ).update({special_field_entry.field_name: special_field_entry.field_value})

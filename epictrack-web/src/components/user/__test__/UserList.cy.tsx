@@ -51,7 +51,7 @@ const endpoints = [
   {
     method: "GET",
     url: "http://localhost:3200/api/v1/staffs?is_active=false",
-    body: { data: mockStaffs },
+    body: mockStaffs,
   },
   {
     method: "GET",
@@ -70,14 +70,12 @@ const endpoints = [
   {
     method: "GET",
     url: "http://localhost:3200/api/v1/users",
-    body: { data: users },
+    body: users,
   },
   {
     method: "GET",
     url: "http://localhost:3200/api/v1/users/groups",
-    body: {
-      data: [user1.group, user2.group],
-    },
+    body: [user1.group, user2.group],
   },
 ];
 

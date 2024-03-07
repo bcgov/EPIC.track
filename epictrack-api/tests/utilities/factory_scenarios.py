@@ -220,9 +220,16 @@ class TestPipOrgType(Enum):
 class TestSpecialField(Enum):
     """Test scenarios for Special fields"""
 
-    special_field1 = {
+    proponent_entity = {
         "entity": EntityEnum.PROPONENT.value,
         "field_name": "name",
+        "field_value": fake.word(),
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
+    }
+
+    work_entity = {
+        "entity": EntityEnum.WORK.value,
+        "field_name": "work_lead_id",
         "field_value": fake.word(),
         "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
     }
