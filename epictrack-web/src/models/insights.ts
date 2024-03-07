@@ -32,3 +32,15 @@ export type WorkByNation = {
   first_nation: string;
   first_nation_id: number;
 };
+
+export type ProjectByType = {
+  count: number;
+  type: string;
+  type_id: number;
+};
+
+export type ProjectBySubtype = {
+  count: number;
+  sub_type: string;
+  sub_type_id: number;
+};
