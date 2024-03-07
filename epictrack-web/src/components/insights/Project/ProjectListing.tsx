@@ -8,17 +8,14 @@ import { Project } from "models/project";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetProjectsQuery } from "services/rtkQuery/insights";
+import { useProjectsContext } from "./ProjectsContext";
 
 const ProjectList = () => {
+  const { projects, loadingProjects } = useProjectsContext();
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 15,
   });
-
-  const { data, isLoading: loadingProjects } = useGetProjectsQuery();
-
-  const projects = data ?? [];
 
   const types = projects
     .map((p) => p.type.name)

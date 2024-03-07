@@ -130,9 +130,11 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Projects", id: "LIST" }],
     }),
-    getProjectBySubType: builder.query<ProjectBySubtype[], number>({
-      query: (type_id: number) =>
-        `insights/projects?group_by=subtype&type_id=${type_id}`,
+    getProjectBySubType: builder.query<ProjectBySubtype[], number | undefined>({
+      query: (type_id?: number) =>
+        `insights/projects?group_by=subtype${
+          type_id ? `&type_id=${type_id}` : ""
+        }`,
       providesTags: (result) =>
         result
           ? [
@@ -159,5 +161,6 @@ export const {
   useGetWorksByNationQuery,
   useGetProjectByTypeQuery,
   useGetProjectBySubTypeQuery,
+  useLazyGetProjectBySubTypeQuery,
   useGetProjectsQuery,
 } = insightsApi;

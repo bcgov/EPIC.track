@@ -38,7 +38,7 @@ const ProjectByTypeChart = () => {
   };
 
   return (
-    <GrayBox>
+    <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <ETCaption1 bold>PROJECT BY TYPE</ETCaption1>

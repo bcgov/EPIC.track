@@ -2,7 +2,7 @@ import { GroupBase } from "react-select/dist/declarations/src/types";
 import { Props } from "react-select";
 
 export interface OptionType {
-  readonly value: string;
+  readonly value: string | number;
   readonly label: string;
 }
 
