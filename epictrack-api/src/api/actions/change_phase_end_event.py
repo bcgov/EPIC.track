@@ -78,7 +78,7 @@ class ChangePhaseEndEvent(ActionFactory):
             ),
             None,
         )
-        next_work_phase_start_event.start_date = source_event.actual_date + timedelta(
+        next_work_phase_start_event.anticipated_date = source_event.actual_date + timedelta(
             days=1
         )
         EventService.update_event(
