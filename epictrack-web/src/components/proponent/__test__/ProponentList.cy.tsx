@@ -1,5 +1,4 @@
 import { MemoryRouter as Router } from "react-router-dom";
-import { SnackbarProvider } from "notistack";
 import ProponentList from "../ProponentList";
 import { faker } from "@faker-js/faker";
 import { Proponent } from "models/proponent";
@@ -63,15 +62,13 @@ describe("ProponentList", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
     cy.mount(
-      <SnackbarProvider maxSnack={3}>
-        <Router>
-          <MasterContext.Provider
-            value={createMockMasterContext(proponents, proponents)}
-          >
-            <ProponentList />
-          </MasterContext.Provider>
-        </Router>
-      </SnackbarProvider>
+      <Router>
+        <MasterContext.Provider
+          value={createMockMasterContext(proponents, proponents)}
+        >
+          <ProponentList />
+        </MasterContext.Provider>
+      </Router>
     );
   });
 

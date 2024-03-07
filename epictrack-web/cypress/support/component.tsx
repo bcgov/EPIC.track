@@ -17,6 +17,7 @@
 import "./commands"
 import { Provider } from "react-redux";
 import { MemoryRouterProps } from "react-router-dom";
+import { SnackbarProvider } from "notistack";
 import { EnhancedStore } from "@reduxjs/toolkit";
 import { RootState, store } from "../../src/store";
 
@@ -53,7 +54,9 @@ Cypress.Commands.add("mount", (component, options = {}) => {
   const wrapped = <Provider store={reduxStore}>
     <ThemeProvider theme={BaseTheme}>
       <StyledEngineProvider injectFirst>
-        {component}
+        <SnackbarProvider maxSnack={3}>
+          {component}
+        </SnackbarProvider>
       </StyledEngineProvider>
     </ThemeProvider>
   </Provider>
