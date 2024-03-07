@@ -5,6 +5,8 @@ import {
   createMockMasterContext,
   generateMockProject,
 } from "../../../../cypress/support/common";
+import { setupIntercepts } from "../../../../cypress/support/utils";
+import { SnackbarProvider } from "notistack";
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
@@ -24,9 +26,20 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
     });
 }
 
+const endpoints = [
+  {
+    name: "getProjectsAll",
+    method: "GET",
+    url: "http://localhost:3200/api/v1/projects",
+    response: { body: projects },
+  },
+];
+
 describe("ProjectList", () => {
   beforeEach(() => {
     // This assumes you have a route set up for your projects in your commands.js
+    setupIntercepts(endpoints);
+
     cy.mount(
       <Router>
         <MasterContext.Provider
@@ -50,10 +63,7 @@ describe("ProjectList", () => {
     );
 
     // Check that the table contains a row for Project 1 and does not contain a row for Project 2
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project1.name)
-      .should("be.visible");
+    cy.get("table").contains("tr", project1.name).should("be.visible");
     cy.get("table").contains("tr", project2.name).should("not.exist");
 
     // Clear the project name input field and type a different project name
@@ -62,61 +72,31 @@ describe("ProjectList", () => {
       .type(project2.name);
 
     // Check that the table contains a row for Project 2 and does not contain a row for Project 1
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project2.name)
-      .should("be.visible");
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project1.name)
-      .should("not.exist");
+    cy.get("table").contains("tr", project2.name).should("be.visible");
+    cy.get("table").contains("tr", project1.name).should("not.exist");
   });
 
   it("should find the table cell with the 'Type' div, find the div that includes the project type and filter accordingly", () => {
     testTableFiltering("Type", project1.type.name);
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project1.name)
-      .should("be.visible");
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project2.name)
-      .should("not.exist");
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 
   it("should find the table cell with the 'Sub Type' div, find the div that includes the sub type and filter accordingly", () => {
     testTableFiltering("Sub Type", project1.sub_type.name);
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project1.name)
-      .should("be.visible");
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project2.name)
-      .should("not.exist");
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 
   it("should find the table cell with the 'Proponents' div, find the div that includes the proponent name and filter accordingly", () => {
     testTableFiltering("Proponents", project1.proponent.name);
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project1.name)
-      .should("be.visible");
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project2.name)
-      .should("not.exist");
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 
   it("should find the table cell with the 'ENV Region' div, find the div that includes the env region and filter accordingly", () => {
     testTableFiltering("ENV Region", project1.region_env.name);
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project1.name)
-      .should("be.visible");
-    cy.get("table")
-      .contains("tbody")
-      .contains("tr", project2.name)
-      .should("not.exist");
+    cy.get("table").contains("tr", project1.name).should("be.visible");
+    cy.get("table").contains("tr", project2.name).should("not.exist");
   });
 });
