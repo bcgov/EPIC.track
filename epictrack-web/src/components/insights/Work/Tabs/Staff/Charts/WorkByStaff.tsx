@@ -15,7 +15,6 @@ import {
   YAxis,
 } from "recharts";
 import type { WorkByStaff } from "models/insights";
-import CustomAxisTick from "./CustomAxisTick";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 
 const WorkByStaffChart = () => {

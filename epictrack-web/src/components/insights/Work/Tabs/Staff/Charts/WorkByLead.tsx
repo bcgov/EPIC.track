@@ -15,7 +15,6 @@ import {
   YAxis,
 } from "recharts";
 import type { WorkByLead } from "models/insights";
-import CustomAxisTick from "./CustomAxisTick";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { BAR_COLOR } from "components/insights/utils";
 
