@@ -9,6 +9,7 @@ import { When } from "react-if";
 import { MY_WORKPLAN_VIEW } from "./type";
 import { MyWorkplanGantt } from "./Gantt";
 import { useAppSelector } from "hooks";
+import { getTotalHeaderHeight } from "components/layout/Header/constants";
 
 const WorkPlanContainer = () => {
   const { myWorkPlanView } = useContext(MyWorkplansContext);
@@ -26,7 +27,7 @@ const WorkPlanContainer = () => {
         sx={{
           position: "sticky",
           zIndex: theme.zIndex.appBar,
-          top: showEnvBanner ? 80 : 72,
+          top: getTotalHeaderHeight(showEnvBanner),
           backgroundColor: "white",
           paddingBottom: "1em",
         }}
