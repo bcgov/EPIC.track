@@ -8,9 +8,11 @@ import { Palette } from "../../../styles/theme";
 import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
+import { useTheme } from "@mui/material";
 
 const INPUT_SIZE = "0.875rem";
 const FilterSelect = (props: SelectProps) => {
+  const theme = useTheme();
   const { name, isMulti, defaultValue } = props;
   const standardDefault = isMulti ? [] : "";
   const [options, setOptions] = React.useState<OptionType[]>([]);
@@ -225,7 +227,7 @@ const FilterSelect = (props: SelectProps) => {
         }),
         menuPortal: (base, props) => ({
           ...base,
-          zIndex: 2,
+          zIndex: theme.zIndex.modal,
           marginTop: "4px",
         }),
         input: (base, props) => ({
