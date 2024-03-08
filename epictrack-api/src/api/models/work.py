@@ -18,7 +18,7 @@ from __future__ import annotations
 import enum
 from typing import List, Tuple
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func
+from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func, or_
 from sqlalchemy.orm import relationship
 
 from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
@@ -159,7 +159,15 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_staff_id(cls, query, staff_id):
         if staff_id is not None:
-            subquery = exists().where(and_(Work.id == StaffWorkRole.work_id, StaffWorkRole.staff_id == staff_id))
+            subquery = exists().where(
+                and_(
+                    Work.id == StaffWorkRole.work_id,
+                    or_(
+                        StaffWorkRole.staff_id == staff_id,
+                        Work.responsible_epd_id == staff_id,
+                    ),
+                )
+            )
             query = query.filter(subquery)
         return query
 
