@@ -9,6 +9,7 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
+  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -16,6 +17,7 @@ import {
 import type { WorkByLead } from "models/insights";
 import CustomAxisTick from "./CustomAxisTick";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { BAR_COLOR } from "components/insights/utils";
 
 const WorkByLeadChart = () => {
   const {
@@ -52,33 +54,26 @@ const WorkByLeadChart = () => {
           <ETCaption1 bold>WORK BY LEAD</ETCaption1>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <BarChart
-            layout="vertical"
-            data={formatData(chartData)}
-            width={600}
-            height={300}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 50, // Increase left margin if names are getting cut off
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis type="number" />
-            <YAxis
-              dataKey="name"
-              type="category"
-              width={80} // Adjust the width to give more space for text
-              tick={<CustomAxisTick width={80} />} // Make sure to pass the width
-            />
-            <Tooltip />
-            <Bar dataKey="value" fill="#82ca9d" barSize={20}>
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={"#4bacc6"} />
-              ))}
-            </Bar>
-          </BarChart>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              layout="vertical"
+              data={formatData(chartData)}
+              margin={{
+                left: 40, // Increase left margin if names are getting cut off
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis type="number" />
+              <YAxis
+                dataKey="name"
+                type="category"
+                width={40} // Adjust the width to give more space for text
+                tick={{ fontSize: 12 }} // Make sure to pass the width
+              />
+              <Tooltip />
+              <Bar dataKey="value" fill={BAR_COLOR} barSize={10} />
+            </BarChart>
+          </ResponsiveContainer>
         </Grid>
       </Grid>
     </GrayBox>

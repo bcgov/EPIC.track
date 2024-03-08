@@ -44,12 +44,13 @@ const WorkList = () => {
     work_type: setWorkTypes,
     eao_team: setTeams,
     work_lead: setLeads,
+    responsible_epd: setOfficers,
   };
 
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "work_lead") {
+      if (key == "work_lead" || key == "responsible_epd") {
         accessor = "full_name";
       }
       const codes = works
@@ -152,7 +153,7 @@ const WorkList = () => {
         },
       },
       {
-        accessorKey: "current_work_phase.name",
+        accessorKey: "responsible_epd.full_name",
         header: "Officer/Analyst",
         filterVariant: "multi-select",
         filterSelectOptions: officers,
