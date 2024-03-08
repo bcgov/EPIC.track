@@ -12,6 +12,7 @@ import TrackSelect from "components/shared/TrackSelect";
 import { useProjectsContext } from "./ProjectsContext";
 import { getProjectsSubtypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
+import { Unless } from "react-if";
 
 const ProjectBySubtypeChart = () => {
   const { projects, loadingProjects } = useProjectsContext();
@@ -34,7 +35,7 @@ const ProjectBySubtypeChart = () => {
   }, [projectSubtypes]);
 
   useEffect(() => {
-    if (selectedSubtype) {
+    if (selectedSubtype?.id) {
       loadChartTrigger(selectedSubtype.id);
     }
   }, [selectedSubtype]);
@@ -49,18 +50,32 @@ const ProjectBySubtypeChart = () => {
     return <div>Error</div>;
   }
 
-  const formatData = (data: ProjectBySubtype[]) => {
-    if (!data) return [];
-    return data.map((item) => {
+  const formatData = (data?: ProjectBySubtype[]) => {
+    if (!data || data.length === 0) {
       return {
-        name: item.sub_type,
-        value: item.count,
-        id: item.sub_type_id,
+        data: [
+          {
+            name: "No result",
+            value: 1,
+            id: 0,
+          },
+        ],
+        noData: true,
       };
-    });
+    }
+    return {
+      data: data.map((item) => {
+        return {
+          name: item.sub_type,
+          value: item.count,
+          id: item.sub_type_id,
+        };
+      }),
+      noData: false,
+    };
   };
 
-  const chartData = queryResult.data ?? [];
+  const { data: chartData, noData } = formatData(queryResult.data);
 
   return (
     <GrayBox sx={{ height: "100%" }}>
@@ -98,16 +113,16 @@ const ProjectBySubtypeChart = () => {
         <Grid item xs={12} container justifyContent={"center"}>
           <PieChart width={600} height={300}>
             <Pie
-              data={formatData(chartData)}
+              data={chartData}
               cx="50%"
               cy="50%"
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
-              label
+              label={!noData}
               isAnimationActive={false}
             >
-              {formatData(chartData).map((entry, index) => (
+              {chartData.map((entry, index) => (
                 <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
               ))}
             </Pie>
@@ -122,7 +137,9 @@ const ProjectBySubtypeChart = () => {
                 overflow: "hidden",
               }}
             />
-            <Tooltip />
+            <Unless condition={noData}>
+              <Tooltip />
+            </Unless>
           </PieChart>
         </Grid>
       </Grid>
