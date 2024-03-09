@@ -15,6 +15,18 @@ export type AssessmentByPhase = {
   phase_id: number;
 };
 
+export type WorkByTeam = {
+  count: number;
+  eao_team: string;
+  eao_team_id: number;
+};
+
+export type WorkByLead = {
+  count: number;
+  work_lead: string;
+  work_lead_id: number;
+};
+
 export type WorkByMinistry = {
   count: number;
   ministry: string;
@@ -31,6 +43,12 @@ export type WorkByNation = {
   count: number;
   first_nation: string;
   first_nation_id: number;
+};
+
+export type WorkByStaff = {
+  count: number;
+  staff: string;
+  staff_id: number;
 };
 
 export type ProjectByType = {
