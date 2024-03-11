@@ -19,7 +19,7 @@ jobs:
   setup-job:
     runs-on: ubuntu-20.04
 
-    if: github.repository == 'bcgov/EPIC.track'
+    if: github.repository == 'saravanpa-aot/EPIC.track'
 
     steps:
       - uses: actions/checkout@v2
@@ -63,10 +63,13 @@ jobs:
         run: |
           npm install --legacy-peer-deps
 
-      - name: Test with Cypress
-        id: test
-        run: |
-          npx cypress run --component --headed --browser chrome
+      - name: Cypress run
+        uses: cypress-io/github-action@v2
+        with:
+          record: true
+          browser: chrome
+          headless: false
+          wait-on: 'http://localhost:3000' # Replace with your app's URL
 
       # # Set codecov branch name with prefix if pull request
       # - name: Sets Codecov branch name
