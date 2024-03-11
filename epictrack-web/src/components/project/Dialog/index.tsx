@@ -4,6 +4,8 @@ import { Project } from "models/project";
 import projectService from "services/projectService/projectService";
 import { showNotification } from "components/shared/notificationProvider";
 import ProjectForm from "../ProjectForm";
+import { useAppSelector } from "hooks";
+import { ROLES } from "constants/application-constant";
 
 type ProjectDialogProps = {
   open: boolean;
@@ -21,6 +23,8 @@ export const ProjectDialog = ({
 }: ProjectDialogProps) => {
   const [project, setProject] = useState<Project | null>(null);
   const [disableSave, setDisableSave] = useState(false);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = roles.includes(ROLES.EDIT);
 
   const fetchProject = async () => {
     if (!projectId) return;
@@ -98,7 +102,7 @@ export const ProjectDialog = ({
       }}
       formId={"project-form"}
       saveButtonProps={{
-        disabled: disableSave,
+        disabled: !canEdit || disableSave,
       }}
     >
       <ProjectForm

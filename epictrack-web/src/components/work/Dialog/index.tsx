@@ -4,6 +4,9 @@ import TrackDialog from "components/shared/TrackDialog";
 import { Work } from "models/work";
 import workService from "services/workService/workService";
 import { showNotification } from "components/shared/notificationProvider";
+import { useAppSelector } from "hooks";
+import { hasPermission } from "components/shared/restricted";
+import { ROLES } from "constants/application-constant";
 
 type WorkDialogProps = {
   open: boolean;
@@ -20,7 +23,9 @@ export const WorkDialog = ({
   },
 }: WorkDialogProps) => {
   const [work, setWork] = useState<Work | null>(null);
-  const [disableSave, setDisableSave] = useState(false);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const [disableSave, setDisableSave] = useState(!canEdit);
 
   const fetchWork = async () => {
     if (!workId) return;
@@ -98,7 +103,7 @@ export const WorkDialog = ({
       }}
       formId={"work-form"}
       saveButtonProps={{
-        disabled: disableSave,
+        disabled: !canEdit || disableSave,
       }}
     >
       <WorkForm
