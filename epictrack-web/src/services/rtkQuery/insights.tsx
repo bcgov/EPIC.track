@@ -174,7 +174,9 @@ export const insightsApi = createApi({
     }),
     getProjectBySubType: builder.query<ProjectBySubtype[], number>({
       query: (type_id: number) =>
-        `insights/projects?group_by=subtype&type_id=${type_id}`,
+        `insights/projects?group_by=subtype${
+          type_id ? `&type_id=${type_id}` : ""
+        }`,
       providesTags: (result) =>
         result
           ? [
@@ -204,6 +206,6 @@ export const {
   useGetWorksByNationQuery,
   useGetWorksByStaffQuery,
   useGetProjectByTypeQuery,
-  useGetProjectBySubTypeQuery,
+  useLazyGetProjectBySubTypeQuery,
   useGetProjectsQuery,
 } = insightsApi;

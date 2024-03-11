@@ -8,17 +8,14 @@ import { Project } from "models/project";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetProjectsQuery } from "services/rtkQuery/insights";
+import { useProjectsContext } from "./ProjectsContext";
 
 const ProjectList = () => {
+  const { projects, loadingProjects } = useProjectsContext();
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 15,
   });
-
-  const { data, isLoading: loadingProjects } = useGetProjectsQuery();
-
-  const projects = data ?? [];
 
   const types = projects
     .map((p) => p.type.name)
@@ -26,15 +23,17 @@ const ProjectList = () => {
   const subTypes = projects
     .map((p) => p.sub_type.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  const envRegions = projects
-    .map((p) => p.region_env?.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
   const proponents = projects
     .map((p) => p.proponent.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
 
   const envRegionsOptions = getSelectFilterOptions(
     projects.map((project) => project.region_env),
+    "name"
+  );
+
+  const nrsRegionOptions = getSelectFilterOptions(
+    projects.map((project) => project.region_flnro),
     "name"
   );
 
@@ -76,8 +75,37 @@ const ProjectList = () => {
         },
       },
       {
+        accessorKey: "sub_type.name",
+        header: "Subtype",
+        filterVariant: "multi-select",
+        filterSelectOptions: subTypes,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > subTypes.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
+      },
+      {
         accessorKey: "proponent.name",
-        header: "Proponents",
+        header: "Proponent",
         filterSelectOptions: proponents,
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
@@ -107,7 +135,7 @@ const ProjectList = () => {
       },
       {
         accessorKey: "region_env.name",
-        header: "ENV Region",
+        header: "Region ENV",
         filterSelectOptions: envRegionsOptions,
         filterVariant: "multi-select",
         Filter: ({ header, column }) => {
@@ -134,9 +162,40 @@ const ProjectList = () => {
           return filterValue.includes(value);
         },
       },
+      {
+        accessorKey: "region_flnro.name",
+        header: "Region NRS",
+        filterSelectOptions: nrsRegionOptions,
+        filterVariant: "multi-select",
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > nrsRegionOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
+      },
     ],
-    [types, subTypes, envRegions, proponents]
+    [types, subTypes, envRegionsOptions, proponents, nrsRegionOptions]
   );
+
+  console.log("projects", projects);
   return (
     <MasterTrackTable
       columns={columns}

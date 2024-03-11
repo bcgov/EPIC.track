@@ -6,6 +6,7 @@ import { envBanner } from "../../../styles/uiStateSlice";
 import InfoIcon from "../../../assets/images/infoIcon.svg";
 import { ETSubhead } from "../../shared";
 import { AppConfig } from "../../../config";
+import { EMPTY_ENV_BANNER_HEIGHT, ENV_BANNER_HEIGHT } from "./constants";
 const EnvironmentBanner = () => {
   const dispatch = useAppDispatch();
   const env = AppConfig.environment;
@@ -19,7 +20,7 @@ const EnvironmentBanner = () => {
     return (
       <Box
         sx={{
-          height: "0.5rem",
+          height: EMPTY_ENV_BANNER_HEIGHT,
           background: Palette.secondary.main,
           boxShadow: "0px 4px 8px 0px rgba(0, 0, 0, 0.10)",
         }}
@@ -37,7 +38,7 @@ const EnvironmentBanner = () => {
         alignItems: "center",
         gap: "8px",
         paddingBlock: "8px",
-        height: "2.5rem",
+        height: ENV_BANNER_HEIGHT,
         boxShadow: "0px 4px 8px 0px rgba(0, 0, 0, 0.10)",
       }}
       textAlign="center"
