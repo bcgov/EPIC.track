@@ -66,11 +66,10 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v2
         with:
-          record: true
+          record: false
           browser: chrome
           headless: false
           install-command: npm install
-          wait-on: 'http://localhost:3000' # Replace with your app's URL
           working-directory: ./epictrack-web
 
       # # Set codecov branch name with prefix if pull request
