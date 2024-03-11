@@ -6,6 +6,7 @@ import { WorkTypeFilter } from "./WorkType";
 import { ProjectTypeFilter } from "./ProjectTypeFilter";
 import { WorkStateFilter } from "./WorkStateFilter";
 import { EnvRegionFilter } from "./EnvRegionFilter";
+import { ResetToDefault } from "./ResetToDefault";
 
 const Filters = () => {
   return (
@@ -33,6 +34,9 @@ const Filters = () => {
         </Grid>
         <Grid item xs={2}>
           <WorkStateFilter />
+        </Grid>
+        <Grid item xs="auto">
+          <ResetToDefault />
         </Grid>
       </Grid>
     </Grid>

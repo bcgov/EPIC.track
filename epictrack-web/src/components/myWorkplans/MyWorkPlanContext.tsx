@@ -33,7 +33,7 @@ export interface WorkPlanSearchOptions {
 // used in WorkStateFilter as default value for the Filter Select
 export const DEFAULT_WORK_STATE = WORK_STATE.IN_PROGRESS;
 
-const defaultSearchOptions: WorkPlanSearchOptions = {
+export const defaultSearchOptions: WorkPlanSearchOptions = {
   teams: [],
   work_states: [DEFAULT_WORK_STATE.value],
   regions: [],

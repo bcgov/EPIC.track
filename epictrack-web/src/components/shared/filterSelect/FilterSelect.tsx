@@ -9,6 +9,7 @@ import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 import { useTheme } from "@mui/material";
+import { difference, differenceBy } from "lodash";
 
 const INPUT_SIZE = "0.875rem";
 const FilterSelect = (props: SelectProps) => {
@@ -140,6 +141,16 @@ const FilterSelect = (props: SelectProps) => {
 
     return !selectValue;
   };
+
+  React.useEffect(() => {
+    if (
+      props.value !== undefined &&
+      selectValue !== undefined &&
+      JSON.stringify(selectValue) !== JSON.stringify(props.value)
+    ) {
+      setSelectValue(props.value);
+    }
+  }, [props.value]);
 
   return (
     <Select
