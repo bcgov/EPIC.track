@@ -65,6 +65,7 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
+        working-directory: ./epictrack-web
         with:
           record: true
           browser: chrome
