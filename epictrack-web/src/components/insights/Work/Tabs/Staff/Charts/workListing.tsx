@@ -3,7 +3,11 @@ import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
-import { ROLES } from "constants/application-constant";
+import {
+  ACTIVE_STATUS,
+  COMMON_ERROR_MESSAGE,
+  ROLES,
+} from "constants/application-constant";
 import { Work } from "models/work";
 import {
   getSelectFilterOptions,
@@ -12,15 +16,16 @@ import {
 import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
-import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/insights";
+import { StaffWorkRole } from "models/staff";
+import workService from "services/workService/workService";
 
 const WorkList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [leads, setLeads] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-  const [officers, setOfficers] = React.useState<string[]>([]);
+  const [workRoles, setWorkRoles] = React.useState<StaffWorkRole[]>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -40,11 +45,31 @@ const WorkList = () => {
     }));
   }, [works]);
 
+  const getWorkTeamMembers = async (workId: string) => {
+    try {
+      const teamResult = await workService.getWorkTeamMembers(Number(workId));
+      if (teamResult.status === 200) {
+        const team = (teamResult.data as StaffWorkRole[]).map((p) => {
+          return {
+            ...p,
+            status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
+          };
+        });
+        setWorkRoles(team);
+        return Promise.resolve();
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, {
+        type: "error",
+      });
+    }
+  };
+
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
     eao_team: setTeams,
     work_lead: setLeads,
-    responsible_epd: setOfficers,
+    responsible_epd: setWorkRoles,
   };
 
   React.useEffect(() => {
@@ -156,7 +181,7 @@ const WorkList = () => {
         accessorKey: "responsible_epd.full_name",
         header: "Officer/Analyst",
         filterVariant: "multi-select",
-        filterSelectOptions: officers,
+        filterSelectOptions: workRoles,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -171,7 +196,7 @@ const WorkList = () => {
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length > officers.length // select all is selected
+            filterValue.length > workRoles.length // select all is selected
           ) {
             return true;
           }
@@ -182,7 +207,7 @@ const WorkList = () => {
         },
       },
     ],
-    [leads, teams, officers, workTypes]
+    [leads, teams, workRoles, workTypes]
   );
   return (
     <MasterTrackTable
