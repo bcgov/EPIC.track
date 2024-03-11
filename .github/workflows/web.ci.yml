@@ -69,6 +69,7 @@ jobs:
           record: true
           browser: chrome
           headless: false
+          install-command: npm ci -f
           wait-on: 'http://localhost:3000' # Replace with your app's URL
           working-directory: ./epictrack-web
 
