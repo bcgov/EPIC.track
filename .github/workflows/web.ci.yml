@@ -65,12 +65,12 @@ jobs:
 
       - name: Cypress run
         uses: cypress-io/github-action@v2
-        working-directory: ./epictrack-web
         with:
           record: true
           browser: chrome
           headless: false
           wait-on: 'http://localhost:3000' # Replace with your app's URL
+          working-directory: ./epictrack-web
 
       # # Set codecov branch name with prefix if pull request
       # - name: Sets Codecov branch name
