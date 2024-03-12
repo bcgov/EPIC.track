@@ -70,7 +70,7 @@ jobs:
           browser: chrome
           headless: false
           install-command: npm install
-          working-directory: ./epictrack-web
+          working-directory: ./epictrack-web/cypress
 
       # # Set codecov branch name with prefix if pull request
       # - name: Sets Codecov branch name
