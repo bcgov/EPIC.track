@@ -49,7 +49,7 @@ const WorkByOtherMinistryChart = () => {
   const chartData = formatData(data);
 
   return (
-    <GrayBox>
+    <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <ETCaption1 bold>WORK BY OTHER MINISTRY</ETCaption1>

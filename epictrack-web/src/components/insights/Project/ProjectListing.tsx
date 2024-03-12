@@ -195,7 +195,6 @@ const ProjectList = () => {
     [types, subTypes, envRegionsOptions, proponents, nrsRegionOptions]
   );
 
-  console.log("projects", projects);
   return (
     <MasterTrackTable
       columns={columns}
