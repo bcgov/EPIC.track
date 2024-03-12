@@ -86,8 +86,6 @@ export default function ProjectForm({
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = roles.includes(ROLES.EDIT);
 
-  const isDisabled = Boolean(project) && !canEdit;
-
   const [isProponentFieldLocked, setIsProponentFieldLocked] =
     React.useState<boolean>(false);
 
@@ -95,6 +93,8 @@ export default function ProjectForm({
     React.useState<boolean>(false);
 
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
+  const shouldSpecialFieldDisabled = Boolean(project) && !canEdit;
+  const shouldNonSpecialFieldDisabled = isSpecialFieldLocked || !canEdit;
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
@@ -244,12 +244,12 @@ export default function ProjectForm({
               fetchProject();
             }}
             title={project?.name || ""}
-            disabled={isDisabled}
+            disabled={shouldSpecialFieldDisabled}
           >
             <ControlledTextField
               name="name"
               placeholder="Project Name"
-              disabled={isDisabled}
+              disabled={shouldSpecialFieldDisabled}
               variant="outlined"
               fullWidth
               onBlur={onBlurProjectName}
@@ -263,11 +263,11 @@ export default function ProjectForm({
               fetchProject();
             }}
             options={proponents || []}
-            disabled={isDisabled}
+            disabled={shouldSpecialFieldDisabled}
           >
             <ControlledSelectV2
               placeholder="Select"
-              disabled={isDisabled}
+              disabled={shouldSpecialFieldDisabled}
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
               defaultValue={project?.proponent_id}
@@ -288,7 +288,7 @@ export default function ProjectForm({
               options={types || []}
               getOptionValue={(o: Type) => o?.id?.toString()}
               getOptionLabel={(o: Type) => o.name}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
               {...register("type_id")}
             ></ControlledSelectV2>
           </Grid>
@@ -302,7 +302,7 @@ export default function ProjectForm({
               options={subTypes || []}
               getOptionValue={(o: SubType) => o?.id?.toString()}
               getOptionLabel={(o: SubType) => o.name}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
               {...register("sub_type_id")}
             ></ControlledSelectV2>
           </Grid>
@@ -313,7 +313,7 @@ export default function ProjectForm({
               fullWidth
               multiline
               rows={4}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
         </Grid>
@@ -336,7 +336,7 @@ export default function ProjectForm({
               fullWidth
               multiline
               rows={3}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -349,7 +349,7 @@ export default function ProjectForm({
               }}
               placeholder="e.g. 22.2222"
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -362,7 +362,7 @@ export default function ProjectForm({
               }}
               placeholder="e.g. -22.2222"
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -375,7 +375,7 @@ export default function ProjectForm({
               options={envRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o?.name}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
               {...register("region_id_env")}
             ></ControlledSelectV2>
           </Grid>
@@ -389,7 +389,7 @@ export default function ProjectForm({
               options={nrsRegions || []}
               getOptionValue={(o: Region) => o?.id?.toString()}
               getOptionLabel={(o: Region) => o?.name}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
               {...register("region_id_flnro")}
             ></ControlledSelectV2>
           </Grid>
@@ -414,7 +414,7 @@ export default function ProjectForm({
                 step: 1,
               }}
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -422,7 +422,7 @@ export default function ProjectForm({
             <ControlledTextField
               name="epic_guid"
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -435,7 +435,7 @@ export default function ProjectForm({
                 step: 1,
               }}
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -448,7 +448,7 @@ export default function ProjectForm({
                 step: 1,
               }}
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -457,7 +457,7 @@ export default function ProjectForm({
               name="ea_certificate"
               helperText
               fullWidth
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
           </Grid>
           <Grid item xs={6}>
@@ -473,7 +473,7 @@ export default function ProjectForm({
                 fullWidth
                 placeholder="EDRMS retrieval code"
                 inputEffects={(e) => e.target.value.toUpperCase()}
-                disabled={isSpecialFieldLocked || !canEdit}
+                disabled={shouldNonSpecialFieldDisabled}
               />
             </Restricted>
           </Grid>
@@ -487,7 +487,7 @@ export default function ProjectForm({
             <ControlledSwitch
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
               name={"is_active"}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
             <ETFormLabel id="active">Active</ETFormLabel>
           </Grid>
@@ -495,7 +495,7 @@ export default function ProjectForm({
             <ControlledSwitch
               name={"is_project_closed"}
               sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              disabled={isSpecialFieldLocked || !canEdit}
+              disabled={shouldNonSpecialFieldDisabled}
             />
             <ETFormLabel id="active">Closed</ETFormLabel>
           </Grid>
