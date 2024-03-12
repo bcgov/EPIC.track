@@ -1,11 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import projectService from "../../../services/projectService/projectService";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const ProjectTypeFilter = () => {
-  const { setSearchOptions } = useContext(MyWorkplansContext);
+  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,8 +29,15 @@ export const ProjectTypeFilter = () => {
     fetchOptions();
   }, []);
 
+  const value = useMemo(() => {
+    return options.filter((option) =>
+      searchOptions.project_types.includes(String(option.value))
+    );
+  }, [searchOptions.project_types]);
+
   return (
     <FilterSelect
+      value={value}
       options={options}
       variant="inline-standalone"
       placeholder="Project Type"
