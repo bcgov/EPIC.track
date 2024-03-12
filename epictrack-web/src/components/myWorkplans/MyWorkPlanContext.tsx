@@ -6,6 +6,10 @@ import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
+import {
+  MY_WORKLAN_FILTERS,
+  MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
+} from "./constants";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
@@ -83,10 +87,39 @@ export const MyWorkplansProvider = ({
   const [workplans, setWorkplans] = useState<WorkPlan[]>([]);
   const [totalWorkplans, setTotalWorkplans] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
+
+  const cachedSearchOptions = useMemo(() => {
+    try {
+      const cachedValue = sessionStorage.getItem(
+        MY_WORKPLAN_CACHED_SEARCH_OPTIONS
+      );
+      if (!cachedValue) return null;
+
+      return JSON.parse(cachedValue) as Partial<WorkPlanSearchOptions>;
+    } catch (error) {
+      return null;
+    }
+  }, []);
+
   const [searchOptions, setSearchOptions] = useState<WorkPlanSearchOptions>({
-    ...defaultSearchOptions,
-    staff_id: user.staffId,
+    teams: cachedSearchOptions?.teams || defaultSearchOptions.teams,
+    work_states:
+      cachedSearchOptions?.work_states || defaultSearchOptions.work_states,
+    regions: cachedSearchOptions?.regions || defaultSearchOptions.regions,
+    project_types:
+      cachedSearchOptions?.project_types || defaultSearchOptions.project_types,
+    work_types:
+      cachedSearchOptions?.work_types || defaultSearchOptions.work_types,
+    text: defaultSearchOptions.text,
+    staff_id: user?.staffId || null,
   });
+
+  useEffect(() => {
+    sessionStorage.setItem(
+      MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
+      JSON.stringify(searchOptions)
+    );
+  }, [searchOptions]);
 
   const [myWorkPlanView, setMyWorkPlanView] = useState<MyWorkPlanView>(
     MY_WORKPLAN_VIEW.CARDS
