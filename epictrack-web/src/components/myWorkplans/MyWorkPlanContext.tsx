@@ -19,27 +19,32 @@ interface MyWorkplanContextProps {
   myWorkPlanView: MyWorkPlanView;
   setMyWorkPlanView: React.Dispatch<React.SetStateAction<MyWorkPlanView>>;
 }
-
-export interface WorkPlanSearchOptions {
+export type WorkPlanFilters = {
   teams: string[];
   work_states: string[];
   regions: string[];
   project_types: string[];
   work_types: string[];
   text: string;
+};
+
+export type WorkPlanSearchOptions = WorkPlanFilters & {
   staff_id: number | null;
-}
+};
 
 // used in WorkStateFilter as default value for the Filter Select
 export const DEFAULT_WORK_STATE = WORK_STATE.IN_PROGRESS;
 
-const defaultSearchOptions: WorkPlanSearchOptions = {
+export const workplanDefaultFilters: WorkPlanFilters = {
   teams: [],
   work_states: [DEFAULT_WORK_STATE.value],
   regions: [],
   project_types: [],
   work_types: [],
   text: "",
+};
+export const defaultSearchOptions: WorkPlanSearchOptions = {
+  ...workplanDefaultFilters,
   staff_id: null,
 };
 

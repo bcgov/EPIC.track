@@ -30,10 +30,10 @@ export const ProjectNameSpecialField = ({
 }: ProjectNameSpecialFieldProps) => {
   if (!id) {
     return (
-      <Grid item xs={6}>
+      <>
         <ETFormLabel>{LABEL}</ETFormLabel>
         {children}
-      </Grid>
+      </>
     );
   }
 

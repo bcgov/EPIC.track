@@ -3,7 +3,11 @@ import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
-import { ROLES } from "constants/application-constant";
+import {
+  ACTIVE_STATUS,
+  COMMON_ERROR_MESSAGE,
+  ROLES,
+} from "constants/application-constant";
 import { Work } from "models/work";
 import {
   getSelectFilterOptions,
@@ -12,15 +16,25 @@ import {
 import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
-import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/insights";
+import { StaffWorkRole } from "models/staff";
+import workService from "services/workService/workService";
+import { WorkStaff } from "models/workStaff";
+import { set } from "lodash";
+import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
+
+type WorkOrWorkStaff = Work | WorkStaff;
 
 const WorkList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [leads, setLeads] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-  const [officers, setOfficers] = React.useState<string[]>([]);
+  const [wsData, setWsData] = React.useState<WorkStaff[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [workRoles, setWorkRoles] = React.useState<
+    MRT_ColumnDef<WorkOrWorkStaff>[]
+  >([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -29,22 +43,61 @@ const WorkList = () => {
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  const { data, error, isLoading } = useGetWorksQuery();
-
-  const works = data || [];
-
   useEffect(() => {
     setPagination((prev) => ({
       ...prev,
-      pageSize: works.length,
+      pageSize: wsData.length,
     }));
-  }, [works]);
+  }, [wsData]);
+
+  const getWorkStaffAllocation = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const workStaffingResult = await workService.getWorkStaffDetails();
+      if (workStaffingResult.status === 200) {
+        setWsData(workStaffingResult.data as WorkStaff[]);
+      }
+    } catch (error) {
+      console.error("Work Staffing List: ", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    getWorkStaffAllocation();
+  }, []);
+
+  React.useEffect(() => {
+    let columns: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
+    if (wsData && wsData.length > 0) {
+      const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
+      columns = [
+        {
+          header: rolename,
+          accessorFn: (row: any) => {
+            const officerAnalyst = row.staff
+              ? row.staff.find(
+                  (p: { role: Role }) =>
+                    p.role.id === WorkStaffRole.OFFICER_ANALYST
+                )
+              : null;
+            return officerAnalyst
+              ? `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
+              : "";
+          },
+          enableHiding: false,
+          enableColumnFilter: true,
+        } as MRT_ColumnDef<WorkOrWorkStaff>,
+      ];
+    }
+    setWorkRoles(columns);
+  }, [wsData]);
 
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
     eao_team: setTeams,
     work_lead: setLeads,
-    responsible_epd: setOfficers,
   };
 
   React.useEffect(() => {
@@ -53,7 +106,7 @@ const WorkList = () => {
       if (key == "work_lead" || key == "responsible_epd") {
         accessor = "full_name";
       }
-      const codes = works
+      const codes = wsData
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
@@ -62,16 +115,10 @@ const WorkList = () => {
         );
       codeTypes[key](codes);
     });
-  }, [works]);
+  }, [wsData]);
 
-  useEffect(() => {
-    if (error) {
-      showNotification("Error fetching works", { type: "error" });
-    }
-  }, [error]);
-
-  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
-    () => [
+  const columns = React.useMemo<MRT_ColumnDef<WorkOrWorkStaff>[]>(() => {
+    return [
       {
         accessorKey: "title",
         header: "Name",
@@ -152,42 +199,13 @@ const WorkList = () => {
           return filterValue.includes(value);
         },
       },
-      {
-        accessorKey: "responsible_epd.full_name",
-        header: "Officer/Analyst",
-        filterVariant: "multi-select",
-        filterSelectOptions: officers,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > officers.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id) || "";
-
-          return filterValue.includes(value);
-        },
-      },
-    ],
-    [leads, teams, officers, workTypes]
-  );
+      ...workRoles,
+    ];
+  }, [leads, teams, workRoles, workTypes, wsData]);
   return (
     <MasterTrackTable
       columns={columns}
-      data={works}
+      data={wsData}
       initialState={{
         sorting: [
           {
@@ -203,7 +221,7 @@ const WorkList = () => {
       }}
       enablePagination
       muiPaginationProps={{
-        rowsPerPageOptions: rowsPerPageOptions(works.length),
+        rowsPerPageOptions: rowsPerPageOptions(wsData.length),
       }}
       onPaginationChange={setPagination}
     />

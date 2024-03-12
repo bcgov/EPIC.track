@@ -39,7 +39,7 @@ const AssessmentByPhaseChart = () => {
   const chartData = formatData(data);
 
   return (
-    <GrayBox>
+    <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <ETCaption1 bold>ASSESSMENT BY PHASE</ETCaption1>

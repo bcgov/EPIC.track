@@ -57,7 +57,7 @@ const WorkByNationChart = () => {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart layout="vertical" data={chartData}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
+              <XAxis type="number" allowDecimals={false} />
               <YAxis dataKey="nation" type="category" tick={{ fontSize: 12 }} />
               <Tooltip />
               <Bar dataKey="count" fill={BAR_COLOR} barSize={10} />
