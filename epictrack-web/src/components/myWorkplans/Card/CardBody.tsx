@@ -48,11 +48,9 @@ const CardBody = ({ workplan }: CardProps) => {
             color={Palette.neutral.dark}
             xs
             enableTooltip
+            enableEllipsis
             tooltip={workTitle}
             sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
               maxWidth: "70%",
             }}
           >

@@ -142,6 +142,7 @@ export const ETHeading4 = ({
             ? MET_Header_Font_Weight_Bold
             : MET_Header_Font_Weight_Regular,
           fontFamily: MET_Header_Font_Family,
+          ...(rest.enableEllipsis && useStyle.textEllipsis),
         }}
         variant="h4"
         {...rest}
