@@ -66,9 +66,6 @@ jobs:
       - name: Cypress run
         uses: cypress-io/github-action@v5
         with:
-          record: false
-          browser: chrome
-          headless: false
           install-command: npm install
           working-directory: ./epictrack-web/cypress
 
