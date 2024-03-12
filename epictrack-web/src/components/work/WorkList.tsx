@@ -368,6 +368,7 @@ const WorkList = () => {
         workId={workId}
         open={showWorkDialogForm}
         setOpen={setShowWorkDialogForm}
+        saveWorkCallback={loadWorks}
       />
     </>
   );
