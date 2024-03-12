@@ -14,6 +14,7 @@ import EpicTrackLogo from "../../../assets/images/epicTrackLogo.svg";
 import { ETCaption2, ETSubhead } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import UserMenu from "../../shared/userMenu/UserMenu";
+import { HEADER_HEIGHT } from "./constants";
 
 const Header = () => {
   const [open, setOpen] = React.useState(false);
@@ -48,7 +49,7 @@ const Header = () => {
         <CssBaseline />
         <Toolbar
           sx={{
-            height: "4.5rem",
+            height: HEADER_HEIGHT,
           }}
         >
           {!isMediumScreen && (
