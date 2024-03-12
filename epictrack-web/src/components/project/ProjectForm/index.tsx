@@ -11,10 +11,12 @@ import { Type } from "../../../models/type";
 import { SubType } from "../../../models/subtype";
 import subTypeService from "../../../services/subTypeService";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import { MasterContext } from "../../shared/MasterContext";
 import projectService from "../../../services/projectService/projectService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { Palette } from "../../../styles/theme";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
+
 import { ProponentSpecialField } from "./ProponentSpecialField";
 import { ProjectNameSpecialField } from "./ProjectNameSpecialField";
 import { Restricted } from "../../shared/restricted";
@@ -83,8 +85,6 @@ export default function ProjectForm({
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = roles.includes(ROLES.EDIT);
 
   const [isProponentFieldLocked, setIsProponentFieldLocked] =
     React.useState<boolean>(false);
@@ -92,9 +92,12 @@ export default function ProjectForm({
   const [isNameFieldLocked, setIsNameFieldLocked] =
     React.useState<boolean>(false);
 
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = roles.includes(ROLES.EDIT);
+
+  const shouldDisableSpecialField = !Boolean(project) || !canEdit;
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
-  const shouldSpecialFieldDisabled = Boolean(project) && !canEdit;
-  const shouldNonSpecialFieldDisabled = isSpecialFieldLocked || !canEdit;
+  const shouldDisableFormField = isSpecialFieldLocked || !canEdit;
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
@@ -233,12 +236,12 @@ export default function ProjectForm({
               fetchProject();
             }}
             title={project?.name || ""}
-            disabled={shouldSpecialFieldDisabled}
+            disabled={shouldDisableSpecialField}
           >
             <ControlledTextField
               name="name"
               placeholder="Project Name"
-              disabled={shouldSpecialFieldDisabled}
+              disabled={shouldDisableSpecialField}
               variant="outlined"
               fullWidth
               onBlur={onBlurProjectName}
@@ -254,11 +257,11 @@ export default function ProjectForm({
               fetchProject();
             }}
             options={proponents || []}
-            disabled={shouldSpecialFieldDisabled}
+            disabled={shouldDisableSpecialField}
           >
             <ControlledSelectV2
               placeholder="Select"
-              disabled={shouldSpecialFieldDisabled}
+              disabled={shouldDisableSpecialField}
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
               defaultValue={project?.proponent_id}
@@ -281,7 +284,7 @@ export default function ProjectForm({
             options={types || []}
             getOptionValue={(o: Type) => o?.id?.toString()}
             getOptionLabel={(o: Type) => o.name}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
             {...register("type_id")}
           ></ControlledSelectV2>
         </Grid>
@@ -295,7 +298,7 @@ export default function ProjectForm({
             options={subTypes || []}
             getOptionValue={(o: SubType) => o?.id?.toString()}
             getOptionLabel={(o: SubType) => o.name}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
             {...register("sub_type_id")}
           ></ControlledSelectV2>
         </Grid>
@@ -306,7 +309,7 @@ export default function ProjectForm({
             fullWidth
             multiline
             rows={4}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Divider style={{ width: "100%", marginTop: "20px" }} />
@@ -318,7 +321,7 @@ export default function ProjectForm({
             fullWidth
             multiline
             rows={3}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -331,7 +334,7 @@ export default function ProjectForm({
             }}
             placeholder="e.g. 22.2222"
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -344,7 +347,7 @@ export default function ProjectForm({
             }}
             placeholder="e.g. -22.2222"
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -357,7 +360,7 @@ export default function ProjectForm({
             options={envRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
             getOptionLabel={(o: Region) => o?.name}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
             {...register("region_id_env")}
           ></ControlledSelectV2>
         </Grid>
@@ -371,7 +374,7 @@ export default function ProjectForm({
             options={nrsRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
             getOptionLabel={(o: Region) => o?.name}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
             {...register("region_id_flnro")}
           ></ControlledSelectV2>
         </Grid>
@@ -386,7 +389,7 @@ export default function ProjectForm({
               step: 1,
             }}
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -394,7 +397,7 @@ export default function ProjectForm({
           <ControlledTextField
             name="epic_guid"
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -407,7 +410,7 @@ export default function ProjectForm({
               step: 1,
             }}
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -420,7 +423,7 @@ export default function ProjectForm({
               step: 1,
             }}
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -429,7 +432,7 @@ export default function ProjectForm({
             name="ea_certificate"
             helperText
             fullWidth
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -445,7 +448,7 @@ export default function ProjectForm({
               fullWidth
               placeholder="EDRMS retrieval code"
               inputEffects={(e) => e.target.value.toUpperCase()}
-              disabled={shouldNonSpecialFieldDisabled}
+              disabled={shouldDisableFormField}
             />
           </Restricted>
         </Grid>
@@ -459,7 +462,7 @@ export default function ProjectForm({
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name={"is_active"}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
           <ETFormLabel id="active">Active</ETFormLabel>
         </Grid>
@@ -467,7 +470,7 @@ export default function ProjectForm({
           <ControlledSwitch
             name={"is_project_closed"}
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
-            disabled={shouldNonSpecialFieldDisabled}
+            disabled={shouldDisableFormField}
           />
           <ETFormLabel id="active">Closed</ETFormLabel>
         </Grid>
