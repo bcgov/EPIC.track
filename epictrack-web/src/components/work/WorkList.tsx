@@ -105,20 +105,18 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: canEdit
-          ? ({ row, renderedCellValue }) => (
-              <ETGridTitle
-                to="#"
-                onClick={() => {
-                  setWorkId(row.original.id);
-                  setShowWorkDialogForm(true);
-                }}
-                titleText={row.original.title}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        Cell: ({ row, renderedCellValue }) => (
+          <ETGridTitle
+            to="#"
+            onClick={() => {
+              setWorkId(row.original.id);
+              setShowWorkDialogForm(true);
+            }}
+            titleText={row.original.title}
+          >
+            {renderedCellValue}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },

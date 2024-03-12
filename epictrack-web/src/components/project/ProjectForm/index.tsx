@@ -26,6 +26,7 @@ import RegionService from "services/regionService";
 import { REGIONS } from "../../../components/shared/constants";
 import typeService from "services/typeService";
 import proponentService from "services/proponentService/proponentService";
+import { useAppSelector } from "hooks";
 
 const schema = yup.object().shape({
   name: yup
@@ -85,15 +86,18 @@ export default function ProjectForm({
   const [types, setTypes] = React.useState<Type[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
 
-  const disabled = Boolean(project);
-
   const [isProponentFieldLocked, setIsProponentFieldLocked] =
     React.useState<boolean>(false);
 
   const [isNameFieldLocked, setIsNameFieldLocked] =
     React.useState<boolean>(false);
 
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = roles.includes(ROLES.EDIT);
+
+  const shouldDisableSpecialField = !Boolean(project) || !canEdit;
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
+  const shouldDisableFormField = isSpecialFieldLocked || !canEdit;
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
@@ -232,11 +236,12 @@ export default function ProjectForm({
               fetchProject();
             }}
             title={project?.name || ""}
+            disabled={shouldDisableSpecialField}
           >
             <ControlledTextField
               name="name"
               placeholder="Project Name"
-              disabled={disabled}
+              disabled={shouldDisableSpecialField}
               variant="outlined"
               fullWidth
               onBlur={onBlurProjectName}
@@ -252,10 +257,11 @@ export default function ProjectForm({
               fetchProject();
             }}
             options={proponents || []}
+            disabled={shouldDisableSpecialField}
           >
             <ControlledSelectV2
               placeholder="Select"
-              disabled={disabled}
+              disabled={shouldDisableSpecialField}
               key={`proponent_select_${formValues.proponent_id}`}
               helperText={errors?.proponent_id?.message?.toString()}
               defaultValue={project?.proponent_id}
@@ -278,7 +284,7 @@ export default function ProjectForm({
             options={types || []}
             getOptionValue={(o: Type) => o?.id?.toString()}
             getOptionLabel={(o: Type) => o.name}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
             {...register("type_id")}
           ></ControlledSelectV2>
         </Grid>
@@ -292,7 +298,7 @@ export default function ProjectForm({
             options={subTypes || []}
             getOptionValue={(o: SubType) => o?.id?.toString()}
             getOptionLabel={(o: SubType) => o.name}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
             {...register("sub_type_id")}
           ></ControlledSelectV2>
         </Grid>
@@ -303,7 +309,7 @@ export default function ProjectForm({
             fullWidth
             multiline
             rows={4}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Divider style={{ width: "100%", marginTop: "20px" }} />
@@ -315,7 +321,7 @@ export default function ProjectForm({
             fullWidth
             multiline
             rows={3}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -328,7 +334,7 @@ export default function ProjectForm({
             }}
             placeholder="e.g. 22.2222"
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -341,7 +347,7 @@ export default function ProjectForm({
             }}
             placeholder="e.g. -22.2222"
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -354,7 +360,7 @@ export default function ProjectForm({
             options={envRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
             getOptionLabel={(o: Region) => o?.name}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
             {...register("region_id_env")}
           ></ControlledSelectV2>
         </Grid>
@@ -368,7 +374,7 @@ export default function ProjectForm({
             options={nrsRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
             getOptionLabel={(o: Region) => o?.name}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
             {...register("region_id_flnro")}
           ></ControlledSelectV2>
         </Grid>
@@ -383,7 +389,7 @@ export default function ProjectForm({
               step: 1,
             }}
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -391,7 +397,7 @@ export default function ProjectForm({
           <ControlledTextField
             name="epic_guid"
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -404,7 +410,7 @@ export default function ProjectForm({
               step: 1,
             }}
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -417,7 +423,7 @@ export default function ProjectForm({
               step: 1,
             }}
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -426,7 +432,7 @@ export default function ProjectForm({
             name="ea_certificate"
             helperText
             fullWidth
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
         </Grid>
         <Grid item xs={6}>
@@ -442,7 +448,7 @@ export default function ProjectForm({
               fullWidth
               placeholder="EDRMS retrieval code"
               inputEffects={(e) => e.target.value.toUpperCase()}
-              disabled={isSpecialFieldLocked}
+              disabled={shouldDisableFormField}
             />
           </Restricted>
         </Grid>
@@ -456,7 +462,7 @@ export default function ProjectForm({
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name={"is_active"}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
           <ETFormLabel id="active">Active</ETFormLabel>
         </Grid>
@@ -464,7 +470,7 @@ export default function ProjectForm({
           <ControlledSwitch
             name={"is_project_closed"}
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
-            disabled={isSpecialFieldLocked}
+            disabled={shouldDisableFormField}
           />
           <ETFormLabel id="active">Closed</ETFormLabel>
         </Grid>

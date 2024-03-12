@@ -17,12 +17,14 @@ interface ProponentSpecialFieldProps {
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
+  disabled?: boolean;
 }
 const LABEL = "Proponent";
 export const ProponentSpecialField = ({
   id,
   onSave,
   open = false,
+  disabled = false,
   onLockClick,
   options,
   children,
@@ -51,6 +53,7 @@ export const ProponentSpecialField = ({
         onLockClick={onLockClick}
         label={LABEL}
         required
+        disabled={disabled}
       />
       {children}
       <When condition={open}>

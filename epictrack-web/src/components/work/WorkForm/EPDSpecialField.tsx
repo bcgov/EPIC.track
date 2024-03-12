@@ -5,7 +5,7 @@ import {
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
 import { ETCaption3, ETFormLabel } from "../../shared";
-import { Grid } from "@mui/material";
+import { Grid, Link } from "@mui/material";
 import { When } from "react-if";
 import { Staff } from "../../../models/staff";
 import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
@@ -16,6 +16,7 @@ interface EPDSpecialFieldProps {
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
+  disabled?: boolean;
 }
 const TITLE = "Responsible EPD";
 export const EPDSpecialField = ({
@@ -24,6 +25,7 @@ export const EPDSpecialField = ({
   open = false,
   onLockClick,
   options,
+  disabled = false,
   children,
 }: EPDSpecialFieldProps) => {
   const selectOptions = useMemo(() => {
@@ -50,6 +52,7 @@ export const EPDSpecialField = ({
           onLockClick={onLockClick}
           label={TITLE}
           required
+          disabled={disabled}
         />
         {children}
       </Grid>
@@ -65,7 +68,7 @@ export const EPDSpecialField = ({
             description={
               <ETCaption3>
                 Update the Responsible EPD of this work.{" "}
-                <a href="#">Click this link</a> for detailed instructions.
+                <Link>Click this link</Link> for detailed instructions.
               </ETCaption3>
             }
             options={selectOptions}

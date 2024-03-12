@@ -16,12 +16,14 @@ interface ProjectNameSpecialFieldProps {
   onLockClick: () => void;
   children?: React.ReactNode;
   title: string;
+  disabled?: boolean;
 }
 const LABEL = "Name";
 export const ProjectNameSpecialField = ({
   id,
   onSave,
   open = false,
+  disabled = false,
   onLockClick,
   children,
   title,
@@ -43,6 +45,7 @@ export const ProjectNameSpecialField = ({
         onLockClick={onLockClick}
         label={LABEL}
         required
+        disabled={disabled}
       />
       {children}
       <When condition={open}>
