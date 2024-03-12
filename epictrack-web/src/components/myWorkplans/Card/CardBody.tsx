@@ -43,21 +43,21 @@ const CardBody = ({ workplan }: CardProps) => {
     >
       <Grid item container spacing={2}>
         <Grid item xs={9}>
-          <Tooltip title={workTitle} placement="top-start">
-            <ETHeading4
-              bold
-              color={Palette.neutral.dark}
-              xs
-              sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-                maxWidth: "70%",
-              }}
-            >
-              {workTitle}
-            </ETHeading4>
-          </Tooltip>
+          <ETHeading4
+            bold
+            color={Palette.neutral.dark}
+            xs
+            enableTooltip
+            tooltip={workTitle}
+            sx={{
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: "70%",
+            }}
+          >
+            {workTitle}
+          </ETHeading4>
         </Grid>
         <Grid item xs={3} container justifyContent={"flex-end"}>
           <ETCaption1 bold>

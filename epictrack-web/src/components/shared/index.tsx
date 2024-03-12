@@ -130,20 +130,25 @@ export const ETHeading4 = ({
   ...rest
 }: HeaderProps) => {
   return (
-    <Typography
-      color={color}
-      sx={{
-        ...sx,
-        fontWeight: bold
-          ? MET_Header_Font_Weight_Bold
-          : MET_Header_Font_Weight_Regular,
-        fontFamily: MET_Header_Font_Family,
-      }}
-      variant="h4"
-      {...rest}
+    <Tooltip
+      title={rest.tooltip as string}
+      disableHoverListener={!rest.enableTooltip}
     >
-      {children}
-    </Typography>
+      <Typography
+        color={color}
+        sx={{
+          ...sx,
+          fontWeight: bold
+            ? MET_Header_Font_Weight_Bold
+            : MET_Header_Font_Weight_Regular,
+          fontFamily: MET_Header_Font_Family,
+        }}
+        variant="h4"
+        {...rest}
+      >
+        {children}
+      </Typography>
+    </Tooltip>
   );
 };
 
