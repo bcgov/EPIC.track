@@ -78,7 +78,7 @@ const EventList = () => {
     () => ctx.team.some((member) => member.staff.email === email),
     [ctx.team, email]
   );
-
+  const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
   const { handleHighlightRows } = useContext(EventContext);
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
     {}
@@ -116,6 +116,11 @@ const EventList = () => {
   }, [milestoneEvent]);
 
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.work_phase.id]);
+  React.useEffect(() => {
+    setTimeout(() => {
+      dispatch(showConfetti(false));
+    }, 5000);
+  }, [isConfettiShown]);
   React.useEffect(() => {
     getCombinedEvents();
   }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.id]);
@@ -333,9 +338,6 @@ const EventList = () => {
           milestoneEvent.actual_date
         ) {
           dispatch(showConfetti(true));
-          setTimeout(() => {
-            dispatch(showConfetti(false));
-          }, 5000);
         }
       });
   };
