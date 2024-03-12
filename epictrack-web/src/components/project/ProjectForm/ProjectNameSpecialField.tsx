@@ -39,17 +39,15 @@ export const ProjectNameSpecialField = ({
 
   return (
     <>
-      <Grid item xs={6}>
-        <SpecialFieldLock
-          id={id}
-          open={open}
-          onLockClick={onLockClick}
-          label={LABEL}
-          required
-          disabled={disabled}
-        />
-        {children}
-      </Grid>
+      <SpecialFieldLock
+        id={id}
+        open={open}
+        onLockClick={onLockClick}
+        label={LABEL}
+        required
+        disabled={disabled}
+      />
+      {children}
       <When condition={open}>
         <Grid item xs={12}>
           <SpecialFieldGrid
