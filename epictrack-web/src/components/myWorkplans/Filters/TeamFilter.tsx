@@ -1,11 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import EAOTeamService from "../../../services/eao_team";
 import { OptionType } from "../../shared/filterSelect/type";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const TeamFilter = () => {
-  const { setSearchOptions } = useContext(MyWorkplansContext);
+  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +29,12 @@ export const TeamFilter = () => {
     fetchOptions();
   }, []);
 
+  const value = useMemo(() => {
+    return options.filter((option) =>
+      searchOptions.teams.includes(String(option.value))
+    );
+  }, [searchOptions.teams]);
+
   return (
     <FilterSelect
       options={options}
@@ -45,6 +51,7 @@ export const TeamFilter = () => {
           teams: [],
         }));
       }}
+      value={value}
       name="team"
       isMulti
       info={true}

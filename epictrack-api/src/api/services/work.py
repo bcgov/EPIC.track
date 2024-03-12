@@ -335,6 +335,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .join(Work, StaffWorkRole.work_id == Work.id)
             .filter(
                 StaffWorkRole.is_deleted.is_(False),
+                StaffWorkRole.is_active.is_(True),
                 Staff.is_active.is_(True),
                 Staff.is_deleted.is_(False),
                 Work.id.in_(work_ids),
