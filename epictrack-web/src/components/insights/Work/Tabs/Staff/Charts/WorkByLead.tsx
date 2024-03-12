@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByLeadQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
@@ -53,13 +53,15 @@ const WorkByLeadChart = () => {
           <ETCaption1 bold>WORK BY LEAD</ETCaption1>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <ResponsiveContainer width="100%" height={300}>
+          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
             <BarChart
               layout="vertical"
               data={formatData(chartData)}
               margin={{
-                left: 40, // Increase left margin if names are getting cut off
+                left: 30, // Increase left margin if names are getting cut off
               }}
+              height={chartData.length * 30 + 100}
+              width={350} // Adjust this value as needed
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
@@ -70,9 +72,13 @@ const WorkByLeadChart = () => {
                 tick={{ fontSize: 12 }} // Make sure to pass the width
               />
               <Tooltip />
-              <Bar dataKey="value" fill={BAR_COLOR} barSize={10} />
+              <Bar dataKey="value" fill="#82ca9d" barSize={20}>
+                {chartData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={"#4bacc6"} />
+                ))}
+              </Bar>
             </BarChart>
-          </ResponsiveContainer>
+          </Box>
         </Grid>
       </Grid>
     </GrayBox>
