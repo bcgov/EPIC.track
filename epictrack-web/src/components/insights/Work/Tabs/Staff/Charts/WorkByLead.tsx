@@ -61,7 +61,7 @@ const WorkByLeadChart = () => {
                 left: 30, // Increase left margin if names are getting cut off
               }}
               height={chartData.length * 30 + 100}
-              width={400} // Adjust this value as needed
+              width={350} // Adjust this value as needed
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />

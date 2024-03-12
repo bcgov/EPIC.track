@@ -22,6 +22,7 @@ import { StaffWorkRole } from "models/staff";
 import workService from "services/workService/workService";
 import { WorkStaff } from "models/workStaff";
 import { set } from "lodash";
+import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 
 type WorkOrWorkStaff = Work | WorkStaff;
 
@@ -70,14 +71,15 @@ const WorkList = () => {
   React.useEffect(() => {
     let columns: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
     if (wsData && wsData.length > 0) {
-      const rolename = "Officer / Analyst";
+      const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
       columns = [
         {
           header: rolename,
           accessorFn: (row: any) => {
             const officerAnalyst = row.staff
               ? row.staff.find(
-                  (p: { role: { name: any } }) => p.role.name === rolename
+                  (p: { role: Role }) =>
+                    p.role.id === WorkStaffRole.OFFICER_ANALYST
                 )
               : null;
             return officerAnalyst
