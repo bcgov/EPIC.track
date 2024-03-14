@@ -13,6 +13,7 @@
 # limitations under the License.
 """String helpers"""
 import locale
+from http import HTTPStatus
 from typing import List, Text
 
 from natsort import humansorted, ns
@@ -34,7 +35,7 @@ def natural_sort(data: List, key: str = None) -> List[dict]:
         if key:
             data = humansorted(data, key=lambda x: fr"{x[key]}", alg=ns.LOCALE)
         else:
-            raise BusinessError("Key not provided to 'natural_sort'")
+            raise BusinessError("Key not provided to 'natural_sort'", HTTPStatus.FAILED_DEPENDENCY)
     else:
         data = humansorted(data)
     return data
