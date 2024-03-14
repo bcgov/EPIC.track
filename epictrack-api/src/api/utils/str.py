@@ -12,11 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """String helpers"""
-from typing import Text
+import locale
+from typing import List, Text
+
+from natsort import humansorted, ns
+
+from api.exceptions import BusinessError
 
 
-def escape_characters(source_string: Text, characters_to_escape: [Text]) -> Text:
+def escape_characters(source_string: Text, characters_to_escape: List[Text]) -> Text:
     """Returns character escaped string"""
     for character in characters_to_escape:
         source_string = source_string.replace(character, fr"\{character}")
     return source_string
+
+
+def natural_sort(data: List, key: str = None) -> List[dict]:
+    """Sort the data based on natural sort algorithms."""
+    locale.setlocale(locale.LC_ALL, "EN_GB.UTF-8")
+    if isinstance(data[0], dict):
+        if key:
+            data = humansorted(data, key=lambda x: fr"{x[key]}", alg=ns.LOCALE)
+        else:
+            raise BusinessError("Key not provided to 'natural_sort'")
+    else:
+        data = humansorted(data)
+    return data
