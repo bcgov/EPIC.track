@@ -33,7 +33,7 @@ export const WorkTypeFilter = () => {
     return options.filter((option) =>
       searchOptions.work_types.includes(String(option.value))
     );
-  }, [searchOptions.work_types]);
+  }, [searchOptions.work_types, options]);
 
   return (
     <FilterSelect
