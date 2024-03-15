@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByStaffQuery } from "services/rtkQuery/insights";
 import { showNotification } from "components/shared/notificationProvider";
@@ -46,19 +46,21 @@ const WorkByStaffChart = () => {
   };
 
   return (
-    <GrayBox>
+    <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <ETCaption1 bold>WORK BY STAFF</ETCaption1>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <ResponsiveContainer width="100%" height={300}>
+          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
             <BarChart
               layout="vertical"
               data={formatData(chartData)}
               margin={{
                 left: 30, // Increase left margin if names are getting cut off
               }}
+              height={chartData.length * 30 + 100}
+              width={350} // Adjust this value as needed
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
@@ -75,7 +77,7 @@ const WorkByStaffChart = () => {
                 ))}
               </Bar>
             </BarChart>
-          </ResponsiveContainer>
+          </Box>
         </Grid>
       </Grid>
     </GrayBox>

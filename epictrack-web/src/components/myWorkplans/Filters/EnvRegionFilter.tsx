@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
@@ -6,7 +6,7 @@ import RegionService from "../../../services/regionService";
 import { REGIONS } from "../../shared/constants";
 
 export const EnvRegionFilter = () => {
-  const { setSearchOptions } = useContext(MyWorkplansContext);
+  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,8 +30,15 @@ export const EnvRegionFilter = () => {
     fetchOptions();
   }, []);
 
+  const value = useMemo(() => {
+    return options.filter((option) =>
+      searchOptions.regions.includes(String(option.value))
+    );
+  }, [searchOptions.regions, options]);
+
   return (
     <FilterSelect
+      value={value}
       options={options}
       variant="inline-standalone"
       placeholder="Region"

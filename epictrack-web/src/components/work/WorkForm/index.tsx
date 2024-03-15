@@ -22,13 +22,18 @@ import ControlledTextField from "../../shared/controlledInputComponents/Controll
 import { EPDSpecialField } from "./EPDSpecialField";
 import icons from "../../icons";
 import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
-import { MIN_WORK_START_DATE } from "../../../constants/application-constant";
+import {
+  MIN_WORK_START_DATE,
+  ROLES,
+} from "../../../constants/application-constant";
 import { Project } from "../../../models/project";
 import ministryService from "services/ministryService";
 import eaActService from "services/eaActService";
 import EAOTeamService from "services/eao_team";
 import federalInvolvementService from "services/federalInvolvementService";
 import substitutionActService from "services/substitutionActService";
+import { useAppSelector } from "hooks";
+import { hasPermission } from "components/shared/restricted";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -122,13 +127,16 @@ export default function WorkForm({
   const federalInvolvementId = watch("federal_involvement_id");
   const title = watch("title");
 
-  const [isEpdFieldLocked, setIsEpdFieldLocked] =
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+
+  const [isEpdFieldUnlocked, setIsEpdFieldUnlocked] =
     React.useState<boolean>(false);
 
-  const [isWorkLeadFieldLocked, setIsWorkLeadFieldLocked] =
+  const [isWorkLeadFieldUnlocked, setIsWorkLeadFieldUnlocked] =
     React.useState<boolean>(false);
 
-  const isSpecialFieldLocked = isEpdFieldLocked || isWorkLeadFieldLocked;
+  const isSpecialFieldUnlocked = isEpdFieldUnlocked || isWorkLeadFieldUnlocked;
 
   useEffect(() => {
     reset(work ?? defaultWork);
@@ -136,9 +144,9 @@ export default function WorkForm({
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
-      setDisableDialogSave(isSpecialFieldLocked);
+      setDisableDialogSave(isSpecialFieldUnlocked);
     }
-  }, [isSpecialFieldLocked, setDisableDialogSave]);
+  }, [isSpecialFieldUnlocked, setDisableDialogSave]);
 
   React.useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
@@ -309,7 +317,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("ea_act_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={4}>
@@ -322,7 +330,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("work_type_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={4}>
@@ -333,7 +341,7 @@ export default function WorkForm({
             name="start_date"
             datePickerProps={{
               minDate: dayjs(MIN_WORK_START_DATE),
-              disabled: isSpecialFieldLocked,
+              disabled: !canEdit || isSpecialFieldUnlocked,
             }}
           />
         </Grid>
@@ -349,7 +357,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("project_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
@@ -362,7 +370,7 @@ export default function WorkForm({
             getOptionValue={(o: Ministry) => o?.id.toString()}
             getOptionLabel={(o: Ministry) => o.name}
             {...register("ministry_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
@@ -375,7 +383,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("federal_involvement_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
 
@@ -389,7 +397,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("substitution_act_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
@@ -410,7 +418,7 @@ export default function WorkForm({
               ),
             }}
             maxLength={maxTitleLength - titlePrefix.length}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
             error={Boolean(errors.title)}
             helperText={errors?.title?.message?.toString()}
           />
@@ -423,7 +431,7 @@ export default function WorkForm({
             multiline
             fullWidth
             rows={2}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           />
         </Grid>
         <Grid item xs={12}>
@@ -442,7 +450,7 @@ export default function WorkForm({
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             defaultChecked={work?.is_cac_recommended}
             name="is_cac_recommended"
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           />
           <ETFormLabel id="is_cac_recommended">CAC Required</ETFormLabel>
           <Tooltip
@@ -464,18 +472,19 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("eao_team_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
 
         <EPDSpecialField
           id={work?.id}
-          onLockClick={() => setIsEpdFieldLocked((prev) => !prev)}
-          open={isEpdFieldLocked}
+          onLockClick={() => setIsEpdFieldUnlocked((prev) => !prev)}
+          open={isEpdFieldUnlocked}
           onSave={() => {
             fetchWork();
           }}
           options={epds || []}
+          disabled={!canEdit}
         >
           <ControlledSelectV2
             disabled={work?.responsible_epd_id != undefined}
@@ -491,12 +500,13 @@ export default function WorkForm({
 
         <WorkLeadSpecialField
           id={work?.id}
-          onLockClick={() => setIsWorkLeadFieldLocked((prev) => !prev)}
-          open={isWorkLeadFieldLocked}
+          onLockClick={() => setIsWorkLeadFieldUnlocked((prev) => !prev)}
+          open={isWorkLeadFieldUnlocked}
           onSave={() => {
             fetchWork();
           }}
           options={leads || []}
+          disabled={!canEdit}
         >
           <ControlledSelectV2
             disabled={work?.work_lead_id != undefined}
@@ -521,14 +531,14 @@ export default function WorkForm({
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("decision_by_id")}
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name="is_active"
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           />
           <ETFormLabel id="is_active">Active</ETFormLabel>
         </Grid>
@@ -537,7 +547,7 @@ export default function WorkForm({
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             defaultChecked={work?.is_high_priority}
             name="is_high_priority"
-            disabled={isSpecialFieldLocked}
+            disabled={!canEdit || isSpecialFieldUnlocked}
           />
           <ETFormLabel id="is_watched">High Priority</ETFormLabel>
           <Tooltip

@@ -11,6 +11,7 @@ interface SpecialFieldLockProps {
   onLockClick: () => void;
   label: string;
   required?: boolean;
+  disabled?: boolean;
 }
 export const SpecialFieldLock = ({
   id,
@@ -18,6 +19,7 @@ export const SpecialFieldLock = ({
   onLockClick,
   label,
   required = false,
+  disabled = false,
 }: SpecialFieldLockProps) => {
   const LockClosedIcon: React.FC<IconProps> = icons["LockClosedIcon"];
   const LockOpenIcon: React.FC<IconProps> = icons["LockOpenIcon"];
@@ -34,13 +36,17 @@ export const SpecialFieldLock = ({
       <IconButton
         onClick={onLockClick}
         disableRipple
-        disabled={!id}
+        disabled={disabled}
         sx={{ padding: 0 }}
       >
         {open ? (
-          <LockOpenIcon fill={Palette.primary.accent.main} />
+          <LockOpenIcon
+            htmlColor={disabled ? "inherit" : Palette.primary.accent.main}
+          />
         ) : (
-          <LockClosedIcon fill={Palette.primary.accent.main} />
+          <LockClosedIcon
+            htmlColor={disabled ? "inherit" : Palette.primary.accent.main}
+          />
         )}
       </IconButton>
     </Stack>

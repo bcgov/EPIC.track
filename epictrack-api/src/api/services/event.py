@@ -114,8 +114,8 @@ class EventService:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        if current_work_phase.is_completed:
-            raise UnprocessableEntityError("Events cannot be added to completed phase")
+        # if current_work_phase.is_completed:
+        #     raise UnprocessableEntityError("Events cannot be added to completed phase")
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
@@ -970,7 +970,7 @@ class EventService:
                 )
                 if existing_event:
                     existing_event.anticipated_date = c_event_start_date
-                    existing_event.update(existing_event.as_dict(), commit=False)
+                    existing_event.update(existing_event.as_dict(recursive=False), commit=False)
                 else:
                     Event.flush(
                         Event(
