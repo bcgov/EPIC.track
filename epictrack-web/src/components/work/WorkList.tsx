@@ -17,7 +17,8 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { WorkDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
-import { useCachedFilters } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -34,11 +35,10 @@ const WorkList = () => {
 
   const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
   const [works, setWorks] = React.useState<Work[]>([]);
-  const [cachedFilters, setCachedFilters] = useCachedFilters(
-    All_WORKS_FILTERS_CACHE_KEY
+  const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
+    All_WORKS_FILTERS_CACHE_KEY,
+    []
   );
-
-  // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
 
   const loadWorks = async () => {
     setLoadingWorks(true);
@@ -312,8 +312,8 @@ const WorkList = () => {
     [projects, phases, teams, ministries, workTypes, eaActs]
   );
 
-  const handleCacheFilters = (filters: any[]) => {
-    if (!filters || !Array.isArray(filters)) {
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
       return;
     }
     setCachedFilters(filters);

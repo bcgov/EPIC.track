@@ -1,16 +1,10 @@
 import { useState, useEffect } from "react";
 
-type Filter = {
-  id: string;
-  value: unknown;
-};
-export function useCachedFilters(
-  storageKey: string
-): [
-  Filter[] | undefined,
-  React.Dispatch<React.SetStateAction<Filter[] | undefined>>
-] {
-  const [filters, setFilters] = useState<Filter[] | undefined>(() => {
+export function useCachedState<StateType>(
+  storageKey: string,
+  defaultValue: StateType
+): [StateType, React.Dispatch<React.SetStateAction<StateType>>] {
+  const [state, setState] = useState<StateType>(() => {
     try {
       const data = sessionStorage.getItem(storageKey);
       if (data) {
@@ -19,16 +13,16 @@ export function useCachedFilters(
     } catch (error) {
       console.error("Error retrieving cached filters:", error);
     }
-    return undefined;
+    return defaultValue;
   });
 
   useEffect(() => {
-    if (filters) {
-      sessionStorage.setItem(storageKey, JSON.stringify(filters));
+    if (state) {
+      sessionStorage.setItem(storageKey, JSON.stringify(state));
     } else {
       sessionStorage.removeItem(storageKey);
     }
-  }, [filters]);
+  }, [state]);
 
-  return [filters, setFilters];
+  return [state, setState];
 }
