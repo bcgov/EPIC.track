@@ -17,24 +17,9 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { WorkDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
+import { useCachedFilters } from "utils/hooks/useCachedFilters";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
-
-const getInitialColumnFilters = () => {
-  const columnFilters = sessionStorage.getItem(All_WORKS_FILTERS_CACHE_KEY);
-  if (!columnFilters) {
-    return undefined;
-  }
-  try {
-    const result = JSON.parse(columnFilters);
-    if (Array.isArray(result)) {
-      return result;
-    }
-  } catch (error) {
-    console.log(error);
-    return undefined;
-  }
-};
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -49,6 +34,9 @@ const WorkList = () => {
 
   const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
   const [works, setWorks] = React.useState<Work[]>([]);
+  const [cachedFilters, setCachedFilters] = useCachedFilters(
+    All_WORKS_FILTERS_CACHE_KEY
+  );
 
   // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
 
@@ -328,10 +316,7 @@ const WorkList = () => {
     if (!filters || !Array.isArray(filters)) {
       return;
     }
-    sessionStorage.setItem(
-      All_WORKS_FILTERS_CACHE_KEY,
-      JSON.stringify(filters)
-    );
+    setCachedFilters(filters);
   };
 
   return (
@@ -353,7 +338,7 @@ const WorkList = () => {
                   desc: false,
                 },
               ],
-              columnFilters: getInitialColumnFilters(),
+              columnFilters: cachedFilters,
             }}
             state={{
               isLoading: loadingWorks,
