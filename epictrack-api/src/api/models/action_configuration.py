@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all operations related to Actions."""
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -29,6 +29,7 @@ class ActionConfiguration(BaseModelVersioned):
     action_id = Column(ForeignKey('actions.id'), nullable=False)
     action_template_id = Column(ForeignKey('action_templates.id'), nullable=True)
     additional_params = Column(JSONB)
+    description = Column(String, nullable=True)
     sort_order = Column(Integer, nullable=False)
 
     outcome_configuration = relationship('OutcomeConfiguration', foreign_keys=[outcome_configuration_id], lazy='select')
