@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 import FilterSelect from "./FilterSelect";
 import { TableFilterProps } from "./type";
@@ -22,6 +22,12 @@ const makeTableFilter =
       [header]
     );
 
+    const toOptionType = (option: any) => {
+      if (typeof option === "object") {
+        return { label: option.text, value: option.value };
+      }
+      return { label: option, value: option };
+    };
     const options = React.useMemo(() => {
       let filterOptions = column.columnDef.filterSelectOptions;
       filterOptions = filterOptions.map(
@@ -32,14 +38,23 @@ const makeTableFilter =
                 text: string;
                 value: any;
               }
-        ) => {
-          if (typeof option === "object") {
-            return { label: option.text, value: option.value };
-          }
-          return { label: option, value: option };
-        }
+        ) => toOptionType(option)
       );
       return filterOptions;
+    }, [column]);
+
+    const handleValues = (value: string | string[]) => {
+      if (!value) return value;
+      if (Array.isArray(value)) {
+        return value.map((val) => {
+          return toOptionType(val);
+        });
+      }
+      return toOptionType(value);
+    };
+
+    useEffect(() => {
+      column.setFilterValue(column.getFilterValue());
     }, [column]);
 
     return (
@@ -48,6 +63,7 @@ const makeTableFilter =
         options={options}
         filterAppliedCallback={filterAppliedCallback}
         filterClearedCallback={filterClearedCallback}
+        defaultValue={handleValues(column.getFilterValue())}
       />
     );
   };
