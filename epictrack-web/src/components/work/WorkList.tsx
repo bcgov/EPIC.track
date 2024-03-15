@@ -22,13 +22,18 @@ const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
 const getInitialColumnFilters = () => {
   const columnFilters = sessionStorage.getItem(All_WORKS_FILTERS_CACHE_KEY);
-  if (columnFilters) {
+  if (!columnFilters) {
+    return undefined;
+  }
+  try {
     const result = JSON.parse(columnFilters);
     if (Array.isArray(result)) {
       return result;
     }
+  } catch (error) {
+    console.log(error);
+    return undefined;
   }
-  return undefined;
 };
 
 const WorkList = () => {
@@ -320,6 +325,9 @@ const WorkList = () => {
   );
 
   const handleCacheFilters = (filters: any[]) => {
+    if (!filters || !Array.isArray(filters)) {
+      return;
+    }
     sessionStorage.setItem(
       All_WORKS_FILTERS_CACHE_KEY,
       JSON.stringify(filters)
