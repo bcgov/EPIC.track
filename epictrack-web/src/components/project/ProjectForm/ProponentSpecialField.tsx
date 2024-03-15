@@ -17,12 +17,14 @@ interface ProponentSpecialFieldProps {
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
+  disabled?: boolean;
 }
 const LABEL = "Proponent";
 export const ProponentSpecialField = ({
   id,
   onSave,
   open = false,
+  disabled = false,
   onLockClick,
   options,
   children,
@@ -36,25 +38,24 @@ export const ProponentSpecialField = ({
 
   if (!id) {
     return (
-      <Grid item xs={6}>
+      <>
         <ETFormLabel>{LABEL}</ETFormLabel>
         {children}
-      </Grid>
+      </>
     );
   }
 
   return (
     <>
-      <Grid item xs={6}>
-        <SpecialFieldLock
-          id={id}
-          open={open}
-          onLockClick={onLockClick}
-          label={LABEL}
-          required
-        />
-        {children}
-      </Grid>
+      <SpecialFieldLock
+        id={id}
+        open={open}
+        onLockClick={onLockClick}
+        label={LABEL}
+        required
+        disabled={disabled}
+      />
+      {children}
       <When condition={open}>
         <Grid item xs={12}>
           <SpecialFieldGrid

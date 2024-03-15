@@ -86,4 +86,5 @@ export enum EventTemplateVisibility {
   MANDATORY = "MANDATORY",
   OPTIONAL = "OPTIONAL",
   HIDDEN = "HIDDEN",
+  SUGGESTED = "SUGGESTED",
 }

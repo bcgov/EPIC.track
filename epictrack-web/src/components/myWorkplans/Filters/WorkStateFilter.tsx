@@ -1,18 +1,25 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import { WORK_STATE } from "../../shared/constants";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { DEFAULT_WORK_STATE, MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const WorkStateFilter = () => {
-  const { setSearchOptions } = useContext(MyWorkplansContext);
+  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
 
   const options = Object.values(WORK_STATE).map((state) => ({
     label: state.label,
     value: state.value,
   }));
 
+  const value = useMemo(() => {
+    return options.filter((option) =>
+      searchOptions.work_states.includes(String(option.value))
+    );
+  }, [searchOptions.work_states, options]);
+
   return (
     <FilterSelect
+      value={value}
       options={options}
       variant="inline-standalone"
       placeholder="Work State"
@@ -33,12 +40,6 @@ export const WorkStateFilter = () => {
       name="workState"
       isMulti
       info={true}
-      defaultValue={[
-        {
-          label: DEFAULT_WORK_STATE.label,
-          value: DEFAULT_WORK_STATE.value,
-        },
-      ]}
     />
   );
 };

@@ -10,17 +10,13 @@ import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import TrackSelect from "components/shared/TrackSelect";
 import { useProjectsContext } from "./ProjectsContext";
-import { getProjectsSubtypes } from "./utils";
+import { getProjectsTypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
-import { Unless } from "react-if";
 
 const ProjectBySubtypeChart = () => {
   const { projects, loadingProjects } = useProjectsContext();
-  const projectSubtypes = useMemo(
-    () => getProjectsSubtypes(projects),
-    [projects]
-  );
-  const [selectedSubtype, setSelectedSubtype] = React.useState({
+  const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
+  const [selectedType, setSelectedType] = React.useState({
     id: 0,
     name: "",
   });
@@ -28,19 +24,19 @@ const ProjectBySubtypeChart = () => {
   const [loadChartTrigger, queryResult] = useLazyGetProjectBySubTypeQuery();
 
   useEffect(() => {
-    if (projectSubtypes) {
-      const defaultSubtype = projectSubtypes[0];
-      setSelectedSubtype(defaultSubtype);
+    if (projectTypes) {
+      const defaultSubtype = projectTypes[0];
+      setSelectedType(defaultSubtype);
     }
-  }, [projectSubtypes]);
+  }, [projectTypes]);
 
   useEffect(() => {
-    if (selectedSubtype?.id) {
-      loadChartTrigger(selectedSubtype.id);
+    if (selectedType?.id) {
+      loadChartTrigger(selectedType.id);
     }
-  }, [selectedSubtype]);
+  }, [selectedType]);
 
-  if (loadingProjects || queryResult.isLoading || !selectedSubtype) {
+  if (loadingProjects || queryResult.isLoading || !selectedType) {
     return <PieChartSkeleton />;
   }
 
@@ -91,17 +87,17 @@ const ProjectBySubtypeChart = () => {
         <Grid item xs={12} container justifyContent="flex-end">
           <Box sx={{ width: "200px" }}>
             <TrackSelect
-              options={projectSubtypes.map((subtype) => ({
+              options={projectTypes.map((subtype) => ({
                 value: subtype.id,
                 label: subtype.name,
               }))}
               value={{
-                value: selectedSubtype.id,
-                label: selectedSubtype.name,
+                value: selectedType.id,
+                label: selectedType.name,
               }}
               onChange={(selectedOption) => {
                 const option = selectedOption as OptionType;
-                setSelectedSubtype({
+                setSelectedType({
                   id: Number(option.value),
                   name: option.label as string,
                 });
@@ -137,9 +133,7 @@ const ProjectBySubtypeChart = () => {
                 overflow: "hidden",
               }}
             />
-            <Unless condition={noData}>
-              <Tooltip />
-            </Unless>
+            {!noData && <Tooltip />}
           </PieChart>
         </Grid>
       </Grid>

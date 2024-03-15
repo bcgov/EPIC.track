@@ -17,12 +17,14 @@ interface WorkLeadSpecialFieldProps {
   open: boolean;
   onLockClick: () => void;
   children: React.ReactNode;
+  disabled?: boolean;
 }
 const TITLE = "Work Lead";
 export const WorkLeadSpecialField = ({
   id,
   onSave,
   open = false,
+  disabled = false,
   onLockClick,
   options,
   children,
@@ -51,6 +53,7 @@ export const WorkLeadSpecialField = ({
           onLockClick={onLockClick}
           label={TITLE}
           required
+          disabled={disabled}
         />
         {children}
       </Grid>

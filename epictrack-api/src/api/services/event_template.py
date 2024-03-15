@@ -391,6 +391,7 @@ class EventTemplateService:
                 "OutcomeNo": "outcome_no",
                 "OutcomeName": "outcome_id",
                 "ActionName": "action_id",
+                "ActionDescription": "description",
                 "AdditionalParams": "additional_params",
                 "SortOrder": "sort_order",
             },

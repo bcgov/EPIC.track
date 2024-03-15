@@ -34,6 +34,7 @@ class EventTemplateVisibilityEnum(enum.Enum):
     MANDATORY = "MANDATORY"
     OPTIONAL = "OPTIONAL"
     HIDDEN = "HIDDEN"
+    SUGGESTED = "SUGGESTED"
 
 
 class EventTemplate(BaseModelVersioned):

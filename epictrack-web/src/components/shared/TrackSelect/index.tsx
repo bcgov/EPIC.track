@@ -7,12 +7,14 @@ type TrackSelectProps = Props & {
   error?: boolean;
   helperText?: string;
   disabled?: boolean;
+  fullWidth?: boolean;
 };
 
 const TrackSelect: React.FC<TrackSelectProps> = ({
   disabled,
   error = false,
   helperText = "",
+  fullWidth = false,
   ...rest
 }) => {
   return (
@@ -27,6 +29,7 @@ const TrackSelect: React.FC<TrackSelectProps> = ({
           control: (baseStyles, state) => {
             return {
               ...baseStyles,
+              width: fullWidth ? "100%" : baseStyles.width,
               borderColor: error
                 ? "#d32f2f"
                 : state.isFocused
