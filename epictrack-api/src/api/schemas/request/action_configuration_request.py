@@ -38,6 +38,10 @@ class ActionConfigurationBodyParameterSchema(RequestBodyParameterSchema):
         metadata={"description": "Additional parameters for the action"}
     )
 
+    description = fields.Str(
+        metadata={"description": "Description of the action"}
+    )
+
     sort_order = fields.Int(
         metadata={"description": "Sort order of the event template item"}
     )
