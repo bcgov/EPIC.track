@@ -341,6 +341,11 @@ class EventService:
                 number_of_days_to_be_pushed,
                 event_old,
             )
+        else:
+            all_work_event_configurations = (
+                EventConfigurationService.find_all_configurations_by_work(event.work_id)
+            )
+            cls._handle_child_events(all_work_event_configurations, event)
 
     @classmethod
     def _push_subsequent_events(
@@ -974,7 +979,7 @@ class EventService:
                                 str(c_event_start_date),
                                 c_event_conf.number_of_days,
                                 c_event_conf.id,
-                                c_event_conf.work_id,
+                                event.work_id,
                                 event.id,
                             )
                         )
