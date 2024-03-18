@@ -86,7 +86,7 @@ export const WorkDialog = ({
   return (
     <TrackDialog
       open={open}
-      dialogTitle={workId ? "Edit Work" : "Create Work"}
+      dialogTitle={workId ? work?.title || "Edit Work" : "Create Work"}
       onClose={() => {
         setWork(null);
         setOpen(false);

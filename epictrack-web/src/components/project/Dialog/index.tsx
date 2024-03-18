@@ -85,7 +85,9 @@ export const ProjectDialog = ({
   return (
     <TrackDialog
       open={open}
-      dialogTitle={projectId ? "Edit Project" : "Create Project"}
+      dialogTitle={
+        projectId ? project?.name || "Edit Project" : "Create Project"
+      }
       onClose={() => {
         setProject(null);
         setOpen(false);
