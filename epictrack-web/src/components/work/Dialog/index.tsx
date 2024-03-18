@@ -40,41 +40,27 @@ export const WorkDialog = ({
   };
 
   const createWork = async (data: any) => {
-    try {
-      await workService.create(data);
-      showNotification("Work created successfully", {
-        type: "success",
-      });
-      setWork(null);
-    } catch (error) {
-      showNotification("Could not create Work", {
-        type: "error",
-      });
-    }
+    await workService.create(data);
   };
 
   const editWork = async (data: any) => {
-    try {
-      await workService.update(data, String(workId));
-      showNotification("Work updated successfully", {
-        type: "success",
-      });
-      setWork(null);
-    } catch (error) {
-      showNotification("Could not update Work", {
-        type: "error",
-      });
-    }
+    await workService.update(data, String(workId));
   };
 
   const saveWork = async (data: any) => {
-    if (workId) {
-      await editWork(data);
-    } else {
-      await createWork(data);
+    try {
+      workId ? await editWork(data) : await createWork(data);
+      showNotification("Work saved successfully", {
+        type: "success",
+      });
+      setOpen(false);
+      setWork(null);
+      saveWorkCallback();
+    } catch (error) {
+      showNotification("Could not save Work", {
+        type: "error",
+      });
     }
-    setOpen(false);
-    saveWorkCallback();
   };
 
   useEffect(() => {
@@ -86,7 +72,7 @@ export const WorkDialog = ({
   return (
     <TrackDialog
       open={open}
-      dialogTitle={workId ? "Edit Work" : "Create Work"}
+      dialogTitle={workId ? work?.title || "Edit Work" : "Create Work"}
       onClose={() => {
         setWork(null);
         setOpen(false);
