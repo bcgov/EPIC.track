@@ -1,5 +1,6 @@
 """Disable work start date action handler"""
 from datetime import timedelta
+from typing import List
 from sqlalchemy import and_
 
 from api.actions.base import ActionFactory
@@ -152,7 +153,7 @@ class AddPhase(ActionFactory):
         }
         return work_phase_data
 
-    def get_configurations(self, source_event: Event, params) -> [EventConfiguration]:
+    def get_configurations(self, source_event: Event, params) -> List[EventConfiguration]:
         """Find the latest event configurations per the given params"""
         work_phase = (
             db.session.query(WorkPhase)
