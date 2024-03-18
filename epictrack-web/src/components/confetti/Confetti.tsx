@@ -14,7 +14,7 @@ const Confetti = ({ displayType = "confetti" }: ConfettiProps) => {
       const animationEnd = Date.now() + duration;
       const defaults = {
         startVelocity: 30,
-        spread: displayType === "fireworks" ? 120 : 360, // narrower spread for fireworks
+        spread: displayType === "fireworks" ? 180 : 360, // wider spread
         ticks: 60,
         zIndex: 0,
       };
@@ -27,10 +27,17 @@ const Confetti = ({ displayType = "confetti" }: ConfettiProps) => {
       }
 
       const particleCount = 50 * (timeLeft / duration);
+      // First point of explosion
       confetti({
         ...defaults,
         particleCount,
-        origin: { x: 0.5, y: 0.5 }, // center of the screen
+        origin: { x: 0.3, y: 0.5 }, // left of the screen
+      });
+      // Second point of explosion
+      confetti({
+        ...defaults,
+        particleCount,
+        origin: { x: 0.7, y: 0.5 }, // right of the screen
       });
 
       timeout = setTimeout(animateConfetti, 250);
@@ -47,5 +54,4 @@ const Confetti = ({ displayType = "confetti" }: ConfettiProps) => {
 
   return null;
 };
-
 export default Confetti;

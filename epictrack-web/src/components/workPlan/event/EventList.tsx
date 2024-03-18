@@ -50,7 +50,6 @@ import {
 } from "../../../constants/application-constant";
 import { Restricted } from "components/shared/restricted";
 import { IButton } from "components/shared";
-import Confetti from "components/confetti/Confetti";
 import { showConfetti } from "styles/uiStateSlice";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -324,21 +323,19 @@ const EventList = () => {
     setShowMilestoneForm(false);
     getCombinedEvents();
     getWorkPhases();
-    setTaskEvent(undefined);
-    setMilestoneEvent(undefined);
     getTemplateUploadStatus()
       .then(() => {
         return getWorkById();
       })
       .then(() => {
         if (
-          milestoneEvent &&
-          milestoneEvent.event_configuration.event_position ===
-            EventPosition.END &&
-          milestoneEvent.actual_date
+          milestoneEvent?.event_configuration.event_position ===
+          EventPosition.END
         ) {
           dispatch(showConfetti(true));
         }
+        setTaskEvent(undefined);
+        setMilestoneEvent(undefined);
       });
   };
 
