@@ -130,6 +130,7 @@ const Endpoints = {
   },
   Insights: {
     WORK_BY_TYPE: "/insights/works?group_by=type",
+    WORK_BY_TEAM: "/insights/works?group_by=team",
     ASSESSMENT_BY_PHASE: "/insights/works?group_by=assessment_by_phase",
   },
 };

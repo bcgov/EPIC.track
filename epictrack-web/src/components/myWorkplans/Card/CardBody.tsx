@@ -47,15 +47,14 @@ const CardBody = ({ workplan }: CardProps) => {
             bold
             color={Palette.neutral.dark}
             xs
+            enableTooltip
+            enableEllipsis
+            tooltip={workTitle}
             sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
+              maxWidth: "70%",
             }}
           >
-            <Tooltip title={workTitle} placement="top-start">
-              <span>{workTitle}</span>
-            </Tooltip>
+            {workTitle}
           </ETHeading4>
         </Grid>
         <Grid item xs={3} container justifyContent={"flex-end"}>

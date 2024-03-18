@@ -439,19 +439,37 @@ const CloseXIcon = (props: IconProps) => {
   );
 };
 
-const LockClosedIcon = (props: IconProps) => {
+const LockClosedIcon = ({
+  height = 16,
+  width = 16,
+  sx,
+  ...rest
+}: SvgIconProps) => {
   return (
-    <svg {...commonProps} {...props} width="16" height="16" viewBox="0 0 16 16">
+    <SvgIcon
+      viewBox="0 0 16 16"
+      sx={{ height: height, width: width, ...sx }}
+      {...rest}
+    >
       <path d="M8 0C10.4688 0 12.5 2.03125 12.5 4.5V6H13C14.0938 6 15 6.90625 15 8V14C15 15.125 14.0938 16 13 16H3C1.875 16 1 15.125 1 14V8C1 6.90625 1.875 6 3 6H3.5V4.5C3.5 2.03125 5.5 0 8 0ZM8 2C6.59375 2 5.5 3.125 5.5 4.5V6H10.5V4.5C10.5 3.125 9.375 2 8 2ZM9 10C9 9.46875 8.53125 9 8 9C7.4375 9 7 9.46875 7 10V12C7 12.5625 7.4375 13 8 13C8.53125 13 9 12.5625 9 12V10Z" />
-    </svg>
+    </SvgIcon>
   );
 };
 
-const LockOpenIcon = (props: IconProps) => {
+const LockOpenIcon = ({
+  height = 20,
+  width = 20,
+  sx,
+  ...rest
+}: SvgIconProps) => {
   return (
-    <svg {...commonProps} {...props} width="20" height="20" viewBox="0 0 20 20">
+    <SvgIcon
+      viewBox="0 0 20 20"
+      sx={{ height: height, width: width, ...sx }}
+      {...rest}
+    >
       <path d="M14.5 4C13.0938 4 12 5.125 12 6.5V8H13C14.0938 8 15 8.90625 15 10V16C15 17.125 14.0938 18 13 18H3C1.875 18 1 17.125 1 16V10C1 8.90625 1.875 8 3 8H10V6.5C10 4.03125 12 2 14.5 2C16.9688 2 19 4.03125 19 6.5V8C19 8.5625 18.5312 9 18 9C17.4375 9 17 8.5625 17 8V6.5C17 5.125 15.875 4 14.5 4ZM9 14C9.53125 14 10 13.5625 10 13C10 12.4688 9.53125 12 9 12H7C6.4375 12 6 12.4688 6 13C6 13.5625 6.4375 14 7 14H9Z" />
-    </svg>
+    </SvgIcon>
   );
 };
 

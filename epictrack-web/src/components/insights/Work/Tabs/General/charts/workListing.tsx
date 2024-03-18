@@ -1,9 +1,6 @@
 import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
-import { useAppSelector } from "hooks";
-import { hasPermission } from "components/shared/restricted";
-import { ROLES } from "constants/application-constant";
 import { Work } from "models/work";
 import {
   getSelectFilterOptions,
@@ -25,9 +22,6 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
   const { data, error, isLoading } = useGetWorksQuery();
 
@@ -83,20 +77,6 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: canEdit
-          ? ({ row, renderedCellValue }) => (
-              <ETGridTitle
-                to="#"
-                onClick={() => {
-                  //TODO: Implement this
-                  return;
-                }}
-                titleText={row.original.title}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
@@ -229,7 +209,7 @@ const WorkList = () => {
         ),
       },
     ],
-    [projects, phases, ministries, workTypes]
+    [projects, phases, workTypes]
   );
   return (
     <MasterTrackTable

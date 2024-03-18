@@ -274,11 +274,9 @@ describe("WorkList", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
     cy.mount(
-      <SnackbarProvider maxSnack={3}>
-        <Router>
-          <WorkList />
-        </Router>
-      </SnackbarProvider>
+      <Router>
+        <WorkList />
+      </Router>
     );
   });
 

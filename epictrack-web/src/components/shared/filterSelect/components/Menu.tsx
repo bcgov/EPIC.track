@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Button } from "@mui/material";
-
 import { components, MenuProps } from "react-select";
 import { Palette } from "../../../../styles/theme";
 import { ETParagraph } from "../..";

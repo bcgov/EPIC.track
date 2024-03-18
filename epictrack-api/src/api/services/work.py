@@ -234,8 +234,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
         work = work.flush()
         cls.create_special_fields(work)
-        print(type(work.start_date))
-        print(work.start_date)
         phase_start_date = work.start_date
         sort_order = 1
         for phase in phases:
@@ -337,6 +335,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .join(Work, StaffWorkRole.work_id == Work.id)
             .filter(
                 StaffWorkRole.is_deleted.is_(False),
+                StaffWorkRole.is_active.is_(True),
                 Staff.is_active.is_(True),
                 Staff.is_deleted.is_(False),
                 Work.id.in_(work_ids),

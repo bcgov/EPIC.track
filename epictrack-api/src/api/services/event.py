@@ -114,8 +114,8 @@ class EventService:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        if current_work_phase.is_completed:
-            raise UnprocessableEntityError("Events cannot be added to completed phase")
+        # if current_work_phase.is_completed:
+        #     raise UnprocessableEntityError("Events cannot be added to completed phase")
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
@@ -341,6 +341,11 @@ class EventService:
                 number_of_days_to_be_pushed,
                 event_old,
             )
+        else:
+            all_work_event_configurations = (
+                EventConfigurationService.find_all_configurations_by_work(event.work_id)
+            )
+            cls._handle_child_events(all_work_event_configurations, event)
 
     @classmethod
     def _push_subsequent_events(
@@ -956,12 +961,16 @@ class EventService:
                         )
                     )
             else:
-                existing_event = db.session.query(Event).filter(
-                    Event.source_event_id == event.id, Event.is_active.is_(True)
+                existing_event = (
+                    db.session.query(Event)
+                    .filter(
+                        Event.source_event_id == event.id, Event.is_active.is_(True)
+                    )
+                    .first()
                 )
                 if existing_event:
                     existing_event.anticipated_date = c_event_start_date
-                    existing_event.update(existing_event.as_dict(), commit=False)
+                    existing_event.update(existing_event.as_dict(recursive=False), commit=False)
                 else:
                     Event.flush(
                         Event(
@@ -970,7 +979,7 @@ class EventService:
                                 str(c_event_start_date),
                                 c_event_conf.number_of_days,
                                 c_event_conf.id,
-                                c_event_conf.work_id,
+                                event.work_id,
                                 event.id,
                             )
                         )

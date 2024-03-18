@@ -4,7 +4,6 @@ import { Box, Button, Grid } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
-import { MasterContext } from "../shared/MasterContext";
 import workService from "../../services/workService/workService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
@@ -12,14 +11,25 @@ import { IconProps } from "../icons/type";
 import Icons from "../icons";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted, hasPermission } from "../shared/restricted";
+import { Restricted } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
-import { useAppSelector } from "../../hooks";
 import { WorkDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
+import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
+
+const getInitialColumnFilters = () => {
+  const columnFilters = sessionStorage.getItem(All_WORKS_FILTERS_CACHE_KEY);
+  if (columnFilters) {
+    const result = JSON.parse(columnFilters);
+    if (Array.isArray(result)) {
+      return result;
+    }
+  }
+  return undefined;
+};
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -34,9 +44,6 @@ const WorkList = () => {
 
   const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
   const [works, setWorks] = React.useState<Work[]>([]);
-
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
   // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
 
@@ -105,20 +112,18 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: canEdit
-          ? ({ row, renderedCellValue }) => (
-              <ETGridTitle
-                to="#"
-                onClick={() => {
-                  setWorkId(row.original.id);
-                  setShowWorkDialogForm(true);
-                }}
-                titleText={row.original.title}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        Cell: ({ row, renderedCellValue }) => (
+          <ETGridTitle
+            to="#"
+            onClick={() => {
+              setWorkId(row.original.id);
+              setShowWorkDialogForm(true);
+            }}
+            titleText={row.original.title}
+          >
+            {renderedCellValue}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
@@ -135,7 +140,7 @@ const WorkList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="projectFilter"
             />
           );
         },
@@ -313,6 +318,14 @@ const WorkList = () => {
     ],
     [projects, phases, teams, ministries, workTypes, eaActs]
   );
+
+  const handleCacheFilters = (filters: any[]) => {
+    sessionStorage.setItem(
+      All_WORKS_FILTERS_CACHE_KEY,
+      JSON.stringify(filters)
+    );
+  };
+
   return (
     <>
       <ETPageContainer
@@ -332,6 +345,7 @@ const WorkList = () => {
                   desc: false,
                 },
               ],
+              columnFilters: getInitialColumnFilters(),
             }}
             state={{
               isLoading: loadingWorks,
@@ -361,6 +375,7 @@ const WorkList = () => {
                 </Restricted>
               </Box>
             )}
+            cacheFilters={handleCacheFilters}
           />
         </Grid>
       </ETPageContainer>

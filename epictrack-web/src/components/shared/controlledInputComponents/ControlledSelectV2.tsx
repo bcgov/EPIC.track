@@ -12,6 +12,7 @@ type IFormInputProps = {
   getOptionValue: (option: any) => string;
   helperText?: string | undefined;
   disabled?: boolean;
+  fullWidth?: boolean;
   onHandleChange?: (val: any) => void;
   // menuPortalTarget: HTMLElement | undefined;
 };

@@ -8,10 +8,9 @@ import projectService from "../../services/projectService/projectService";
 import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted, hasPermission } from "../shared/restricted";
+import { Restricted } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
-import { useAppSelector } from "../../hooks";
 import { ProjectDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 
@@ -24,18 +23,6 @@ const ProjectList = () => {
   const [showFormDialog, setShowFormDialog] = React.useState(false);
   const [projects, setProjects] = React.useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = React.useState(true);
-
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-
-  // React.useEffect(() => {
-  //   ctx.setService(projectService);
-  //   ctx.setFormStyle({
-  //     "& .MuiDialogContent-root": {
-  //       padding: 0,
-  //     },
-  //   });
-  // }, []);
 
   const fetchProjects = async () => {
     setLoadingProjects(true);
@@ -92,21 +79,19 @@ const ProjectList = () => {
       {
         accessorKey: "name",
         header: "Project Name",
-        Cell: canEdit
-          ? ({ cell, row, renderedCellValue }) => (
-              <ETGridTitle
-                to={"#"}
-                onClick={() => {
-                  setProjectId(row.original.id);
-                  setShowFormDialog(true);
-                }}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        Cell: ({ cell, row, renderedCellValue }) => (
+          <ETGridTitle
+            to={"#"}
+            onClick={() => {
+              setProjectId(row.original.id);
+              setShowFormDialog(true);
+            }}
+            enableTooltip={true}
+            tooltip={cell.getValue<string>()}
+          >
+            {renderedCellValue}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
