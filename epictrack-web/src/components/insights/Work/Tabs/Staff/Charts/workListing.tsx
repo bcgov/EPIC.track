@@ -68,8 +68,8 @@ const WorkList = () => {
     getWorkStaffAllocation();
   }, []);
 
-  React.useEffect(() => {
-    let columns: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
+  const tableColumns = React.useMemo(() => {
+    let cols: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
     if (wsData && wsData.length > 0) {
       const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
 
@@ -92,11 +92,14 @@ const WorkList = () => {
         )
       );
 
-      columns = [
+      cols = [
         {
           header: rolename,
           filterSelectOptions: officerAnalystOptions,
           accessorFn: (row: any) => {
+            if (!row.staff) {
+              return "";
+            }
             const officerAnalysts = row.staff
               ? row.staff.filter(
                   (p: { role: Role }) =>
@@ -108,8 +111,18 @@ const WorkList = () => {
                 (officerAnalyst: any) =>
                   `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
               )
-              .join(", "); // join the names with a comma and a space
+              .join(", ");
           },
+          Cell: ({ renderedCellValue }) => (
+            <ETGridTitle
+              to="#"
+              enableEllipsis
+              enableTooltip={true}
+              tooltip={renderedCellValue}
+            >
+              {renderedCellValue}
+            </ETGridTitle>
+          ),
           enableHiding: false,
           enableColumnFilter: true,
           sortingFn: "sortFn",
@@ -144,7 +157,7 @@ const WorkList = () => {
         } as MRT_ColumnDef<WorkOrWorkStaff>,
       ];
     }
-    setWorkRoles(columns);
+    setWorkRoles(cols);
   }, [wsData]);
 
   const codeTypes: { [x: string]: any } = {
