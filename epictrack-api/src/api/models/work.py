@@ -125,7 +125,7 @@ class Work(BaseModelVersioned):
 
         query = cls.filter_by_search_criteria(query, search_filters)
 
-        query = query.order_by(Work.start_date.desc())
+        query = query.order_by(Work.start_date.desc(), Work.title)
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
         if no_pagination_options:
