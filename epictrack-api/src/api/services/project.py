@@ -196,7 +196,7 @@ class ProjectService:
         return {"first_nation_available": result}
 
     @classmethod
-    def import_projects(cls, file: IO):
+    def import_projects(cls, file: IO):  # pylint: disable=too-many-locals
         """Import proponents"""
         data = cls._read_excel(file)
         proponent_names = set(data["proponent_id"].to_list())
