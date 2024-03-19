@@ -13,7 +13,10 @@ import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { ProjectDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
+const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
   const [envRegions, setEnvRegions] = React.useState<string[]>([]);
   const [subTypes, setSubTypes] = React.useState<string[]>([]);
@@ -23,6 +26,10 @@ const ProjectList = () => {
   const [showFormDialog, setShowFormDialog] = React.useState(false);
   const [projects, setProjects] = React.useState<Project[]>([]);
   const [loadingProjects, setLoadingProjects] = React.useState(true);
+  const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
+    projectsListingFiltersCacheKey,
+    []
+  );
 
   const fetchProjects = async () => {
     setLoadingProjects(true);
@@ -257,6 +264,14 @@ const ProjectList = () => {
     ],
     [types, subTypes, envRegions, proponents]
   );
+
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
+      return;
+    }
+    setColumnFilters(filters);
+  };
+
   return (
     <>
       <ETPageContainer
@@ -276,6 +291,7 @@ const ProjectList = () => {
                   desc: false,
                 },
               ],
+              columnFilters: columnFilters,
             }}
             state={{
               isLoading: loadingProjects,
@@ -305,6 +321,7 @@ const ProjectList = () => {
                 </Restricted>
               </Box>
             )}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
       </ETPageContainer>
