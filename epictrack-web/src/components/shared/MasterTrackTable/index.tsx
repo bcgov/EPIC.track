@@ -12,6 +12,7 @@ import SearchIcon from "../../../assets/images/search.svg";
 import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2 } from "..";
+import { FiltersCache } from "./FiltersCache";
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
@@ -60,12 +61,14 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
   setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
+  cacheFilters?: (columnFilters: any) => void;
 }
 
 const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
   data,
   setTableInstance,
+  cacheFilters,
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const table = useMaterialReactTable({
@@ -220,9 +223,13 @@ const MasterTrackTable = <TData extends MRT_RowData>({
       setTableInstance(table);
     }
   }, [table]);
+
   return (
     <>
       <MaterialReactTable table={table} />
+      {cacheFilters && (
+        <FiltersCache cacheFilters={cacheFilters} table={table} />
+      )}
     </>
   );
 };

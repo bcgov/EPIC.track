@@ -15,7 +15,7 @@ export const WorkStateFilter = () => {
     return options.filter((option) =>
       searchOptions.work_states.includes(String(option.value))
     );
-  }, [searchOptions.work_states]);
+  }, [searchOptions.work_states, options]);
 
   return (
     <FilterSelect
@@ -40,12 +40,6 @@ export const WorkStateFilter = () => {
       name="workState"
       isMulti
       info={true}
-      defaultValue={[
-        {
-          label: DEFAULT_WORK_STATE.label,
-          value: DEFAULT_WORK_STATE.value,
-        },
-      ]}
     />
   );
 };

@@ -34,7 +34,7 @@ export const EnvRegionFilter = () => {
     return options.filter((option) =>
       searchOptions.regions.includes(String(option.value))
     );
-  }, [searchOptions.regions]);
+  }, [searchOptions.regions, options]);
 
   return (
     <FilterSelect

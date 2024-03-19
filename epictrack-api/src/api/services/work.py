@@ -896,7 +896,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 parent_config
                 for parent_config in event_configurations
                 if parent_config.visibility
-                == EventTemplateVisibilityEnum.MANDATORY.value
+                in [
+                    EventTemplateVisibilityEnum.MANDATORY.value,
+                    EventTemplateVisibilityEnum.SUGGESTED.value,
+                ]
                 and parent_config.work_phase_id == work_phase.id
             ]
             for p_event_conf in parent_event_configs:

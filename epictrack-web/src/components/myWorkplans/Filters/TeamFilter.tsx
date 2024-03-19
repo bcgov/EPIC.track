@@ -33,7 +33,7 @@ export const TeamFilter = () => {
     return options.filter((option) =>
       searchOptions.teams.includes(String(option.value))
     );
-  }, [searchOptions.teams]);
+  }, [searchOptions.teams, options]);
 
   return (
     <FilterSelect

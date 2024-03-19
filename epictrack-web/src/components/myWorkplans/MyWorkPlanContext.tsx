@@ -6,6 +6,11 @@ import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
+import {
+  MY_WORKLAN_FILTERS,
+  MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
+} from "./constants";
+import { useCachedState } from "utils/hooks/useCachedFilters";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
@@ -83,10 +88,14 @@ export const MyWorkplansProvider = ({
   const [workplans, setWorkplans] = useState<WorkPlan[]>([]);
   const [totalWorkplans, setTotalWorkplans] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
-  const [searchOptions, setSearchOptions] = useState<WorkPlanSearchOptions>({
-    ...defaultSearchOptions,
-    staff_id: user.staffId,
-  });
+
+  const [searchOptions, setSearchOptions] = useCachedState(
+    MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
+    {
+      ...defaultSearchOptions,
+      staff_id: user?.staffId || null,
+    }
+  );
 
   const [myWorkPlanView, setMyWorkPlanView] = useState<MyWorkPlanView>(
     MY_WORKPLAN_VIEW.CARDS

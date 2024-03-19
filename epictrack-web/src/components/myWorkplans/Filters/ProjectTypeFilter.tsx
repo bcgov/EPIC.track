@@ -33,7 +33,7 @@ export const ProjectTypeFilter = () => {
     return options.filter((option) =>
       searchOptions.project_types.includes(String(option.value))
     );
-  }, [searchOptions.project_types]);
+  }, [searchOptions.project_types, options]);
 
   return (
     <FilterSelect
