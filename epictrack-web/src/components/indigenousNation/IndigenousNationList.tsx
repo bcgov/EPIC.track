@@ -19,8 +19,16 @@ import { useAppSelector } from "../../hooks";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { debounce } from "lodash";
 import { Palette } from "styles/theme";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
+const firstNationsColumnFiltersCacheKey =
+  "first-nations-listing-column-filters";
 export default function IndigenousNationList() {
+  const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
+    firstNationsColumnFiltersCacheKey,
+    []
+  );
   const [indigenousNationID, setIndigenousNationID] = React.useState<number>();
   const [staffs, setStaffs] = React.useState<Staff[]>([]);
   const ctx = React.useContext(MasterContext);
@@ -231,6 +239,13 @@ export default function IndigenousNationList() {
     getStaffs();
   }, []);
 
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
+      return;
+    }
+    setColumnFilters(filters);
+  };
+
   return (
     <>
       <ETPageContainer
@@ -250,6 +265,7 @@ export default function IndigenousNationList() {
                   desc: false,
                 },
               ],
+              columnFilters,
             }}
             state={{
               isLoading: ctx.loading,
@@ -279,6 +295,7 @@ export default function IndigenousNationList() {
                 </Restricted>
               </Box>
             )}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
         <UserMenu

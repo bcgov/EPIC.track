@@ -368,7 +368,7 @@ const WorkList = () => {
                 </Restricted>
               </Box>
             )}
-            cacheFilters={handleCacheFilters}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
       </ETPageContainer>
