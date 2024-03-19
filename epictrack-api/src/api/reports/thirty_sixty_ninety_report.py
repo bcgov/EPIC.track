@@ -1,4 +1,5 @@
 """Classes for specific report types."""
+
 from datetime import datetime, timedelta
 from io import BytesIO
 
@@ -17,6 +18,7 @@ from api.models import Event, Project, Work, WorkStatus, WorkType, db
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.work import WorkStateEnum
 
 from .report_factory import ReportFactory
@@ -44,6 +46,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "event_id",
             "event_title",
             "event_date",
+            "project_id"
         ]
         super().__init__(data_keys, filters=filters, color_intensity=color_intensity)
         self.report_date = None
@@ -120,14 +123,16 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 status_update_max_date_query,
                 and_(
                     status_update_max_date_query.c.work_id == WorkStatus.work_id,
-                    status_update_max_date_query.c.max_posted_date == WorkStatus.posted_date,
+                    status_update_max_date_query.c.max_posted_date
+                    == WorkStatus.posted_date,
                 ),
             )
             .add_columns(
                 Project.name.label("project_name"),
                 WorkType.report_title.label("work_report_title"),
                 (
-                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
+                    Event.anticipated_date
+                    + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
                 Work.report_description.label("work_short_description"),
                 WorkStatus.description.label("work_status_text"),
@@ -141,6 +146,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     "event_date"
                 ),
                 EventConfiguration.event_category_id.label("milestone_id"),
+                Project.id.label("project_id")
             )
         )
 
@@ -159,9 +165,12 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 work["work_id"], work["anticipated_decision_date"]
             )
             event_decision_date = work["anticipated_decision_date"]
-            work[
-                "anticipated_decision_date"
-            ] = next_major_decision_event.anticipated_date
+            work["anticipated_decision_date"] = (
+                next_major_decision_event.anticipated_date
+            )
+            project_name = self._get_special_field_project_history(
+                work["project_id"], event_decision_date
+            )
             work.update(
                 {
                     "is_decision_event": False,
@@ -169,6 +178,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     "is_reportable_event": False,
                 }
             )
+            if project_name:
+                work["project_name"] = project_name
             if work["milestone_id"] in self.decision_configuration_ids:
                 work["is_decision_event"] = True
             elif work["milestone_id"] in self.pecp_configuration_ids:
@@ -236,7 +247,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
                     ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
-                ] + styles
+                ]
+                + styles
             )
         )
         story.append(table)
@@ -283,7 +295,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 next_pcp_min_date_query,
                 and_(
                     next_pcp_min_date_query.c.work_id == Event.work_id,
-                    func.coalesce(Event.actual_date, Event.anticipated_date) == next_pcp_min_date_query.c.min_pcp_date,
+                    func.coalesce(Event.actual_date, Event.anticipated_date)
+                    == next_pcp_min_date_query.c.min_pcp_date,
                 ),
             )
             .filter(
@@ -327,7 +340,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 next_major_decision_event_query,
                 and_(
                     Event.work_id == next_major_decision_event_query.c.work_id,
-                    Event.anticipated_date == next_major_decision_event_query.c.min_anticipated_start_date,
+                    Event.anticipated_date
+                    == next_major_decision_event_query.c.min_anticipated_start_date,
                 ),
             )
             .first()
@@ -359,15 +373,19 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ],
                     [
                         Paragraph(
-                            work["work_short_description"]
-                            if work["work_short_description"]
-                            else "",
+                            (
+                                work["work_short_description"]
+                                if work["work_short_description"]
+                                else ""
+                            ),
                             style,
                         ),
                         Paragraph(
-                            work["work_status_text"]
-                            if work["work_status_text"]
-                            else "",
+                            (
+                                work["work_status_text"]
+                                if work["work_status_text"]
+                                else ""
+                            ),
                             style,
                         ),
                         Paragraph(
@@ -404,3 +422,19 @@ class ThirtySixtyNinetyReport(ReportFactory):
             )
             table_data.extend(period_data)
         return table_data, styles
+
+    def _get_special_field_project_history(self, project_id: int, date: datetime) -> str:
+        """Get the special field history value for project name for given date"""
+        history = (
+            db.session.query(Project)
+            .join(SpecialField, Project.id == SpecialField.entity_id)
+            .filter(
+                SpecialField.entity == EntityEnum.PROJECT.value,
+                SpecialField.entity_id == project_id,
+                SpecialField.field_name == 'name',
+                SpecialField.time_range.contains(date),
+            ).add_columns(
+                SpecialField.field_value.label('project_name')
+            ).first()
+        )
+        return history.project_name if history else None
