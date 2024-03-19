@@ -14,10 +14,17 @@ import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
+const staffListColumnFiltersCacheKey = "staff-listing-column-filters";
 const StaffList = () => {
   const [staffId, setStaffId] = React.useState<number>();
   const [positions, setPositions] = React.useState<string[]>([]);
+  const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
+    staffListColumnFiltersCacheKey,
+    []
+  );
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const ctx = React.useContext(MasterContext);
 
@@ -155,6 +162,14 @@ const StaffList = () => {
     ],
     [positions]
   );
+
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
+      return;
+    }
+    setColumnFilters(filters);
+  };
+
   return (
     <>
       <ETPageContainer
@@ -174,6 +189,7 @@ const StaffList = () => {
                   desc: false,
                 },
               ],
+              columnFilters,
             }}
             state={{
               isLoading: ctx.loading,
@@ -203,6 +219,7 @@ const StaffList = () => {
                 </Restricted>
               </Box>
             )}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
       </ETPageContainer>

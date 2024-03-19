@@ -1,15 +1,21 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Grid } from "@mui/material";
+import { Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer } from "../../shared";
-import projectService from "../../../services/projectService/projectService";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { ETPageContainer } from "components/shared";
 
+const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
   const [wsData, setwsData] = React.useState<WorkStaff[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
+  const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
+    workStaffListColumnFiltersCacheKey,
+    []
+  );
 
   const getWorkStaffAllocation = React.useCallback(async () => {
     setLoading(true);
@@ -159,34 +165,37 @@ const WorkStaffList = () => {
       workLeadFilter,
     ]
   );
+
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
+      return;
+    }
+    setColumnFilters(filters);
+  };
+
   return (
-    <>
-      <ETPageContainer
-        direction="row"
-        container
-        columnSpacing={2}
-        rowSpacing={3}
-      >
-        <Grid item xs={12}>
-          <MasterTrackTable
-            columns={columns}
-            data={wsData}
-            initialState={{
-              sorting: [
-                {
-                  id: "title",
-                  desc: false,
-                },
-              ],
-            }}
-            state={{
-              isLoading: loading,
-              showGlobalFilter: true,
-            }}
-          />
-        </Grid>
-      </ETPageContainer>
-    </>
+    <ETPageContainer direction="row" container columnSpacing={2} rowSpacing={3}>
+      <Grid item xs={12}>
+        <MasterTrackTable
+          columns={columns}
+          data={wsData}
+          initialState={{
+            sorting: [
+              {
+                id: "title",
+                desc: false,
+              },
+            ],
+            columnFilters,
+          }}
+          state={{
+            isLoading: loading,
+            showGlobalFilter: true,
+          }}
+          onCacheFilters={handleCacheFilters}
+        />
+      </Grid>
+    </ETPageContainer>
   );
 };
 
