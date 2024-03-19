@@ -11,6 +11,7 @@ import { isStatusOutOfDate } from "../../workPlan/status/shared";
 import { Status } from "../../../models/status";
 import { When } from "react-if";
 import { daysLeft } from "./util";
+import { useMediaQuery } from "@mui/material";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
@@ -24,7 +25,7 @@ const CardBody = ({ workplan }: CardProps) => {
   const lastStatusUpdate = dayjs(workplan.status_info.posted_date).format(
     MONTH_DAY_YEAR
   );
-
+  const isSmallScreen = useMediaQuery("(max-width:1400px)");
   const workTitle = `${workplan.work_type.name}${
     workplan.simple_title ? ` - ${workplan.simple_title}` : ""
   }`;
@@ -51,7 +52,7 @@ const CardBody = ({ workplan }: CardProps) => {
             enableEllipsis
             tooltip={workTitle}
             sx={{
-              maxWidth: "70%",
+              maxWidth: isSmallScreen ? "75%" : "100%",
             }}
           >
             {workTitle}
