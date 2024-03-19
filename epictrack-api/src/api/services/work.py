@@ -901,6 +901,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     EventTemplateVisibilityEnum.SUGGESTED.value,
                 ]
                 and parent_config.work_phase_id == work_phase.id
+                and parent_config.parent_id is None
             ]
             for p_event_conf in parent_event_configs:
                 days = cls._find_start_at_value(p_event_conf.start_at, 0)
@@ -921,7 +922,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 c_events = [
                     c_event
                     for c_event in event_configurations
-                    if c_event.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                    if c_event.visibility
+                    in [
+                        EventTemplateVisibilityEnum.MANDATORY.value,
+                        EventTemplateVisibilityEnum.SUGGESTED.value,
+                    ]
                     and c_event.work_phase_id == work_phase.id
                     and c_event.parent_id == p_event_conf.id
                 ]
