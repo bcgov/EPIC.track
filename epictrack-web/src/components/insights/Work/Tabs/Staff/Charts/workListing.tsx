@@ -118,10 +118,10 @@ const WorkList = () => {
             if (!row.staff) {
               return "";
             }
-            const officerAnalysts = row.staff.filter(
+            const officerAnalystsForRow = row.staff.filter(
               (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
             );
-            return officerAnalysts
+            return officerAnalystsForRow
               .map(
                 (officerAnalyst: any) =>
                   `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
