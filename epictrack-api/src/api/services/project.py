@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Project."""
+from datetime import datetime
 from typing import IO, List
 
 import numpy as np
 import pandas as pd
 from flask import current_app
+from psycopg2.extras import DateTimeTZRange
 from sqlalchemy import and_
 
 from api.exceptions import BadRequestError, ResourceExistsError, ResourceNotFoundError
@@ -26,7 +28,7 @@ from api.models.indigenous_work import IndigenousWork
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.region import Region
-from api.models.special_field import EntityEnum
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.sub_types import SubType
 from api.models.types import Type
 from api.models.work import Work
@@ -194,7 +196,7 @@ class ProjectService:
         return {"first_nation_available": result}
 
     @classmethod
-    def import_projects(cls, file: IO):
+    def import_projects(cls, file: IO):  # pylint: disable=too-many-locals
         """Import proponents"""
         data = cls._read_excel(file)
         proponent_names = set(data["proponent_id"].to_list())
@@ -234,6 +236,25 @@ class ProjectService:
         data = cls._update_or_delete_old_projects(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Project, data)
+        special_history_mappings = []
+        time_range = DateTimeTZRange(
+            datetime.now(), None, bounds="[)"
+        )
+        for project_data in data:
+            project = db.session.query(Project).filter(
+                Project.name == project_data["name"],
+                Project.proponent_id == project_data["proponent_id"],
+            ).first()
+            special_history_mappings.append(
+                {
+                    "entity": EntityEnum.PROJECT,
+                    "entity_id": project.id,
+                    "field_name": "name",
+                    "field_value": project.name,
+                    "time_range": time_range
+                }
+            )
+        db.session.bulk_insert_mappings(SpecialField, special_history_mappings)
         db.session.commit()
         return "Created successfully"
 

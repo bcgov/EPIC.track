@@ -112,6 +112,8 @@ const WorkList = () => {
               setWorkId(row.original.id);
               setShowWorkDialogForm(true);
             }}
+            enableTooltip
+            tooltip={row.original.title}
             titleText={row.original.title}
           >
             {renderedCellValue}
@@ -368,7 +370,7 @@ const WorkList = () => {
                 </Restricted>
               </Box>
             )}
-            cacheFilters={handleCacheFilters}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
       </ETPageContainer>

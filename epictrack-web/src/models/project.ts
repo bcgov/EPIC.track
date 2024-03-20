@@ -33,5 +33,5 @@ export interface Project {
 export const defaultProject = {
   is_active: true,
   description:
-    "[Proponent] proposes to develop the [Project name], a [project type] which would be located approximately [distance]km from [known near population centre/known near landmark] within the boundaries of [the QQQ Region]. The proposed project is anticipated to produce approximately [production yield] per year of [product], and would include [describe major project components].",
+    "[Proponent name] proposes to develop the [project name], a [project type] located approximately [distance] kilometers [N/E/S/W] from [known near population centre/known near landmark/start and end locations of project]. The proposed project is anticipated to [produce/store/etc] approximately [storage capacity/production yield/etc.] per year of [product]. It would include [describe major project components].",
 };

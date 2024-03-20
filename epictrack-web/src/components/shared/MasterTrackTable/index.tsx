@@ -61,14 +61,14 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
   setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
-  cacheFilters?: (columnFilters: any) => void;
+  onCacheFilters?: (columnFilters: any) => void;
 }
 
 const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
   data,
   setTableInstance,
-  cacheFilters,
+  onCacheFilters,
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const table = useMaterialReactTable({
@@ -227,8 +227,8 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   return (
     <>
       <MaterialReactTable table={table} />
-      {cacheFilters && (
-        <FiltersCache cacheFilters={cacheFilters} table={table} />
+      {onCacheFilters && (
+        <FiltersCache onCacheFilters={onCacheFilters} table={table} />
       )}
     </>
   );
