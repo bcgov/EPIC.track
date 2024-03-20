@@ -23,6 +23,7 @@ from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import IndigenousNation, db
 from api.models.pip_org_type import PIPOrgType
 from api.models.staff import Staff
+from api.utils.str import natural_sort
 from api.utils.token_info import TokenInfo
 
 
@@ -38,6 +39,7 @@ class IndigenousNationService:
     def find_all_indigenous_nations(cls, is_active):
         """Find all active indigenous nations"""
         indigenous_nations = IndigenousNation.find_all(default_filters=is_active)
+        indigenous_nations = natural_sort(indigenous_nations, "name")
         return indigenous_nations
 
     @classmethod
