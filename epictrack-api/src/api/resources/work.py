@@ -98,8 +98,12 @@ class Works(Resource):
         """Return all active works."""
         args = request.args
         is_active = args.get("is_active", False, bool)
+        include_indigenous_nations = args.get('include_indigenous_nations', False, bool)
         works = WorkService.find_all_works(is_active)
-        return jsonify(res.WorkResponseSchema(many=True).dump(works)), HTTPStatus.OK
+        exclude = [] if include_indigenous_nations else ['indigenous_works']
+        works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
+
+        return jsonify(works_schema.dump(works)), HTTPStatus.OK
 
     @staticmethod
     @cors.crossdomain(origin="*")
