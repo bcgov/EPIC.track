@@ -30,10 +30,10 @@ def escape_characters(source_string: Text, characters_to_escape: List[Text]) -> 
 
 def natural_sort(data: List, key: str = None) -> List[dict]:
     """Sort the data based on natural sort algorithms."""
-    locale.setlocale(locale.LC_ALL, "EN_GB")
+    locale.setlocale(locale.LC_ALL, "")
     if isinstance(data[0], dict):
         if key:
-            data = humansorted(data, key=lambda x: fr"{getattr(x, key)}", alg=ns.LOCALE)
+            data = humansorted(data, key=lambda x: fr"{x[key]}", alg=ns.LOCALE)
         else:
             raise BusinessError("Key not provided to 'natural_sort'", HTTPStatus.FAILED_DEPENDENCY)
     else:
