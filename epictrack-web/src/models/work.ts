@@ -92,4 +92,6 @@ export interface TemplateStatus extends MasterBase {
 
 export const defaultWork = {
   is_active: true,
+  report_description:
+    "On [date], [initiator] submitted a [work type] to [rationale/desired result/description of change].",
 };
