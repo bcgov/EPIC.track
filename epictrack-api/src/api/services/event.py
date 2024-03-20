@@ -438,8 +438,8 @@ class EventService:
             )
             actual_max_date = cls._find_actual_date_max(current_work_phase)
             if (
-                event.actual_date < actual_min_date
-                or event.actual_date > actual_max_date
+                event.actual_date.date() < actual_min_date.date()
+                or event.actual_date.date() > actual_max_date.date()
             ):
                 raise UnprocessableEntityError(
                     f"Actual date should be between {actual_min_date} and {actual_max_date}"
@@ -660,16 +660,16 @@ class EventService:
     @classmethod
     def event_compare_func(cls, event_x, event_y):
         """Compare function for event sort"""
-        if (
-            event_x.event_position == EventPositionEnum.START.value
-            or event_y.event_position == EventPositionEnum.END.value
-        ):
-            return -1
-        if (
-            event_y.event_position == EventPositionEnum.START.value
-            or event_x.event_position == EventPositionEnum.END.value
-        ):
-            return 1
+        # if (
+        #     event_x.event_position == EventPositionEnum.START.value
+        #     or event_y.event_position == EventPositionEnum.END.value
+        # ):
+        #     return -1
+        # if (
+        #     event_y.event_position == EventPositionEnum.START.value
+        #     or event_x.event_position == EventPositionEnum.END.value
+        # ):
+        #     return 1
         if (
             cls._find_event_date(event_x).date() - cls._find_event_date(event_y).date()
         ).days == 0:
