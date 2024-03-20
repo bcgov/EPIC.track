@@ -7,6 +7,7 @@ from api.models.event_configuration import EventPositionEnum
 from api.models.phase_code import PhaseVisibilityEnum
 from api.utils import util
 from .set_events_status import SetEventsStatus
+from .common import find_configuration
 
 
 class ChangePhaseEndEvent(ActionFactory):
@@ -27,22 +28,26 @@ class ChangePhaseEndEvent(ActionFactory):
             )
             .first()
         )
-        current_end_event_config.event_position = EventPositionEnum.INTERMEDIATE.value
+        current_end_event_config.event_position = EventPositionEnum.INTERMEDIATE
         current_end_event_config.update(
             current_end_event_config.as_dict(recursive=False), commit=False
         )
         # Make sure all the other events after the new end event date should be deactivated
-        set_event_status = SetEventsStatus()
-        set_event_status.run(source_event, {"all_future_events": False})
-        new_end_event_configuration = (
-            db.session.query(EventConfiguration)
-            .filter(
-                EventConfiguration.work_phase_id == work_phase.id,
-                EventConfiguration.name == params.get("event_name"),
-                EventConfiguration.is_active.is_(True),
-            )
-            .first()
+        new_end_event_configuration = find_configuration(source_event, params)
+        new_source_event_status_update = Event.find_by_params(
+            {"event_configuration_id": new_end_event_configuration.id}
         )
+        set_event_status = SetEventsStatus()
+        set_event_status.run(new_source_event_status_update[0], {"all_future_events": False})
+        # new_end_event_configuration = (
+        #     db.session.query(EventConfiguration)
+        #     .filter(
+        #         EventConfiguration.work_phase_id == work_phase.id,
+        #         EventConfiguration.name == params.get("event_name"),
+        #         EventConfiguration.is_active.is_(True),
+        #     )
+        #     .first()
+        # )
         new_end_event_configuration.event_position = EventPositionEnum.END.value
         new_end_event_configuration.update(
             new_end_event_configuration.as_dict(recursive=False), commit=False

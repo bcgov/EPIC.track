@@ -42,8 +42,8 @@ class AddPhase(ActionFactory):
                     "sort_order": sort_order,
                 }
             )
-            work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
             event_configurations = self.get_configurations(source_event, param)
+            work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
             event_configurations = res.EventConfigurationResponseSchema(many=True).dump(
                 event_configurations
             )
