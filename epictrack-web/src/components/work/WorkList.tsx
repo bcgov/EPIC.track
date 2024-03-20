@@ -112,6 +112,8 @@ const WorkList = () => {
               setWorkId(row.original.id);
               setShowWorkDialogForm(true);
             }}
+            enableTooltip
+            tooltip={row.original.title}
             titleText={row.original.title}
           >
             {renderedCellValue}
