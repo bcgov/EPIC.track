@@ -26,7 +26,7 @@ from api.models.special_field import EntityEnum
 from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
 
 
-class SpecialFieldService:  # pylint:disable=too-few-public-methods
+class SpecialFieldService:  # pylint:disable=too-many-arguments
     """Service to manage special field related operations"""
 
     @classmethod
