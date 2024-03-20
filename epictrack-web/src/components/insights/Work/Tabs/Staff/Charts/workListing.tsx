@@ -68,30 +68,48 @@ const WorkList = () => {
     getWorkStaffAllocation();
   }, []);
 
+  const officerAnalysts = React.useMemo(() => {
+    return wsData.flatMap((row: any) =>
+      row.staff
+        ? row.staff.filter(
+            (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
+          )
+        : []
+    );
+  }, [wsData]);
+
+  const officerAnalystOptions = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        officerAnalysts.map(
+          (officerAnalyst: any) =>
+            `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
+        )
+      )
+    );
+  }, [officerAnalysts]);
+
+  const officerFilterFunction = (row: any, id: any, filterValue: any) => {
+    if (
+      !filterValue.length ||
+      filterValue.length > officerAnalystOptions.length // select all is selected
+    ) {
+      return true;
+    }
+
+    const value: string = row.getValue(id) || "";
+
+    // Split the cell value into individual names
+    const names = value.split(", ");
+
+    // Check if any name includes the filter value
+    return names.some((name) => filterValue.includes(name));
+  };
+
   const tableColumns = React.useMemo(() => {
     let cols: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
     if (wsData && wsData.length > 0) {
       const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
-
-      // Extract all officer analysts from wsData
-      const officerAnalysts = wsData.flatMap((row: any) =>
-        row.staff
-          ? row.staff.filter(
-              (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
-            )
-          : []
-      );
-
-      // Create an array of strings for each officer analyst
-      const officerAnalystOptions = Array.from(
-        new Set(
-          officerAnalysts.map(
-            (officerAnalyst: any) =>
-              `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
-          )
-        )
-      );
-
       cols = [
         {
           header: rolename,
@@ -100,13 +118,10 @@ const WorkList = () => {
             if (!row.staff) {
               return "";
             }
-            const officerAnalysts = row.staff
-              ? row.staff.filter(
-                  (p: { role: Role }) =>
-                    p.role.id === WorkStaffRole.OFFICER_ANALYST
-                )
-              : [];
-            return officerAnalysts
+            const officerAnalystsForRow = row.staff.filter(
+              (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
+            );
+            return officerAnalystsForRow
               .map(
                 (officerAnalyst: any) =>
                   `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
@@ -138,22 +153,7 @@ const WorkList = () => {
               />
             );
           },
-          filterFn: (row, id, filterValue) => {
-            if (
-              !filterValue.length ||
-              filterValue.length > officerAnalystOptions.length // select all is selected
-            ) {
-              return true;
-            }
-
-            const value: string = row.getValue(id) || "";
-
-            // Split the cell value into individual names
-            const names = value.split(", ");
-
-            // Check if any name includes the filter value
-            return names.some((name) => filterValue.includes(name));
-          },
+          filterFn: officerFilterFunction,
         } as MRT_ColumnDef<WorkOrWorkStaff>,
       ];
     }
