@@ -112,27 +112,30 @@ export default function AnticipatedEAOSchedule() {
     setSelectedTab(newValue);
   };
 
-  const staleLevel = React.useCallback((date: string) => {
-    if (date === null || date === undefined)
-      return {
-        background: Palette.error.main,
-      };
-    const date_updated = moment(date);
-    const diff = moment().diff(date_updated, "days");
-    if (diff > 10) {
-      return {
-        background: Palette.error.main,
-      };
-    } else if (diff >= 6) {
-      return {
-        background: Palette.secondary.main,
-      };
-    } else {
-      return {
-        background: Palette.success.main,
-      };
-    }
-  }, []);
+  const staleLevel = React.useCallback(
+    (statusUpdateDate: string) => {
+      if (statusUpdateDate === null || statusUpdateDate === undefined)
+        return {
+          background: Palette.error.main,
+        };
+      const date_updated = moment(statusUpdateDate);
+      const diff = moment(reportDate).diff(date_updated, "days");
+      if (diff > 10) {
+        return {
+          background: Palette.error.main,
+        };
+      } else if (diff >= 6) {
+        return {
+          background: Palette.secondary.main,
+        };
+      } else {
+        return {
+          background: Palette.success.main,
+        };
+      }
+    },
+    [reportDate]
+  );
 
   interface TabPanelProps {
     children?: React.ReactNode;
