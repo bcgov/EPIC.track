@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 from io import BytesIO
+from typing import Dict, List
 
 from pytz import utc
 from reportlab.lib import colors
@@ -18,8 +19,9 @@ from api.models import Event, Project, Work, WorkStatus, WorkType, db
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
-from api.models.special_field import EntityEnum, SpecialField
+from api.models.special_field import EntityEnum
 from api.models.work import WorkStateEnum
+from api.services.special_field import SpecialFieldService
 
 from .report_factory import ReportFactory
 
@@ -46,7 +48,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "event_id",
             "event_title",
             "event_date",
-            "project_id"
+            "project_id",
         ]
         super().__init__(data_keys, filters=filters, color_intensity=color_intensity)
         self.report_date = None
@@ -146,7 +148,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     "event_date"
                 ),
                 EventConfiguration.event_category_id.label("milestone_id"),
-                Project.id.label("project_id")
+                Project.id.label("project_id"),
             )
         )
 
@@ -160,6 +162,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "60": [],
             "90": [],
         }
+        project_special_history = self._get_project_special_history(data)
         for work in data:
             next_major_decision_event = self._get_next_major_decision_event(
                 work["work_id"], work["anticipated_decision_date"]
@@ -168,9 +171,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
             work["anticipated_decision_date"] = (
                 next_major_decision_event.anticipated_date
             )
-            project_name = self._get_special_field_project_history(
-                work["project_id"], event_decision_date
-            )
             work.update(
                 {
                     "is_decision_event": False,
@@ -178,8 +178,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     "is_reportable_event": False,
                 }
             )
-            if project_name:
-                work["project_name"] = project_name
             if work["milestone_id"] in self.decision_configuration_ids:
                 work["is_decision_event"] = True
             elif work["milestone_id"] in self.pecp_configuration_ids:
@@ -187,10 +185,25 @@ class ThirtySixtyNinetyReport(ReportFactory):
             else:
                 work["is_reportable_event"] = True
             if event_decision_date <= (self.report_date + timedelta(days=30)):
+                special_history = self._get_project_special_history_id(
+                    work["project_id"], project_special_history[30], event_decision_date
+                )
+                if special_history:
+                    work["project_name"] = special_history.field_value
                 response["30"].append(work)
             elif event_decision_date <= (self.report_date + timedelta(days=60)):
+                special_history = self._get_project_special_history_id(
+                    work["project_id"], project_special_history[60], event_decision_date
+                )
+                if special_history:
+                    work["project_name"] = special_history.field_value
                 response["60"].append(work)
             elif event_decision_date <= (self.report_date + timedelta(days=90)):
+                special_history = self._get_project_special_history_id(
+                    work["project_id"], project_special_history[90], event_decision_date
+                )
+                if special_history:
+                    work["project_name"] = special_history.field_value
                 response["90"].append(work)
         return response
 
@@ -423,18 +436,43 @@ class ThirtySixtyNinetyReport(ReportFactory):
             table_data.extend(period_data)
         return table_data, styles
 
-    def _get_special_field_project_history(self, project_id: int, date: datetime) -> str:
-        """Get the special field history value for project name for given date"""
-        history = (
-            db.session.query(Project)
-            .join(SpecialField, Project.id == SpecialField.entity_id)
-            .filter(
-                SpecialField.entity == EntityEnum.PROJECT.value,
-                SpecialField.entity_id == project_id,
-                SpecialField.field_name == 'name',
-                SpecialField.time_range.contains(date),
-            ).add_columns(
-                SpecialField.field_value.label('project_name')
-            ).first()
+    def _get_project_special_history_id(
+        self, project_id: int, data: List[dict], date: datetime
+    ) -> str:
+        """Get the special field history value for project name for given period and date"""
+        special_history = next(
+            (
+                sp_hist
+                for sp_hist in data
+                if sp_hist.entity_id == project_id and sp_hist.time_range.lower <= date
+                and (sp_hist.time_range.upper is None or sp_hist.time_range.upper > date)
+            ),
+            None,
         )
-        return history.project_name if history else None
+        return special_history
+
+    def _get_project_ids_by_period(self, data: List[dict]) -> Dict[int, List[int]]:
+        """Finds project ids by that fall under 30/60/90 days from report date."""
+        periods = {30: [], 60: [], 90: []}
+        for index, period in enumerate(periods):
+            periods[period] = [
+                x["project_id"]
+                for x in data
+                if x["anticipated_decision_date"] <= self.report_date + timedelta(days=period)
+                and x["anticipated_decision_date"] >= self.report_date + timedelta(days=index * 30)
+            ]
+        return periods
+
+    def _get_project_special_history(self, data: List[dict]) -> Dict[int, List]:
+        """Find special field entry for given project ids valid for 30/60/90 days from report date."""
+        project_ids_by_period = self._get_project_ids_by_period(data)
+        periods = {30: [], 60: [], 90: []}
+        for index, period in enumerate(periods):
+            periods[period] = SpecialFieldService.find_special_history_by_date_range(
+                entity=EntityEnum.PROJECT.value,
+                field_name="name",
+                from_date=self.report_date + timedelta(days=index * 30),
+                to_date=self.report_date + timedelta(days=period),
+                entity_ids=project_ids_by_period[period],
+            )
+        return periods

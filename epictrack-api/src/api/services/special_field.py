@@ -13,7 +13,7 @@
 # limitations under the License.
 """Service to manage Special fields."""
 from datetime import datetime, timedelta
-from typing import Union
+from typing import List, Optional, Union
 
 from flask import current_app
 from psycopg2.extras import DateTimeTZRange
@@ -50,7 +50,9 @@ class SpecialFieldService:  # pylint:disable=too-few-public-methods
         return special_field
 
     @classmethod
-    def update_special_field_entry(cls, special_field_id: int, payload: dict, commit: bool = True):
+    def update_special_field_entry(
+        cls, special_field_id: int, payload: dict, commit: bool = True
+    ):
         """Create special field entry"""
         special_field = SpecialField.find_by_id(special_field_id)
         upper_limit = cls._get_upper_limit(payload, special_field_id)
@@ -110,7 +112,30 @@ class SpecialFieldService:  # pylint:disable=too-few-public-methods
     def _update_original_model(cls, special_field_entry: SpecialField) -> None:
         """If `special_field_entry` is latest, update original table with new value"""
         if special_field_entry.time_range.upper is None:
-            model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[EntityEnum(special_field_entry.entity)]
+            model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[
+                EntityEnum(special_field_entry.entity)
+            ]
             model_class.query.filter(
                 model_class.id == special_field_entry.entity_id
             ).update({special_field_entry.field_name: special_field_entry.field_value})
+
+    @classmethod
+    def find_special_history_by_date_range(
+        cls,
+        entity: EntityEnum,
+        field_name: str,
+        from_date: datetime,
+        to_date: datetime,
+        entity_ids: Optional[List[int]] = None,
+    ) -> List[SpecialField]:
+        """Find special field entries of given entity within given date range."""
+        # time_range = DateRange(from_date, to_date)
+        time_range = DateTimeTZRange(from_date, to_date)
+        query = db.session.query(SpecialField).filter(
+            SpecialField.entity == entity,
+            SpecialField.field_name == field_name,
+            SpecialField.time_range.overlaps(time_range)
+        )
+        if entity_ids:
+            query = query.filter(SpecialField.entity_id.in_(entity_ids))
+        return query.all()
