@@ -1,4 +1,4 @@
-import { Grid, Stack, Tooltip } from "@mui/material";
+import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -24,7 +24,6 @@ const CardBody = ({ workplan }: CardProps) => {
   const lastStatusUpdate = dayjs(workplan.status_info.posted_date).format(
     MONTH_DAY_YEAR
   );
-
   const workTitle = `${workplan.work_type.name}${
     workplan.simple_title ? ` - ${workplan.simple_title}` : ""
   }`;
@@ -51,7 +50,7 @@ const CardBody = ({ workplan }: CardProps) => {
             enableEllipsis
             tooltip={workTitle}
             sx={{
-              maxWidth: "70%",
+              maxWidth: { md: "75%", lg: "85%", xl: "100%" },
             }}
           >
             {workTitle}

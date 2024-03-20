@@ -295,7 +295,7 @@ class EventTemplateService:
                 list(
                     filter(
                         lambda x, _outcome_no=outcome["no"]: x["outcome_no"]
-                        == _outcome_no,
+                        == _outcome_no and x["action_id"] != "NONE",
                         action_dict.to_dict("records"),
                     )
                 )
