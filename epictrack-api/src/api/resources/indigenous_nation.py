@@ -21,6 +21,7 @@ from api.schemas import request as req
 from api.schemas import response as res
 from api.services import IndigenousNationService
 from api.utils import auth, profiletime
+from api.utils.str import natural_sort
 from api.utils.util import cors_preflight
 
 
@@ -110,10 +111,10 @@ class IndigenousNations(Resource):
         indigenous_nations = IndigenousNationService.find_all_indigenous_nations(
             args.get("is_active")
         )
+        response = res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)
+        response = natural_sort(response, "name")
         return (
-            jsonify(
-                res.IndigenousResponseNationSchema(many=True).dump(indigenous_nations)
-            ),
+            jsonify(response),
             HTTPStatus.OK,
         )
 

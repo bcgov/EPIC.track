@@ -60,3 +60,4 @@ tzdata==2023.4
 urllib3==2.1.0
 zipp==3.17.0
 matplotlib==3.7.4
+natsort[icu]==8.4.0
