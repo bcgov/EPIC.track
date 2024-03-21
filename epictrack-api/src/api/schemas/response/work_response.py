@@ -2,8 +2,8 @@
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from api.models import Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus, IndigenousWork
-from api.schemas import PositionSchema, RoleSchema, IndigenousNationSchema
+from api.models import Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
+from api.schemas import PositionSchema, RoleSchema
 from api.schemas.base import AutoSchemaBase
 from api.schemas.ea_act import EAActSchema
 from api.schemas.eao_team import EAOTeamSchema
