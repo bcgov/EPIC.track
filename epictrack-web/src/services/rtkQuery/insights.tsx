@@ -19,7 +19,21 @@ import { Project } from "models/project";
 
 // Define a service using a base URL and expected endpoints
 export const insightsApi = createApi({
-  tagTypes: ["Works", "Projects"],
+  tagTypes: [
+    "Works",
+    "Projects",
+    "WorksByStaff",
+    "AssessmentsByPhase",
+    "ProjectsByType",
+    "ProjectsBySubType",
+    "WorksByType",
+    "WorksByTeam",
+    "WorksByLead",
+    "WorksByMinistry",
+    "WorksByFederalInvolvement",
+    "WorksByNation",
+    "WorksWithNations",
+  ],
   reducerPath: "insightsApi",
   baseQuery: fetchBaseQuery({
     baseUrl: AppConfig.apiUrl,
@@ -32,12 +46,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ work_type_id }) => ({
-                type: "Works" as const,
+                type: "WorksByType" as const,
                 id: work_type_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByType", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByType", id: "LIST" }],
     }),
     getAssessmentsByPhase: builder.query<AssessmentByPhase[], void>({
       query: () => `insights/works?group_by=assessment_by_phase`,
@@ -45,15 +59,15 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ phase_id }) => ({
-                type: "Works" as const,
+                type: "AssessmentsByPhase" as const,
                 id: phase_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "AssessmentsByPhase", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "AssessmentsByPhase", id: "LIST" }],
     }),
     getWorks: builder.query<Work[], void>({
-      query: () => `works`,
+      query: () => `works?is_active=true`,
       providesTags: (result) =>
         result
           ? [
@@ -65,18 +79,31 @@ export const insightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
+    getWorksWithNations: builder.query<Work[], void>({
+      query: () => `works?is_active=true&include_indigenous_nations=true`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({
+                type: "WorksWithNations" as const,
+                id,
+              })),
+              { type: "WorksWithNations", id: "LIST" },
+            ]
+          : [{ type: "WorksWithNations", id: "LIST" }],
+    }),
     getWorkByMinistry: builder.query<WorkByMinistry[], void>({
       query: () => `insights/works?group_by=ministry`,
       providesTags: (result) =>
         result
           ? [
               ...result.map(({ ministry_id }) => ({
-                type: "Works" as const,
+                type: "WorksByMinistry" as const,
                 id: ministry_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByMinistry", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByMinistry", id: "LIST" }],
     }),
     getWorksByFederalInvolvement: builder.query<
       WorkByFederalInvolvement[],
@@ -87,12 +114,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ federal_involvement_id }) => ({
-                type: "Works" as const,
+                type: "WorksByFederalInvolvement" as const,
                 id: federal_involvement_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByFederalInvolvement", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByFederalInvolvement", id: "LIST" }],
     }),
     getWorksByNation: builder.query<WorkByNation[], void>({
       query: () => `insights/works?group_by=first_nation`,
@@ -100,12 +127,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ first_nation_id }) => ({
-                type: "Works" as const,
+                type: "WorksByNation" as const,
                 id: first_nation_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByNation", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByNation", id: "LIST" }],
     }),
     getWorksByTeam: builder.query<WorkByTeam[], void>({
       query: () => `insights/works?group_by=team`,
@@ -113,12 +140,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ eao_team_id }) => ({
-                type: "Works" as const,
+                type: "WorksByTeam" as const,
                 id: eao_team_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByTeam", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByTeam", id: "LIST" }],
     }),
     getWorksByLead: builder.query<WorkByLead[], void>({
       query: () => `insights/works?group_by=lead`,
@@ -126,12 +153,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ work_lead_id }) => ({
-                type: "Works" as const,
+                type: "WorksByLead" as const,
                 id: work_lead_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByLead", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByLead", id: "LIST" }],
     }),
     getWorksByStaff: builder.query<WorkByStaff[], void>({
       query: () => `insights/works?group_by=staff`,
@@ -139,12 +166,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ staff_id }) => ({
-                type: "Works" as const,
+                type: "WorksByStaff" as const,
                 id: staff_id,
               })),
-              { type: "Works", id: "LIST" },
+              { type: "WorksByStaff", id: "LIST" },
             ]
-          : [{ type: "Works", id: "LIST" }],
+          : [{ type: "WorksByStaff", id: "LIST" }],
     }),
     getProjects: builder.query<Project[], void>({
       query: () => `projects`,
@@ -165,12 +192,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ type_id }) => ({
-                type: "Projects" as const,
+                type: "ProjectsByType" as const,
                 id: type_id,
               })),
-              { type: "Projects", id: "LIST" },
+              { type: "ProjectsByType", id: "LIST" },
             ]
-          : [{ type: "Projects", id: "LIST" }],
+          : [{ type: "ProjectsByType", id: "LIST" }],
     }),
     getProjectBySubType: builder.query<ProjectBySubtype[], number>({
       query: (type_id: number) =>
@@ -181,12 +208,12 @@ export const insightsApi = createApi({
         result
           ? [
               ...result.map(({ sub_type_id }) => ({
-                type: "Projects" as const,
+                type: "ProjectsBySubType" as const,
                 id: sub_type_id,
               })),
-              { type: "Projects", id: "LIST" },
+              { type: "ProjectsBySubType", id: "LIST" },
             ]
-          : [{ type: "Projects", id: "LIST" }],
+          : [{ type: "ProjectsBySubType", id: "LIST" }],
     }),
   }),
 
@@ -208,4 +235,5 @@ export const {
   useGetProjectByTypeQuery,
   useLazyGetProjectBySubTypeQuery,
   useGetProjectsQuery,
+  useGetWorksWithNationsQuery,
 } = insightsApi;

@@ -96,6 +96,9 @@ class Work(BaseModelVersioned):
     eac_decision_by = relationship("Staff", foreign_keys=[eac_decision_by_id], lazy='select')
     decision_by = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
     decision_maker_position = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
+    indigenous_works = relationship(
+        "IndigenousWork", backref="parent_work", lazy="select", cascade="all, delete-orphan"
+    )
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""

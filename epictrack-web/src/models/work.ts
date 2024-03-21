@@ -58,6 +58,10 @@ export interface Work extends MasterBase {
   substitution_act: ListType;
   eac_decision_by: Staff;
   decision_by: Staff;
+  indigenous_works?: {
+    id: number;
+    name: string;
+  }[];
 }
 
 export interface WorkPhase extends MasterBase {
