@@ -49,6 +49,7 @@ class IndigenousWorkResponseSchema(
         fields = ['id', 'name']
 
     name = fields.Method("get_name")
+
     def get_name(self, obj: WorkPhase) -> str:
         """Return the name of the indigenous nation"""
         return obj.indigenous_nation.name if obj.indigenous_nation else ""
