@@ -67,7 +67,7 @@ export const insightsApi = createApi({
           : [{ type: "AssessmentsByPhase", id: "LIST" }],
     }),
     getWorks: builder.query<Work[], void>({
-      query: () => `works`,
+      query: () => `works?is_active=true`,
       providesTags: (result) =>
         result
           ? [
@@ -80,7 +80,7 @@ export const insightsApi = createApi({
           : [{ type: "Works", id: "LIST" }],
     }),
     getWorksWithNations: builder.query<Work[], void>({
-      query: () => `works?include_indigenous_nations=true`,
+      query: () => `works?is_active=true&include_indigenous_nations=true`,
       providesTags: (result) =>
         result
           ? [
