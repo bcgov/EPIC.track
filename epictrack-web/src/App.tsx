@@ -10,6 +10,9 @@ import ETNotificationProvider from "./components/shared/notificationProvider/ETN
 import "./styles/App.scss";
 import { Loader } from "./components/shared/loader";
 import Confetti from "components/confetti/Confetti";
+import { ErrorBoundary } from "react-error-boundary";
+import ErrorPage from "routes/ErrorPage";
+import { TrackErrorBoundary } from "TrackErrorBoundary";
 
 export function App() {
   const dispatch = useAppDispatch();
@@ -23,10 +26,10 @@ export function App() {
     UserService.initKeycloak(dispatch);
   }, [dispatch]);
   return (
-    <>
-      <AxiosErrorHandler>
-        {isLoggedIn && (
-          <Router>
+    <AxiosErrorHandler>
+      {isLoggedIn && (
+        <Router>
+          <TrackErrorBoundary>
             {uiState.showConfetti && <Confetti />}
             <Box sx={{ display: "flex" }}>
               <Header />
@@ -46,9 +49,9 @@ export function App() {
                 </ETNotificationProvider>
               </Box>
             </Box>
-          </Router>
-        )}
-      </AxiosErrorHandler>
-    </>
+          </TrackErrorBoundary>
+        </Router>
+      )}
+    </AxiosErrorHandler>
   );
 }
