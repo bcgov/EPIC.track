@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import moment from "moment";
 import { Palette } from "styles/theme";
@@ -6,7 +6,6 @@ import { Gantt } from "components/gantt";
 import Color from "color";
 import { useNavigate } from "react-router-dom";
 import { WORKPLAN_TAB_INDEX } from "components/workPlan/constants";
-import { WorkPlan } from "models/workplan";
 import { getDaysLeft } from "./util";
 
 export const MyWorkplanGantt = () => {

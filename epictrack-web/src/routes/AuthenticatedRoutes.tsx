@@ -15,7 +15,6 @@ import { MasterProvider } from "../components/shared/MasterContext";
 import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlan from "../components/workPlan";
 import EventCalendar from "../components/eventCalendar/EventCalendar";
-import ComingSoon from "./ComingSoon";
 import { ROLES } from "../constants/application-constant";
 import AuthGate from "./AuthGate";
 import Unauthorized from "./Unauthorized";
