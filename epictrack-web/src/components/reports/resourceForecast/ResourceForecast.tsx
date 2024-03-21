@@ -351,7 +351,6 @@ export default function ResourceForecast() {
     ]
   );
   const fetchReportData = React.useCallback(async () => {
-    setIsLoading(true);
     try {
       const reportData = await ReportService.fetchReportData(
         REPORT_TYPE.RESOURCE_FORECAST,
@@ -360,7 +359,6 @@ export default function ResourceForecast() {
           color_intensity: "25",
         }
       );
-      setIsLoading(false);
       if (reportData.status && reportData.status === 200) {
         const data = reportData.data as never[];
         data.forEach((element) => {
