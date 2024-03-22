@@ -70,7 +70,12 @@ export const ThirtySixtyNinety = () => {
             {work?.project.name} is in {currentWorkPhase?.work_phase.name}
           </ETPreviewText>
         </Grid>
-
+        <Grid item xs={12}>
+          <ETCaption2 bold color={Palette.neutral.light}>
+            Work Description
+          </ETCaption2>
+          <ETPreviewText>{work?.report_description}</ETPreviewText>
+        </Grid>
         <When condition={Boolean(currentStatus)}>
           <Grid item xs={12}>
             <ETCaption2 bold color={Palette.neutral.light}>
