@@ -26,4 +26,4 @@ marshmallow-sqlalchemy==0.29.0
 pandas==2.0.2
 openpyxl==3.0.10
 matplotlib==3.7.4
-natsort[icu]==8.4.0
+natsort==8.4.0
