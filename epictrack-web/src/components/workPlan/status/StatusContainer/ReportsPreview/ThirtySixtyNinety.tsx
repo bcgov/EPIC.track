@@ -73,7 +73,12 @@ export const ThirtySixtyNinety = () => {
             {work?.project.name} is in {currentWorkPhase?.work_phase.name}
           </ETPreviewText>
         </Grid>
-
+        <Grid item xs={12}>
+          <ETCaption2 bold color={Palette.neutral.light}>
+            {`Report Description`}
+          </ETCaption2>
+          <ETPreviewText>{work?.report_description}</ETPreviewText>
+        </Grid>
         <Grid item xs={12}>
           <ETCaption2 bold mb={"0.5em"}>
             Status{" "}
