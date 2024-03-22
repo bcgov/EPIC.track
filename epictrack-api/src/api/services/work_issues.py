@@ -14,7 +14,7 @@
 """Service to manage Work status."""
 from typing import Dict
 
-from api.exceptions import ResourceNotFoundError
+from api.exceptions import BadRequestError, ResourceNotFoundError
 from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
 from api.models import WorkIssues as WorkIssuesModel
 from api.utils import TokenInfo
@@ -66,12 +66,15 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
-        work_issue_id = work_issues[0].id
+        work_issue = work_issues[0]
+        work_issue_id = work_issue.id
 
         cls._check_create_auth(work_id)
 
         if not work_issues:
             raise ResourceNotFoundError("Work Issues not found")
+
+        cls._check_update_date_validity(work_issue, data)
 
         new_update = WorkIssueUpdatesModel(
             description=data.get('description'),
@@ -139,7 +142,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
 
     @classmethod
-    def edit_issue_update(cls, work_id, issue_id, issue_update_id, issue_data):
+    def edit_issue_update(cls, work_id, issue_id, issue_update_id, issue_update_data):
         """Edit an existing work issue update."""
         work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
 
@@ -152,9 +155,10 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             raise ResourceNotFoundError("Issue Description doesnt exist")
 
         cls._check_edit_update_auth(work_issue.id, issue_update)
+        cls._check_update_date_validity(work_issue, issue_update_data, issue_update.id)
 
-        issue_update.description = issue_data.get('description')
-        issue_update.posted_date = issue_data.get('posted_date')
+        issue_update.description = issue_update_data.get('description')
+        issue_update.posted_date = issue_update_data.get('posted_date')
         issue_update.save()
 
         return issue_update
@@ -169,3 +173,16 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             authorisation.check_auth(one_of_roles=one_of_roles)
         else:
             cls._check_edit_auth(work_id)
+
+    @classmethod
+    def _check_update_date_validity(cls, work_issue, update_data, issue_update_id=None):
+        """Check if edited date is valid"""
+        if update_data.get('posted_date') < work_issue.start_date:
+            raise BadRequestError('posted date cannot be before the work issue start date')
+
+        other_updates_dates = [update.posted_date for update in work_issue.updates if update.id != issue_update_id]
+        if not other_updates_dates:
+            return
+
+        if update_data.get('posted_date') <= max(other_updates_dates):
+            raise BadRequestError('posted date must be greater than last update')
