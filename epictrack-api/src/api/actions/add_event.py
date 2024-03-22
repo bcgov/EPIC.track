@@ -37,7 +37,6 @@ class AddEvent(ActionFactory):
             )
             set_event_date: SetEventDate = SetEventDate()
             # Setting the event date from here cz, otherwise the event won't get pushed
-            # param["start_at"] = param["start_at"] - 1  # cz, we have already added one day when we added the event
             set_event_date.run(source_event, param)
             source_event = new_event
 
