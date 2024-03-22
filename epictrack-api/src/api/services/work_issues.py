@@ -192,6 +192,6 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             update.posted_date for update in work_issue.updates
             if update.id != issue_update_id and not update.is_approved
         ]
-        if not other_unapproved_updates_dates:
+        if other_unapproved_updates_dates:
             if update_data.get('posted_date').timestamp() >= max(other_unapproved_updates_dates).timestamp():
                 raise BadRequestError('Cannot exceed the posted date of a pending unapproved update')
