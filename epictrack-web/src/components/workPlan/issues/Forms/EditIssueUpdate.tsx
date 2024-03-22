@@ -34,16 +34,16 @@ const EditIssueUpdate = () => {
       (issue) => issue.id === updateToEdit?.work_issue_id
     );
     if (!issue) return undefined;
-    const issueUpdatesDates = issue?.updates
-      .filter((update) => update.id !== updateToEdit?.id)
+    const approvedIssueUpdatesDates = issue?.updates
+      .filter((update) => update.id !== updateToEdit?.id && update.is_approved)
       .map((update) => dayjs(update.posted_date).add(1, "day").unix());
     const minDateUnix = Math.max(
-      ...issueUpdatesDates,
+      ...approvedIssueUpdatesDates,
       dayjs(issue?.start_date).unix()
     );
     const minDate = dayjs(minDateUnix * 1000);
     return minDate;
-  }, [issues]);
+  }, [issues, updateToEdit?.id]);
 
   const methods = useForm<CloneForm>({
     resolver: yupResolver(schema),
@@ -84,7 +84,9 @@ const EditIssueUpdate = () => {
             <ETFormLabel required>Date</ETFormLabel>
             <ControlledDatePicker
               name="posted_date"
-              datePickerProps={{ minDate: minPostedDate }}
+              datePickerProps={{
+                minDate: minPostedDate,
+              }}
             />
           </Grid>
         </Grid>

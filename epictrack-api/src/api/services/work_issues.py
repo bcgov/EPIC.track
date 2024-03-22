@@ -180,9 +180,24 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if update_data.get('posted_date') < work_issue.start_date:
             raise BadRequestError('posted date cannot be before the work issue start date')
 
-        other_updates_dates = [update.posted_date for update in work_issue.updates if update.id != issue_update_id]
-        if not other_updates_dates:
+        other_approved_updates_dates = [
+            update.posted_date for update in work_issue.updates
+            if update.id != issue_update_id and update.is_approved
+        ]
+        if not other_approved_updates_dates:
             return
 
-        if update_data.get('posted_date') <= max(other_updates_dates):
+        if update_data.get('posted_date') <= max(other_approved_updates_dates):
             raise BadRequestError('posted date must be greater than last update')
+
+        other_unapproved_updates_dates = [
+            update.posted_date for update in work_issue.updates
+            if update.id != issue_update_id and not update.is_approved
+        ]
+
+        if not other_unapproved_updates_dates:
+            return
+
+        if update_data.get('posted_date') >= max(other_unapproved_updates_dates):
+            raise BadRequestError('Cannot exceed the posted date of a pending unapproved update')
+
