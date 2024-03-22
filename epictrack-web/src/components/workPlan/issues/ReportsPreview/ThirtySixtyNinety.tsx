@@ -72,7 +72,7 @@ export const ThirtySixtyNinety = () => {
         </Grid>
         <Grid item xs={12}>
           <ETCaption2 bold color={Palette.neutral.light}>
-            {`Report Description`}
+            Work Description
           </ETCaption2>
           <ETPreviewText>{work?.report_description}</ETPreviewText>
         </Grid>
