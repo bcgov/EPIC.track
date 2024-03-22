@@ -255,7 +255,7 @@ class WorkIssuesUpdateEditSchema(RequestBodyParameterSchema):
 
     posted_date = fields.DateTime(
         metadata={"description": "posted date for the update"},
-        required=False
+        required=True
     )
 
     description = fields.Str(
@@ -270,7 +270,7 @@ class WorkIssuesUpdateCloneSchema(RequestBodyParameterSchema):
 
     posted_date = fields.DateTime(
         metadata={"description": "posted date for the update"},
-        required=False
+        required=True
     )
 
     description = fields.Str(

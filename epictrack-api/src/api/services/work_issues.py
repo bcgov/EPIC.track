@@ -177,7 +177,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     @classmethod
     def _check_update_date_validity(cls, work_issue, update_data, issue_update_id=None):
         """Check if edited date is valid"""
-        if update_data.get('posted_date') < work_issue.start_date:
+        if update_data.get('posted_date').timestamp() < work_issue.start_date.timestamp():
             raise BadRequestError('posted date cannot be before the work issue start date')
 
         other_approved_updates_dates = [
@@ -187,7 +187,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if not other_approved_updates_dates:
             return
 
-        if update_data.get('posted_date') <= max(other_approved_updates_dates):
+        if update_data.get('posted_date').timestamp() <= max(other_approved_updates_dates).timestamp():
             raise BadRequestError('posted date must be greater than last update')
 
         other_unapproved_updates_dates = [
@@ -198,5 +198,5 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if not other_unapproved_updates_dates:
             return
 
-        if update_data.get('posted_date') >= max(other_unapproved_updates_dates):
+        if update_data.get('posted_date').timestamp() >= max(other_unapproved_updates_dates).timestamp():
             raise BadRequestError('Cannot exceed the posted date of a pending unapproved update')
