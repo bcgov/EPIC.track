@@ -1,4 +1,4 @@
 export type ColumnFilter = {
-    id: string;
-    value: unknown
-}
+  id: string;
+  value: unknown;
+};
