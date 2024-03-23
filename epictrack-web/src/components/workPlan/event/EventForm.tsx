@@ -234,15 +234,12 @@ const EventForm = ({
       ctx.selectedWorkPhase?.work_phase.legislated &&
       selectedConfiguration?.event_category_id !== EventCategory.EXTENSION
     ) {
-      const diff = dayjs(ctx.selectedWorkPhase.work_phase.end_date).diff(
-        ctx.selectedWorkPhase.work_phase.start_date,
-        "day"
-      );
       return dayjs(ctx.selectedWorkPhase.work_phase.end_date);
     }
     return dayjs(new Date());
   }, [ctx.selectedWorkPhase, selectedConfiguration]);
-
+  console.log("Actual Date Min", actualDateMin);
+  console.log("Actual Date Max", actualDateMax);
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -757,6 +754,7 @@ const EventForm = ({
                 isFormFieldsLocked={isFormFieldsLocked}
                 configurationId={selectedConfiguration?.id}
                 decisionMakerPositionId={decisionMakerPositionIds}
+                decisionMakerId={ctx.work?.decision_by_id}
               />
             </When>
             <When

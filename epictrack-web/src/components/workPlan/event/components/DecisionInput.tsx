@@ -12,11 +12,13 @@ import { Staff } from "../../../../models/staff";
 
 export interface DecisionInputProps {
   configurationId?: number;
-  decisionMakerPositionId: number[];
+  decisionMakerPositionId?: number[];
+  decisionMakerId?: number;
   isFormFieldsLocked: boolean;
 }
 const DecisionInput = ({
   decisionMakerPositionId,
+  decisionMakerId,
   configurationId,
   isFormFieldsLocked,
 }: DecisionInputProps) => {
@@ -48,11 +50,18 @@ const DecisionInput = ({
   };
   const getDecisionMakers = async () => {
     try {
-      const result = await staffService.getStaffByPosition(
-        decisionMakerPositionId.join(",")
-      );
-      if (result.status === 200) {
-        setDecisionMakers(result.data as Staff[]);
+      if (decisionMakerId) {
+        const result = await staffService.getById(String(decisionMakerId));
+        if (result.status === 200) {
+          setDecisionMakers([result.data as Staff]);
+        }
+      } else if (decisionMakerPositionId) {
+        const result = await staffService.getStaffByPosition(
+          decisionMakerPositionId.join(",")
+        );
+        if (result.status === 200) {
+          setDecisionMakers(result.data as Staff[]);
+        }
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
