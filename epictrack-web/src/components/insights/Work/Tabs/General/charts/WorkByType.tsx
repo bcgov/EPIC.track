@@ -3,7 +3,7 @@ import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { useGetWorksByTypeQuery } from "services/rtkQuery/insights";
+import { useGetWorksByTypeQuery } from "services/rtkQuery/workInsights";
 import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";

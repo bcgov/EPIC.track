@@ -17,12 +17,12 @@ import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksQuery } from "services/rtkQuery/insights";
 import { StaffWorkRole } from "models/staff";
 import workService from "services/workService/workService";
 import { WorkStaff } from "models/workStaff";
 import { set } from "lodash";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
+import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
 
 type WorkOrWorkStaff = Work | WorkStaff;
 
@@ -30,8 +30,6 @@ const WorkList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [leads, setLeads] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-  const [wsData, setWsData] = React.useState<WorkStaff[]>([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [workRoles, setWorkRoles] = React.useState<
     MRT_ColumnDef<WorkOrWorkStaff>[]
   >([]);
@@ -43,30 +41,15 @@ const WorkList = () => {
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
+  const { data, error, isLoading } = useGetWorkStaffsQuery();
+  const wsData = (data as WorkStaff[]) || [];
+
   useEffect(() => {
     setPagination((prev) => ({
       ...prev,
       pageSize: wsData.length,
     }));
   }, [wsData]);
-
-  const getWorkStaffAllocation = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const workStaffingResult = await workService.getWorkStaffDetails();
-      if (workStaffingResult.status === 200) {
-        setWsData(workStaffingResult.data as WorkStaff[]);
-      }
-    } catch (error) {
-      console.error("Work Staffing List: ", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  React.useEffect(() => {
-    getWorkStaffAllocation();
-  }, []);
 
   const officerAnalysts = React.useMemo(() => {
     return wsData.flatMap((row: any) =>

@@ -131,6 +131,16 @@ const Endpoints = {
   Insights: {
     WORK_BY_TYPE: "/insights/works?group_by=type",
     WORK_BY_TEAM: "/insights/works?group_by=team",
+    WORK_BY_LEAD: "/insights/works?group_by=work_lead",
+    WORK_BY_MINISTRY: "/insights/works?group_by=ministry",
+    WORK_BY_FEDERAL_INVOLVEMENT: "/insights/works?group_by=federal_involvement",
+    WORK_BY_NATION:
+      "/insights/works?is_active=true&include_indigenous_nations=true",
+    WORK_BY_STAFF: "/insights/works?group_by=staff",
+    PROJECT_BY_TYPE: "/insights/projects?group_by=type",
+    PROJECT_BY_SUBTYPE: "/insights/projects?group_by=sub_type",
+    WORK_BY_PHASE: "/insights/works?group_by=phase",
+    WORKS_ACTIVE: "/insights/works?isactive",
     ASSESSMENT_BY_PHASE: "/insights/works?group_by=assessment_by_phase",
   },
 };

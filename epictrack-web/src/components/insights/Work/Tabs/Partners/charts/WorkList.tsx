@@ -6,7 +6,7 @@ import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksWithNationsQuery } from "services/rtkQuery/insights";
+import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({

@@ -1,7 +1,7 @@
 import React from "react";
 import { Grid, Box } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
-import { useGetWorksByLeadQuery } from "services/rtkQuery/insights";
+import { useGetWorksByLeadQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import {
