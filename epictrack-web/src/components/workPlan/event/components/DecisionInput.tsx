@@ -12,24 +12,20 @@ import { Staff } from "../../../../models/staff";
 
 export interface DecisionInputProps {
   configurationId?: number;
-  decisionMakerPositionId?: number[];
-  decisionMakerId?: number;
+  decisionMakers?: Staff[];
   isFormFieldsLocked: boolean;
 }
 const DecisionInput = ({
-  decisionMakerPositionId,
-  decisionMakerId,
+  decisionMakers,
   configurationId,
   isFormFieldsLocked,
 }: DecisionInputProps) => {
-  const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
   const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
   const {
     register,
     formState: { errors },
   } = useFormContext();
   React.useEffect(() => {
-    getDecisionMakers();
     if (configurationId) {
       getOutcomes();
     }
@@ -41,27 +37,6 @@ const DecisionInput = ({
       );
       if (result.status === 200) {
         setOutcomes(result.data as any[]);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-  const getDecisionMakers = async () => {
-    try {
-      if (decisionMakerId) {
-        const result = await staffService.getById(String(decisionMakerId));
-        if (result.status === 200) {
-          setDecisionMakers([result.data as Staff]);
-        }
-      } else if (decisionMakerPositionId) {
-        const result = await staffService.getStaffByPosition(
-          decisionMakerPositionId.join(",")
-        );
-        if (result.status === 200) {
-          setDecisionMakers(result.data as Staff[]);
-        }
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {
