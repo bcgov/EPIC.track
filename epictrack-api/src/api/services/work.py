@@ -605,28 +605,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
         # unsupported-assignment-operation
 
         file_buffer = BytesIO()
-        columns = [
-            "name",
-            "type",
-            "start_date",
-            "end_date",
-            "days",
-            "assigned",
-            "responsibility",
-            "notes",
-            "progress",
-        ]
-        headers = [
-            "Name",
-            "Type",
-            "Start Date",
-            "End Date",
-            "Days",
-            "Assigned",
-            "Responsibility",
-            "Notes",
-            "Progress",
-        ]
+        columns = ["name", "type", "start_date", "end_date", "days", "assigned",
+            "responsibility", "notes", "progress"]
+        headers = ["Name", "Type", "Start Date", "End Date", "Days", "Assigned",
+            "Responsibility", "Notes", "Progress"]
         data.to_excel(file_buffer, index=False, columns=columns, header=headers)
         file_buffer.seek(0, 0)
         return file_buffer.getvalue()
