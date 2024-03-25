@@ -112,7 +112,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
         serialized_works = []
 
-        work_staffs = WorkService.find_staff_for_works(work_ids)
+        work_staffs = WorkService.find_staff_for_works(work_ids, is_active=True)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
         work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
         work_phases = WorkPhaseService.find_multiple_works_phases_status(
@@ -367,27 +367,42 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ) -> bool:
         """Check the existence of staff in work"""
-        query = db.session.query(StaffWorkRole).filter(
-            StaffWorkRole.work_id == work_id,
-            StaffWorkRole.staff_id == staff_id,
-            StaffWorkRole.is_deleted.is_(False),
-            StaffWorkRole.role_id == role_id,
-        )
-        if work_staff_id:
-            query = query.filter(StaffWorkRole.id != work_staff_id)
-        if query.count() > 0:
+        staff_work_roles = StaffWorkRole.find_by_work_and_staff_and_role(
+            work_id, staff_id, role_id, work_staff_id)
+        if staff_work_roles:
             return True
         return False
+
+    @classmethod
+    def check_work_staff_existence_duplication(
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+    ):
+        """Check the existence of staff in work"""
+        exists = cls.check_work_staff_existence(
+            work_id, staff_id, role_id, work_staff_id)
+        if exists:
+            raise ResourceExistsError("Staff Work association already exists")
+
+    @classmethod
+    def check_valid_role_association(
+        cls, work_id: int, role_id: int
+    ):
+        """Check the existence of staff in work"""
+        if role_id != Membership.LEAD.value:
+            return
+        staff_work_roles = StaffWorkRole.find_by_role_and_work(work_id, role_id)
+        if staff_work_roles:
+            raise ResourceExistsError("This work already has a active Team Lead")
 
     @classmethod
     def create_work_staff(
         cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Create Staff Work"""
-        if cls.check_work_staff_existence(
+        cls.check_work_staff_existence_duplication(
             work_id, data.get("staff_id"), data.get("role_id")
-        ):
-            raise ResourceExistsError("Staff Work association already exists")
+        )
+        cls.check_valid_role_association(work_id, data.get("role_id"))
 
         cls._check_can_create_or_team_member_auth(work_id)
 
@@ -416,11 +431,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
-        if cls.check_work_staff_existence(
-            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
-        ):
-            raise ResourceExistsError("Staff Work association already exists")
 
+        cls.check_work_staff_existence_duplication(
+            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
+        )
+        cls.check_valid_role_association(work_staff.work_id, data.get("role_id"))
         cls._check_can_edit_or_team_member_auth(work_staff.work_id)
 
         work_staff.is_active = data.get("is_active")
@@ -590,28 +605,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
         # unsupported-assignment-operation
 
         file_buffer = BytesIO()
-        columns = [
-            "name",
-            "type",
-            "start_date",
-            "end_date",
-            "days",
-            "assigned",
-            "responsibility",
-            "notes",
-            "progress",
-        ]
-        headers = [
-            "Name",
-            "Type",
-            "Start Date",
-            "End Date",
-            "Days",
-            "Assigned",
-            "Responsibility",
-            "Notes",
-            "Progress",
-        ]
+        columns = ["name", "type", "start_date", "end_date", "days", "assigned",
+                   "responsibility", "notes", "progress"]
+        headers = ["Name", "Type", "Start Date", "End Date", "Days", "Assigned",
+                   "Responsibility", "Notes", "Progress"]
         data.to_excel(file_buffer, index=False, columns=columns, header=headers)
         file_buffer.seek(0, 0)
         return file_buffer.getvalue()
