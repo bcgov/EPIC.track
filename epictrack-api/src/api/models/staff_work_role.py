@@ -51,7 +51,7 @@ class StaffWorkRole(BaseModelVersioned):
     @classmethod
     def find_by_role_and_work(cls, work_id: int, role_id):
         """Return by work and role ids."""
-        return cls.query(StaffWorkRole).filter(
+        return cls.query.filter(
             StaffWorkRole.work_id == work_id,
             StaffWorkRole.role_id == role_id,
             StaffWorkRole.is_deleted.is_(False),
@@ -59,9 +59,9 @@ class StaffWorkRole(BaseModelVersioned):
         ).all()
 
     @classmethod
-    def find_by_work_and_staff_and_role(cls, work_id: int, staff_id, role_id, work_staff_id):
-        """Return by work and role ids."""
-        query = cls.query(StaffWorkRole).filter(
+    def find_by_work_and_staff_and_role(cls, work_id: int, staff_id: object, role_id: object, work_staff_id: object):
+        """Return by work, staff and role ids."""
+        query = cls.query.filter(
             StaffWorkRole.work_id == work_id,
             StaffWorkRole.staff_id == staff_id,
             StaffWorkRole.is_deleted.is_(False),

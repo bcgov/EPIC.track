@@ -377,10 +377,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_id: int, role_id: int
     ):
         """Check the existence of staff in work"""
-        if role_id != Membership.LEAD:
+        if role_id != Membership.LEAD.value:
             return
-        staff_work_role = StaffWorkRole.find_by_role_and_work(work_id, role_id)
-        if staff_work_role:
+        staff_work_roles = StaffWorkRole.find_by_role_and_work(work_id, role_id)
+        if staff_work_roles:
             raise ResourceExistsError("This work already has a active Team Lead")
 
     @classmethod
