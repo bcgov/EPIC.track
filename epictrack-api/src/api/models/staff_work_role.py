@@ -56,7 +56,7 @@ class StaffWorkRole(BaseModelVersioned):
             StaffWorkRole.role_id == role_id,
             StaffWorkRole.is_deleted.is_(False),
             StaffWorkRole.is_active.is_(True),
-        ).first()
+        ).all()
 
     @classmethod
     def find_by_work_and_staff_and_role(cls, work_id: int, staff_id, role_id, work_staff_id):
