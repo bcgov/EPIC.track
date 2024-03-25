@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -9,6 +9,8 @@ import { IssuesContext } from "../IssuesContext";
 import { CloneForm } from "../types";
 import { descriptionCharacterLimit } from "./constants";
 import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
+import { WorkplanContext } from "components/workPlan/WorkPlanContext";
+import dayjs from "dayjs";
 
 const schema = yup.object().shape({
   posted_date: yup.string().required("Date is required"),
@@ -19,12 +21,29 @@ const schema = yup.object().shape({
 });
 
 const EditIssueUpdate = () => {
+  const { issues } = React.useContext(WorkplanContext);
   const {
     setUpdateToClone,
     updateToEdit,
     editIssueUpdate,
     setEditIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
+
+  const minPostedDate = useMemo(() => {
+    const issue = issues.find(
+      (issue) => issue.id === updateToEdit?.work_issue_id
+    );
+    if (!issue) return undefined;
+    const approvedIssueUpdatesDates = issue?.updates
+      .filter((update) => update.id !== updateToEdit?.id && update.is_approved)
+      .map((update) => dayjs(update.posted_date).add(1, "day").unix());
+    const minDateUnix = Math.max(
+      ...approvedIssueUpdatesDates,
+      dayjs(issue?.start_date).unix()
+    );
+    const minDate = dayjs(minDateUnix * 1000);
+    return minDate;
+  }, [issues, updateToEdit?.id]);
 
   const methods = useForm<CloneForm>({
     resolver: yupResolver(schema),
@@ -63,7 +82,12 @@ const EditIssueUpdate = () => {
         <Grid item xs={12} container>
           <Grid item xs={6}>
             <ETFormLabel required>Date</ETFormLabel>
-            <ControlledDatePicker name="posted_date" />
+            <ControlledDatePicker
+              name="posted_date"
+              datePickerProps={{
+                minDate: minPostedDate,
+              }}
+            />
           </Grid>
         </Grid>
         <Grid item xs={12}>
