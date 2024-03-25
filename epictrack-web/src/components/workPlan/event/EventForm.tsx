@@ -53,6 +53,8 @@ import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
 import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import { Staff } from "models/staff";
+import staffService from "services/staffService/staffService";
 
 interface EventFormProps {
   onSave: () => void;
@@ -99,6 +101,7 @@ const EventForm = ({
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
   const isCreateMode = useMemo(() => !event, [event]);
+  const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
   const titleRef = useRef();
   const MISSING_RESUMPTION_ERROR =
     "No resumption milestone configuration found to resume the phase";
@@ -181,6 +184,31 @@ const EventForm = ({
       POSITION_ENUM.MINISTER,
     ];
   }, [ctx.work, ctx.workPhases, ctx.selectedWorkPhase, event, milestoneEvents]);
+  const getDecisionMakers = useCallback(async () => {
+    if (!decisionMakerPositionIds || decisionMakerPositionIds.length === 0) {
+      const result = await staffService.getById(
+        String(ctx.work?.decision_by_id)
+      );
+      if (result.status === 200) {
+        setDecisionMakers([result.data as Staff]);
+      }
+    } else {
+      const result = await staffService.getStaffByPosition(
+        decisionMakerPositionIds.join(",")
+      );
+      if (result.status === 200) {
+        setDecisionMakers(result.data as Staff[]);
+      }
+    }
+  }, [decisionMakerPositionIds, ctx.work]);
+  useEffect(() => {
+    if (
+      actualAdded &&
+      selectedConfiguration?.event_category_id === EventCategory.DECISION
+    ) {
+      getDecisionMakers();
+    }
+  }, [actualAdded, selectedConfiguration]);
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
@@ -753,8 +781,7 @@ const EventForm = ({
               <DecisionInput
                 isFormFieldsLocked={isFormFieldsLocked}
                 configurationId={selectedConfiguration?.id}
-                decisionMakerPositionId={decisionMakerPositionIds}
-                decisionMakerId={ctx.work?.decision_by_id}
+                decisionMakers={decisionMakers}
               />
             </When>
             <When
