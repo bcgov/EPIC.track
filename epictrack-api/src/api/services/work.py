@@ -365,11 +365,22 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def check_work_staff_existence(
         cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
-    ):
+    ) -> bool:
         """Check the existence of staff in work"""
         staff_work_roles = StaffWorkRole.find_by_work_and_staff_and_role(
             work_id, staff_id, role_id, work_staff_id)
         if staff_work_roles:
+            return True
+        return False
+
+    @classmethod
+    def check_work_staff_existence_duplication(
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+    ):
+        """Check the existence of staff in work"""
+        exists = cls.check_work_staff_existence(
+            work_id, staff_id, role_id, work_staff_id)
+        if exists:
             raise ResourceExistsError("Staff Work association already exists")
 
     @classmethod
@@ -388,7 +399,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Create Staff Work"""
-        cls.check_work_staff_existence(
+        cls.check_work_staff_existence_duplication(
             work_id, data.get("staff_id"), data.get("role_id")
         )
         cls.check_valid_role_association(work_id, data.get("role_id"))
@@ -421,7 +432,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
 
-        cls.check_work_staff_existence(
+        cls.check_work_staff_existence_duplication(
             work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
         )
         cls.check_valid_role_association(work_staff.work_id, data.get("role_id"))
