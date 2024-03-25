@@ -8,6 +8,7 @@ from io import BytesIO
 from typing import IO, List, Tuple
 
 from dateutil import rrule
+from pytz import timezone
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A3, landscape
@@ -16,7 +17,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import and_, func, or_
+from sqlalchemy import INTEGER, and_, func, or_
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
@@ -27,6 +28,7 @@ from api.models.event_configuration import EventConfiguration
 from api.models.event_template import EventPositionEnum, EventTemplateVisibilityEnum
 from api.models.event_type import EventTypeEnum
 from api.models.phase_code import PhaseVisibilityEnum
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
 from api.services.work_phase import WorkPhaseService
@@ -182,6 +184,7 @@ class EAResourceForeCastReport(ReportFactory):
         greater_than_report_date_query = self._get_greater_than_report_date_query(
             report_date
         )
+        report_date = report_date.astimezone(timezone('US/Pacific'))
 
         works = (
             Project.query.filter(
@@ -222,8 +225,29 @@ class EAResourceForeCastReport(ReportFactory):
                 greater_than_report_date_query,
                 Work.id == greater_than_report_date_query.c.work_id,
             )
-            .outerjoin(responsible_epd, responsible_epd.id == Work.responsible_epd_id)
-            .outerjoin(work_lead, work_lead.id == Work.work_lead_id)
+            .outerjoin(
+                SpecialField,
+                and_(
+                    SpecialField.entity == EntityEnum.WORK.value,
+                    SpecialField.entity_id == Work.id,
+                    SpecialField.time_range.contains(report_date),
+                    SpecialField.field_name.in_(["responsible_epd_id", "work_lead_id"]),
+                ),
+            )
+            .outerjoin(
+                responsible_epd,
+                and_(
+                    responsible_epd.id == func.cast(SpecialField.field_value, INTEGER),
+                    SpecialField.field_name == "responsible_epd_id",
+                ),
+            )
+            .outerjoin(
+                work_lead,
+                and_(
+                    work_lead.id == func.cast(SpecialField.field_value, INTEGER),
+                    SpecialField.field_name == "work_lead_id",
+                ),
+            )
             .add_columns(
                 Work.title.label("work_title"),
                 Project.capital_investment.label("capital_investment"),
@@ -251,6 +275,7 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .all()
         )
+
         return works
 
     def _get_less_than_end_date_query(self):
@@ -752,7 +777,7 @@ class EAResourceForeCastReport(ReportFactory):
                     row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
                     color = month_data["color"][1:]
-                    bg_color = [int(color[i: i + 2], 16) / 255 for i in (0, 2, 4)]
+                    bg_color = [int(color[i : i + 2], 16) / 255 for i in (0, 2, 4)]
                     styles.append(
                         (
                             "BACKGROUND",
