@@ -367,15 +367,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ):
         """Check the existence of staff in work"""
-        query = db.session.query(StaffWorkRole).filter(
-            StaffWorkRole.work_id == work_id,
-            StaffWorkRole.staff_id == staff_id,
-            StaffWorkRole.is_deleted.is_(False),
-            StaffWorkRole.role_id == role_id,
-        )
-        if work_staff_id:
-            query = query.filter(StaffWorkRole.id != work_staff_id)
-        if query.count() > 0:
+        staff_work_roles = StaffWorkRole.find_by_work_and_staff_and_role(
+            work_id, staff_id, role_id, work_staff_id)
+        if staff_work_roles:
             raise ResourceExistsError("Staff Work association already exists")
 
     @classmethod
@@ -386,7 +380,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if role_id != Membership.LEAD:
             return
         staff_work_role = StaffWorkRole.find_by_role_and_work(work_id, role_id)
-
         if staff_work_role:
             raise ResourceExistsError("This work already has a active Team Lead")
 
