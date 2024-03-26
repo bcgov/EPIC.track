@@ -384,17 +384,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
             raise ResourceExistsError("Staff Work association already exists")
 
     @classmethod
-    def check_valid_role_association(
-        cls, work_id: int, role_id: int
-    ):
-        """Check the existence of staff in work"""
-        if role_id != Membership.LEAD.value:
-            return
-        staff_work_roles = StaffWorkRole.find_by_role_and_work(work_id, role_id)
-        if staff_work_roles:
-            raise ResourceExistsError("This work already has a active Team Lead")
-
-    @classmethod
     def create_work_staff(
         cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
@@ -402,7 +391,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls.check_work_staff_existence_duplication(
             work_id, data.get("staff_id"), data.get("role_id")
         )
-        cls.check_valid_role_association(work_id, data.get("role_id"))
 
         cls._check_can_create_or_team_member_auth(work_id)
 
@@ -435,7 +423,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls.check_work_staff_existence_duplication(
             work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
         )
-        cls.check_valid_role_association(work_staff.work_id, data.get("role_id"))
         cls._check_can_edit_or_team_member_auth(work_staff.work_id)
 
         work_staff.is_active = data.get("is_active")

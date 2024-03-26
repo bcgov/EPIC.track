@@ -18,11 +18,10 @@ import { highlightText } from "../../../utils/MatchingTextHighlight";
 
 const SEARCH_TEXT_THRESHOLD = 1;
 export const NameFilter = () => {
+  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState<string[]>([]);
-  const [searchText, setSearchText] = useState<string>("");
-
-  const { setSearchOptions } = useContext(MyWorkplansContext);
+  const [searchText, setSearchText] = useState<string>(searchOptions.text);
 
   const handleSearchOptions = (searchText: string) => {
     setSearchOptions(
@@ -60,6 +59,7 @@ export const NameFilter = () => {
     <Autocomplete
       freeSolo
       options={searchText.length >= SEARCH_TEXT_THRESHOLD ? options : []}
+      defaultValue={searchOptions.text}
       onInputChange={(_, newValue) => {
         setSearchText(newValue ?? "");
       }}
