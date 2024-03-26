@@ -39,4 +39,4 @@ class EventConfigurationResponseSchema(
 
     def get_event_position(self, obj: EventConfiguration) -> str:
         """Return the work state"""
-        return obj.event_position.value if obj.event_position else None
+        return obj.event_position if isinstance(obj.event_position, str) else obj.event_position.value

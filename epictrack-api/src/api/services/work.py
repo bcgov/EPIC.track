@@ -254,13 +254,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 for template in event_template_json
                 if template["phase_id"] == phase.id
             ]
-            work_phase_id = cls.create_events_by_template(
+            work_phase = cls.create_events_by_template(
                 work_phase, phase_event_templates
             )
             if phase.visibility.value != PhaseVisibilityEnum.HIDDEN.value:
                 phase_start_date = end_date + timedelta(days=1)
             if sort_order == 1:
-                work.current_work_phase_id = work_phase_id
+                work.current_work_phase_id = work_phase.id
             sort_order = sort_order + 1
         # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
         role_id = (
@@ -834,7 +834,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_phase, phase_event_templates
         )
         cls.create_events_by_configuration(work_phase, event_configurations)
-        return work_phase.id
+        return work_phase
 
     @classmethod
     def create_configurations(
