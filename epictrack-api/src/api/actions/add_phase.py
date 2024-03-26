@@ -7,6 +7,7 @@ from api.actions.base import ActionFactory
 from api.models import Event, EventConfiguration, WorkPhase, Work, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.event_template import EventTemplateVisibilityEnum, EventPositionEnum
+from api.services.event_template import EventTemplateService
 from api.schemas import response as res
 
 
@@ -42,17 +43,22 @@ class AddPhase(ActionFactory):
                     "sort_order": sort_order,
                 }
             )
-            event_configurations = self.get_configurations(source_event, param)
-            work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
-            event_configurations = res.EventConfigurationResponseSchema(many=True).dump(
-                event_configurations
+            event_templates_for_the_phase = EventTemplateService.find_by_phase_id(work_phase_data.get("phase_id"))
+            event_templates_for_the_phase_json = res.EventTemplateResponseSchema(many=True).dump(
+                event_templates_for_the_phase
             )
-            new_event_configurations = WorkService.create_configurations(
-                work_phase, event_configurations, False
-            )
-            WorkService.create_events_by_configuration(
-                work_phase, new_event_configurations
-            )
+            # event_configurations = self.get_configurations(source_event, param)
+            # work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
+            # event_configurations = res.EventConfigurationResponseSchema(many=True).dump(
+            #     event_configurations
+            # )
+            work_phase = WorkService.create_events_by_template(work_phase_data, event_templates_for_the_phase_json)
+            # new_event_configurations = WorkService.create_configurations(
+            #     work_phase, event_configurations, False
+            # )
+            # WorkService.create_events_by_configuration(
+            #     work_phase, new_event_configurations
+            # )
             sort_order = sort_order + 1
             phase_start_date = end_date + timedelta(days=1)
         # update the current work phase

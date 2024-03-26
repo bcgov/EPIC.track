@@ -175,7 +175,11 @@ const EventForm = ({
       ctx.selectedWorkPhase?.is_last_phase &&
       lastDecisionIndex === currentEventIndex
     ) {
-      return [Number(ctx.work?.decision_maker_position_id)];
+      if (ctx.work?.decision_maker_position_id) {
+        return [Number(ctx.work?.decision_maker_position_id)];
+      } else {
+        return [];
+      }
     }
     return [
       POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
