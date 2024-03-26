@@ -17,12 +17,12 @@ import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksQuery } from "services/rtkQuery/insights";
 import { StaffWorkRole } from "models/staff";
 import workService from "services/workService/workService";
 import { WorkStaff } from "models/workStaff";
 import { set } from "lodash";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
+import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
 
 type WorkOrWorkStaff = Work | WorkStaff;
 
@@ -30,8 +30,6 @@ const WorkList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [leads, setLeads] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-  const [wsData, setWsData] = React.useState<WorkStaff[]>([]);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [workRoles, setWorkRoles] = React.useState<
     MRT_ColumnDef<WorkOrWorkStaff>[]
   >([]);
@@ -43,40 +41,27 @@ const WorkList = () => {
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
+  const { data: workStaffs, error, isLoading } = useGetWorkStaffsQuery();
+
   useEffect(() => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: wsData.length,
-    }));
-  }, [wsData]);
-
-  const getWorkStaffAllocation = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const workStaffingResult = await workService.getWorkStaffDetails();
-      if (workStaffingResult.status === 200) {
-        setWsData(workStaffingResult.data as WorkStaff[]);
-      }
-    } catch (error) {
-      console.error("Work Staffing List: ", error);
-    } finally {
-      setIsLoading(false);
+    if (workStaffs) {
+      setPagination((prev) => ({
+        ...prev,
+        pageSize: workStaffs.length,
+      }));
     }
-  }, []);
-
-  React.useEffect(() => {
-    getWorkStaffAllocation();
-  }, []);
+  }, [workStaffs]);
 
   const officerAnalysts = React.useMemo(() => {
-    return wsData.flatMap((row: any) =>
+    if (!workStaffs) return [];
+    return workStaffs.flatMap((row: any) =>
       row.staff
         ? row.staff.filter(
             (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
           )
         : []
     );
-  }, [wsData]);
+  }, [workStaffs]);
 
   const officerAnalystOptions = React.useMemo(() => {
     return Array.from(
@@ -108,7 +93,7 @@ const WorkList = () => {
 
   const tableColumns = React.useMemo(() => {
     let cols: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
-    if (wsData && wsData.length > 0) {
+    if (workStaffs && workStaffs.length > 0) {
       const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
       cols = [
         {
@@ -158,7 +143,7 @@ const WorkList = () => {
       ];
     }
     setWorkRoles(cols);
-  }, [wsData]);
+  }, [workStaffs]);
 
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
@@ -167,12 +152,13 @@ const WorkList = () => {
   };
 
   React.useEffect(() => {
+    if (!workStaffs) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
       if (key == "work_lead" || key == "responsible_epd") {
         accessor = "full_name";
       }
-      const codes = wsData
+      const codes = workStaffs
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
@@ -181,7 +167,7 @@ const WorkList = () => {
         );
       codeTypes[key](codes);
     });
-  }, [wsData]);
+  }, [workStaffs]);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkOrWorkStaff>[]>(() => {
     return [
@@ -267,11 +253,11 @@ const WorkList = () => {
       },
       ...workRoles,
     ];
-  }, [leads, teams, workRoles, workTypes, wsData]);
+  }, [leads, teams, workRoles, workTypes, workStaffs]);
   return (
     <MasterTrackTable
       columns={columns}
-      data={wsData}
+      data={workStaffs || []}
       initialState={{
         sorting: [
           {
@@ -287,7 +273,7 @@ const WorkList = () => {
       }}
       enablePagination
       muiPaginationProps={{
-        rowsPerPageOptions: rowsPerPageOptions(wsData.length),
+        rowsPerPageOptions: rowsPerPageOptions(workStaffs?.length || 0),
       }}
       onPaginationChange={setPagination}
     />

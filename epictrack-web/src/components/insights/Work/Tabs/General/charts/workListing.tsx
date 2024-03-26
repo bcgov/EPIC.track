@@ -11,7 +11,7 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksQuery } from "services/rtkQuery/insights";
+import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);

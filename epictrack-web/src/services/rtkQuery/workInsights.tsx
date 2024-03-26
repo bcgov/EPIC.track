@@ -1,31 +1,23 @@
-// Need to use the React-specific entry point to import createApi
+// worksApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
 import {
-  AssessmentByPhase,
-  WorkByLead,
-  WorkByTeam,
-  ProjectBySubtype,
-  ProjectByType,
-  WorkByFederalInvolvement,
-  WorkByMinistry,
-  WorkByNation,
   WorkByType,
+  WorkByTeam,
+  WorkByLead,
+  WorkByMinistry,
+  WorkByFederalInvolvement,
+  WorkByNation,
   WorkByStaff,
+  AssessmentByPhase,
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
-import { Project } from "models/project";
 
-// Define a service using a base URL and expected endpoints
-export const insightsApi = createApi({
+export const workInsightsApi = createApi({
   tagTypes: [
     "Works",
-    "Projects",
     "WorksByStaff",
-    "AssessmentsByPhase",
-    "ProjectsByType",
-    "ProjectsBySubType",
     "WorksByType",
     "WorksByTeam",
     "WorksByLead",
@@ -33,26 +25,14 @@ export const insightsApi = createApi({
     "WorksByFederalInvolvement",
     "WorksByNation",
     "WorksWithNations",
+    "AssessmentsByPhase",
   ],
-  reducerPath: "insightsApi",
+  reducerPath: "workInsightsApi",
   baseQuery: fetchBaseQuery({
     baseUrl: AppConfig.apiUrl,
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getWorksByType: builder.query<WorkByType[], void>({
-      query: () => `insights/works?group_by=type`,
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ work_type_id }) => ({
-                type: "WorksByType" as const,
-                id: work_type_id,
-              })),
-              { type: "WorksByType", id: "LIST" },
-            ]
-          : [{ type: "WorksByType", id: "LIST" }],
-    }),
     getAssessmentsByPhase: builder.query<AssessmentByPhase[], void>({
       query: () => `insights/works?group_by=assessment_by_phase`,
       providesTags: (result) =>
@@ -78,6 +58,19 @@ export const insightsApi = createApi({
               { type: "Works", id: "LIST" },
             ]
           : [{ type: "Works", id: "LIST" }],
+    }),
+    getWorksByType: builder.query<WorkByType[], void>({
+      query: () => `insights/works?group_by=type`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ work_type_id }) => ({
+                type: "WorksByType" as const,
+                id: work_type_id,
+              })),
+              { type: "WorksByType", id: "LIST" },
+            ]
+          : [{ type: "WorksByType", id: "LIST" }],
     }),
     getWorksWithNations: builder.query<Work[], void>({
       query: () => `works?is_active=true&include_indigenous_nations=true`,
@@ -173,58 +166,12 @@ export const insightsApi = createApi({
             ]
           : [{ type: "WorksByStaff", id: "LIST" }],
     }),
-    getProjects: builder.query<Project[], void>({
-      query: () => `projects`,
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ id }) => ({
-                type: "Projects" as const,
-                id,
-              })),
-              { type: "Projects", id: "LIST" },
-            ]
-          : [{ type: "Projects", id: "LIST" }],
-    }),
-    getProjectByType: builder.query<ProjectByType[], void>({
-      query: () => `insights/projects?group_by=type`,
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ type_id }) => ({
-                type: "ProjectsByType" as const,
-                id: type_id,
-              })),
-              { type: "ProjectsByType", id: "LIST" },
-            ]
-          : [{ type: "ProjectsByType", id: "LIST" }],
-    }),
-    getProjectBySubType: builder.query<ProjectBySubtype[], number>({
-      query: (type_id: number) =>
-        `insights/projects?group_by=subtype${
-          type_id ? `&type_id=${type_id}` : ""
-        }`,
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ sub_type_id }) => ({
-                type: "ProjectsBySubType" as const,
-                id: sub_type_id,
-              })),
-              { type: "ProjectsBySubType", id: "LIST" },
-            ]
-          : [{ type: "ProjectsBySubType", id: "LIST" }],
-    }),
   }),
-
   refetchOnMountOrArgChange: 300,
 });
 
-// Export hooks for usage in functional components, which are
-// auto-generated based on the defined endpoints
 export const {
   useGetWorksByTypeQuery,
-  useGetAssessmentsByPhaseQuery,
   useGetWorksQuery,
   useGetWorksByTeamQuery,
   useGetWorksByLeadQuery,
@@ -232,8 +179,6 @@ export const {
   useGetWorksByFederalInvolvementQuery,
   useGetWorksByNationQuery,
   useGetWorksByStaffQuery,
-  useGetProjectByTypeQuery,
-  useLazyGetProjectBySubTypeQuery,
-  useGetProjectsQuery,
   useGetWorksWithNationsQuery,
-} = insightsApi;
+  useGetAssessmentsByPhaseQuery,
+} = workInsightsApi;

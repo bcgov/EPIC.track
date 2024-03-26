@@ -6,7 +6,7 @@ import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksWithNationsQuery } from "services/rtkQuery/insights";
+import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
@@ -32,11 +32,11 @@ const WorkList = () => {
   }, [error]);
 
   const federalInvolvements = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w.federal_involvement.name)));
+    return Array.from(new Set(works.map((w) => w?.federal_involvement?.name)));
   }, [works]);
 
   const ministries = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w.ministry.name)));
+    return Array.from(new Set(works.map((w) => w?.ministry?.name)));
   }, [works]);
 
   const indigenousNations = useMemo(() => {

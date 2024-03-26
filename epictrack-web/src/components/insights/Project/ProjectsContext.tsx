@@ -1,6 +1,6 @@
 import { Project } from "models/project";
 import React, { createContext, useContext, useMemo } from "react";
-import { useGetProjectsQuery } from "services/rtkQuery/insights";
+import { useGetProjectsQuery } from "services/rtkQuery/projectInsights";
 
 interface ProjectsContextState {
   projects: Project[];

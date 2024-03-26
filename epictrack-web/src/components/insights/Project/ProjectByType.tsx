@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { useGetProjectByTypeQuery } from "services/rtkQuery/insights";
+import { useGetProjectByTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";

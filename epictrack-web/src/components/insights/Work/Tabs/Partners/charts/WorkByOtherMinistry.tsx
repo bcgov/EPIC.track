@@ -10,11 +10,8 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { getChartColor } from "components/insights/utils";
-import { AssessmentByPhase, WorkByMinistry } from "models/insights";
-import {
-  useGetAssessmentsByPhaseQuery,
-  useGetWorkByMinistryQuery,
-} from "services/rtkQuery/insights";
+import { WorkByMinistry } from "models/insights";
+import { useGetWorkByMinistryQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
