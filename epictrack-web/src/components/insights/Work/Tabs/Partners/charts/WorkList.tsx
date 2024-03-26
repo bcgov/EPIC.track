@@ -32,11 +32,11 @@ const WorkList = () => {
   }, [error]);
 
   const federalInvolvements = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w.federal_involvement.name)));
+    return Array.from(new Set(works.map((w) => w?.federal_involvement?.name)));
   }, [works]);
 
   const ministries = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w.ministry.name)));
+    return Array.from(new Set(works.map((w) => w?.ministry?.name)));
   }, [works]);
 
   const indigenousNations = useMemo(() => {

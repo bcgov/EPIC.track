@@ -12,7 +12,7 @@ export const projectInsightsApi = createApi({
     "ProjectsByType",
     "ProjectsBySubType",
   ],
-  reducerPath: "insightsApi",
+  reducerPath: "projectInsightsApi",
   baseQuery: fetchBaseQuery({
     baseUrl: AppConfig.apiUrl,
     prepareHeaders,

@@ -41,25 +41,27 @@ const WorkList = () => {
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  const { data, error, isLoading } = useGetWorkStaffsQuery();
-  const wsData = (data as WorkStaff[]) || [];
+  const { data: workStaffs, error, isLoading } = useGetWorkStaffsQuery();
 
   useEffect(() => {
-    setPagination((prev) => ({
-      ...prev,
-      pageSize: wsData.length,
-    }));
-  }, [wsData]);
+    if (workStaffs) {
+      setPagination((prev) => ({
+        ...prev,
+        pageSize: workStaffs.length,
+      }));
+    }
+  }, [workStaffs]);
 
   const officerAnalysts = React.useMemo(() => {
-    return wsData.flatMap((row: any) =>
+    if (!workStaffs) return [];
+    return workStaffs.flatMap((row: any) =>
       row.staff
         ? row.staff.filter(
             (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
           )
         : []
     );
-  }, [wsData]);
+  }, [workStaffs]);
 
   const officerAnalystOptions = React.useMemo(() => {
     return Array.from(
@@ -91,7 +93,7 @@ const WorkList = () => {
 
   const tableColumns = React.useMemo(() => {
     let cols: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
-    if (wsData && wsData.length > 0) {
+    if (workStaffs && workStaffs.length > 0) {
       const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
       cols = [
         {
@@ -141,7 +143,7 @@ const WorkList = () => {
       ];
     }
     setWorkRoles(cols);
-  }, [wsData]);
+  }, [workStaffs]);
 
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
@@ -150,12 +152,13 @@ const WorkList = () => {
   };
 
   React.useEffect(() => {
+    if (!workStaffs) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
       if (key == "work_lead" || key == "responsible_epd") {
         accessor = "full_name";
       }
-      const codes = wsData
+      const codes = workStaffs
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
@@ -164,7 +167,7 @@ const WorkList = () => {
         );
       codeTypes[key](codes);
     });
-  }, [wsData]);
+  }, [workStaffs]);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkOrWorkStaff>[]>(() => {
     return [
@@ -250,11 +253,11 @@ const WorkList = () => {
       },
       ...workRoles,
     ];
-  }, [leads, teams, workRoles, workTypes, wsData]);
+  }, [leads, teams, workRoles, workTypes, workStaffs]);
   return (
     <MasterTrackTable
       columns={columns}
-      data={wsData}
+      data={workStaffs || []}
       initialState={{
         sorting: [
           {
@@ -270,7 +273,7 @@ const WorkList = () => {
       }}
       enablePagination
       muiPaginationProps={{
-        rowsPerPageOptions: rowsPerPageOptions(wsData.length),
+        rowsPerPageOptions: rowsPerPageOptions(workStaffs?.length || 0),
       }}
       onPaginationChange={setPagination}
     />
