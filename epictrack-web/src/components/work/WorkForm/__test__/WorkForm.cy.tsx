@@ -1,5 +1,11 @@
+import { ROLES } from "constants/application-constant";
 import WorkForm from "..";
 import { faker } from "@faker-js/faker";
+import { useAppDispatch } from "hooks";
+import { Provider } from "react-redux";
+import { userDetails } from "services/userService/userSlice";
+import { store } from "store";
+import { UserDetail } from "services/userService/type";
 
 const generateFakePosition = () => {
   return {
@@ -181,9 +187,27 @@ function setupIntercepts(endpoints: any[]) {
 describe("WorkForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
+    store.dispatch(
+      userDetails(
+        new UserDetail(
+          faker.word.words(1),
+          faker.internet.userName(),
+          [faker.word.words(1)],
+          faker.person.firstName(),
+          faker.person.lastName(),
+          faker.internet.email(),
+          faker.number.int(),
+          faker.phone.number(),
+          faker.person.jobTitle(),
+          [ROLES.EDIT]
+        )
+      )
+    );
 
     cy.mount(
-      <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
+      <Provider store={store}>
+        <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
+      </Provider>
     );
   });
 
