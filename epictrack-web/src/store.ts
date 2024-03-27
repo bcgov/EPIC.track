@@ -3,19 +3,26 @@ import userSlice from "./services/userService/userSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import uiStateSlice from "./styles/uiStateSlice";
 import loadingSlice from "./services/loadingService";
-import { insightsApi } from "services/rtkQuery/insights";
+import { projectInsightsApi } from "services/rtkQuery/projectInsights";
+import { workInsightsApi } from "services/rtkQuery/workInsights";
+import { workStaffInsightsApi } from "services/rtkQuery/workStaffInsights";
 
 export const store = configureStore({
   reducer: {
     user: userSlice,
     uiState: uiStateSlice,
     loadingState: loadingSlice,
-    [insightsApi.reducerPath]: insightsApi.reducer,
+    [projectInsightsApi.reducerPath]: projectInsightsApi.reducer,
+    [workInsightsApi.reducerPath]: workInsightsApi.reducer,
+    [workStaffInsightsApi.reducerPath]: workStaffInsightsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }).concat(insightsApi.middleware),
+    })
+      .concat(projectInsightsApi.middleware)
+      .concat(workInsightsApi.middleware)
+      .concat(workStaffInsightsApi.middleware),
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors

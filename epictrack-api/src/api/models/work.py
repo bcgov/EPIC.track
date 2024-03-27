@@ -96,6 +96,9 @@ class Work(BaseModelVersioned):
     eac_decision_by = relationship("Staff", foreign_keys=[eac_decision_by_id], lazy='select')
     decision_by = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
     decision_maker_position = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
+    indigenous_works = relationship(
+        "IndigenousWork", backref="parent_work", lazy="select", cascade="all, delete-orphan"
+    )
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
@@ -124,6 +127,8 @@ class Work(BaseModelVersioned):
         query = cls.query.filter_by(is_active=True, is_deleted=False)
 
         query = cls.filter_by_search_criteria(query, search_filters)
+
+        query = query.order_by(Work.title)
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
         if no_pagination_options:

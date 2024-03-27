@@ -2,7 +2,14 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { FormControlLabel, Grid, TextField } from "@mui/material";
+import {
+  FormControlLabel,
+  Grid,
+  TextField,
+  Stack,
+  Tooltip,
+  Box,
+} from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { showNotification } from "../../shared/notificationProvider";
@@ -20,6 +27,7 @@ import {
 import { OptionType } from "../../shared/filterSelect/type";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import { InfoIconComponent } from "components/shared/notificationProvider/components/icons";
 
 interface FirstNationFormProps {
   workNationId?: number;
@@ -262,10 +270,24 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <FormControlLabel
-            control={<ControlledSwitch name="is_active" />}
-            label="Active"
-          />
+          <Stack direction={"row"}>
+            <Tooltip title={"Test"}>
+              <Box
+                sx={{
+                  mr: 1,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <InfoIconComponent />
+              </Box>
+            </Tooltip>
+            <FormControlLabel
+              control={<ControlledSwitch name="is_active" />}
+              label="Active"
+            />
+          </Stack>
         </Grid>
       </Grid>
     </FormProvider>

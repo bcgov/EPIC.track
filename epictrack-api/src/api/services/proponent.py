@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Proponent."""
+from datetime import datetime
 from typing import IO, List
 
 import numpy as np
 import pandas as pd
 from flask import current_app
+from psycopg2.extras import DateTimeTZRange
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Proponent, db
-from api.models.special_field import EntityEnum
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.staff import Staff
 from api.services.special_field import SpecialFieldService
 from api.utils.token_info import TokenInfo
@@ -117,6 +119,24 @@ class ProponentService:
         data = cls._update_or_delete_old_data(data)
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Proponent, data)
+        special_history_mappings = []
+        time_range = DateTimeTZRange(
+            datetime.now(), None, bounds="[)"
+        )
+        for proponent_data in data:
+            proponent = db.session.query(Proponent).filter(
+                Proponent.name == proponent_data["name"],
+            ).first()
+            special_history_mappings.append(
+                {
+                    "entity": EntityEnum.PROPONENT,
+                    "entity_id": proponent.id,
+                    "field_name": "name",
+                    "field_value": proponent.name,
+                    "time_range": time_range
+                }
+            )
+        db.session.bulk_insert_mappings(SpecialField, special_history_mappings)
         db.session.commit()
         return "Created successfully"
 

@@ -20,7 +20,6 @@ import { MemoryRouterProps } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import { EnhancedStore } from "@reduxjs/toolkit";
 import { RootState, store } from "../../src/store";
-import { SnackbarProvider } from "notistack";
 // Alternatively you can use CommonJS syntax:
 // require("./commands")
 

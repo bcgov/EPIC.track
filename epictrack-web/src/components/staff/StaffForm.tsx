@@ -50,13 +50,17 @@ const schema = yup.object().shape({
 export default function StaffForm({ ...props }) {
   const [positions, setPositions] = React.useState<ListType[]>([]);
   const ctx = React.useContext(MasterContext);
-  React.useEffect(() => {
-    ctx.setTitle("Staff");
-  }, [ctx.title]);
 
   React.useEffect(() => {
     ctx.setFormId("staff-form");
   }, []);
+
+  React.useEffect(() => {
+    const staff = ctx?.item as Staff;
+    ctx.setTitle(
+      staff?.full_name ? staff?.full_name || "Edit Staff" : "Create Staff"
+    );
+  }, [ctx.item]);
 
   React.useEffect(() => {
     ctx.setId(props.staffId);

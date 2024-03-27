@@ -53,6 +53,8 @@ import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
 import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import { Staff } from "models/staff";
+import staffService from "services/staffService/staffService";
 
 interface EventFormProps {
   onSave: () => void;
@@ -99,6 +101,7 @@ const EventForm = ({
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
   const isCreateMode = useMemo(() => !event, [event]);
+  const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
   const titleRef = useRef();
   const MISSING_RESUMPTION_ERROR =
     "No resumption milestone configuration found to resume the phase";
@@ -172,7 +175,11 @@ const EventForm = ({
       ctx.selectedWorkPhase?.is_last_phase &&
       lastDecisionIndex === currentEventIndex
     ) {
-      return [Number(ctx.work?.decision_maker_position_id)];
+      if (ctx.work?.decision_maker_position_id) {
+        return [Number(ctx.work?.decision_maker_position_id)];
+      } else {
+        return [];
+      }
     }
     return [
       POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
@@ -181,6 +188,31 @@ const EventForm = ({
       POSITION_ENUM.MINISTER,
     ];
   }, [ctx.work, ctx.workPhases, ctx.selectedWorkPhase, event, milestoneEvents]);
+  const getDecisionMakers = useCallback(async () => {
+    if (!decisionMakerPositionIds || decisionMakerPositionIds.length === 0) {
+      const result = await staffService.getById(
+        String(ctx.work?.decision_by_id)
+      );
+      if (result.status === 200) {
+        setDecisionMakers([result.data as Staff]);
+      }
+    } else {
+      const result = await staffService.getStaffByPosition(
+        decisionMakerPositionIds.join(",")
+      );
+      if (result.status === 200) {
+        setDecisionMakers(result.data as Staff[]);
+      }
+    }
+  }, [decisionMakerPositionIds, ctx.work]);
+  useEffect(() => {
+    if (
+      actualAdded &&
+      selectedConfiguration?.event_category_id === EventCategory.DECISION
+    ) {
+      getDecisionMakers();
+    }
+  }, [actualAdded, selectedConfiguration]);
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
@@ -234,15 +266,12 @@ const EventForm = ({
       ctx.selectedWorkPhase?.work_phase.legislated &&
       selectedConfiguration?.event_category_id !== EventCategory.EXTENSION
     ) {
-      const diff = dayjs(ctx.selectedWorkPhase.work_phase.end_date).diff(
-        ctx.selectedWorkPhase.work_phase.start_date,
-        "day"
-      );
       return dayjs(ctx.selectedWorkPhase.work_phase.end_date);
     }
     return dayjs(new Date());
   }, [ctx.selectedWorkPhase, selectedConfiguration]);
-
+  console.log("Actual Date Min", actualDateMin);
+  console.log("Actual Date Max", actualDateMax);
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -756,7 +785,7 @@ const EventForm = ({
               <DecisionInput
                 isFormFieldsLocked={isFormFieldsLocked}
                 configurationId={selectedConfiguration?.id}
-                decisionMakerPositionId={decisionMakerPositionIds}
+                decisionMakers={decisionMakers}
               />
             </When>
             <When

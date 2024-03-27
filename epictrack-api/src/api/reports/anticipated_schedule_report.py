@@ -2,6 +2,7 @@
 from datetime import timedelta
 
 from flask import jsonify
+from pytz import timezone
 from sqlalchemy import and_, func, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
@@ -17,6 +18,7 @@ from api.models.phase_code import PhaseCode
 from api.models.project import Project
 from api.models.proponent import Proponent
 from api.models.region import Region
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.staff import Staff
 from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
@@ -64,6 +66,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
         start_date = report_date + timedelta(days=-7)
+        report_date = report_date.astimezone(timezone('US/Pacific'))
         eac_decision_by = aliased(Staff)
         decision_by = aliased(Staff)
 
@@ -90,7 +93,15 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .join(Project, Work.project_id == Project.id)
-            .join(Proponent)
+            # TODO: Switch to `JOIN` once proponents are imported again with special field entries created
+            .outerjoin(SpecialField, and_(
+                SpecialField.entity_id == Project.proponent_id,
+                SpecialField.entity == EntityEnum.PROPONENT.value,
+                SpecialField.time_range.contains(report_date),
+                SpecialField.field_name == "name"
+            ))
+            # TODO: Remove this JOIN once proponents are imported again with special field entries created
+            .join(Proponent, Proponent.id == Project.proponent_id)
             .join(Region, Region.id == Project.region_id_env)
             .join(EAAct, EAAct.id == Work.ea_act_id)
             .join(Ministry)
@@ -116,7 +127,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
-                Proponent.name.label("proponent"),
+                func.coalesce(
+                    SpecialField.field_value, Proponent.name
+                ).label("proponent"),
                 Region.name.label("region"),
                 Project.address.label("location"),
                 EAAct.name.label("ea_act"),

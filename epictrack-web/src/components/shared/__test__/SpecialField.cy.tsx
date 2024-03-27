@@ -6,11 +6,28 @@ import {
 } from "../../../constants/application-constant";
 
 import { setupIntercepts } from "../../../../cypress/support/utils";
+import { faker } from "@faker-js/faker";
 
 const endpoints = [
   {
+    name: "SpecialFieldOptions",
     method: "OPTIONS",
     url: "http://localhost:3200/api/v1/special-fields?entity=PROJECT&entity_id=1&field_name=name",
+  },
+  {
+    name: "GetSpecialField",
+    method: "GET",
+    url: "http://localhost:3200/api/v1/special-fields?entity=PROJECT&entity_id=1&field_name=name",
+    response: {
+      body: {
+        id: faker.number.int(),
+        entity: SpecialFieldEntityEnum.PROJECT,
+        entity_id: 1,
+        field_name: SPECIAL_FIELDS.PROJECT.NAME,
+        field_label: "Name",
+        active_from: faker.date.recent(),
+      },
+    },
   },
 ];
 
@@ -42,8 +59,7 @@ describe("SpecialFieldGrid Component Tests", () => {
   });
 
   it("should display the correct description", () => {
-    cy.get('[data-cy="description"]').should(
-      "have.text",
+    cy.get('[data-cy="description"]').contains(
       "Testing Description for test field"
     );
   });

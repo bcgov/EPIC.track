@@ -10,6 +10,7 @@ import { CloneForm } from "../types";
 import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
 import dayjs from "dayjs";
 import { descriptionCharacterLimit } from "./constants";
+import { WorkplanContext } from "components/workPlan/WorkPlanContext";
 
 const schema = yup.object().shape({
   posted_date: yup.string().required("Date is required"),
@@ -24,12 +25,14 @@ const NewIssueUpdate = () => {
     cloneIssueUpdate,
   } = React.useContext(IssuesContext);
 
+  const minPostedDate = updateToClone?.posted_date
+    ? dayjs(updateToClone.posted_date).add(1, "day").format().toString()
+    : "";
+
   const methods = useForm<CloneForm>({
     resolver: yupResolver(schema),
     defaultValues: {
-      posted_date: updateToClone?.posted_date
-        ? dayjs(updateToClone.posted_date).format().toString()
-        : "",
+      posted_date: minPostedDate,
       description: updateToClone?.description || "",
     },
     mode: "onSubmit",
@@ -63,7 +66,12 @@ const NewIssueUpdate = () => {
         <Grid item xs={12} container>
           <Grid item xs={6}>
             <ETFormLabel required>Date</ETFormLabel>
-            <ControlledDatePicker name="posted_date" />
+            <ControlledDatePicker
+              name="posted_date"
+              datePickerProps={{
+                minDate: minPostedDate ? dayjs(minPostedDate) : undefined,
+              }}
+            />
           </Grid>
         </Grid>
         <Grid item xs={12}>

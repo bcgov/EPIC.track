@@ -23,3 +23,4 @@ from .set_project_status import SetProjectStatus
 from .set_work_decision_maker import SetWorkDecisionMaker
 from .set_work_state import SetWorkState
 from .change_phase_end_event import ChangePhaseEndEvent
+from .set_project_state import SetProjectState

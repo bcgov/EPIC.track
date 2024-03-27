@@ -4,6 +4,8 @@ import issueService from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/SearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { CloneForm, CreateIssueForm, EditIssueForm } from "./types";
+import { showNotification } from "components/shared/notificationProvider";
+import { getErrorMessage } from "utils/axiosUtils";
 
 interface IssuesContextProps {
   isIssuesLoading: boolean;
@@ -143,6 +145,10 @@ export const IssuesProvider = ({
       await issueService.create(workId, request);
       handleLoadIssues();
     } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
       setIsIssuesLoading(false);
     }
   };
@@ -170,6 +176,10 @@ export const IssuesProvider = ({
       await issueService.editIssue(workId, String(issueToEdit.id), request);
       handleLoadIssues();
     } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
       setIsIssuesLoading(false);
     }
   };
@@ -191,6 +201,10 @@ export const IssuesProvider = ({
       );
       handleLoadIssues();
     } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
       setIsIssuesLoading(false);
     }
   };
@@ -206,6 +220,10 @@ export const IssuesProvider = ({
       );
       handleLoadIssues();
     } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
       setIsIssuesLoading(false);
     }
   };
@@ -220,6 +238,10 @@ export const IssuesProvider = ({
       });
       handleLoadIssues();
     } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
       setIsIssuesLoading(false);
     }
   };

@@ -131,40 +131,26 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     handleSubmit,
     formState: { errors },
     reset,
-    control,
   } = methods;
+
+  const saveTeamMember = (data: StaffWorkRole) => {
+    if (workStaffId) {
+      return workService.updateWorkStaff(data, Number(workStaffId));
+    }
+    return workService.createWorkStaff(data, Number(ctx.work?.id));
+  };
 
   const onSubmitHandler = async (data: StaffWorkRole) => {
     try {
-      if (workStaffId) {
-        const createResult = await workService.updateWorkStaff(
-          data,
-          Number(workStaffId)
-        );
-        if (createResult.status === 200) {
-          showNotification("Team details updated", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
-      } else {
-        const createResult = await workService.createWorkStaff(
-          data,
-          Number(ctx.work?.id)
-        );
-        if (createResult.status === 201) {
-          showNotification("Team details inserted", {
-            type: "success",
-          });
-          if (onSave) {
-            onSave();
-          }
-        }
+      await saveTeamMember(data);
+      showNotification("Team details saved", {
+        type: "success",
+      });
+      if (onSave) {
+        onSave();
       }
-    } catch (e: any) {
-      const message = getErrorMessage(e);
+    } catch (error: any) {
+      const message = getErrorMessage(error);
       showNotification(message, {
         type: "error",
       });

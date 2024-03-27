@@ -1,6 +1,7 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import ProjectList from "../ProjectList";
 import { generateMockProject } from "../../../../cypress/support/common";
+import { AppConfig } from "config";
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
@@ -24,7 +25,7 @@ const endpoints = [
   {
     name: "getProjectsListType",
     method: "GET",
-    url: "http://localhost:3200/api/v1/projects",
+    url: `${AppConfig.apiUrl}projects`,
     response: {
       body: projects,
     },

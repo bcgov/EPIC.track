@@ -21,7 +21,16 @@ import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { Palette } from "styles/theme";
 import { debounce } from "lodash";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+
+const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
+
 export default function ProponentList() {
+  const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
+    proponentsListColumnFiltersCacheKey,
+    []
+  );
   const [proponentId, setProponentId] = useState<number>();
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const ctx = useContext(MasterContext);
@@ -196,6 +205,13 @@ export default function ProponentList() {
     getStaffs();
   }, []);
 
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
+      return;
+    }
+    setColumnFilters(filters);
+  };
+
   return (
     <>
       <ETPageContainer
@@ -215,6 +231,7 @@ export default function ProponentList() {
                   desc: false,
                 },
               ],
+              columnFilters,
             }}
             state={{
               isLoading: ctx.loading,
@@ -244,6 +261,7 @@ export default function ProponentList() {
                 </Restricted>
               </Box>
             )}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
         <UserMenu

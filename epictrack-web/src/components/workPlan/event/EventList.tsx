@@ -50,7 +50,6 @@ import {
 } from "../../../constants/application-constant";
 import { Restricted } from "components/shared/restricted";
 import { IButton } from "components/shared";
-import Confetti from "components/confetti/Confetti";
 import { showConfetti } from "styles/uiStateSlice";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
@@ -78,7 +77,7 @@ const EventList = () => {
     () => ctx.team.some((member) => member.staff.email === email),
     [ctx.team, email]
   );
-
+  const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
   const { handleHighlightRows } = useContext(EventContext);
   const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
     {}
@@ -116,6 +115,11 @@ const EventList = () => {
   }, [milestoneEvent]);
 
   React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.work_phase.id]);
+  React.useEffect(() => {
+    setTimeout(() => {
+      dispatch(showConfetti(false));
+    }, 5000);
+  }, [isConfettiShown]);
   React.useEffect(() => {
     getCombinedEvents();
   }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.id]);
@@ -319,24 +323,19 @@ const EventList = () => {
     setShowMilestoneForm(false);
     getCombinedEvents();
     getWorkPhases();
-    setTaskEvent(undefined);
-    setMilestoneEvent(undefined);
     getTemplateUploadStatus()
       .then(() => {
         return getWorkById();
       })
       .then(() => {
         if (
-          milestoneEvent &&
-          milestoneEvent.event_configuration.event_position ===
-            EventPosition.END &&
-          milestoneEvent.actual_date
+          milestoneEvent?.event_configuration.event_position ===
+          EventPosition.END
         ) {
           dispatch(showConfetti(true));
-          setTimeout(() => {
-            dispatch(showConfetti(false));
-          }, 5000);
         }
+        setTaskEvent(undefined);
+        setMilestoneEvent(undefined);
       });
   };
 

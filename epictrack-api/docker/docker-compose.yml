@@ -2,18 +2,19 @@ version: "3.1"
 
 services:
   reportdb:
-    image: postgres:11
+    image: postgres:latest
     restart: always
     environment:
-      POSTGRES_DB: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: ${CAMUNDA_JDBC_DB_NAME:-reports-db}
     ports:
       - "54332:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data1
+      - ./postgres/reports-db:/var/lib/postgresql/data
 
   reportdb-test:
-    image: postgres:11
+    image: postgres:latest
     restart: always
     environment:
       POSTGRES_DB: postgres

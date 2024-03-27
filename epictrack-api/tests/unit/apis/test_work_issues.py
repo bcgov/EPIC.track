@@ -82,8 +82,14 @@ def test_create_and_fetch_work_issues(client, auth_header):
 def test_create_and_update_work_issues(client, auth_header):
     """Test create and update WorkIssues with updates."""
     work = factory_work_model()
-    issue_data = TestWorkIssuesInfo.issue1.value
-    update_data = TestWorkIssueUpdatesInfo.update1.value
+    issue_data = {
+        **TestWorkIssuesInfo.issue1.value,
+        'start_date': fake.date_time().isoformat()
+    }
+    update_data = {
+        **TestWorkIssueUpdatesInfo.update1.value,
+        'posted_date': issue_data.get('start_date'),
+    }
     work_issue = factory_work_issues_model(work.id, issue_data)
 
     work_issue_update = factory_work_issue_updates_model(work_issue.id, update_data)
@@ -96,7 +102,7 @@ def test_create_and_update_work_issues(client, auth_header):
     updated_update_data = {
         "id": work_issue_update.id,
         "description": new_description,
-        "posted_date": fake.date_time_this_decade(tzinfo=None).isoformat()
+        "posted_date": update_data.get('posted_date')
     }
 
     url_update = urljoin(API_BASE_URL, f'work/{work.id}/issues/{work_issue.id}/update/{updates_id}')

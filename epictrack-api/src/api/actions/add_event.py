@@ -1,5 +1,4 @@
 """Disable work start date action handler"""
-
 from api.actions.base import ActionFactory
 from api.models import Event, db
 from api.models.event_configuration import EventConfiguration
@@ -25,6 +24,7 @@ class AddEvent(ActionFactory):
 
         for param in params:
             event_data, work_phase_id = self.get_additional_params(source_event, param)
+            # setting anticipated date one day later so that the new event falls below the source event
             event_data.update(
                 {
                     "is_active": True,

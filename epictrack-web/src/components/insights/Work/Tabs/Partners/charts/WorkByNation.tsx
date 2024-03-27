@@ -13,7 +13,7 @@ import {
 import { BAR_COLOR } from "components/insights/utils";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { WorkByNation } from "models/insights";
-import { useGetWorksByNationQuery } from "services/rtkQuery/insights";
+import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";

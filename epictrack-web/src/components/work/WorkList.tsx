@@ -17,19 +17,10 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { WorkDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
+import { useCachedState } from "utils/hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
-
-const getInitialColumnFilters = () => {
-  const columnFilters = sessionStorage.getItem(All_WORKS_FILTERS_CACHE_KEY);
-  if (columnFilters) {
-    const result = JSON.parse(columnFilters);
-    if (Array.isArray(result)) {
-      return result;
-    }
-  }
-  return undefined;
-};
 
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
@@ -44,8 +35,10 @@ const WorkList = () => {
 
   const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
   const [works, setWorks] = React.useState<Work[]>([]);
-
-  // const works = React.useMemo(() => ctx.data as Work[], [ctx.data]);
+  const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
+    All_WORKS_FILTERS_CACHE_KEY,
+    []
+  );
 
   const loadWorks = async () => {
     setLoadingWorks(true);
@@ -119,6 +112,8 @@ const WorkList = () => {
               setWorkId(row.original.id);
               setShowWorkDialogForm(true);
             }}
+            enableTooltip
+            tooltip={row.original.title}
             titleText={row.original.title}
           >
             {renderedCellValue}
@@ -319,11 +314,11 @@ const WorkList = () => {
     [projects, phases, teams, ministries, workTypes, eaActs]
   );
 
-  const handleCacheFilters = (filters: any[]) => {
-    sessionStorage.setItem(
-      All_WORKS_FILTERS_CACHE_KEY,
-      JSON.stringify(filters)
-    );
+  const handleCacheFilters = (filters?: ColumnFilter[]) => {
+    if (!filters) {
+      return;
+    }
+    setCachedFilters(filters);
   };
 
   return (
@@ -345,7 +340,7 @@ const WorkList = () => {
                   desc: false,
                 },
               ],
-              columnFilters: getInitialColumnFilters(),
+              columnFilters: cachedFilters,
             }}
             state={{
               isLoading: loadingWorks,
@@ -375,7 +370,7 @@ const WorkList = () => {
                 </Restricted>
               </Box>
             )}
-            cacheFilters={handleCacheFilters}
+            onCacheFilters={handleCacheFilters}
           />
         </Grid>
       </ETPageContainer>

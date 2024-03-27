@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import { getChartColor } from "components/insights/utils";
 import { WorkByFederalInvolvement } from "models/insights";
-import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/insights";
+import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";

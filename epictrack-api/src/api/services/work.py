@@ -112,7 +112,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
         serialized_works = []
 
-        work_staffs = WorkService.find_staff_for_works(work_ids)
+        work_staffs = WorkService.find_staff_for_works(work_ids, is_active=True)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
         work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
         work_phases = WorkPhaseService.find_multiple_works_phases_status(
@@ -254,13 +254,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 for template in event_template_json
                 if template["phase_id"] == phase.id
             ]
-            work_phase_id = cls.create_events_by_template(
+            work_phase = cls.create_events_by_template(
                 work_phase, phase_event_templates
             )
             if phase.visibility.value != PhaseVisibilityEnum.HIDDEN.value:
                 phase_start_date = end_date + timedelta(days=1)
             if sort_order == 1:
-                work.current_work_phase_id = work_phase_id
+                work.current_work_phase_id = work_phase.id
             sort_order = sort_order + 1
         # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
         role_id = (
@@ -367,27 +367,30 @@ class WorkService:  # pylint: disable=too-many-public-methods
         cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ) -> bool:
         """Check the existence of staff in work"""
-        query = db.session.query(StaffWorkRole).filter(
-            StaffWorkRole.work_id == work_id,
-            StaffWorkRole.staff_id == staff_id,
-            StaffWorkRole.is_deleted.is_(False),
-            StaffWorkRole.role_id == role_id,
-        )
-        if work_staff_id:
-            query = query.filter(StaffWorkRole.id != work_staff_id)
-        if query.count() > 0:
+        staff_work_roles = StaffWorkRole.find_by_work_and_staff_and_role(
+            work_id, staff_id, role_id, work_staff_id)
+        if staff_work_roles:
             return True
         return False
+
+    @classmethod
+    def check_work_staff_existence_duplication(
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+    ):
+        """Check the existence of staff in work"""
+        exists = cls.check_work_staff_existence(
+            work_id, staff_id, role_id, work_staff_id)
+        if exists:
+            raise ResourceExistsError("Staff Work association already exists")
 
     @classmethod
     def create_work_staff(
         cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Create Staff Work"""
-        if cls.check_work_staff_existence(
+        cls.check_work_staff_existence_duplication(
             work_id, data.get("staff_id"), data.get("role_id")
-        ):
-            raise ResourceExistsError("Staff Work association already exists")
+        )
 
         cls._check_can_create_or_team_member_auth(work_id)
 
@@ -416,11 +419,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
         if not work_staff:
             raise ResourceNotFoundError("No staff work association found")
-        if cls.check_work_staff_existence(
-            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
-        ):
-            raise ResourceExistsError("Staff Work association already exists")
 
+        cls.check_work_staff_existence_duplication(
+            work_staff.work_id, data.get("staff_id"), data.get("role_id"), work_staff_id
+        )
         cls._check_can_edit_or_team_member_auth(work_staff.work_id)
 
         work_staff.is_active = data.get("is_active")
@@ -590,28 +592,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
         # unsupported-assignment-operation
 
         file_buffer = BytesIO()
-        columns = [
-            "name",
-            "type",
-            "start_date",
-            "end_date",
-            "days",
-            "assigned",
-            "responsibility",
-            "notes",
-            "progress",
-        ]
-        headers = [
-            "Name",
-            "Type",
-            "Start Date",
-            "End Date",
-            "Days",
-            "Assigned",
-            "Responsibility",
-            "Notes",
-            "Progress",
-        ]
+        columns = ["name", "type", "start_date", "end_date", "days", "assigned",
+                   "responsibility", "notes", "progress"]
+        headers = ["Name", "Type", "Start Date", "End Date", "Days", "Assigned",
+                   "Responsibility", "Notes", "Progress"]
         data.to_excel(file_buffer, index=False, columns=columns, header=headers)
         file_buffer.seek(0, 0)
         return file_buffer.getvalue()
@@ -850,7 +834,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             work_phase, phase_event_templates
         )
         cls.create_events_by_configuration(work_phase, event_configurations)
-        return work_phase.id
+        return work_phase
 
     @classmethod
     def create_configurations(
@@ -896,8 +880,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 parent_config
                 for parent_config in event_configurations
                 if parent_config.visibility
-                == EventTemplateVisibilityEnum.MANDATORY.value
+                in [
+                    EventTemplateVisibilityEnum.MANDATORY.value,
+                    EventTemplateVisibilityEnum.SUGGESTED.value,
+                ]
                 and parent_config.work_phase_id == work_phase.id
+                and parent_config.parent_id is None
             ]
             for p_event_conf in parent_event_configs:
                 days = cls._find_start_at_value(p_event_conf.start_at, 0)
@@ -918,7 +906,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 c_events = [
                     c_event
                     for c_event in event_configurations
-                    if c_event.visibility == EventTemplateVisibilityEnum.MANDATORY.value
+                    if c_event.visibility
+                    in [
+                        EventTemplateVisibilityEnum.MANDATORY.value,
+                        EventTemplateVisibilityEnum.SUGGESTED.value,
+                    ]
                     and c_event.work_phase_id == work_phase.id
                     and c_event.parent_id == p_event_conf.id
                 ]

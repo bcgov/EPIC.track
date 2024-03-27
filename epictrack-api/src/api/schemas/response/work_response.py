@@ -38,6 +38,23 @@ class WorkPhaseResponseSchema(
         return obj.visibility if isinstance(obj.visibility, str) else obj.visibility.value
 
 
+class IndigenousWorkResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Indigenous Work model schema class"""
+
+    class Meta:
+        """Meta information"""
+
+        fields = ['id', 'name']
+
+    name = fields.Method("get_name")
+
+    def get_name(self, obj: WorkPhase) -> str:
+        """Return the name of the indigenous nation"""
+        return obj.indigenous_nation.name if obj.indigenous_nation else ""
+
+
 class WorkResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
@@ -67,6 +84,7 @@ class WorkResponseSchema(
     eac_decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_state = fields.Method("get_work_state")
+    indigenous_works = fields.List(fields.Nested(IndigenousWorkResponseSchema, dump_only=True))
 
     def get_work_state(self, obj: Work) -> str:
         """Return the work state"""

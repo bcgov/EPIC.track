@@ -4,7 +4,7 @@ import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
 import { getChartColor } from "components/insights/utils";
 import { AssessmentByPhase } from "models/insights";
-import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/insights";
+import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";

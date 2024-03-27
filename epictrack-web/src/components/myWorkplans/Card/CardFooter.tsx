@@ -1,11 +1,9 @@
+import React from "react";
 import { Button, Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import { ETCaption1, ETCaption2, ETParagraph } from "../../shared";
-import Icons from "../../icons";
-import { IconProps } from "../../icons/type";
+import { ETCaption1, ETParagraph } from "../../shared";
 import { CardProps } from "./type";
 import { useNavigate } from "react-router-dom";
-import React from "react";
 import StaffGroup from "./Staff/StaffGroup";
 
 const CardFooter = ({ workplan }: CardProps) => {
