@@ -6,6 +6,7 @@ import { Provider } from "react-redux";
 import { userDetails } from "services/userService/userSlice";
 import { store } from "store";
 import { UserDetail } from "services/userService/type";
+import { AppConfig } from "config";
 
 const generateFakePosition = () => {
   return {
@@ -42,7 +43,7 @@ const endpoints = [
   {
     name: "getEaActs",
     method: "GET",
-    url: "http://localhost:3200/api/v1/ea-acts",
+    url: `${AppConfig.apiUrl}ea-acts`,
     response: {
       body: faker.lorem
         .words(10)
@@ -56,7 +57,7 @@ const endpoints = [
   {
     name: "getMinistries",
     method: "GET",
-    url: "http://localhost:3200/api/v1/ministries",
+    url: `${AppConfig.apiUrl}ministries`,
     response: {
       body: faker.lorem
         .words(10)
@@ -73,7 +74,7 @@ const endpoints = [
   {
     name: "getWorkTypes",
     method: "GET",
-    url: "http://localhost:3200/api/v1/work-types",
+    url: `${AppConfig.apiUrl}work-types`,
     response: {
       body: [mockWorkType],
     },
@@ -81,7 +82,7 @@ const endpoints = [
   {
     name: "getFederalActs",
     method: "GET",
-    url: "http://localhost:3200/api/v1/federal-involvements",
+    url: `${AppConfig.apiUrl}federal-involvements`,
     response: {
       body: faker.lorem
         .words(10)
@@ -95,7 +96,7 @@ const endpoints = [
   {
     name: "getEaoTeams",
     method: "GET",
-    url: "http://localhost:3200/api/v1/eao-teams",
+    url: `${AppConfig.apiUrl}eao-teams`,
     response: {
       body: faker.lorem
         .words(10)
@@ -109,7 +110,7 @@ const endpoints = [
   {
     name: "getSubstitutionActs",
     method: "GET",
-    url: "http://localhost:3200/api/v1/substitution-acts",
+    url: `${AppConfig.apiUrl}substitution-acts`,
     response: {
       body: faker.lorem
         .words(10)
@@ -123,7 +124,7 @@ const endpoints = [
   {
     name: "getStaffs4And3",
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?positions=4,3",
+    url: `${AppConfig.apiUrl}staffs?positions=4,3`,
     response: {
       body: [generateFakePosition(), generateFakePosition()],
     },
@@ -131,7 +132,7 @@ const endpoints = [
   {
     name: "getStaffs1And2And8",
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?positions=1,2,8",
+    url: `${AppConfig.apiUrl}staffs?positions=1,2,8`,
     response: {
       body: [
         generateFakePosition(),
@@ -143,7 +144,7 @@ const endpoints = [
   {
     name: "getProjectsListType",
     method: "GET",
-    url: "http://localhost:3200/api/v1/projects?return_type=list_type",
+    url: `${AppConfig.apiUrl}projects?return_type=list_type`,
     response: {
       body: [mockProject],
     },
@@ -151,7 +152,7 @@ const endpoints = [
   {
     name: "getStaffsPosition3",
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?positions=3",
+    url: `${AppConfig.apiUrl}staffs?positions=3`,
     response: {
       body: [generateFakePosition()],
     },
@@ -159,7 +160,7 @@ const endpoints = [
   {
     name: "getProjectsAll",
     method: "GET",
-    url: "http://localhost:3200/api/v1/projects/*",
+    url: `${AppConfig.apiUrl}projects/*`,
     response: {
       body: {
         description: faker.lorem.paragraph(1),
@@ -169,7 +170,7 @@ const endpoints = [
   {
     name: "checkWorkExists ",
     method: "GET",
-    url: "http://localhost:3200/api/v1/works/exists*",
+    url: `${AppConfig.apiUrl}works/exists*`,
     response: {
       body: {
         exists: false,
