@@ -128,12 +128,14 @@ class WorkResources(Resource):
     @profiletime
     def get():
         """Return all resource and work details"""
-        works = WorkService.find_allocated_resources()
+        is_active = request.args.get('is_active')
+        if is_active is not None:
+            is_active = is_active.lower() == 'true'
+        works = WorkService.find_allocated_resources(is_active)
         return (
             jsonify(res.WorkResourceResponseSchema(many=True).dump(works)),
             HTTPStatus.OK,
         )
-
 
 @cors_preflight("GET, DELETE, PUT")
 @API.route("/<int:work_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])

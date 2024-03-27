@@ -32,6 +32,7 @@ const Endpoints = {
   Works: {
     WORKS: "works",
     WORK_RESOURCES: "works/resources",
+    WORK_RESOURCES_ACTIVE: "works/resources?is_active=true",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
     WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",

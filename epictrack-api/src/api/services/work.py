@@ -174,19 +174,23 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return serialized_work
 
     @classmethod
-    def find_allocated_resources(cls):
+    def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
         lead = aliased(Staff)
         epd = aliased(Staff)
-        work_result = (
-            Work.query.filter(Work.is_deleted.is_(False))
-            .join(Project)
-            .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
-            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
-            .outerjoin(lead, lead.id == Work.work_lead_id)
-            .outerjoin(epd, epd.id == Work.responsible_epd_id)
-            .all()
-        )
+        query = (
+        Work.query.filter(Work.is_deleted.is_(False))
+        .join(Project)
+        .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
+        .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
+        .outerjoin(lead, lead.id == Work.work_lead_id)
+        .outerjoin(epd, epd.id == Work.responsible_epd_id))
+        
+        if is_active is not None:
+            query = query.filter(Work.is_active == is_active)
+
+        work_result = query.all()
+        
         works = [
             {
                 "id": work.id,
