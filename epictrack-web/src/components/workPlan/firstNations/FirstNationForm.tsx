@@ -271,7 +271,11 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
         </Grid>
         <Grid item xs={12}>
           <Stack direction={"row"}>
-            <Tooltip title={"Test"}>
+            <Tooltip
+              title={
+                "A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
+              }
+            >
               <Box
                 sx={{
                   mr: 1,
