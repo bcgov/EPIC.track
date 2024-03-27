@@ -10,6 +10,7 @@ import {
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { setupIntercepts } from "../../../../cypress/support/utils";
+import { AppConfig } from "config";
 
 let userCounter = 0;
 
@@ -38,43 +39,43 @@ const users = [user1, user2];
 const endpoints = [
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
     body: mockStaffs,
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    url: `${AppConfig.apiUrl}codes/pip_org_types`,
     body: [],
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
     body: [],
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/users/groups",
+    url: `${AppConfig.apiUrl}users/groups`,
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/users",
+    url: `${AppConfig.apiUrl}users`,
     body: users,
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/users/groups",
+    url: `${AppConfig.apiUrl}users/groups`,
     body: [user1.group, user2.group],
   },
 ];
