@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { Grid, Box } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
   BarChart,
@@ -54,15 +54,28 @@ const WorkByNationChart = () => {
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart layout="vertical" data={chartData}>
+          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
+            <BarChart
+              layout="vertical"
+              data={chartData}
+              margin={{
+                left: 30, // Increase left margin if names are getting cut off
+              }}
+              height={chartData.length * 30 + 100}
+              width={350} // Adjust this value as needed
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" allowDecimals={false} />
-              <YAxis dataKey="nation" type="category" tick={{ fontSize: 12 }} />
+              <YAxis
+                dataKey="nation"
+                type="category"
+                width={40}
+                tick={{ fontSize: 12 }}
+              />
               <Tooltip />
-              <Bar dataKey="count" fill={BAR_COLOR} barSize={10} />
+              <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
             </BarChart>
-          </ResponsiveContainer>
+          </Box>
         </Grid>
       </Grid>
     </GrayBox>
