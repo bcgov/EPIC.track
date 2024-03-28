@@ -2,7 +2,7 @@ import React from "react";
 import AboutContainer from "./AboutContainer";
 import { AboutProvider } from "./AboutContext";
 
-const Status = () => {
+const About = () => {
   return (
     <AboutProvider>
       <AboutContainer />
@@ -10,4 +10,4 @@ const Status = () => {
   );
 };
 
-export default Status;
+export default About;
