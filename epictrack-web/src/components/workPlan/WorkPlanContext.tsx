@@ -49,7 +49,7 @@ interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
 
-export const WorkplanContext = createContext<WorkplanContextProps>({
+export const initialWorkPlanContext: WorkplanContextProps = {
   selectedWorkPhase: undefined,
   setSelectedWorkPhase: () => ({}),
   setTeam: () => ({}),
@@ -70,7 +70,10 @@ export const WorkplanContext = createContext<WorkplanContextProps>({
   getWorkById: () => new Promise((resolve) => resolve),
   selectedStaff: undefined,
   setSelectedStaff: () => ({}),
-});
+};
+export const WorkplanContext = createContext<WorkplanContextProps>(
+  initialWorkPlanContext
+);
 
 export const WorkplanProvider = ({
   children,
