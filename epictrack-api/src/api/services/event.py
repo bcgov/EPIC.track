@@ -622,6 +622,7 @@ class EventService:
             == EventPositionEnum.END.value
         ):
             current_work_phase.is_completed = True
+            current_work_phase.end_date = event.actual_date
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
             )
