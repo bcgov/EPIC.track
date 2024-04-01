@@ -52,7 +52,7 @@ export const GanttProvider = ({
     const earliestStart = tasks.reduce(
       (prev: Date, task: GanttItem) =>
         task.start.getTime() < prev.getTime() ? task.start : prev,
-      tasks?.[0].start || new Date()
+      tasks?.[0]?.start || new Date()
     );
     return moment(earliestStart).startOf("month").toDate();
   }, [tasks]);
@@ -61,7 +61,7 @@ export const GanttProvider = ({
     const latestEnd = tasks.reduce(
       (prev: Date, task: GanttItem) =>
         task.end.getTime() > prev.getTime() ? task.end : prev,
-      tasks?.[0].end || new Date()
+      tasks?.[0]?.end || new Date()
     );
     return moment(latestEnd).endOf("month").toDate();
   }, [tasks]);
