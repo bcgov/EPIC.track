@@ -10,9 +10,8 @@ import ETNotificationProvider from "./components/shared/notificationProvider/ETN
 import "./styles/App.scss";
 import { Loader } from "./components/shared/loader";
 import Confetti from "components/confetti/Confetti";
-import { ErrorBoundary } from "react-error-boundary";
-import ErrorPage from "routes/ErrorPage";
 import { TrackErrorBoundary } from "TrackErrorBoundary";
+import AppHelpButton from "components/AppHelpButton";
 
 export function App() {
   const dispatch = useAppDispatch();
@@ -45,6 +44,7 @@ export function App() {
                   <React.StrictMode>
                     <AuthenticatedRoutes />
                     <Loader />
+                    <AppHelpButton />
                   </React.StrictMode>
                 </ETNotificationProvider>
               </Box>
