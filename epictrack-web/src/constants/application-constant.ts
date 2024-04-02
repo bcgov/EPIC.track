@@ -125,3 +125,9 @@ export const SPECIAL_FIELDS = Object.freeze({
 export const MILESTONE_TYPES = Object.freeze({
   REFERRAL: 5,
 });
+
+export enum StalenessEnum {
+  CRITICAL = "CRITICAL",
+  WARN = "WARN",
+  GOOD = "GOOD",
+}
