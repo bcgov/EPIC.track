@@ -1,5 +1,6 @@
 """Classes for specific report types."""
-from datetime import timedelta
+from datetime import datetime, timedelta
+from enum import Enum
 
 from flask import jsonify
 from pytz import timezone
@@ -24,12 +25,21 @@ from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
 from api.models.work_status import WorkStatus
+from api.utils.constants import CANADA_TIMEZONE
 
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
 
 
 # pylint:disable=not-callable
+
+
+class StalenessEnum(Enum):
+    """Status update staleness level ENUM"""
+
+    CRITICAL = "CRITICAL"
+    WARN = "WARN"
+    GOOD = "GOOD"
 
 
 class EAAnticipatedScheduleReport(ReportFactory):
@@ -163,6 +173,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Generates a report and returns it"""
         data = self._fetch_data(report_date)
         data = self._format_data(data)
+        data = self._update_staleness(data, report_date)
         if return_type == "json" and data:
             return {"data": data}, None
         if not data:
@@ -269,3 +280,20 @@ class EAAnticipatedScheduleReport(ReportFactory):
             )
             .subquery()
         )
+
+    def _update_staleness(self, data: dict, report_date: datetime) -> dict:
+        """Calculate the staleness based on report date"""
+        date = report_date.astimezone(CANADA_TIMEZONE)
+        for _, work_type_data in data.items():
+            for work in work_type_data:
+                if work["date_updated"]:
+                    diff = (date - work["date_updated"]).days
+                    if diff > 10:
+                        work["staleness"] = StalenessEnum.CRITICAL.value
+                    elif diff > 5:
+                        work["staleness"] = StalenessEnum.WARN.value
+                    else:
+                        work["staleness"] = StalenessEnum.GOOD.value
+                else:
+                    work["staleness"] = StalenessEnum.CRITICAL.value
+        return data

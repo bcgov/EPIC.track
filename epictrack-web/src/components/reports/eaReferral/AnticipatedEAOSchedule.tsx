@@ -27,6 +27,7 @@ import {
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
   MILESTONE_TYPES,
+  StalenessEnum,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import moment from "moment";
@@ -113,18 +114,12 @@ export default function AnticipatedEAOSchedule() {
   };
 
   const staleLevel = React.useCallback(
-    (statusUpdateDate: string) => {
-      if (statusUpdateDate === null || statusUpdateDate === undefined)
+    (staleness: string) => {
+      if (staleness == StalenessEnum.CRITICAL) {
         return {
           background: Palette.error.main,
         };
-      const date_updated = moment(statusUpdateDate);
-      const diff = moment(reportDate).diff(date_updated, "days");
-      if (diff > 10) {
-        return {
-          background: Palette.error.main,
-        };
-      } else if (diff >= 6) {
+      } else if (staleness == StalenessEnum.WARN) {
         return {
           background: Palette.secondary.main,
         };
@@ -240,7 +235,7 @@ export default function AnticipatedEAOSchedule() {
                                     borderRadius: "4px",
                                     fontSize: "12px",
                                     width: "100px",
-                                    ...staleLevel(item["date_updated"]),
+                                    ...staleLevel(item["staleness"]),
                                   }}
                                   label={
                                     <>
