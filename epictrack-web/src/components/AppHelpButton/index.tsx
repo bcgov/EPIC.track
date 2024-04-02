@@ -1,28 +1,7 @@
 import * as React from "react";
-import FileCopyIcon from "@mui/icons-material/FileCopyOutlined";
-import SaveIcon from "@mui/icons-material/Save";
-import PrintIcon from "@mui/icons-material/Print";
-import ShareIcon from "@mui/icons-material/Share";
 import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
-import { Fab, Menu, MenuItem, MenuItemProps } from "@mui/material";
-import { Palette } from "styles/theme";
-
-const HelpMenuItem = ({ children, ...rest }: MenuItemProps) => {
-  return (
-    <MenuItem
-      sx={{
-        backgroundColor: Palette.primary.main,
-        color: Palette.white,
-        "&:hover": {
-          backgroundColor: Palette.primary.main,
-        },
-      }}
-      {...rest}
-    >
-      {children}
-    </MenuItem>
-  );
-};
+import { Fab, Menu } from "@mui/material";
+import SupportCenterMenuItem from "./SupportCenterMenuItem";
 
 export default function AppHelpButton() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -59,7 +38,7 @@ export default function AppHelpButton() {
         }}
         disableEnforceFocus
       >
-        <HelpMenuItem onClick={handleClose}>Support Center</HelpMenuItem>
+        <SupportCenterMenuItem />
       </Menu>
     </>
   );

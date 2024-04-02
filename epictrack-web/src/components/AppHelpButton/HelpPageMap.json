@@ -1,0 +1,72 @@
+{
+  "help": {
+    "default": {
+      "epicTrackPath": "/",
+      "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=486DC51B23C545A9A9FB2EAE41A9230A"
+    },
+    "links": [
+      {
+        "epicTrackPath": "/",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=486DC51B23C545A9A9FB2EAE41A9230A"
+      },
+      {
+        "epicTrackPath": "/works",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=2B50E80500B344E0A264A973633EBE51"
+      },
+
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10"
+      },
+
+      {
+        "epicTrackPath": "/reports/referral-schedule",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#referralschedule"
+      },
+      {
+        "epicTrackPath": "/reports/resource-forecast",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#resourceforecast"
+      },
+      {
+        "epicTrackPath": "/reports/30-60-90",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#30-60-90"
+      },
+      {
+        "epicTrackPath": "/reports/event-calendar",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#eventcalendar"
+      },
+      {
+        "epicTrackPath": "/insights",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=7B171BC62B8B470DAAA7C2F6CEA33664"
+      },
+      {
+        "epicTrackPath": "/templates",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=ECDFFA21BDB1495BAF0561F6F836D6F3"
+      },
+      {
+        "epicTrackPath": "/list-management/staffs",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#staff"
+      },
+      {
+        "epicTrackPath": "/list-management/first-nations",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#firstnations"
+      },
+      {
+        "epicTrackPath": "/list-management/proponents",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#proponents"
+      },
+      {
+        "epicTrackPath": "/list-management/projects",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#projects"
+      },
+      {
+        "epicTrackPath": "/list-management/work-staff",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#workstaff"
+      },
+      {
+        "epicTrackPath": "/admin/users",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=D198F12C1FF743E3A7BE8A0A8A5E2AA9"
+      }
+    ]
+  }
+}
