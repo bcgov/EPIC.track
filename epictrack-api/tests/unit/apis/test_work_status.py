@@ -19,8 +19,9 @@ from urllib.parse import urljoin
 from faker import Faker
 from flask import g
 
-from tests.utilities.factory_scenarios import (TestJwtClaims, TestStatus)
-from tests.utilities.factory_utils import factory_work_model, factory_auth_header, factory_work_status_model
+from tests.utilities.factory_scenarios import TestJwtClaims, TestStatus
+from tests.utilities.factory_utils import factory_auth_header, factory_work_model, factory_work_status_model
+
 
 API_BASE_URL = "/api/v1/"
 
@@ -94,3 +95,24 @@ def test_approve_work_status(client, jwt):
     assert approved_work_status["is_approved"]
     assert approved_work_status["approved_by"] == staff_user["preferred_username"]
     assert "approved_date" in approved_work_status
+
+
+def test_update_work_status(client, auth_header):
+    """Test update work status"""
+    work = work = factory_work_model()
+    status = factory_work_status_model(work_id=work.id)
+
+    updated_data = {
+        "description": "New status update description",
+    }
+    url = urljoin(API_BASE_URL, f'work/{work.id}/statuses/{status.id}')
+    response = client.put(url, headers=auth_header, json=updated_data)
+    response_json = response.json
+
+    assert response.status_code == HTTPStatus.OK
+    assert response_json["id"] == status.id
+    assert response_json["description"] == updated_data["description"]
+    assert response_json["work_id"] == work.id
+    assert not response_json["is_approved"]
+    assert response_json["approved_by"] is None
+    assert response_json["approved_date"] is None
