@@ -304,7 +304,7 @@ class EventService:
         current_work_phase_index = util.find_index_in_array(
             all_work_phases, current_work_phase
         )
-        cls._validate_dates(event, current_work_phase, all_work_phases)
+        # cls._validate_dates(event, current_work_phase, all_work_phases)
         cls._previous_event_acutal_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old
         )
