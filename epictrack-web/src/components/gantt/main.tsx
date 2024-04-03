@@ -1,8 +1,15 @@
 import React from "react";
 import { Chart } from "./Chart";
 import ControlBar from "./ControlBar";
+import { useGanttContext } from "./GanttContext";
 
 const Main = () => {
+  const { rows } = useGanttContext();
+
+  if (!rows.length) {
+    return null;
+  }
+
   return (
     <div
       style={{

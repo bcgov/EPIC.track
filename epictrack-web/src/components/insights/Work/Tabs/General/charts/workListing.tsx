@@ -2,14 +2,9 @@ import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import {
-  getSelectFilterOptions,
-  rowsPerPageOptions,
-} from "components/shared/MasterTrackTable/utils";
-import { ETGridTitle } from "components/shared";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
-import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 
@@ -17,7 +12,6 @@ const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [projects, setProjects] = React.useState<string[]>([]);
-  const [ministries, setMinistries] = React.useState<string[]>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -37,7 +31,6 @@ const WorkList = () => {
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
     project: setProjects,
-    ministry: setMinistries,
     current_work_phase: setPhases,
   };
 
@@ -57,13 +50,6 @@ const WorkList = () => {
       codeTypes[key](codes);
     });
   }, [works]);
-
-  const statuses = getSelectFilterOptions(
-    works,
-    "is_active",
-    (value) => (value ? "Active" : "Inactive"),
-    (value) => value
-  );
 
   useEffect(() => {
     if (error) {
@@ -167,46 +153,6 @@ const WorkList = () => {
 
           return filterValue.includes(value);
         },
-      },
-      {
-        accessorKey: "is_active",
-        header: "Status",
-        size: 80,
-        filterVariant: "multi-select",
-        filterSelectOptions: statuses,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statuses.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
-        Cell: ({ cell }) => (
-          <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
-          </span>
-        ),
       },
     ],
     [projects, phases, workTypes]

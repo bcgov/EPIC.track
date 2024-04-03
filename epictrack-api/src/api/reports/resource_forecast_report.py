@@ -5,10 +5,9 @@ from collections import defaultdict
 from datetime import datetime
 from functools import partial
 from io import BytesIO
-from typing import IO, List, Tuple
+from typing import IO, Dict, List, Tuple
 
 from dateutil import rrule
-from pytz import timezone
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A3, landscape
@@ -33,6 +32,7 @@ from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
+from api.utils.constants import CANADA_TIMEZONE
 
 from .report_factory import ReportFactory
 
@@ -57,8 +57,6 @@ class EAResourceForeCastReport(ReportFactory):
             "sub_type",
             "type",
             "eao_team",
-            "responsible_epd",
-            "work_lead",
             "env_region",
             "nrs_region",
             "work_id",
@@ -178,13 +176,10 @@ class EAResourceForeCastReport(ReportFactory):
         """Find and return works that are started before end date and did not end before report date"""
         env_region = aliased(Region)
         nrs_region = aliased(Region)
-        responsible_epd = aliased(Staff)
-        work_lead = aliased(Staff)
         less_than_end_date_query = self._get_less_than_end_date_query()
         greater_than_report_date_query = self._get_greater_than_report_date_query(
             report_date
         )
-        report_date = report_date.astimezone(timezone('US/Pacific'))
 
         works = (
             Project.query.filter(
@@ -225,29 +220,6 @@ class EAResourceForeCastReport(ReportFactory):
                 greater_than_report_date_query,
                 Work.id == greater_than_report_date_query.c.work_id,
             )
-            .outerjoin(
-                SpecialField,
-                and_(
-                    SpecialField.entity == EntityEnum.WORK.value,
-                    SpecialField.entity_id == Work.id,
-                    SpecialField.time_range.contains(report_date),
-                    SpecialField.field_name.in_(["responsible_epd_id", "work_lead_id"]),
-                ),
-            )
-            .outerjoin(
-                responsible_epd,
-                and_(
-                    responsible_epd.id == func.cast(SpecialField.field_value, INTEGER),
-                    SpecialField.field_name == "responsible_epd_id",
-                ),
-            )
-            .outerjoin(
-                work_lead,
-                and_(
-                    work_lead.id == func.cast(SpecialField.field_value, INTEGER),
-                    SpecialField.field_name == "work_lead_id",
-                ),
-            )
             .add_columns(
                 Work.title.label("work_title"),
                 Project.capital_investment.label("capital_investment"),
@@ -263,8 +235,6 @@ class EAResourceForeCastReport(ReportFactory):
                 env_region.name.label("env_region"),
                 nrs_region.name.label("nrs_region"),
                 Work.id.label("work_id"),
-                responsible_epd.full_name.label("responsible_epd"),
-                work_lead.full_name.label("work_lead"),
                 Work.id.label("work_id"),
                 func.concat(SubType.short_name, " (", Type.short_name, ")").label(
                     "sector(sub)"
@@ -390,6 +360,8 @@ class EAResourceForeCastReport(ReportFactory):
         start_events = self._filter_start_events(events)
         start_events = {y: self._filter_work_events(y, start_events) for y in work_ids}
         work_data = self._update_month_labels(works, start_events)
+        special_histories = self._fetch_works_special_history(work_ids, report_date)
+        work_data = self._update_special_history(work_data, special_histories)
         data = self._format_data(work_data)
         if not data:
             return {}, None
@@ -963,3 +935,35 @@ class EAResourceForeCastReport(ReportFactory):
                     )
                 )
         return section_headings, styles, filtered_cells
+
+    def _fetch_works_special_history(
+        self, work_ids: List[int], report_date: datetime
+    ) -> List:
+        """Fetch special history entries for given work ids and date"""
+        date = report_date.astimezone(CANADA_TIMEZONE)
+        special_histories = (
+            db.session.query(SpecialField)
+            .filter(
+                SpecialField.entity == EntityEnum.WORK.value,
+                SpecialField.entity_id.in_(work_ids),
+                SpecialField.time_range.contains(date),
+                SpecialField.field_name.in_(["responsible_epd_id", "work_lead_id"]),
+            )
+            .join(Staff, Staff.id == func.cast(SpecialField.field_value, INTEGER))
+            .add_column(Staff.full_name.label("staff_name"))
+            .all()
+        )
+        return special_histories
+
+    def _update_special_history(
+        self, work_data: Dict[str, List], special_histories: List
+    ) -> List[dict]:
+        """Update work data with corresponding special history value(s)"""
+        for work_id, work in work_data.items():
+            work_special_histories = {
+                history.SpecialField.field_name.replace("_id", ""): history.staff_name
+                for history in special_histories
+                if history.SpecialField.entity_id == work_id
+            }
+            work[0].update(work_special_histories)
+        return work_data
