@@ -8,7 +8,7 @@ from api.models.phase_code import PhaseVisibilityEnum
 from api.models.work import WorkStateEnum, Work
 from api.utils import util
 from .set_events_status import SetEventsStatus
-from .common import find_configuration
+from .common import find_configuration, find_event_date
 
 
 class ChangePhaseEndEvent(ActionFactory):
@@ -128,7 +128,7 @@ class ChangePhaseEndEvent(ActionFactory):
                 None,
             )
             next_work_phase_start_event.anticipated_date = (
-                source_event.actual_date + timedelta(days=1)
+                find_event_date(new_end_event) + timedelta(days=1)
             )
             EventService.update_event(
                 next_work_phase_start_event.as_dict(recursive=False),
