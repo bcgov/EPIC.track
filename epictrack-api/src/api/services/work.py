@@ -915,12 +915,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     c_event
                     for c_event in event_configurations
                     if c_event.visibility
-                       in [
-                           EventTemplateVisibilityEnum.MANDATORY.value,
-                           EventTemplateVisibilityEnum.SUGGESTED.value,
-                       ]
-                       and c_event.work_phase_id == work_phase.id
-                       and c_event.parent_id == p_event_conf.id
+                    in [
+                        EventTemplateVisibilityEnum.MANDATORY.value,
+                        EventTemplateVisibilityEnum.SUGGESTED.value,
+                    ]
+                    and c_event.work_phase_id == work_phase.id
+                    and c_event.parent_id == p_event_conf.id
                 ]
                 for c_event_conf in c_events:
                     c_event_start_date = p_event_start_date + timedelta(
