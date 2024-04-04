@@ -88,10 +88,15 @@ class StaffService:
         return True
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id, exclude_deleted=False):
         """Find staff by id."""
-        staff = Staff.find_by_id(_id)
-        return staff
+        query = db.session.query(Staff).filter(Staff.id == _id)
+        if exclude_deleted:
+            query = query.filter(Staff.is_deleted.is_(False))
+        staff = query.one_or_none()
+        if staff:
+            return staff
+        raise ResourceNotFoundError(f"Staff with id '{_id}' not found.")
 
     @classmethod
     def check_existence(cls, email, staff_id=None):
