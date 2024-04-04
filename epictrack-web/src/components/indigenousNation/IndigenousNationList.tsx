@@ -19,7 +19,7 @@ import { useAppSelector } from "../../hooks";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { debounce } from "lodash";
 import { Palette } from "styles/theme";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const firstNationsColumnFiltersCacheKey =

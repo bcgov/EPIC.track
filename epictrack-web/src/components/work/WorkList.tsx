@@ -17,7 +17,7 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { WorkDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];

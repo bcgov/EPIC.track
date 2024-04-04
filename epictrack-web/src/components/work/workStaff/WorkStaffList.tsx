@@ -4,7 +4,7 @@ import { Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETPageContainer } from "components/shared";
 

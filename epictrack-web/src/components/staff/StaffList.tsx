@@ -14,7 +14,7 @@ import { Restricted, hasPermission } from "../shared/restricted";
 import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const staffListColumnFiltersCacheKey = "staff-listing-column-filters";

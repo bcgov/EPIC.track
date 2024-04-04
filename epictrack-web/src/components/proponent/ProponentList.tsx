@@ -22,7 +22,7 @@ import UserMenu from "components/shared/userMenu/UserMenu";
 import { Palette } from "styles/theme";
 import { debounce } from "lodash";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 

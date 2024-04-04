@@ -41,11 +41,11 @@ export function App() {
                 }}
               >
                 <ETNotificationProvider preventDuplicate>
-                  <React.StrictMode>
-                    <AuthenticatedRoutes />
-                    <Loader />
-                    <AppHelpButton />
-                  </React.StrictMode>
+                  {/* <React.StrictMode> */}
+                  <AuthenticatedRoutes />
+                  <Loader />
+                  <AppHelpButton />
+                  {/* </React.StrictMode> */}
                 </ETNotificationProvider>
               </Box>
             </Box>

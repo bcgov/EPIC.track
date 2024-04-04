@@ -13,7 +13,7 @@ import { ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { ProjectDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";

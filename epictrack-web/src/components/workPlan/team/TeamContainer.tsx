@@ -1,6 +1,6 @@
 import React from "react";
 import { Grid, SxProps } from "@mui/material";
-import { ETHeading3, ETParagraph } from "../../shared";
+import { ETHeading3 } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import TeamList from "./TeamList";
 import TeamInfo from "./TeamInfo";
