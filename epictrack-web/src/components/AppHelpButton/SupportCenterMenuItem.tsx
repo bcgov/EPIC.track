@@ -19,8 +19,6 @@ const SupportCenterMenuItem = () => {
       : location.pathname; // Get pathname without query params
     const currentPathSegments = currentPath.split("/"); // Split current path
 
-    console.log(currentPath);
-
     // Find the most resembling epicTrackPath and its corresponding helpPage
     const closestMatch = helpPageMap.help.links.reduce(
       (
@@ -66,8 +64,6 @@ const SupportCenterMenuItem = () => {
       },
       { link: { epicTrackPath: "", helpPage: "" }, matchCount: 0 } // Initial bestMatch
     );
-
-    console.log(closestMatch);
 
     const helpPageUrl =
       closestMatch.link.helpPage || helpPageMap.help.default.helpPage;
