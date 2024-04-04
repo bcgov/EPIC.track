@@ -46,7 +46,6 @@ class Work(BaseModelVersioned):
     __tablename__ = 'works'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(150), nullable=False)
     simple_title = Column(String(), nullable=True)
     report_description = Column(String(2000))
     epic_description = Column(Text)
@@ -100,6 +99,13 @@ class Work(BaseModelVersioned):
         "IndigenousWork", backref="parent_work", lazy="select", cascade="all, delete-orphan"
     )
 
+    @property
+    def title(self):
+        """Dynamically create the title."""
+        if self.project and self.work_type:
+            return f"{self.project.type.name} - {self.work_type.name} - {self.simple_title}"
+        return None
+
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         result = super().as_dict(recursive=recursive)
@@ -108,20 +114,34 @@ class Work(BaseModelVersioned):
     @classmethod
     def check_existence(cls, title, work_id=None):
         """Checks if a work exists for a given title"""
-        query = Work.query.filter(
-            func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
-        )
+        title_parts = title.split()
+        project_type_name = title_parts[0]
+        work_type_name = title_parts[1]
+        simple_title = title_parts[2] if len(title_parts) > 2 else None
+        # pylint: disable=import-outside-toplevel
+        from api.models.work_type import WorkType
+
+        query = cls.query \
+            .join(Project, cls.project_id == Project.id) \
+            .join(WorkType, cls.work_type_id == WorkType.id) \
+            .filter(func.lower(Project.name) == func.lower(project_type_name.strip())) \
+            .filter(func.lower(WorkType.name) == func.lower(work_type_name.strip()))
+
+        if simple_title:
+            query = query.filter(func.lower(cls.simple_title) == func.lower(simple_title.strip()))
+
+        query = query.filter(cls.is_deleted.is_(False))
+
         if work_id:
-            query = query.filter(Work.id != work_id)
-        if query.count() > 0:
-            return True
-        return False
+            query = query.filter(cls.id != work_id)
+
+        return query.count() > 0
 
     @classmethod
     def fetch_all_works(
-        cls,
-        pagination_options: PaginationOptions,
-        search_filters: WorkplanDashboardSearchOptions = None
+            cls,
+            pagination_options: PaginationOptions,
+            search_filters: WorkplanDashboardSearchOptions = None
     ) -> Tuple[List[Work], int]:
         """Fetch all active works."""
         query = cls.query.filter_by(is_active=True, is_deleted=False)

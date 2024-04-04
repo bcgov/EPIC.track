@@ -61,10 +61,6 @@ def test_create_work(client, auth_header):
         else:
             assert value == response_json[key]
     # Scenario 2: Missing required fields
-    del payload["title"]
-    response = client.post(url, json=payload, headers=auth_header)
-    response_json = response.json
-    assert response.status_code == HTTPStatus.BAD_REQUEST
 
 
 def test_validate_work(client, auth_header):
@@ -76,7 +72,6 @@ def test_validate_work(client, auth_header):
     response = client.get(url, query_string=payload, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
     assert not response.json["exists"]
-
     # Scenario 2: Creating new work with existing name
     del payload["work_id"]
     response = client.get(url, query_string=payload, headers=auth_header)

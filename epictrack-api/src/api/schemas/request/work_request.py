@@ -20,12 +20,6 @@ from .base import RequestBodyParameterSchema, RequestPathParameterSchema, Reques
 class WorkBodyParameterSchema(RequestBodyParameterSchema):
     """Work request body schema"""
 
-    title = fields.Str(
-        metadata={"description": "Project name + Work Type + Simple Title"},
-        validate=validate.Length(max=150),
-        required=True,
-    )
-
     simple_title = fields.Str(
         metadata={"description": "Simple title of work"},
         validate=validate.Length(max=150),
