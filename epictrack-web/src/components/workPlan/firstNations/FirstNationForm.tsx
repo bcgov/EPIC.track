@@ -54,7 +54,9 @@ const schema = yup.object().shape({
         return true;
       },
     }),
-  indigenous_consultation_level_id: yup.number(),
+  indigenous_consultation_level_id: yup
+    .number()
+    .typeError("Please select consultation level"),
 });
 
 const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
