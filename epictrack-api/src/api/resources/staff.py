@@ -73,7 +73,7 @@ class Staff(Resource):
     def get(staff_id):
         """Return a staff detail based on id."""
         req.StaffIdPathParameterSchema().load(request.view_args)
-        staff = StaffService.find_by_id(staff_id)
+        staff = StaffService.find_by_id(staff_id, exclude_deleted=True)
         if staff:
             return res.StaffResponseSchema().dump(staff), HTTPStatus.OK
         raise ResourceNotFoundError(f'Staff with id "{staff_id}" not found')

@@ -23,9 +23,12 @@ from api.config import get_named_config
 from api.models.special_field import EntityEnum
 from api.utils.constants import CANADA_TIMEZONE
 from tests.constants import ASSESSMENT_WORK_TYPE
+from tests.utilities.providers import FormattedPhoneNumberProvider
 
 
 fake = Faker()
+fake.add_provider(FormattedPhoneNumberProvider)
+
 CONFIG = get_named_config('testing')
 
 
@@ -100,9 +103,22 @@ class TestStaffInfo(Enum):
     staff1 = {
         "first_name": fake.first_name(),
         "last_name": fake.last_name(),
-        "phone": fake.phone_number(),
+        "phone": fake.formatted_phone_number(),
         "email": fake.email(),
-        "is_active": True
+        "is_active": True,
+        "position_id": fake.random_int(min=1, max=12)
+    }
+
+    update_staff = {
+        "first_name": fake.first_name(),
+        "last_name": fake.last_name(),
+        "email": fake.email(),
+        "is_active": True,
+        "position_id": fake.random_int(min=1, max=12)
+    }
+
+    validate_staff = {
+        "email": fake.email()
     }
 
 
