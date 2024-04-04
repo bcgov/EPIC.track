@@ -102,9 +102,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def fetch_all_work_plans(
-            cls,
-            pagination_options: PaginationOptions,
-            search_options: WorkplanDashboardSearchOptions,
+        cls,
+        pagination_options: PaginationOptions,
+        search_options: WorkplanDashboardSearchOptions,
     ):
         """Fetch all workplans"""
         works, total = Work.fetch_all_works(pagination_options, search_options)
@@ -333,7 +333,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def find_staff_for_works(
-            cls, work_ids: List[int], is_active: Optional[bool] = None
+        cls, work_ids: List[int], is_active: Optional[bool] = None
     ) -> Dict[int, List[StaffWorkRole]]:
         """Active staff assigned on multiple works"""
         query = (
@@ -372,7 +372,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_staff_existence(
-            cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ) -> bool:
         """Check the existence of staff in work"""
         staff_work_roles = StaffWorkRole.find_by_work_and_staff_and_role(
@@ -383,7 +383,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_staff_existence_duplication(
-            cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
+        cls, work_id: int, staff_id: int, role_id: int, work_staff_id: int = None
     ):
         """Check the existence of staff in work"""
         exists = cls.check_work_staff_existence(
@@ -393,7 +393,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_work_staff(
-            cls, work_id: int, data: dict, commit: bool = True
+        cls, work_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Create Staff Work"""
         cls.check_work_staff_existence_duplication(
@@ -417,7 +417,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def update_work_staff(
-            cls, work_staff_id: int, data: dict, commit: bool = True
+        cls, work_staff_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
         """Update work staff"""
         work_staff = (
@@ -442,7 +442,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def copy_outcome_and_actions(
-            cls, template: dict, config: EventConfiguration, from_template: bool = True
+        cls, template: dict, config: EventConfiguration, from_template: bool = True
     ) -> None:
         """Copy the outcome and actions"""
         if from_template:
@@ -501,13 +501,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def _prepare_regular_event(  # pylint: disable=too-many-arguments
-            cls,
-            name: str,
-            start_date: str,
-            number_of_days: int,
-            ev_config_id: int,
-            work_id: int,
-            source_e_id: int = None,
+        cls,
+        name: str,
+        start_date: str,
+        number_of_days: int,
+        ev_config_id: int,
+        work_id: int,
+        source_e_id: int = None,
     ) -> dict:
         """Prepare the event object"""
         return {
@@ -572,7 +572,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_workplan(
-            cls, work_phase_id: int
+        cls, work_phase_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         milestone_events = EventService.find_milestone_events_by_work_phase(
@@ -676,7 +676,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_work_indigenous_nation(
-            cls, work_id: int, data: dict, commit: bool = True
+        cls, work_id: int, data: dict, commit: bool = True
     ) -> IndigenousWork:
         """Create Indigenous Work"""
         if cls.check_work_nation_existence(work_id, data.get("indigenous_nation_id")):
@@ -702,7 +702,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def update_work_indigenous_nation(
-            cls, work_indigenous_nation_id: int, data: dict
+        cls, work_indigenous_nation_id: int, data: dict
     ) -> IndigenousWork:
         """Update work indigenous nation"""
         work_indigenous_nation = (
@@ -713,9 +713,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work_indigenous_nation:
             raise ResourceNotFoundError("No first nation work association found")
         if cls.check_work_nation_existence(
-                work_indigenous_nation.work_id,
-                data.get("indigenous_nation_id"),
-                work_indigenous_nation_id,
+            work_indigenous_nation.work_id,
+            data.get("indigenous_nation_id"),
+            work_indigenous_nation_id,
         ):
             raise ResourceExistsError("First nation Work association already exists")
 
@@ -734,7 +734,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_first_nations_excel(
-            cls, work_id: int
+        cls, work_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
@@ -818,7 +818,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def check_work_nation_existence(
-            cls, work_id: int, nation_id: int, work_nation_id: int = None
+        cls, work_id: int, nation_id: int, work_nation_id: int = None
     ) -> bool:
         """Check the existence of first nation in work"""
         query = db.session.query(IndigenousWork).filter(
@@ -834,7 +834,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_template(
-            cls, work_phase: WorkPhase, phase_event_templates: List[dict]
+        cls, work_phase: WorkPhase, phase_event_templates: List[dict]
     ) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))
@@ -846,10 +846,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_configurations(
-            cls,
-            work_phase: WorkPhase,
-            event_configs: List[dict],
-            from_template: bool = True,
+        cls,
+        work_phase: WorkPhase,
+        event_configs: List[dict],
+        from_template: bool = True,
     ) -> List[EventConfiguration]:
         """Create event configurations from existing configurations/templates"""
         event_configurations: List[EventConfiguration] = []
@@ -880,7 +880,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_configuration(
-            cls, work_phase: WorkPhase, event_configurations: List[EventConfiguration]
+        cls, work_phase: WorkPhase, event_configurations: List[EventConfiguration]
     ) -> None:
         """Create events by given event configurations"""
         if work_phase.visibility.value == PhaseVisibilityEnum.REGULAR.value:
@@ -888,12 +888,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 parent_config
                 for parent_config in event_configurations
                 if parent_config.visibility
-                   in [
-                       EventTemplateVisibilityEnum.MANDATORY.value,
-                       EventTemplateVisibilityEnum.SUGGESTED.value,
-                   ]
-                   and parent_config.work_phase_id == work_phase.id
-                   and parent_config.parent_id is None
+                in [
+                    EventTemplateVisibilityEnum.MANDATORY.value,
+                    EventTemplateVisibilityEnum.SUGGESTED.value,
+                ]
+                and parent_config.work_phase_id == work_phase.id
+                and parent_config.parent_id is None
             ]
             for p_event_conf in parent_event_configs:
                 days = cls._find_start_at_value(p_event_conf.start_at, 0)
@@ -927,8 +927,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                         days=cls._find_start_at_value(c_event_conf.start_at, 0)
                     )
                     if (
-                            c_event_conf.event_category_id
-                            == EventCategoryEnum.CALENDAR.value
+                        c_event_conf.event_category_id
+                        == EventCategoryEnum.CALENDAR.value
                     ):
                         cal_event = CalendarEvent.flush(
                             CalendarEvent(
