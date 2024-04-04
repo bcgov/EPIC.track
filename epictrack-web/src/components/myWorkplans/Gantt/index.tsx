@@ -5,7 +5,7 @@ import { Palette } from "styles/theme";
 import { Gantt } from "components/gantt";
 import Color from "color";
 import { useNavigate } from "react-router-dom";
-import { WORKPLAN_TAB_INDEX } from "components/workPlan/constants";
+import { WORKPLAN_TAB } from "components/workPlan/constants";
 import { getDaysLeft } from "./util";
 
 export const MyWorkplanGantt = () => {
@@ -49,7 +49,7 @@ export const MyWorkplanGantt = () => {
       }),
       onClick: () => {
         navigate(`/work-plan?work_id=${workplan.id}`, {
-          state: { tabIndex: WORKPLAN_TAB_INDEX.ABOUT },
+          state: { tabIndex: WORKPLAN_TAB.ABOUT.index },
         });
       },
     };

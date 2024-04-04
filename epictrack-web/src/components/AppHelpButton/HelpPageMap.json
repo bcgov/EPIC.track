@@ -7,33 +7,57 @@
     "links": [
       {
         "epicTrackPath": "/",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=486DC51B23C545A9A9FB2EAE41A9230A"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=5A423F59AE1A476E869CB22CF5A85452"
       },
       {
         "epicTrackPath": "/works",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=2B50E80500B344E0A264A973633EBE51"
       },
-
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10"
       },
 
       {
+        "epicTrackPath": "/work-plan#workplan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#workplan"
+      },
+      {
+        "epicTrackPath": "/work-plan#status",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#status"
+      },
+      {
+        "epicTrackPath": "/work-plan#issues",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#issues"
+      },
+      {
+        "epicTrackPath": "/work-plan#about",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#about"
+      },
+      {
+        "epicTrackPath": "/work-plan#team",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#teams"
+      },
+      {
+        "epicTrackPath": "/work-plan#firstnations",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#firstnations"
+      },
+
+      {
         "epicTrackPath": "/reports/referral-schedule",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#referralschedule"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=FE54F5EFE92B4CF0AC74490E2D03FD4A"
       },
       {
         "epicTrackPath": "/reports/resource-forecast",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#resourceforecast"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=D3A49B2EF3D942EB9DA92AE712802F2A"
       },
       {
         "epicTrackPath": "/reports/30-60-90",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#30-60-90"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=B7BB22539993411A8DE8CE1F3E2FF900"
       },
       {
         "epicTrackPath": "/reports/event-calendar",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=799708BF5E1542E380D423D8C7AE881A#eventcalendar"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=DC1673B4BB3E47F9A22993757C0748C5"
       },
       {
         "epicTrackPath": "/insights",
@@ -45,23 +69,23 @@
       },
       {
         "epicTrackPath": "/list-management/staffs",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#staff"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=940FCDAE1B1749C1A28ABB6E7976AB7F"
       },
       {
         "epicTrackPath": "/list-management/first-nations",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#firstnations"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=EE07A45C67B44F5890DE1A9664499917"
       },
       {
         "epicTrackPath": "/list-management/proponents",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#proponents"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=7546609EB80945EAB59FD272D8859584"
       },
       {
         "epicTrackPath": "/list-management/projects",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#projects"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=165BCE74CDFB458F894E6826D7664B12"
       },
       {
         "epicTrackPath": "/list-management/work-staff",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=F4C6F1E0FD894908A68D74CD88ED3F93#workstaff"
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=4FE5542FDDBA49EC9F909F2F14B6E48F"
       },
       {
         "epicTrackPath": "/admin/users",
