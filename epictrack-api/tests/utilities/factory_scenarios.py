@@ -59,6 +59,7 @@ class TestWorkInfo(Enum):
     """Test scenarios of Project Creation."""
 
     work1 = {
+        "title": fake.word(),
         "report_description": fake.sentence(),
         "epic_description": fake.paragraph(),
         "is_active": True,
@@ -77,6 +78,7 @@ class TestWorkInfo(Enum):
     }
 
     assessment_work = {
+        "title": f"{fake.word()}-Assessment",
         "report_description": fake.sentence(),
         "epic_description": fake.paragraph(),
         "is_active": True,

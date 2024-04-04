@@ -18,8 +18,10 @@ depends_on = None
 
 def upgrade():
     op.drop_column('works', 'title')
+    op.drop_column('works_history', 'title')
 
 
 def downgrade():
-    op.add_column('works', sa.Column('title', sa.String(150), nullable=False))
+    op.add_column('works', sa.Column('title', sa.String(150), nullable=True))
+    op.add_column('works_history', sa.Column('title', sa.String(150), nullable=True))
 
