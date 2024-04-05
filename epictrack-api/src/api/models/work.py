@@ -139,9 +139,9 @@ class Work(BaseModelVersioned):
 
     @classmethod
     def fetch_all_works(
-            cls,
-            pagination_options: PaginationOptions,
-            search_filters: WorkplanDashboardSearchOptions = None
+        cls,
+        pagination_options: PaginationOptions,
+        search_filters: WorkplanDashboardSearchOptions = None
     ) -> Tuple[List[Work], int]:
         """Fetch all active works."""
         query = cls.query.filter_by(is_active=True, is_deleted=False)
