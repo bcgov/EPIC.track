@@ -886,8 +886,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 for parent_config in event_configurations
                 if parent_config.visibility
                 in [
-                   EventTemplateVisibilityEnum.MANDATORY.value,
-                   EventTemplateVisibilityEnum.SUGGESTED.value,
+                    EventTemplateVisibilityEnum.MANDATORY.value,
+                    EventTemplateVisibilityEnum.SUGGESTED.value,
                 ]
                 and parent_config.work_phase_id == work_phase.id
                 and parent_config.parent_id is None
@@ -913,8 +913,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     for c_event in event_configurations
                     if c_event.visibility
                     in [
-                       EventTemplateVisibilityEnum.MANDATORY.value,
-                       EventTemplateVisibilityEnum.SUGGESTED.value,
+                        EventTemplateVisibilityEnum.MANDATORY.value,
+                        EventTemplateVisibilityEnum.SUGGESTED.value,
                     ]
                     and c_event.work_phase_id == work_phase.id
                     and c_event.parent_id == p_event_conf.id
