@@ -49,4 +49,7 @@ def find_index_in_array(json_array, target_object):
 
 def generate_title(project_name, work_type_name, simple_title=''):
     """Generate the title string for a work."""
-    return f"{project_name} - {work_type_name} - {simple_title}"
+    parts = [project_name, work_type_name]
+    if simple_title:
+        parts.append(simple_title)
+    return ' - '.join(parts)
