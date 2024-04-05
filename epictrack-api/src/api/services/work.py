@@ -82,6 +82,7 @@ from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
+from api.utils import util
 from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
@@ -284,7 +285,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Check if the title exists."""
         project = Project.find_by_id(payload.get('project_id'))
         work_type: WorkType = WorkType.find_by_id(payload.get('work_type_id'))
-        title = f"{project.name} - {work_type.name} - {payload.get('simple_title')}"
+        title = util.generate_title(project.name, work_type.name, payload.get('simple_title'))
         if cls.check_existence(title, work_id):
             raise ResourceExistsError("Work with same title already exists")
 
@@ -737,9 +738,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-        print(":" * 100)
         print(first_nations)
-        print(":" * 100)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 

@@ -25,6 +25,7 @@ from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.project import Project
 from api.models.staff_work_role import StaffWorkRole
 
+from api.utils import util
 from .base_model import BaseModelVersioned
 from .pagination_options import PaginationOptions
 
@@ -103,7 +104,7 @@ class Work(BaseModelVersioned):
     def title(self):
         """Dynamically create the title."""
         if self.project and self.work_type:
-            return f"{self.project.type.name} - {self.work_type.name} - {self.simple_title}"
+            return util.generate_title(self.project.type.name, self.work_type.name, self.simple_title)
         return None
 
     def as_dict(self, recursive=True):
@@ -115,20 +116,19 @@ class Work(BaseModelVersioned):
     def check_existence(cls, title, work_id=None):
         """Checks if a work exists for a given title"""
         title_parts = title.split()
-        project_type_name = title_parts[0]
-        work_type_name = title_parts[1]
-        simple_title = title_parts[2] if len(title_parts) > 2 else None
+        project_type_name, work_type_name, simple_title = (title_parts[i].strip() if i < len(title_parts)
+                                                           else None for i in range(3))
         # pylint: disable=import-outside-toplevel
         from api.models.work_type import WorkType
 
         query = cls.query \
             .join(Project, cls.project_id == Project.id) \
             .join(WorkType, cls.work_type_id == WorkType.id) \
-            .filter(func.lower(Project.name) == func.lower(project_type_name.strip())) \
-            .filter(func.lower(WorkType.name) == func.lower(work_type_name.strip()))
+            .filter(func.lower(Project.name) == func.lower(project_type_name)) \
+            .filter(func.lower(WorkType.name) == func.lower(work_type_name))
 
         if simple_title:
-            query = query.filter(func.lower(cls.simple_title) == func.lower(simple_title.strip()))
+            query = query.filter(func.lower(cls.simple_title) == func.lower(simple_title))
 
         query = query.filter(cls.is_deleted.is_(False))
 
