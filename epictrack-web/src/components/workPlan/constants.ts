@@ -1,8 +1,26 @@
-export const WORKPLAN_TAB_INDEX = {
-  WORKPLAN: 0,
-  STATUS: 1,
-  ISSUES: 2,
-  ABOUT: 3,
-  TEAM: 4,
-  FIRST_NATIONS: 5,
+export const WORKPLAN_TAB = {
+  WORKPLAN: {
+    label: "Workplan",
+    index: 0,
+  },
+  STATUS: {
+    label: "Status",
+    index: 1,
+  },
+  ISSUES: {
+    label: "Issues",
+    index: 2,
+  },
+  ABOUT: {
+    label: "About",
+    index: 3,
+  },
+  TEAM: {
+    label: "Team",
+    index: 4,
+  },
+  FIRST_NATIONS: {
+    label: "First Nations",
+    index: 5,
+  },
 };

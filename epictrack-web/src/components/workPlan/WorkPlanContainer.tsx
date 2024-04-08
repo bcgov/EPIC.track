@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
@@ -17,8 +17,8 @@ import Issues from "./issues";
 import WorkState from "./WorkState";
 import { isStatusOutOfDate } from "./status/shared";
 import About from "./about";
-import { useLocation } from "react-router-dom";
-import { WORKPLAN_TAB_INDEX } from "./constants";
+import { useLocation, useNavigate } from "react-router-dom";
+import { WORKPLAN_TAB } from "./constants";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -27,8 +27,9 @@ const tabPanel: SxProps = {
 };
 const WorkPlanContainer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const tabIndex = location.state?.tabIndex ?? WORKPLAN_TAB_INDEX.WORKPLAN;
+  const tabIndex = location.state?.tabIndex ?? WORKPLAN_TAB.WORKPLAN.index;
 
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(tabIndex);
 
@@ -41,6 +42,13 @@ const WorkPlanContainer = () => {
   const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
+
+  useEffect(() => {
+    const currentTabLabel = Object.values(WORKPLAN_TAB).find(
+      (tab) => tab.index === selectedTabIndex
+    )?.label;
+    navigate(".", { state: { tab: currentTabLabel } });
+  }, [selectedTabIndex]);
 
   if (ctx.loading) {
     return <WorkPlanSkeleton />;
@@ -80,24 +88,27 @@ const WorkPlanContainer = () => {
             sx={{
               paddingLeft: 0,
             }}
-            label="Workplan"
+            label={WORKPLAN_TAB.WORKPLAN.label}
           />
-          <ETTab label="Status" icon={statusOutOfDate && <IndicatorIcon />} />
-          <ETTab label="Issues" />
-          <ETTab label="About" />
           <ETTab
-            label="Team"
+            label={WORKPLAN_TAB.STATUS.label}
+            icon={statusOutOfDate && <IndicatorIcon />}
+          />
+          <ETTab label={WORKPLAN_TAB.ISSUES.label} />
+          <ETTab label={WORKPLAN_TAB.ABOUT.label} />
+          <ETTab
+            label={WORKPLAN_TAB.TEAM.label}
             identifier={activeStaff.length.toString()}
             data-title="dddd"
           />
           <ETTab
-            label="First Nations"
+            label={WORKPLAN_TAB.FIRST_NATIONS.label}
             identifier={ctx.firstNations.length.toString()}
           />
         </ETTabs>
       </Box>
       <TabPanel
-        index={WORKPLAN_TAB_INDEX.WORKPLAN}
+        index={WORKPLAN_TAB.WORKPLAN.index}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -106,7 +117,7 @@ const WorkPlanContainer = () => {
         <PhaseContainer />
       </TabPanel>
       <TabPanel
-        index={WORKPLAN_TAB_INDEX.STATUS}
+        index={WORKPLAN_TAB.STATUS.index}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -115,7 +126,7 @@ const WorkPlanContainer = () => {
         <Status />
       </TabPanel>
       <TabPanel
-        index={WORKPLAN_TAB_INDEX.ISSUES}
+        index={WORKPLAN_TAB.ISSUES.index}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -124,7 +135,7 @@ const WorkPlanContainer = () => {
         <Issues />
       </TabPanel>
       <TabPanel
-        index={WORKPLAN_TAB_INDEX.ABOUT}
+        index={WORKPLAN_TAB.ABOUT.index}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -133,7 +144,7 @@ const WorkPlanContainer = () => {
         <About />
       </TabPanel>
       <TabPanel
-        index={WORKPLAN_TAB_INDEX.TEAM}
+        index={WORKPLAN_TAB.TEAM.index}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
@@ -142,7 +153,7 @@ const WorkPlanContainer = () => {
         <TeamContainer />
       </TabPanel>
       <TabPanel
-        index={WORKPLAN_TAB_INDEX.FIRST_NATIONS}
+        index={WORKPLAN_TAB.FIRST_NATIONS.index}
         value={selectedTabIndex}
         sx={{
           ...tabPanel,
