@@ -312,7 +312,6 @@ export const SpecialFieldGrid = ({
         background: Palette.white,
         overflowX: "auto",
         position: "absolute",
-        zIndex: 2,
       }}
     >
       <Box
