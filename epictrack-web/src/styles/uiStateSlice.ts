@@ -14,8 +14,9 @@ export const uiStateSlice = createSlice({
   initialState,
   reducers: {
     toggleDrawer: (state) => {
-      state.isDrawerExpanded = !state.isDrawerExpanded;
-      state.drawerWidth = state.isDrawerExpanded ? 259 : 0;
+      const isDrawerExpanded = !state.isDrawerExpanded;
+      state.isDrawerExpanded = isDrawerExpanded;
+      state.drawerWidth = isDrawerExpanded ? 260 : 0;
     },
     envBanner: (state, action: PayloadAction<boolean>) => {
       state.showEnvBanner = action.payload;

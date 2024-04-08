@@ -8,6 +8,8 @@ import {
   Toolbar,
   ListItemIcon,
   ListItemText,
+  useMediaQuery,
+  Theme,
 } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { styled } from "@mui/system";
@@ -16,13 +18,15 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import Collapse from "@mui/material/Collapse";
 import { RouteType, Routes } from "./SideNavElements";
 import { Palette } from "../../../styles/theme";
-import { SideNavProps } from "./types";
-import { useAppSelector } from "../../../hooks";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
 import Icons from "../../icons";
 import { groupBy } from "../../../utils";
 import { IconProps } from "../../icons/type";
 import { ETSubhead } from "../../shared";
 import { hasPermission } from "../../shared/restricted";
+import { toggleDrawer } from "styles/uiStateSlice";
+import MiniDrawer from "./MiniDrawer";
+import NavOpenButton from "./NavOpenButton";
 
 const ListItemStyled = styled(ListItem)({
   padding: "0px 0px 0px 0px",
@@ -53,15 +57,25 @@ const ListItemIconStyled = styled(ListItemIcon)({
   marginRight: "16px",
 });
 
-const DrawerBox = () => {
+export const DrawerBox = () => {
   const navigate = useNavigate();
-  const [open, setOpen] = React.useState<{ [x: string]: boolean }>({});
-  const uiState = useAppSelector((state) => state.uiState);
-  const location = useLocation();
+  const [subMenuExpand, setSubMenuExpand] = React.useState<{
+    [x: string]: boolean;
+  }>({});
+  const { isDrawerExpanded: open, toggleDrawerMarginTop } = useAppSelector(
+    (state) => state.uiState
+  );
   const { roles } = useAppSelector((state) => state.user.userDetail);
+  const location = useLocation();
+
+  const dispatch = useAppDispatch();
+
   const handleClick = (route: any) => {
     if (route.routes && route.routes.length > 0) {
-      setOpen((prevState: any) => ({
+      if (!open) {
+        dispatch(toggleDrawer());
+      }
+      setSubMenuExpand((prevState: any) => ({
         [route.name]: !prevState[route.name],
       }));
     } else {
@@ -110,13 +124,13 @@ const DrawerBox = () => {
     <Box
       data-testid={`sidenav`}
       sx={{
-        overflow: "auto",
+        overflow: "hidden",
         height: "100%",
         background: Palette.primary.main,
         padding: "16px 0px 57px 0px",
       }}
     >
-      <List sx={{ paddingTop: uiState.toggleDrawerMarginTop }}>
+      <List sx={{ paddingTop: toggleDrawerMarginTop }}>
         <>
           {Object.keys(groupedRoutes).map((groupKey) => {
             return (
@@ -129,16 +143,29 @@ const DrawerBox = () => {
                           key={`lstbutton-${groupKey}${i}`}
                           data-testid={`SideNav/${route.name}-button`}
                           onClick={() => handleClick(route)}
+                          sx={{
+                            justifyContent: open ? "initial" : "initial",
+                          }}
                         >
                           {route.icon && (
-                            <ListItemIconStyled key={`lsticon-${groupKey}${i}`}>
+                            <ListItemIconStyled
+                              key={`lsticon-${groupKey}${i}`}
+                              sx={{
+                                minWidth: 0,
+                                mr: open ? 3 : "auto",
+                                justifyContent: "center",
+                              }}
+                            >
                               {renderIcon(
                                 route.icon,
                                 location.pathname === route.path
                               )}
                             </ListItemIconStyled>
                           )}
-                          <ListItemText key={`lsttext-${groupKey}${i}`}>
+                          <ListItemText
+                            key={`lsttext-${groupKey}${i}`}
+                            sx={{ opacity: open ? 1 : 0 }}
+                          >
                             <ETSubhead
                               className={`sidebar-item ${
                                 location.pathname === route.path ? "active" : ""
@@ -147,8 +174,10 @@ const DrawerBox = () => {
                               {route.name}
                             </ETSubhead>
                           </ListItemText>
-                          {route?.routes &&
-                            (route?.routes?.length > 0 && !!open[route.name] ? (
+                          {open &&
+                            route?.routes &&
+                            (route?.routes?.length > 0 &&
+                            !!subMenuExpand[route.name] ? (
                               <ExpandLess className="sidebar-item" />
                             ) : (
                               <ExpandMore className="sidebar-item" />
@@ -157,7 +186,7 @@ const DrawerBox = () => {
                       </ListItemStyled>
                       {route.routes && route.routes?.length > 0 && (
                         <Collapse
-                          in={!!open[route.name]}
+                          in={!!subMenuExpand[route.name]}
                           timeout="auto"
                           unmountOnExit
                         >
@@ -210,47 +239,59 @@ const DrawerBox = () => {
   );
 };
 
-const SideNav = ({
-  open,
-  setOpen,
-  isMediumScreen,
-  drawerWidth,
-}: SideNavProps) => {
+const SideNav = () => {
+  const { drawerWidth, isDrawerExpanded: open } = useAppSelector(
+    (state) => state.uiState
+  );
+  const isMediumScreen = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.up("md")
+  );
+  const dispatch = useAppDispatch();
+  const handleToggleDrawer = () => {
+    dispatch(toggleDrawer());
+  };
+
   return (
     <>
-      {isMediumScreen ? (
-        <Drawer
-          variant="permanent"
-          anchor="left"
-          sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: {
-              width: drawerWidth,
-              boxSizing: "border-box",
-              backgroundColor: Palette.primary.main,
-            },
-          }}
-        >
-          <Toolbar />
-          <DrawerBox />
-        </Drawer>
-      ) : (
-        <Drawer
-          sx={{
-            width: "15%",
-            background: Palette.primary.main,
-          }}
-          onClose={() => setOpen(false)}
-          anchor={"left"}
-          open={open}
-          hideBackdrop={!open}
-        >
-          <DrawerBox />
-        </Drawer>
-      )}
+      <MiniDrawer />
+      {/* <NavOpenButton /> */}
     </>
   );
+  // return (
+  //   <>
+  //     {isMediumScreen ? (
+  //       <Drawer
+  //         variant="permanent"
+  //         anchor="left"
+  //         sx={{
+  //           width: drawerWidth,
+  //           flexShrink: 0,
+  //           [`& .MuiDrawer-paper`]: {
+  //             width: drawerWidth,
+  //             boxSizing: "border-box",
+  //             backgroundColor: Palette.primary.main,
+  //           },
+  //         }}
+  //       >
+  //         <Toolbar />
+  //         {/* <DrawerBox /> */}
+  //       </Drawer>
+  //     ) : (
+  //       <Drawer
+  //         sx={{
+  //           width: "15%",
+  //           background: Palette.primary.main,
+  //         }}
+  //         onClose={handleToggleDrawer}
+  //         anchor={"left"}
+  //         open={open}
+  //         hideBackdrop={!open}
+  //       >
+  //         {/* <DrawerBox /> */}
+  //       </Drawer>
+  //     )}
+  //   </>
+  // );
 };
 
 export default SideNav;

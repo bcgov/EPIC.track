@@ -4,7 +4,7 @@ import Header from "./components/layout/Header/Header";
 import UserService from "./services/userService";
 import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
 import { useAppDispatch, useAppSelector } from "./hooks";
-import { Box } from "@mui/material";
+import { Box, Fab, useTheme } from "@mui/material";
 import AxiosErrorHandler from "./components/axiosErrorHandler/AxiosErrorHandler";
 import ETNotificationProvider from "./components/shared/notificationProvider/ETNotificationProvider";
 import "./styles/App.scss";
@@ -12,6 +12,7 @@ import { Loader } from "./components/shared/loader";
 import Confetti from "components/confetti/Confetti";
 import { TrackErrorBoundary } from "TrackErrorBoundary";
 import AppHelpButton from "components/AppHelpButton";
+import NavOpenButton from "components/layout/SideNav/NavOpenButton";
 
 export function App() {
   const dispatch = useAppDispatch();
@@ -32,6 +33,7 @@ export function App() {
             {uiState.showConfetti && <Confetti />}
             <Box sx={{ display: "flex" }}>
               <Header />
+              {/* <NavOpenButton /> */}
               <Box
                 component="main"
                 sx={{
@@ -41,11 +43,11 @@ export function App() {
                 }}
               >
                 <ETNotificationProvider preventDuplicate>
-                  <React.StrictMode>
-                    <AuthenticatedRoutes />
-                    <Loader />
-                    <AppHelpButton />
-                  </React.StrictMode>
+                  {/* <React.StrictMode> */}
+                  <AuthenticatedRoutes />
+                  <Loader />
+                  <AppHelpButton />
+                  {/* </React.StrictMode> */}
                 </ETNotificationProvider>
               </Box>
             </Box>

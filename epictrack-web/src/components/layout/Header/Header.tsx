@@ -1,8 +1,14 @@
 import React from "react";
-import AppBar from "@mui/material/AppBar";
+import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import { useMediaQuery, Theme, IconButton, Avatar } from "@mui/material";
+import {
+  useMediaQuery,
+  Theme,
+  IconButton,
+  Avatar,
+  styled,
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
 import EnvironmentBanner from "./EnvironmentBanner";
@@ -15,13 +21,37 @@ import { ETCaption2, ETSubhead } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import { HEADER_HEIGHT } from "./constants";
+import { useDispatch } from "react-redux";
+import { toggleDrawer } from "styles/uiStateSlice";
+import NavOpenButton from "../SideNav/NavOpenButton";
+
+interface AppBarProps extends MuiAppBarProps {
+  open?: boolean;
+}
+const AppBar = styled(MuiAppBar, {
+  shouldForwardProp: (prop) => prop !== "open",
+})<AppBarProps>(({ theme, open }) => ({
+  zIndex: theme.zIndex.drawer + 1,
+  transition: theme.transitions.create(["width", "margin"], {
+    easing: theme.transitions.easing.sharp,
+    duration: theme.transitions.duration.leavingScreen,
+  }),
+  // ...(open && {
+  //   marginLeft: 260,
+  //   width: `calc(100% - ${260}px)`,
+  //   transition: theme.transitions.create(["width", "margin"], {
+  //     easing: theme.transitions.easing.sharp,
+  //     duration: theme.transitions.duration.enteringScreen,
+  //   }),
+  // }),
+}));
 
 const Header = () => {
-  const [open, setOpen] = React.useState(false);
-  const isMediumScreen: boolean = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.up("md")
+  const { isDrawerExpanded: open }: UIState = useAppSelector(
+    (state) => state.uiState
   );
-  const uiState: UIState = useAppSelector((state) => state.uiState);
+  const dispatch = useDispatch();
+
   const user = useAppSelector((state) => state.user.userDetail);
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] =
@@ -37,34 +67,26 @@ const Header = () => {
 
   return (
     <>
-      <AppBar
-        position="fixed"
-        sx={{
-          boxShadow: "none",
-          zIndex: (theme: Theme) =>
-            isMediumScreen ? theme.zIndex.drawer + 1 : theme.zIndex.drawer,
-        }}
-        data-testid="appbar-header"
-      >
+      <AppBar position="fixed" open={open} data-testid="appbar-header">
         <CssBaseline />
         <Toolbar
           sx={{
             height: HEADER_HEIGHT,
           }}
         >
-          {!isMediumScreen && (
-            <IconButton
-              data-testid="menu-icon"
-              component={MenuIcon}
-              color="info"
-              sx={{
-                height: "2em",
-                width: "2em",
-                marginRight: { xs: "1em" },
-              }}
-              onClick={() => setOpen(!open)}
-            />
-          )}
+          <IconButton
+            data-testid="menu-icon"
+            component={MenuIcon}
+            color="info"
+            sx={{
+              height: "2em",
+              width: "2em",
+              marginRight: { xs: "1em" },
+            }}
+            onClick={() => {
+              dispatch(toggleDrawer());
+            }}
+          />
           <Box
             component="img"
             sx={{
@@ -129,13 +151,8 @@ const Header = () => {
         </Toolbar>
         <EnvironmentBanner />
       </AppBar>
-      <SideNav
-        setOpen={setOpen}
-        data-testid="sidenav-header"
-        isMediumScreen={isMediumScreen}
-        open={open}
-        drawerWidth={uiState.drawerWidth}
-      />
+      <SideNav data-testid="sidenav-header" />
+      {/* <NavOpenButton /> */}
     </>
   );
 };
