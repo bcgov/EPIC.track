@@ -5,7 +5,7 @@ import { WorkplanContext } from "../WorkPlanContext";
 import { ETCaption1, ETHeading4 } from "../../shared";
 import { CustomSwitch } from "../../shared/CustomSwitch";
 import { Palette } from "../../../styles/theme";
-import { WorkPhase, WorkPhaseAdditionalInfo } from "../../../models/work";
+import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
 
 const PhaseContainer = () => {

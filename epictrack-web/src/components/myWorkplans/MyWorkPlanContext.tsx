@@ -10,7 +10,7 @@ import {
   MY_WORKLAN_FILTERS,
   MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
 } from "./constants";
-import { useCachedState } from "utils/hooks/useCachedFilters";
+import { useCachedState } from "hooks/useCachedFilters";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
