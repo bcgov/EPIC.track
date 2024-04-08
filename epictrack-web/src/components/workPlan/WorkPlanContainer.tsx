@@ -47,7 +47,9 @@ const WorkPlanContainer = () => {
     const currentTabLabel = Object.values(WORKPLAN_TAB).find(
       (tab) => tab.index === selectedTabIndex
     )?.label;
-    navigate(".", { state: { tab: currentTabLabel } });
+    navigate(`${location.pathname}${location.search ?? ""}`, {
+      state: { tab: currentTabLabel },
+    });
   }, [selectedTabIndex]);
 
   if (ctx.loading) {
