@@ -283,3 +283,14 @@ class TestWorkNotesEnum(Enum):
         "notes": fake.sentence(),
         "note_type": "issue_notes"
     }
+
+
+class TestTaskTemplateEnum(Enum):
+    """Test scenarios for task templates"""
+
+    task_template1 = {
+        "name": fake.word(),
+        "ea_act_id": 3,
+        "work_type_id": 1,
+        "phase_id": 1,
+    }
