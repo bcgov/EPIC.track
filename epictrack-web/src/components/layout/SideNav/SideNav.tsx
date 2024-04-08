@@ -240,9 +240,7 @@ export const DrawerBox = () => {
 };
 
 const SideNav = () => {
-  const { drawerWidth, isDrawerExpanded: open } = useAppSelector(
-    (state) => state.uiState
-  );
+  const { isDrawerExpanded: open } = useAppSelector((state) => state.uiState);
   const isMediumScreen = useMediaQuery((theme: Theme) =>
     theme.breakpoints.up("md")
   );
@@ -251,47 +249,30 @@ const SideNav = () => {
     dispatch(toggleDrawer());
   };
 
+  if (!isMediumScreen) {
+    return (
+      <Drawer
+        sx={{
+          width: "15%",
+          background: Palette.primary.main,
+        }}
+        onClose={handleToggleDrawer}
+        anchor={"left"}
+        open={open}
+        hideBackdrop={!open}
+      >
+        <Toolbar />
+        <DrawerBox />
+      </Drawer>
+    );
+  }
+
   return (
     <>
       <MiniDrawer />
-      {/* <NavOpenButton /> */}
+      <NavOpenButton />
     </>
   );
-  // return (
-  //   <>
-  //     {isMediumScreen ? (
-  //       <Drawer
-  //         variant="permanent"
-  //         anchor="left"
-  //         sx={{
-  //           width: drawerWidth,
-  //           flexShrink: 0,
-  //           [`& .MuiDrawer-paper`]: {
-  //             width: drawerWidth,
-  //             boxSizing: "border-box",
-  //             backgroundColor: Palette.primary.main,
-  //           },
-  //         }}
-  //       >
-  //         <Toolbar />
-  //         {/* <DrawerBox /> */}
-  //       </Drawer>
-  //     ) : (
-  //       <Drawer
-  //         sx={{
-  //           width: "15%",
-  //           background: Palette.primary.main,
-  //         }}
-  //         onClose={handleToggleDrawer}
-  //         anchor={"left"}
-  //         open={open}
-  //         hideBackdrop={!open}
-  //       >
-  //         {/* <DrawerBox /> */}
-  //       </Drawer>
-  //     )}
-  //   </>
-  // );
 };
 
 export default SideNav;

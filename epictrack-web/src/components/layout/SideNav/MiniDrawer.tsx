@@ -1,21 +1,15 @@
 import * as React from "react";
-import { styled, useTheme, Theme, CSSObject } from "@mui/material/styles";
+import { styled, Theme, CSSObject } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
-import IconButton from "@mui/material/IconButton";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { DrawerBox } from "./SideNav";
-import { Fab } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "hooks";
-import NavOpenButton from "./NavOpenButton";
-
-const drawerWidth = 260;
+import { useAppSelector } from "hooks";
+import { drawerExpandedWidth } from "styles/uiStateSlice";
 
 const openedMixin = (theme: Theme): CSSObject => ({
-  width: drawerWidth,
+  width: drawerExpandedWidth,
   transition: theme.transitions.create("width", {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.enteringScreen,
@@ -47,7 +41,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 const Drawer = styled(MuiDrawer, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme, open }) => ({
-  width: drawerWidth,
+  width: drawerExpandedWidth,
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
@@ -68,19 +62,10 @@ export default function MiniDrawer() {
     <Box sx={{ display: "flex" }}>
       <CssBaseline />
       <Drawer variant="permanent" open={open}>
-        <DrawerHeader>
-          {/* <IconButton onClick={() => setOpen(!open)}>
-            {theme.direction === "rtl" ? (
-              <ChevronRightIcon />
-            ) : (
-              <ChevronLeftIcon />
-            )}
-          </IconButton> */}
-        </DrawerHeader>
+        <DrawerHeader />
         <Divider />
         <DrawerBox />
       </Drawer>
-      <NavOpenButton />
     </Box>
   );
 }

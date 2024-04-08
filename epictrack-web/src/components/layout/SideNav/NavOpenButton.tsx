@@ -1,5 +1,12 @@
 import React from "react";
-import { Box, BoxProps, styled, useTheme } from "@mui/material";
+import {
+  Box,
+  BoxProps,
+  CSSObject,
+  Theme,
+  styled,
+  useTheme,
+} from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useAppDispatch, useAppSelector } from "hooks";
 import { Palette } from "styles/theme";
@@ -30,7 +37,9 @@ const DrawerToggleButton = styled(PlainDrawerToggleButton, {
 }));
 
 const NavOpenButton = () => {
-  const { isDrawerExpanded } = useAppSelector((state) => state.uiState);
+  const { isDrawerExpanded, drawerWidth } = useAppSelector(
+    (state) => state.uiState
+  );
   const theme = useTheme();
   const dispatch = useAppDispatch();
   const handleToggleDrawer = () => {
@@ -42,6 +51,17 @@ const NavOpenButton = () => {
         height: "100%",
         width: 32,
         zIndex: theme.zIndex.drawer,
+        position: "fixed",
+        left: drawerWidth,
+        transition: isDrawerExpanded
+          ? theme.transitions.create("left", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            })
+          : theme.transitions.create("left", {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen,
+            }),
       }}
     >
       <DrawerToggleButton
@@ -52,14 +72,7 @@ const NavOpenButton = () => {
         }}
         onClick={handleToggleDrawer}
       >
-        <ChevronRightIcon
-          fontSize="large"
-          sx={{
-            transform: isDrawerExpanded ? "rotateZ(180deg)" : "none",
-            easing: theme.transitions.easing.sharp,
-            duration: theme.transitions.duration.short,
-          }}
-        />
+        <ChevronRightIcon fontSize="large" />
       </DrawerToggleButton>
     </Box>
   );

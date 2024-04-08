@@ -1,9 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UIState } from "./type";
 
+export const drawerExpandedWidth = 260;
+export const drawerCollapsedWidth = 65;
+export const drawerHiddenWidth = 0;
 const initialState: UIState = {
   isDrawerExpanded: true,
-  drawerWidth: 260,
+  drawerWidth: drawerExpandedWidth,
   showEnvBanner: false,
   toggleDrawerMarginTop: "5rem",
   showConfetti: false,
@@ -16,7 +19,9 @@ export const uiStateSlice = createSlice({
     toggleDrawer: (state) => {
       const isDrawerExpanded = !state.isDrawerExpanded;
       state.isDrawerExpanded = isDrawerExpanded;
-      state.drawerWidth = isDrawerExpanded ? 260 : 0;
+      state.drawerWidth = isDrawerExpanded
+        ? drawerExpandedWidth
+        : drawerCollapsedWidth;
     },
     envBanner: (state, action: PayloadAction<boolean>) => {
       state.showEnvBanner = action.payload;

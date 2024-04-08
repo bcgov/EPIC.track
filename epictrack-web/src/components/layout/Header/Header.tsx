@@ -23,7 +23,7 @@ import UserMenu from "../../shared/userMenu/UserMenu";
 import { HEADER_HEIGHT } from "./constants";
 import { useDispatch } from "react-redux";
 import { toggleDrawer } from "styles/uiStateSlice";
-import NavOpenButton from "../SideNav/NavOpenButton";
+import { Unless } from "react-if";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -53,6 +53,9 @@ const Header = () => {
   const dispatch = useDispatch();
 
   const user = useAppSelector((state) => state.user.userDetail);
+  const isMediumScreen = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.up("md")
+  );
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -74,19 +77,21 @@ const Header = () => {
             height: HEADER_HEIGHT,
           }}
         >
-          <IconButton
-            data-testid="menu-icon"
-            component={MenuIcon}
-            color="info"
-            sx={{
-              height: "2em",
-              width: "2em",
-              marginRight: { xs: "1em" },
-            }}
-            onClick={() => {
-              dispatch(toggleDrawer());
-            }}
-          />
+          <Unless condition={isMediumScreen}>
+            <IconButton
+              data-testid="menu-icon"
+              component={MenuIcon}
+              color="info"
+              sx={{
+                height: "2em",
+                width: "2em",
+                marginRight: { xs: "1em" },
+              }}
+              onClick={() => {
+                dispatch(toggleDrawer());
+              }}
+            />
+          </Unless>
           <Box
             component="img"
             sx={{
@@ -152,7 +157,6 @@ const Header = () => {
         <EnvironmentBanner />
       </AppBar>
       <SideNav data-testid="sidenav-header" />
-      {/* <NavOpenButton /> */}
     </>
   );
 };
