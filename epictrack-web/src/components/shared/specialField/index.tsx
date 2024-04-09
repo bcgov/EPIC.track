@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, TextField } from "@mui/material";
+import { Box, Button, IconButton, TextField, useTheme } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import { When } from "react-if";
 import {
@@ -69,6 +69,7 @@ export const SpecialFieldGrid = ({
     field_value: false,
     active_from: false,
   });
+  const theme = useTheme();
   const [tableInstance, setTableInstance] =
     useState<MRT_TableInstance<SpecialField>>();
   const tableState = useMemo<MRT_TableState<SpecialField> | undefined>(() => {
@@ -312,6 +313,7 @@ export const SpecialFieldGrid = ({
         background: Palette.white,
         overflowX: "auto",
         position: "absolute",
+        zIndex: theme.zIndex.modal + 1,
       }}
     >
       <Box
