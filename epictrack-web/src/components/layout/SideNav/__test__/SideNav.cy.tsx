@@ -6,20 +6,14 @@ import { Routes } from "components/layout/SideNav/SideNavElements";
 describe("<SideNav />", () => {
   it("renders and navigates correctly", () => {
     const setOpen = cy.stub();
-    const isMediumScreen = true;
     const open = true;
     const drawerWidth = 240;
     cy.viewport(1980, 1080);
 
     cy.mount(
       <Router initialEntries={["/initial/path"]}>
-        <SideNav
-          setOpen={setOpen}
-          data-testid="sidenav-header"
-          isMediumScreen={isMediumScreen}
-          open={open}
-          drawerWidth={drawerWidth}
-        />
+        // Create store and pass above props to the store
+        <SideNav />
       </Router>
     );
 

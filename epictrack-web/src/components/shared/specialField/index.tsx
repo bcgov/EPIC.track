@@ -311,6 +311,7 @@ export const SpecialFieldGrid = ({
         border: `2px solid ${Palette.neutral.bg.dark}`,
         background: Palette.white,
         overflowX: "auto",
+        position: "absolute",
       }}
     >
       <Box
