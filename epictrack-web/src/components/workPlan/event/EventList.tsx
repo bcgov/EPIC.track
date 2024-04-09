@@ -29,6 +29,7 @@ import ImportTaskEvent from "../task/ImportTaskEvent";
 import {
   TemplateStatus,
   Work,
+  WorkPhase,
   WorkPhaseAdditionalInfo,
 } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
@@ -323,20 +324,8 @@ const EventList = () => {
     setShowMilestoneForm(false);
     getCombinedEvents();
     getWorkPhases();
-    getTemplateUploadStatus()
-      .then(() => {
-        return getWorkById();
-      })
-      .then(() => {
-        if (
-          milestoneEvent?.event_configuration.event_position ===
-          EventPosition.END
-        ) {
-          dispatch(showConfetti(true));
-        }
-        setTaskEvent(undefined);
-        setMilestoneEvent(undefined);
-      });
+    getTemplateUploadStatus();
+    getWorkPhaseById();
   };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -492,8 +481,22 @@ const EventList = () => {
         });
         notificationId.current = notification;
       }
+      if (templateUploadStatus.is_completed) {
+        dispatch(showConfetti(true));
+      }
     }
   }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
+
+  const getWorkPhaseById = React.useCallback(async () => {
+    if (ctx.selectedWorkPhase?.work_phase.id) {
+      const workPhase = (await workService.getWorkPhaseById(
+        Number(ctx.selectedWorkPhase.work_phase.id)
+      )) as WorkPhase;
+      if (workPhase.is_completed) {
+        dispatch(showConfetti(true));
+      }
+    }
+  }, [ctx.selectedWorkPhase?.work_phase.id]);
 
   React.useEffect(() => {
     getTemplateUploadStatus();

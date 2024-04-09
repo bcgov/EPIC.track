@@ -92,6 +92,7 @@ export interface WorkPhaseAdditionalInfo {
 export interface TemplateStatus extends MasterBase {
   template_available: boolean;
   task_added: boolean;
+  is_completed: boolean;
 }
 
 export const defaultWork = {

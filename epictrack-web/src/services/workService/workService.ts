@@ -100,6 +100,15 @@ class WorkService implements ServiceBase {
     return await http.GetRequest(Endpoints.Works.WORKS + `/${workId}/phases`);
   }
 
+  async getWorkPhaseById(workPhaseId: number) {
+    return await http.GetRequest(
+      Endpoints.Works.GET_WORK_PHASE_BY_ID.replace(
+        ":work_phase_id",
+        workPhaseId.toString()
+      )
+    );
+  }
+
   async downloadWorkplan(workPhaseId: number) {
     return await http.PostRequest(
       Endpoints.Works.DOWNLOAD_WORK_PLAN + `?work_phase_id=${workPhaseId}`,
