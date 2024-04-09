@@ -24,3 +24,4 @@ from .set_work_decision_maker import SetWorkDecisionMaker
 from .set_work_state import SetWorkState
 from .change_phase_end_event import ChangePhaseEndEvent
 from .set_project_state import SetProjectState
+from .set_federal_involvement import SetFederalInvolvement
