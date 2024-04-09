@@ -10,6 +10,7 @@ export interface User {
 export interface Group {
   id: string;
   name: string;
+  path: string;
   level: number;
   display_name: string;
 }
