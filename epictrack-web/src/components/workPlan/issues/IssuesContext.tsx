@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { WorkplanContext } from "../WorkPlanContext";
 import issueService from "../../../services/issueService";
-import { useSearchParams } from "../../../hooks/SearchParams";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { CloneForm, CreateIssueForm, EditIssueForm } from "./types";
 import { showNotification } from "components/shared/notificationProvider";
