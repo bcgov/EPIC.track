@@ -46,12 +46,12 @@ export const ProjectNameSpecialField = ({
           onLockClick={onLockClick}
           label={LABEL}
           required
-          disabled={false}
+          disabled={disabled}
         />
         {children}
       </Grid>
       <When condition={open}>
-        <Grid item xs={open ? 0 : 0}>
+        <Grid item xs={12}>
           <SpecialFieldGrid
             entity={SpecialFieldEntityEnum.PROJECT}
             entity_id={id}

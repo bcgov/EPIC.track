@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Box, Divider, Grid } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,10 +11,8 @@ import { Type } from "../../../models/type";
 import { SubType } from "../../../models/subtype";
 import subTypeService from "../../../services/subTypeService";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { MasterContext } from "../../shared/MasterContext";
 import projectService from "../../../services/projectService/projectService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { Palette } from "../../../styles/theme";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
 import { ProponentSpecialField } from "./ProponentSpecialField";
@@ -228,7 +226,7 @@ export default function ProjectForm({
         onSubmit={handleSubmit(onSubmitHandler)}
       >
         <ProjectNameSpecialField
-          id={1}
+          id={project?.id}
           onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
           open={isNameFieldLocked}
           onSave={() => {
@@ -247,7 +245,7 @@ export default function ProjectForm({
           />
         </ProjectNameSpecialField>
         <ProponentSpecialField
-          id={2}
+          id={project?.id}
           onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
           open={isProponentFieldLocked}
           onSave={() => {
