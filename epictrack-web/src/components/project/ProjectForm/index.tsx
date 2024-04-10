@@ -92,10 +92,9 @@ export default function ProjectForm({
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = roles.includes(ROLES.EDIT);
-
-  const shouldDisableSpecialField = !Boolean(project) || !canEdit;
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
-  const shouldDisableFormField = isSpecialFieldLocked || !canEdit;
+  const shouldDisableSpecialField = !isSpecialFieldLocked || !canEdit;
+  const shouldDisableFormField = !canEdit;
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
@@ -233,7 +232,7 @@ export default function ProjectForm({
             fetchProject();
           }}
           title={project?.name || ""}
-          disabled={shouldDisableSpecialField}
+          disabled={!canEdit}
         >
           <ControlledTextField
             name="name"
@@ -252,7 +251,7 @@ export default function ProjectForm({
             fetchProject();
           }}
           options={proponents || []}
-          disabled={shouldDisableSpecialField}
+          disabled={!canEdit}
         >
           <ControlledSelectV2
             placeholder="Select"
