@@ -114,14 +114,15 @@ class TaskTemplateService:
         return True
 
     @classmethod
-    def find_by_id(cls, template_id) -> TaskTemplate:
+    def find_by_id(cls, template_id, exclude_deleted=False) -> TaskTemplate:
         """Find template by id."""
-        template = TaskTemplate.find_by_id(template_id)
-        if not template:
-            raise ResourceNotFoundError(
-                f"Task template with id '{template_id}' not found"
-            )
-        return template
+        query = db.session.query(TaskTemplate).filter(TaskTemplate.id == template_id)
+        if exclude_deleted:
+            query = query.filter(TaskTemplate.is_deleted.is_(False))
+        template = query.one_or_none()
+        if template:
+            return template
+        raise ResourceNotFoundError(f"Task template with id '{template_id}' not found")
 
     @classmethod
     def check_template_exists(cls, work_type_id: int, phase_id: int, ea_act_id: int) -> bool:
