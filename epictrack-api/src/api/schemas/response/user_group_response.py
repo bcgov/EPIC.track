@@ -20,6 +20,7 @@ class UserGroupResponseSchema(Schema):
 
     id = fields.Str(metadata={"description": "Id of the group"})
     name = fields.Str(metadata={"description": "Name of the group"})
+    path = fields.Method("get_path")
 
     level = fields.Method("get_level")
     display_name = fields.Method("get_display_name")
@@ -31,3 +32,8 @@ class UserGroupResponseSchema(Schema):
     def get_display_name(self, instance):
         """Get the display name of the group"""
         return instance["attributes"]["display_name"][0]
+
+    def get_path(self, instance):
+        """Format the path of the group from keycloak"""
+        path = instance["path"]
+        return path[1:len(path)]
