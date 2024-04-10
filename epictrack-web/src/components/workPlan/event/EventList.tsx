@@ -481,9 +481,6 @@ const EventList = () => {
         });
         notificationId.current = notification;
       }
-      if (templateUploadStatus.is_completed) {
-        dispatch(showConfetti(true));
-      }
     }
   }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
 
