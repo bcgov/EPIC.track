@@ -491,7 +491,7 @@ const EventList = () => {
     if (ctx.selectedWorkPhase?.work_phase.id) {
       const workPhase = (await workService.getWorkPhaseById(
         Number(ctx.selectedWorkPhase.work_phase.id)
-      )) as WorkPhase;
+      )) as unknown as WorkPhase;
       if (workPhase.is_completed) {
         dispatch(showConfetti(true));
       }

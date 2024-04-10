@@ -28,7 +28,7 @@ from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
 from api.utils.util import cors_preflight
-
+from api.models.work_phase import WorkPhase
 
 API = Namespace("works", description="Works")
 
@@ -317,11 +317,9 @@ class WorkPhaseTemplateStatus(Resource):
     def get(work_phase_id):
         """Get the status if template upload is available"""
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
-        template_upload_status = WorkPhaseService.get_template_upload_status(
-            work_phase_id
-        )
+        work_phase = WorkPhase.find_by_id(work_phase_id)
         return (
-            res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status),
+            res.WorkPhaseResponseSchema().dump(work_phase),
             HTTPStatus.OK,
         )
         
