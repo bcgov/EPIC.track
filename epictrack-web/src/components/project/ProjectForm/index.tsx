@@ -252,7 +252,7 @@ export default function ProjectForm({
             fetchProject();
           }}
           options={proponents || []}
-          disabled={false}
+          disabled={shouldDisableSpecialField}
         >
           <ControlledSelectV2
             placeholder="Select"
