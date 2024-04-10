@@ -30,26 +30,28 @@ export const ProjectNameSpecialField = ({
 }: ProjectNameSpecialFieldProps) => {
   if (!id) {
     return (
-      <>
+      <Grid item xs={12}>
         <ETFormLabel>{LABEL}</ETFormLabel>
         {children}
-      </>
+      </Grid>
     );
   }
 
   return (
     <>
-      <SpecialFieldLock
-        id={id}
-        open={open}
-        onLockClick={onLockClick}
-        label={LABEL}
-        required
-        disabled={disabled}
-      />
-      {children}
+      <Grid item xs={6}>
+        <SpecialFieldLock
+          id={id}
+          open={open}
+          onLockClick={onLockClick}
+          label={LABEL}
+          required
+          disabled={false}
+        />
+        {children}
+      </Grid>
       <When condition={open}>
-        <Grid item xs={12}>
+        <Grid item xs={open ? 0 : 0}>
           <SpecialFieldGrid
             entity={SpecialFieldEntityEnum.PROJECT}
             entity_id={id}
