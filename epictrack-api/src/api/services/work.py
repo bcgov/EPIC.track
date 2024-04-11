@@ -285,8 +285,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Check if the title exists."""
         project = Project.find_by_id(payload.get('project_id'))
         work_type: WorkType = WorkType.find_by_id(payload.get('work_type_id'))
-        title = util.generate_title(project.name, work_type.name, payload.get('simple_title'))
-        if cls.check_existence(title, work_id):
+
+        # Create the temporary title string for the work to check for duplicacy
+        title_to_check = util.generate_title(project.name, work_type.name, payload.get('simple_title'))
+        if cls.check_existence(title_to_check, work_id):
             raise ResourceExistsError("Work with same title already exists")
 
     @classmethod
