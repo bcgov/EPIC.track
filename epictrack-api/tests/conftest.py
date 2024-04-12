@@ -73,6 +73,7 @@ def db(app):  # pylint: disable=redefined-outer-name, invalid-name
     Drops schema, and recreate.
     """
     with app.app_context():
+        g.jwt_oidc_token_info = TestJwtClaims.staff_admin_role
         drop_schema_sql = text("""DROP SCHEMA public CASCADE;
                                     CREATE SCHEMA public;
                                     GRANT ALL ON SCHEMA public TO postgres;

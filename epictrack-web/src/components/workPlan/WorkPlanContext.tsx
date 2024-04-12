@@ -154,7 +154,8 @@ export const WorkplanProvider = ({
   const getWorkPhases = async () => {
     if (workId) {
       const workPhasesResult = await workService.getWorkPhases(String(workId));
-      setWorkPhases(workPhasesResult.data as WorkPhaseAdditionalInfo[]);
+      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
+      setWorkPhases(workPhases);
     }
     return Promise.resolve();
   };
