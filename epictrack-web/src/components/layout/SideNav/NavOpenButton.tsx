@@ -1,13 +1,7 @@
 import React from "react";
-import {
-  Box,
-  BoxProps,
-  CSSObject,
-  Theme,
-  styled,
-  useTheme,
-} from "@mui/material";
+import { Box, BoxProps, styled, useTheme } from "@mui/material";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import { useAppDispatch, useAppSelector } from "hooks";
 import { Palette } from "styles/theme";
 import { toggleDrawer } from "styles/uiStateSlice";
@@ -23,7 +17,7 @@ const DrawerToggleButton = styled(PlainDrawerToggleButton, {
   shouldForwardProp: (prop) => prop !== "open",
 })(({ theme }) => ({
   zIndex: theme.zIndex.drawer,
-  top: 85,
+  top: 110,
   height: 48,
   width: 32,
   backgroundColor: Palette.primary.main,
@@ -72,7 +66,11 @@ const NavOpenButton = () => {
         }}
         onClick={handleToggleDrawer}
       >
-        <ChevronRightIcon fontSize="large" />
+        {isDrawerExpanded ? (
+          <ChevronLeftIcon fontSize="large" />
+        ) : (
+          <ChevronRightIcon fontSize="large" />
+        )}
       </DrawerToggleButton>
     </Box>
   );

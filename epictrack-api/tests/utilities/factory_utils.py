@@ -31,9 +31,11 @@ from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.special_field import SpecialField
 from api.models.staff_work_role import StaffWorkRole
+from api.models.task_template import TaskTemplate
 from tests.utilities.factory_scenarios import (
     TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestRoleEnum, TestSpecialField, TestStaffInfo,
-    TestStatus, TestWorkFirstNationEnum, TestWorkInfo, TestWorkIssuesInfo, TestWorkIssueUpdatesInfo)
+    TestStatus, TestTaskTemplateEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkIssuesInfo,
+    TestWorkIssueUpdatesInfo)
 
 
 CONFIG = get_named_config("testing")
@@ -86,7 +88,6 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
     work_lead = factory_staff_model()
     decision_maker = factory_staff_model()
     work = WorkModel(
-        title=work_data["title"],
         report_description=work_data["report_description"],
         epic_description=work_data["epic_description"],
         is_active=work_data["is_active"],
@@ -245,3 +246,15 @@ def factory_work_first_nation_model(
     )
     work_first_nation.save()
     return work_first_nation
+
+
+def factory_task_template_model(data=TestTaskTemplateEnum.task_template1.value):
+    """Produce a task template model"""
+    task_template = TaskTemplate(
+        name=data["name"],
+        ea_act_id=data["ea_act_id"],
+        work_type_id=data["work_type_id"],
+        phase_id=data["phase_id"],
+    )
+    task_template.save()
+    return task_template

@@ -93,10 +93,10 @@ export default function ProjectForm({
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = roles.includes(ROLES.EDIT);
-
-  const shouldDisableSpecialField = !Boolean(project) || !canEdit;
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
-  const shouldDisableFormField = isSpecialFieldLocked || !canEdit;
+  const shouldDisableSpecialField =
+    (!isSpecialFieldLocked || !canEdit) && Boolean(project?.id);
+  const shouldDisableFormField = !canEdit;
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
@@ -227,52 +227,48 @@ export default function ProjectForm({
         spacing={2}
         onSubmit={handleSubmit(onSubmitHandler)}
       >
-        <Grid item xs={6}>
-          <ProjectNameSpecialField
-            id={project?.id}
-            onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
-            open={isNameFieldLocked}
-            onSave={() => {
-              fetchProject();
-            }}
-            title={project?.name || ""}
+        <ProjectNameSpecialField
+          id={project?.id}
+          onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
+          open={isNameFieldLocked}
+          onSave={() => {
+            fetchProject();
+          }}
+          title={project?.name || ""}
+          disabled={!canEdit}
+        >
+          <ControlledTextField
+            name="name"
+            placeholder="Project Name"
             disabled={shouldDisableSpecialField}
-          >
-            <ControlledTextField
-              name="name"
-              placeholder="Project Name"
-              disabled={shouldDisableSpecialField}
-              variant="outlined"
-              fullWidth
-              onBlur={onBlurProjectName}
-            />
-          </ProjectNameSpecialField>
-        </Grid>
-        <Grid item xs={6}>
-          <ProponentSpecialField
-            id={project?.id}
-            onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
-            open={isProponentFieldLocked}
-            onSave={() => {
-              fetchProject();
-            }}
+            variant="outlined"
+            fullWidth
+            onBlur={onBlurProjectName}
+          />
+        </ProjectNameSpecialField>
+        <ProponentSpecialField
+          id={project?.id}
+          onLockClick={() => setIsProponentFieldLocked((prev) => !prev)}
+          open={isProponentFieldLocked}
+          onSave={() => {
+            fetchProject();
+          }}
+          options={proponents || []}
+          disabled={!canEdit}
+        >
+          <ControlledSelectV2
+            placeholder="Select"
+            disabled={shouldDisableSpecialField}
+            key={`proponent_select_${formValues.proponent_id}`}
+            helperText={errors?.proponent_id?.message?.toString()}
+            defaultValue={project?.proponent_id}
             options={proponents || []}
-            disabled={shouldDisableSpecialField}
-          >
-            <ControlledSelectV2
-              placeholder="Select"
-              disabled={shouldDisableSpecialField}
-              key={`proponent_select_${formValues.proponent_id}`}
-              helperText={errors?.proponent_id?.message?.toString()}
-              defaultValue={project?.proponent_id}
-              options={proponents || []}
-              fullWidth
-              getOptionValue={(o: Proponent) => o?.id?.toString()}
-              getOptionLabel={(o: Proponent) => o.name}
-              {...register("proponent_id")}
-            ></ControlledSelectV2>
-          </ProponentSpecialField>
-        </Grid>
+            fullWidth
+            getOptionValue={(o: Proponent) => o?.id?.toString()}
+            getOptionLabel={(o: Proponent) => o.name}
+            {...register("proponent_id")}
+          ></ControlledSelectV2>
+        </ProponentSpecialField>
         <Grid item xs={6}>
           <ETFormLabel required>Type</ETFormLabel>
           <ControlledSelectV2
