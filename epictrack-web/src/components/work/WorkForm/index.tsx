@@ -173,7 +173,8 @@ export default function WorkForm({
   const getStaffByPosition = async (position: string) => {
     const staffResult = await staffService.getStaffByPosition(position);
     if (staffResult.status === 200) {
-      staffByRoles[position](staffResult.data as never);
+      const data = sort(staffResult.data as never[], "full_name");
+      staffByRoles[position](data);
     }
   };
 
@@ -196,9 +197,7 @@ export default function WorkForm({
   const getMinistries = async () => {
     const ministryResult = await ministryService.getAll();
     if (ministryResult.status === 200) {
-      let ministries = ministryResult.data as ListType[];
-      ministries = sort(ministries, "name");
-      setMinistries(ministries);
+      setMinistries(ministryResult.data as ListType[]);
     }
   };
 

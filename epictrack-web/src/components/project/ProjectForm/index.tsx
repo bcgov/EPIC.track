@@ -11,10 +11,8 @@ import { Type } from "../../../models/type";
 import { SubType } from "../../../models/subtype";
 import subTypeService from "../../../services/subTypeService";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { MasterContext } from "../../shared/MasterContext";
 import projectService from "../../../services/projectService/projectService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { Palette } from "../../../styles/theme";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 
 import { ProponentSpecialField } from "./ProponentSpecialField";
@@ -27,6 +25,7 @@ import { REGIONS } from "../../../components/shared/constants";
 import typeService from "services/typeService";
 import proponentService from "services/proponentService/proponentService";
 import { useAppSelector } from "hooks";
+import { sort } from "utils";
 
 const schema = yup.object().shape({
   name: yup
@@ -213,7 +212,8 @@ export default function ProjectForm({
   const getProponents = async () => {
     const proponentsResult = await proponentService.getAll();
     if (proponentsResult.status === 200) {
-      const proponents = proponentsResult.data as Proponent[];
+      let proponents = proponentsResult.data as Proponent[];
+      proponents = sort(proponents, "name");
       setProponents(proponents);
     }
   };
