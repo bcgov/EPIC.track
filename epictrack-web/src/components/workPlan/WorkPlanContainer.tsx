@@ -17,8 +17,9 @@ import Issues from "./issues";
 import WorkState from "./WorkState";
 import { isStatusOutOfDate } from "./status/shared";
 import About from "./about";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -39,17 +40,15 @@ const WorkPlanContainer = () => {
     (staffWorkRole) => staffWorkRole.is_active
   );
 
-  const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
+  const handleTabSelected = (_event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
 
-  useEffect(() => {
-    const currentTabLabel = Object.values(WORKPLAN_TAB).find(
+  useRouterLocationStateForHelpPage(() => {
+    const currentSelectedTabLabel = Object.values(WORKPLAN_TAB).find(
       (tab) => tab.index === selectedTabIndex
     )?.label;
-    navigate(`${location.pathname}${location.search}`, {
-      state: { tab: currentTabLabel },
-    });
+    return currentSelectedTabLabel;
   }, [selectedTabIndex]);
 
   if (ctx.loading) {

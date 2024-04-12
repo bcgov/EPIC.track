@@ -25,6 +25,7 @@ from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.project import Project
 from api.models.staff_work_role import StaffWorkRole
 
+from api.utils import util
 from .base_model import BaseModelVersioned
 from .pagination_options import PaginationOptions
 
@@ -46,7 +47,6 @@ class Work(BaseModelVersioned):
     __tablename__ = 'works'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(150), nullable=False)
     simple_title = Column(String(), nullable=True)
     report_description = Column(String(2000))
     epic_description = Column(Text)
@@ -100,6 +100,13 @@ class Work(BaseModelVersioned):
         "IndigenousWork", backref="parent_work", lazy="select", cascade="all, delete-orphan"
     )
 
+    @property
+    def title(self):
+        """Dynamically create the title."""
+        if self.project and self.work_type:
+            return util.generate_title(self.project.type.name, self.work_type.name, self.simple_title)
+        return None
+
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         result = super().as_dict(recursive=recursive)
@@ -108,14 +115,27 @@ class Work(BaseModelVersioned):
     @classmethod
     def check_existence(cls, title, work_id=None):
         """Checks if a work exists for a given title"""
-        query = Work.query.filter(
-            func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
-        )
+        title_parts = title.split()
+        project_type_name, work_type_name, simple_title = (title_parts[i].strip() if i < len(title_parts)
+                                                           else None for i in range(3))
+        # pylint: disable=import-outside-toplevel
+        from api.models.work_type import WorkType
+
+        query = cls.query \
+            .join(Project, cls.project_id == Project.id) \
+            .join(WorkType, cls.work_type_id == WorkType.id) \
+            .filter(func.lower(Project.name) == func.lower(project_type_name)) \
+            .filter(func.lower(WorkType.name) == func.lower(work_type_name))
+
+        if simple_title:
+            query = query.filter(func.lower(cls.simple_title) == func.lower(simple_title))
+
+        query = query.filter(cls.is_deleted.is_(False))
+
         if work_id:
-            query = query.filter(Work.id != work_id)
-        if query.count() > 0:
-            return True
-        return False
+            query = query.filter(cls.id != work_id)
+
+        return query.count() > 0
 
     @classmethod
     def fetch_all_works(

@@ -38,24 +38,26 @@ export const ProponentSpecialField = ({
 
   if (!id) {
     return (
-      <>
+      <Grid item xs={6}>
         <ETFormLabel>{LABEL}</ETFormLabel>
         {children}
-      </>
+      </Grid>
     );
   }
 
   return (
     <>
-      <SpecialFieldLock
-        id={id}
-        open={open}
-        onLockClick={onLockClick}
-        label={LABEL}
-        required
-        disabled={disabled}
-      />
-      {children}
+      <Grid item xs={6}>
+        <SpecialFieldLock
+          id={id}
+          open={open}
+          onLockClick={onLockClick}
+          label={LABEL}
+          required
+          disabled={disabled}
+        />
+        {children}
+      </Grid>
       <When condition={open}>
         <Grid item xs={12}>
           <SpecialFieldGrid

@@ -5,9 +5,9 @@ from sqlalchemy import event
 from api.models.db import db
 
 
-@event.listens_for(db.session, "before_flush")
+@event.listens_for(db.session, "before_commit")
 def before_commit(session, *args):  # pylint: disable=unused-argument
-    """Listens to the before commit event and updates the created_by/updated_by fields"""
+    """Listens to the  and updates the created_by/updated_by fields"""
     new_objects = session.new
     updated_objects = session.dirty
     username = g.jwt_oidc_token_info.get("preferred_username", None)
