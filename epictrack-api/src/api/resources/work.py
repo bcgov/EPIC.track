@@ -128,10 +128,7 @@ class WorkResources(Resource):
     @profiletime
     def get():
         """Return all resource and work details"""
-        is_active = request.args.get('is_active')
-        if is_active is not None:
-            is_active = is_active.lower() == 'true'
-        works = WorkService.find_allocated_resources(is_active)
+        works = WorkService.find_allocated_resources()
         return (
             jsonify(res.WorkResourceResponseSchema(many=True).dump(works)),
             HTTPStatus.OK,

@@ -251,32 +251,6 @@ const WorkList = () => {
           return filterValue.includes(value);
         },
       },
-      {
-        accessorKey: "is_active",
-        header: "Active",
-        filterVariant: "multi-select",
-        filterSelectOptions: [true, false].map((value) => value.toString()), // Convert booleans to strings
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="activeFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (!filterValue.length) {
-            return true;
-          }
-
-          const value: boolean = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
-      },
       ...workRoles,
     ];
   }, [leads, teams, workRoles, workTypes, workStaffs]);

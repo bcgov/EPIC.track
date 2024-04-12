@@ -4,11 +4,11 @@
 from typing import List
 
 from sqlalchemy import func
-
+from sqlalchemy import and_
 from api.models import db
 from api.models.staff import Staff
 from api.models.work import Work
-
+from api.models.staff_work_role import StaffWorkRole
 
 # pylint: disable=not-callable
 class WorkLeadInsightGenerator:
@@ -23,16 +23,19 @@ class WorkLeadInsightGenerator:
                 .over(order_by=Work.work_lead_id, partition_by=Work.work_lead_id)
                 .label("count"),
             )
+            .join(StaffWorkRole, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
+                StaffWorkRole.is_active.is_(True),
+                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),  # Only include StaffWorkRole records where staff_id is a work_lead_id
             )
             .distinct(Work.work_lead_id)
             .subquery()
         )
         return partition_query
-
+    
     def fetch_data(self) -> List[dict]:
         """Fetch data from db"""
         partition_query = self.generate_partition_query()
