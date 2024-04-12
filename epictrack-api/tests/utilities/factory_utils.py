@@ -88,7 +88,6 @@ def factory_work_model(work_data: dict = TestWorkInfo.work1.value):
     work_lead = factory_staff_model()
     decision_maker = factory_staff_model()
     work = WorkModel(
-        title=work_data["title"],
         report_description=work_data["report_description"],
         epic_description=work_data["epic_description"],
         is_active=work_data["is_active"],
