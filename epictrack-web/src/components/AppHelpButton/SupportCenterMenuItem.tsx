@@ -45,16 +45,14 @@ const SupportCenterMenuItem = () => {
 
   const findLinkWithTagsOrAny = (matchingLinks: HelpPageLink[]) => {
     const helpPageTags = location.state?.helpPageTags || [];
-    console.log("helpPageTags", helpPageTags);
-    console.log("matchingLinks", matchingLinks);
     if (helpPageTags.length === 0) {
       return matchingLinks[0];
     }
 
     return matchingLinks.find((link: HelpPageLink) => {
+      const linkTags = new Set(link.tags);
       return helpPageTags.every((tag: string) => {
-        const formattedTag = tag.toLocaleLowerCase().replace(" ", "");
-        return link.tags?.includes(formattedTag);
+        return linkTags.has(tag);
       });
     });
   };

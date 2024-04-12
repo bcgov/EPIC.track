@@ -9,7 +9,6 @@ const useRouterLocationStateForHelpPage = (
   const location = useLocation();
 
   useEffect(() => {
-    console.log("ran");
     const callBackValue = callback();
 
     let newtags: string[] = [];
@@ -18,8 +17,6 @@ const useRouterLocationStateForHelpPage = (
     } else if (callBackValue) {
       newtags = [callBackValue];
     }
-
-    console.log(newtags);
 
     navigate(`${location.pathname}${location.search}`, {
       state: { helpPageTags: newtags },
