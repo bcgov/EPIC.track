@@ -104,7 +104,7 @@ class Work(BaseModelVersioned):
     def title(self):
         """Dynamically create the title."""
         if self.project and self.work_type:
-            return util.generate_title(self.project.type.name, self.work_type.name, self.simple_title)
+            return util.generate_title(self.project.name, self.work_type.name, self.simple_title)
         return None
 
     def as_dict(self, recursive=True):
