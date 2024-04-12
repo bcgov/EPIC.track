@@ -50,17 +50,17 @@
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/project-notification",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/project-notification",
         "tags": ["Project Notification"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/minister-s-designation",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/minister-s-designation",
         "tags": ["Minister's Designation"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/ceao-s-designation",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/ceao-s-designation",
         "tags": ["CEAO's Designation"]
       },
       {
@@ -70,52 +70,52 @@
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/exemption-request",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/exemption-request",
         "tags": ["Exemption Order"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-assessment",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-assessment",
         "tags": ["Assessment"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/amendment-complex",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/amendment-complex",
         "tags": ["Amendment"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/document-review",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/document-review",
         "tags": ["Post-EAC Document Review"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-extension",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-extension",
         "tags": ["EAC Extension"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/substantial-start-decision",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/substantial-start-decision",
         "tags": ["Substantial Start Decision"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-transfer",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-transfer",
         "tags": ["EAC/Order Transfer"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-suspension",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-suspension",
         "tags": ["EAC/Order Suspension"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-cancellation",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-cancellation",
         "tags": ["EAC/Order Cancellation"]
       },
       {
         "epicTrackPath": "/work-plan",
-        "helpPage": "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/other",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/other",
         "tags": ["Other"]
       },
       {
