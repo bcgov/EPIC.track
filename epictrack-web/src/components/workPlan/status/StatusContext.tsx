@@ -5,7 +5,7 @@ import StatusForm from "./StatusForm";
 import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
 import statusService from "../../../services/statusService/statusService";
-import { useSearchParams } from "../../../hooks/SearchParams";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 

@@ -86,9 +86,15 @@ class WorkResponseSchema(
     work_state = fields.Method("get_work_state")
     indigenous_works = fields.List(fields.Nested(IndigenousWorkResponseSchema, dump_only=True))
 
+    title = fields.Method("get_title")
+
     def get_work_state(self, obj: Work) -> str:
         """Return the work state"""
         return obj.work_state.value if obj.work_state else None
+
+    def get_title(self, obj: Work) -> str:
+        """Return the title"""
+        return obj.title
 
 
 class WorkStaffRoleReponseSchema(

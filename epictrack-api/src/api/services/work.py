@@ -82,6 +82,7 @@ from api.services.phaseservice import PhaseService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
+from api.utils import util
 from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
@@ -218,8 +219,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def create_work(cls, payload, commit: bool = True):
         # pylint: disable=too-many-locals
         """Create a new work"""
-        if cls.check_existence(payload["title"]):
-            raise ResourceExistsError("Work with same title already exists")
+        cls._check_duplicate_title(payload)
         work = Work(**payload)
         work.work_state = WorkStateEnum.IN_PROGRESS
         phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
@@ -279,6 +279,17 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if commit:
             db.session.commit()
         return work
+
+    @classmethod
+    def _check_duplicate_title(cls, payload, work_id=None):
+        """Check if the title exists."""
+        project = Project.find_by_id(payload.get('project_id'))
+        work_type: WorkType = WorkType.find_by_id(payload.get('work_type_id'))
+
+        # Create the temporary title string for the work to check for duplicacy
+        title_to_check = util.generate_title(project.name, work_type.name, payload.get('simple_title'))
+        if cls.check_existence(title_to_check, work_id):
+            raise ResourceExistsError("Work with same title already exists")
 
     @classmethod
     def create_special_fields(cls, work: Work):
@@ -434,7 +445,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def copy_outcome_and_actions(
-        cls, template: dict, config: EventConfiguration, from_template: bool = True
+            cls, template: dict, config: EventConfiguration, from_template: bool = True
     ) -> None:
         """Copy the outcome and actions"""
         if from_template:
@@ -544,9 +555,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def update_work(cls, work_id: int, payload: dict):
         """Update existing work."""
-        exists = cls.check_existence(payload["title"], work_id)
-        if exists:
-            raise ResourceExistsError("Work with same title already exists")
+        cls._check_duplicate_title(payload, work_id)
         work = Work.find_by_id(work_id)
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
@@ -564,7 +573,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_workplan(
-        cls, work_phase_id: int
+            cls, work_phase_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         milestone_events = EventService.find_milestone_events_by_work_phase(
@@ -726,14 +735,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_first_nations_excel(
-        cls, work_id: int
+            cls, work_id: int
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-        print(":" * 100)
         print(first_nations)
-        print(":" * 100)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 
@@ -826,7 +833,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def create_events_by_template(
-        cls, work_phase: WorkPhase, phase_event_templates: List[dict]
+            cls, work_phase: WorkPhase, phase_event_templates: List[dict]
     ) -> int:  # pylint: disable=too-many-locals
         """Create a new work phase and related events and event configuration entries"""
         work_phase = WorkPhase.flush(WorkPhase(**work_phase))

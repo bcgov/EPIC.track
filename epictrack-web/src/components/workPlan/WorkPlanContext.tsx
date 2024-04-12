@@ -6,7 +6,7 @@ import {
   useState,
   useMemo,
 } from "react";
-import { useSearchParams } from "../../hooks/SearchParams";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import workService from "../../services/workService/workService";
 import { Work, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
@@ -154,7 +154,8 @@ export const WorkplanProvider = ({
   const getWorkPhases = async () => {
     if (workId) {
       const workPhasesResult = await workService.getWorkPhases(String(workId));
-      setWorkPhases(workPhasesResult.data as WorkPhaseAdditionalInfo[]);
+      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
+      setWorkPhases(workPhases);
     }
     return Promise.resolve();
   };

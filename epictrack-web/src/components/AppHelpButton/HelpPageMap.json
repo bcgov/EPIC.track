@@ -19,28 +19,34 @@
       },
 
       {
-        "epicTrackPath": "/work-plan#workplan",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#workplan"
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#workplan",
+        "tags": ["workplan"]
       },
       {
-        "epicTrackPath": "/work-plan#status",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#status"
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#status",
+        "tags": ["status"]
       },
       {
-        "epicTrackPath": "/work-plan#issues",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#issues"
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#issues",
+        "tags": ["issues"]
       },
       {
-        "epicTrackPath": "/work-plan#about",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#about"
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#about",
+        "tags": ["about"]
       },
       {
-        "epicTrackPath": "/work-plan#team",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#teams"
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#teams",
+        "tags": ["team"]
       },
       {
-        "epicTrackPath": "/work-plan#firstnations",
-        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#firstnations"
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#firstnations",
+        "tags": ["firstnations"]
       },
 
       {
