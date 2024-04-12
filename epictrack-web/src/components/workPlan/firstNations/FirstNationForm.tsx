@@ -27,12 +27,15 @@ import {
 import { OptionType } from "../../shared/filterSelect/type";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import { InfoIconComponent } from "components/shared/notificationProvider/components/icons";
+import { IconProps } from "components/icons/type";
+import icons from "components/icons";
 
 interface FirstNationFormProps {
   workNationId?: number;
   onSave: () => void;
 }
+
+const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
 
 const schema = yup.object().shape({
   indigenous_nation_id: yup
@@ -272,28 +275,18 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <Stack direction={"row"}>
-            <Tooltip
-              title={
-                "A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
-              }
-            >
-              <Box
-                sx={{
-                  mr: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <InfoIconComponent />
-              </Box>
-            </Tooltip>
-            <FormControlLabel
-              control={<ControlledSwitch name="is_active" />}
-              label="Active"
-            />
-          </Stack>
+          <FormControlLabel
+            control={<ControlledSwitch name="is_active" />}
+            label="Active"
+          />
+          <Tooltip
+            sx={{ paddingLeft: "2px" }}
+            title="A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
+          >
+            <Box component={"span"}>
+              <InfoIcon />
+            </Box>
+          </Tooltip>
         </Grid>
       </Grid>
     </FormProvider>

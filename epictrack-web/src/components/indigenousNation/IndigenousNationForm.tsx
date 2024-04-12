@@ -1,5 +1,5 @@
 import React from "react";
-import { TextField, Grid } from "@mui/material";
+import { TextField, Grid, Box, Tooltip } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -18,6 +18,10 @@ import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import ControlledRichTextEditor from "components/shared/controlledInputComponents/ControlledRichTextEditor";
 import pipOrgTypeService from "services/pipOrgTypeService";
 import { ListType } from "models/code";
+import { IconProps } from "components/icons/type";
+import icons from "components/icons";
+
+const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
 
 const schema = yup.object().shape({
   name: yup
@@ -172,6 +176,14 @@ export default function IndigenousNationForm({ ...props }) {
           <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
             <ControlledSwitch name="is_active" />
             <ETFormLabel id="active">Active</ETFormLabel>
+            <Tooltip
+              sx={{ paddingLeft: "2px" }}
+              title="A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
+            >
+              <Box component={"span"}>
+                <InfoIcon />
+              </Box>
+            </Tooltip>
           </Grid>
           <Grid item xs={12}>
             <ETFormLabel>Notes</ETFormLabel>
