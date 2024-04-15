@@ -31,7 +31,7 @@ class WorkStaffInsightGenerator:
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
-                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id))  # Only include StaffWorkRole records where staff_id is a work_lead_id
+                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),
             )
             .distinct(StaffWorkRole.staff_id)
             .subquery()

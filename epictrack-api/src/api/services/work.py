@@ -87,6 +87,7 @@ from api.utils import util
 from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
+
 class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
 
@@ -189,10 +190,10 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 .outerjoin(epd, epd.id == Work.responsible_epd_id)
             )
         else:
-            staff = aliased(Staff)
             query = (
                 Work.query
-                .join(StaffWorkRole, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
+                .join(StaffWorkRole, 
+                and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
                 .filter(
                     Work.is_active.is_(True),
                     Work.is_deleted.is_(False),
@@ -217,7 +218,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         staff_result = (
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
-                StaffWorkRole.work_id.in_(work_ids), StaffWorkRole.is_deleted.is_(False), StaffWorkRole.is_active.is_(is_active)
+                StaffWorkRole.work_id.in_(work_ids), 
+                StaffWorkRole.is_deleted.is_(False), 
+                StaffWorkRole.is_active.is_(is_active)
             )
             .join(Role, Role.id == StaffWorkRole.role_id)
             .add_entity(Role)

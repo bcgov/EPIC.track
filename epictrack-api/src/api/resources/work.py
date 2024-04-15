@@ -137,6 +137,7 @@ class WorkResources(Resource):
             HTTPStatus.OK,
         )
 
+
 @cors_preflight("GET, DELETE, PUT")
 @API.route("/<int:work_id>", methods=["GET", "PUT", "DELETE", "OPTIONS"])
 class Work(Resource):

@@ -10,6 +10,7 @@ from api.models.staff import Staff
 from api.models.work import Work
 from api.models.staff_work_role import StaffWorkRole
 
+
 # pylint: disable=not-callable
 class WorkLeadInsightGenerator:
     """Insight generator for work resource grouped by work lead"""
@@ -29,7 +30,7 @@ class WorkLeadInsightGenerator:
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
-                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),  # Only include StaffWorkRole records where staff_id is a work_lead_id
+                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),
             )
             .distinct(Work.work_lead_id)
             .subquery()
