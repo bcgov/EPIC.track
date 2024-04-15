@@ -306,7 +306,7 @@ class WorkPhaseTemplateStatus(Resource):
         )
         
 @cors_preflight("GET")
-@API.route("/work-phases/<int:work_phase_id>/", methods=["GET", "OPTIONS"])
+@API.route("/work-phases/<int:work_phase_id>", methods=["GET", "OPTIONS"])
 class WorkPhaseTemplateStatus(Resource):
     """Endpoints to get work phase template upload status"""
 
@@ -319,7 +319,7 @@ class WorkPhaseTemplateStatus(Resource):
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
         work_phase = WorkPhase.find_by_id(work_phase_id)
         return (
-            res.WorkPhaseResponseSchema().dump(work_phase),
+            res.WorkPhaseByIdResponseSchema().dump(work_phase),
             HTTPStatus.OK,
         )
         
