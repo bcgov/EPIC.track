@@ -149,7 +149,11 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               </Grid>
               <Grid item xs={2}>
                 <SummaryItem
-                  title="Days left / Total"
+                  title={
+                    phase.work_phase.is_completed
+                      ? "Total"
+                      : "Days left / Total"
+                  }
                   children={
                     <Box
                       sx={{
@@ -167,9 +171,9 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                               : Palette.neutral.dark,
                         }}
                       >
-                        {phase.work_phase.is_completed && phase.days_left < 0
-                          ? 0
-                          : phase.days_left}
+                        {phase.work_phase.is_completed && (
+                          <>{phase.days_left < 0 ? 0 : phase.days_left}</>
+                        )}
                         {!phase.work_phase.is_completed && (
                           <>
                             {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
