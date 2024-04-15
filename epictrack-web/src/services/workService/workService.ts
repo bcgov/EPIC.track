@@ -101,12 +101,13 @@ class WorkService implements ServiceBase {
   }
 
   async getWorkPhaseById(workPhaseId: number) {
-    return await http.GetRequest(
+    const result = await http.GetRequest(
       Endpoints.Works.GET_WORK_PHASE_BY_ID.replace(
         ":work_phase_id",
         workPhaseId.toString()
       )
     );
+    return result.data;
   }
 
   async downloadWorkplan(workPhaseId: number) {

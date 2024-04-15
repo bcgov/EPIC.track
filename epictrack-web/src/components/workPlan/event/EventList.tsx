@@ -325,7 +325,11 @@ const EventList = () => {
     getCombinedEvents();
     getWorkPhases();
     getTemplateUploadStatus();
-    getWorkPhaseById();
+    if (
+      milestoneEvent?.event_configuration?.event_position === EventPosition.END
+    ) {
+      getWorkPhaseById();
+    }
   };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -489,6 +493,7 @@ const EventList = () => {
       const workPhase = (await workService.getWorkPhaseById(
         Number(ctx.selectedWorkPhase.work_phase.id)
       )) as unknown as WorkPhase;
+      console.log(workPhase);
       if (workPhase.is_completed) {
         dispatch(showConfetti(true));
       }
