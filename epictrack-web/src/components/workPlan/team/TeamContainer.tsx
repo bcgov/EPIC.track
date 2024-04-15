@@ -4,6 +4,8 @@ import { ETHeading3 } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import TeamList from "./TeamList";
 import TeamInfo from "./TeamInfo";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { WORKPLAN_TAB } from "../constants";
 
 const title: SxProps = {
   borderBottom: `2px solid ${Palette.primary.main}`,
@@ -11,6 +13,7 @@ const title: SxProps = {
 };
 
 const TeamContainer = () => {
+  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.TEAM.label, []);
   return (
     <Grid container columnSpacing={1.5}>
       <Grid item xs={8}>
