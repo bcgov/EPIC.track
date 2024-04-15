@@ -87,7 +87,6 @@ from api.utils import util
 from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
-
 class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
 
@@ -202,9 +201,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id))
                 )
             )
-
         work_result = query.all()
-        
         works = [
             {
                 "id": work.id,

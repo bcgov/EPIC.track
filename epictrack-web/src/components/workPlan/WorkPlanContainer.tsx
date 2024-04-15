@@ -20,7 +20,6 @@ import About from "./about";
 import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
-import { useNavigate } from "react-router-dom";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -29,7 +28,6 @@ const tabPanel: SxProps = {
 };
 const WorkPlanContainer = () => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const tabIndex = location.state?.tabIndex ?? WORKPLAN_TAB.WORKPLAN.index;
 

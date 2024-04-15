@@ -35,7 +35,7 @@ class WorkLeadInsightGenerator:
             .subquery()
         )
         return partition_query
-    
+
     def fetch_data(self) -> List[dict]:
         """Fetch data from db"""
         partition_query = self.generate_partition_query()
