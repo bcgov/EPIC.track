@@ -113,14 +113,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work_ids = [work.id for work in works]
 
         serialized_works = []
-
         work_staffs = WorkService.find_staff_for_works(work_ids, is_active=True)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
         work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
         work_phases = WorkPhaseService.find_multiple_works_phases_status(
             work_id_phase_id_dict
         )
-
         work: Work
         for work in works:
             serialized_work = WorkService._serialize_work(
@@ -135,7 +133,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Serialize a single work"""
         staff_info = work_staffs.get(work.id, [])
         works_status = works_statuses.get(work.id, None)
-
         serialized_work = WorkResponseSchema(
             only=(
                 "id",
@@ -165,7 +162,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
             ).dump(work_phase)
 
             serialized_work["phase_info"] = serialised_phase
-
         serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(
             works_status
         )
@@ -192,7 +188,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         else:
             query = (
                 Work.query
-                .join(StaffWorkRole, 
+                .join(StaffWorkRole,
                 and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
                 .filter(
                     Work.is_active.is_(True),
@@ -219,7 +215,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
                 StaffWorkRole.work_id.in_(work_ids), 
-                StaffWorkRole.is_deleted.is_(False), 
+                StaffWorkRole.is_deleted.is_(False),
                 StaffWorkRole.is_active.is_(is_active)
             )
             .join(Role, Role.id == StaffWorkRole.role_id)
