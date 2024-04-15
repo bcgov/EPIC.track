@@ -167,11 +167,18 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                               : Palette.neutral.dark,
                         }}
                       >
-                        {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
-                        {phase.total_number_of_days.toString()}
-                        {phase.days_left < 0
-                          ? ` (${Math.abs(phase.days_left)} over)`
-                          : ""}
+                        {phase.work_phase.is_completed && phase.days_left < 0
+                          ? 0
+                          : phase.days_left}
+                        {!phase.work_phase.is_completed && (
+                          <>
+                            {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
+                            {phase.total_number_of_days.toString()}
+                            {phase.days_left < 0
+                              ? ` (${Math.abs(phase.days_left)} over)`
+                              : ""}
+                          </>
+                        )}
                       </ETParagraph>
                       <When condition={phase.days_left < 0}>
                         <Box
