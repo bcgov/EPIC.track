@@ -275,10 +275,8 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={12}>
-          <FormControlLabel
-            control={<ControlledSwitch name="is_active" />}
-            label="Active"
-          />
+          <ControlledSwitch name="is_active" />
+          <ETFormLabel id="active">Active</ETFormLabel>
           <Tooltip
             sx={{ paddingLeft: "2px" }}
             title="A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
