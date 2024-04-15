@@ -20,6 +20,7 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 from flask import current_app
+from sqlalchemy import and_
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
@@ -175,19 +176,34 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return serialized_work
 
     @classmethod
-    def find_allocated_resources(cls):
+    def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
         lead = aliased(Staff)
         epd = aliased(Staff)
-        work_result = (
-            Work.query.filter(Work.is_deleted.is_(False))
-            .join(Project)
-            .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
-            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
-            .outerjoin(lead, lead.id == Work.work_lead_id)
-            .outerjoin(epd, epd.id == Work.responsible_epd_id)
-            .all()
-        )
+        if is_active is None:
+            query = (
+                Work.query.filter(Work.is_deleted.is_(False))
+                .join(Project)
+                .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
+                .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
+                .outerjoin(lead, lead.id == Work.work_lead_id)
+                .outerjoin(epd, epd.id == Work.responsible_epd_id)
+            )
+        else:
+            staff = aliased(Staff)
+            query = (
+                Work.query
+                .join(StaffWorkRole, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
+                .filter(
+                    Work.is_active.is_(True),
+                    Work.is_deleted.is_(False),
+                    Work.is_completed.is_(False),
+                    StaffWorkRole.is_active.is_(True),
+                    StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id))
+                )
+            )
+
+        work_result = query.all()
         
         works = [
             {
@@ -204,7 +220,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
         staff_result = (
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
-                StaffWorkRole.work_id.in_(work_ids), StaffWorkRole.is_deleted.is_(False)
+                StaffWorkRole.work_id.in_(work_ids), StaffWorkRole.is_deleted.is_(False), StaffWorkRole.is_active.is_(is_active)
             )
             .join(Role, Role.id == StaffWorkRole.role_id)
             .add_entity(Role)

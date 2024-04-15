@@ -3,7 +3,7 @@
 from typing import List
 
 from sqlalchemy import func
-
+from sqlalchemy import and_
 from api.models import db
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
@@ -25,7 +25,7 @@ class WorkStaffInsightGenerator:
                 )
                 .label("count"),
             )
-            .join(Work, Work.id == StaffWorkRole.work_id)
+            .join(Work, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),

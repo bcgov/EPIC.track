@@ -172,7 +172,7 @@ const WorkList = () => {
   const columns = React.useMemo<MRT_ColumnDef<WorkOrWorkStaff>[]>(() => {
     return [
       {
-        accessorKey: "title",
+        accessorKey: "project.name",
         header: "Name",
         size: 300,
         Cell: canEdit
