@@ -20,6 +20,7 @@ from typing import List, Tuple
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func, or_
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.project import Project
@@ -100,12 +101,18 @@ class Work(BaseModelVersioned):
         "IndigenousWork", backref="parent_work", lazy="select", cascade="all, delete-orphan"
     )
 
-    @property
+    @hybrid_property
     def title(self):
         """Dynamically create the title."""
         if self.project and self.work_type:
-            return util.generate_title(self.project.type.name, self.work_type.name, self.simple_title)
+            return util.generate_title(self.project.name, self.work_type.name, self.simple_title)
         return None
+
+    @title.expression
+    def title(self):
+        """SQL expression for title."""
+        from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
+        return func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title)  # pylint:disable=not-callable
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
@@ -113,29 +120,21 @@ class Work(BaseModelVersioned):
         return result
 
     @classmethod
-    def check_existence(cls, title, work_id=None):
+    def check_existence(cls, title: str, work_id=None):
         """Checks if a work exists for a given title"""
-        title_parts = title.split()
-        project_type_name, work_type_name, simple_title = (title_parts[i].strip() if i < len(title_parts)
-                                                           else None for i in range(3))
-        # pylint: disable=import-outside-toplevel
-        from api.models.work_type import WorkType
-
-        query = cls.query \
-            .join(Project, cls.project_id == Project.id) \
-            .join(WorkType, cls.work_type_id == WorkType.id) \
-            .filter(func.lower(Project.name) == func.lower(project_type_name)) \
-            .filter(func.lower(WorkType.name) == func.lower(work_type_name))
-
-        if simple_title:
-            query = query.filter(func.lower(cls.simple_title) == func.lower(simple_title))
-
-        query = query.filter(cls.is_deleted.is_(False))
-
+        from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
+        query = (
+            Work.query.join(Project, Work.project_id == Project.id)
+            .join(WorkType, Work.work_type_id == WorkType.id)
+            .filter(
+                func.trim(func.lower(Work.title)) == func.trim(func.lower(title)), Work.is_deleted.is_(False)
+            )
+        )
         if work_id:
-            query = query.filter(cls.id != work_id)
-
-        return query.count() > 0
+            query = query.filter(Work.id != work_id)
+        if query.count() > 0:
+            return True
+        return False
 
     @classmethod
     def fetch_all_works(
