@@ -7,6 +7,8 @@ import { CustomSwitch } from "../../shared/CustomSwitch";
 import { Palette } from "../../../styles/theme";
 import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { WORKPLAN_TAB } from "../constants";
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
@@ -42,6 +44,11 @@ const PhaseContainer = () => {
     setCompletedPhases(completedPhases);
     setCurrentAndFuturePhases(currentAndFuturePhases);
   }, [showCompletedPhases, ctx.workPhases]);
+
+  useRouterLocationStateForHelpPage(() => {
+    return ctx.work?.work_type?.name ?? undefined;
+  }, [ctx.work?.work_type_id]);
+
   if (ctx.workPhases.length === 0) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

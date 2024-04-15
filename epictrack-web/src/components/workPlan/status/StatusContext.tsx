@@ -8,6 +8,8 @@ import statusService from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { WORKPLAN_TAB } from "../constants";
 
 interface StatusContextProps {
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
@@ -125,6 +127,8 @@ export const StatusProvider = ({
       });
     }
   };
+
+  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.STATUS.label, []);
 
   return (
     <StatusContext.Provider

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
@@ -44,13 +44,6 @@ const WorkPlanContainer = () => {
   const handleTabSelected = (_event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
-
-  useRouterLocationStateForHelpPage(() => {
-    const currentSelectedTabLabel = Object.values(WORKPLAN_TAB).find(
-      (tab) => tab.index === selectedTabIndex
-    )?.label;
-    return currentSelectedTabLabel;
-  }, [selectedTabIndex]);
 
   if (ctx.loading) {
     return <WorkPlanSkeleton />;

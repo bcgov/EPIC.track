@@ -69,7 +69,7 @@ def test_create_work(client, auth_header):
 
 
 def _extract_title(payload):
-    project_name = ProjectModel.find_by_id(payload.get('project_id')).type.name
+    project_name = ProjectModel.find_by_id(payload.get('project_id')).name
     work_type = WorkTypeModel.find_by_id(payload.get('work_type_id')).name
     expected_title = util.generate_title(project_name, work_type, payload.get('simple_title'))
     return expected_title
@@ -101,7 +101,7 @@ def test_get_work_details(client, auth_header):
     """Test get work"""
     work = factory_work_model()
 
-    title = util.generate_title(work.project.type.name, work.work_type.name, work.simple_title)
+    title = util.generate_title(work.project.name, work.work_type.name, work.simple_title)
     url = urljoin(API_BASE_URL, f"works/{work.id}")
     response = client.get(url, headers=auth_header)
     response_json = response.json

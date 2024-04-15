@@ -21,34 +21,103 @@
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#workplan",
-        "tags": ["workplan"]
+        "tags": ["Workplan"]
       },
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#status",
-        "tags": ["status"]
+        "tags": ["Status"]
       },
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#issues",
-        "tags": ["issues"]
+        "tags": ["Issues"]
       },
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#about",
-        "tags": ["about"]
+        "tags": ["About"]
       },
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#teams",
-        "tags": ["team"]
+        "tags": ["Team"]
       },
       {
         "epicTrackPath": "/work-plan",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=A35C49D2D60144F594F8C1DDB5F0EA10#firstnations",
-        "tags": ["firstnations"]
+        "tags": ["First Nations"]
       },
-
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/project-notification",
+        "tags": ["Project Notification"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/minister-s-designation",
+        "tags": ["Minister's Designation"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/ceao-s-designation",
+        "tags": ["CEAO's Designation"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "",
+        "tags": ["Intake (Pre-EA)"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/exemption-request",
+        "tags": ["Exemption Order"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-assessment",
+        "tags": ["Assessment"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/amendment-complex",
+        "tags": ["Amendment"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/document-review",
+        "tags": ["Post-EAC Document Review"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-extension",
+        "tags": ["EAC Extension"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/substantial-start-decision",
+        "tags": ["Substantial Start Decision"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-transfer",
+        "tags": ["EAC/Order Transfer"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-suspension",
+        "tags": ["EAC/Order Suspension"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/eac-order-cancellation",
+        "tags": ["EAC/Order Cancellation"]
+      },
+      {
+        "epicTrackPath": "/work-plan",
+        "helpPage": "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/milestone-definitions/other",
+        "tags": ["Other"]
+      },
       {
         "epicTrackPath": "/reports/referral-schedule",
         "helpPage": "https://intranet.gov.bc.ca/intranet/content?id=FE54F5EFE92B4CF0AC74490E2D03FD4A"
