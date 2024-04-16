@@ -224,7 +224,6 @@ const ProjectList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
-        size: 115,
         Filter: ({ header, column }) => {
           return (
             <Box sx={{ width: "100px" }}>
