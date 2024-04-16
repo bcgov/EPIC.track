@@ -489,13 +489,21 @@ const EventList = () => {
   }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
 
   const getWorkPhaseById = React.useCallback(async () => {
-    if (ctx.selectedWorkPhase?.work_phase.id) {
-      const workPhase = (await workService.getWorkPhaseById(
-        Number(ctx.selectedWorkPhase.work_phase.id)
-      )) as unknown as WorkPhase;
-      console.log(workPhase);
-      if (workPhase.is_completed) {
-        dispatch(showConfetti(true));
+    const workPhaseId = ctx.selectedWorkPhase?.work_phase.id;
+    if (workPhaseId) {
+      try {
+        const workPhase = (await workService.getWorkPhaseById(
+          Number(workPhaseId)
+        )) as WorkPhase;
+
+        if (workPhase?.is_completed) {
+          dispatch(showConfetti(true));
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching work phase with ID: ${workPhaseId}`,
+          error
+        );
       }
     }
   }, [ctx.selectedWorkPhase?.work_phase.id]);
