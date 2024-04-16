@@ -323,7 +323,7 @@ class WorkPhaseId(Resource):
             res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
- 
+
 
 
 @cors_preflight("GET,POST")
