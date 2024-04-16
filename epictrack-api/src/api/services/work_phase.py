@@ -79,7 +79,6 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         result["template_available"] = template_available
         return result
 
-
     @classmethod
     def find_current_work_phase(cls, work_id: int) -> WorkPhase:
         """Find the current work phase which is in progress"""
