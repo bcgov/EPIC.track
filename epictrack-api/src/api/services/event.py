@@ -307,6 +307,9 @@ class EventService:
         cls._previous_event_acutal_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old
         )
+        cls._handle_work_start_date_for_start_event_start_phase(
+            event, current_work_phase_index
+        )
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, event_old, current_work_phase
         )
@@ -530,6 +533,20 @@ class EventService:
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
             )
+
+    @classmethod
+    def _handle_work_start_date_for_start_event_start_phase(
+        cls, event: Event, current_phase_index: int
+    ):
+        """Update the work start date to the event's actual if the event is start event and the phase is start phase"""
+        if (
+            event.actual_date
+            and event.event_position == EventPositionEnum.START.value
+            and current_phase_index == 0
+        ):
+            work = event.work
+            work.start_date = event.actual_date
+            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _handle_end_event_date_when_start_event_changed(
