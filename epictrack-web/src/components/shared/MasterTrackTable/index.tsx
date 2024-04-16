@@ -207,7 +207,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
       showColumnFilters: true,
       density: "compact",
       columnPinning: { right: ["mrt-row-actions"] },
-      ...rest.initialState,
+      ...initialState,
     },
     state: {
       showGlobalFilter: true,
