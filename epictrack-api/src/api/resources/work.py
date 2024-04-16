@@ -305,6 +305,7 @@ class WorkPhaseTemplateStatus(Resource):
             HTTPStatus.OK,
         )
 
+
 @cors_preflight("GET")
 @API.route("/work-phases/<int:work_phase_id>", methods=["GET", "OPTIONS"])
 class WorkPhaseId(Resource):
@@ -323,7 +324,6 @@ class WorkPhaseId(Resource):
             res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
-
 
 
 @cors_preflight("GET,POST")
