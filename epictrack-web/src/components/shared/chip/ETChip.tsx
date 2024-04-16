@@ -4,8 +4,6 @@ import { Palette } from "../../../styles/theme";
 const chipStyles = {
   fontWeight: "bold",
   borderRadius: "4px",
-  padding: "0px 0px",
-  gap: "0px",
   minWidth: "80px",
 };
 
