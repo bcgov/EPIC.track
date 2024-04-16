@@ -1,4 +1,10 @@
-import React, { Dispatch, SetStateAction, useEffect } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -13,46 +19,45 @@ import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2 } from "..";
 import { FiltersCache } from "./FiltersCache";
+import { set } from "lodash";
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
   return (
-    <>
-      <Container
+    <Container
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "400px",
+      }}
+    >
+      <Box
         sx={{
           display: "flex",
+          flexDirection: "column",
+          gap: "2rem",
           alignItems: "center",
-          justifyContent: "center",
-          minHeight: "400px",
         }}
       >
+        <Box component="img" src={SearchIcon} alt="Search" width="32px" />
         <Box
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: "2rem",
+            gap: "1rem",
             alignItems: "center",
           }}
         >
-          <Box component="img" src={SearchIcon} alt="Search" width="32px" />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "1rem",
-              alignItems: "center",
-            }}
-          >
-            <ETHeading2 bold>No results found</ETHeading2>
-            {table.options.data.length > 0 && (
-              <Typography color="#6D7274">
-                Adjust your parameters and try again
-              </Typography>
-            )}
-          </Box>
+          <ETHeading2 bold>No results found</ETHeading2>
+          {table.options.data.length > 0 && (
+            <Typography color="#6D7274">
+              Adjust your parameters and try again
+            </Typography>
+          )}
         </Box>
-      </Container>
-    </>
+      </Box>
+    </Container>
   );
 };
 
@@ -71,9 +76,21 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   onCacheFilters,
   ...rest
 }: MaterialReactTableProps<TData>) => {
+  const [dataState, setDataState] = useState(data);
+  const [dataColumns, setDataColumns] = useState(columns);
+
+  const { initialState, state, icons, ...otherProps } = rest;
+  const [otherPropsData, setOtherPropsData] = useState(otherProps);
+
+  useEffect(() => {
+    setDataColumns(columns);
+    setDataState(data);
+    setOtherPropsData(otherProps);
+  }, [columns, data]);
+
   const table = useMaterialReactTable({
-    columns,
-    data,
+    columns: dataColumns,
+    data: dataState,
     globalFilterFn: "contains",
     enableHiding: false,
     enableGlobalFilter: false,
@@ -190,26 +207,22 @@ const MasterTrackTable = <TData extends MRT_RowData>({
           });
       },
     },
-    renderToolbarInternalActions: ({ table }) => (
-      <>{/* <MRT_ToggleFiltersButton table={table} /> */}</>
-    ),
     renderEmptyRowsFallback: ({ table }) => <NoDataComponent table={table} />,
-    ...rest,
     initialState: {
       showColumnFilters: true,
       density: "compact",
       columnPinning: { right: ["mrt-row-actions"] },
-      ...rest.initialState,
+      ...initialState,
     },
     state: {
       showGlobalFilter: true,
       columnPinning: { right: ["mrt-row-actions"] },
-      ...rest.state,
+      ...state,
     },
     icons: {
       FilterAltIcon: () => null,
       CloseIcon: () => null,
-      ...rest.icons,
+      ...icons,
     },
     filterFns: {
       multiSelectFilter: (row, id, filterValue) => {
@@ -217,7 +230,9 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         return filterValue.includes(row.getValue(id));
       },
     },
+    ...otherPropsData,
   });
+
   useEffect(() => {
     if (table && setTableInstance) {
       setTableInstance(table);
