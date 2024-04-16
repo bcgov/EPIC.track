@@ -320,7 +320,7 @@ class WorkPhaseTemplateStatus(Resource):
         work_phase = WorkPhase.find_by_id(work_phase_id)
         print(work_phase.name)
         return (
-            res.WorkPhaseByIdResponseSchema().dump(work_phase),
+            res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
         

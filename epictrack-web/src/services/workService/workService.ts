@@ -107,7 +107,7 @@ class WorkService implements ServiceBase {
         workPhaseId.toString()
       )
     );
-    return result.data;
+    return result.data?.work_phase;
   }
 
   async downloadWorkplan(workPhaseId: number) {
