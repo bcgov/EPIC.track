@@ -304,10 +304,10 @@ class WorkPhaseTemplateStatus(Resource):
             res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status),
             HTTPStatus.OK,
         )
-        
+
 @cors_preflight("GET")
 @API.route("/work-phases/<int:work_phase_id>", methods=["GET", "OPTIONS"])
-class WorkPhaseTemplateStatus(Resource):
+class WorkPhaseId(Resource):
     """Endpoints to get work phase template upload status"""
 
     @staticmethod
@@ -323,7 +323,7 @@ class WorkPhaseTemplateStatus(Resource):
             res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
-        
+ 
 
 
 @cors_preflight("GET,POST")
