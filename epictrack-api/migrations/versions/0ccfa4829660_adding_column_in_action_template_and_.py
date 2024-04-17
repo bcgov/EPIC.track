@@ -31,7 +31,6 @@ def upgrade():
         batch_op.add_column(sa.Column('description', sa.String(), autoincrement=False, nullable=True))
 
     with op.batch_alter_table('special_fields', schema=None) as batch_op:
-        batch_op.drop_index('entity_field_index')
         batch_op.create_index('entity_field_index', ['entity', 'entity_id', 'field_name', 'time_range'], unique=False)
 
     # ### end Alembic commands ###
