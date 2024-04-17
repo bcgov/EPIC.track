@@ -94,8 +94,7 @@ export default function ProjectForm({
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = roles.includes(ROLES.EDIT);
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
-  const shouldDisableSpecialField =
-    (!isSpecialFieldLocked || !canEdit) && Boolean(project?.id);
+  const shouldDisableSpecialField = Boolean(project?.id);
   const shouldDisableFormField = !canEdit && Boolean(project?.name);
 
   React.useEffect(() => {
