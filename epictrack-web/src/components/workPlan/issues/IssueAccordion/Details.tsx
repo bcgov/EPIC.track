@@ -3,7 +3,7 @@ import { Button, Grid } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
 import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
-import { ActiveChip, ErrorChip } from "../../../shared/chip/ETChip";
+import { ETChip } from "../../../shared/chip/ETChip";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { Palette } from "../../../../styles/theme";
@@ -68,12 +68,17 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 <If condition={latestUpdate.is_approved}>
                   <Then>
                     <Grid item xs="auto">
-                      <ActiveChip data-cy={`approved-chip`} label="Approved" />
+                      <ETChip
+                        active
+                        data-cy={`approved-chip`}
+                        label="Approved"
+                      />
                     </Grid>
                   </Then>
                   <Else>
                     <Grid item xs="auto">
-                      <ErrorChip
+                      <ETChip
+                        error
                         data-cy={`need-approval-chip`}
                         label="Need Approval"
                       />

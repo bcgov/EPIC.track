@@ -7,7 +7,7 @@ import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
-import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { ETChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { Restricted, hasPermission } from "../shared/restricted";
@@ -150,12 +150,8 @@ const StaffList = () => {
         },
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip inactive label="Inactive" />}
           </span>
         ),
       },
