@@ -73,10 +73,9 @@ const UserList = () => {
 
   const currentUserGroup = React.useMemo<Group>(() => {
     return groups
-      .filter((p) => userDetails.groups.includes(p.name))
+      .filter((p) => userDetails.groups.includes(p.path))
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
-
   const columns = React.useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {

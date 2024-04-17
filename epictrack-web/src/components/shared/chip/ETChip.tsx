@@ -1,42 +1,42 @@
-import { Chip, styled } from "@mui/material";
+import { Chip, ChipProps, styled } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 
-const ActiveChip = styled(Chip)({
-  background: "#C2EACA",
-  color: "#236430",
+const chipStyles = {
   fontWeight: "bold",
   borderRadius: "4px",
-  padding: "4px 8px",
-  gap: "8px",
-  width: "100px",
+  minWidth: "80px",
+};
+
+const ActiveChip = styled(({ size = "small", ...other }: ChipProps) => (
+  <Chip size={size} {...other} />
+))({
+  background: Palette.success.bg.light,
+  color: Palette.success.dark,
+  ...chipStyles,
 });
 
-const InactiveChip = styled(Chip)({
+const InactiveChip = styled(({ size = "small", ...other }: ChipProps) => (
+  <Chip size={size} {...other} />
+))({
   background: "#F2F2F2",
   color: "#6D7274",
-  fontWeight: "bold",
-  borderRadius: "4px",
-  padding: "4px 8px",
-  gap: "8px",
-  width: "100px",
+  ...chipStyles,
 });
 
-const HighPriorityChip = styled(Chip)({
+const HighPriorityChip = styled(({ size = "small", ...other }: ChipProps) => (
+  <Chip size={size} {...other} />
+))({
   background: `${Palette.secondary.bg.light}`,
   color: `${Palette.secondary.dark}`,
-  fontWeight: "bold",
-  borderRadius: "4px",
-  padding: "4px 8px",
-  gap: "8px",
+  ...chipStyles,
 });
 
-const ErrorChip = styled(Chip)({
+const ErrorChip = styled(({ size = "small", ...other }: ChipProps) => (
+  <Chip size={size} {...other} />
+))({
   background: `${Palette.error.bg.light}`,
   color: `${Palette.error.dark}`,
-  fontWeight: "bold",
-  borderRadius: "4px",
-  padding: "4px 8px",
-  gap: "8px",
+  ...chipStyles,
 });
 
 export { ActiveChip, InactiveChip, HighPriorityChip, ErrorChip };

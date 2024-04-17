@@ -462,6 +462,7 @@ const EventListTable = ({
     ],
     [events]
   );
+
   return (
     <MasterTrackTable
       enableSorting={false}

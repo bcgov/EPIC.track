@@ -78,7 +78,6 @@ class EventService:
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
         event = event.flush()
-        current_app.logger.debug(f"Creating event: {event}")
         if not current_app.config["SKIP_EVENT_LOGIC"]:
             cls._process_events(
                 current_work_phase, event, all_work_events, push_events, None
@@ -304,9 +303,12 @@ class EventService:
         current_work_phase_index = util.find_index_in_array(
             all_work_phases, current_work_phase
         )
-        # cls._validate_dates(event, current_work_phase, all_work_phases)
+        cls._validate_dates(event, current_work_phase, all_work_phases)
         cls._previous_event_acutal_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old
+        )
+        cls._handle_work_start_date_for_start_event_start_phase(
+            event, current_work_phase_index
         )
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, event_old, current_work_phase
@@ -436,7 +438,7 @@ class EventService:
             actual_min_date = cls._find_actual_date_min(
                 event, current_work_phase, all_work_phases
             )
-            actual_max_date = cls._find_actual_date_max(current_work_phase)
+            actual_max_date = cls._find_actual_date_max(current_work_phase, event)
             if (
                 event.actual_date.date() < actual_min_date.date()
                 or event.actual_date.date() > actual_max_date.date()
@@ -480,16 +482,18 @@ class EventService:
         return actual_date_min
 
     @classmethod
-    def _find_actual_date_max(cls, current_work_phase: WorkPhase):
+    def _find_actual_date_max(cls, current_work_phase: WorkPhase, event: Event):
         """Return the max date of actual date"""
-        date_diff_days = (
-            (current_work_phase.end_date - current_work_phase.start_date).days
-            if current_work_phase.legislated
-            else 0
-        )
+        # date_diff_days = (
+        #     (current_work_phase.end_date - current_work_phase.start_date).days
+        #     if current_work_phase.legislated
+        #     else 0
+        # )
         actual_date_max = (
-            current_work_phase.start_date + timedelta(days=date_diff_days)
+            current_work_phase.end_date
             if current_work_phase.legislated
+            and event.event_configuration.event_category_id
+            != EventCategoryEnum.EXTENSION.value
             else datetime.utcnow().replace(tzinfo=pytz.utc)
         )
         return actual_date_max
@@ -529,6 +533,20 @@ class EventService:
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
             )
+
+    @classmethod
+    def _handle_work_start_date_for_start_event_start_phase(
+        cls, event: Event, current_phase_index: int
+    ):
+        """Update the work start date to the event's actual if the event is start event and the phase is start phase"""
+        if (
+            event.actual_date
+            and event.event_position == EventPositionEnum.START.value
+            and current_phase_index == 0
+        ):
+            work = event.work
+            work.start_date = event.actual_date
+            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _handle_end_event_date_when_start_event_changed(
@@ -780,11 +798,12 @@ class EventService:
         for event_to_update in phase_events:
             if event_to_update.id != event.id:
                 event_from_db = Event.find_by_id(event_to_update.id)
-                if event_from_db.actual_date:
-                    event_from_db.actual_date = event_from_db.actual_date + timedelta(
-                        days=number_of_days_to_be_pushed
-                    )
-                elif event_from_db.anticipated_date:
+                # if event_from_db.actual_date:
+                #     event_from_db.actual_date = event_from_db.actual_date + timedelta(
+                #         days=number_of_days_to_be_pushed
+                #     )
+                # elif event_from_db.anticipated_date:
+                if not event_from_db.actual_date:  # do not modify already locked milestones
                     event_from_db.anticipated_date = (
                         event_from_db.anticipated_date
                         + timedelta(days=number_of_days_to_be_pushed)
@@ -902,8 +921,8 @@ class EventService:
             if (
                 event_index > 0
                 and not phase_events[event_index - 1].actual_date
-                and not phase_events[event_index - 1].event_position
-                == EventPositionEnum.END.value
+                # and not phase_events[event_index - 1].event_position
+                # == EventPositionEnum.END.value
             ):
                 raise UnprocessableEntityError(
                     "Previous event should be completed to proceed"

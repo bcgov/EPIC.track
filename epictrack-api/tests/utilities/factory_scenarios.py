@@ -59,7 +59,6 @@ class TestWorkInfo(Enum):
     """Test scenarios of Project Creation."""
 
     work1 = {
-        "title": fake.word(),
         "report_description": fake.sentence(),
         "epic_description": fake.paragraph(),
         "is_active": True,
@@ -282,4 +281,15 @@ class TestWorkNotesEnum(Enum):
     work_notes2 = {
         "notes": fake.sentence(),
         "note_type": "issue_notes"
+    }
+
+
+class TestTaskTemplateEnum(Enum):
+    """Test scenarios for task templates"""
+
+    task_template1 = {
+        "name": fake.word(),
+        "ea_act_id": 3,
+        "work_type_id": 1,
+        "phase_id": 1,
     }

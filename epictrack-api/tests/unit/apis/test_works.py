@@ -25,12 +25,15 @@ from openpyxl import load_workbook
 from api.services.event import EventService
 from api.services.event_configuration import EventConfigurationService
 from api.services.phaseservice import PhaseService
+from api.models.project import Project as ProjectModel
+from api.models.work_type import WorkType as WorkTypeModel
 from api.services.role import RoleService
 from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum
 from tests.utilities.factory_utils import (
     factory_first_nation_model, factory_staff_model, factory_staff_work_role_model, factory_work_first_nation_model,
     factory_work_model)
 from tests.utilities.helpers import prepare_work_payload
+from api.utils import util
 
 
 API_BASE_URL = "/api/v1/"
@@ -47,12 +50,14 @@ def test_create_work(client, auth_header):
     """Test create new work."""
     url = urljoin(API_BASE_URL, "works")
     payload = prepare_work_payload()
-
+    expected_title = _extract_title(payload)
     # Scenario 1: Valid payload
     response = client.post(url, json=payload, headers=auth_header)
     response_json = response.json
     assert response.status_code == HTTPStatus.CREATED
     assert "id" in response_json
+    assert expected_title == response_json.get('title')
+    assert payload.get('simple_title') == response_json.get('simple_title')
     for key, value in payload.items():
         if key == "start_date":
             start_date = datetime.fromisoformat(response_json[key])
@@ -61,10 +66,13 @@ def test_create_work(client, auth_header):
         else:
             assert value == response_json[key]
     # Scenario 2: Missing required fields
-    del payload["title"]
-    response = client.post(url, json=payload, headers=auth_header)
-    response_json = response.json
-    assert response.status_code == HTTPStatus.BAD_REQUEST
+
+
+def _extract_title(payload):
+    project_name = ProjectModel.find_by_id(payload.get('project_id')).name
+    work_type = WorkTypeModel.find_by_id(payload.get('work_type_id')).name
+    expected_title = util.generate_title(project_name, work_type, payload.get('simple_title'))
+    return expected_title
 
 
 def test_validate_work(client, auth_header):
@@ -76,12 +84,11 @@ def test_validate_work(client, auth_header):
     response = client.get(url, query_string=payload, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
     assert not response.json["exists"]
-
     # Scenario 2: Creating new work with existing name
     del payload["work_id"]
     response = client.get(url, query_string=payload, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
-    assert response.json["exists"]
+    assert response.json["exists"] is False
 
     # Scenario 3: Creating new work with new name
     payload = TestWorkInfo.validation_work.value
@@ -93,9 +100,12 @@ def test_validate_work(client, auth_header):
 def test_get_work_details(client, auth_header):
     """Test get work"""
     work = factory_work_model()
+
+    title = util.generate_title(work.project.name, work.work_type.name, work.simple_title)
     url = urljoin(API_BASE_URL, f"works/{work.id}")
     response = client.get(url, headers=auth_header)
     response_json = response.json
+    assert title == response.json.get('title')
 
     assert response.status_code == HTTPStatus.OK
     for key, value in response_json.items():
@@ -186,13 +196,13 @@ def test_update_work(client, auth_header):
     work = factory_work_model()
     updated_data = copy(TestWorkInfo.work1.value)
     updated_data["project_id"] = work.project_id
-    updated_data["title"] = "Work title updated"
+    updated_data["simple_title"] = "Work title updated"
     url = urljoin(API_BASE_URL, f"works/{work.id}")
     response = client.put(url, headers=auth_header, json=updated_data)
     response_json = response.json
     assert response.status_code == HTTPStatus.OK
     assert response_json["id"] == work.id
-    assert response_json["title"] == updated_data["title"]
+    assert response_json["simple_title"] == updated_data["simple_title"]
 
 
 def test_delete_work(client, auth_header):

@@ -20,11 +20,13 @@ from typing import List, Tuple
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func, or_
 from sqlalchemy.orm import relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.project import Project
 from api.models.staff_work_role import StaffWorkRole
 
+from api.utils import util
 from .base_model import BaseModelVersioned
 from .pagination_options import PaginationOptions
 
@@ -46,7 +48,6 @@ class Work(BaseModelVersioned):
     __tablename__ = 'works'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(150), nullable=False)
     simple_title = Column(String(), nullable=True)
     report_description = Column(String(2000))
     epic_description = Column(Text)
@@ -100,16 +101,34 @@ class Work(BaseModelVersioned):
         "IndigenousWork", backref="parent_work", lazy="select", cascade="all, delete-orphan"
     )
 
+    @hybrid_property
+    def title(self):
+        """Dynamically create the title."""
+        if self.project and self.work_type:
+            return util.generate_title(self.project.name, self.work_type.name, self.simple_title)
+        return None
+
+    @title.expression
+    def title(self):
+        """SQL expression for title."""
+        from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
+        return func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title)  # pylint:disable=not-callable
+
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         result = super().as_dict(recursive=recursive)
         return result
 
     @classmethod
-    def check_existence(cls, title, work_id=None):
+    def check_existence(cls, title: str, work_id=None):
         """Checks if a work exists for a given title"""
-        query = Work.query.filter(
-            func.lower(Work.title) == func.lower(title), Work.is_deleted.is_(False)
+        from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
+        query = (
+            Work.query.join(Project, Work.project_id == Project.id)
+            .join(WorkType, Work.work_type_id == WorkType.id)
+            .filter(
+                func.trim(func.lower(Work.title)) == func.trim(func.lower(title)), Work.is_deleted.is_(False)
+            )
         )
         if work_id:
             query = query.filter(Work.id != work_id)

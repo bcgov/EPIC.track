@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { WorkplanContext } from "../WorkPlanContext";
 import issueService from "../../../services/issueService";
-import { useSearchParams } from "../../../hooks/SearchParams";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { CloneForm, CreateIssueForm, EditIssueForm } from "./types";
 import { showNotification } from "components/shared/notificationProvider";
 import { getErrorMessage } from "utils/axiosUtils";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { WORKPLAN_TAB } from "../constants";
 
 interface IssuesContextProps {
   isIssuesLoading: boolean;
@@ -245,6 +247,8 @@ export const IssuesProvider = ({
       setIsIssuesLoading(false);
     }
   };
+
+  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.ISSUES.label, []);
 
   return (
     <IssuesContext.Provider

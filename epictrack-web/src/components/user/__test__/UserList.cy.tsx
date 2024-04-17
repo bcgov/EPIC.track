@@ -24,6 +24,7 @@ const generateMockUser = (): User => {
     group_id: faker.datatype.string() + userCounter,
     group: {
       name: "test" + userCounter,
+      path: "/test" + userCounter,
       id: faker.datatype.string() + userCounter,
       level: 0,
       display_name: "test" + userCounter,

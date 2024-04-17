@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext } from "react";
 import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
 import { Palette } from "../../styles/theme";
 import { Box } from "@mui/system";
@@ -17,8 +17,9 @@ import Issues from "./issues";
 import WorkState from "./WorkState";
 import { isStatusOutOfDate } from "./status/shared";
 import About from "./about";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 
@@ -27,7 +28,6 @@ const tabPanel: SxProps = {
 };
 const WorkPlanContainer = () => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const tabIndex = location.state?.tabIndex ?? WORKPLAN_TAB.WORKPLAN.index;
 
@@ -39,18 +39,9 @@ const WorkPlanContainer = () => {
     (staffWorkRole) => staffWorkRole.is_active
   );
 
-  const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
+  const handleTabSelected = (_event: React.SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
-
-  useEffect(() => {
-    const currentTabLabel = Object.values(WORKPLAN_TAB).find(
-      (tab) => tab.index === selectedTabIndex
-    )?.label;
-    navigate(`${location.pathname}${location.search}`, {
-      state: { tab: currentTabLabel },
-    });
-  }, [selectedTabIndex]);
 
   if (ctx.loading) {
     return <WorkPlanSkeleton />;

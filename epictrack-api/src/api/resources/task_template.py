@@ -90,7 +90,7 @@ class Template(Resource):
     def get(template_id):
         """Get a task template details"""
         req.TaskTemplateIdPathParameterSchema().load(request.view_args)
-        template = TaskTemplateService.find_by_id(template_id=template_id)
+        template = TaskTemplateService.find_by_id(template_id=template_id, exclude_deleted=True)
         return res.TaskTemplateResponseSchema().dump(template), HTTPStatus.OK
 
     @staticmethod

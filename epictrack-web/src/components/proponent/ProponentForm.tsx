@@ -11,9 +11,8 @@ import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSe
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
-import Icons from "../icons";
-import { IconProps } from "../icons/type";
 import { ProponentNameSpecialField } from "./ProponentNameSpecialField";
+import { sort } from "utils";
 
 const schema = yup.object().shape({
   name: yup
@@ -76,7 +75,8 @@ export default function ProponentForm({ ...props }) {
   const getStaffs = async () => {
     const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
-      setStaffs(staffsResult.data as never);
+      const data = sort(staffsResult.data as never, "full_name");
+      setStaffs(data);
     }
   };
   React.useEffect(() => {

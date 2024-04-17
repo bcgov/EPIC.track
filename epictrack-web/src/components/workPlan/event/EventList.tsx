@@ -72,11 +72,18 @@ const EventList = () => {
   const [showTemplateForm, setShowTemplateForm] =
     React.useState<boolean>(false);
 
-  const ctx = useContext(WorkplanContext);
+  const {
+    selectedWorkPhase,
+    setSelectedWorkPhase,
+    setWorkPhases,
+    team,
+    work,
+    setWork,
+  } = useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const userIsTeamMember = useMemo(
-    () => ctx.team.some((member) => member.staff.email === email),
-    [ctx.team, email]
+    () => team.some((member) => member.staff.email === email),
+    [team, email]
   );
   const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
   const { handleHighlightRows } = useContext(EventContext);
@@ -106,16 +113,16 @@ const EventList = () => {
 
   const showExtensionWarningBox = useMemo(
     () =>
-      Number(ctx.selectedWorkPhase?.days_left) < 0 &&
-      ctx.selectedWorkPhase?.work_phase.legislated &&
+      Number(selectedWorkPhase?.days_left) < 0 &&
+      selectedWorkPhase?.work_phase.legislated &&
       openExtensionWarningBox,
-    [ctx.selectedWorkPhase, openExtensionWarningBox]
+    [selectedWorkPhase, openExtensionWarningBox]
   );
   const isEventFormFieldLocked = React.useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
 
-  React.useEffect(() => setEvents([]), [ctx.selectedWorkPhase?.work_phase.id]);
+  React.useEffect(() => setEvents([]), [selectedWorkPhase?.work_phase.id]);
   React.useEffect(() => {
     setTimeout(() => {
       dispatch(showConfetti(false));
@@ -123,10 +130,10 @@ const EventList = () => {
   }, [isConfettiShown]);
   React.useEffect(() => {
     getCombinedEvents();
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.id]);
+  }, [work?.id, selectedWorkPhase?.work_phase.id]);
 
   React.useEffect(() => {
-    const options: OptionType[] = ctx.team
+    const options: OptionType[] = team
       .filter((staff) => staff.is_active)
       .map((staff) => {
         return {
@@ -139,11 +146,11 @@ const EventList = () => {
           arr.findIndex((t) => t.value === ele.value) === index
       );
     setStaffSelectOptions(options);
-  }, [ctx.team]);
+  }, [team]);
 
   const getCombinedEvents = React.useCallback(() => {
     let result: EventsGridModel[] = [];
-    if (ctx.work?.id && ctx.selectedWorkPhase?.work_phase.id) {
+    if (work?.id && selectedWorkPhase?.work_phase.id) {
       setLoading(true);
       Promise.all([getMilestoneEvents(), getTaskEvents()]).then(
         (data: Array<EventsGridModel[]>) => {
@@ -244,13 +251,13 @@ const EventList = () => {
       );
     }
     setRowSelection({});
-  }, [ctx.work, ctx.selectedWorkPhase?.work_phase.id]);
+  }, [work, selectedWorkPhase?.work_phase.id]);
 
   const getTaskEvents = async (): Promise<EventsGridModel[]> => {
     let result: EventsGridModel[] = [];
     try {
       const taskResult = await taskEventService.getAll(
-        Number(ctx.selectedWorkPhase?.work_phase.id)
+        Number(selectedWorkPhase?.work_phase.id)
       );
 
       if (taskResult.status === 200) {
@@ -275,7 +282,7 @@ const EventList = () => {
     let result: EventsGridModel[] = [];
     try {
       const milestoneResult = await eventService.getMilestoneEvents(
-        Number(ctx.selectedWorkPhase?.work_phase.id)
+        Number(selectedWorkPhase?.work_phase.id)
       );
       if (milestoneResult.status === 200) {
         result = (milestoneResult.data as any[]).map((element) => {
@@ -302,19 +309,26 @@ const EventList = () => {
   };
 
   const getWorkPhases = React.useCallback(async () => {
-    if (ctx.work?.id) {
+    if (work?.id) {
       setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(
-        String(ctx.work?.id)
+        String(work?.id)
       );
-      ctx.setWorkPhases(workPhasesResult.data as WorkPhaseAdditionalInfo[]);
+      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
+      setWorkPhases(workPhases);
+      if (selectedWorkPhase) {
+        const selectedWp = workPhases.filter(
+          (p) => p.work_phase.id === selectedWorkPhase.work_phase.id
+        )[0];
+        setSelectedWorkPhase(selectedWp);
+      }
       setLoading(false);
     }
   }, []);
   const getWorkById = async () => {
-    if (ctx?.work?.id) {
-      const work = await workService.getById(String(ctx.work.id));
-      ctx.setWork(work.data as Work);
+    if (work?.id) {
+      const result = await workService.getById(String(work.id));
+      setWork(result.data as Work);
     }
   };
 
@@ -342,7 +356,7 @@ const EventList = () => {
     try {
       const result = await taskEventService.importTasksFromTemplate(
         {
-          work_phase_id: ctx.selectedWorkPhase?.work_phase.id,
+          work_phase_id: selectedWorkPhase?.work_phase.id,
         },
         Number(selectedTemplateId)
       );
@@ -365,14 +379,14 @@ const EventList = () => {
   const downloadPDFReport = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        Number(ctx.selectedWorkPhase?.work_phase.id)
+        Number(selectedWorkPhase?.work_phase.id)
       );
       const url = window.URL.createObjectURL(
         new Blob([(binaryReponse as any).data])
       );
       const link = document.createElement("a");
       link.href = url;
-      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_${ctx.selectedWorkPhase?.work_phase.phase.name}`;
+      const fileName = `${work?.project.name}_${work?.title}_${selectedWorkPhase?.work_phase.phase.name}`;
       link.setAttribute("download", `${fileName}.xlsx`);
       document.body.appendChild(link);
       link.click();
@@ -380,7 +394,7 @@ const EventList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
+  }, [work?.id, selectedWorkPhase?.work_phase.phase.id]);
 
   const onRowClick = async (event: any, row: EventsGridModel) => {
     event.preventDefault();
@@ -447,13 +461,13 @@ const EventList = () => {
   };
 
   const getTemplateUploadStatus = React.useCallback(async () => {
-    if (ctx.work && ctx.selectedWorkPhase) {
+    if (work && selectedWorkPhase) {
       if (notificationId.current !== null) {
         closeSnackbar(notificationId.current);
         notificationId.current = null;
       }
       const response = await workService.checkTemplateUploadStatus(
-        Number(ctx.selectedWorkPhase.work_phase.id)
+        Number(selectedWorkPhase.work_phase.id)
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
@@ -469,7 +483,7 @@ const EventList = () => {
             <Typography>
               Do you want to preview available Templates for{" "}
               <Typography style={{ fontWeight: "bold" }} component="span">
-                {ctx.selectedWorkPhase.work_phase.phase.name}
+                {selectedWorkPhase.work_phase.phase.name}
               </Typography>{" "}
               with lists of tasks?
             </Typography>
@@ -481,12 +495,12 @@ const EventList = () => {
               callback: () => setShowTemplateForm(true),
             },
           ],
-          key: `template-available-${ctx.selectedWorkPhase.work_phase.name}`,
+          key: `template-available-${selectedWorkPhase.work_phase.name}`,
         });
         notificationId.current = notification;
       }
     }
-  }, [ctx.selectedWorkPhase?.work_phase.phase.id]);
+  }, [selectedWorkPhase?.work_phase.phase.id]);
 
   const getWorkPhaseById = React.useCallback(async () => {
     const workPhaseId = ctx.selectedWorkPhase?.work_phase.id;
@@ -510,7 +524,7 @@ const EventList = () => {
 
   React.useEffect(() => {
     getTemplateUploadStatus();
-  }, [ctx.selectedWorkPhase]);
+  }, [selectedWorkPhase]);
 
   const getResponsibilities = async (): Promise<ListType[]> => {
     const result: ListType[] = [];
@@ -537,7 +551,7 @@ const EventList = () => {
       if (notificationId.current !== null) {
         closeSnackbar(notificationId.current);
         notificationId.current = null;
-        ctx.setSelectedWorkPhase(undefined);
+        setSelectedWorkPhase(undefined);
         setTemplateAvailable(undefined);
       }
     };
@@ -551,7 +565,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         assignee_ids,
-        work_id: ctx.work?.id,
+        work_id: work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -585,7 +599,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         responsibility_ids,
-        work_id: ctx.work?.id,
+        work_id: work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -616,7 +630,7 @@ const EventList = () => {
       const data = {
         task_ids: Object.keys(rowSelection),
         status,
-        work_id: ctx.work?.id,
+        work_id: work?.id,
       };
       const result = await taskEventService.patchTasks(data);
       try {
@@ -645,7 +659,7 @@ const EventList = () => {
   const deleteTasks = async () => {
     const data = {
       task_ids: Object.keys(rowSelection).join(","),
-      work_id: ctx.work?.id,
+      work_id: work?.id,
     };
     const response = await taskEventService.deleteTasks(data);
     try {
@@ -715,8 +729,7 @@ const EventList = () => {
       <Grid container>
         <When
           condition={
-            Number(ctx.selectedWorkPhase?.days_left) < 0 &&
-            showExtensionWarningBox
+            Number(selectedWorkPhase?.days_left) < 0 && showExtensionWarningBox
           }
         >
           <WarningBox
@@ -727,7 +740,7 @@ const EventList = () => {
         </When>
         <When
           condition={
-            ctx.selectedWorkPhase?.work_phase.is_suspended &&
+            selectedWorkPhase?.work_phase.is_suspended &&
             showSuspendedWarningBox
           }
         >

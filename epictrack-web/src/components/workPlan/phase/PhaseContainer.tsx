@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import PhaseAccordion from "./PhaseAccordion";
 import { Box, FormControlLabel, Grid } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -7,16 +7,21 @@ import { CustomSwitch } from "../../shared/CustomSwitch";
 import { Palette } from "../../../styles/theme";
 import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { WORKPLAN_TAB } from "../constants";
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
-  const [currentAndFuturePhases, setCurrentAndFuturePhases] = useState<
-    WorkPhaseAdditionalInfo[]
-  >([]);
-  const [completedPhases, setCompletedPhases] = useState<
-    WorkPhaseAdditionalInfo[]
-  >([]);
+
+  const currentAndFuturePhases: WorkPhaseAdditionalInfo[] = useMemo(
+    () => ctx.workPhases.filter((p) => !p.work_phase.is_completed),
+    [ctx.workPhases]
+  );
+  const completedPhases: WorkPhaseAdditionalInfo[] = useMemo(
+    () => ctx.workPhases.filter((p) => p.work_phase.is_completed),
+    [ctx.workPhases]
+  );
 
   useEffect(() => {
     if (
@@ -32,16 +37,10 @@ const PhaseContainer = () => {
     }
   }, [ctx.workPhases, ctx.work]);
 
-  useEffect(() => {
-    const currentAndFuturePhases = ctx.workPhases.filter(
-      (p) => !p.work_phase.is_completed
-    );
-    const completedPhases = ctx.workPhases.filter(
-      (p) => p.work_phase.is_completed
-    );
-    setCompletedPhases(completedPhases);
-    setCurrentAndFuturePhases(currentAndFuturePhases);
-  }, [showCompletedPhases, ctx.workPhases]);
+  useRouterLocationStateForHelpPage(() => {
+    return ctx.work?.work_type?.name ?? undefined;
+  }, [ctx.work?.work_type_id]);
+
   if (ctx.workPhases.length === 0) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

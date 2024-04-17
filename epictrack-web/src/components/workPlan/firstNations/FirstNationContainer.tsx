@@ -14,6 +14,8 @@ import debounce from "lodash/debounce";
 import workService from "../../../services/workService/workService";
 import { Work } from "../../../models/work";
 import { showNotification } from "../../shared/notificationProvider";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import { WORKPLAN_TAB } from "../constants";
 
 const LinkIcon: React.FC<IconProps> = Icons["LinkIcon"];
 
@@ -73,6 +75,8 @@ const FirstNationContainer = () => {
       debounceSave(value);
     }
   };
+
+  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.FIRST_NATIONS.label, []);
 
   return (
     <Grid container columnSpacing={1.5}>
