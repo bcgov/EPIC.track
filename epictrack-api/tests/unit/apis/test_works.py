@@ -30,8 +30,12 @@ from api.models.work_type import WorkType as WorkTypeModel
 from api.services.role import RoleService
 from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum
 from tests.utilities.factory_utils import (
-    factory_first_nation_model, factory_staff_model, factory_staff_work_role_model, factory_work_first_nation_model,
-    factory_work_model)
+    factory_first_nation_model,
+    factory_staff_model,
+    factory_staff_work_role_model,
+    factory_work_first_nation_model,
+    factory_work_model,
+)
 from tests.utilities.helpers import prepare_work_payload
 from api.utils import util
 
@@ -42,7 +46,22 @@ API_BASE_URL = "/api/v1/"
 def test_get_works(client, auth_header):
     """Test get works."""
     url = urljoin(API_BASE_URL, "works")
+    factory_work_model()
+    factory_work_model(TestWorkInfo.work_in_active.value)
     result = client.get(url, headers=auth_header)
+    in_active_works = [work for work in result.json if work['is_active'] is False]
+    assert len(in_active_works) > 0
+    assert result.status_code == HTTPStatus.OK
+
+
+def test_get_active_works(client, auth_header):
+    """Test get works."""
+    url = urljoin(API_BASE_URL, "works?is_active=true")
+    factory_work_model()
+    factory_work_model(TestWorkInfo.work_in_active.value)
+    result = client.get(url, headers=auth_header)
+    in_active_works = [work for work in result.json if work['is_active'] is False]
+    assert len(in_active_works) == 0
     assert result.status_code == HTTPStatus.OK
 
 

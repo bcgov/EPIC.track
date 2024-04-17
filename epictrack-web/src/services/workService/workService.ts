@@ -8,7 +8,7 @@ import { Work } from "../../models/work";
 import { WorkType } from "../../models/workType";
 
 class WorkService implements ServiceBase {
-  async getAll(is_active = false) {
+  async getAll(is_active = undefined) {
     return await http.GetRequest<Work[]>(Endpoints.Works.WORKS, { is_active });
   }
 
