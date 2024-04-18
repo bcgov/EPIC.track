@@ -2,11 +2,7 @@ import React from "react";
 import { Button, Grid, Stack } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
 import { AccordionSummaryItem } from "../../../shared/accordion/components/AccordionSummaryItem";
-import {
-  ActiveChip,
-  HighPriorityChip,
-  InactiveChip,
-} from "../../../shared/chip/ETChip";
+import { ETChip } from "../../../shared/chip/ETChip";
 import { ETParagraph } from "../../../shared";
 import moment from "moment";
 import {
@@ -45,14 +41,14 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
           <Stack spacing={2} direction={"row"}>
             <ETParagraph data-cy="issue-title">{issue.title}</ETParagraph>
             <When condition={issue.is_high_priority}>
-              <HighPriorityChip label="High Priority" />
+              <ETChip highPriority label="High Priority" />
             </When>
             <If condition={issue.is_active}>
               <Then>
-                <ActiveChip label="Active" />
+                <ETChip active label="Active" />
               </Then>
               <Else>
-                <InactiveChip label="Inactive" />
+                <ETChip inactive label="Inactive" />
               </Else>
             </If>
           </Stack>

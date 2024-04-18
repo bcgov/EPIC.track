@@ -9,7 +9,7 @@ import IndigenousNationForm from "./IndigenousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { MasterContext } from "../shared/MasterContext";
-import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { ETChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
@@ -216,12 +216,8 @@ export default function IndigenousNationList() {
         },
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip inactive label="Inactive" />}
           </span>
         ),
       },
