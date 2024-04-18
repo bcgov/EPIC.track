@@ -288,3 +288,16 @@ class WorkNotesBodySchema(RequestBodyParameterSchema):
         validate=validate.OneOf(['status_notes', 'issue_notes']),  # Add your predefined types
         required=True,
     )
+
+
+class WorkQueryParameterSchema(RequestQueryParameterSchema):
+    """Work Query parameters"""
+
+    is_active = fields.Bool(
+        metadata={"description": "query active or inactive ones"},
+        allow_none=True
+    )
+
+    include_indigenous_nations = fields.Bool(
+        metadata={"description": "Indicate if the result should have indigenous nations"}
+    )
