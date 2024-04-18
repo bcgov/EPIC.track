@@ -29,10 +29,10 @@ class CreateWork(ActionFactory):
             "ea_act_id": source_event.work.ea_act_id,
             "work_type_id": work_type.id,
             "start_date": start_date,
+            "report_description": "",
             "project_id": source_event.work.project_id,
             "ministry_id": source_event.work.ministry_id,
             "federal_involvement_id": source_event.work.federal_involvement_id,
-            "title": f"{source_event.work.project.name} - {work_type.report_title}",
             "is_active": True,
             "responsible_epd_id": source_event.work.responsible_epd_id,
             # Added because of errors
