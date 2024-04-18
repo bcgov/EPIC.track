@@ -9,7 +9,7 @@ import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
-import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { ETChip } from "../shared/chip/ETChip";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { Restricted, hasPermission } from "../shared/restricted";
@@ -176,12 +176,8 @@ export default function ProponentList() {
         },
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip error label="Inactive" />}
           </span>
         ),
       },
