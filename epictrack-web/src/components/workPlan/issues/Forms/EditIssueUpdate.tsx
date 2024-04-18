@@ -94,6 +94,7 @@ const EditIssueUpdate = () => {
           <ETFormLabelWithCharacterLimit
             characterCount={watchedDescription.length}
             maxCharacterLength={descriptionCharacterLimit}
+            required
           >
             Description
           </ETFormLabelWithCharacterLimit>
