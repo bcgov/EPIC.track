@@ -76,21 +76,16 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   onCacheFilters,
   ...rest
 }: MaterialReactTableProps<TData>) => {
-  const [dataState, setDataState] = useState(data);
-  const [dataColumns, setDataColumns] = useState(columns);
-
   const { initialState, state, icons, ...otherProps } = rest;
   const [otherPropsData, setOtherPropsData] = useState(otherProps);
 
   useEffect(() => {
-    setDataColumns(columns);
-    setDataState(data);
     setOtherPropsData(otherProps);
   }, [columns, data]);
 
   const table = useMaterialReactTable({
-    columns: dataColumns,
-    data: dataState,
+    columns: columns,
+    data: data,
     globalFilterFn: "contains",
     enableHiding: false,
     enableGlobalFilter: false,

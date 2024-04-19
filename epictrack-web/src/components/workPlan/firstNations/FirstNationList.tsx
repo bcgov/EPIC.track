@@ -23,7 +23,7 @@ import {
   ROLES,
 } from "../../../constants/application-constant";
 import AddIcon from "@mui/icons-material/Add";
-import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
+import { ETChip } from "../../shared/chip/ETChip";
 import TrackDialog from "../../shared/TrackDialog";
 import NoDataEver from "../../shared/NoDataEver";
 import TableFilter from "../../shared/filterSelect/TableFilter";
@@ -270,10 +270,10 @@ const FirstNationList = () => {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<string>() === ACTIVE_STATUS.ACTIVE && (
-              <ActiveChip label="Active" color="primary" />
+              <ETChip active label="Active" />
             )}
             {cell.getValue<string>() === ACTIVE_STATUS.INACTIVE && (
-              <InactiveChip label="Inactive" color="error" />
+              <ETChip error label="Inactive" />
             )}
           </span>
         ),

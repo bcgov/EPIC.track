@@ -5,7 +5,7 @@ import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
 import workService from "../../services/workService/workService";
-import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { ETChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
@@ -301,12 +301,8 @@ const WorkList = () => {
         },
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip error label="Inactive" />}
           </span>
         ),
       },

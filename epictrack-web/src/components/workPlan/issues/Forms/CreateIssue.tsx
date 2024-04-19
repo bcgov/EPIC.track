@@ -4,7 +4,11 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, FormControlLabel, Grid, Stack, Tooltip } from "@mui/material";
 import ControlledTextField from "../../../shared/controlledInputComponents/ControlledTextField";
-import { ETFormLabelWithCharacterLimit, ETParagraph } from "../../../shared";
+import {
+  ETFormLabel,
+  ETFormLabelWithCharacterLimit,
+  ETParagraph,
+} from "../../../shared";
 import ControlledSwitch from "../../../shared/controlledInputComponents/ControlledSwitch";
 import { IssuesContext } from "../IssuesContext";
 import { IconProps } from "../../../icons/type";
@@ -92,6 +96,7 @@ const CreateIssue = () => {
           <ETFormLabelWithCharacterLimit
             characterCount={watchedTitle.length}
             maxCharacterLength={titleCharacterLimit}
+            required
           >
             Title
           </ETFormLabelWithCharacterLimit>
@@ -108,6 +113,7 @@ const CreateIssue = () => {
           <ETFormLabelWithCharacterLimit
             characterCount={watchedDescription.length}
             maxCharacterLength={descriptionCharacterLimit}
+            required
           >
             Description
           </ETFormLabelWithCharacterLimit>
@@ -153,7 +159,7 @@ const CreateIssue = () => {
           </Stack>
         </Grid>
         <Grid item xs={6}>
-          <ETParagraph bold>Start Date</ETParagraph>
+          <ETFormLabel required>Start Date</ETFormLabel>
           <ControlledDatePicker name="start_date" />
         </Grid>
         <Grid item xs={6}>

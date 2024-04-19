@@ -57,14 +57,12 @@ const ListItemIconStyled = styled(ListItemIcon)({
   marginRight: "16px",
 });
 
-export const DrawerBox = () => {
+export const DrawerBox = ({ open = true }: { open?: boolean }) => {
   const navigate = useNavigate();
   const [subMenuExpand, setSubMenuExpand] = React.useState<{
     [x: string]: boolean;
   }>({});
-  const { isDrawerExpanded: open, toggleDrawerMarginTop } = useAppSelector(
-    (state) => state.uiState
-  );
+  const { toggleDrawerMarginTop } = useAppSelector((state) => state.uiState);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const location = useLocation();
 

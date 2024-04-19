@@ -54,7 +54,19 @@ from .task_request import (
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (
-    WorkBodyParameterSchema, WorkExistenceQueryParamSchema, WorkFirstNationImportBodyParamSchema,
-    WorkFirstNationNotesBodySchema, WorkIdPathParameterSchema, WorkIdPhaseIdPathParameterSchema,
-    WorkIssuesCreateParameterSchema, WorkIssuesParameterSchema, WorkIssuesUpdateCloneSchema, WorkIssuesUpdateEditSchema,
-    WorkNotesBodySchema, WorkPlanDownloadQueryParamSchema, WorkStatusParameterSchema, WorkTypeIdQueryParamSchema)
+    WorkBodyParameterSchema,
+    WorkExistenceQueryParamSchema,
+    WorkFirstNationImportBodyParamSchema,
+    WorkFirstNationNotesBodySchema,
+    WorkIdPathParameterSchema,
+    WorkIdPhaseIdPathParameterSchema,
+    WorkIssuesCreateParameterSchema,
+    WorkIssuesParameterSchema,
+    WorkIssuesUpdateCloneSchema,
+    WorkIssuesUpdateEditSchema,
+    WorkNotesBodySchema,
+    WorkPlanDownloadQueryParamSchema,
+    WorkStatusParameterSchema,
+    WorkTypeIdQueryParamSchema,
+    WorkQueryParameterSchema,
+)

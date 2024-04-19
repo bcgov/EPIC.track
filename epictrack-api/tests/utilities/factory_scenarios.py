@@ -72,6 +72,20 @@ class TestWorkInfo(Enum):
         "simple_title": fake.word()
     }
 
+    work_in_active = {
+        "report_description": fake.sentence(),
+        "epic_description": fake.paragraph(),
+        "is_active": False,
+        "start_date": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
+        "ministry_id": 1,
+        "ea_act_id": 3,
+        "eao_team_id": 1,
+        "federal_involvement_id": 1,
+        "work_type_id": 1,
+        "substitution_act_id": 1,
+        "simple_title": fake.word()
+    }
+
     validation_work = {
         "title": fake.word(),
     }
