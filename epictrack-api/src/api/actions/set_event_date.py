@@ -1,7 +1,6 @@
 """Disable work start date action handler"""
 
 from datetime import timedelta
-
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event import Event

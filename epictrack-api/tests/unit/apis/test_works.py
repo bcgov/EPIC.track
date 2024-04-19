@@ -408,7 +408,7 @@ def test_work_phase_template_upload_status(client, auth_header):
     work_response_json = work_response.json
     assert work_response.status_code == HTTPStatus.CREATED
     url = urljoin(
-        API_BASE_URL, f"works/work-phases/{work_response_json['current_work_phase_id']}"
+        API_BASE_URL, f"works/work-phases/{work_response_json['current_work_phase_id']}/template-upload-status"
     )
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK

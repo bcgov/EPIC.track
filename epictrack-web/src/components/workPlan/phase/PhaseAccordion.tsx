@@ -78,21 +78,20 @@ const SummaryItem = (props: SummaryItemProps) => {
 
 const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
-  const ctx = useContext(WorkplanContext);
+  const { selectedWorkPhase, setSelectedWorkPhase } =
+    useContext(WorkplanContext);
   const isSelectedPhase = React.useMemo<boolean>(
-    () => phase.work_phase.id === ctx.selectedWorkPhase?.work_phase.id,
-    [ctx.selectedWorkPhase]
+    () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
+    [selectedWorkPhase]
   );
   React.useEffect(
-    () =>
-      setExpanded(phase.work_phase.id === ctx.selectedWorkPhase?.work_phase.id),
-    [phase, ctx.selectedWorkPhase]
+    () => setExpanded(phase.work_phase.id === selectedWorkPhase?.work_phase.id),
+    [phase, selectedWorkPhase]
   );
   const onExpandHandler = (expand: boolean) => {
     setExpanded(expand);
-    ctx.setSelectedWorkPhase(phase);
+    setSelectedWorkPhase(phase);
   };
-
   const fromDate = React.useMemo(
     () =>
       Moment(phase.work_phase.start_date).isSameOrAfter(Moment())
