@@ -35,7 +35,8 @@ const Endpoints = {
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
     WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",
-    CHECK_TEMPLATE_UPLOAD_STATUS: "works/work-phases/:work_phase_id",
+    CHECK_TEMPLATE_UPLOAD_STATUS:
+      "works/work-phases/:work_phase_id/template-upload-status",
     WORK_FIRST_NATION_NOTES: "works/:work_id/first-nation-notes",
     WORK_NOTES: "works/:work_id/notes",
     WORK_FIRST_NATIONS: "works/:work_id/first-nations",
@@ -43,6 +44,7 @@ const Endpoints = {
     WORK_FIRST_NATION: "works/first-nations/:work_first_nation_id",
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
     GET_ALL_WORK_TYPES: "works/types",
+    GET_WORK_PHASE_BY_ID: "works/work-phases/:work_phase_id",
   },
   WorkTypes: {
     GET_ALL: "work-types",

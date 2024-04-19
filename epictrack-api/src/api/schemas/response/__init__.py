@@ -37,4 +37,4 @@ from .user_response import UserResponseSchema
 from .work_response import (
     WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema, WorkPhaseAdditionalInfoResponseSchema,
     WorkPhaseResponseSchema, WorkPhaseTemplateAvailableResponse, WorkResourceResponseSchema, WorkResponseSchema,
-    WorkStaffRoleReponseSchema, WorkStatusResponseSchema)
+    WorkStaffRoleReponseSchema, WorkStatusResponseSchema, WorkPhaseByIdResponseSchema)

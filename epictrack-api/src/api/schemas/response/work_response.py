@@ -150,6 +150,12 @@ class WorkResourceResponseSchema(
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
 
 
+class WorkPhaseByIdResponseSchema(Schema):
+    """Schema for additional work phase details"""
+
+    work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
+
+
 class WorkPhaseAdditionalInfoResponseSchema(Schema):
     """Schema for additional work phase details"""
 
