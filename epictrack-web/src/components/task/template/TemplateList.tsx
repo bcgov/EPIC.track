@@ -9,7 +9,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import TrackDialog from "../../shared/TrackDialog";
 import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
-import { ActiveChip, InactiveChip } from "../../shared/chip/ETChip";
+import { ETChip } from "../../shared/chip/ETChip";
 import templateService from "../../../services/taskService/templateService";
 import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
 import TableFilter from "../../shared/filterSelect/TableFilter";
@@ -199,12 +199,8 @@ const TemplateList = () => {
         },
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip error label="Inactive" />}
           </span>
         ),
       },

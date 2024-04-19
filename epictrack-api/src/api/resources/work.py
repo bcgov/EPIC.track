@@ -96,9 +96,9 @@ class Works(Resource):
     @profiletime
     def get():
         """Return all active works."""
-        args = request.args
-        is_active = args.get("is_active", False, bool)
-        include_indigenous_nations = args.get('include_indigenous_nations', False, bool)
+        request_args = req.WorkQueryParameterSchema().load(request.args)
+        is_active = request_args.get("is_active", None)
+        include_indigenous_nations = request_args.get('include_indigenous_nations')
         works = WorkService.find_all_works(is_active)
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)

@@ -12,6 +12,7 @@ import Icons from "../../../icons";
 import { EditIssueForm } from "../types";
 import moment from "moment";
 import ControlledDatePicker from "../../../shared/controlledInputComponents/ControlledDatePicker";
+import { ETFormLabel } from "../../../shared";
 
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
@@ -84,6 +85,7 @@ const EditIssue = () => {
           <ETFormLabelWithCharacterLimit
             characterCount={watchedTitle.length}
             maxCharacterLength={titleCharacterLimit}
+            required
           >
             Title
           </ETFormLabelWithCharacterLimit>
@@ -128,11 +130,11 @@ const EditIssue = () => {
           </Stack>
         </Grid>
         <Grid item xs={6}>
-          <ETParagraph bold>Start Date</ETParagraph>
+          <ETFormLabel required>Start Date</ETFormLabel>
           <ControlledDatePicker name="start_date" />
         </Grid>
         <Grid item xs={6}>
-          <ETParagraph bold>Expected Resolution Date</ETParagraph>
+          <ETFormLabel required>Expected Resolution Date</ETFormLabel>
           <ControlledDatePicker name="expected_resolution_date" />
         </Grid>
       </Grid>

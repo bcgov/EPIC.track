@@ -13,7 +13,6 @@ import { setupIntercepts } from "../../../../cypress/support/utils";
 import { defaultFirstNation } from "models/firstNation";
 import { MasterContext } from "components/shared/MasterContext";
 import { ETGridTitle } from "..";
-import { ActiveChip, InactiveChip } from "components/shared/chip/ETChip";
 import TableFilter from "../filterSelect/TableFilter";
 import { MRT_ColumnDef } from "material-react-table";
 import { FirstNation } from "models/firstNation";

@@ -11,7 +11,7 @@ interface WorkPhaseResponse {
   work_phase: WorkPhase;
 }
 class WorkService implements ServiceBase {
-  async getAll(is_active = false) {
+  async getAll(is_active = undefined) {
     return await http.GetRequest<Work[]>(Endpoints.Works.WORKS, { is_active });
   }
 

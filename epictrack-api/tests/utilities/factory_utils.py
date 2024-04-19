@@ -45,21 +45,24 @@ JWT_HEADER = {"typ": "JWT", "kid": "epictrack"}
 
 def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
     """Produce a participant model."""
-    project = ProjectModel(
-        name=project_data["name"],
-        description=project_data["description"],
-        address=project_data["address"],
-        type_id=project_data["type_id"],
-        sub_type_id=project_data["sub_type_id"],
-        proponent_id=project_data["proponent_id"],
-        region_id_env=project_data["region_id_env"],
-        region_id_flnro=project_data["region_id_flnro"],
-        latitude=project_data["latitude"],
-        longitude=project_data["longitude"],
-        abbreviation=project_data["abbreviation"],
-        project_state=ProjectStateEnum.PRE_WORK.value,
-    )
-    project.save()
+    project_result = ProjectModel.find_by_params({"name": project_data["name"]})
+    project = project_result[0] if project_result else None
+    if not project:
+        project = ProjectModel(
+            name=project_data["name"],
+            description=project_data["description"],
+            address=project_data["address"],
+            type_id=project_data["type_id"],
+            sub_type_id=project_data["sub_type_id"],
+            proponent_id=project_data["proponent_id"],
+            region_id_env=project_data["region_id_env"],
+            region_id_flnro=project_data["region_id_flnro"],
+            latitude=project_data["latitude"],
+            longitude=project_data["longitude"],
+            abbreviation=project_data["abbreviation"],
+            project_state=ProjectStateEnum.PRE_WORK.value,
+        )
+        project.save()
     return project
 
 
