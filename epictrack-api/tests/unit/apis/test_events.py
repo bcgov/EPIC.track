@@ -69,6 +69,7 @@ def test_change_date_start_event_legislated_phase_push(client, jwt):
     # all the events will be pushed till the end event in the last phase
     _change_event_anticipated_date(jwt, client, push_events=True, legislated=True)
 
+
 def test_change_date_start_event_legislated_phase_not_push(client, jwt):
     """Change the date of start event in a legislated phase by 7 days and choose not to push subsequent events"""
     # Change the aniticipated date of the start event in a legislated phaes, then choose to push the subsequent
@@ -78,9 +79,9 @@ def test_change_date_start_event_legislated_phase_not_push(client, jwt):
         jwt, client, push_events=False, legislated=True
     )
 
+
 def test_change_intermediate_event_non_legislated_phase_push(client, jwt):
-    """Change the date of the intermediate event in a legislated phase by 7 days and chosee to push subsequent
-    events"""
+    """Change the date of the intermediate event in a legislated phase by 7 days and chosee to push subsequent events"""
     # All the subsequent events plus the current event date should be pushed by the number of days to be pushed
     # since it is a non-legislated phase, the date push will continue all the way over to the end phase end event
     _change_event_anticipated_date(
@@ -91,9 +92,9 @@ def test_change_intermediate_event_non_legislated_phase_push(client, jwt):
         test_type=TestTypeEnum.INTERMEDIATE_EVENT,
     )
 
+
 def test_change_intermediate_event_non_legislated_phase_not_push(client, jwt):
-    """Change the anticipated date of the intermediate event in a nonlegislated phase by 7 days and choose not
-     to push events"""
+    """Change the anticipated date of the intermediate event in a nonlegislated phase by 7 days ,not to push events"""
     # Only the current event will change no other events will change
     _change_event_anticipated_date(
         jwt,
