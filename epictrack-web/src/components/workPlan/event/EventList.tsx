@@ -316,12 +316,12 @@ const EventList = () => {
       );
       const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
       setWorkPhases(workPhases);
-      if (selectedWorkPhase) {
-        const selectedWp = workPhases.filter(
-          (p) => p.work_phase.id === selectedWorkPhase.work_phase.id
-        )[0];
-        setSelectedWorkPhase(selectedWp);
-      }
+      // if (selectedWorkPhase) {
+      //   const selectedWp = workPhases.filter(
+      //     (p) => p.work_phase.id === selectedWorkPhase.work_phase.id
+      //   )[0];
+      //   setSelectedWorkPhase(selectedWp);
+      // }
       setLoading(false);
     }
   }, []);
@@ -337,6 +337,7 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
+    getWorkById();
     getWorkPhases();
     getTemplateUploadStatus();
     if (
@@ -503,7 +504,7 @@ const EventList = () => {
   }, [selectedWorkPhase?.work_phase.phase.id]);
 
   const getWorkPhaseById = React.useCallback(async () => {
-    const workPhaseId = ctx.selectedWorkPhase?.work_phase.id;
+    const workPhaseId = selectedWorkPhase?.work_phase.id;
     if (workPhaseId) {
       try {
         const workPhase = (await workService.getWorkPhaseById(
@@ -520,7 +521,7 @@ const EventList = () => {
         );
       }
     }
-  }, [ctx.selectedWorkPhase?.work_phase.id]);
+  }, [selectedWorkPhase?.work_phase.id]);
 
   React.useEffect(() => {
     getTemplateUploadStatus();
