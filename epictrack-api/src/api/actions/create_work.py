@@ -4,8 +4,6 @@ from datetime import timedelta
 from pytz import timezone
 
 from api.actions.base import ActionFactory
-from api.models import db
-from api.models.work_type import WorkType
 
 
 class CreateWork(ActionFactory):
@@ -15,19 +13,12 @@ class CreateWork(ActionFactory):
         """Create a new WORK: "Minister's Designation" and link to this work's Project"""
         # Importing here to avoid circular imports
         from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
-        work_type = (
-            db.session.query(WorkType)
-            .filter(
-                WorkType.name == "Minister's Designation", WorkType.is_active.is_(True)
-            )
-            .first()
-        )
 
         start_date = source_event.actual_date + timedelta(days=1)
         start_date = start_date.astimezone(timezone('US/Pacific'))
         new_work = {
             "ea_act_id": source_event.work.ea_act_id,
-            "work_type_id": work_type.id,
+            "work_type_id": params.get("work_type"),
             "start_date": start_date,
             "report_description": "",
             "project_id": source_event.work.project_id,
