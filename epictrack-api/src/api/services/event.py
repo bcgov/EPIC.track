@@ -898,14 +898,11 @@ class EventService:
         have actual dates in all the previous events.
         """
         if event.actual_date:
-            if (
-                event.event_position == EventPositionEnum.START.value
-                and current_work_phase_index > 0
-            ):
+            if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
                 if not previous_work_phase.is_completed:
                     raise UnprocessableEntityError(
-                        "Previous event should be completed to proceed"
+                        "Previous phase should be completed to proceed"
                     )
             event_index = cls.find_event_index(
                 all_work_events,
