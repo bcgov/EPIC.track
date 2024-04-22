@@ -68,6 +68,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         print('is this empty')
         print(payload)
         special_field = special_field.update(payload, commit=commit)
+        special_field.flush()
         cls._update_original_model(special_field)
         if commit:
             db.session.commit()
@@ -115,7 +116,6 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     def _update_original_model(cls, special_field_entry: SpecialField) -> None:
         """If `special_field_entry` is latest, update original table with new value"""
         if special_field_entry.time_range.upper is None:
-            print("special_field_entry.entity is latest")
             model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[
                 EntityEnum(special_field_entry.entity)
             ]
@@ -128,18 +128,14 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     @classmethod
     def run_other_related_updates(cls, special_field: SpecialField):
         from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
-        print('run_other_related_updates')
-        print(special_field.entity)
-        print(EntityEnum.WORK.value)
-        if special_field.entity == EntityEnum.WORK:
-            print(special_field.field_name)
+        special_field_entity = EntityEnum(special_field.entity).value
+        if special_field_entity == EntityEnum.WORK.value:
             data = {
                 "staff_id": special_field.field_value,
                 "is_active": True
             }
+            print(special_field.field_name)
             if special_field.field_name == "responsible_epd_id":
-                print("responsible_epd_id")
-                print(data)
                 data = {
                     **data,
                     "role_id": RoleEnum.RESPONSIBLE_EPD.value
@@ -147,9 +143,8 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
                 WorkService.replace_work_staff(
                     special_field.entity_id, data
                 )
+            print(special_field.field_name)
             if special_field.field_name == "work_lead_id":
-                print("work_lead_id")
-                print(data)
                 data = {
                     **data,
                     "role_id": RoleEnum.TEAM_LEAD.value

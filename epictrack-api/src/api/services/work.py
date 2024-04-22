@@ -811,7 +811,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-        print(first_nations)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 

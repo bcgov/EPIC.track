@@ -34,6 +34,7 @@ interface HeaderProps {
 interface LinkHeaderProps extends HeaderProps {
   to: string | Partial<Path>;
   onClick?: (eventArg?: any) => void;
+  disabled?: boolean;
 }
 
 interface PageContainerProps {
@@ -268,8 +269,13 @@ export const ETGridTitle = ({
   color,
   children,
   sx,
+  disabled = false,
   ...rest
 }: LinkHeaderProps) => {
+  if (disabled) {
+    return <ETParagraph bold={bold}>{children}</ETParagraph>;
+  }
+
   return (
     <ETLink onClick={rest.onClick} {...rest}>
       <Tooltip
