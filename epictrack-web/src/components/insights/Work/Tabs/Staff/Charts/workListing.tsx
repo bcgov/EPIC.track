@@ -71,7 +71,7 @@ const WorkList = () => {
             `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
         )
       )
-    );
+    ).sort((a, b) => a.localeCompare(b));
   }, [officerAnalysts]);
 
   const officerFilterFunction = (row: any, id: any, filterValue: any) => {
@@ -165,7 +165,8 @@ const WorkList = () => {
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
-      codeTypes[key](codes);
+      const sortedCodes = codes.sort();
+      codeTypes[key](sortedCodes);
     });
   }, [workStaffs]);
 

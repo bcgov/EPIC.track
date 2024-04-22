@@ -19,13 +19,16 @@ const ProjectList = () => {
 
   const types = projects
     .map((p) => p.type.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index)
+    .sort();
   const subTypes = projects
     .map((p) => p.sub_type.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index)
+    .sort();
   const proponents = projects
     .map((p) => p.proponent.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index)
+    .sort();
 
   const envRegionsOptions = getSelectFilterOptions(
     projects.map((project) => project.region_env),

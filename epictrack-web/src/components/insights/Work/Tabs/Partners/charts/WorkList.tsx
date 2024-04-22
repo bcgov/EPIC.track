@@ -7,6 +7,7 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
+import { sort } from "utils";
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
@@ -36,7 +37,18 @@ const WorkList = () => {
   }, [works]);
 
   const ministries = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w?.ministry?.name)));
+    return Array.from(
+      new Set(
+        [...works]
+          .sort(
+            (a, b) =>
+              a.ministry?.minister?.position?.sort_order -
+              b.ministry?.minister?.position?.sort_order
+          )
+          .filter((w) => w.ministry)
+          .map((w) => w.ministry.name)
+      )
+    );
   }, [works]);
 
   const indigenousNations = useMemo(() => {
@@ -45,7 +57,7 @@ const WorkList = () => {
       .flat()
       .map((nation) => nation?.name ?? "")
       .filter((nation) => nation);
-    return Array.from(new Set(nations));
+    return Array.from(new Set(nations)).sort();
   }, [works]);
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(

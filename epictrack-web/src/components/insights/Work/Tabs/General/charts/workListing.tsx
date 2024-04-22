@@ -47,7 +47,8 @@ const WorkList = () => {
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
-      codeTypes[key](codes);
+      const sortedCodes = codes.sort();
+      codeTypes[key](sortedCodes);
     });
   }, [works]);
 
