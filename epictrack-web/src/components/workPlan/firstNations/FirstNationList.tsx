@@ -273,7 +273,7 @@ const FirstNationList = () => {
               <ETChip active label="Active" />
             )}
             {cell.getValue<string>() === ACTIVE_STATUS.INACTIVE && (
-              <ETChip error label="Inactive" />
+              <ETChip inactive label="Inactive" />
             )}
           </span>
         ),

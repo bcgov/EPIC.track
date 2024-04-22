@@ -302,7 +302,7 @@ const WorkList = () => {
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
-            {!cell.getValue<boolean>() && <ETChip error label="Inactive" />}
+            {!cell.getValue<boolean>() && <ETChip inactive label="Inactive" />}
           </span>
         ),
       },
