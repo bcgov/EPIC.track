@@ -95,7 +95,8 @@ export default function ProjectForm({
   const canEdit = roles.includes(ROLES.EDIT);
   const isSpecialFieldLocked = isProponentFieldLocked || isNameFieldLocked;
   const shouldDisableSpecialField = Boolean(project?.id);
-  const shouldDisableFormField = !canEdit && Boolean(project?.name);
+  const shouldDisableFormField =
+    (!canEdit && Boolean(project?.name)) || isSpecialFieldLocked;
 
   React.useEffect(() => {
     if (setDisableDialogSave) {
