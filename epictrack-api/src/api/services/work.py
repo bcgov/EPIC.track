@@ -79,6 +79,7 @@ from api.services.event_template import EventTemplateService
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
+from api.services.role import RoleService
 from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
@@ -216,6 +217,29 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return works
 
     @classmethod
+    def create_work_initial_staff(cls, work_id: int, team_lead_id: int, responsible_epd_id: int):
+        """Create initial staffs for the work"""
+        team_lead_role = RoleService.find_by_name("Team Lead")
+        responsible_epd_role = RoleService.find_by_name("Responsible EPD")
+        staffs_data = [
+            {
+            "work_id": work_id,
+            "staff_id": team_lead_id,
+            "role_id": team_lead_role.id,
+            "is_active": True,
+            },
+            {
+            "work_id": work_id,
+            "staff_id": responsible_epd_id,
+            "role_id": responsible_epd_role.id,
+            "is_active": True,
+            }
+        ]
+
+        work_staffs = WorkService.create_work_staff_bulk(staffs_data)
+        return work_staffs
+
+    @classmethod
     def create_work(cls, payload, commit: bool = True):
         # pylint: disable=too-many-locals
         """Create a new work"""
@@ -276,6 +300,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "is_active": True,
             },
         )
+        cls.create_work_initial_staff(work.id, payload["work_lead_id"], payload["responsible_epd_id"])
         if commit:
             db.session.commit()
         return work
@@ -419,6 +444,25 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return work_staff
 
     @classmethod
+    def create_work_staff_bulk(cls, work_staffs: list):
+        """Create Staff Work"""
+        for work_staff in work_staffs:
+            cls._check_can_create_or_team_member_auth(work_staff.get("work_id"))
+            work_staffs.append(
+                StaffWorkRole(
+                    **{
+                        "work_id": work_staff.get("work_id"),
+                        "staff_id": work_staff.get("staff_id"),
+                        "role_id": work_staff.get("role_id"),
+                        "is_active": work_staff.get("is_active"),
+                    }
+                )
+            )
+        db.session.bulk_save_objects(work_staffs)
+        db.session.commit()
+        return work_staffs
+
+    @classmethod
     def update_work_staff(
         cls, work_staff_id: int, data: dict, commit: bool = True
     ) -> StaffWorkRole:
@@ -442,6 +486,33 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if commit:
             db.session.commit()
         return work_staff
+
+    @classmethod
+    def upsert_work_staff(cls, work_id: int, data: dict, commit: bool = True):
+        """Upsert work staff"""
+        work_staff = StaffWorkRole.find_one_by_work_and_staff_and_role(
+            work_id, data.get("staff_id"), data.get("role_id"), work_staff_id=None)
+        if work_staff:
+            return cls.update_work_staff(work_staff.id, data, commit)
+        return cls.create_work_staff(work_id, data, commit)
+
+    @classmethod
+    def replace_work_staff(cls, work_id: int, data: dict):
+        """Replace work staff"""
+        work_staff = StaffWorkRole.find_one_by_role_and_work(
+            work_id, data.get("role_id")
+        )
+        if work_staff:
+            update_data = {
+                "role_id": work_staff.role_id,
+                "staff_id": work_staff.staff_id,
+                "is_active": False,
+            }
+            cls.update_work_staff(work_staff.id, update_data, commit=False)
+
+        upserted_work_staff = cls.upsert_work_staff(work_id, data, commit=False)
+        db.session.commit()
+        return upserted_work_staff
 
     @classmethod
     def copy_outcome_and_actions(

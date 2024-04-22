@@ -22,6 +22,7 @@ from sqlalchemy.dialects.postgresql.ranges import Range
 
 from api.exceptions import ResourceNotFoundError
 from api.models import SpecialField, db
+from api.models.role import RoleEnum
 from api.models.special_field import EntityEnum
 from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
 
@@ -64,6 +65,8 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         payload["time_range"] = Range(
             payload.pop("active_from"), upper_limit, bounds="[)"
         )
+        print('is this empty')
+        print(payload)
         special_field = special_field.update(payload, commit=commit)
         cls._update_original_model(special_field)
         if commit:
@@ -112,12 +115,48 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     def _update_original_model(cls, special_field_entry: SpecialField) -> None:
         """If `special_field_entry` is latest, update original table with new value"""
         if special_field_entry.time_range.upper is None:
+            print("special_field_entry.entity is latest")
             model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[
                 EntityEnum(special_field_entry.entity)
             ]
+
             model_class.query.filter(
                 model_class.id == special_field_entry.entity_id
             ).update({special_field_entry.field_name: special_field_entry.field_value})
+            cls.run_other_related_updates(special_field_entry)
+
+    @classmethod
+    def run_other_related_updates(cls, special_field: SpecialField):
+        from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
+        print('run_other_related_updates')
+        print(special_field.entity)
+        print(EntityEnum.WORK.value)
+        if special_field.entity == EntityEnum.WORK:
+            print(special_field.field_name)
+            data = {
+                "staff_id": special_field.field_value,
+                "is_active": True
+            }
+            if special_field.field_name == "responsible_epd_id":
+                print("responsible_epd_id")
+                print(data)
+                data = {
+                    **data,
+                    "role_id": RoleEnum.RESPONSIBLE_EPD.value
+                }
+                WorkService.replace_work_staff(
+                    special_field.entity_id, data
+                )
+            if special_field.field_name == "work_lead_id":
+                print("work_lead_id")
+                print(data)
+                data = {
+                    **data,
+                    "role_id": RoleEnum.TEAM_LEAD.value
+                }
+                WorkService.replace_work_staff(
+                    special_field.entity_id, data
+                )
 
     @classmethod
     def find_special_history_by_date_range(

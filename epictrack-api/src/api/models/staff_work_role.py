@@ -59,6 +59,16 @@ class StaffWorkRole(BaseModelVersioned):
         ).all()
 
     @classmethod
+    def find_one_by_role_and_work(cls, work_id: int, role_id):
+        """Return by work and role ids."""
+        return cls.query.filter(
+            StaffWorkRole.work_id == work_id,
+            StaffWorkRole.role_id == role_id,
+            StaffWorkRole.is_deleted.is_(False),
+            StaffWorkRole.is_active.is_(True),
+        ).first()
+
+    @classmethod
     def find_by_work_and_staff_and_role(cls, work_id: int, staff_id: object, role_id: object, work_staff_id: object):
         """Return by work, staff and role ids."""
         query = cls.query.filter(
@@ -72,3 +82,21 @@ class StaffWorkRole(BaseModelVersioned):
             query = query.filter(StaffWorkRole.id != work_staff_id)
 
         return query.all()
+
+    @classmethod
+    def find_one_by_work_and_staff_and_role(cls, work_id: int, staff_id: object, role_id: object, work_staff_id: object, is_active: bool = None):
+        """Return by work, staff and role ids."""
+        query = cls.query.filter(
+            StaffWorkRole.work_id == work_id,
+            StaffWorkRole.staff_id == staff_id,
+            StaffWorkRole.is_deleted.is_(False),
+            StaffWorkRole.role_id == role_id,
+        )
+
+        if is_active is not None:
+            query = query.filter(StaffWorkRole.is_active.is_(is_active))
+
+        if work_staff_id:
+            query = query.filter(StaffWorkRole.id != work_staff_id)
+
+        return query.first()
