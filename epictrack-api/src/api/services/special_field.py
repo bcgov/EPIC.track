@@ -132,7 +132,6 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
                 "staff_id": special_field.field_value,
                 "is_active": True
             }
-            print(special_field.field_name)
             if special_field.field_name == "responsible_epd_id":
                 data = {
                     **data,
@@ -141,7 +140,6 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
                 WorkService.replace_work_staff(
                     special_field.entity_id, data
                 )
-            print(special_field.field_name)
             if special_field.field_name == "work_lead_id":
                 data = {
                     **data,

@@ -217,29 +217,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return works
 
     @classmethod
-    def create_work_initial_staff(cls, work_id: int, team_lead_id: int, responsible_epd_id: int):
-        """Create initial staffs for the work"""
-        team_lead_role = RoleService.find_by_name("Team Lead")
-        responsible_epd_role = RoleService.find_by_name("Responsible EPD")
-        staffs_data = [
-            {
-            "work_id": work_id,
-            "staff_id": team_lead_id,
-            "role_id": team_lead_role.id,
-            "is_active": True,
-            },
-            {
-            "work_id": work_id,
-            "staff_id": responsible_epd_id,
-            "role_id": responsible_epd_role.id,
-            "is_active": True,
-            }
-        ]
-
-        work_staffs = WorkService.create_work_staff_bulk(staffs_data)
-        return work_staffs
-
-    @classmethod
     def create_work(cls, payload, commit: bool = True):
         # pylint: disable=too-many-locals
         """Create a new work"""
@@ -287,20 +264,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 work.current_work_phase_id = work_phase.id
             sort_order = sort_order + 1
         # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
-        role_id = (
-            CodeService.find_code_values_by_type("roles", {"name": "Team Lead"})
-            .get("codes")[0]
-            .get("id")
-        )
-        WorkService.create_work_staff(
-            work.id,
-            {
-                "staff_id": payload["work_lead_id"],
-                "role_id": role_id,
-                "is_active": True,
-            },
-        )
-        cls.create_work_initial_staff(work.id, payload["work_lead_id"], payload["responsible_epd_id"])
+
         if commit:
             db.session.commit()
         return work
@@ -442,25 +406,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if commit:
             db.session.commit()
         return work_staff
-
-    @classmethod
-    def create_work_staff_bulk(cls, work_staffs: list):
-        """Create Staff Work"""
-        for work_staff in work_staffs:
-            cls._check_can_create_or_team_member_auth(work_staff.get("work_id"))
-            work_staffs.append(
-                StaffWorkRole(
-                    **{
-                        "work_id": work_staff.get("work_id"),
-                        "staff_id": work_staff.get("staff_id"),
-                        "role_id": work_staff.get("role_id"),
-                        "is_active": work_staff.get("is_active"),
-                    }
-                )
-            )
-        db.session.bulk_save_objects(work_staffs)
-        db.session.commit()
-        return work_staffs
 
     @classmethod
     def update_work_staff(
