@@ -127,6 +127,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
 
     @classmethod
     def run_other_related_updates(cls, special_field: SpecialField):
+        """Run other related updates based on special field entry."""
         from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
         special_field_entity = EntityEnum(special_field.entity).value
         if special_field_entity == EntityEnum.WORK.value:

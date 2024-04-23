@@ -84,7 +84,14 @@ class StaffWorkRole(BaseModelVersioned):
         return query.all()
 
     @classmethod
-    def find_one_by_work_and_staff_and_role(cls, work_id: int, staff_id: object, role_id: object, work_staff_id: object, is_active: bool = None):
+    def find_one_by_work_and_staff_and_role(
+            cls,
+            work_id: int,
+            staff_id: object,
+            role_id: object,
+            work_staff_id: object,
+            is_active: bool = None
+    ):
         """Return by work, staff and role ids."""
         query = cls.query.filter(
             StaffWorkRole.work_id == work_id,
