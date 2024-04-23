@@ -175,9 +175,11 @@ const WorkList = () => {
         filterSelectOptions: indigenousNations,
         accessorFn: (row) => {
           return (
-            row.indigenous_works
-              ?.map((indigenous_work) => indigenous_work.name)
-              ?.join(", ") ?? ""
+            <ul>
+              {row.indigenous_works?.map((indigenous_work) => (
+                <li key={indigenous_work.id}>{indigenous_work.name}</li>
+              ))}
+            </ul>
           );
         },
         Filter: ({ header, column }) => {
