@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
@@ -7,13 +7,23 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
+import { All_WORKS_FILTERS_CACHE_KEY } from "components/work/constants";
+import { useCachedState } from "hooks/useCachedFilters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { ETGridTitle } from "components/shared";
+import { useNavigate } from "react-router-dom";
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   });
-
+  const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
+    All_WORKS_FILTERS_CACHE_KEY,
+    []
+  );
+  const navigate = useNavigate();
+  const prevCachedFiltersRef = useRef(cachedFilters);
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
   const works = data || [];
@@ -24,6 +34,16 @@ const WorkList = () => {
       pageSize: works.length,
     }));
   }, [works]);
+
+  useEffect(() => {
+    if (
+      JSON.stringify(prevCachedFiltersRef.current) !==
+      JSON.stringify(cachedFilters)
+    ) {
+      navigate("/works");
+    }
+    prevCachedFiltersRef.current = cachedFilters;
+  }, [cachedFilters]);
 
   useEffect(() => {
     if (error) {
@@ -38,6 +58,18 @@ const WorkList = () => {
   const ministries = useMemo(() => {
     return Array.from(new Set(works.map((w) => w?.ministry?.name)));
   }, [works]);
+
+  const handleFilterChange = (newFilter: ColumnFilter) => {
+    const newFilters = cachedFilters.map((filter) =>
+      filter.id === newFilter.id ? newFilter : filter
+    );
+
+    if (!newFilters.find((filter) => filter.id === newFilter.id)) {
+      newFilters.push(newFilter);
+    }
+
+    setCachedFilters(newFilters);
+  };
 
   const indigenousNations = useMemo(() => {
     const nations = works
@@ -56,6 +88,23 @@ const WorkList = () => {
         size: 300,
         sortingFn: "sortFn",
         filterFn: searchFilter,
+        Cell: ({ row, renderedCellValue }) => (
+          <ETGridTitle
+            to="#"
+            enableTooltip
+            onClick={(e) => {
+              e.preventDefault();
+              handleFilterChange({
+                id: "title",
+                value: row.original.title,
+              });
+            }}
+            titleText={row.original.title}
+            tooltip={row.original.title}
+          >
+            {row.original.title}
+          </ETGridTitle>
+        ),
       },
       {
         accessorKey: "ministry.name",
@@ -92,7 +141,7 @@ const WorkList = () => {
       {
         accessorKey: "federal_involvement.name",
         header: "Federal Involvement",
-        size: 200,
+        size: 100,
         filterSelectOptions: federalInvolvements,
         Filter: ({ header, column }) => {
           return (
