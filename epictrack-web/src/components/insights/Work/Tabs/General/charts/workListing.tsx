@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
@@ -8,13 +8,8 @@ import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { ETGridTitle } from "components/shared";
-import { useNavigate } from "react-router-dom";
-import { All_WORKS_FILTERS_CACHE_KEY } from "components/work/constants";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { useCachedState } from "hooks/useCachedFilters";
 
 const WorkList = () => {
-  const navigate = useNavigate();
   const [phases, setPhases] = React.useState<string[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [projects, setProjects] = React.useState<string[]>([]);
@@ -22,12 +17,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-  const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
-    All_WORKS_FILTERS_CACHE_KEY,
-    []
-  );
   const { data, error, isLoading } = useGetWorksQuery();
-  const prevCachedFiltersRef = useRef(cachedFilters);
 
   const works = data || [];
 
@@ -37,16 +27,6 @@ const WorkList = () => {
       pageSize: works.length,
     }));
   }, [works]);
-
-  useEffect(() => {
-    if (
-      JSON.stringify(prevCachedFiltersRef.current) !==
-      JSON.stringify(cachedFilters)
-    ) {
-      navigate("/works");
-    }
-    prevCachedFiltersRef.current = cachedFilters;
-  }, [cachedFilters]);
 
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
@@ -77,18 +57,6 @@ const WorkList = () => {
     }
   }, [error]);
 
-  const handleFilterChange = (newFilter: ColumnFilter) => {
-    const newFilters = cachedFilters.map((filter) =>
-      filter.id === newFilter.id ? newFilter : filter
-    );
-
-    if (!newFilters.find((filter) => filter.id === newFilter.id)) {
-      newFilters.push(newFilter);
-    }
-
-    setCachedFilters(newFilters);
-  };
-
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
@@ -99,13 +67,9 @@ const WorkList = () => {
         filterFn: searchFilter,
         Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle
-            to={"#"}
+            to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
             tooltip={row.original.title}
-            onClick={(e) => {
-              e.preventDefault();
-              handleFilterChange({ id: "title", value: row.original.title });
-            }}
           >
             {renderedCellValue}
           </ETGridTitle>

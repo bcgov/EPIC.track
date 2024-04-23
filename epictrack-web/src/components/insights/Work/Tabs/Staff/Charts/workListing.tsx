@@ -12,21 +12,11 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
-import { All_WORKS_FILTERS_CACHE_KEY } from "components/work/constants";
-import { useCachedState } from "hooks/useCachedFilters";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { useNavigate } from "react-router-dom";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 
 type WorkStaffWithWork = WorkStaff & { work: Work };
 
 const WorkList = () => {
-  const navigate = useNavigate();
-  const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
-    All_WORKS_FILTERS_CACHE_KEY,
-    []
-  );
-  const prevCachedFiltersRef = useRef(cachedFilters);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [leads, setLeads] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
@@ -64,16 +54,6 @@ const WorkList = () => {
       }));
     }
   }, [workStaffs, works]);
-
-  useEffect(() => {
-    if (
-      JSON.stringify(prevCachedFiltersRef.current) !==
-      JSON.stringify(cachedFilters)
-    ) {
-      navigate("/works");
-    }
-    prevCachedFiltersRef.current = cachedFilters;
-  }, [cachedFilters]);
 
   const officerAnalysts = React.useMemo(() => {
     if (!workStaffs) return [];
@@ -159,18 +139,6 @@ const WorkList = () => {
     setWorkRoles(cols);
   }, [workStaffs]);
 
-  const handleFilterChange = (newFilter: ColumnFilter) => {
-    const newFilters = cachedFilters.map((filter) =>
-      filter.id === newFilter.id ? newFilter : filter
-    );
-
-    if (!newFilters.find((filter) => filter.id === newFilter.id)) {
-      newFilters.push(newFilter);
-    }
-
-    setCachedFilters(newFilters);
-  };
-
   const codeTypes: { [x: string]: any } = {
     work_type: setWorkTypes,
     eao_team: setTeams,
@@ -204,14 +172,7 @@ const WorkList = () => {
         Cell: ({ row, renderedCellValue }) => {
           return (
             <ETGridTitle
-              to="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleFilterChange({
-                  id: "title",
-                  value: row.original.work.title,
-                });
-              }}
+              to={`/work-plan?work_id=${row.original.work.id}`}
               titleText={row.original.work.title}
               enableTooltip
               tooltip={row.original.work.title}
