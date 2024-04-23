@@ -67,8 +67,7 @@ from api.schemas.response import (
     StaffWorkRoleResponseSchema,
     WorkPhaseAdditionalInfoResponseSchema,
     WorkResponseSchema,
-    WorkStatusResponseSchema,
-)
+    WorkStatusResponseSchema,)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.schemas.work_type import WorkTypeSchema
