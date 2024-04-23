@@ -53,4 +53,5 @@ class SpecialField(BaseModelVersioned):
         if hasattr(cls, 'is_deleted'):
             query['is_deleted'] = False
         rows = cls.query.filter_by(**query).order_by(SpecialField.time_range.desc()).all()
+
         return rows

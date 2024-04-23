@@ -22,6 +22,7 @@ from sqlalchemy.dialects.postgresql.ranges import Range
 
 from api.exceptions import ResourceNotFoundError
 from api.models import SpecialField, db
+from api.models.role import RoleEnum
 from api.models.special_field import EntityEnum
 from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
 
@@ -115,9 +116,38 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
             model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[
                 EntityEnum(special_field_entry.entity)
             ]
+
             model_class.query.filter(
                 model_class.id == special_field_entry.entity_id
             ).update({special_field_entry.field_name: special_field_entry.field_value})
+            cls.run_other_related_updates(special_field_entry)
+
+    @classmethod
+    def run_other_related_updates(cls, special_field: SpecialField):
+        """Run other related updates based on special field entry."""
+        from api.services.work import WorkService  # pylint: disable=import-outside-toplevel
+        special_field_entity = EntityEnum(special_field.entity).value
+        if special_field_entity == EntityEnum.WORK.value:
+            data = {
+                "staff_id": special_field.field_value,
+                "is_active": True
+            }
+            if special_field.field_name == "responsible_epd_id":
+                data = {
+                    **data,
+                    "role_id": RoleEnum.RESPONSIBLE_EPD.value
+                }
+                WorkService.replace_work_staff(
+                    special_field.entity_id, data
+                )
+            if special_field.field_name == "work_lead_id":
+                data = {
+                    **data,
+                    "role_id": RoleEnum.TEAM_LEAD.value
+                }
+                WorkService.replace_work_staff(
+                    special_field.entity_id, data
+                )
 
     @classmethod
     def find_special_history_by_date_range(

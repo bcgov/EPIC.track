@@ -275,10 +275,11 @@ def test_work_resources(client, auth_header):
         == work_response_json["responsible_epd_id"]
     )
     assert work_resource_json["work_lead"]["id"] == work_response_json["work_lead_id"]
-    assert len(work_resource_json["staff"]) == 1
-    work_staff = work_resource_json["staff"][0]
-    assert work_staff["id"] == work_response_json["work_lead_id"]
-    assert work_staff["role"]["name"] == "Team Lead"
+    assert len(work_resource_json["staff"]) == 2
+    team_lead = [x for x in work_resource_json["staff"] if x["role"]['name'] == 'Team Lead'][0]
+    epd = [x for x in work_resource_json["staff"] if x["role"]['name'] == 'Responsible EPD'][0]
+    assert team_lead["id"] == work_response_json["work_lead_id"]
+    assert epd["id"] == work_response_json["responsible_epd_id"]
 
 
 def test_get_work_staff_roles(client, auth_header):
@@ -294,7 +295,7 @@ def test_get_work_staff_roles(client, auth_header):
     url = urljoin(API_BASE_URL, f'works/{work_response_json["id"]}/staff-roles')
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
-    assert len(response.json) == 1
+    assert len(response.json) == 2
 
 
 def test_create_work_staff_roles(client, auth_header):

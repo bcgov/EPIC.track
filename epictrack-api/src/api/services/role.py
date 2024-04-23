@@ -26,3 +26,17 @@ class RoleService:  # pylint:disable=too-few-public-methods
         current_app.logger.debug("find roles")
         roles = Role.find_all()
         return roles
+
+    @classmethod
+    def find_by_name(cls, name):
+        """Find role by name"""
+        current_app.logger.debug("find role by name")
+        role = Role.find_by_name(name)
+        return role
+
+    @classmethod
+    def find_all_by_names(cls, names):
+        """Find role by name"""
+        current_app.logger.debug("find roles by names")
+        roles = Role.find_all_by_names(names)
+        return roles

@@ -133,7 +133,6 @@ def _change_event_anticipated_date(
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=work_data, headers=headers)
     work_response_json = work_response.json
-    print(work_response_json)
     work_id = work_response_json["id"]
     work_phases = WorkPhase.find_by_params({"work_id": work_id})
     # first work phase in the assessment would be non-legislated and second is legislated
