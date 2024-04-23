@@ -65,10 +65,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         payload["time_range"] = Range(
             payload.pop("active_from"), upper_limit, bounds="[)"
         )
-        print('is this empty')
-        print(payload)
         special_field = special_field.update(payload, commit=commit)
-        special_field.flush()
         cls._update_original_model(special_field)
         if commit:
             db.session.commit()
