@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
