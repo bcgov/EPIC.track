@@ -20,6 +20,9 @@ import NoDataEver from "../../shared/NoDataEver";
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
+import { WorkStaffRole } from "models/role";
+import { unEditableTeamMembers } from "./constants";
+
 const TeamList = () => {
   const [roles, setRoles] = React.useState<string[]>([]);
   const [statuses, setStatuses] = React.useState<string[]>([]);
@@ -27,11 +30,13 @@ const TeamList = () => {
   const [loading, setLoading] = React.useState<boolean>(true);
   const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
   const ctx = React.useContext(WorkplanContext);
-  const teamMembers = useMemo(() => ctx.team, [ctx.team]);
   const staff = ctx.selectedStaff?.staff;
   const { email, roles: givenUserAuthRoles } = useAppSelector(
     (state) => state.user.userDetail
   );
+
+  const teamMembers = useMemo(() => ctx.team, [ctx.team]);
+
   const userIsTeamMember = useMemo(
     () => teamMembers.some((member) => member.staff.email === email),
     [teamMembers, email]
@@ -70,19 +75,20 @@ const TeamList = () => {
         header: "Name",
         muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         size: 250,
-        Cell: canEdit
-          ? ({ cell, row }) => (
-              <ETGridTitle
-                to="#"
-                enableEllipsis
-                onClick={(event: any) => onRowClick(event, row.original)}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {cell.getValue<string>()}
-              </ETGridTitle>
-            )
-          : undefined,
+        Cell: ({ cell, row }) => (
+          <ETGridTitle
+            to="#"
+            enableEllipsis
+            onClick={(event: any) => onRowClick(event, row.original)}
+            enableTooltip={true}
+            tooltip={cell.getValue<string>()}
+            disabled={
+              unEditableTeamMembers.includes(row.original.role.id) || !canEdit
+            }
+          >
+            {cell.getValue<string>()}
+          </ETGridTitle>
+        ),
         sortingFn: "sortFn",
       },
       {

@@ -44,3 +44,13 @@ class Role(db.Model, CodeTableVersioned):
             'id': self.id,
             'name': self.name
         }
+
+    @classmethod
+    def find_by_name(cls, name):
+        """Find role by name."""
+        return cls.query.filter_by(name=name).one_or_none()
+
+    @classmethod
+    def find_all_by_names(cls, names):
+        """Find role by name."""
+        return cls.query.filter(Role.name.in_(names)).all()
