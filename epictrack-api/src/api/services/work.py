@@ -77,7 +77,6 @@ from api.services.event_template import EventTemplateService
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
-from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
 from api.utils import util
@@ -280,6 +279,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def create_special_fields(cls, work: Work):
         """Create work special fields"""
+        from api.services.special_field import SpecialFieldService  # pylint: disable=import-outside-toplevel
         work_epd_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
