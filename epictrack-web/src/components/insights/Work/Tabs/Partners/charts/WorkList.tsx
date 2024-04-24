@@ -63,7 +63,7 @@ const WorkList = () => {
             titleText={row.original.title}
             tooltip={row.original.title}
           >
-            {row.original.title}
+            {renderedCellValue}
           </ETGridTitle>
         ),
       },

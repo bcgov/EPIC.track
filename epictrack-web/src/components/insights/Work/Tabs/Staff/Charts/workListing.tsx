@@ -177,7 +177,7 @@ const WorkList = () => {
               enableTooltip
               tooltip={row.original.work.title}
             >
-              {row.original.work.title}
+              {renderedCellValue}
             </ETGridTitle>
           );
         },
