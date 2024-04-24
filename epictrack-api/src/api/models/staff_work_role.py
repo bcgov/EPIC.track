@@ -84,7 +84,7 @@ class StaffWorkRole(BaseModelVersioned):
         return query.all()
 
     @classmethod
-    def find_one_by_work_and_staff_and_role(
+    def find_one_by_work_and_staff_and_role(  # pylint:disable=too-many-arguments
             cls,
             work_id: int,
             staff_id: object,
