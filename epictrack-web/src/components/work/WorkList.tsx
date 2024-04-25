@@ -19,7 +19,6 @@ import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { sort } from "utils";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -68,28 +67,16 @@ const WorkList = () => {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      let sort_key = "sort_order";
-      if (key == "project") {
-        sort_key = "name";
-      }
       if (key == "ministry") {
         accessor = "abbreviation";
       }
-      sort_key = key + "." + sort_key;
-
-      const filteredWorks = works.filter(
-        (w) =>
-          w[key as keyof typeof w] !== null &&
-          w[key as keyof typeof w] !== undefined
-      );
-      const codes = sort([...filteredWorks], sort_key)
+      const codes = works
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
-
       codeTypes[key](codes);
     });
   }, [works]);
