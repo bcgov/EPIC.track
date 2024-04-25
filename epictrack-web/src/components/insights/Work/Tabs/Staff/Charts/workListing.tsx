@@ -65,14 +65,15 @@ const WorkList = () => {
   }, [workStaffs]);
 
   const officerAnalystOptions = React.useMemo(() => {
-    return Array.from(
+    const sortedOfficerAnalysts = sort(officerAnalysts, "full_name");
+    const uniqueOfficerAnalystNames = Array.from(
       new Set(
-        officerAnalysts.map(
-          (officerAnalyst: any) =>
-            `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
+        sortedOfficerAnalysts.map(
+          (officerAnalyst: any) => `${officerAnalyst.full_name}`
         )
       )
-    ).sort((a, b) => a.localeCompare(b));
+    );
+    return uniqueOfficerAnalystNames;
   }, [officerAnalysts]);
 
   const officerFilterFunction = (row: any, id: any, filterValue: any) => {
@@ -108,10 +109,7 @@ const WorkList = () => {
               (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
             );
             return officerAnalystsForRow
-              .map(
-                (officerAnalyst: any) =>
-                  `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
-              )
+              .map((officerAnalyst: any) => `${officerAnalyst.full_name}`)
               .join(", ");
           },
           Cell: ({ renderedCellValue }) => (
