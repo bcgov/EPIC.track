@@ -7,6 +7,7 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
+import { sort } from "utils";
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
@@ -37,18 +38,23 @@ const WorkList = () => {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
+      let sort_key = "sort_order";
+      if (key == "project") {
+        sort_key = "name";
+      }
       if (key == "ministry") {
         accessor = "abbreviation";
       }
-      const codes = works
+      sort_key = key + "." + sort_key;
+      const codes = sort([...works], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
-      const sortedCodes = codes.sort();
-      codeTypes[key](sortedCodes);
+
+      codeTypes[key](codes);
     });
   }, [works]);
 

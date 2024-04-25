@@ -23,6 +23,7 @@ import { WorkStaff } from "models/workStaff";
 import { set } from "lodash";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
+import { sort } from "utils";
 
 type WorkOrWorkStaff = Work | WorkStaff;
 
@@ -146,7 +147,6 @@ const WorkList = () => {
   }, [workStaffs]);
 
   const codeTypes: { [x: string]: any } = {
-    work_type: setWorkTypes,
     eao_team: setTeams,
     work_lead: setLeads,
   };
@@ -155,18 +155,20 @@ const WorkList = () => {
     if (!workStaffs) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "work_lead" || key == "responsible_epd") {
+      let sort_key = "sort_order";
+      if (key == "work_lead") {
         accessor = "full_name";
+        sort_key = "full_name";
       }
-      const codes = workStaffs
+      sort_key = key + "." + sort_key;
+      const codes = sort([...workStaffs], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
-      const sortedCodes = codes.sort();
-      codeTypes[key](sortedCodes);
+      codeTypes[key](codes);
     });
   }, [workStaffs]);
 

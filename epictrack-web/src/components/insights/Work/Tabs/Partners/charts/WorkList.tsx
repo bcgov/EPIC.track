@@ -37,27 +37,29 @@ const WorkList = () => {
   }, [works]);
 
   const ministries = useMemo(() => {
-    return Array.from(
+    const ministry = Array.from(
       new Set(
         [...works]
-          .sort(
-            (a, b) =>
-              a.ministry?.minister?.position?.sort_order -
-              b.ministry?.minister?.position?.sort_order
-          )
+          .sort((a, b) => a.ministry?.sort_order - b.ministry?.sort_order)
           .filter((w) => w.ministry)
           .map((w) => w.ministry.name)
       )
     );
+    return ministry;
   }, [works]);
 
   const indigenousNations = useMemo(() => {
-    const nations = works
-      .map((work) => work.indigenous_works)
-      .flat()
-      .map((nation) => nation?.name ?? "")
-      .filter((nation) => nation);
-    return Array.from(new Set(nations)).sort();
+    const nations = works.map((work) => work.indigenous_works).flat();
+
+    const uniqueNations = Array.from(
+      new Set(
+        sort([...nations], "name")
+          .map((nation) => nation?.name ?? "")
+          .filter((nation) => nation)
+      )
+    );
+
+    return uniqueNations;
   }, [works]);
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
