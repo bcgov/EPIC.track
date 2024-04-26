@@ -21,6 +21,7 @@ from faker import Faker
 
 from api.config import get_named_config
 from api.models.special_field import EntityEnum
+from api.models.task_event import StatusEnum
 from api.utils.constants import CANADA_TIMEZONE
 from tests.constants import ASSESSMENT_WORK_TYPE
 from tests.utilities.providers import FormattedPhoneNumberProvider
@@ -306,4 +307,28 @@ class TestTaskTemplateEnum(Enum):
         "ea_act_id": 3,
         "work_type_id": 1,
         "phase_id": 1,
+    }
+
+
+class WorkPhaseEnum(Enum):
+    """Test scenarios for work phase"""
+
+    work_phase1 = {
+        "start_date": (start_date := fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE)).isoformat(),
+        "end_date": fake.date_time_between_dates(datetime_start=start_date, tzinfo=CANADA_TIMEZONE).isoformat(),
+        "phase_id": 1,
+        "sort_order": 1
+    }
+
+
+class TestTaskEnum(Enum):
+    """Test scenarios for tasks"""
+
+    task1 = {
+        "name": fake.word(),
+        "responsibility_ids": fake.random_elements(elements=(
+            1, 2, 3, 4, 5, 6, 7, 8, 9
+        ), unique=True),
+        "start_date": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
+        "status": StatusEnum.NOT_STARTED.value
     }
