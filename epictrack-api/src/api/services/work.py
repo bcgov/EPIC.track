@@ -279,7 +279,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def create_special_fields(cls, work: Work):
         """Create work special fields"""
-        from api.services.special_field import SpecialFieldService  # pylint: disable=import-outside-toplevel
+        from api.services.special_field import SpecialFieldService  # pylint: disable=import-outside-toplevel,cyclic-import
         work_epd_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
