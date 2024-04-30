@@ -1,6 +1,6 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
 import StaffForm from "./StaffForm";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
@@ -16,6 +16,8 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { exportToCsv } from "utils/exportUtils";
+import { FileDownload } from "@mui/icons-material";
 
 const staffListColumnFiltersCacheKey = "staff-listing-column-filters";
 const StaffList = () => {
@@ -191,7 +193,7 @@ const StaffList = () => {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={() => (
+            renderTopToolbarCustomActions={({ table }) => (
               <Box
                 sx={{
                   width: "100%",
@@ -213,6 +215,19 @@ const StaffList = () => {
                     Create Staff
                   </Button>
                 </Restricted>
+                <Tooltip title="Export to csv">
+                  <IconButton
+                    onClick={() =>
+                      exportToCsv({
+                        table,
+                        downloadDate: new Date().toISOString(),
+                        filenamePrefix: "staff-listing",
+                      })
+                    }
+                  >
+                    <FileDownload />
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
             onCacheFilters={handleCacheFilters}

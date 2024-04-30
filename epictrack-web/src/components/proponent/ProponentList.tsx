@@ -1,5 +1,14 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  Stack,
+  Typography,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
@@ -23,6 +32,8 @@ import { Palette } from "styles/theme";
 import { debounce } from "lodash";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
+import { exportToCsv } from "utils/exportUtils";
+import { FileDownload } from "@mui/icons-material";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 
@@ -233,7 +244,7 @@ export default function ProponentList() {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={() => (
+            renderTopToolbarCustomActions={({ table }) => (
               <Box
                 sx={{
                   width: "100%",
@@ -255,6 +266,19 @@ export default function ProponentList() {
                     Create Proponent
                   </Button>
                 </Restricted>
+                <Tooltip title="Export to csv">
+                  <IconButton
+                    onClick={() =>
+                      exportToCsv({
+                        table,
+                        downloadDate: new Date().toISOString(),
+                        filenamePrefix: "proponent-listing",
+                      })
+                    }
+                  >
+                    <FileDownload />
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
             onCacheFilters={handleCacheFilters}

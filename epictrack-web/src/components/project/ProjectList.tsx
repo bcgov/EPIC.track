@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, Tooltip, IconButton } from "@mui/material";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
@@ -15,6 +15,8 @@ import { ProjectDialog } from "./Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { exportToCsv } from "utils/exportUtils";
+import { FileDownload } from "@mui/icons-material";
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
@@ -292,7 +294,7 @@ const ProjectList = () => {
               isLoading: loadingProjects,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={() => (
+            renderTopToolbarCustomActions={({ table }) => (
               <Box
                 sx={{
                   width: "100%",
@@ -314,6 +316,19 @@ const ProjectList = () => {
                     Create Project
                   </Button>
                 </Restricted>
+                <Tooltip title="Export to csv">
+                  <IconButton
+                    onClick={() =>
+                      exportToCsv({
+                        table,
+                        downloadDate: new Date().toISOString(),
+                        filenamePrefix: "project-listing",
+                      })
+                    }
+                  >
+                    <FileDownload />
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
             onCacheFilters={handleCacheFilters}

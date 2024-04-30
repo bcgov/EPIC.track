@@ -23,6 +23,9 @@ import { WorkStaff } from "models/workStaff";
 import { set } from "lodash";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
+import { exportToCsv } from "utils/exportUtils";
+import { FileDownload } from "@mui/icons-material";
+import { IconButton, Tooltip, Box } from "@mui/material";
 
 type WorkOrWorkStaff = Work | WorkStaff;
 
@@ -271,6 +274,29 @@ const WorkList = () => {
         showGlobalFilter: true,
         pagination: pagination,
       }}
+      renderTopToolbarCustomActions={({ table }) => (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "right",
+          }}
+        >
+          <Tooltip title="Export to csv">
+            <IconButton
+              onClick={() =>
+                exportToCsv({
+                  table,
+                  downloadDate: new Date().toISOString(),
+                  filenamePrefix: "staff-insights-listing",
+                })
+              }
+            >
+              <FileDownload />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
       enablePagination
       muiPaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(workStaffs?.length || 0),

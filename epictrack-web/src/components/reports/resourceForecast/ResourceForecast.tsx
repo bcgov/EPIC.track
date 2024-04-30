@@ -33,7 +33,6 @@ import { ETPageContainer, ETParagraph } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
-import { exportToCsv } from "utils/exportUtils";
 
 export default function ResourceForecast() {
   const [reportDate, setReportDate] = useState<string>("");
@@ -53,9 +52,6 @@ export default function ResourceForecast() {
     pageIndex: 0,
     pageSize: 10, //customize the default page size
   });
-  const exportDate = dateUtils.formatDate(
-    reportDate ? reportDate : new Date().toISOString()
-  );
 
   const FILENAME_PREFIX = "EAO_Resource_Forecast";
 
@@ -75,6 +71,39 @@ export default function ResourceForecast() {
     );
     setColumnFilters(filteredColumnFilters);
   }, [columnVisibility, setColumnFilters]);
+
+  const exportToCsv = React.useCallback(
+    async (table: MRT_TableInstance<ResourceForecastModel>) => {
+      const filteredResult = table.getFilteredRowModel().flatRows.map((p) => {
+        return {
+          ...p.original,
+          [p.original.months[0].label]: p.original.months[0].phase,
+          [p.original.months[1].label]: p.original.months[1].phase,
+          [p.original.months[2].label]: p.original.months[2].phase,
+          [p.original.months[3].label]: p.original.months[3].phase,
+        };
+      });
+      const columns = table
+        .getVisibleFlatColumns()
+        .map((p) => p.columnDef.id?.toString());
+      const csv = await json2csv(filteredResult, {
+        emptyFieldValue: "",
+        keys: columns as string[],
+      });
+      const url = window.URL.createObjectURL(new Blob([csv as any]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${FILENAME_PREFIX}-${dateUtils.formatDate(
+          reportDate ? reportDate : new Date().toISOString()
+        )}.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+    },
+    [reportDate]
+  );
 
   React.useEffect(() => {
     const diff = dateUtils.diff(
@@ -444,22 +473,7 @@ export default function ResourceForecast() {
                 </IconButton>
               </Tooltip>
               <Tooltip title="Export to csv">
-                <IconButton
-                  onClick={() =>
-                    exportToCsv({
-                      table,
-                      downloadDate: exportDate,
-                      filenamePrefix: FILENAME_PREFIX,
-                      mapRow: (row) => ({
-                        ...row,
-                        [row.months[0].label]: row.months[0].phase,
-                        [row.months[1].label]: row.months[1].phase,
-                        [row.months[2].label]: row.months[2].phase,
-                        [row.months[3].label]: row.months[3].phase,
-                      }),
-                    })
-                  }
-                >
+                <IconButton onClick={() => exportToCsv(table)}>
                   <FileDownloadIcon />
                 </IconButton>
               </Tooltip>

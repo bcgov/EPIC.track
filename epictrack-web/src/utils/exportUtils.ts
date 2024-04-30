@@ -1,27 +1,21 @@
 import { json2csv } from "json-2-csv";
 import dateUtils from "./dateUtils";
-
-interface TableInstance<T> {
-  getFilteredRowModel: () => { flatRows: { original: T }[] };
-  getVisibleFlatColumns: () => { columnDef: { id?: string } }[];
-}
-
-interface ExportToCsvOptions<T> {
-  table: TableInstance<T>;
+import { MRT_TableInstance } from "material-react-table";
+import { MRT_RowData } from "material-react-table";
+interface ExportToCsvOptions<T extends MRT_RowData> {
+  table: MRT_TableInstance<T>;
   downloadDate: string | null;
   filenamePrefix: string;
-  mapRow: (row: T) => any;
 }
 
-export async function exportToCsv<T>({
+export async function exportToCsv<T extends MRT_RowData>({
   table,
   downloadDate,
   filenamePrefix,
-  mapRow,
 }: ExportToCsvOptions<T>) {
   const filteredResult = table
     .getFilteredRowModel()
-    .flatRows.map((p) => mapRow(p.original));
+    .flatRows.map((p) => p.original);
   const columns = table
     .getVisibleFlatColumns()
     .map((p) => p.columnDef.id?.toString());
