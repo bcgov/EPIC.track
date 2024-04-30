@@ -7,13 +7,13 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
+import { ETGridTitle } from "components/shared";
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   });
-
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
   const works = data || [];
@@ -56,6 +56,16 @@ const WorkList = () => {
         size: 300,
         sortingFn: "sortFn",
         filterFn: searchFilter,
+        Cell: ({ row, renderedCellValue }) => (
+          <ETGridTitle
+            to={`/work-plan?work_id=${row.original.id}`}
+            enableTooltip
+            titleText={row.original.title}
+            tooltip={row.original.title}
+          >
+            {renderedCellValue}
+          </ETGridTitle>
+        ),
       },
       {
         accessorKey: "ministry.name",
@@ -92,7 +102,7 @@ const WorkList = () => {
       {
         accessorKey: "federal_involvement.name",
         header: "Federal Involvement",
-        size: 200,
+        size: 100,
         filterSelectOptions: federalInvolvements,
         Filter: ({ header, column }) => {
           return (
@@ -126,9 +136,11 @@ const WorkList = () => {
         filterSelectOptions: indigenousNations,
         accessorFn: (row) => {
           return (
-            row.indigenous_works
-              ?.map((indigenous_work) => indigenous_work.name)
-              ?.join(", ") ?? ""
+            <ul>
+              {row.indigenous_works?.map((indigenous_work) => (
+                <li key={indigenous_work.id}>{indigenous_work.name}</li>
+              ))}
+            </ul>
           );
         },
         Filter: ({ header, column }) => {
