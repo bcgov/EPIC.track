@@ -845,12 +845,20 @@ class EventService:
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
-            each_work_phase.end_date = each_work_phase.end_date + timedelta(
-                days=number_of_days_to_be_pushed
-            )
-            each_work_phase.update(
-                each_work_phase.as_dict(recursive=False), commit=False
-            )
+            # work phase end date is handled in _handle_work_phase_for_end_phase_end_event, if the event has actual and if event is end event
+            # . This code has to be invoked only if the work phase is not current phase and doesn't have
+            # actual date on the event
+            if (
+                each_work_phase.id != current_work_phase.id
+                or not event.actual_date
+                or not event.event_position == EventPositionEnum.END.value
+            ):
+                each_work_phase.end_date = each_work_phase.end_date + timedelta(
+                    days=number_of_days_to_be_pushed
+                )
+                each_work_phase.update(
+                    each_work_phase.as_dict(recursive=False), commit=False
+                )
 
     @classmethod
     def _find_work_phase_events(
@@ -898,14 +906,11 @@ class EventService:
         have actual dates in all the previous events.
         """
         if event.actual_date:
-            if (
-                event.event_position == EventPositionEnum.START.value
-                and current_work_phase_index > 0
-            ):
+            if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
                 if not previous_work_phase.is_completed:
                     raise UnprocessableEntityError(
-                        "Previous event should be completed to proceed"
+                        "Previous phase should be completed to proceed"
                     )
             event_index = cls.find_event_index(
                 all_work_events,

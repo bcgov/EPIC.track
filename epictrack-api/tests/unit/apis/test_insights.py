@@ -57,14 +57,12 @@ def test_get_works_by_staff(client, auth_header):
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=payload, headers=auth_header)
     work_response_json = work_response.json
-    print(work_response_json)
     url = urljoin(API_BASE_URL, "insights/works?group_by=staff")
     result = client.get(url, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
-    assert len(result.json) == 1
-    staff_insight = result.json[0]
-    assert staff_insight["staff_id"] == work_response_json["work_lead_id"]
-    assert staff_insight["count"] == 1
+    assert len(result.json) == 2
+    initial_staff = [work_response_json["work_lead_id"], work_response_json["responsible_epd_id"]]
+    assert set([staff_insight["staff_id"] for staff_insight in result.json]) == set(initial_staff)
 
 
 def test_get_works_by_ministry(client, auth_header):
