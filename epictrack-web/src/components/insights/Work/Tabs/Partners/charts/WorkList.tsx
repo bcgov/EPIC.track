@@ -7,6 +7,7 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
+import { sort } from "utils";
 import { ETGridTitle } from "components/shared";
 
 const WorkList = () => {
@@ -36,16 +37,29 @@ const WorkList = () => {
   }, [works]);
 
   const ministries = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w?.ministry?.name)));
+    const ministry = Array.from(
+      new Set(
+        [...works]
+          .sort((a, b) => a.ministry?.sort_order - b.ministry?.sort_order)
+          .filter((w) => w.ministry)
+          .map((w) => w.ministry.name)
+      )
+    );
+    return ministry;
   }, [works]);
 
   const indigenousNations = useMemo(() => {
-    const nations = works
-      .map((work) => work.indigenous_works)
-      .flat()
-      .map((nation) => nation?.name ?? "")
-      .filter((nation) => nation);
-    return Array.from(new Set(nations));
+    const nations = works.map((work) => work.indigenous_works).flat();
+
+    const uniqueNations = Array.from(
+      new Set(
+        sort([...nations], "name")
+          .map((nation) => nation?.name ?? "")
+          .filter((nation) => nation)
+      )
+    );
+
+    return uniqueNations;
   }, [works]);
 
   const columns = React.useMemo<MRT_ColumnDef<Work>[]>(

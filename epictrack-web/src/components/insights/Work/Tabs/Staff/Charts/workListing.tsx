@@ -12,6 +12,7 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
+import { sort } from "utils";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 
 type WorkStaffWithWork = WorkStaff & { work: Work };
@@ -67,14 +68,15 @@ const WorkList = () => {
   }, [workStaffs]);
 
   const officerAnalystOptions = React.useMemo(() => {
-    return Array.from(
+    const sortedOfficerAnalysts = sort(officerAnalysts, "full_name");
+    const uniqueOfficerAnalystNames = Array.from(
       new Set(
-        officerAnalysts.map(
-          (officerAnalyst: any) =>
-            `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
+        sortedOfficerAnalysts.map(
+          (officerAnalyst: any) => `${officerAnalyst.full_name}`
         )
       )
     );
+    return uniqueOfficerAnalystNames;
   }, [officerAnalysts]);
 
   const officerFilterFunction = (row: any, id: any, filterValue: any) => {
@@ -110,10 +112,7 @@ const WorkList = () => {
               (p: { role: Role }) => p.role.id === WorkStaffRole.OFFICER_ANALYST
             );
             return officerAnalystsForRow
-              .map(
-                (officerAnalyst: any) =>
-                  `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
-              )
+              .map((officerAnalyst: any) => `${officerAnalyst.full_name}`)
               .join(", ");
           },
           Cell: ({ renderedCellValue }) => renderedCellValue,
@@ -140,7 +139,6 @@ const WorkList = () => {
   }, [workStaffs]);
 
   const codeTypes: { [x: string]: any } = {
-    work_type: setWorkTypes,
     eao_team: setTeams,
     work_lead: setLeads,
   };
@@ -149,10 +147,13 @@ const WorkList = () => {
     if (!workStaffs) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "work_lead" || key == "responsible_epd") {
+      let sort_key = "sort_order";
+      if (key == "work_lead") {
         accessor = "full_name";
+        sort_key = "full_name";
       }
-      const codes = workStaffs
+      sort_key = key + "." + sort_key;
+      const codes = sort([...workStaffs], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))

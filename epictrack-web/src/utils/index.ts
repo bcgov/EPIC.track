@@ -1,12 +1,24 @@
 import dateUtils from "./dateUtils";
+
 const sort = (collection: any[], sortField: string) => {
   const collator = new Intl.Collator("en-GB", {
     numeric: true,
     ignorePunctuation: true,
     sensitivity: "base",
   });
-  return collection.sort(function (a, b) {
-    return collator.compare(a[sortField], b[sortField]);
+
+  const keys = sortField.split(".");
+
+  return [...collection].sort(function (a, b) {
+    let aValue = a;
+    let bValue = b;
+
+    keys.forEach((key) => {
+      aValue = aValue[key];
+      bValue = bValue[key];
+    });
+
+    return collator.compare(aValue, bValue);
   });
 };
 
