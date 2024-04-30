@@ -95,6 +95,7 @@ const generateMockWork = (): Work => {
       abbreviation: "",
       combined: "",
       minister: mockStaffs[workCounter - 1] as Staff,
+      sort_order: workCounter,
     },
     ea_act: { id: workCounter, name: faker.random.word() },
     eao_team: { id: workCounter, name: faker.random.word() },

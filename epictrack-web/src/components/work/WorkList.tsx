@@ -118,7 +118,7 @@ const WorkList = () => {
             tooltip={row.original.title}
             titleText={row.original.title}
           >
-            {renderedCellValue}
+            {row.original.title}
           </ETGridTitle>
         ),
         sortingFn: "sortFn",

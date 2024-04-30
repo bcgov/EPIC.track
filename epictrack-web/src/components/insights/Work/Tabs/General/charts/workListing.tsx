@@ -10,6 +10,8 @@ import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "utils/exportUtils";
 import { FileDownload } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
+import { sort } from "utils";
+import { ETGridTitle } from "components/shared";
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
@@ -19,7 +21,6 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-
   const { data, error, isLoading } = useGetWorksQuery();
 
   const works = data || [];
@@ -40,16 +41,22 @@ const WorkList = () => {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
+      let sort_key = "sort_order";
+      if (key == "project") {
+        sort_key = "name";
+      }
       if (key == "ministry") {
         accessor = "abbreviation";
       }
-      const codes = works
+      sort_key = key + "." + sort_key;
+      const codes = sort([...works], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
+
       codeTypes[key](codes);
     });
   }, [works]);
@@ -68,6 +75,15 @@ const WorkList = () => {
         size: 300,
         sortingFn: "sortFn",
         filterFn: searchFilter,
+        Cell: ({ row, renderedCellValue }) => (
+          <ETGridTitle
+            to={`/work-plan?work_id=${row.original.id}`}
+            enableTooltip
+            tooltip={row.original.title}
+          >
+            {renderedCellValue}
+          </ETGridTitle>
+        ),
       },
       {
         accessorKey: "project.name",

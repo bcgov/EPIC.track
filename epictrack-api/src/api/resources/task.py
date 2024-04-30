@@ -16,11 +16,13 @@ from http import HTTPStatus
 
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
+
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services import TaskService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
+
 
 API = Namespace("tasks", description="Tasks")
 
@@ -99,7 +101,7 @@ class Event(Resource):
     def get(event_id):
         """Gets the task event"""
         req.TaskEventIdPathParameterSchema().load(request.view_args)
-        task_event = TaskService.find_task_event(event_id)
+        task_event = TaskService.find_task_event(event_id, exclude_deleted=True)
         return res.TaskEventResponseSchema().dump(task_event), HTTPStatus.OK
 
 

@@ -12,6 +12,7 @@ import { useProjectsContext } from "./ProjectsContext";
 import { exportToCsv } from "utils/exportUtils";
 import { FileDownload } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
+import { sort } from "utils";
 
 const ProjectList = () => {
   const { projects, loadingProjects } = useProjectsContext();
@@ -20,13 +21,13 @@ const ProjectList = () => {
     pageSize: 15,
   });
 
-  const types = projects
+  const types = sort([...projects], "type.sort_order")
     .map((p) => p.type.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  const subTypes = projects
+  const subTypes = sort([...projects], "sub_type.sort_order")
     .map((p) => p.sub_type.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  const proponents = projects
+  const proponents = sort([...projects], "proponent.name")
     .map((p) => p.proponent.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
 
