@@ -20,13 +20,14 @@ from flask import current_app
 from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
 
-from api.exceptions import UnprocessableEntityError
+from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, WorkPhase, db
 from api.models.task_event_responsibility import TaskEventResponsibility
-from . import authorisation
 
+from ..utils.roles import Membership
+from ..utils.roles import Role as KeycloakRole
+from . import authorisation
 from .task_template import TaskTemplateService
-from ..utils.roles import Membership, Role as KeycloakRole
 
 
 class TaskService:
@@ -82,9 +83,7 @@ class TaskService:
             )
         task_event.update(data, commit=False)
         cls._handle_assignees(data.get("assignee_ids"), [task_event.id])
-        cls._handle_responsibilities(
-            data.get("responsibility_ids"), [task_event.id]
-        )
+        cls._handle_responsibilities(data.get("responsibility_ids"), [task_event.id])
         db.session.commit()
         return task_event
 
@@ -105,9 +104,9 @@ class TaskService:
         )
 
     @classmethod
-    def find_task_event(cls, event_id: int) -> TaskEvent:
+    def find_task_event(cls, event_id: int, exclude_deleted: bool = False) -> TaskEvent:
         """Get the task event"""
-        return (
+        query = (
             db.session.query(TaskEvent)
             .outerjoin(
                 TaskEventAssignee,
@@ -117,9 +116,14 @@ class TaskService:
                 ),
             )
             .filter(TaskEvent.id == event_id)
-            .options(contains_eager(TaskEvent.assignees))
-            .scalar()
         )
+        if exclude_deleted:
+            query = query.filter(TaskEvent.is_deleted.is_(False))
+        task_event = query.options(contains_eager(TaskEvent.assignees)).scalar()
+        print(f"Task event in service {task_event}")
+        if task_event:
+            return task_event
+        raise ResourceNotFoundError(f"TaskEvent with id '{event_id}' not found.")
 
     @classmethod
     def create_task_events_from_template(
@@ -240,7 +244,7 @@ class TaskService:
             .filter(
                 TaskEvent.is_active.is_(True),
                 TaskEvent.is_deleted.is_(False),
-                TaskEvent.work_phase_id == work_phase_id
+                TaskEvent.work_phase_id == work_phase_id,
             )
             .count()
         )
