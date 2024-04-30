@@ -1177,7 +1177,10 @@ class EventService:
         all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
         work = source_event.work
         # if it is same, no need to do unwanted update
-        if work.current_work_phase_id != all_work_phases[0].id:
+        if (
+            len(all_work_phases) > 0
+            and work.current_work_phase_id != all_work_phases[0].id
+        ):
             work.current_work_phase = all_work_phases[0]
             work.update(work.as_dict(recursive=False), commit=False)
 
