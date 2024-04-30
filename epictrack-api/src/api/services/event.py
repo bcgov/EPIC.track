@@ -83,6 +83,7 @@ class EventService:
                 current_work_phase, event, all_work_events, push_events, None
             )
         cls._process_actions(event, data.get("outcome_id", None))
+        cls._post_process_actions(event)
         if commit:
             db.session.commit()
         return event
@@ -127,6 +128,7 @@ class EventService:
                     event_old,
                 )
             cls._process_actions(event, data.get("outcome_id", None))
+            cls._post_process_actions(event)
         if commit:
             db.session.commit()
         return event
@@ -845,7 +847,8 @@ class EventService:
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
-            # work phase end date is handled in _handle_work_phase_for_end_phase_end_event, if the event has actual and if event is end event
+            # work phase end date is handled in _handle_work_phase_for_end_phase_end_event,
+            # if the event has actual and if event is end event
             # . This code has to be invoked only if the work phase is not current phase and doesn't have
             # actual date on the event
             if (
@@ -1160,6 +1163,26 @@ class EventService:
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
             action_handler.apply(event, action_configuration.additional_params)
+
+    @classmethod
+    def _post_process_actions(cls, source_event: Event):
+        """Things to happen after the actions are being processed"""
+        all_work_phases = WorkPhase.find_by_params(
+            {
+                "work_id": source_event.event_configuration.work_phase.work_id,
+                "visibility": PhaseVisibilityEnum.REGULAR.value,
+                "is_completed": False,
+            }
+        )
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+        work = source_event.work
+        # if it is same, no need to do unwanted update
+        if (
+            len(all_work_phases) > 0
+            and work.current_work_phase_id != all_work_phases[0].id
+        ):
+            work.current_work_phase = all_work_phases[0]
+            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def find_events_by_date(cls, from_date: datetime) -> List[Event]:

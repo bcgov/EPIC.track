@@ -8,6 +8,7 @@ import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { sort } from "utils";
+import { ETGridTitle } from "components/shared";
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
@@ -17,7 +18,6 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-
   const { data, error, isLoading } = useGetWorksQuery();
 
   const works = data || [];
@@ -72,6 +72,15 @@ const WorkList = () => {
         size: 300,
         sortingFn: "sortFn",
         filterFn: searchFilter,
+        Cell: ({ row, renderedCellValue }) => (
+          <ETGridTitle
+            to={`/work-plan?work_id=${row.original.id}`}
+            enableTooltip
+            tooltip={row.original.title}
+          >
+            {renderedCellValue}
+          </ETGridTitle>
+        ),
       },
       {
         accessorKey: "project.name",
