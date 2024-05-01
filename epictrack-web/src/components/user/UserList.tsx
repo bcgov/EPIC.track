@@ -36,7 +36,12 @@ const UserList = () => {
     try {
       const userResult = await UserService.getUsers();
       if (userResult.status === 200) {
-        setUsers(userResult.data as never);
+        const sortedResults = (userResult.data as User[]).sort((a, b) => {
+          const aValue = a.group?.level ?? -Infinity;
+          const bValue = b.group?.level ?? -Infinity;
+          return bValue - aValue;
+        });
+        setUsers(sortedResults as never);
       }
     } catch (error) {
       console.error("User List: ", error);
@@ -76,13 +81,13 @@ const UserList = () => {
       .filter((p) => userDetails.groups.includes(p.path))
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
+
   const columns = React.useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
         id: "name",
         accessorFn: (row: User) => `${row.last_name}, ${row.first_name}`,
         header: "Name",
-        sortingFn: "sortFn",
         enableEditing: false,
       },
       {
@@ -165,7 +170,7 @@ const UserList = () => {
             initialState={{
               sorting: [
                 {
-                  id: "name",
+                  id: "group.level",
                   desc: false,
                 },
               ],

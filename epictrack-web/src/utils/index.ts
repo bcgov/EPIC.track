@@ -13,12 +13,20 @@ const sort = (collection: any[], sortField: string) => {
     let aValue = a;
     let bValue = b;
 
-    keys.forEach((key) => {
-      aValue = aValue[key];
-      bValue = bValue[key];
-    });
+    for (const key of keys) {
+      aValue = aValue ? aValue[key] : null;
+      bValue = bValue ? bValue[key] : null;
+    }
 
-    return collator.compare(aValue, bValue);
+    if (aValue === null && bValue === null) {
+      return 0; // both are null, so they're equal
+    } else if (aValue === null) {
+      return 1; // aValue is null, so it should come after bValue
+    } else if (bValue === null) {
+      return -1; // bValue is null, so it should come after aValue
+    } else {
+      return collator.compare(aValue, bValue);
+    }
   });
 };
 
