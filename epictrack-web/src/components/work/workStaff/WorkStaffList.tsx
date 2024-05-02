@@ -10,7 +10,7 @@ import { ETPageContainer } from "components/shared";
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
-  const [wsData, setwsData] = React.useState<WorkStaff[]>([]);
+  const [workStaffData, setWorkStaffData] = React.useState<WorkStaff[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     workStaffListColumnFiltersCacheKey,
@@ -21,8 +21,20 @@ const WorkStaffList = () => {
     setLoading(true);
     try {
       const workStaffingResult = await workService.getWorkStaffDetails();
-      if (workStaffingResult.status === 200) {
-        setwsData(workStaffingResult.data as WorkStaff[]);
+      const worksResult = await workService.getAll();
+      if (workStaffingResult.status === 200 && worksResult.status === 200) {
+        const mergedData = workStaffingResult.data
+          .map((workStaff: any) => {
+            const work = worksResult.data.find(
+              (w: any) => w.eao_team_id === workStaff.eao_team.id
+            );
+            if (!work) {
+              return null;
+            }
+            return { ...workStaff, title: work.title };
+          })
+          .filter(Boolean) as WorkStaff[];
+        setWorkStaffData(mergedData);
       }
     } catch (error) {
       console.error("Work Staffing List: ", error);
@@ -36,7 +48,7 @@ const WorkStaffList = () => {
   }, []);
 
   let uniquestaff: any[] = [];
-  wsData.forEach((value, index) => {
+  workStaffData.forEach((value, index) => {
     if (value.staff.length > 0) {
       const roles = value.staff
         .map((p) => p.role.name)
@@ -48,7 +60,7 @@ const WorkStaffList = () => {
   });
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
-    if (wsData && wsData.length > 0) {
+    if (workStaffData && workStaffData.length > 0) {
       columns = uniquestaff.map((rolename: any, index: number) => {
         return {
           header: rolename,
@@ -66,54 +78,54 @@ const WorkStaffList = () => {
       });
     }
     return columns;
-  }, [wsData]);
+  }, [workStaffData]);
 
   const projectFilter = React.useMemo(
     () =>
-      wsData
+      workStaffData
         .filter((p) => p.project && p.project.name)
         .map((p) => p.project.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [wsData]
+    [workStaffData]
   );
 
   const titleFilter = React.useMemo(
     () =>
-      wsData
+      workStaffData
         .filter((p) => p.title)
         .map((p) => p.title)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [wsData]
+    [workStaffData]
   );
 
   const teamFilter = React.useMemo(
     () =>
-      wsData
+      workStaffData
         .filter((p) => p.eao_team)
         .map((p) => p.eao_team.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [wsData]
+    [workStaffData]
   );
 
   const responsibleEpdFilter = React.useMemo(
     () =>
-      wsData
+      workStaffData
         .filter((p) => p.responsible_epd)
         .map(
           (p) =>
             `${p.responsible_epd.first_name} ${p.responsible_epd.last_name}`
         )
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [wsData]
+    [workStaffData]
   );
 
   const workLeadFilter = React.useMemo(
     () =>
-      wsData
+      workStaffData
         .filter((p) => p.responsible_epd)
         .map((p) => `${p.work_lead?.first_name} ${p.work_lead?.last_name}`)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [wsData]
+    [workStaffData]
   );
 
   const columns = React.useMemo<MRT_ColumnDef<WorkStaff>[]>(
@@ -136,15 +148,6 @@ const WorkStaffList = () => {
         header: "Team",
         filterVariant: "multi-select",
         filterSelectOptions: teamFilter,
-      },
-      {
-        accessorFn: (row: WorkStaff) =>
-          row.responsible_epd
-            ? `${row.responsible_epd?.first_name} ${row.responsible_epd?.last_name}`
-            : "",
-        header: "Responsible EPD",
-        filterVariant: "multi-select",
-        filterSelectOptions: responsibleEpdFilter,
       },
       {
         accessorFn: (row: WorkStaff) =>
@@ -178,7 +181,7 @@ const WorkStaffList = () => {
       <Grid item xs={12}>
         <MasterTrackTable
           columns={columns}
-          data={wsData}
+          data={workStaffData}
           initialState={{
             sorting: [
               {
