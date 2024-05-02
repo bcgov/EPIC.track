@@ -9,8 +9,8 @@ import {
   mockStaffs,
   testTableFiltering,
 } from "../../../../cypress/support/common";
-import { setupIntercepts } from "../../../../cypress/support/utils";
 import { AppConfig } from "config";
+
 //ensure proponents are never the same by incrementing the counter
 let proponentCounter = 0;
 
@@ -29,30 +29,27 @@ const proponent1 = generateMockProponent();
 const proponent2 = generateMockProponent();
 const proponents = [proponent1, proponent2];
 
+function setupIntercepts(endpoints: any[]) {
+  endpoints.forEach(({ method, url, response, name }) => {
+    cy.intercept(method, url, response).as(name);
+  });
+}
+
 const endpoints = [
   {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}staffs?is_active=false`,
-  },
-  {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}pip-org-types`,
-  },
-  {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}first_nations`,
-  },
-  {
+    name: "getActiveStaff",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: { data: mockStaffs } },
   },
   {
+    name: "getPIPType",
     method: "GET",
     url: `${AppConfig.apiUrl}pip-org-types`,
     response: { body: [] },
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
     response: { body: [] },

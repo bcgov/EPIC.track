@@ -33,25 +33,19 @@ const staffs: Staff[] = [
 
 const endpoints = [
   {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}staffs?is_active=false`,
-  },
-  {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}pip-org-types`,
-  },
-  { method: "OPTIONS", url: `${AppConfig.apiUrl}first_nations` },
-  {
+    name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     respone: { body: { data: staffs } },
   },
   {
+    name: "getPIPType",
     method: "GET",
     url: `${AppConfig.apiUrl}pip-org-types`,
     response: { body: [] },
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
     response: { body: [] },
@@ -80,9 +74,10 @@ function createMockContext() {
     setDialogProps: cy.stub(),
   };
 }
+
 function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, body }) => {
-    cy.intercept(method, url, { body });
+  endpoints.forEach(({ method, url, response, name }) => {
+    cy.intercept(method, url, response).as(name);
   });
 }
 

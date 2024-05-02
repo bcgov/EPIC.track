@@ -5,30 +5,29 @@ import {
   createMockMasterContext,
   mockStaffs,
 } from "../../../../cypress/support/common";
-import { setupIntercepts } from "../../../../cypress/support/utils";
 import { AppConfig } from "config";
+
+function setupIntercepts(endpoints: any[]) {
+  endpoints.forEach(({ method, url, response, name }) => {
+    cy.intercept(method, url, response).as(name);
+  });
+}
 
 const endpoints = [
   {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}staffs?is_active=false`,
-  },
-  {
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}codes/pip_org_types`,
-  },
-  { method: "OPTIONS", url: `${AppConfig.apiUrl}first_nations` },
-  {
+    name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: { data: mockStaffs } },
   },
   {
+    name: "getPIPType",
     method: "GET",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
     response: { body: [] },
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
     response: { body: [] },
