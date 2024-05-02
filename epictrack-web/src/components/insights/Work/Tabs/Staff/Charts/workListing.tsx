@@ -1,56 +1,60 @@
 import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
-import {
-  ACTIVE_STATUS,
-  COMMON_ERROR_MESSAGE,
-  ROLES,
-} from "constants/application-constant";
+import { ROLES } from "constants/application-constant";
 import { Work } from "models/work";
-import {
-  getSelectFilterOptions,
-  rowsPerPageOptions,
-} from "components/shared/MasterTrackTable/utils";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { StaffWorkRole } from "models/staff";
-import workService from "services/workService/workService";
 import { WorkStaff } from "models/workStaff";
-import { set } from "lodash";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
+import { sort } from "utils";
+import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 
-type WorkOrWorkStaff = Work | WorkStaff;
+type WorkStaffWithWork = WorkStaff & { work: Work };
 
 const WorkList = () => {
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [leads, setLeads] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
   const [workRoles, setWorkRoles] = React.useState<
-    MRT_ColumnDef<WorkOrWorkStaff>[]
+    MRT_ColumnDef<WorkStaffWithWork>[]
   >([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
   });
-
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
 
   const { data: workStaffs, error, isLoading } = useGetWorkStaffsQuery();
+  const { data: works } = useGetWorksQuery();
 
   useEffect(() => {
-    if (workStaffs) {
+    if (workStaffs && works) {
+      const mergedData = workStaffs
+        .map((workStaff) => {
+          const work = works.find(
+            (w) => w.eao_team_id === workStaff.eao_team.id
+          );
+          if (!work) {
+            return null;
+          }
+          return { ...workStaff, work };
+        })
+        .filter(Boolean) as WorkStaffWithWork[];
+      setWorkData(mergedData);
       setPagination((prev) => ({
         ...prev,
         pageSize: workStaffs.length,
       }));
     }
-  }, [workStaffs]);
+  }, [workStaffs, works]);
 
   const officerAnalysts = React.useMemo(() => {
     if (!workStaffs) return [];
@@ -64,7 +68,8 @@ const WorkList = () => {
   }, [workStaffs]);
 
   const officerAnalystOptions = React.useMemo(() => {
-    return Array.from(
+    const sortedOfficerAnalysts = sort(officerAnalysts, "full_name");
+    const uniqueOfficerAnalystNames = Array.from(
       new Set(
         officerAnalysts.map(
           (officerAnalyst: any) =>
@@ -72,6 +77,7 @@ const WorkList = () => {
         )
       )
     );
+    return uniqueOfficerAnalystNames;
   }, [officerAnalysts]);
 
   const officerFilterFunction = (row: any, id: any, filterValue: any) => {
@@ -92,7 +98,7 @@ const WorkList = () => {
   };
 
   const tableColumns = React.useMemo(() => {
-    let cols: Array<MRT_ColumnDef<WorkOrWorkStaff>> = [];
+    let cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
     if (workStaffs && workStaffs.length > 0) {
       const rolename = WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST];
       cols = [
@@ -113,16 +119,7 @@ const WorkList = () => {
               )
               .join("; ");
           },
-          Cell: ({ renderedCellValue }) => (
-            <ETGridTitle
-              to="#"
-              enableEllipsis
-              enableTooltip={true}
-              tooltip={renderedCellValue}
-            >
-              {renderedCellValue}
-            </ETGridTitle>
-          ),
+          Cell: ({ renderedCellValue }) => renderedCellValue,
           enableHiding: false,
           enableColumnFilter: true,
           sortingFn: "sortFn",
@@ -139,14 +136,13 @@ const WorkList = () => {
             );
           },
           filterFn: officerFilterFunction,
-        } as MRT_ColumnDef<WorkOrWorkStaff>,
+        } as MRT_ColumnDef<WorkStaffWithWork>,
       ];
     }
     setWorkRoles(cols);
   }, [workStaffs]);
 
   const codeTypes: { [x: string]: any } = {
-    work_type: setWorkTypes,
     eao_team: setTeams,
     work_lead: setLeads,
   };
@@ -155,10 +151,13 @@ const WorkList = () => {
     if (!workStaffs) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "work_lead" || key == "responsible_epd") {
+      let sort_key = "sort_order";
+      if (key == "work_lead") {
         accessor = "full_name";
+        sort_key = "full_name";
       }
-      const codes = workStaffs
+      sort_key = key + "." + sort_key;
+      const codes = sort([...workStaffs], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
@@ -169,33 +168,31 @@ const WorkList = () => {
     });
   }, [workStaffs]);
 
-  const columns = React.useMemo<MRT_ColumnDef<WorkOrWorkStaff>[]>(() => {
+  const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {
     return [
       {
-        accessorKey: "project.name",
+        accessorKey: "work.title",
         header: "Name",
-        size: 300,
-        Cell: canEdit
-          ? ({ row, renderedCellValue }) => (
-              <ETGridTitle
-                to="#"
-                onClick={() => {
-                  //TODO: Implement this
-                  return;
-                }}
-                titleText={row.original.title}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        size: 200,
+        Cell: ({ row, renderedCellValue }) => {
+          return (
+            <ETGridTitle
+              to={`/work-plan?work_id=${row.original.work.id}`}
+              titleText={row.original.work.title}
+              enableTooltip
+              tooltip={row.original.work.title}
+            >
+              {renderedCellValue}
+            </ETGridTitle>
+          );
+        },
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
       {
         accessorKey: "eao_team.name",
         header: "Team",
-        size: 200,
+        size: 80,
         filterVariant: "multi-select",
         filterSelectOptions: teams,
         Filter: ({ header, column }) => {
@@ -225,6 +222,7 @@ const WorkList = () => {
       {
         accessorKey: "work_lead.full_name",
         header: "Lead",
+        size: 100,
         filterVariant: "multi-select",
         filterSelectOptions: leads,
         Filter: ({ header, column }) => {
@@ -257,7 +255,7 @@ const WorkList = () => {
   return (
     <MasterTrackTable
       columns={columns}
-      data={workStaffs || []}
+      data={workData || []}
       initialState={{
         sorting: [
           {

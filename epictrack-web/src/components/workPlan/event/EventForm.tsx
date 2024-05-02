@@ -185,7 +185,7 @@ const EventForm = ({
       POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
       POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
       POSITION_ENUM.ADM,
-      POSITION_ENUM.MINISTER,
+      POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR,
     ];
   }, [work, workPhases, selectedWorkPhase, event, milestoneEvents]);
   const getDecisionMakers = useCallback(async () => {

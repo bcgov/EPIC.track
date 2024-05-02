@@ -5,7 +5,7 @@ import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
 import projectService from "../../services/projectService/projectService";
-import { ActiveChip, InactiveChip } from "../shared/chip/ETChip";
+import { ETChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
 import { Restricted } from "../shared/restricted";
@@ -224,7 +224,6 @@ const ProjectList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
-        size: 115,
         Filter: ({ header, column }) => {
           return (
             <Box sx={{ width: "100px" }}>
@@ -252,12 +251,8 @@ const ProjectList = () => {
         },
         Cell: ({ cell }) => (
           <span>
-            {cell.getValue<boolean>() && (
-              <ActiveChip label="Active" color="primary" />
-            )}
-            {!cell.getValue<boolean>() && (
-              <InactiveChip label="Inactive" color="error" />
-            )}
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip inactive label="Inactive" />}
           </span>
         ),
       },

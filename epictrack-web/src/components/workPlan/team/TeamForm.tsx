@@ -16,6 +16,7 @@ import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import roleService from "services/roleService";
+import { unEditableTeamMembers } from "./constants";
 
 interface TeamFormProps {
   workStaffId?: number;
@@ -112,7 +113,10 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       const result = await roleService.getAll();
       if (result.status === 200) {
         const roles = result.data as ListType[];
-        setRoles(sort(roles, "name"));
+        const filteredRoles = roles.filter(
+          (role) => !unEditableTeamMembers.includes(role.id)
+        );
+        setRoles(sort(filteredRoles, "name"));
       }
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, {

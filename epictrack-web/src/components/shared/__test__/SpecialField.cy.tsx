@@ -7,17 +7,18 @@ import {
 
 import { setupIntercepts } from "../../../../cypress/support/utils";
 import { faker } from "@faker-js/faker";
+import { AppConfig } from "config";
 
 const endpoints = [
   {
     name: "SpecialFieldOptions",
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/special-fields?entity=PROJECT&entity_id=1&field_name=name",
+    url: `${AppConfig.apiUrl}special-fields?entity=PROJECT&entity_id=1&field_name=name`,
   },
   {
     name: "GetSpecialField",
     method: "GET",
-    url: "http://localhost:3200/api/v1/special-fields?entity=PROJECT&entity_id=1&field_name=name",
+    url: `${AppConfig.apiUrl}special-fields?entity=PROJECT&entity_id=1&field_name=name`,
     response: {
       body: {
         id: faker.number.int(),

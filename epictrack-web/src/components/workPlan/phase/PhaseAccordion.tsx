@@ -78,21 +78,20 @@ const SummaryItem = (props: SummaryItemProps) => {
 
 const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
   const [expanded, setExpanded] = React.useState<boolean>(false);
-  const ctx = useContext(WorkplanContext);
+  const { selectedWorkPhase, setSelectedWorkPhase } =
+    useContext(WorkplanContext);
   const isSelectedPhase = React.useMemo<boolean>(
-    () => phase.work_phase.id === ctx.selectedWorkPhase?.work_phase.id,
-    [ctx.selectedWorkPhase]
+    () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
+    [selectedWorkPhase]
   );
   React.useEffect(
-    () =>
-      setExpanded(phase.work_phase.id === ctx.selectedWorkPhase?.work_phase.id),
-    [phase, ctx.selectedWorkPhase]
+    () => setExpanded(phase.work_phase.id === selectedWorkPhase?.work_phase.id),
+    [phase, selectedWorkPhase]
   );
   const onExpandHandler = (expand: boolean) => {
     setExpanded(expand);
-    ctx.setSelectedWorkPhase(phase);
+    setSelectedWorkPhase(phase);
   };
-
   const fromDate = React.useMemo(
     () =>
       Moment(phase.work_phase.start_date).isSameOrAfter(Moment())
@@ -149,7 +148,11 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               </Grid>
               <Grid item xs={2}>
                 <SummaryItem
-                  title="Days left / Total"
+                  title={
+                    phase.work_phase.is_completed
+                      ? "Total"
+                      : "Days left / Total"
+                  }
                   children={
                     <Box
                       sx={{
@@ -167,11 +170,18 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                               : Palette.neutral.dark,
                         }}
                       >
-                        {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
-                        {phase.total_number_of_days.toString()}
-                        {phase.days_left < 0
-                          ? ` (${Math.abs(phase.days_left)} over)`
-                          : ""}
+                        {phase.work_phase.is_completed && (
+                          <>{phase.days_left < 0 ? 0 : phase.days_left}</>
+                        )}
+                        {!phase.work_phase.is_completed && (
+                          <>
+                            {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
+                            {phase.total_number_of_days.toString()}
+                            {phase.days_left < 0
+                              ? ` (${Math.abs(phase.days_left)} over)`
+                              : ""}
+                          </>
+                        )}
                       </ETParagraph>
                       <When condition={phase.days_left < 0}>
                         <Box

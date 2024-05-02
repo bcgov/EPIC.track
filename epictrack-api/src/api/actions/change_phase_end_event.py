@@ -77,7 +77,7 @@ class ChangePhaseEndEvent(ActionFactory):
             )
         if (
             new_end_event_work_phase.work.work_state == WorkStateEnum.COMPLETED
-            and not new_end_event_work_phase.acutal_date
+            and not new_end_event.actual_date
         ):
             new_end_event_work_phase.work.work_state = WorkStateEnum.IN_PROGRESS
             new_end_event_work_phase.work.update(

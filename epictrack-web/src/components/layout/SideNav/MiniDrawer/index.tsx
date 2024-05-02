@@ -1,12 +1,14 @@
 import * as React from "react";
-import { styled, Theme, CSSObject } from "@mui/material/styles";
+import { styled, Theme, CSSObject, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
-import { DrawerBox } from "./SideNav";
+import { DrawerBox } from "../SideNav";
 import { useAppSelector } from "hooks";
-import { drawerExpandedWidth } from "styles/uiStateSlice";
+import { drawerCollapsedWidth, drawerExpandedWidth } from "styles/uiStateSlice";
+import { Palette } from "styles/theme";
+import { Unless } from "react-if";
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerExpandedWidth,
@@ -57,15 +59,58 @@ const Drawer = styled(MuiDrawer, {
 
 export default function MiniDrawer() {
   const { isDrawerExpanded: open } = useAppSelector((state) => state.uiState);
+  const [isHovering, setIsHovering] = React.useState(false);
+
+  const theme = useTheme();
+
+  const handleOnMouseEnter = () => {
+    setIsHovering(true);
+  };
+
+  const handleOnMouseLeave = () => {
+    setIsHovering(false);
+  };
+
+  if (!open && isHovering) {
+    return (
+      <>
+        <span
+          style={{
+            width: drawerCollapsedWidth,
+            height: "100%",
+            position: "relative",
+            top: 0,
+            left: 0,
+            zIndex: theme.zIndex.drawer,
+            backgroundColor: "transparent",
+          }}
+        />
+        <MuiDrawer
+          sx={{
+            width: drawerExpandedWidth,
+            background: Palette.primary.main,
+          }}
+          anchor={"left"}
+          open={true}
+          hideBackdrop={true}
+          onMouseLeave={handleOnMouseLeave}
+        >
+          <DrawerHeader />
+          <DrawerBox open={true} />
+        </MuiDrawer>
+      </>
+    );
+  }
 
   return (
-    <Box sx={{ display: "flex" }}>
-      <CssBaseline />
-      <Drawer variant="permanent" open={open}>
-        <DrawerHeader />
-        <Divider />
-        <DrawerBox />
-      </Drawer>
-    </Box>
+    <Drawer
+      variant={"permanent"}
+      open={open}
+      onMouseEnter={open ? undefined : handleOnMouseEnter}
+    >
+      <DrawerHeader />
+      <Divider />
+      <DrawerBox open={open} />
+    </Drawer>
   );
 }

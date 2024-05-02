@@ -30,8 +30,12 @@ from api.models.work_type import WorkType as WorkTypeModel
 from api.services.role import RoleService
 from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum
 from tests.utilities.factory_utils import (
-    factory_first_nation_model, factory_staff_model, factory_staff_work_role_model, factory_work_first_nation_model,
-    factory_work_model)
+    factory_first_nation_model,
+    factory_staff_model,
+    factory_staff_work_role_model,
+    factory_work_first_nation_model,
+    factory_work_model,
+)
 from tests.utilities.helpers import prepare_work_payload
 from api.utils import util
 
@@ -42,7 +46,22 @@ API_BASE_URL = "/api/v1/"
 def test_get_works(client, auth_header):
     """Test get works."""
     url = urljoin(API_BASE_URL, "works")
+    factory_work_model()
+    factory_work_model(TestWorkInfo.work_in_active.value)
     result = client.get(url, headers=auth_header)
+    in_active_works = [work for work in result.json if work['is_active'] is False]
+    assert len(in_active_works) > 0
+    assert result.status_code == HTTPStatus.OK
+
+
+def test_get_active_works(client, auth_header):
+    """Test get works."""
+    url = urljoin(API_BASE_URL, "works?is_active=true")
+    factory_work_model()
+    factory_work_model(TestWorkInfo.work_in_active.value)
+    result = client.get(url, headers=auth_header)
+    in_active_works = [work for work in result.json if work['is_active'] is False]
+    assert len(in_active_works) == 0
     assert result.status_code == HTTPStatus.OK
 
 
@@ -256,10 +275,11 @@ def test_work_resources(client, auth_header):
         == work_response_json["responsible_epd_id"]
     )
     assert work_resource_json["work_lead"]["id"] == work_response_json["work_lead_id"]
-    assert len(work_resource_json["staff"]) == 1
-    work_staff = work_resource_json["staff"][0]
-    assert work_staff["id"] == work_response_json["work_lead_id"]
-    assert work_staff["role"]["name"] == "Team Lead"
+    assert len(work_resource_json["staff"]) == 2
+    team_lead = [x for x in work_resource_json["staff"] if x["role"]['name'] == 'Team Lead'][0]
+    epd = [x for x in work_resource_json["staff"] if x["role"]['name'] == 'Responsible EPD'][0]
+    assert team_lead["id"] == work_response_json["work_lead_id"]
+    assert epd["id"] == work_response_json["responsible_epd_id"]
 
 
 def test_get_work_staff_roles(client, auth_header):
@@ -275,7 +295,7 @@ def test_get_work_staff_roles(client, auth_header):
     url = urljoin(API_BASE_URL, f'works/{work_response_json["id"]}/staff-roles')
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
-    assert len(response.json) == 1
+    assert len(response.json) == 2
 
 
 def test_create_work_staff_roles(client, auth_header):
@@ -389,7 +409,7 @@ def test_work_phase_template_upload_status(client, auth_header):
     work_response_json = work_response.json
     assert work_response.status_code == HTTPStatus.CREATED
     url = urljoin(
-        API_BASE_URL, f"works/work-phases/{work_response_json['current_work_phase_id']}"
+        API_BASE_URL, f"works/work-phases/{work_response_json['current_work_phase_id']}/template-upload-status"
     )
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK

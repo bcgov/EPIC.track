@@ -10,7 +10,7 @@ const EditIssueDialog = () => {
   return (
     <TrackDialog
       open={editIsssueFormIsOpen}
-      dialogTitle={"Update Description"}
+      dialogTitle={"Update Issue"}
       disableEscapeKeyDown
       fullWidth
       maxWidth="sm"

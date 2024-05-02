@@ -7,8 +7,9 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
-import { ETGridTitle } from "components/shared";
 import { Link } from "react-router-dom";
+import { sort } from "utils";
+import { ETGridTitle } from "components/shared";
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
@@ -18,7 +19,6 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-
   const { data, error, isLoading } = useGetWorksQuery();
 
   const works = data || [];
@@ -39,16 +39,22 @@ const WorkList = () => {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
+      let sort_key = "sort_order";
+      if (key == "project") {
+        sort_key = "name";
+      }
       if (key == "ministry") {
         accessor = "abbreviation";
       }
-      const codes = works
+      sort_key = key + "." + sort_key;
+      const codes = sort([...works], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         .map((w) => (w[key] ? w[key][accessor] : null))
         .filter(
           (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
         );
+
       codeTypes[key](codes);
     });
   }, [works]);

@@ -83,6 +83,7 @@ class EventService:
                 current_work_phase, event, all_work_events, push_events, None
             )
         cls._process_actions(event, data.get("outcome_id", None))
+        cls._post_process_actions(event)
         if commit:
             db.session.commit()
         return event
@@ -127,6 +128,7 @@ class EventService:
                     event_old,
                 )
             cls._process_actions(event, data.get("outcome_id", None))
+            cls._post_process_actions(event)
         if commit:
             db.session.commit()
         return event
@@ -306,6 +308,9 @@ class EventService:
         cls._validate_dates(event, current_work_phase, all_work_phases)
         cls._previous_event_acutal_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old
+        )
+        cls._handle_work_start_date_for_start_event_start_phase(
+            event, current_work_phase_index
         )
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
             event, event_old, current_work_phase
@@ -530,6 +535,20 @@ class EventService:
             current_work_phase.update(
                 current_work_phase.as_dict(recursive=False), commit=False
             )
+
+    @classmethod
+    def _handle_work_start_date_for_start_event_start_phase(
+        cls, event: Event, current_phase_index: int
+    ):
+        """Update the work start date to the event's actual if the event is start event and the phase is start phase"""
+        if (
+            event.actual_date
+            and event.event_position == EventPositionEnum.START.value
+            and current_phase_index == 0
+        ):
+            work = event.work
+            work.start_date = event.actual_date
+            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _handle_end_event_date_when_start_event_changed(
@@ -828,12 +847,21 @@ class EventService:
                 each_work_phase.start_date = each_work_phase.start_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
-            each_work_phase.end_date = each_work_phase.end_date + timedelta(
-                days=number_of_days_to_be_pushed
-            )
-            each_work_phase.update(
-                each_work_phase.as_dict(recursive=False), commit=False
-            )
+            # work phase end date is handled in _handle_work_phase_for_end_phase_end_event,
+            # if the event has actual and if event is end event
+            # . This code has to be invoked only if the work phase is not current phase and doesn't have
+            # actual date on the event
+            if (
+                each_work_phase.id != current_work_phase.id
+                or not event.actual_date
+                or not event.event_position == EventPositionEnum.END.value
+            ):
+                each_work_phase.end_date = each_work_phase.end_date + timedelta(
+                    days=number_of_days_to_be_pushed
+                )
+                each_work_phase.update(
+                    each_work_phase.as_dict(recursive=False), commit=False
+                )
 
     @classmethod
     def _find_work_phase_events(
@@ -881,14 +909,11 @@ class EventService:
         have actual dates in all the previous events.
         """
         if event.actual_date:
-            if (
-                event.event_position == EventPositionEnum.START.value
-                and current_work_phase_index > 0
-            ):
+            if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
                 if not previous_work_phase.is_completed:
                     raise UnprocessableEntityError(
-                        "Previous event should be completed to proceed"
+                        "Previous phase should be completed to proceed"
                     )
             event_index = cls.find_event_index(
                 all_work_events,
@@ -1138,6 +1163,26 @@ class EventService:
         for action_configuration in action_configurations:
             action_handler = ActionHandler(ActionEnum(action_configuration.action_id))
             action_handler.apply(event, action_configuration.additional_params)
+
+    @classmethod
+    def _post_process_actions(cls, source_event: Event):
+        """Things to happen after the actions are being processed"""
+        all_work_phases = WorkPhase.find_by_params(
+            {
+                "work_id": source_event.event_configuration.work_phase.work_id,
+                "visibility": PhaseVisibilityEnum.REGULAR.value,
+                "is_completed": False,
+            }
+        )
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+        work = source_event.work
+        # if it is same, no need to do unwanted update
+        if (
+            len(all_work_phases) > 0
+            and work.current_work_phase_id != all_work_phases[0].id
+        ):
+            work.current_work_phase = all_work_phases[0]
+            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def find_events_by_date(cls, from_date: datetime) -> List[Event]:

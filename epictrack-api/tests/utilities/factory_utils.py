@@ -31,11 +31,13 @@ from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.special_field import SpecialField
 from api.models.staff_work_role import StaffWorkRole
+from api.models.task_event import TaskEvent
 from api.models.task_template import TaskTemplate
+from api.models.work_phase import WorkPhase
 from tests.utilities.factory_scenarios import (
     TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestRoleEnum, TestSpecialField, TestStaffInfo,
-    TestStatus, TestTaskTemplateEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkIssuesInfo,
-    TestWorkIssueUpdatesInfo)
+    TestStatus, TestTaskEnum, TestTaskTemplateEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkIssuesInfo,
+    TestWorkIssueUpdatesInfo, WorkPhaseEnum)
 
 
 CONFIG = get_named_config("testing")
@@ -45,21 +47,24 @@ JWT_HEADER = {"typ": "JWT", "kid": "epictrack"}
 
 def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
     """Produce a participant model."""
-    project = ProjectModel(
-        name=project_data["name"],
-        description=project_data["description"],
-        address=project_data["address"],
-        type_id=project_data["type_id"],
-        sub_type_id=project_data["sub_type_id"],
-        proponent_id=project_data["proponent_id"],
-        region_id_env=project_data["region_id_env"],
-        region_id_flnro=project_data["region_id_flnro"],
-        latitude=project_data["latitude"],
-        longitude=project_data["longitude"],
-        abbreviation=project_data["abbreviation"],
-        project_state=ProjectStateEnum.PRE_WORK.value,
-    )
-    project.save()
+    project_result = ProjectModel.find_by_params({"name": project_data["name"]})
+    project = project_result[0] if project_result else None
+    if not project:
+        project = ProjectModel(
+            name=project_data["name"],
+            description=project_data["description"],
+            address=project_data["address"],
+            type_id=project_data["type_id"],
+            sub_type_id=project_data["sub_type_id"],
+            proponent_id=project_data["proponent_id"],
+            region_id_env=project_data["region_id_env"],
+            region_id_flnro=project_data["region_id_flnro"],
+            latitude=project_data["latitude"],
+            longitude=project_data["longitude"],
+            abbreviation=project_data["abbreviation"],
+            project_state=ProjectStateEnum.PRE_WORK.value,
+        )
+        project.save()
     return project
 
 
@@ -258,3 +263,33 @@ def factory_task_template_model(data=TestTaskTemplateEnum.task_template1.value):
     )
     task_template.save()
     return task_template
+
+
+def factory_work_phase_model(data=WorkPhaseEnum.work_phase1.value, work_id=None):
+    """Produce a work phase model"""
+    if work_id is None:
+        work = factory_work_model()
+        work_id = work.id
+    work_phase = WorkPhase(
+        work_id=work_id,
+        phase_id=data["phase_id"],
+        start_date=data["start_date"],
+        end_date=data["end_date"],
+        sort_order=data["sort_order"]
+    )
+    work_phase.save()
+    return work_phase
+
+
+def factory_task_model(data=TestTaskEnum.task1.value, work_id: int = None):
+    """Produce a task model"""
+    work_phase = factory_work_phase_model(work_id=work_id)
+    data["work_phase_id"] = work_phase.id
+    task_event = TaskEvent(
+        work_phase_id=data["work_phase_id"],
+        start_date=data["start_date"],
+        status=data["status"],
+        name=data["name"]
+    )
+    task_event.save()
+    return task_event

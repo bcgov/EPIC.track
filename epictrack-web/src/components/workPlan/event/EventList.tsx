@@ -29,6 +29,7 @@ import ImportTaskEvent from "../task/ImportTaskEvent";
 import {
   TemplateStatus,
   Work,
+  WorkPhase,
   WorkPhaseAdditionalInfo,
 } from "../../../models/work";
 import { SnackbarKey, closeSnackbar } from "notistack";
@@ -315,12 +316,12 @@ const EventList = () => {
       );
       const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
       setWorkPhases(workPhases);
-      if (selectedWorkPhase) {
-        const selectedWp = workPhases.filter(
-          (p) => p.work_phase.id === selectedWorkPhase.work_phase.id
-        )[0];
-        setSelectedWorkPhase(selectedWp);
-      }
+      // if (selectedWorkPhase) {
+      //   const selectedWp = workPhases.filter(
+      //     (p) => p.work_phase.id === selectedWorkPhase.work_phase.id
+      //   )[0];
+      //   setSelectedWorkPhase(selectedWp);
+      // }
       setLoading(false);
     }
   }, []);
@@ -336,21 +337,14 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
+    getWorkById();
     getWorkPhases();
-    getTemplateUploadStatus()
-      .then(() => {
-        return getWorkById();
-      })
-      .then(() => {
-        if (
-          milestoneEvent?.event_configuration.event_position ===
-          EventPosition.END
-        ) {
-          dispatch(showConfetti(true));
-        }
-        setTaskEvent(undefined);
-        setMilestoneEvent(undefined);
-      });
+    getTemplateUploadStatus();
+    if (
+      milestoneEvent?.event_configuration?.event_position === EventPosition.END
+    ) {
+      getWorkPhaseById();
+    }
   };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -508,6 +502,26 @@ const EventList = () => {
       }
     }
   }, [selectedWorkPhase?.work_phase.phase.id]);
+
+  const getWorkPhaseById = React.useCallback(async () => {
+    const workPhaseId = selectedWorkPhase?.work_phase.id;
+    if (workPhaseId) {
+      try {
+        const workPhase = (await workService.getWorkPhaseById(
+          Number(workPhaseId)
+        )) as WorkPhase;
+
+        if (workPhase?.is_completed) {
+          dispatch(showConfetti(true));
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching work phase with ID: ${workPhaseId}`,
+          error
+        );
+      }
+    }
+  }, [selectedWorkPhase?.work_phase.id]);
 
   React.useEffect(() => {
     getTemplateUploadStatus();

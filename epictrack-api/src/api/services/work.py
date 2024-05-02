@@ -68,19 +68,16 @@ from api.schemas.response import (
     StaffWorkRoleResponseSchema,
     WorkPhaseAdditionalInfoResponseSchema,
     WorkResponseSchema,
-    WorkStatusResponseSchema,
-)
+    WorkStatusResponseSchema,)
 from api.schemas.work_first_nation import WorkFirstNationSchema
 from api.schemas.work_plan import WorkPlanSchema
 from api.schemas.work_type import WorkTypeSchema
 from api.services import authorisation
-from api.services.code import CodeService
 from api.services.event import EventService
 from api.services.event_template import EventTemplateService
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.services.outcome_template import OutcomeTemplateService
 from api.services.phaseservice import PhaseService
-from api.services.special_field import SpecialFieldService
 from api.services.task import TaskService
 from api.services.work_phase import WorkPhaseService
 from api.utils import util
@@ -97,9 +94,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return Work.check_existence(title=title, work_id=work_id)
 
     @classmethod
-    def find_all_works(cls, default_filters=False):
+    def find_all_works(cls, is_active=False):
         """Find all non-deleted works"""
-        works = Work.find_all(default_filters)
+        works = Work.find_all(is_active)
         return works
 
     @classmethod
@@ -276,19 +273,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 work.current_work_phase_id = work_phase.id
             sort_order = sort_order + 1
         # dev-note: find_code_values_by_type - we should use RoleService instead of the "code" way
-        role_id = (
-            CodeService.find_code_values_by_type("roles", {"name": "Team Lead"})
-            .get("codes")[0]
-            .get("id")
-        )
-        WorkService.create_work_staff(
-            work.id,
-            {
-                "staff_id": payload["work_lead_id"],
-                "role_id": role_id,
-                "is_active": True,
-            },
-        )
+
         if commit:
             db.session.commit()
         return work
@@ -307,6 +292,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def create_special_fields(cls, work: Work):
         """Create work special fields"""
+        # pylint: disable=import-outside-toplevel,cyclic-import
+        from api.services.special_field import SpecialFieldService
         work_epd_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
@@ -455,6 +442,33 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if commit:
             db.session.commit()
         return work_staff
+
+    @classmethod
+    def upsert_work_staff(cls, work_id: int, data: dict, commit: bool = True):
+        """Upsert work staff"""
+        work_staff = StaffWorkRole.find_one_by_work_and_staff_and_role(
+            work_id, data.get("staff_id"), data.get("role_id"), work_staff_id=None)
+        if work_staff:
+            return cls.update_work_staff(work_staff.id, data, commit)
+        return cls.create_work_staff(work_id, data, commit)
+
+    @classmethod
+    def replace_work_staff(cls, work_id: int, data: dict):
+        """Replace work staff"""
+        work_staff = StaffWorkRole.find_one_by_role_and_work(
+            work_id, data.get("role_id")
+        )
+        if work_staff:
+            update_data = {
+                "role_id": work_staff.role_id,
+                "staff_id": work_staff.staff_id,
+                "is_active": False,
+            }
+            cls.update_work_staff(work_staff.id, update_data, commit=False)
+
+        upserted_work_staff = cls.upsert_work_staff(work_id, data, commit=False)
+        db.session.commit()
+        return upserted_work_staff
 
     @classmethod
     def copy_outcome_and_actions(
@@ -753,7 +767,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Generate the workplan excel file for given work and phase"""
         cls._check_can_edit_or_team_member_auth(work_id)
         first_nations = cls.find_first_nations(work_id, None)
-        print(first_nations)
         schema = WorkFirstNationSchema(many=True)
         data = schema.dump(first_nations)
 

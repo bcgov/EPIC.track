@@ -28,7 +28,7 @@ from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
 from api.utils.util import cors_preflight
-
+from api.models.work_phase import WorkPhase
 
 API = Namespace("works", description="Works")
 
@@ -96,9 +96,9 @@ class Works(Resource):
     @profiletime
     def get():
         """Return all active works."""
-        args = request.args
-        is_active = args.get("is_active", False, bool)
-        include_indigenous_nations = args.get('include_indigenous_nations', False, bool)
+        request_args = req.WorkQueryParameterSchema().load(request.args)
+        is_active = request_args.get("is_active", None)
+        include_indigenous_nations = request_args.get('include_indigenous_nations')
         works = WorkService.find_all_works(is_active)
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
@@ -289,7 +289,7 @@ class WorkPlan(Resource):
 
 
 @cors_preflight("GET")
-@API.route("/work-phases/<int:work_phase_id>", methods=["GET", "OPTIONS"])
+@API.route("/work-phases/<int:work_phase_id>/template-upload-status", methods=["GET", "OPTIONS"])
 class WorkPhaseTemplateStatus(Resource):
     """Endpoints to get work phase template upload status"""
 
@@ -305,6 +305,25 @@ class WorkPhaseTemplateStatus(Resource):
         )
         return (
             res.WorkPhaseTemplateAvailableResponse().dump(template_upload_status),
+            HTTPStatus.OK,
+        )
+
+
+@cors_preflight("GET")
+@API.route("/work-phases/<int:work_phase_id>", methods=["GET", "OPTIONS"])
+class WorkPhaseId(Resource):
+    """Endpoints to get work phase template upload status"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_phase_id):
+        """Get the status if template upload is available"""
+        req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
+        work_phase = WorkPhase.find_by_id(work_phase_id)
+        return (
+            res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
 

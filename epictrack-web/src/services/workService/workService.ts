@@ -4,11 +4,14 @@ import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
 import { StaffWorkRole } from "../../models/staff";
 import { WorkFirstNation } from "../../models/firstNation";
-import { Work } from "../../models/work";
+import { Work, WorkPhase } from "../../models/work";
 import { WorkType } from "../../models/workType";
-
+import { AxiosResponse } from "axios";
+interface WorkPhaseResponse {
+  work_phase: WorkPhase;
+}
 class WorkService implements ServiceBase {
-  async getAll(is_active = false) {
+  async getAll(is_active = undefined) {
     return await http.GetRequest<Work[]>(Endpoints.Works.WORKS, { is_active });
   }
 
@@ -98,6 +101,28 @@ class WorkService implements ServiceBase {
 
   async getWorkPhases(workId: string) {
     return await http.GetRequest(Endpoints.Works.WORKS + `/${workId}/phases`);
+  }
+
+  async getWorkPhaseById(workPhaseId: number): Promise<WorkPhase | null> {
+    try {
+      const endpoint = Endpoints.Works.GET_WORK_PHASE_BY_ID.replace(
+        ":work_phase_id",
+        workPhaseId.toString()
+      );
+      const result: AxiosResponse<WorkPhaseResponse> = await http.GetRequest(
+        endpoint
+      );
+
+      if (!result.data || !result.data.work_phase) {
+        console.error(`No work phase found with ID: ${workPhaseId}`);
+        return null;
+      }
+
+      return result.data.work_phase;
+    } catch (error) {
+      console.error(`Error fetching work phase with ID: ${workPhaseId}`, error);
+      return null;
+    }
   }
 
   async downloadWorkplan(workPhaseId: number) {

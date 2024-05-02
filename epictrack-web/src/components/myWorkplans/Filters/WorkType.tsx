@@ -3,7 +3,7 @@ import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
 import workService from "../../../services/workService/workService";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
-
+import { sort } from "utils";
 export const WorkTypeFilter = () => {
   const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
 
@@ -14,7 +14,8 @@ export const WorkTypeFilter = () => {
     setLoading(true);
     try {
       const response = await workService.getWorkTypes();
-      const types = response.data.map((type) => ({
+      const sortedResponse = sort(response.data, "sort_order");
+      const types = sortedResponse.map((type) => ({
         label: type.name,
         value: type.id.toString(),
       }));
