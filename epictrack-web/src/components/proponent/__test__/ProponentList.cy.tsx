@@ -10,6 +10,7 @@ import {
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { setupIntercepts } from "../../../../cypress/support/utils";
+import { AppConfig } from "config";
 //ensure proponents are never the same by incrementing the counter
 let proponentCounter = 0;
 
@@ -31,29 +32,29 @@ const proponents = [proponent1, proponent2];
 const endpoints = [
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/pip-org-types",
+    url: `${AppConfig.apiUrl}pip-org-types`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
     body: { data: mockStaffs },
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/pip-org-types",
+    url: `${AppConfig.apiUrl}pip-org-types`,
     body: [],
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
     body: [],
   },
 ];
