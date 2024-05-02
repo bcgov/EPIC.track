@@ -44,17 +44,17 @@ const endpoints = [
   {
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    body: { data: staffs },
+    respone: { body: { data: staffs } },
   },
   {
     method: "GET",
     url: `${AppConfig.apiUrl}pip-org-types`,
-    body: [],
+    response: { body: [] },
   },
   {
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
-    body: [],
+    response: { body: [] },
   },
 ];
 

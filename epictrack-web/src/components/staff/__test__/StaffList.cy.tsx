@@ -52,17 +52,17 @@ const endpoints = [
   {
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    body: { data: mockStaffs },
+    response: { body: { data: mockStaffs } },
   },
   {
     method: "GET",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
-    body: [],
+    response: { body: [] },
   },
   {
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
-    body: [],
+    response: { body: [] },
   },
 ];
 
