@@ -43,6 +43,22 @@ const staffs = [staff1, staff2];
 
 const endpoints = [
   {
+    name: "getActiveStaffsOptions",
+    method: "OPTIONS",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
+  },
+  {
+    name: "getPIPTypeOptions",
+    method: "OPTIONS",
+    url: `${AppConfig.apiUrl}codes/pip_org_types`,
+  },
+
+  {
+    name: "getFirstNationsOptions",
+    method: "OPTIONS",
+    url: `${AppConfig.apiUrl}first_nations`,
+  },
+  {
     name: "getInactiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
