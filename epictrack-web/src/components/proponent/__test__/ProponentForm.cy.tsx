@@ -3,6 +3,7 @@ import { MasterBase } from "models/type";
 import ProponentForm from "../ProponentForm";
 import { Staff } from "models/staff";
 import { defaultProponent } from "models/proponent";
+import { AppConfig } from "config";
 
 const staffs: Staff[] = [
   {
@@ -33,26 +34,26 @@ const staffs: Staff[] = [
 const endpoints = [
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/pip-org-types",
+    url: `${AppConfig.apiUrl}pip-org-types`,
   },
-  { method: "OPTIONS", url: "http://localhost:3200/api/v1/first_nations" },
+  { method: "OPTIONS", url: `${AppConfig.apiUrl}first_nations` },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
     body: { data: staffs },
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/pip-org-types",
+    url: `${AppConfig.apiUrl}pip-org-types`,
     body: [],
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
     body: [],
   },
 ];

@@ -11,6 +11,7 @@ import {
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { setupIntercepts } from "../../../../cypress/support/utils";
+import { AppConfig } from "config";
 
 //ensure staffs are never the same by incrementing the counter
 let staffCounter = 0;
@@ -38,29 +39,29 @@ const staffs = [staff1, staff2];
 const endpoints = [
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
   {
     method: "OPTIONS",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/staffs?is_active=false",
+    url: `${AppConfig.apiUrl}staffs?is_active=false`,
     body: { data: mockStaffs },
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/codes/pip_org_types",
+    url: `${AppConfig.apiUrl}codes/pip_org_types`,
     body: [],
   },
   {
     method: "GET",
-    url: "http://localhost:3200/api/v1/first_nations",
+    url: `${AppConfig.apiUrl}first_nations`,
     body: [],
   },
 ];
