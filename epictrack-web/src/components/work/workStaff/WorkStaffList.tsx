@@ -7,6 +7,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETPageContainer } from "components/shared";
+import { Work } from "models/work";
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
@@ -23,10 +24,10 @@ const WorkStaffList = () => {
       const workStaffingResult = await workService.getWorkStaffDetails();
       const worksResult = await workService.getAll();
       if (workStaffingResult.status === 200 && worksResult.status === 200) {
-        const mergedData = workStaffingResult.data
-          .map((workStaff: any) => {
-            const work = worksResult.data.find(
-              (w: any) => w.eao_team_id === workStaff.eao_team.id
+        const mergedData = (workStaffingResult.data as WorkStaff[])
+          .map((workStaff: WorkStaff) => {
+            const work = (worksResult.data as Work[]).find(
+              (w: Work) => w.eao_team_id === workStaff.eao_team.id
             );
             if (!work) {
               return null;
