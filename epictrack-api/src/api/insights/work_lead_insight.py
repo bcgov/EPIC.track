@@ -23,16 +23,15 @@ class WorkLeadInsightGenerator:
                 func.count()
                 .over(order_by=Work.work_lead_id, partition_by=Work.work_lead_id)
                 .label("count"),
-            )
+            ).group_by(Work.work_lead_id, Work.id)
             .join(StaffWorkRole, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
-                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),
             )
-            .distinct(Work.work_lead_id)
+            .distinct(Work.id)
             .subquery()
         )
         return partition_query

@@ -186,17 +186,17 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 .outerjoin(epd, epd.id == Work.responsible_epd_id)
             )
         else:
-            query = (
-                Work.query
-                .join(StaffWorkRole,
-                and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
-                .filter(
-                    Work.is_active.is_(True),
-                    Work.is_deleted.is_(False),
-                    Work.is_completed.is_(False),
-                    StaffWorkRole.is_active.is_(True),
-                    StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id))
-                )
+            query = Work.query.join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == Work.id,
+                    StaffWorkRole.staff_id == Work.work_lead_id,
+                ),
+            ).filter(
+                Work.is_active.is_(True),
+                Work.is_deleted.is_(False),
+                Work.is_completed.is_(False),
+                StaffWorkRole.is_active.is_(True),
             )
         work_result = query.all()
         works = [

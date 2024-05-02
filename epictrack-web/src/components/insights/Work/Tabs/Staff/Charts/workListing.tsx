@@ -68,7 +68,7 @@ const WorkList = () => {
       new Set(
         officerAnalysts.map(
           (officerAnalyst: any) =>
-            `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
+            `${officerAnalyst.last_name}, ${officerAnalyst.first_name}`
         )
       )
     );
@@ -109,9 +109,9 @@ const WorkList = () => {
             return officerAnalystsForRow
               .map(
                 (officerAnalyst: any) =>
-                  `${officerAnalyst.first_name} ${officerAnalyst.last_name}`
+                  `${officerAnalyst.last_name}, ${officerAnalyst.first_name}`
               )
-              .join(", ");
+              .join("; ");
           },
           Cell: ({ renderedCellValue }) => (
             <ETGridTitle

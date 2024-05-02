@@ -22,16 +22,15 @@ class WorkTeamInsightGenerator:
                 func.count()
                 .over(order_by=Work.eao_team_id, partition_by=Work.eao_team_id)
                 .label("count"),
-            )
+            ).group_by(Work.eao_team_id,Work.id)
             .join(StaffWorkRole, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
-                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),
             )
-            .distinct(Work.eao_team_id)
+            .distinct(Work.id)
             .subquery()
         )
         return partition_query

@@ -24,16 +24,15 @@ class WorkStaffInsightGenerator:
                     order_by=StaffWorkRole.staff_id, partition_by=StaffWorkRole.staff_id
                 )
                 .label("count"),
-            )
-            .join(Work, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
+            ).group_by(StaffWorkRole.staff_id, Work.id)
+            .join(Work, and_(StaffWorkRole.work_id == Work.id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
-                StaffWorkRole.staff_id.in_(db.session.query(Work.work_lead_id)),
             )
-            .distinct(StaffWorkRole.staff_id)
+            .distinct(Work.id)
             .subquery()
         )
         return partition_query
