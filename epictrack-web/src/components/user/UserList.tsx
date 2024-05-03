@@ -38,8 +38,8 @@ const UserList = () => {
       const userResult = await UserService.getUsers();
       if (userResult.status === 200) {
         const sortedResults = (userResult.data as User[]).sort((a, b) => {
-          const aValue = a.group?.level ?? -Infinity;
-          const bValue = b.group?.level ?? -Infinity;
+          const aValue = a.group?.level ?? -0;
+          const bValue = b.group?.level ?? -0;
           return bValue - aValue;
         });
         setUsers(sortedResults as never);
