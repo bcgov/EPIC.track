@@ -6,6 +6,7 @@ import { userDetails } from "services/userService/userSlice";
 import { store } from "store";
 import { UserDetail } from "services/userService/type";
 import { AppConfig } from "config";
+import { setupIntercepts } from "../../../../cypress/support/utils";
 
 const generateFakePosition = () => {
   return {
@@ -177,12 +178,6 @@ const endpoints = [
     },
   },
 ];
-
-function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, response, name }) => {
-    cy.intercept(method, url, response).as(name);
-  });
-}
 
 describe("WorkForm", () => {
   beforeEach(() => {

@@ -6,12 +6,7 @@ import {
   mockStaffs,
 } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-
-function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, response, name }) => {
-    cy.intercept(method, url, response).as(name);
-  });
-}
+import { setupIntercepts } from "../../../../cypress/support/utils";
 
 const endpoints = [
   {

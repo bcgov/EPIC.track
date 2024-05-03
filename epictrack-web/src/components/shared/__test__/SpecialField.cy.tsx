@@ -4,7 +4,6 @@ import {
   SpecialFieldEntityEnum,
   SPECIAL_FIELDS,
 } from "../../../constants/application-constant";
-
 import { setupIntercepts } from "../../../../cypress/support/utils";
 import { faker } from "@faker-js/faker";
 import { AppConfig } from "config";

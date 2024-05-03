@@ -18,18 +18,13 @@ import { FirstNation } from "models/firstNation";
 import { MemoryRouter as Router } from "react-router-dom";
 import { Project } from "models/project";
 import { AppConfig } from "config";
+import { setupIntercepts } from "../../../../cypress/support/utils";
 
 // Mock reducer
 declare global {
   interface Window {
     store: any; // replace 'any' with the type of your Redux store if you have one
   }
-}
-
-function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, response, name }) => {
-    cy.intercept(method, url, response).as(name);
-  });
 }
 
 const endpoints = [
