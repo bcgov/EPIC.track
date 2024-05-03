@@ -52,7 +52,7 @@ const endpoints = [
     name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    respone: { body: { data: staffs } },
+    response: { body: { staffs } },
   },
   {
     name: "getPIPType",
@@ -112,7 +112,6 @@ describe("ProponentForm", () => {
   beforeEach(() => {
     const mockContext = createMockContext();
     setupIntercepts(endpoints);
-
     cy.mount(
       <MasterContext.Provider value={mockContext}>
         <ProponentForm />
