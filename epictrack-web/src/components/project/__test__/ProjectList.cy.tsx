@@ -2,6 +2,7 @@ import { MemoryRouter as Router } from "react-router-dom";
 import ProjectList from "../ProjectList";
 import { generateMockProject } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
+import { setupIntercepts } from "../../../../cypress/support/utils";
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
@@ -31,12 +32,6 @@ const endpoints = [
     },
   },
 ];
-
-function setupIntercepts(endpoints: any[]) {
-  endpoints.forEach(({ method, url, response, name }) => {
-    cy.intercept(method, url, response).as(name);
-  });
-}
 
 describe("ProjectList", () => {
   beforeEach(() => {

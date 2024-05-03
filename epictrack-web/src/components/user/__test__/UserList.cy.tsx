@@ -39,45 +39,54 @@ const users = [user1, user2];
 
 const endpoints = [
   {
+    name: "getInactiveStaffsOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
+    name: "getPIPTypeOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
   {
+    name: "getFirstNationsOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}first_nations`,
   },
   {
+    name: "getInactiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    body: mockStaffs,
+    response: { body: mockStaffs },
   },
   {
+    name: "getPIPType",
     method: "GET",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
-    body: [],
+    response: { body: [] },
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
-    body: [],
+    response: { body: [] },
   },
   {
+    name: "getUsersOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}users/groups`,
   },
   {
+    name: "getUsers",
     method: "GET",
     url: `${AppConfig.apiUrl}users`,
-    body: users,
+    response: { body: users },
   },
   {
+    name: "getGroups",
     method: "GET",
     url: `${AppConfig.apiUrl}users/groups`,
-    body: [user1.group, user2.group],
+    response: { body: [user1.group, user2.group] },
   },
 ];
 

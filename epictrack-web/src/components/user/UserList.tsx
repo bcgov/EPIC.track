@@ -23,6 +23,7 @@ import MasterTrackTable, {
 } from "../shared/MasterTrackTable";
 import { UserGroupUpdate } from "../../services/userService/type";
 import { useAppSelector } from "../../hooks";
+import { searchFilter } from "components/shared/MasterTrackTable/filters";
 
 const UserList = () => {
   const [isValidGroup, setIsValidGroup] = React.useState<boolean>(true);
@@ -89,6 +90,7 @@ const UserList = () => {
         accessorFn: (row: User) => `${row.last_name}, ${row.first_name}`,
         header: "Name",
         enableEditing: false,
+        filterFn: searchFilter,
       },
       {
         accessorKey: "group.display_name",
