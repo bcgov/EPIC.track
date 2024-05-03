@@ -15,6 +15,7 @@ import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "../../../hooks";
 import { Restricted, hasPermission } from "../../shared/restricted";
+import { searchFilter } from "components/shared/MasterTrackTable/filters";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -116,6 +117,7 @@ const TemplateList = () => {
             )
           : undefined,
         sortingFn: "sortFn",
+        filterFn: searchFilter,
       },
       {
         accessorKey: "ea_act.name",
