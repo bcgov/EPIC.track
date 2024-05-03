@@ -53,7 +53,7 @@ const endpoints = [
     name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    response: { body: { staffs } },
+    response: { body: staffs },
   },
   {
     name: "getPIPType",

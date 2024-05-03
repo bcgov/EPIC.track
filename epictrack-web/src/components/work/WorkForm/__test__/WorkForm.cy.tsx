@@ -6,7 +6,7 @@ import { userDetails } from "services/userService/userSlice";
 import { store } from "store";
 import { UserDetail } from "services/userService/type";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { setupIntercepts } from "../../../../../cypress/support/utils";
 
 const generateFakePosition = () => {
   return {
