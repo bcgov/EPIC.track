@@ -46,7 +46,6 @@ const WorkList = () => {
         accessor = "abbreviation";
       }
       sort_key = key + "." + sort_key;
-      console.log(sort_key);
       const codes = sort([...works], sort_key)
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
