@@ -18,14 +18,22 @@ const ProjectList = () => {
     pageSize: 15,
   });
 
-  const types = sort([...projects], "type.sort_order")
-    .map((p) => p.type.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+  const types = projects.map((project) => project.type);
+  const types_filter = Array.from(
+    new Set(
+      types
+        .sort((type_a, type_b) => type_a.sort_order - type_b.sort_order)
+        .map((type) => type.name)
+    )
+  );
   const subTypes = sort([...projects], "sub_type.sort_order")
     .map((p) => p.sub_type.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  const proponents = sort([...projects], "proponent.name")
-    .map((p) => p.proponent.name)
+  const proponents = sort(
+    projects.map((project) => project.proponent),
+    "name"
+  )
+    .map((proponent) => proponent.name)
     .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
 
   const envRegionsOptions = getSelectFilterOptions(
@@ -50,7 +58,7 @@ const ProjectList = () => {
         accessorKey: "type.name",
         header: "Type",
         filterVariant: "multi-select",
-        filterSelectOptions: types,
+        filterSelectOptions: types_filter,
         Filter: ({ header, column }) => {
           return (
             <TableFilter

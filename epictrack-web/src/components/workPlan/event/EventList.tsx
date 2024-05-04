@@ -332,7 +332,7 @@ const EventList = () => {
     }
   };
 
-  const onDialogClose = () => {
+  const onSaveHandler = () => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
@@ -345,6 +345,16 @@ const EventList = () => {
     ) {
       getWorkPhaseById();
     }
+    setMilestoneEvent(undefined);
+    setTaskEvent(undefined);
+  };
+
+  const onCancelHandler = () => {
+    setShowTaskForm(false);
+    setShowTemplateForm(false);
+    setShowMilestoneForm(false);
+    setMilestoneEvent(undefined);
+    setTaskEvent(undefined);
   };
 
   const onTemplateFormSaveHandler = (templateId: number) => {
@@ -413,13 +423,6 @@ const EventList = () => {
       row.type === EVENT_TYPE.MILESTONE &&
         !(row.visibility === EventTemplateVisibility.MANDATORY)
     );
-  };
-  const onCancelHandler = () => {
-    setShowTaskForm(false);
-    setShowTemplateForm(false);
-    setShowMilestoneForm(false);
-    setMilestoneEvent(undefined);
-    setTaskEvent(undefined);
   };
   const onAddMilestone = () => {
     setShowMilestoneForm(true);
@@ -682,7 +685,7 @@ const EventList = () => {
         });
         setShowDeleteDialog(false);
         getCombinedEvents();
-        onDialogClose();
+        onSaveHandler();
       }
     } catch (e) {}
   };
@@ -905,7 +908,7 @@ const EventList = () => {
           },
         }}
       >
-        <TaskForm onSave={onDialogClose} taskEvent={taskEvent} />
+        <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
       </TrackDialog>
       <TrackDialog
         open={showMilestoneForm}
@@ -926,7 +929,7 @@ const EventList = () => {
         additionalActions={deleteAction}
       >
         <EventForm
-          onSave={onDialogClose}
+          onSave={onSaveHandler}
           event={milestoneEvent}
           milestoneEvents={milestoneEvents}
           isFormFieldsLocked={isEventFormFieldLocked}

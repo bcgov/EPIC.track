@@ -50,7 +50,7 @@ const WorkByLeadChart = () => {
     <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>
         <Grid item xs={12}>
-          <ETCaption1 bold>WORK BY LEAD</ETCaption1>
+          <ETCaption1 bold>WORK BY LEAD AND CO-LEAD</ETCaption1>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>

@@ -1,6 +1,5 @@
 """Insight generator for work resource grouped by EAO team"""
 
-
 from typing import List
 
 from sqlalchemy import func
@@ -9,6 +8,7 @@ from api.models import db
 from api.models.eao_team import EAOTeam
 from api.models.work import Work
 from api.models.staff_work_role import StaffWorkRole
+
 
 # pylint: disable=not-callable
 class WorkTeamInsightGenerator:
@@ -22,8 +22,15 @@ class WorkTeamInsightGenerator:
                 func.count()
                 .over(order_by=Work.eao_team_id, partition_by=Work.eao_team_id)
                 .label("count"),
-            ).group_by(Work.eao_team_id,Work.id)
-            .join(StaffWorkRole, and_(StaffWorkRole.work_id == Work.id, StaffWorkRole.staff_id == Work.work_lead_id))
+            )
+            .group_by(Work.eao_team_id, Work.id)
+            .join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == Work.id,
+                    StaffWorkRole.staff_id == Work.work_lead_id,
+                ),
+            )
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),

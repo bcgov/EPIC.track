@@ -10,6 +10,7 @@ export enum WorkStaffRole {
   OFFICER_ANALYST = 3,
   FN_CAIRT = 4,
   OTHER = 5,
+  TEAM_CO_LEAD = 6,
 }
 
 export const WorkStaffRoleNames: Record<WorkStaffRole, string> = {
@@ -18,4 +19,5 @@ export const WorkStaffRoleNames: Record<WorkStaffRole, string> = {
   [WorkStaffRole.OFFICER_ANALYST]: "Officer Analyst",
   [WorkStaffRole.FN_CAIRT]: "FN CAIRT",
   [WorkStaffRole.OTHER]: "Other",
+  [WorkStaffRole.TEAM_CO_LEAD]: "Team Co-Lead",
 };

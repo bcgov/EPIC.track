@@ -85,6 +85,7 @@ from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
 
+# pylint:disable=not-callable, too-many-lines
 class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
 
@@ -299,14 +300,14 @@ class WorkService:  # pylint: disable=too-many-public-methods
             "entity_id": work.id,
             "field_name": "responsible_epd_id",
             "field_value": work.responsible_epd_id,
-            "active_from": work.created_at,
+            "active_from": work.start_date,
         }
         work_team_lead_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
             "field_name": "work_lead_id",
             "field_value": work.work_lead_id,
-            "active_from": work.created_at,
+            "active_from": work.start_date,
         }
 
         SpecialFieldService.create_special_field_entry(
