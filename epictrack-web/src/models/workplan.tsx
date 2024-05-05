@@ -1,3 +1,4 @@
+import { WorkPhase } from "./work";
 import { WorkType } from "./workType";
 
 export interface WorkPlan {
@@ -5,6 +6,7 @@ export interface WorkPlan {
   title: string;
   simple_title: string;
   is_active: boolean;
+  current_work_phase_id: number;
   work_type: WorkType;
   work_state: string;
 
@@ -19,6 +21,7 @@ export interface WorkPlan {
     total_number_of_days: number;
     work_phase: {
       name: string;
+      id: number;
       phase: {
         color: string;
       };

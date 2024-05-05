@@ -4,6 +4,7 @@ from datetime import timedelta
 from pytz import timezone
 
 from api.actions.base import ActionFactory
+from api.models.linked_work import LinkedWork
 
 
 class CreateWork(ActionFactory):
@@ -31,4 +32,13 @@ class CreateWork(ActionFactory):
             "eao_team_id": source_event.work.eao_team_id,
             "decision_by_id": source_event.work.decision_by_id,
         }
-        WorkService.create_work(new_work)
+        work = WorkService.create_work(new_work)
+        linked_work = LinkedWork(
+            **{
+                "source_work_id": source_event.work_id,
+                "linked_work_id": work.id,
+                "source_event_id": source_event.id,
+                "is_active": True,
+            }
+        )
+        linked_work.flush()
