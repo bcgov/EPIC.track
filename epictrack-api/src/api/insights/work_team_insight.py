@@ -3,11 +3,9 @@
 from typing import List
 
 from sqlalchemy import func
-from sqlalchemy import and_
 from api.models import db
 from api.models.eao_team import EAOTeam
 from api.models.work import Work
-from api.models.staff_work_role import StaffWorkRole
 
 
 # pylint: disable=not-callable
@@ -24,18 +22,10 @@ class WorkTeamInsightGenerator:
                 .label("count"),
             )
             .group_by(Work.eao_team_id, Work.id)
-            .join(
-                StaffWorkRole,
-                and_(
-                    StaffWorkRole.work_id == Work.id,
-                    StaffWorkRole.staff_id == Work.work_lead_id,
-                ),
-            )
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
-                StaffWorkRole.is_active.is_(True),
             )
             .distinct(Work.id)
             .subquery()
