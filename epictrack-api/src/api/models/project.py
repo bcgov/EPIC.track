@@ -78,7 +78,7 @@ class Project(BaseModelVersioned):
         if with_works:
             query = query.filter(cls.works.any())
         if is_active is not None:
-            query = query.filter(cls.is_active.is_(False))
+            query = query.filter(cls.is_active.is_(is_active))
         return query.filter(cls.is_deleted.is_(False)).all()
 
     @classmethod
