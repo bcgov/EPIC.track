@@ -44,8 +44,9 @@ const WorkStaffList = () => {
       const roles = value.staff
         .filter(
           (p) =>
-            p.role.id !== WorkStaffRole.TEAM_LEAD &&
-            p.role.id !== WorkStaffRole.RESPONSIBLE_EPD
+            ![WorkStaffRole.TEAM_LEAD, WorkStaffRole.RESPONSIBLE_EPD].includes(
+              p.role.id
+            )
         )
         .map((p) => p.role.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
