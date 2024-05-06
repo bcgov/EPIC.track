@@ -91,7 +91,6 @@ const EventForm = ({
   const [showEventPushConfirmation, setShowEventPushConfirmation] =
     useState(false);
   const [pushEvents, setPushEvents] = useState<boolean>(false);
-
   const initialNotes = useMemo(() => event?.notes, [event?.id]);
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
@@ -143,6 +142,11 @@ const EventForm = ({
         }),
       }),
     [selectedConfiguration, actualAdded]
+  );
+  const disableAnticipatedDate = Boolean(
+    selectedConfiguration?.id &&
+      selectedWorkPhase?.work_phase.legislated &&
+      selectedConfiguration?.event_position === EventPosition.END
   );
   const isHighPriorityActive = useMemo(() => {
     if (event) {
@@ -679,10 +683,7 @@ const EventForm = ({
               <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
               <ControlledDatePicker
                 name="anticipated_date"
-                disabled={Boolean(
-                  selectedConfiguration?.id &&
-                    selectedConfiguration?.event_position === EventPosition.END
-                )}
+                disabled={disableAnticipatedDate}
                 defaultValue={dayjs(anticipatedDefaultValue).format()}
                 datePickerProps={{
                   referenceDate: dayjs(
