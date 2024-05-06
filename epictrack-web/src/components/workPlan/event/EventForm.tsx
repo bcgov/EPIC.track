@@ -679,6 +679,7 @@ const EventForm = ({
               <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
               <ControlledDatePicker
                 name="anticipated_date"
+                disabled={Boolean(selectedConfiguration?.id)}
                 defaultValue={dayjs(anticipatedDefaultValue).format()}
                 datePickerProps={{
                   referenceDate: dayjs(
