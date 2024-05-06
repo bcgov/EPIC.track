@@ -139,15 +139,6 @@ const WorkStaffList = () => {
       },
       {
         accessorFn: (row: WorkStaff) =>
-          row.responsible_epd
-            ? `${row.responsible_epd?.first_name} ${row.responsible_epd?.last_name}`
-            : "",
-        header: "Responsible EPD",
-        filterVariant: "multi-select",
-        filterSelectOptions: responsibleEpdFilter,
-      },
-      {
-        accessorFn: (row: WorkStaff) =>
           row.work_lead
             ? `${row.work_lead?.first_name} ${row.work_lead?.last_name}`
             : "",

@@ -142,12 +142,14 @@ class WorkResourceResponseSchema(
         model = Work
         include_fk = False
         unknown = EXCLUDE
-
+        
     project = fields.Nested(ProjectResponseSchema(only=("id", "name")))
     eao_team = fields.Nested(EAOTeamSchema, dump_only=True)
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
+    title = fields.Str()
+    
 
 
 class WorkPhaseByIdResponseSchema(Schema):
