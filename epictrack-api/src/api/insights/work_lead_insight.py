@@ -22,7 +22,6 @@ class WorkLeadInsightGenerator:
             db.session.query(
                 StaffWorkRole.staff_id,
                 func.count()
-                # .over(order_by=Work.work_lead_id, partition_by=Work.work_lead_id)
                 .label("count"),
             )
             .group_by(StaffWorkRole.staff_id)

@@ -20,10 +20,7 @@ class WorkStaffInsightGenerator:
         partition_query = (
             db.session.query(
                 StaffWorkRole.staff_id,
-                func.count()
-                # .over(
-                #     order_by=StaffWorkRole.staff_id, partition_by=StaffWorkRole.staff_id
-                # )
+                func.count()                
                 .label("count"),
             ).group_by(StaffWorkRole.staff_id)
             .join(Work, and_(StaffWorkRole.work_id == Work.id))
