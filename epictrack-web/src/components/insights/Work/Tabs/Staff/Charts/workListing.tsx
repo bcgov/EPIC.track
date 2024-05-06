@@ -12,7 +12,7 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
-import { exportToCsv } from "utils/exportUtils";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";

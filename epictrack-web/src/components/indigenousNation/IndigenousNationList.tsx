@@ -30,7 +30,7 @@ import { debounce } from "lodash";
 import { Palette } from "styles/theme";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { exportToCsv } from "utils/exportUtils";
+import { exportToCsv } from "../shared/MasterTrackTable/utils";
 import FileDownload from "@mui/icons-material/FileDownload";
 
 const firstNationsColumnFiltersCacheKey =

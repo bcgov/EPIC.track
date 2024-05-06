@@ -19,7 +19,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { exportToCsv } from "utils/exportUtils";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];

@@ -32,7 +32,7 @@ import { Palette } from "styles/theme";
 import { debounce } from "lodash";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
-import { exportToCsv } from "utils/exportUtils";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";

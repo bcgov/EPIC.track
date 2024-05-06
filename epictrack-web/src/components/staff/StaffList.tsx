@@ -16,7 +16,7 @@ import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { exportToCsv } from "utils/exportUtils";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 
 const staffListColumnFiltersCacheKey = "staff-listing-column-filters";

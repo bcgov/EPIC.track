@@ -7,7 +7,7 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
-import { exportToCsv } from "utils/exportUtils";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
