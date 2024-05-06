@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import {
   getSelectFilterOptions,
@@ -21,34 +21,57 @@ const ProjectList = () => {
     pageSize: 15,
   });
 
-  const types = projects.map((project) => project.type);
-  const types_filter = Array.from(
-    new Set(
-      types
-        .sort((type_a, type_b) => type_a.sort_order - type_b.sort_order)
-        .map((type) => type.name)
-    )
+  const types = useMemo(
+    () => projects.map((project) => project.type),
+    [projects]
   );
-  const subTypes = sort([...projects], "sub_type.sort_order")
-    .map((p) => p.sub_type.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-  const proponents = sort(
-    projects.map((project) => project.proponent),
-    "name"
-  )
-    .map((proponent) => proponent.name)
-    .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-
-  const envRegionsOptions = getSelectFilterOptions(
-    projects.map((project) => project.region_env),
-    "name"
+  const types_filter = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          types
+            .sort((type_a, type_b) => type_a.sort_order - type_b.sort_order)
+            .map((type) => type.name)
+        )
+      ),
+    [types]
+  );
+  const subTypes = useMemo(
+    () =>
+      sort([...projects], "sub_type.sort_order")
+        .map((p) => p.sub_type.name)
+        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
+    [projects]
+  );
+  const proponents = useMemo(
+    () =>
+      sort(
+        projects.map((project) => project.proponent),
+        "name"
+      )
+        .map((proponent) => proponent.name)
+        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
+    [projects]
   );
 
-  const nrsRegionOptions = getSelectFilterOptions(
-    projects.map((project) => project.region_flnro),
-    "name"
+  const envRegionsOptions = useMemo(
+    () =>
+      getSelectFilterOptions(
+        projects.map((project) => project.region_env),
+        "name"
+      ),
+    [projects]
   );
 
+  const nrsRegionOptions = useMemo(
+    () =>
+      getSelectFilterOptions(
+        projects.map((project) => project.region_flnro),
+        "name"
+      ),
+    [projects]
+  );
+  console.log("rerender");
   const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
@@ -232,7 +255,7 @@ const ProjectList = () => {
             justifyContent: "right",
           }}
         >
-          <Tooltip title="Export to csv">
+          {/* <Tooltip title="Export to csv">
             <IconButton
               onClick={() =>
                 exportToCsv({
@@ -244,7 +267,7 @@ const ProjectList = () => {
             >
               <FileDownload />
             </IconButton>
-          </Tooltip>
+          </Tooltip> */}
         </Box>
       )}
       enablePagination
