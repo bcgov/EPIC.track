@@ -7,6 +7,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETPageContainer } from "components/shared";
+import { WorkStaffRole } from "models/role";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 
@@ -41,6 +42,12 @@ const WorkStaffList = () => {
   wsData.forEach((value, index) => {
     if (value.staff.length > 0) {
       const roles = value.staff
+        .filter(
+          (p) =>
+            ![WorkStaffRole.TEAM_LEAD, WorkStaffRole.RESPONSIBLE_EPD].includes(
+              p.role.id
+            )
+        )
         .map((p) => p.role.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
       uniquestaff = [...uniquestaff, ...roles].filter(
@@ -48,6 +55,7 @@ const WorkStaffList = () => {
       );
     }
   });
+
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (wsData && wsData.length > 0) {
@@ -134,12 +142,6 @@ const WorkStaffList = () => {
         filterSelectOptions: titleFilter,
       },
       {
-        accessorKey: "eao_team.name",
-        header: "Team",
-        filterVariant: "multi-select",
-        filterSelectOptions: teamFilter,
-      },
-      {
         accessorFn: (row: WorkStaff) =>
           row.responsible_epd
             ? `${row.responsible_epd?.first_name} ${row.responsible_epd?.last_name}`
@@ -147,6 +149,12 @@ const WorkStaffList = () => {
         header: "Responsible EPD",
         filterVariant: "multi-select",
         filterSelectOptions: responsibleEpdFilter,
+      },
+      {
+        accessorKey: "eao_team.name",
+        header: "Team",
+        filterVariant: "multi-select",
+        filterSelectOptions: teamFilter,
       },
       {
         accessorFn: (row: WorkStaff) =>
