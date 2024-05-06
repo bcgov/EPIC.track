@@ -55,16 +55,9 @@ class ProjectService:
         raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
 
     @classmethod
-    def find_all(cls, with_works=False):
+    def find_all(cls, with_works=False, is_active=None):
         """Find all projects"""
-        if with_works:
-            return Project.find_all_with_works()
-        return Project.find_all(default_filters=False)
-
-    @classmethod
-    def find_all_with_works(cls):
-        """Find all projects"""
-        return Project.find_all_with_works()
+        return Project.find_all_projects(with_works, is_active)
 
     @classmethod
     def create_project(cls, payload: dict):

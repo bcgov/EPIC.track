@@ -18,8 +18,8 @@ export const projectInsightsApi = createApi({
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getProjects: builder.query<Project[], void>({
-      query: () => `projects`,
+    getProjects: builder.query<Project[], boolean | void>({
+      query: (is_active = true) => `projects?is_active=${is_active}`,
       providesTags: (result) =>
         result
           ? [

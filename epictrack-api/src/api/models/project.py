@@ -72,9 +72,14 @@ class Project(BaseModelVersioned):
     works = relationship('Work', lazy='dynamic')
 
     @classmethod
-    def find_all_with_works(cls):
+    def find_all_projects(cls, with_works=False, is_active=None):
         """Return all projects with works."""
-        return cls.query.filter(cls.works.any()).filter(cls.is_deleted.is_(False)).all()
+        query = cls.query
+        if with_works:
+            query = query.filter(cls.works.any())
+        if is_active is not None:
+            query = query.filter(cls.is_active.is_(False))
+        return query.filter(cls.is_deleted.is_(False)).all()
 
     @classmethod
     def check_existence(cls, name, project_id=None):
