@@ -84,6 +84,7 @@ from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
 
+# pylint: disable=too-many-lines
 class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
 
@@ -137,6 +138,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 "id",
                 "work_state",
                 "work_type",
+                "current_work_phase_id",
                 "federal_involvement",
                 "eao_team",
                 "title",
@@ -153,6 +155,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "next_milestone",
                     "milestone_progress",
                     "days_left",
+                    "work_phase.id",
                     "work_phase.phase.color",
                     "work_phase.start_date",
                     "work_phase.end_date",

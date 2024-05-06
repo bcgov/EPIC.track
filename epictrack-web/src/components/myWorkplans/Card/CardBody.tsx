@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
@@ -27,6 +28,14 @@ const CardBody = ({ workplan }: CardProps) => {
   const workTitle = `${workplan.work_type.name}${
     workplan.simple_title ? ` - ${workplan.simple_title}` : ""
   }`;
+
+  const currentWorkPhaseInfo = useMemo(() => {
+    const currentPhaseInfo = workplan.phase_info.filter(
+      (p) => p.work_phase.id === workplan.current_work_phase_id
+    );
+    return currentPhaseInfo[0];
+  }, [workplan]);
+  console.log("CURRENT WORKPHASE INFO", currentWorkPhaseInfo);
 
   return (
     <Grid
@@ -64,7 +73,7 @@ const CardBody = ({ workplan }: CardProps) => {
       </Grid>
 
       <Grid item container direction="row" spacing={1} sx={{ height: "26px" }}>
-        <When condition={"phase_info" in workplan}>
+        <When condition={Boolean(currentWorkPhaseInfo)}>
           <Grid item xs={12}>
             <Stack
               direction={"row"}
@@ -85,11 +94,11 @@ const CardBody = ({ workplan }: CardProps) => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {workplan?.phase_info[0]?.work_phase.name}
+                {currentWorkPhaseInfo.work_phase.name}
               </ETCaption2>
               <ClockIcon
                 fill={
-                  workplan?.phase_info[0]?.days_left > 0
+                  currentWorkPhaseInfo?.days_left > 0
                     ? Palette.neutral.main
                     : Palette.error.main
                 }
@@ -98,7 +107,7 @@ const CardBody = ({ workplan }: CardProps) => {
                 bold
                 enableEllipsis
                 color={
-                  workplan?.phase_info[0]?.days_left > 0
+                  currentWorkPhaseInfo?.days_left > 0
                     ? Palette.neutral.main
                     : Palette.error.main
                 }
@@ -108,8 +117,8 @@ const CardBody = ({ workplan }: CardProps) => {
                 }}
               >
                 {daysLeft(
-                  workplan?.phase_info[0]?.days_left,
-                  workplan?.phase_info[0]?.total_number_of_days
+                  currentWorkPhaseInfo?.days_left,
+                  currentWorkPhaseInfo?.total_number_of_days
                 )}
               </ETCaption2>
             </Stack>
@@ -117,7 +126,7 @@ const CardBody = ({ workplan }: CardProps) => {
         </When>
       </Grid>
       <Grid container sx={{ height: "64px" }} spacing={1}>
-        <When condition={Boolean(workplan?.phase_info[0])}>
+        <When condition={Boolean(currentWorkPhaseInfo)}>
           <Grid item container direction="row" spacing={1}>
             <Grid
               item
@@ -129,7 +138,7 @@ const CardBody = ({ workplan }: CardProps) => {
             >
               <ETCaption1 color={Palette.neutral.main}>
                 {`UPCOMING MILESTONE ${dayjs(new Date())
-                  .add(workplan?.phase_info[0]?.days_left, "days")
+                  .add(currentWorkPhaseInfo?.days_left, "days")
                   .format(MONTH_DAY_YEAR)
                   .toUpperCase()}`}
               </ETCaption1>
@@ -146,7 +155,7 @@ const CardBody = ({ workplan }: CardProps) => {
                   whiteSpace: "nowrap",
                 }}
               >
-                {workplan.phase_info[0]?.next_milestone}
+                {currentWorkPhaseInfo?.next_milestone}
               </ETParagraph>
             </Grid>
           </Grid>
