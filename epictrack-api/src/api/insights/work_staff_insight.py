@@ -20,16 +20,16 @@ class WorkStaffInsightGenerator:
         partition_query = (
             db.session.query(
                 StaffWorkRole.staff_id,
-                func.count()                
-                .label("count"),
-            ).group_by(StaffWorkRole.staff_id)
+                func.count().label("count"),
+            )
+            .group_by(StaffWorkRole.staff_id)
             .join(Work, and_(StaffWorkRole.work_id == Work.id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
-                StaffWorkRole.role_id == RoleEnum.OFFICER_ANALYST.value
+                StaffWorkRole.role_id == RoleEnum.OFFICER_ANALYST.value,
             )
             .distinct(StaffWorkRole.staff_id)
             .subquery()
