@@ -10,8 +10,8 @@ import {
   mockStaffs,
   testTableFiltering,
 } from "../../../../cypress/support/common";
-import { setupIntercepts } from "../../../../cypress/support/utils";
 import { AppConfig } from "config";
+import { setupIntercepts } from "../../../../cypress/support/utils";
 
 //ensure staffs are never the same by incrementing the counter
 let staffCounter = 0;
@@ -38,31 +38,38 @@ const staffs = [staff1, staff2];
 
 const endpoints = [
   {
+    name: "getActiveStaffsOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
+    name: "getPIPTypeOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
+
   {
+    name: "getFirstNationsOptions",
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}first_nations`,
   },
   {
+    name: "getInactiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    body: { data: mockStaffs },
+    response: { body: { data: mockStaffs } },
   },
   {
+    name: "getPIPType",
     method: "GET",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
-    body: [],
+    response: { body: [] },
   },
   {
+    name: "getFirstNations",
     method: "GET",
     url: `${AppConfig.apiUrl}first_nations`,
-    body: [],
+    response: { body: [] },
   },
 ];
 
