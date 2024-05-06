@@ -44,6 +44,7 @@ interface WorkplanContextProps {
   getWorkById: () => Promise<void>;
   selectedStaff?: StaffWorkRole;
   setSelectedStaff: Dispatch<SetStateAction<StaffWorkRole | undefined>>;
+  loadData: () => Promise<void>;
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
@@ -70,6 +71,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
   getWorkById: () => new Promise((resolve) => resolve),
   selectedStaff: undefined,
   setSelectedStaff: () => ({}),
+  loadData: () => new Promise((resolve) => resolve),
 };
 export const WorkplanContext = createContext<WorkplanContextProps>(
   initialWorkPlanContext
@@ -214,6 +216,7 @@ export const WorkplanProvider = ({
         setIssues,
         loadIssues,
         getWorkById,
+        loadData,
       }}
     >
       {children}

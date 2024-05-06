@@ -19,7 +19,7 @@ import { Restricted } from "components/shared/restricted";
 const WorkDetails = () => {
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
 
-  const { work, workPhases, getWorkById, team } = useContext(WorkplanContext);
+  const { work, workPhases, loadData, team } = useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const isTeamMember = team.find((member) => member.staff.email === email);
 
@@ -40,7 +40,7 @@ const WorkDetails = () => {
   const handleLoadWork = async () => {
     try {
       setLoadingWork(true);
-      await getWorkById();
+      await loadData();
       setLoadingWork(false);
     } catch (error) {
       setLoadingWork(false);
@@ -208,6 +208,7 @@ const WorkDetails = () => {
         open={openWorkDialog}
         setOpen={setOpenWorkDialog}
         saveWorkCallback={handleLoadWork}
+        closeCallback={handleLoadWork}
       />
     </>
   );
