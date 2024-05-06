@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Box, Grid, IconButton, Tooltip } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
@@ -38,24 +38,30 @@ const WorkStaffList = () => {
     getWorkStaffAllocation();
   }, []);
 
-  let uniquestaff: any[] = [];
-  wsData.forEach((value, index) => {
-    if (value.staff.length > 0) {
-      const roles = value.staff
-        .filter(
-          (p) =>
-            ![WorkStaffRole.TEAM_LEAD, WorkStaffRole.RESPONSIBLE_EPD].includes(
-              p.role.id
-            )
-        )
-        .map((p) => p.role.name)
-        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-      uniquestaff = [...uniquestaff, ...roles].filter(
-        (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-      );
-    }
-  });
-
+  const uniquestaff = useMemo(() => {
+    let uniquestaff: any[] = [];
+    wsData.forEach((value, index) => {
+      if (value.staff.length > 0) {
+        const roles = value.staff
+          .filter(
+            (p) =>
+              ![
+                WorkStaffRole.TEAM_LEAD,
+                WorkStaffRole.RESPONSIBLE_EPD,
+              ].includes(p.role.id)
+          )
+          .map((p) => p.role.name)
+          .filter(
+            (ele, index, arr) => arr.findIndex((t) => t === ele) === index
+          );
+        uniquestaff = [...uniquestaff, ...roles].filter(
+          (ele, index, arr) => arr.findIndex((t) => t === ele) === index
+        );
+      }
+    });
+    return uniquestaff;
+  }, [wsData]);
+  console.log(uniquestaff);
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (wsData && wsData.length > 0) {
@@ -76,7 +82,7 @@ const WorkStaffList = () => {
       });
     }
     return columns;
-  }, [wsData]);
+  }, [wsData, uniquestaff]);
 
   const projectFilter = React.useMemo(
     () =>
