@@ -8,6 +8,9 @@ import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { Link } from "react-router-dom";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import { FileDownload } from "@mui/icons-material";
+import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 import { ETGridTitle } from "components/shared";
 
@@ -194,6 +197,29 @@ const WorkList = () => {
         showGlobalFilter: true,
         pagination: pagination,
       }}
+      renderTopToolbarCustomActions={({ table }) => (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "right",
+          }}
+        >
+          <Tooltip title="Export to csv">
+            <IconButton
+              onClick={() =>
+                exportToCsv({
+                  table,
+                  downloadDate: new Date().toISOString(),
+                  filenamePrefix: "general-insights-listing",
+                })
+              }
+            >
+              <FileDownload />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
       enablePagination
       muiPaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(works.length),

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid } from "@mui/material";
+import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
@@ -20,6 +20,8 @@ import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { sort } from "utils";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import { FileDownload } from "@mui/icons-material";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
 
@@ -343,7 +345,7 @@ const WorkList = () => {
               isLoading: loadingWorks,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={() => (
+            renderTopToolbarCustomActions={({ table }) => (
               <Box
                 sx={{
                   width: "100%",
@@ -365,6 +367,19 @@ const WorkList = () => {
                     Create Work
                   </Button>
                 </Restricted>
+                <Tooltip title="Export to csv">
+                  <IconButton
+                    onClick={() =>
+                      exportToCsv({
+                        table,
+                        downloadDate: new Date().toISOString(),
+                        filenamePrefix: "all-works-listing",
+                      })
+                    }
+                  >
+                    <FileDownload />
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
             onCacheFilters={handleCacheFilters}

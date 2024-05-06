@@ -71,6 +71,7 @@ export default function ResourceForecast() {
     );
     setColumnFilters(filteredColumnFilters);
   }, [columnVisibility, setColumnFilters]);
+
   const exportToCsv = React.useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
       const filteredResult = table.getFilteredRowModel().flatRows.map((p) => {
