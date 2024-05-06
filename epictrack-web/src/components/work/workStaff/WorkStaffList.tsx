@@ -7,6 +7,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETPageContainer } from "components/shared";
+import { WorkStaffRole } from "models/role";
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
@@ -39,6 +40,11 @@ const WorkStaffList = () => {
   wsData.forEach((value, index) => {
     if (value.staff.length > 0) {
       const roles = value.staff
+        .filter(
+          (p) =>
+            p.role.id !== WorkStaffRole.TEAM_LEAD &&
+            p.role.id !== WorkStaffRole.RESPONSIBLE_EPD
+        )
         .map((p) => p.role.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
       uniquestaff = [...uniquestaff, ...roles].filter(
@@ -46,6 +52,7 @@ const WorkStaffList = () => {
       );
     }
   });
+
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (wsData && wsData.length > 0) {
@@ -130,6 +137,15 @@ const WorkStaffList = () => {
         header: "Work Title",
         filterVariant: "multi-select",
         filterSelectOptions: titleFilter,
+      },
+      {
+        accessorFn: (row: WorkStaff) =>
+          row.responsible_epd
+            ? `${row.responsible_epd?.first_name} ${row.responsible_epd?.last_name}`
+            : "",
+        header: "Responsible EPD",
+        filterVariant: "multi-select",
+        filterSelectOptions: responsibleEpdFilter,
       },
       {
         accessorKey: "eao_team.name",
