@@ -225,7 +225,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         return filterValue.includes(row.getValue(id));
       },
     },
-    ...otherPropsData,
+    ...otherProps,
   });
 
   useEffect(() => {
