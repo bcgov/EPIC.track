@@ -264,7 +264,7 @@ def test_work_resources(client, auth_header):
     work_response_json = work_response.json
     assert work_response.status_code == HTTPStatus.CREATED
 
-    url = urljoin(API_BASE_URL, "works/resources")
+    url = urljoin(API_BASE_URL, "works/resources?is_active=true")
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
     work_resource_json = response.json[0]

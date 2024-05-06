@@ -19,8 +19,7 @@ from flask_restx import Namespace, Resource, cors
 
 from api.schemas import request as req
 from api.services.insights import InsightService
-from api.utils import auth, constants, profiletime
-from api.utils.caching import AppCache
+from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
 
@@ -36,7 +35,6 @@ class Works(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return work insights based on group by param."""
         args = req.WorkInsightRequestQueryParameterSchema().load(request.args)
@@ -53,7 +51,6 @@ class AssessmentWorks(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return work insights based on group by param."""
         args = req.WorkInsightRequestQueryParameterSchema().load(request.args)
@@ -70,7 +67,6 @@ class Projects(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     def get():
         """Return project insights based on group by param."""
         args = req.ProjectInsightRequestQueryParameterSchema().load(request.args)

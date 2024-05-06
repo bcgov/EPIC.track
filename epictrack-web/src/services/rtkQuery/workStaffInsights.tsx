@@ -14,7 +14,7 @@ export const workStaffInsightsApi = createApi({
   }),
   endpoints: (builder) => ({
     getWorkStaffs: builder.query<WorkStaff[], void>({
-      query: () => Endpoints.Works.WORK_RESOURCES,
+      query: () => Endpoints.Works.WORK_RESOURCES_ACTIVE,
       providesTags: (result) =>
         result
           ? [
