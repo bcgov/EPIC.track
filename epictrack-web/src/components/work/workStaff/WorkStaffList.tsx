@@ -1,12 +1,14 @@
 import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Grid } from "@mui/material";
+import { Box, Grid, IconButton, Tooltip } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETPageContainer } from "components/shared";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import { FileDownload } from "@mui/icons-material";
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
@@ -192,6 +194,29 @@ const WorkStaffList = () => {
             isLoading: loading,
             showGlobalFilter: true,
           }}
+          renderTopToolbarCustomActions={({ table }) => (
+            <Box
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "right",
+              }}
+            >
+              <Tooltip title="Export to csv">
+                <IconButton
+                  onClick={() =>
+                    exportToCsv({
+                      table,
+                      downloadDate: new Date().toISOString(),
+                      filenamePrefix: "work-staff-listing",
+                    })
+                  }
+                >
+                  <FileDownload />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          )}
           onCacheFilters={handleCacheFilters}
         />
       </Grid>

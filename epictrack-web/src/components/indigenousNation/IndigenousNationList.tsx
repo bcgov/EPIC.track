@@ -1,5 +1,14 @@
 import React, { useMemo } from "react";
-import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Grid,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
@@ -21,6 +30,8 @@ import { debounce } from "lodash";
 import { Palette } from "styles/theme";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { exportToCsv } from "../shared/MasterTrackTable/utils";
+import FileDownload from "@mui/icons-material/FileDownload";
 
 const firstNationsColumnFiltersCacheKey =
   "first-nations-listing-column-filters";
@@ -267,7 +278,7 @@ export default function IndigenousNationList() {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={() => (
+            renderTopToolbarCustomActions={({ table }) => (
               <Box
                 sx={{
                   width: "100%",
@@ -289,6 +300,19 @@ export default function IndigenousNationList() {
                     Create First Nation
                   </Button>
                 </Restricted>
+                <Tooltip title="Export to csv">
+                  <IconButton
+                    onClick={() =>
+                      exportToCsv({
+                        table,
+                        downloadDate: new Date().toISOString(),
+                        filenamePrefix: "first-nations-listing",
+                      })
+                    }
+                  >
+                    <FileDownload />
+                  </IconButton>
+                </Tooltip>
               </Box>
             )}
             onCacheFilters={handleCacheFilters}

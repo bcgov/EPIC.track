@@ -12,6 +12,9 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import { FileDownload } from "@mui/icons-material";
+import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 
@@ -265,6 +268,29 @@ const WorkList = () => {
         showGlobalFilter: true,
         pagination: pagination,
       }}
+      renderTopToolbarCustomActions={({ table }) => (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "right",
+          }}
+        >
+          <Tooltip title="Export to csv">
+            <IconButton
+              onClick={() =>
+                exportToCsv({
+                  table,
+                  downloadDate: new Date().toISOString(),
+                  filenamePrefix: "staff-insights-listing",
+                })
+              }
+            >
+              <FileDownload />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
       enablePagination
       muiPaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(workStaffs?.length || 0),
