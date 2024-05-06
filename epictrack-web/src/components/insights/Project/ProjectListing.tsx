@@ -9,6 +9,9 @@ import TableFilter from "components/shared/filterSelect/TableFilter";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useProjectsContext } from "./ProjectsContext";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import { FileDownload } from "@mui/icons-material";
+import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 
 const ProjectList = () => {
@@ -213,6 +216,29 @@ const ProjectList = () => {
         showGlobalFilter: true,
         pagination: pagination,
       }}
+      renderTopToolbarCustomActions={({ table }) => (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "right",
+          }}
+        >
+          <Tooltip title="Export to csv">
+            <IconButton
+              onClick={() =>
+                exportToCsv({
+                  table,
+                  downloadDate: new Date().toISOString(),
+                  filenamePrefix: "project-insights-listing",
+                })
+              }
+            >
+              <FileDownload />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      )}
       enablePagination
       muiPaginationProps={{
         rowsPerPageOptions: rowsPerPageOptions(projects.length),
