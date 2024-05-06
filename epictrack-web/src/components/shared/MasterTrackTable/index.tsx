@@ -82,7 +82,6 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   useEffect(() => {
     setOtherPropsData(otherProps);
   }, [columns, data]);
-
   const table = useMaterialReactTable({
     columns: columns,
     data: data,

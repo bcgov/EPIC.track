@@ -76,7 +76,6 @@ const UserList = () => {
   const [selectedGroup, setSelectedGroup] = React.useState<
     Group | undefined | null
   >();
-
   const currentUserGroup = React.useMemo<Group>(() => {
     return groups
       .filter((p) => userDetails.groups.includes(p.path))

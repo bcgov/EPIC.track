@@ -4,10 +4,12 @@
 from typing import List
 
 from sqlalchemy import func
-
+from sqlalchemy import and_
 from api.models import db
 from api.models.staff import Staff
 from api.models.work import Work
+from api.models.staff_work_role import StaffWorkRole
+from api.models.role import RoleEnum
 
 
 # pylint: disable=not-callable
@@ -18,17 +20,22 @@ class WorkLeadInsightGenerator:
         """Generates the group by subquery."""
         partition_query = (
             db.session.query(
-                Work.work_lead_id,
+                StaffWorkRole.staff_id,
                 func.count()
-                .over(order_by=Work.work_lead_id, partition_by=Work.work_lead_id)
                 .label("count"),
             )
+            .group_by(StaffWorkRole.staff_id)
+            .join(Work, and_(StaffWorkRole.work_id == Work.id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
+                StaffWorkRole.is_active.is_(True),
+                StaffWorkRole.role_id.in_(
+                    [RoleEnum.TEAM_CO_LEAD.value, RoleEnum.TEAM_LEAD.value]
+                ),
             )
-            .distinct(Work.work_lead_id)
+            .distinct(StaffWorkRole.staff_id)
             .subquery()
         )
         return partition_query
@@ -39,7 +46,7 @@ class WorkLeadInsightGenerator:
 
         lead_insights = (
             db.session.query(Staff)
-            .join(partition_query, partition_query.c.work_lead_id == Staff.id)
+            .join(partition_query, partition_query.c.staff_id == Staff.id)
             .add_columns(
                 Staff.full_name.label("work_lead"),
                 Staff.id.label("work_lead_id"),

@@ -3,11 +3,12 @@
 from typing import List
 
 from sqlalchemy import func
-
+from sqlalchemy import and_
 from api.models import db
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
 from api.models.work import Work
+from api.models.role import RoleEnum
 
 
 # pylint: disable=not-callable
@@ -19,18 +20,16 @@ class WorkStaffInsightGenerator:
         partition_query = (
             db.session.query(
                 StaffWorkRole.staff_id,
-                func.count()
-                .over(
-                    order_by=StaffWorkRole.staff_id, partition_by=StaffWorkRole.staff_id
-                )
-                .label("count"),
+                func.count().label("count"),
             )
-            .join(Work, Work.id == StaffWorkRole.work_id)
+            .group_by(StaffWorkRole.staff_id)
+            .join(Work, and_(StaffWorkRole.work_id == Work.id))
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
+                StaffWorkRole.role_id == RoleEnum.OFFICER_ANALYST.value,
             )
             .distinct(StaffWorkRole.staff_id)
             .subquery()
