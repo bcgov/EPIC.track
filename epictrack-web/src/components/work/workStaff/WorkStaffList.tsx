@@ -6,7 +6,7 @@ import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { ETPageContainer } from "components/shared";
+import { ETGridTitle, ETPageContainer } from "components/shared";
 import { WorkStaffRole } from "models/role";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
@@ -140,6 +140,19 @@ const WorkStaffList = () => {
         header: "Work Title",
         filterVariant: "multi-select",
         filterSelectOptions: titleFilter,
+        Cell: ({ row, renderedCellValue }) => {
+          return (
+            <ETGridTitle
+              to={`/work-plan?work_id=${row.original.id}`}
+              titleText={row.original.title}
+              enableTooltip
+              enableEllipsis
+              tooltip={row.original.title}
+            >
+              {renderedCellValue}
+            </ETGridTitle>
+          );
+        },
       },
       {
         accessorFn: (row: WorkStaff) =>
