@@ -82,7 +82,7 @@ export default function ProjectForm({
   const [envRegions, setEnvRegions] = React.useState<ListType[]>();
   const [nrsRegions, setNRSRegions] = React.useState<ListType[]>();
   const [subTypes, setSubTypes] = React.useState<SubType[]>([]);
-  const [types, setTypes] = React.useState<Type[]>([]);
+  const [types, setTypes] = React.useState<ListType[]>([]);
   const [proponents, setProponents] = React.useState<Proponent[]>();
 
   const [isProponentFieldLocked, setIsProponentFieldLocked] =

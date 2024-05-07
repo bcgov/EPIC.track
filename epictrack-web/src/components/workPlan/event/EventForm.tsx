@@ -91,7 +91,6 @@ const EventForm = ({
   const [showEventPushConfirmation, setShowEventPushConfirmation] =
     useState(false);
   const [pushEvents, setPushEvents] = useState<boolean>(false);
-
   const initialNotes = useMemo(() => event?.notes, [event?.id]);
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
@@ -143,6 +142,11 @@ const EventForm = ({
         }),
       }),
     [selectedConfiguration, actualAdded]
+  );
+  const disableAnticipatedDate = Boolean(
+    selectedConfiguration?.id &&
+      selectedWorkPhase?.work_phase.legislated &&
+      selectedConfiguration?.event_position === EventPosition.END
   );
   const isHighPriorityActive = useMemo(() => {
     if (event) {
@@ -416,7 +420,6 @@ const EventForm = ({
 
   const onSubmitHandler = async (submittedData: MilestoneEvent) => {
     try {
-      submittedData.notes = notes;
       const pushRequired = dateCheckStatus?.subsequent_event_push_required;
       if (pushRequired) {
         setShowEventPushConfirmation(pushRequired);
@@ -491,38 +494,39 @@ const EventForm = ({
     },
     [event, pushEvents]
   );
-  const handleSaveEvent = useCallback(
-    async (
-      data?: MilestoneEvent,
-      pushEventConfirmed = false,
-      confirmSaveInLocked = false
-    ) => {
-      try {
-        const dataToBeSubmitted = data ?? getValues();
-        if (showLockConfirmDialog(dataToBeSubmitted) && !confirmSaveInLocked) {
-          setShowEventLockDialog(true);
-        } else {
-          dataToBeSubmitted.anticipated_date = Moment(
-            dataToBeSubmitted.anticipated_date
+  const handleSaveEvent = async (
+    data?: MilestoneEvent,
+    pushEventConfirmed = false,
+    confirmSaveInLocked = false
+  ) => {
+    try {
+      const formData = data ?? getValues();
+      const dataToBeSubmitted = {
+        ...formData,
+        notes: notes,
+      };
+      if (showLockConfirmDialog(dataToBeSubmitted) && !confirmSaveInLocked) {
+        setShowEventLockDialog(true);
+      } else {
+        dataToBeSubmitted.anticipated_date = Moment(
+          dataToBeSubmitted.anticipated_date
+        ).format();
+        if (!!dataToBeSubmitted.actual_date) {
+          dataToBeSubmitted.actual_date = Moment(
+            dataToBeSubmitted.actual_date
           ).format();
-          if (!!dataToBeSubmitted.actual_date) {
-            dataToBeSubmitted.actual_date = Moment(
-              dataToBeSubmitted.actual_date
-            ).format();
-          }
-          await saveEvent(dataToBeSubmitted, pushEventConfirmed);
-          onSave();
-          setDateCheckStatus(undefined);
         }
-      } catch (e) {
-        const message = getErrorMessage(e);
-        showNotification(message, {
-          type: "error",
-        });
+        await saveEvent(dataToBeSubmitted, pushEventConfirmed);
+        onSave();
+        setDateCheckStatus(undefined);
       }
-    },
-    [pushEvents, event]
-  );
+    } catch (e) {
+      const message = getErrorMessage(e);
+      showNotification(message, {
+        type: "error",
+      });
+    }
+  };
 
   const onChangeMilestoneType = (configuration_id: number) => {
     const configuration = configurations.filter(
@@ -679,6 +683,7 @@ const EventForm = ({
               <ETFormLabel required>{anticipatedLabel}</ETFormLabel>
               <ControlledDatePicker
                 name="anticipated_date"
+                disabled={disableAnticipatedDate}
                 defaultValue={dayjs(anticipatedDefaultValue).format()}
                 datePickerProps={{
                   referenceDate: dayjs(

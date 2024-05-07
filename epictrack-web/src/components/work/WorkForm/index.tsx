@@ -290,11 +290,13 @@ export default function WorkForm({
   }, [titlePrefix, simple_title]);
 
   const handleProjectChange = async (id: string) => {
-    const selectedProject: any = projects.filter((project) => {
-      return project.id.toString() === id;
-    });
-    const project = await getProject(selectedProject[0].id);
-    setValue("epic_description", String(project?.description));
+    if (id) {
+      const selectedProject: any = projects.filter((project) => {
+        return project.id.toString() === id;
+      });
+      const project = await getProject(selectedProject[0].id);
+      setValue("epic_description", String(project?.description));
+    }
   };
 
   return (
@@ -353,8 +355,8 @@ export default function WorkForm({
             helperText={errors?.project_id?.message?.toString()}
             defaultValue={work?.project_id}
             options={projects || []}
-            getOptionValue={(o: ListType) => o?.id.toString()}
-            getOptionLabel={(o: ListType) => o.name}
+            getOptionValue={(o: ListType) => o?.id?.toString()}
+            getOptionLabel={(o: ListType) => o?.name}
             {...register("project_id")}
             disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Box, Grid, IconButton, Tooltip } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
@@ -76,7 +76,7 @@ const WorkStaffList = () => {
       });
     }
     return columns;
-  }, [wsData]);
+  }, [wsData, uniquestaff]);
 
   const projectFilter = React.useMemo(
     () =>

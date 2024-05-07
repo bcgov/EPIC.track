@@ -6,20 +6,16 @@ const sort = (collection: any[], sortField: string) => {
     ignorePunctuation: true,
     sensitivity: "base",
   });
-
   const keys = sortField.split(".");
-
-  return [...collection].sort(function (a, b) {
-    let aValue = a;
-    let bValue = b;
-
-    keys.forEach((key) => {
-      aValue = aValue[key];
-      bValue = bValue[key];
+  if (keys && keys.length === 0) {
+    return collection.sort(function (a, b) {
+      return collator.compare(a[sortField], b[sortField]);
     });
-
-    return collator.compare(aValue, bValue);
-  });
+  } else {
+    return collection.sort(function (a, b) {
+      return collator.compare(a[keys[0]][keys[1]], b[keys[0]][keys[1]]);
+    });
+  }
 };
 
 const groupBy = <T>(arr: T[], fn: (item: T) => any) => {
