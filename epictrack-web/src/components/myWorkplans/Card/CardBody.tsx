@@ -94,7 +94,7 @@ const CardBody = ({ workplan }: CardProps) => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {currentWorkPhaseInfo.work_phase.name}
+                {currentWorkPhaseInfo?.work_phase?.name}
               </ETCaption2>
               <ClockIcon
                 fill={
