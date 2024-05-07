@@ -73,26 +73,6 @@ const TeamList = () => {
     }
   }, [teamMembers]);
 
-  const downloadPDFReport = React.useCallback(async () => {
-    try {
-      const binaryReponse = await workService.downloadFirstNations(
-        Number(ctx.work?.id)
-      );
-      const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
-      );
-      const link = document.createElement("a");
-      link.href = url;
-      const fileName = `${ctx.work?.project.name}_${ctx.work?.title}_team_members`;
-      link.setAttribute("download", `${fileName}.xlsx`);
-      document.body.appendChild(link);
-      link.click();
-      showNotification("File downloading completed", {
-        type: "success",
-      });
-    } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
-
   const columns = React.useMemo<MRT_ColumnDef<StaffWorkRole>[]>(
     () => [
       {
