@@ -2,6 +2,7 @@ import { SvgIconProps, SxProps } from "@mui/material";
 
 export type Icon =
   | "AllIcon"
+  | "CheckList"
   | "DashboardIcon"
   | "ReportIcon"
   | "InsightIcon"

@@ -2,6 +2,7 @@ import React from "react";
 import { IconProps } from "./type";
 import { SvgIcon, SvgIconProps } from "@mui/material";
 import { Palette } from "styles/theme";
+import CheckListIcon from "@mui/icons-material/Checklist";
 
 const commonProps = {
   className: "sidebar-item",
@@ -10,6 +11,11 @@ const commonProps = {
   viewBox: "0 0 24 24",
   xmlns: "http://www.w3.org/2000/svg",
 };
+
+const CheckList = () => {
+  return <CheckListIcon sx={commonProps} />;
+};
+
 const AllIcon = (props: IconProps) => {
   return (
     <svg {...commonProps} {...props}>
@@ -554,6 +560,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   EyeIcon,
   AddIcon,
   CheckIcon,
+  CheckList,
   CloseXIcon,
   LockClosedIcon,
   LockOpenIcon,

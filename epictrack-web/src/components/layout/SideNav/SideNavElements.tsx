@@ -11,10 +11,18 @@ export const Routes: RouteType[] = [
     isAuthenticated: false,
   },
   {
+    name: "My Tasks",
+    icon: "CheckList",
+    path: "/my-tasks",
+    group: "Group1",
+    allowedRoles: [],
+    isAuthenticated: false,
+  },
+  {
     name: "All Works",
     icon: "AllIcon",
     path: "/works",
-    group: "Group1",
+    group: "Group2",
     allowedRoles: [],
     isAuthenticated: false,
   },
@@ -54,14 +62,14 @@ export const Routes: RouteType[] = [
     name: "Insights",
     icon: "InsightIcon",
     path: "/insights",
-    group: "Group2",
+    group: "Group3",
     allowedRoles: [],
     isAuthenticated: false,
   },
   {
     name: "Task Templates",
     path: "/templates",
-    group: "Group3",
+    group: "Group4",
     icon: "PenIcon",
     allowedRoles: [],
     isAuthenticated: false,
@@ -70,7 +78,7 @@ export const Routes: RouteType[] = [
     name: "List Management",
     icon: "GridIcon",
     path: "/list-management",
-    group: "Group3",
+    group: "Group4",
     routes: [
       {
         name: "Staff",
@@ -108,7 +116,7 @@ export const Routes: RouteType[] = [
     name: "Admin",
     path: "/admin",
     icon: "GearIcon",
-    group: "Group4",
+    group: "Group5",
     routes: [
       {
         name: "Users",
