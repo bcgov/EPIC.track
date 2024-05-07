@@ -74,9 +74,6 @@ export default function ResourceForecast() {
 
   const exportToCsv = React.useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
-      console.log("Exporting to CSV");
-      console.log(table.getFilteredRowModel());
-      console.log(table.getFilteredRowModel().flatRows.map((p) => p.original));
       const filteredResult = table.getFilteredRowModel().flatRows.map((p) => {
         return {
           ...p.original,
@@ -86,7 +83,6 @@ export default function ResourceForecast() {
           [p.original.months[3].label]: p.original.months[3].phase,
         };
       });
-      console.log(filteredResult);
       const columns = table
         .getVisibleFlatColumns()
         .map((p) => p.columnDef.id?.toString());
