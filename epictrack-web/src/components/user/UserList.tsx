@@ -76,6 +76,7 @@ const UserList = () => {
   const [selectedGroup, setSelectedGroup] = React.useState<
     Group | undefined | null
   >();
+  console.log("SLEECTED GROUP ", selectedGroup);
   const currentUserGroup = React.useMemo<Group>(() => {
     return groups
       .filter((p) => userDetails.groups.includes(p.path))
@@ -123,7 +124,7 @@ const UserList = () => {
         ),
       },
     ],
-    [groups, isValidGroup]
+    [groups, isValidGroup, selectedGroup]
   );
 
   const handleCancelRowEdits = () => {
@@ -184,6 +185,8 @@ const UserList = () => {
             onEditingRowCancel={handleCancelRowEdits}
             renderRowActions={({ row, table }) => {
               const level = row.original.group?.level || 0;
+              console.log("CURRENT GROUP", currentUserGroup);
+              console.log("LEVEL ", level);
               return (
                 <>
                   {currentUserGroup && currentUserGroup.level >= level && (
