@@ -19,6 +19,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { sort } from "utils";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 
@@ -46,7 +47,7 @@ const WorkList = () => {
     setLoadingWorks(true);
     try {
       const response = await workService.getAll();
-      setWorks(response.data);
+      setWorks(sort(response.data, "title"));
       setLoadingWorks(false);
     } catch (error) {
       showNotification("Could not load works", { type: "error" });

@@ -128,7 +128,8 @@ class WorkResources(Resource):
     @profiletime
     def get():
         """Return all resource and work details"""
-        works = WorkService.find_allocated_resources()
+        args = req.BasicRequestQueryParameterSchema().load(request.args)
+        works = WorkService.find_allocated_resources(args.get("is_active"))
         return (
             jsonify(res.WorkResourceResponseSchema(many=True).dump(works)),
             HTTPStatus.OK,

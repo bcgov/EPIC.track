@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Box, Grid, IconButton, Tooltip } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
@@ -7,6 +7,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETPageContainer } from "components/shared";
+import { WorkStaffRole } from "models/role";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 
@@ -37,17 +38,30 @@ const WorkStaffList = () => {
     getWorkStaffAllocation();
   }, []);
 
-  let uniquestaff: any[] = [];
-  wsData.forEach((value, index) => {
-    if (value.staff.length > 0) {
-      const roles = value.staff
-        .map((p) => p.role.name)
-        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-      uniquestaff = [...uniquestaff, ...roles].filter(
-        (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-      );
-    }
-  });
+  const uniquestaff = useMemo(() => {
+    let uniquestaff: any[] = [];
+    wsData.forEach((value, index) => {
+      if (value.staff.length > 0) {
+        const roles = value.staff
+          .filter(
+            (p) =>
+              ![
+                WorkStaffRole.TEAM_LEAD,
+                WorkStaffRole.RESPONSIBLE_EPD,
+              ].includes(p.role.id)
+          )
+          .map((p) => p.role.name)
+          .filter(
+            (ele, index, arr) => arr.findIndex((t) => t === ele) === index
+          );
+        uniquestaff = [...uniquestaff, ...roles].filter(
+          (ele, index, arr) => arr.findIndex((t) => t === ele) === index
+        );
+      }
+    });
+    return uniquestaff;
+  }, [wsData]);
+  console.log(uniquestaff);
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (wsData && wsData.length > 0) {
@@ -68,7 +82,7 @@ const WorkStaffList = () => {
       });
     }
     return columns;
-  }, [wsData]);
+  }, [wsData, uniquestaff]);
 
   const projectFilter = React.useMemo(
     () =>
@@ -134,12 +148,6 @@ const WorkStaffList = () => {
         filterSelectOptions: titleFilter,
       },
       {
-        accessorKey: "eao_team.name",
-        header: "Team",
-        filterVariant: "multi-select",
-        filterSelectOptions: teamFilter,
-      },
-      {
         accessorFn: (row: WorkStaff) =>
           row.responsible_epd
             ? `${row.responsible_epd?.first_name} ${row.responsible_epd?.last_name}`
@@ -147,6 +155,12 @@ const WorkStaffList = () => {
         header: "Responsible EPD",
         filterVariant: "multi-select",
         filterSelectOptions: responsibleEpdFilter,
+      },
+      {
+        accessorKey: "eao_team.name",
+        header: "Team",
+        filterVariant: "multi-select",
+        filterSelectOptions: teamFilter,
       },
       {
         accessorFn: (row: WorkStaff) =>

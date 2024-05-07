@@ -1,10 +1,8 @@
 """Insight generator for work resource grouped by EAO team"""
 
-
 from typing import List
 
 from sqlalchemy import func
-
 from api.models import db
 from api.models.eao_team import EAOTeam
 from api.models.work import Work
@@ -23,12 +21,13 @@ class WorkTeamInsightGenerator:
                 .over(order_by=Work.eao_team_id, partition_by=Work.eao_team_id)
                 .label("count"),
             )
+            .group_by(Work.eao_team_id, Work.id)
             .filter(
                 Work.is_active.is_(True),
                 Work.is_deleted.is_(False),
                 Work.is_completed.is_(False),
             )
-            .distinct(Work.eao_team_id)
+            .distinct(Work.id)
             .subquery()
         )
         return partition_query

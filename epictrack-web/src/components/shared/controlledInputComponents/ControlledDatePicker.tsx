@@ -7,6 +7,7 @@ import TrackDatePicker from "../DatePicker";
 type ControlledDatePickerProps = {
   name: string;
   defaultValue?: any;
+  disabled?: boolean;
   datePickerProps?: {
     placeholder?: string;
     referenceDate?: dayjs.Dayjs;
@@ -29,6 +30,7 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
   datePickerProps,
   datePickerSlotProps,
   defaultValue,
+  disabled,
 }) => {
   const { control, register } = useFormContext();
   return (
@@ -57,6 +59,7 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
               onChange(event?.format() || "");
             }
           }}
+          disabled={disabled}
         />
       )}
     />

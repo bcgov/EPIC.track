@@ -148,6 +148,7 @@ class WorkResourceResponseSchema(
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
+    title = fields.Str()
 
 
 class WorkPhaseByIdResponseSchema(Schema):

@@ -20,6 +20,7 @@ from typing import Dict, List, Optional
 
 import pandas as pd
 from flask import current_app
+from sqlalchemy import and_
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
@@ -84,6 +85,7 @@ from api.utils.roles import Membership
 from api.utils.roles import Role as KeycloakRole
 
 
+# pylint:disable=not-callable, too-many-lines
 class WorkService:  # pylint: disable=too-many-public-methods
     """Service to manage work related operations."""
 
@@ -109,14 +111,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         work_ids = [work.id for work in works]
 
         serialized_works = []
-
         work_staffs = WorkService.find_staff_for_works(work_ids, is_active=True)
         works_statuses = WorkStatus.list_latest_approved_statuses_for_work_ids(work_ids)
         work_id_phase_id_dict = {work.id: work.current_work_phase_id for work in works}
         work_phases = WorkPhaseService.find_multiple_works_phases_status(
             work_id_phase_id_dict
         )
-
         work: Work
         for work in works:
             serialized_work = WorkService._serialize_work(
@@ -131,12 +131,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
         """Serialize a single work"""
         staff_info = work_staffs.get(work.id, [])
         works_status = works_statuses.get(work.id, None)
-
         serialized_work = WorkResponseSchema(
             only=(
                 "id",
                 "work_state",
                 "work_type",
+                "current_work_phase_id",
                 "federal_involvement",
                 "eao_team",
                 "title",
@@ -153,6 +153,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "next_milestone",
                     "milestone_progress",
                     "days_left",
+                    "work_phase.id",
                     "work_phase.phase.color",
                     "work_phase.start_date",
                     "work_phase.end_date",
@@ -161,7 +162,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
             ).dump(work_phase)
 
             serialized_work["phase_info"] = serialised_phase
-
         serialized_work["status_info"] = WorkStatusResponseSchema(many=False).dump(
             works_status
         )
@@ -172,19 +172,33 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return serialized_work
 
     @classmethod
-    def find_allocated_resources(cls):
+    def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
         lead = aliased(Staff)
         epd = aliased(Staff)
-        work_result = (
-            Work.query.filter(Work.is_deleted.is_(False))
-            .join(Project)
-            .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
-            .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
-            .outerjoin(lead, lead.id == Work.work_lead_id)
-            .outerjoin(epd, epd.id == Work.responsible_epd_id)
-            .all()
-        )
+        if is_active is None:
+            query = (
+                Work.query.filter(Work.is_deleted.is_(False))
+                .join(Project)
+                .filter(Project.is_deleted.is_(False), Project.is_project_closed.is_(False))
+                .outerjoin(EAOTeam, Work.eao_team_id == EAOTeam.id)
+                .outerjoin(lead, lead.id == Work.work_lead_id)
+                .outerjoin(epd, epd.id == Work.responsible_epd_id)
+            )
+        else:
+            query = Work.query.join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == Work.id,
+                    StaffWorkRole.staff_id == Work.work_lead_id,
+                ),
+            ).filter(
+                Work.is_active.is_(True),
+                Work.is_deleted.is_(False),
+                Work.is_completed.is_(False),
+                StaffWorkRole.is_active.is_(True),
+            )
+        work_result = query.all()
         works = [
             {
                 "id": work.id,
@@ -200,7 +214,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
         staff_result = (
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
-                StaffWorkRole.work_id.in_(work_ids), StaffWorkRole.is_deleted.is_(False)
+                StaffWorkRole.work_id.in_(work_ids),
+                StaffWorkRole.is_deleted.is_(False),
+                StaffWorkRole.is_active.is_(True)
             )
             .join(Role, Role.id == StaffWorkRole.role_id)
             .add_entity(Role)
@@ -286,14 +302,14 @@ class WorkService:  # pylint: disable=too-many-public-methods
             "entity_id": work.id,
             "field_name": "responsible_epd_id",
             "field_value": work.responsible_epd_id,
-            "active_from": work.created_at,
+            "active_from": work.start_date,
         }
         work_team_lead_special_field_data = {
             "entity": EntityEnum.WORK,
             "entity_id": work.id,
             "field_name": "work_lead_id",
             "field_value": work.work_lead_id,
-            "active_from": work.created_at,
+            "active_from": work.start_date,
         }
 
         SpecialFieldService.create_special_field_entry(
