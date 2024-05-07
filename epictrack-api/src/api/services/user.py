@@ -58,7 +58,7 @@ class UserService:
         """Update the group of a user"""
         token_groups = TokenInfo.get_user_data()["groups"]
         groups = cls.get_groups()
-        requested_group = next(
+        requesters_group = next(
             (group for group in groups if group["name"] in token_groups), None
         )
         updating_group = next(
@@ -70,13 +70,30 @@ class UserService:
             None,
         )
         if (
-            not requested_group
+            not requesters_group
             and not updating_group
-            and int(UserService._get_level(requested_group))
+            and int(UserService._get_level(requesters_group))
             < int(UserService._get_level(updating_group))
         ):
             raise PermissionDeniedError("Permission denied")
 
+        # if a group has exclusive flag , user can only be present exclusively in that group
+        # All other group access has to be removed before assigning to exclusive group
+        requires_all_group_removal = updating_group.get("attributes", {}).get("exclusive", ['false'])[
+                                          0].lower() == 'true'
+
+        if requires_all_group_removal:
+            UserService._delete_from_all_epictrack_subgroups(user_id)
+        else:
+            UserService._delete_from_current_group(user_group_request, user_id)
+
+        result = KeycloakService.update_user_group(
+            user_id, user_group_request["group_id_to_update"]
+        )
+        return result
+
+    @classmethod
+    def _delete_from_current_group(cls, user_group_request, user_id):
         existing_group_id = user_group_request.get("existing_group_id")
         if existing_group_id:
             result = KeycloakService.delete_user_group(
@@ -84,10 +101,20 @@ class UserService:
             )
             if result.status_code != 204:
                 raise BusinessError("Error removing group", 500)
-        result = KeycloakService.update_user_group(
-            user_id, user_group_request["group_id_to_update"]
-        )
-        return result
+
+    @staticmethod
+    def _delete_from_all_epictrack_subgroups(user_id):
+        """Delete all subgroups of 'epictrack' for a user"""
+        groups = KeycloakService.get_user_groups(user_id)
+
+        # Find the main group 'epictrack' and get its subgroups
+        track_subgroups = [group for group in groups if 'track' in group['path'].lower()]
+
+        for subgroup in track_subgroups:
+            result = KeycloakService.delete_user_group(user_id, subgroup['id'])
+
+            if result.status_code != 204:
+                raise BusinessError("Error removing group", 500)
 
     @classmethod
     def _get_level(cls, group):

@@ -49,6 +49,12 @@ class KeycloakService:
         return KeycloakService._request_keycloak(f'users/{user_id}/groups/{group_id}', HttpMethod.DELETE)
 
     @staticmethod
+    def get_user_groups(user_id):
+        """Get groups of a user by user ID"""
+        response = KeycloakService._request_keycloak(f'users/{user_id}/groups')
+        return response.json()
+
+    @staticmethod
     def _request_keycloak(relative_url, http_method: HttpMethod = HttpMethod.GET, data=None):
         """Common method to request keycloak"""
         base_url = current_app.config.get('KEYCLOAK_BASE_URL')
