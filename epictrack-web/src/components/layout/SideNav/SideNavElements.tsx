@@ -12,7 +12,7 @@ export const Routes: RouteType[] = [
   },
   {
     name: "My Tasks",
-    icon: "CheckList",
+    icon: "CheckListIcon",
     path: "/my-tasks",
     group: "Group1",
     allowedRoles: [],

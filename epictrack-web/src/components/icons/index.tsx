@@ -12,10 +12,6 @@ const commonProps = {
   xmlns: "http://www.w3.org/2000/svg",
 };
 
-const CheckList = () => {
-  return <CheckListIcon sx={commonProps} />;
-};
-
 const AllIcon = (props: IconProps) => {
   return (
     <svg {...commonProps} {...props}>
@@ -560,7 +556,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   EyeIcon,
   AddIcon,
   CheckIcon,
-  CheckList,
+  CheckListIcon,
   CloseXIcon,
   LockClosedIcon,
   LockOpenIcon,
