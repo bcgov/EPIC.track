@@ -37,12 +37,7 @@ const UserList = () => {
     try {
       const userResult = await UserService.getUsers();
       if (userResult.status === 200) {
-        const sortedResults = (userResult.data as User[]).sort((a, b) => {
-          const aValue = a.group?.level ?? -0;
-          const bValue = b.group?.level ?? -0;
-          return bValue - aValue;
-        });
-        setUsers(sortedResults as never);
+        setUsers(userResult.data as never);
       }
     } catch (error) {
       console.error("User List: ", error);
@@ -101,7 +96,9 @@ const UserList = () => {
               menuPosition="fixed"
               getOptionValue={(opt) => opt.id}
               getOptionLabel={(opt) => opt.display_name}
-              options={groups.filter((p) => currentUserGroup.level >= p.level)}
+              options={groups
+                .filter((p) => currentUserGroup.level >= p.level)
+                .sort((a, b) => b.level - a.level)}
               required={true}
               // menuPortalTarget={document.body}
               onChange={(newVal) => setSelectedGroup(newVal)}
@@ -171,7 +168,7 @@ const UserList = () => {
             initialState={{
               sorting: [
                 {
-                  id: "group.level",
+                  id: "name",
                   desc: false,
                 },
               ],
