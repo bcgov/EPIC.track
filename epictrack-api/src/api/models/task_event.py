@@ -78,3 +78,23 @@ class TaskEvent(BaseModelVersioned):
     def find_by_work_phase(cls, work_id: int, phase_id: int):
         """Find task events by work id and phase id"""
         return cls.query.filter_by(work_id=work_id, phase_id=phase_id).all()
+
+    @classmethod
+    def find_by_staff_work_role_staff_id(cls, staff_id: int, is_active: bool = None):
+        """Find task events by staff work role id"""
+        from . import Work, WorkPhase, StaffWorkRole # pylint: disable=import-outside-toplevel
+        query = cls.query.join(
+            WorkPhase, WorkPhase.id == TaskEvent.work_phase_id
+        ).join(
+            Work, Work.id == WorkPhase.work_id
+        ).join(
+            StaffWorkRole, StaffWorkRole.work_id == Work.id
+        ).filter(
+            StaffWorkRole.staff_id == staff_id
+        )
+
+        if is_active is not None:
+            query = query.filter(TaskEvent.is_active.is_(is_active))
+
+        query = query.order_by(TaskEvent.start_date.asc())
+        return query.all()

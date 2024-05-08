@@ -50,7 +50,7 @@ from .task_request import (
     TaskBodyParameterSchema, TaskEventBodyParamSchema, TaskEventBulkUpdateBodyParamSchema,
     TaskEventIdPathParameterSchema, TaskEventQueryParamSchema, TasksBulkDeleteQueryParamSchema,
     TaskTemplateBodyParameterSchema, TaskTemplateIdPathParameterSchema, TaskTemplateImportEventsBodyParamSchema,
-    TaskTemplateQueryParamSchema)
+    TaskTemplateQueryParamSchema, TaskEventByStaffQueryParamSchema)
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
 from .work_request import (
