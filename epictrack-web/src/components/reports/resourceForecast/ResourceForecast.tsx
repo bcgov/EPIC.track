@@ -191,6 +191,7 @@ export default function ResourceForecast() {
   const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
       {
+        accessorKey: "work_title",
         header: "Work",
         enableHiding: false,
         filterVariant: "multi-select",

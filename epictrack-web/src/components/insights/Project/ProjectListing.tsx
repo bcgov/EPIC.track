@@ -255,7 +255,7 @@ const ProjectList = () => {
             justifyContent: "right",
           }}
         >
-          {/* <Tooltip title="Export to csv">
+          <Tooltip title="Export to csv">
             <IconButton
               onClick={() =>
                 exportToCsv({
@@ -267,7 +267,7 @@ const ProjectList = () => {
             >
               <FileDownload />
             </IconButton>
-          </Tooltip> */}
+          </Tooltip>
         </Box>
       )}
       enablePagination

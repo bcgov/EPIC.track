@@ -1,10 +1,10 @@
-import { Button, Grid } from "@mui/material";
+import { Button, Grid, Tooltip } from "@mui/material";
 import React, { useMemo } from "react";
 import { StaffWorkRole } from "../../../models/staff";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
-import { ETGridTitle } from "../../shared";
+import { ETGridTitle, IButton } from "../../shared";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { showNotification } from "../../shared/notificationProvider";
 import {
@@ -22,6 +22,11 @@ import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
 import { WorkStaffRole } from "models/role";
 import { unEditableTeamMembers } from "./constants";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import Icons from "../../icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const TeamList = () => {
   const [roles, setRoles] = React.useState<string[]>([]);
@@ -203,31 +208,66 @@ const TeamList = () => {
       {teamMembers.length > 0 && (
         <Grid container rowSpacing={1}>
           <Grid item xs={12}>
-            <Restricted
-              allowed={[ROLES.CREATE]}
-              exception={userIsTeamMember}
-              errorProps={{
-                disabled: true,
-              }}
-            >
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setShowTeamForm(true)}
-              >
-                Team Member
-              </Button>
-            </Restricted>
-          </Grid>
-          <Grid item xs={12}>
             <MasterTrackTable
               columns={columns}
               data={teamMembers}
-              enableTopToolbar={false}
+              enableTopToolbar={true}
               state={{
                 isLoading: loading,
                 showGlobalFilter: true,
               }}
+              renderTopToolbarCustomActions={({ table }) => (
+                <Grid container rowSpacing={1}>
+                  <Grid item xs={6}>
+                    <Restricted
+                      allowed={[ROLES.CREATE]}
+                      exception={userIsTeamMember}
+                      errorProps={{
+                        disabled: true,
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={() => setShowTeamForm(true)}
+                      >
+                        Team Member
+                      </Button>
+                    </Restricted>
+                  </Grid>
+                  <Grid
+                    item
+                    xs={6}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "right",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <Tooltip title="Export Team List to CSV">
+                      <Restricted
+                        allowed={[ROLES.CREATE]}
+                        exception={userIsTeamMember}
+                        errorProps={{
+                          disabled: true,
+                        }}
+                      >
+                        <IButton
+                          onClick={() =>
+                            exportToCsv({
+                              table,
+                              downloadDate: new Date().toISOString(),
+                              filenamePrefix: "teams-list",
+                            })
+                          }
+                        >
+                          <DownloadIcon className="icon" />
+                        </IButton>
+                      </Restricted>
+                    </Tooltip>
+                  </Grid>
+                </Grid>
+              )}
             />
           </Grid>
         </Grid>

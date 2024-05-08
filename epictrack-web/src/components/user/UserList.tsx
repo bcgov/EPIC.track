@@ -12,7 +12,7 @@ import {
   Grid,
   Tooltip,
 } from "@mui/material";
-import { Edit } from "@mui/icons-material";
+import { Edit, FileDownload } from "@mui/icons-material";
 import { Group, User } from "../../models/user";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import UserService from "../../services/userService";
@@ -24,6 +24,7 @@ import MasterTrackTable, {
 import { UserGroupUpdate } from "../../services/userService/type";
 import { useAppSelector } from "../../hooks";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 
 const UserList = () => {
   const [isValidGroup, setIsValidGroup] = React.useState<boolean>(true);
@@ -195,6 +196,29 @@ const UserList = () => {
                 </>
               );
             }}
+            renderTopToolbarCustomActions={({ table }) => (
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "right",
+                }}
+              >
+                <Tooltip title="Export to csv">
+                  <IconButton
+                    onClick={() =>
+                      exportToCsv({
+                        table,
+                        downloadDate: new Date().toISOString(),
+                        filenamePrefix: "users-listing",
+                      })
+                    }
+                  >
+                    <FileDownload />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            )}
           />
         </Grid>
       </ETPageContainer>
