@@ -6,7 +6,7 @@ import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { ETPageContainer } from "components/shared";
+import { ETGridTitle, ETPageContainer } from "components/shared";
 import { WorkStaffRole } from "models/role";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
@@ -38,30 +38,24 @@ const WorkStaffList = () => {
     getWorkStaffAllocation();
   }, []);
 
-  const uniquestaff = useMemo(() => {
-    let uniquestaff: any[] = [];
-    wsData.forEach((value, index) => {
-      if (value.staff.length > 0) {
-        const roles = value.staff
-          .filter(
-            (p) =>
-              ![
-                WorkStaffRole.TEAM_LEAD,
-                WorkStaffRole.RESPONSIBLE_EPD,
-              ].includes(p.role.id)
-          )
-          .map((p) => p.role.name)
-          .filter(
-            (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-          );
-        uniquestaff = [...uniquestaff, ...roles].filter(
-          (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-        );
-      }
-    });
-    return uniquestaff;
-  }, [wsData]);
-  console.log(uniquestaff);
+  let uniquestaff: any[] = [];
+  wsData.forEach((value, index) => {
+    if (value.staff.length > 0) {
+      const roles = value.staff
+        .filter(
+          (p) =>
+            ![WorkStaffRole.TEAM_LEAD, WorkStaffRole.RESPONSIBLE_EPD].includes(
+              p.role.id
+            )
+        )
+        .map((p) => p.role.name)
+        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
+      uniquestaff = [...uniquestaff, ...roles].filter(
+        (ele, index, arr) => arr.findIndex((t) => t === ele) === index
+      );
+    }
+  });
+
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (wsData && wsData.length > 0) {
@@ -146,6 +140,19 @@ const WorkStaffList = () => {
         header: "Work Title",
         filterVariant: "multi-select",
         filterSelectOptions: titleFilter,
+        Cell: ({ row, renderedCellValue }) => {
+          return (
+            <ETGridTitle
+              to={`/work-plan?work_id=${row.original.id}`}
+              titleText={row.original.title}
+              enableTooltip
+              enableEllipsis
+              tooltip={row.original.title}
+            >
+              {renderedCellValue}
+            </ETGridTitle>
+          );
+        },
       },
       {
         accessorFn: (row: WorkStaff) =>
