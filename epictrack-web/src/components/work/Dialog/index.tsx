@@ -13,12 +13,16 @@ type WorkDialogProps = {
   setOpen: (open: boolean) => void;
   workId?: number;
   saveWorkCallback?: () => void;
+  closeCallback?: () => void;
 };
 export const WorkDialog = ({
   workId,
   open,
   setOpen,
   saveWorkCallback = () => {
+    return;
+  },
+  closeCallback = () => {
     return;
   },
 }: WorkDialogProps) => {
@@ -76,6 +80,7 @@ export const WorkDialog = ({
       onClose={() => {
         setWork(null);
         setOpen(false);
+        closeCallback();
       }}
       disableEscapeKeyDown
       fullWidth
@@ -86,6 +91,7 @@ export const WorkDialog = ({
       onCancel={() => {
         setWork(null);
         setOpen(false);
+        closeCallback();
       }}
       formId={"work-form"}
       saveButtonProps={{
