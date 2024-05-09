@@ -129,13 +129,6 @@ const WorkStaffList = () => {
   const columns = React.useMemo<MRT_ColumnDef<WorkStaff>[]>(
     () => [
       {
-        accessorKey: "project.name",
-        header: "Project",
-        enableHiding: false,
-        filterVariant: "multi-select",
-        filterSelectOptions: projectFilter,
-      },
-      {
         accessorKey: "title",
         header: "Work Title",
         filterVariant: "multi-select",
@@ -153,6 +146,13 @@ const WorkStaffList = () => {
             </ETGridTitle>
           );
         },
+      },
+      {
+        accessorKey: "project.name",
+        header: "Project",
+        enableHiding: false,
+        filterVariant: "multi-select",
+        filterSelectOptions: projectFilter,
       },
       {
         accessorFn: (row: WorkStaff) =>
