@@ -47,7 +47,7 @@ from .staff_request import (
 from .staff_work_role_request import (
     StaffWorkBodyParamSchema, StaffWorkExistenceCheckQueryParamSchema, StaffWorkPathParamSchema)
 from .task_request import (
-    TaskBodyParameterSchema, TaskEventBodyParamSchema, TaskEventBulkUpdateBodyParamSchema,
+    TaskBodyParameterSchema, CopyTaskEventBodyParameterSchema, TaskEventBodyParamSchema, TaskEventBulkUpdateBodyParamSchema,
     TaskEventIdPathParameterSchema, TaskEventQueryParamSchema, TasksBulkDeleteQueryParamSchema,
     TaskTemplateBodyParameterSchema, TaskTemplateIdPathParameterSchema, TaskTemplateImportEventsBodyParamSchema,
     TaskTemplateQueryParamSchema)

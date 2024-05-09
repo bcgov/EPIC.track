@@ -79,6 +79,19 @@ class Events(Resource):
         return result, HTTPStatus.OK
 
 
+
+@cors_preflight("POST")
+@API.route("/events", methods=["GET", "DELETE", "POST", "PATCH", "OPTIONS"])
+class CopyEvents(Resource):
+    """Endpoints for copying task events from one work to another"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        request_json = req.CopyTaskEventBodyParameterSchema().load(API.payload)
+
 @cors_preflight("GET,PUT")
 @API.route("/events/<int:event_id>", methods=["GET", "PUT", "OPTIONS"])
 class Event(Resource):

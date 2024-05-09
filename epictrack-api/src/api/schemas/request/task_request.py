@@ -187,6 +187,20 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
     )
 
 
+class CopyTaskEventBodyParameterSchema(RequestBodyParameterSchema):
+    """Copy Task event body parameter schema"""
+
+
+    source_work_id=fields.Int(
+        metadata={"description": "Source work id"},
+        required=True
+    )
+
+    target_work_id=fields.Int(
+        metadata={"description": "Target work id to which the tasks event to be copied"}
+    )
+
+
 class TaskEventIdPathParameterSchema(RequestPathParameterSchema):
     """Staff id path parameter schema"""
 
