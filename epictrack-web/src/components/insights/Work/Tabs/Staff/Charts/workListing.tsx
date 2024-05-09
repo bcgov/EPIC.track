@@ -99,10 +99,10 @@ const WorkList = () => {
 
     const value: string = row.getValue(id) || "";
     // Split the cell value into individual names
-    const names = value.split(", ");
+    const names = value.split("; ");
 
     // Check if any name includes the filter value
-    return filterValue.includes(value);
+    return names.some((name) => filterValue.includes(name));
   };
   const getRolfilterOptions = (role: WorkStaffRole) => {
     return role === WorkStaffRole.OFFICER_ANALYST
