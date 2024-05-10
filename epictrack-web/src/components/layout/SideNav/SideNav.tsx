@@ -122,13 +122,19 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
     <Box
       data-testid={`sidenav`}
       sx={{
-        overflow: "hidden",
+        overflowY: "auto",
+        overflowX: "hidden",
         height: "100%",
         background: Palette.primary.main,
         padding: "16px 0px 57px 0px",
       }}
     >
-      <List sx={{ paddingTop: toggleDrawerMarginTop }}>
+      <List
+        sx={{
+          paddingTop: toggleDrawerMarginTop,
+          backgroundColor: "inherit",
+        }}
+      >
         <>
           {Object.keys(groupedRoutes).map((groupKey) => {
             return (
@@ -252,7 +258,7 @@ const SideNav = () => {
       <Drawer
         sx={{
           width: "15%",
-          background: Palette.primary.main,
+          backgroundColor: Palette.primary.main,
         }}
         onClose={handleToggleDrawer}
         anchor={"left"}
