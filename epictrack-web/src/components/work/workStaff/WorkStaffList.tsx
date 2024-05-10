@@ -6,10 +6,13 @@ import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { ETGridTitle, ETPageContainer } from "components/shared";
+import { ETGridTitle, ETPageContainer, IButton } from "components/shared";
 import { WorkStaffRole } from "models/role";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { FileDownload } from "@mui/icons-material";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
@@ -224,7 +227,7 @@ const WorkStaffList = () => {
               }}
             >
               <Tooltip title="Export to csv">
-                <IconButton
+                <IButton
                   onClick={() =>
                     exportToCsv({
                       table,
@@ -233,8 +236,8 @@ const WorkStaffList = () => {
                     })
                   }
                 >
-                  <FileDownload />
-                </IconButton>
+                  <DownloadIcon className="icon" />
+                </IButton>
               </Tooltip>
             </Box>
           )}

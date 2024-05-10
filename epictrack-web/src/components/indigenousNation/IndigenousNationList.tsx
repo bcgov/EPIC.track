@@ -13,7 +13,7 @@ import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
+import { ETCaption2, ETGridTitle, ETPageContainer, IButton } from "../shared";
 import IndigenousNationForm from "./IndigenousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
@@ -31,7 +31,10 @@ import { Palette } from "styles/theme";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { exportToCsv } from "../shared/MasterTrackTable/utils";
-import FileDownload from "@mui/icons-material/FileDownload";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const firstNationsColumnFiltersCacheKey =
   "first-nations-listing-column-filters";
@@ -301,7 +304,7 @@ export default function IndigenousNationList() {
                   </Button>
                 </Restricted>
                 <Tooltip title="Export to csv">
-                  <IconButton
+                  <IButton
                     onClick={() =>
                       exportToCsv({
                         table,
@@ -310,8 +313,8 @@ export default function IndigenousNationList() {
                       })
                     }
                   >
-                    <FileDownload />
-                  </IconButton>
+                    <DownloadIcon className="icon" />
+                  </IButton>
                 </Tooltip>
               </Box>
             )}

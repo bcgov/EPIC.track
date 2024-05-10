@@ -3,7 +3,7 @@ import { MRT_ColumnDef } from "material-react-table";
 import { Box, Button, Grid, Tooltip, IconButton } from "@mui/material";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer } from "../shared";
+import { ETGridTitle, ETPageContainer, IButton } from "../shared";
 import projectService from "../../services/projectService/projectService";
 import { ETChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
@@ -16,7 +16,10 @@ import { showNotification } from "components/shared/notificationProvider";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { FileDownload } from "@mui/icons-material";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
@@ -317,7 +320,7 @@ const ProjectList = () => {
                   </Button>
                 </Restricted>
                 <Tooltip title="Export to csv">
-                  <IconButton
+                  <IButton
                     onClick={() =>
                       exportToCsv({
                         table,
@@ -326,8 +329,8 @@ const ProjectList = () => {
                       })
                     }
                   >
-                    <FileDownload />
-                  </IconButton>
+                    <DownloadIcon className="icon" />
+                  </IButton>
                 </Tooltip>
               </Box>
             )}

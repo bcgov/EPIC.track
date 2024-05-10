@@ -5,7 +5,7 @@ import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
-import { ETGridTitle } from "components/shared";
+import { ETGridTitle, IButton } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -17,6 +17,10 @@ import { FileDownload } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 type WorkStaffWithWork = WorkStaff & { work: Work };
 
@@ -289,7 +293,7 @@ const WorkList = () => {
           }}
         >
           <Tooltip title="Export to csv">
-            <IconButton
+            <IButton
               onClick={() =>
                 exportToCsv({
                   table,
@@ -298,8 +302,8 @@ const WorkList = () => {
                 })
               }
             >
-              <FileDownload />
-            </IconButton>
+              <DownloadIcon className="icon" />
+            </IButton>
           </Tooltip>
         </Box>
       )}
