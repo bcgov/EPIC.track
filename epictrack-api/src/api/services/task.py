@@ -30,6 +30,7 @@ from api.models import (
     db,
 )
 from api.models.task_event_responsibility import TaskEventResponsibility
+from ..models.queries.task_event_queries import find_by_staff_work_role_staff_id
 
 from ..utils.roles import Membership
 from ..utils.roles import Role as KeycloakRole
@@ -113,7 +114,7 @@ class TaskService:
     @classmethod
     def find_by_staff_work_role_staff_id(cls, staff_id: int, is_active: bool = None) -> [TaskEvent]:
         """Get all task events per assignee_id"""
-        tasks = TaskEvent.find_by_staff_work_role_staff_id(staff_id, is_active)
+        tasks = find_by_staff_work_role_staff_id(staff_id, is_active)
         return tasks
 
     @classmethod
