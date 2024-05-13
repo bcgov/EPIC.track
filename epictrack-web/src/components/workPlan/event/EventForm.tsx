@@ -55,6 +55,7 @@ import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import { Staff } from "models/staff";
 import staffService from "services/staffService/staffService";
+import { OUTCOME_ID } from "./constants";
 
 interface EventFormProps {
   onSave: () => void;
@@ -117,7 +118,7 @@ const EventForm = ({
           then: () => yup.string().required("Number of days is required"),
           otherwise: () => yup.string().nullable(),
         }),
-        outcome_id: yup.string().when([], {
+        [OUTCOME_ID]: yup.string().when([], {
           is: () =>
             actualAdded &&
             selectedConfiguration?.event_category_id === EventCategory.DECISION,

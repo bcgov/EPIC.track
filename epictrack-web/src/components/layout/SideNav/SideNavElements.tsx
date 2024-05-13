@@ -30,7 +30,7 @@ export const Routes: RouteType[] = [
     name: "Reports",
     icon: "ReportIcon",
     path: "/reports",
-    group: "Group2",
+    group: "Group3",
     routes: [
       {
         name: "Referral Schedule",

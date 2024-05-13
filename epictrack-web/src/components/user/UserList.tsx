@@ -16,7 +16,7 @@ import { Edit, FileDownload } from "@mui/icons-material";
 import { Group, User } from "../../models/user";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import UserService from "../../services/userService";
-import { ETPageContainer } from "../shared";
+import { ETPageContainer, IButton } from "../shared";
 import Select from "react-select";
 import MasterTrackTable, {
   MaterialReactTableProps,
@@ -25,6 +25,10 @@ import { UserGroupUpdate } from "../../services/userService/type";
 import { useAppSelector } from "../../hooks";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const UserList = () => {
   const [isValidGroup, setIsValidGroup] = React.useState<boolean>(true);
@@ -205,7 +209,7 @@ const UserList = () => {
                 }}
               >
                 <Tooltip title="Export to csv">
-                  <IconButton
+                  <IButton
                     onClick={() =>
                       exportToCsv({
                         table,
@@ -214,8 +218,8 @@ const UserList = () => {
                       })
                     }
                   >
-                    <FileDownload />
-                  </IconButton>
+                    <DownloadIcon className="icon" />
+                  </IButton>
                 </Tooltip>
               </Box>
             )}

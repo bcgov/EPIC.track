@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { ETFormLabel } from "../../../shared";
 import ControlledSelectV2 from "../../../shared/controlledInputComponents/ControlledSelectV2";
 import { useFormContext } from "react-hook-form";
@@ -9,6 +9,8 @@ import { showNotification } from "../../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../../constants/application-constant";
 import outcomeConfigurationService from "../../../../services/outcomeConfigurationService/outcomeConfigurationService";
 import { Staff } from "../../../../models/staff";
+import { use } from "chai";
+import { OUTCOME_ID } from "../constants";
 
 export interface DecisionInputProps {
   configurationId?: number;
@@ -24,6 +26,7 @@ const DecisionInput = ({
   const {
     register,
     formState: { errors },
+    setValue,
   } = useFormContext();
   React.useEffect(() => {
     if (configurationId) {
@@ -45,6 +48,12 @@ const DecisionInput = ({
     }
   };
 
+  useEffect(() => {
+    if (outcomes.length === 1) {
+      setValue(OUTCOME_ID, outcomes[0].id);
+    }
+  }, [outcomes]);
+
   return (
     <>
       <Grid item xs={6}>
@@ -61,12 +70,12 @@ const DecisionInput = ({
       <Grid item xs={6}>
         <ETFormLabel required>Decision</ETFormLabel>
         <ControlledSelectV2
+          name={OUTCOME_ID}
           disabled={isFormFieldsLocked}
           helperText={errors?.outcome_id?.message?.toString()}
           options={outcomes || []}
           getOptionValue={(o: ListType) => o?.id?.toString()}
           getOptionLabel={(o: ListType) => o?.name}
-          {...register("outcome_id")}
         ></ControlledSelectV2>
       </Grid>
     </>
