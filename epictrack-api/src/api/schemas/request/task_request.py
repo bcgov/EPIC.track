@@ -17,7 +17,11 @@ from marshmallow import fields, validate
 from api.models.task_event import StatusEnum
 from api.schemas.request.custom_fields import IntegerList
 
-from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
+from .base import (
+    RequestBodyParameterSchema,
+    RequestPathParameterSchema,
+    RequestQueryParameterSchema,
+)
 
 
 class TaskTemplateBodyParameterSchema(RequestBodyParameterSchema):
@@ -87,7 +91,7 @@ class TaskBodyParameterSchema(RequestBodyParameterSchema):
 
     tips = fields.Str(
         metadata={"description": "Practical info on why/how to do the task"},
-        allow_none=True
+        allow_none=True,
     )
 
     number_of_days = fields.Int(
@@ -171,10 +175,7 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         allow_none=True,
     )
 
-    notes = fields.Str(
-        metadata={"description": "Notes for the task"},
-        allow_none=True
-    )
+    notes = fields.Str(metadata={"description": "Notes for the task"}, allow_none=True)
 
     assignee_ids = fields.List(
         fields.Int(metadata={"description": "List of assignees of the task"})
@@ -184,6 +185,18 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
         metadata={"description": "Status of the task"},
         required=True,
         validate=validate.OneOf([v.value for v in StatusEnum]),
+    )
+
+
+class CopyTaskEventBodyParameterSchema(RequestBodyParameterSchema):
+    """Copy Task event body parameter schema"""
+
+    source_work_id = fields.Int(
+        metadata={"description": "Source work id"}, required=True
+    )
+
+    target_work_id = fields.Int(
+        metadata={"description": "Target work id to which the tasks event to be copied"}
     )
 
 

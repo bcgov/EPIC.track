@@ -21,7 +21,14 @@ from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
 
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
-from api.models import StaffWorkRole, StatusEnum, TaskEvent, TaskEventAssignee, WorkPhase, db
+from api.models import (
+    StaffWorkRole,
+    StatusEnum,
+    TaskEvent,
+    TaskEventAssignee,
+    WorkPhase,
+    db,
+)
 from api.models.task_event_responsibility import TaskEventResponsibility
 
 from ..utils.roles import Membership
@@ -346,3 +353,54 @@ class TaskService:
         db.session.bulk_insert_mappings(
             TaskEventResponsibility, mappings=task_event_responsibilities
         )
+
+    @classmethod
+    def copy_task_events(cls, data: dict, commit=True):
+        """Copy works from source work to target work"""
+        source_work_id = data.get("source_work_id", None)
+        target_work_id = data.get("target_work_id")
+        source_events = (
+            db.session.query(TaskEvent)
+            .join(
+                WorkPhase,
+                and_(
+                    WorkPhase.id == TaskEvent.work_phase_id,
+                    WorkPhase.work_id == source_work_id,
+                ),
+            )
+            .all()
+        )
+        target_work_phases = WorkPhase.find_by_params({"work_id": target_work_id})
+        task_events = []
+        for work_phase in target_work_phases:
+            # skip the iteration if the target workphase already has tasks added
+            if work_phase.task_added:
+                pass
+            source_events_per_wp = [
+                event
+                for event in source_events
+                if event.work_phase.phase_id == work_phase.phase_id
+                and event.work_phase.sort_order == work_phase.sort_order
+            ]
+            task_added = False
+            for sv in source_events_per_wp:
+                task_event = TaskEvent(
+                    **{
+                        "name": sv.name,
+                        "work_phase_id": work_phase.id,
+                        "start_date": work_phase.start_date,
+                        "number_of_days": sv.number_of_days,
+                        "tips": sv.tips,
+                        "notes": sv.notes,
+                        "status": StatusEnum.NOT_STARTED.value,
+                    }
+                )
+                task_event.flush()
+                task_events.append(task_event)
+                task_added = True
+            if task_added:
+                work_phase.task_added = True
+                work_phase.update(work_phase.as_dict(recursive=False), commit=False)
+        if commit:
+            db.session.commit()
+        return task_events
