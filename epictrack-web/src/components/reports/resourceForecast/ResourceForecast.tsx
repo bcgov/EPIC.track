@@ -29,10 +29,14 @@ import { ResourceForecastModel } from "./type";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer, ETParagraph } from "../../shared";
+import { ETPageContainer, ETParagraph, IButton } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 export default function ResourceForecast() {
   const [reportDate, setReportDate] = useState<string>("");
@@ -474,9 +478,9 @@ export default function ResourceForecast() {
                 </IconButton>
               </Tooltip>
               <Tooltip title="Export to csv">
-                <IconButton onClick={() => exportToCsv(table)}>
-                  <FileDownloadIcon />
-                </IconButton>
+                <IButton onClick={() => exportToCsv(table)}>
+                  <DownloadIcon className="icon" />
+                </IButton>
               </Tooltip>
               <MRT_ToggleFullScreenButton table={table} />
             </>

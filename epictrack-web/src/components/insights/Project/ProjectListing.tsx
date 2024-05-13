@@ -10,9 +10,13 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useProjectsContext } from "./ProjectsContext";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { FileDownload } from "@mui/icons-material";
-import { IconButton, Tooltip, Box } from "@mui/material";
+import { Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+import { IButton } from "components/shared";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const ProjectList = () => {
   const { projects, loadingProjects } = useProjectsContext();
@@ -256,7 +260,7 @@ const ProjectList = () => {
           }}
         >
           <Tooltip title="Export to csv">
-            <IconButton
+            <IButton
               onClick={() =>
                 exportToCsv({
                   table,
@@ -265,8 +269,8 @@ const ProjectList = () => {
                 })
               }
             >
-              <FileDownload />
-            </IconButton>
+              <DownloadIcon className="icon" />
+            </IButton>
           </Tooltip>
         </Box>
       )}
