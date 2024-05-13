@@ -84,7 +84,7 @@ class TaskEvent(BaseModelVersioned):
         """Find task events by staff work role id"""
         from . import Work, WorkPhase, StaffWorkRole # pylint: disable=import-outside-toplevel
         query = cls.query.join(
-            WorkPhase, WorkPhase.id == TaskEvent.work_phase_id
+            WorkPhase, WorkPhase.id == cls.work_phase_id
         ).join(
             Work, Work.id == WorkPhase.work_id
         ).join(
@@ -94,7 +94,7 @@ class TaskEvent(BaseModelVersioned):
         )
 
         if is_active is not None:
-            query = query.filter(TaskEvent.is_active.is_(is_active))
+            query = query.filter(cls.is_active.is_(is_active))
 
-        query = query.order_by(TaskEvent.start_date.asc())
+        query = query.order_by(cls.start_date.asc())
         return query.all()
