@@ -41,7 +41,6 @@ const WorkList = () => {
 
   const { data: workStaffs, error, isLoading } = useGetWorkStaffsQuery();
   const { data: works } = useGetWorksQuery();
-
   useEffect(() => {
     if (workStaffs && works) {
       const mergedData = workStaffs
@@ -186,16 +185,16 @@ const WorkList = () => {
   const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {
     return [
       {
-        accessorKey: "work.title",
+        accessorKey: "title",
         header: "Name",
         size: 200,
         Cell: ({ row, renderedCellValue }) => {
           return (
             <ETGridTitle
               to={`/work-plan?work_id=${row.original.work.id}`}
-              titleText={row.original.work.title}
+              titleText={row.original.title}
               enableTooltip
-              tooltip={row.original.work.title}
+              tooltip={row.original.title}
             >
               {renderedCellValue}
             </ETGridTitle>
