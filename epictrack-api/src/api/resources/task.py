@@ -62,7 +62,9 @@ class Events(Resource):
     @profiletime
     def patch():
         """Bulk update tasks."""
-        request_json = req.TaskEventBulkUpdateBodyParamSchema(partial=True).load(API.payload)
+        request_json = req.TaskEventBulkUpdateBodyParamSchema(partial=True).load(
+            API.payload
+        )
         result = TaskService.bulk_update(request_json)
         return result, HTTPStatus.OK
 
@@ -79,9 +81,8 @@ class Events(Resource):
         return result, HTTPStatus.OK
 
 
-
 @cors_preflight("POST")
-@API.route("/events", methods=["GET", "DELETE", "POST", "PATCH", "OPTIONS"])
+@API.route("/events/copy", methods=["GET", "DELETE", "POST", "PATCH", "OPTIONS"])
 class CopyEvents(Resource):
     """Endpoints for copying task events from one work to another"""
 
@@ -90,7 +91,14 @@ class CopyEvents(Resource):
     @auth.require
     @profiletime
     def post():
+        """Copy events from one work to another"""
         request_json = req.CopyTaskEventBodyParameterSchema().load(API.payload)
+        result = TaskService.copy_task_events(request_json, commit=True)
+        return (
+            jsonify(res.TaskEventResponseSchema(many=True).dump(result)),
+            HTTPStatus.CREATED,
+        )
+
 
 @cors_preflight("GET,PUT")
 @API.route("/events/<int:event_id>", methods=["GET", "PUT", "OPTIONS"])
@@ -130,7 +138,9 @@ class TemplateEvents(Resource):
     def post(template_id: int):
         """Return all task templates."""
         request_json = req.TaskTemplateImportEventsBodyParamSchema().load(API.payload)
-        task_events = TaskService.create_task_events_from_template(request_json, template_id)
+        task_events = TaskService.create_task_events_from_template(
+            request_json, template_id
+        )
         return (
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.CREATED,
