@@ -92,7 +92,7 @@ from .task_request import (
     TaskTemplateBodyParameterSchema,
     TaskTemplateIdPathParameterSchema,
     TaskTemplateImportEventsBodyParamSchema,
-    TaskTemplateQueryParamSchema,
+    TaskTemplateQueryParamSchema, TaskEventByStaffQueryParamSchema,
 )
 from .type_request import TypeIdPathParameterSchema
 from .user_group_request import UserGroupBodyParamSchema, UserGroupPathParamSchema
