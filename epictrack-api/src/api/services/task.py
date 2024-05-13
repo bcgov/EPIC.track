@@ -111,6 +111,12 @@ class TaskService:
         )
 
     @classmethod
+    def find_by_staff_work_role_staff_id(cls, staff_id: int, is_active: bool = None) -> [TaskEvent]:
+        """Get all task events per assignee_id"""
+        tasks = TaskEvent.find_by_staff_work_role_staff_id(staff_id, is_active)
+        return tasks
+
+    @classmethod
     def find_task_event(cls, event_id: int, exclude_deleted: bool = False) -> TaskEvent:
         """Get the task event"""
         query = (

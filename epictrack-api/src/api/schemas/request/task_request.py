@@ -143,6 +143,15 @@ class TaskEventQueryParamSchema(RequestQueryParameterSchema):
     )
 
 
+class TaskEventByStaffQueryParamSchema(RequestQueryParameterSchema):
+    """Task events per work/phase query parameters"""
+
+    is_active = fields.Bool(
+        metadata={"description": "to filter for active or inactive tasks"},
+        required=False,
+    )
+
+
 class TaskEventBodyParamSchema(RequestBodyParameterSchema):
     """Task events body parameter"""
 

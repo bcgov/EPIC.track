@@ -145,3 +145,23 @@ class TemplateEvents(Resource):
             jsonify(res.TaskEventResponseSchema(many=True).dump(task_events)),
             HTTPStatus.CREATED,
         )
+
+
+@cors_preflight("GET")
+@API.route("/events/staff-work/<int:staff_id>", methods=["GET", "OPTIONS"])
+class AssigneeEvents(Resource):
+    """Endpoint resource to return all task events for given assignee id"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(staff_id: int):
+        """Return all task templates."""
+        args = req.TaskEventByStaffQueryParamSchema().load(request.args)
+        task_events = TaskService.find_by_staff_work_role_staff_id(
+            staff_id, is_active=args.get("is_active", None))
+        return (
+            jsonify(res.TaskEventByStaffResponseSchema(many=True).dump(task_events)),
+            HTTPStatus.OK,
+        )
