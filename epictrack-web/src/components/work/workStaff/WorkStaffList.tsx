@@ -218,29 +218,8 @@ const WorkStaffList = () => {
             isLoading: loading,
             showGlobalFilter: true,
           }}
-          renderTopToolbarCustomActions={({ table }) => (
-            <Box
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "right",
-              }}
-            >
-              <Tooltip title="Export to csv">
-                <IButton
-                  onClick={() =>
-                    exportToCsv({
-                      table,
-                      downloadDate: new Date().toISOString(),
-                      filenamePrefix: "work-staff-listing",
-                    })
-                  }
-                >
-                  <DownloadIcon className="icon" />
-                </IButton>
-              </Tooltip>
-            </Box>
-          )}
+          tableName={"work-staff-listing"}
+          enableExport
           onCacheFilters={handleCacheFilters}
         />
       </Grid>
