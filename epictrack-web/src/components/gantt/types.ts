@@ -3,7 +3,7 @@ export type GanttItem = {
   name: string;
   start: Date;
   end: Date;
-  progress: number;
+  progress: string;
   style: {
     bar: React.CSSProperties;
     progress: React.CSSProperties;

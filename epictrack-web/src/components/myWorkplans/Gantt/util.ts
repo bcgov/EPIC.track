@@ -4,7 +4,7 @@ import moment from "moment";
 export const getDaysLeft = (phaseInfo: WorkPlan["phase_info"][0]) => {
   const today = moment().startOf("day");
   const isFutureTask = moment(phaseInfo.work_phase.start_date).isAfter(today);
-  if (isFutureTask) return null;
+  if (isFutureTask) return "";
 
   const isCurrentTask = moment(phaseInfo.work_phase.end_date).isAfter(today);
 
