@@ -76,6 +76,7 @@ class KeycloakService:
             response = requests.delete(url, headers=headers, timeout=timeout)
         else:
             raise ValueError('Invalid HTTP method')
+        response.raise_for_status()
         return response
 
     @staticmethod
