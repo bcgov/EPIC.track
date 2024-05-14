@@ -483,7 +483,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
             outcomes = OutcomeTemplateService.find_all_outcomes(outcome_params)
             outcome_ids = list(map(lambda x: x.id, outcomes))
             actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
-        if not from_template:
+        else:
             outcome_params = {"event_configuration_id": template.get("id")}
             outcomes = OutcomeConfigurationService.find_all_outcomes(outcome_params)
             outcome_ids = list(map(lambda x: x.id, outcomes))

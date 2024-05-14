@@ -43,11 +43,11 @@ class Staffs(Resource):
         args = req.StaffByPositionsQueryParamSchema().load(request.args)
         positions = args.get('positions')
         is_active = args.get('is_active')
-        if not positions:
-            staffs = StaffService.find_all_non_deleted_staff(is_active)
         if positions:
             current_app.logger.info(f'Position ids are {positions}')
             staffs = StaffService.find_by_position_ids(positions)
+        else:
+            staffs = StaffService.find_all_non_deleted_staff(is_active)
         return jsonify(res.StaffResponseSchema(many=True).dump(staffs)), HTTPStatus.OK
 
     @staticmethod
