@@ -44,6 +44,15 @@ class TaskEventService {
     );
   }
 
+  async getMyTasks(staffId: number) {
+    return await http.GetRequest(
+      `${Endpoints.TaskEvents.MY_TASKS.replace(
+        ":staff_id",
+        staffId.toString()
+      )}`
+    );
+  }
+
   async patchTasks(payload: any) {
     return await http.PatchRequest(
       Endpoints.TaskEvents.EVENTS,

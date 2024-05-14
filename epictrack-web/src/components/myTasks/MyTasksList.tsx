@@ -21,63 +21,103 @@ import { Palette } from "styles/theme";
 import { debounce } from "lodash";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
+import taskEventService from "services/taskEventService/taskEventService";
+import { MyTask } from "models/task";
+
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 
 export default function MyTasksList() {
+  const user = useAppSelector((state) => state.user.userDetail);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     proponentsListColumnFiltersCacheKey,
-    []
+    [
+      {
+        id: "progress",
+        value: ["In Progress", "Not Started"],
+      },
+      {
+        id: "assigned",
+        value: [user.lastName + ", " + user.firstName],
+      },
+    ]
   );
-  const [proponentId, setProponentId] = useState<number>();
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const ctx = useContext(MasterContext);
-  const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
-  const [userMenuAnchorEl, setUserMenuAnchorEl] =
-    React.useState<null | HTMLElement>(null);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-  const menuHoverRef = React.useRef(false);
+  const [loading, setLoading] = useState(true);
+  const [myTasks, setMyTasks] = useState<[]>([]);
+  const [startDates, setStartDates] = useState<[]>([]);
+  const [endDates, setEndDates] = useState<[]>([]);
+  const [progress, setProgress] = useState<[]>([]);
+  const [assigned, setAssigned] = useState<[]>([]);
+  const [work, setWork] = useState<[]>([]);
+
+  const getMyTasks = async (): Promise<MyTask[]> => {
+    const result: [] = [];
+    try {
+      const taskResult = await taskEventService.getMyTasks(
+        Number(user.staffId)
+      );
+
+      if (taskResult.status === 200) {
+        console.log("taskResult", taskResult.data);
+        setMyTasks(taskResult.data as never);
+      }
+    } catch (e) {
+      setLoading(false);
+    }
+    return Promise.resolve(result);
+  };
 
   useEffect(() => {
     ctx.setForm(<></>);
-  }, [proponentId]);
+  }, []);
 
   const onEdit = (id: number) => {
-    setProponentId(id);
     ctx.setShowModalForm(true);
   };
 
   useEffect(() => {
-    ctx.setService(proponentService);
+    getMyTasks();
   }, []);
 
-  const handleOpenUserMenu = (
-    event: React.MouseEvent<HTMLElement>,
-    staff: Staff
-  ) => {
-    setRelationshipHolder(staff);
-    setUserMenuAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseUserMenu = debounce(() => {
-    if (!menuHoverRef.current) {
-      setUserMenuAnchorEl(null);
-      setRelationshipHolder(undefined);
-    }
-  }, 100);
-
-  const proponents = useMemo(() => ctx.data as Proponent[], [ctx.data]);
-  const statusesOptions = getSelectFilterOptions(
-    proponents,
+  const progressOptions = getSelectFilterOptions(
+    myTasks,
     "is_active",
-    (value) => (value ? "Active" : "Inactive"),
+    (value) => (value ? "In Progress" : "Not Started"),
     (value) => value
   );
 
-  const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
+  const codeTypes: { [x: string]: any } = {
+    start_date: setStartDates,
+    end_date: setEndDates,
+    progress: setProgress,
+    assigned: setAssigned,
+    work: setWork,
+  };
+
+  React.useEffect(() => {
+    Object.keys(codeTypes).forEach((key: string) => {
+      let accessor = `${key}`;
+      if (key == "work") {
+        accessor = "title";
+      }
+      const codes = myTasks
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        .map((w) => (w[key] ? w[key][accessor] : null))
+        .filter(
+          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
+        );
+      codeTypes[key](codes);
+    });
+  }, [myTasks]);
+
+  const columns = useMemo<MRT_ColumnDef<MyTask>[]>(
     () => [
       {
-        accessorKey: "name",
+        accessorKey: "title",
         header: "Task",
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
@@ -95,102 +135,37 @@ export default function MyTasksList() {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "relationship_holder.full_name",
+        accessorKey: "work.start_date",
         header: "Start Date",
-        filterSelectOptions: staffs.map((s) => s.full_name),
-        Cell: ({ row }) => {
-          const user = row.original.relationship_holder;
-          if (user === undefined || user === null) return <></>;
-          return (
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <Avatar
-                sx={{
-                  backgroundColor: Palette.neutral.bg.main,
-                  color: Palette.neutral.accent.dark,
-                  fontSize: "1rem",
-                  lineHeight: "1.3rem",
-                  fontWeight: 700,
-                  width: "2rem",
-                  height: "2rem",
-                }}
-                onMouseEnter={(event) => {
-                  event.stopPropagation();
-                  event.preventDefault();
-                  handleCloseUserMenu.cancel();
-                  handleOpenUserMenu(event, user);
-                }}
-                onMouseLeave={handleCloseUserMenu}
-              >
-                <ETCaption2 bold>
-                  {`${user?.first_name[0]}${user?.last_name[0]}`}
-                </ETCaption2>
-              </Avatar>
-              <Typography
-                style={{
-                  fontWeight: "400",
-                  fontSize: "1rem",
-                  lineHeight: "1.5rem",
-                  color: Palette.neutral.dark,
-                }}
-                component="span"
-              >
-                {user.full_name}
-              </Typography>
-            </Stack>
-          );
-        },
+        sortingFn: "sortFn",
+        filterFn: searchFilter,
+        filterVariant: "multi-select",
+        filterSelectOptions: endDates,
       },
       {
-        accessorKey: "name",
+        accessorKey: "work.end_date",
         header: "End Date",
-        Cell: canEdit
-          ? ({ cell, row, renderedCellValue }) => (
-              <ETGridTitle
-                to={"#"}
-                onClick={() => onEdit(row.original.id)}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
         sortingFn: "sortFn",
+        filterVariant: "multi-select",
+        filterSelectOptions: startDates,
         filterFn: searchFilter,
       },
       {
         accessorKey: "name",
         header: "Progress",
-        Cell: canEdit
-          ? ({ cell, row, renderedCellValue }) => (
-              <ETGridTitle
-                to={"#"}
-                onClick={() => onEdit(row.original.id)}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        filterVariant: "multi-select",
+        filterSelectOptions: progress,
+        Cell: ({ cell, row, renderedCellValue }) => renderedCellValue,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
       {
         accessorKey: "name",
         header: "Assigned",
-        Cell: canEdit
-          ? ({ cell, row, renderedCellValue }) => (
-              <ETGridTitle
-                to={"#"}
-                onClick={() => onEdit(row.original.id)}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        filterVariant: "multi-select",
+        filterSelectOptions: assigned,
+        Cell: ({ cell, row, renderedCellValue }) =>
+          user.lastName + ", " + user.firstName,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
@@ -213,25 +188,16 @@ export default function MyTasksList() {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "name",
+        accessorKey: "work.title",
         header: "Work",
-        Cell: canEdit
-          ? ({ cell, row, renderedCellValue }) => (
-              <ETGridTitle
-                to={"#"}
-                onClick={() => onEdit(row.original.id)}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
+        filterVariant: "multi-select",
+        filterSelectOptions: work,
+        Cell: ({ cell, row, renderedCellValue }) => renderedCellValue,
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
     ],
-    [staffs, proponents, userMenuAnchorEl, relationshipHolder]
+    [staffs, myTasks, work, assigned, startDates, endDates, progress]
   );
 
   const getStaffs = async () => {
@@ -268,13 +234,14 @@ export default function MyTasksList() {
         <Grid item xs={12}>
           <MasterTrackTable
             columns={columns}
-            data={proponents}
+            data={myTasks}
             initialState={{
               sorting: [
                 {
                   id: "name",
                   desc: false,
                 },
+                { id: "work.start_date", desc: false },
               ],
               columnFilters,
             }}
