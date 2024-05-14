@@ -216,6 +216,8 @@ const TeamList = () => {
                 isLoading: loading,
                 showGlobalFilter: true,
               }}
+              tableName="team-listing"
+              enableExport
               renderTopToolbarCustomActions={({ table }) => (
                 <Grid container rowSpacing={1}>
                   <Grid item xs={6}>
@@ -234,37 +236,6 @@ const TeamList = () => {
                         Team Member
                       </Button>
                     </Restricted>
-                  </Grid>
-                  <Grid
-                    item
-                    xs={6}
-                    sx={{
-                      display: "flex",
-                      justifyContent: "right",
-                      gap: "0.5rem",
-                    }}
-                  >
-                    <Tooltip title="Export Team List to CSV">
-                      <Restricted
-                        allowed={[ROLES.CREATE]}
-                        exception={userIsTeamMember}
-                        errorProps={{
-                          disabled: true,
-                        }}
-                      >
-                        <IButton
-                          onClick={() =>
-                            exportToCsv({
-                              table,
-                              downloadDate: new Date().toISOString(),
-                              filenamePrefix: "teams-list",
-                            })
-                          }
-                        >
-                          <DownloadIcon className="icon" />
-                        </IButton>
-                      </Restricted>
-                    </Tooltip>
                   </Grid>
                 </Grid>
               )}

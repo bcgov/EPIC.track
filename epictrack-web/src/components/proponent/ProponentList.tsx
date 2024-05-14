@@ -247,42 +247,23 @@ export default function ProponentList() {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
+            tableName={"proponent-listing"}
+            enableExport
             renderTopToolbarCustomActions={({ table }) => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                errorProps={{ disabled: true }}
               >
-                <Restricted
-                  allowed={[ROLES.CREATE]}
-                  errorProps={{ disabled: true }}
+                <Button
+                  onClick={() => {
+                    ctx.setShowModalForm(true);
+                    setProponentId(undefined);
+                  }}
+                  variant="contained"
                 >
-                  <Button
-                    onClick={() => {
-                      ctx.setShowModalForm(true);
-                      setProponentId(undefined);
-                    }}
-                    variant="contained"
-                  >
-                    Create Proponent
-                  </Button>
-                </Restricted>
-                <Tooltip title="Export to csv">
-                  <IButton
-                    onClick={() =>
-                      exportToCsv({
-                        table,
-                        downloadDate: new Date().toISOString(),
-                        filenamePrefix: "proponent-listing",
-                      })
-                    }
-                  >
-                    <DownloadIcon className="icon" />
-                  </IButton>
-                </Tooltip>
-              </Box>
+                  Create Proponent
+                </Button>
+              </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
           />

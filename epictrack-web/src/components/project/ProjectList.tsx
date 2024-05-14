@@ -297,42 +297,23 @@ const ProjectList = () => {
               isLoading: loadingProjects,
               showGlobalFilter: true,
             }}
+            tableName={"project-listing"}
+            enableExport
             renderTopToolbarCustomActions={({ table }) => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                errorProps={{ disabled: true }}
               >
-                <Restricted
-                  allowed={[ROLES.CREATE]}
-                  errorProps={{ disabled: true }}
+                <Button
+                  onClick={() => {
+                    setShowFormDialog(true);
+                    setProjectId(undefined);
+                  }}
+                  variant="contained"
                 >
-                  <Button
-                    onClick={() => {
-                      setShowFormDialog(true);
-                      setProjectId(undefined);
-                    }}
-                    variant="contained"
-                  >
-                    Create Project
-                  </Button>
-                </Restricted>
-                <Tooltip title="Export to csv">
-                  <IButton
-                    onClick={() =>
-                      exportToCsv({
-                        table,
-                        downloadDate: new Date().toISOString(),
-                        filenamePrefix: "project-listing",
-                      })
-                    }
-                  >
-                    <DownloadIcon className="icon" />
-                  </IButton>
-                </Tooltip>
-              </Box>
+                  Create Project
+                </Button>
+              </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
           />
