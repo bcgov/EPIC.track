@@ -7,12 +7,14 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
-import { Link } from "react-router-dom";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { FileDownload } from "@mui/icons-material";
-import { IconButton, Tooltip, Box } from "@mui/material";
+import { Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
-import { ETGridTitle } from "components/shared";
+import { ETGridTitle, IButton } from "components/shared";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
   const [phases, setPhases] = React.useState<string[]>([]);
@@ -206,7 +208,7 @@ const WorkList = () => {
           }}
         >
           <Tooltip title="Export to csv">
-            <IconButton
+            <IButton
               onClick={() =>
                 exportToCsv({
                   table,
@@ -215,8 +217,8 @@ const WorkList = () => {
                 })
               }
             >
-              <FileDownload />
-            </IconButton>
+              <DownloadIcon className="icon" />
+            </IButton>
           </Tooltip>
         </Box>
       )}

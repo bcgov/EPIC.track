@@ -11,7 +11,11 @@ import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { FileDownload } from "@mui/icons-material";
 import { IconButton, Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
-import { ETGridTitle } from "components/shared";
+import { ETGridTitle, IButton } from "components/shared";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
@@ -153,11 +157,11 @@ const WorkList = () => {
         filterSelectOptions: indigenousNations,
         accessorFn: (row) => {
           return (
-            <ul>
-              {row.indigenous_works?.map((indigenous_work) => (
-                <li key={indigenous_work.id}>{indigenous_work.name}</li>
-              ))}
-            </ul>
+            <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+              {row.indigenous_works
+                ?.map((indigenous_work) => indigenous_work.name)
+                .join(", ")}
+            </div>
           );
         },
         Filter: ({ header, column }) => {
@@ -215,7 +219,7 @@ const WorkList = () => {
           }}
         >
           <Tooltip title="Export to csv">
-            <IconButton
+            <IButton
               onClick={() =>
                 exportToCsv({
                   table,
@@ -224,8 +228,8 @@ const WorkList = () => {
                 })
               }
             >
-              <FileDownload />
-            </IconButton>
+              <DownloadIcon className="icon" />
+            </IButton>
           </Tooltip>
         </Box>
       )}
