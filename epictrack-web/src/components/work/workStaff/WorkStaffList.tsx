@@ -6,7 +6,12 @@ import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { ETGridTitle, ETPageContainer, IButton } from "components/shared";
+import {
+  ETGridTitle,
+  ETPageContainer,
+  ETParagraph,
+  IButton,
+} from "components/shared";
 import { WorkStaffRole } from "models/role";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
@@ -75,6 +80,21 @@ const WorkStaffList = () => {
               .join(", ")}`,
           enableHiding: false,
           enableColumnFilter: true,
+          Cell: ({ row, renderedCellValue }) => {
+            const staff = row.original.staff
+              .filter((p: { role: { name: any } }) => p.role.name === rolename)
+              .map(
+                (p: { first_name: string; last_name: string }) =>
+                  `${p.first_name} ${p.last_name}`
+              )
+              .join(", ");
+
+            return (
+              <ETParagraph enableTooltip enableEllipsis tooltip={staff}>
+                {renderedCellValue}
+              </ETParagraph>
+            );
+          },
         } as MRT_ColumnDef<WorkStaff>;
       });
     }
@@ -156,6 +176,17 @@ const WorkStaffList = () => {
         enableHiding: false,
         filterVariant: "multi-select",
         filterSelectOptions: projectFilter,
+        Cell: ({ row, renderedCellValue }) => {
+          return (
+            <ETParagraph
+              enableTooltip
+              enableEllipsis
+              tooltip={row.original.project.name}
+            >
+              {renderedCellValue}
+            </ETParagraph>
+          );
+        },
       },
       {
         accessorFn: (row: WorkStaff) =>
@@ -165,12 +196,35 @@ const WorkStaffList = () => {
         header: "Responsible EPD",
         filterVariant: "multi-select",
         filterSelectOptions: responsibleEpdFilter,
+        Cell: ({ row, renderedCellValue }) => {
+          const { responsible_epd } = row.original;
+          return (
+            <ETParagraph
+              enableTooltip
+              enableEllipsis
+              tooltip={`${responsible_epd?.first_name} ${responsible_epd?.last_name}`}
+            >
+              {renderedCellValue}
+            </ETParagraph>
+          );
+        },
       },
       {
         accessorKey: "eao_team.name",
         header: "Team",
         filterVariant: "multi-select",
         filterSelectOptions: teamFilter,
+        Cell: ({ row, renderedCellValue }) => {
+          return (
+            <ETParagraph
+              enableTooltip
+              enableEllipsis
+              tooltip={row.original.eao_team.name}
+            >
+              {renderedCellValue}
+            </ETParagraph>
+          );
+        },
       },
       {
         accessorFn: (row: WorkStaff) =>
@@ -180,6 +234,18 @@ const WorkStaffList = () => {
         header: "Work Lead",
         filterVariant: "multi-select",
         filterSelectOptions: workLeadFilter,
+        Cell: ({ row, renderedCellValue }) => {
+          const { work_lead } = row.original;
+          return (
+            <ETParagraph
+              enableTooltip
+              enableEllipsis
+              tooltip={`${work_lead?.first_name} ${work_lead?.last_name}`}
+            >
+              {renderedCellValue}
+            </ETParagraph>
+          );
+        },
       },
       ...setRoleColumns(),
     ],
