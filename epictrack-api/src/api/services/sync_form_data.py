@@ -127,7 +127,7 @@ class SyncFormDataService:  # pylint:disable=too-few-public-methods
     def sync_data(cls, payload: dict):
         """Synchronize data from payload with database."""
         result = {}
-
+        model_name = None
         for model_key, dataset in payload.items():  # pylint:disable=too-many-nested-blocks
             if model_key not in result:
                 foreign_keys = {}
