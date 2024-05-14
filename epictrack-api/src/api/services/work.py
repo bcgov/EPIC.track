@@ -15,7 +15,6 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from io import BytesIO
-from itertools import product
 from typing import Dict, List, Optional
 
 import pandas as pd
