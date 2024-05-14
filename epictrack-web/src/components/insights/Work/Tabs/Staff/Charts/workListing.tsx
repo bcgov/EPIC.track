@@ -191,7 +191,7 @@ const WorkList = () => {
         Cell: ({ row, renderedCellValue }) => {
           return (
             <ETGridTitle
-              to={`/work-plan?work_id=${row.original.work.id}`}
+              to={`/work-plan?work_id=${row.original.id}`}
               titleText={row.original.title}
               enableTooltip
               tooltip={row.original.title}
