@@ -42,12 +42,12 @@ import { EVENT_TYPE } from "components/workPlan/phase/type";
 import { getTextFromDraftJsContentState } from "components/shared/richTextEditor/utils";
 import { dateUtils } from "utils";
 
-const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
+const myTasksListColumnFiltersCacheKey = "myTasks-listing-column-filters";
 
 export default function MyTasksList() {
   const user = useAppSelector((state) => state.user.userDetail);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
-    proponentsListColumnFiltersCacheKey,
+    myTasksListColumnFiltersCacheKey,
     [
       {
         id: "status",
@@ -57,7 +57,6 @@ export default function MyTasksList() {
         id: "assigned",
         value: [user.lastName + ", " + user.firstName],
       },
-      { id: "work.title", value: [] },
     ]
   );
   const [staffs, setStaffs] = useState<Staff[]>([]);
