@@ -2,17 +2,25 @@ import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Avatar, Box, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
+import {
+  ETCaption2,
+  ETGridTitle,
+  ETPageContainer,
+  ETParagraph,
+} from "../shared";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
 import { MasterContext } from "../shared/MasterContext";
 import proponentService from "../../services/proponentService/proponentService";
 import { ETChip } from "../shared/chip/ETChip";
-import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import {
+  BLANK_OPTION,
+  getSelectFilterOptions,
+} from "../shared/MasterTrackTable/utils";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { hasPermission } from "../shared/restricted";
-import { ROLES } from "../../constants/application-constant";
+import { MONTH_DAY_YEAR, ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
@@ -23,6 +31,16 @@ import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
 import taskEventService from "services/taskEventService/taskEventService";
 import { MyTask } from "models/task";
+import { EVENT_STATUS, statusOptions } from "models/taskEvent";
+import { Switch, Case } from "react-if";
+import {
+  CompletedIcon,
+  InProgressIcon,
+  NotStartedIcon,
+} from "components/icons/status";
+import { EVENT_TYPE } from "components/workPlan/phase/type";
+import { getTextFromDraftJsContentState } from "components/shared/richTextEditor/utils";
+import { dateUtils } from "utils";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 
@@ -32,13 +50,14 @@ export default function MyTasksList() {
     proponentsListColumnFiltersCacheKey,
     [
       {
-        id: "progress",
+        id: "status",
         value: ["In Progress", "Not Started"],
       },
       {
         id: "assigned",
         value: [user.lastName + ", " + user.firstName],
       },
+      { id: "work.title", value: [] },
     ]
   );
   const [staffs, setStaffs] = useState<Staff[]>([]);
@@ -46,7 +65,7 @@ export default function MyTasksList() {
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
   const [loading, setLoading] = useState(true);
-  const [myTasks, setMyTasks] = useState<[]>([]);
+  const [myTasks, setMyTasks] = useState<MyTask[]>([]);
   const [startDates, setStartDates] = useState<[]>([]);
   const [endDates, setEndDates] = useState<[]>([]);
   const [progress, setProgress] = useState<[]>([]);
@@ -61,8 +80,7 @@ export default function MyTasksList() {
       );
 
       if (taskResult.status === 200) {
-        console.log("taskResult", taskResult.data);
-        setMyTasks(taskResult.data as never);
+        setMyTasks(taskResult.data as MyTask[]);
       }
     } catch (e) {
       setLoading(false);
@@ -82,11 +100,38 @@ export default function MyTasksList() {
     getMyTasks();
   }, []);
 
-  const progressOptions = getSelectFilterOptions(
+  const statusFilterOptions = getSelectFilterOptions(
     myTasks,
-    "is_active",
-    (value) => (value ? "In Progress" : "Not Started"),
-    (value) => value
+    "status",
+    (value) =>
+      statusOptions.find((statusOption) => statusOption.value == value)
+        ?.label ?? BLANK_OPTION
+  );
+
+  const startDateFilterOptions = getSelectFilterOptions(
+    myTasks,
+    "start_date",
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+  );
+  const endDateFilterOptions = getSelectFilterOptions(
+    myTasks,
+    "end_date",
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+  );
+
+  const assigneeOptions = Array.from(
+    new Set(
+      myTasks
+        .map((task) => task.assignees || [""])
+        .flat()
+        .map((assignee) =>
+          assignee
+            ? `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
+            : BLANK_OPTION
+        )
+    )
   );
 
   const codeTypes: { [x: string]: any } = {
@@ -117,7 +162,7 @@ export default function MyTasksList() {
   const columns = useMemo<MRT_ColumnDef<MyTask>[]>(
     () => [
       {
-        accessorKey: "title",
+        accessorKey: "name",
         header: "Task",
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
@@ -135,64 +180,157 @@ export default function MyTasksList() {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "work.start_date",
+        accessorKey: "start_date",
         header: "Start Date",
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
         filterVariant: "multi-select",
-        filterSelectOptions: endDates,
+        filterSelectOptions: startDateFilterOptions,
+        size: 140,
+        Cell: ({ cell, row }) => (
+          <ETParagraph enableEllipsis={true}>
+            {dateUtils.formatDate(cell.getValue<string>(), MONTH_DAY_YEAR)}
+          </ETParagraph>
+        ),
       },
       {
-        accessorKey: "work.end_date",
+        accessorKey: "end_date",
+        size: 140,
         header: "End Date",
-        sortingFn: "sortFn",
         filterVariant: "multi-select",
-        filterSelectOptions: startDates,
-        filterFn: searchFilter,
+        filterSelectOptions: endDateFilterOptions,
+        Cell: ({ cell, row }) => (
+          <ETParagraph enableEllipsis={true}>
+            {cell.getValue<string>() &&
+              dateUtils.formatDate(
+                String(cell.getValue<string>()),
+                MONTH_DAY_YEAR
+              )}
+          </ETParagraph>
+        ),
       },
       {
-        accessorKey: "name",
+        accessorKey: "status",
+        filterVariant: "multi-select",
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterSelectOptions: statusFilterOptions,
         header: "Progress",
-        filterVariant: "multi-select",
-        filterSelectOptions: progress,
-        Cell: ({ cell, row, renderedCellValue }) => renderedCellValue,
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
+        size: 150,
+        Cell: ({ cell, row }) => {
+          const value = cell.getValue<EVENT_STATUS>();
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.5rem",
+              }}
+            >
+              <Switch>
+                <Case condition={value === EVENT_STATUS.NOT_STARTED}>
+                  <NotStartedIcon fill={Palette.neutral.light} />
+                </Case>
+                <Case condition={value === EVENT_STATUS.INPROGRESS}>
+                  <InProgressIcon fill={Palette.success.light} />
+                </Case>
+                <Case condition={value === EVENT_STATUS.COMPLETED}>
+                  <CompletedIcon fill={Palette.neutral.accent.light} />
+                </Case>
+              </Switch>
+              <ETParagraph>
+                {
+                  statusOptions.filter(
+                    (statusOption) => statusOption.value === value
+                  )[0]?.label
+                }
+              </ETParagraph>
+            </Box>
+          );
+        },
       },
       {
-        accessorKey: "name",
+        accessorKey: "assigned",
         header: "Assigned",
+        accessorFn: (row) =>
+          row.assignees
+            ?.map((p) => `${p.assignee.first_name} ${p.assignee.last_name}`)
+            .join(", "),
         filterVariant: "multi-select",
-        filterSelectOptions: assigned,
-        Cell: ({ cell, row, renderedCellValue }) =>
-          user.lastName + ", " + user.firstName,
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > assigneeOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const renderedValue: string = row.renderValue(id) || BLANK_OPTION;
+          return filterValue.every((filterName: string) =>
+            renderedValue.includes(filterName)
+          );
+        },
+        filterSelectOptions: assigneeOptions,
+        size: 140,
+        Cell: ({ cell, row }) => {
+          return (
+            <ETParagraph
+              enableEllipsis
+              enableTooltip
+              tooltip={cell.getValue<string>()}
+            >
+              {cell.getValue<string>()}
+            </ETParagraph>
+          );
+        },
       },
       {
-        accessorKey: "name",
+        accessorKey: "notes",
+        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         header: "Notes",
-        Cell: canEdit
-          ? ({ cell, row, renderedCellValue }) => (
-              <ETGridTitle
-                to={"#"}
-                onClick={() => onEdit(row.original.id)}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
-              >
-                {renderedCellValue}
-              </ETGridTitle>
-            )
-          : undefined,
-        sortingFn: "sortFn",
-        filterFn: searchFilter,
+        size: 250,
+        Cell: ({ cell, row }) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={getTextFromDraftJsContentState(cell.getValue<string>())}
+          >
+            {getTextFromDraftJsContentState(cell.getValue<string>())}
+          </ETParagraph>
+        ),
       },
       {
         accessorKey: "work.title",
         header: "Work",
         filterVariant: "multi-select",
         filterSelectOptions: work,
-        Cell: ({ cell, row, renderedCellValue }) => renderedCellValue,
+        Cell: ({ cell, row, renderedCellValue }) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={row.original.work.title}
+          >
+            {row.original.work.title}
+          </ETParagraph>
+        ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
       },
@@ -241,7 +379,8 @@ export default function MyTasksList() {
                   id: "name",
                   desc: false,
                 },
-                { id: "work.start_date", desc: false },
+                { id: "start_date", desc: false },
+                { id: "work.title", desc: false },
               ],
               columnFilters,
             }}

@@ -1,5 +1,6 @@
+import { Staff } from "./staff";
 import { Work } from "./work";
-
+import { EventsGridModel } from "./event";
 export interface Task {
   name: string;
   start_at: number;
@@ -8,9 +9,11 @@ export interface Task {
   tips: string;
 }
 
-export interface MyTask {
+export interface MyTask extends EventsGridModel {
   id: number;
   work: Work;
-  title: string;
   notes: string;
+  start_date: string;
+  end_date: string;
+  assigned: string;
 }
