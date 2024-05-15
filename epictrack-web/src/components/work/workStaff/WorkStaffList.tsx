@@ -77,7 +77,7 @@ const WorkStaffList = () => {
                 (p: { first_name: string; last_name: string }) =>
                   `${p.last_name} ${p.first_name}`
               )
-              .join(", ")}`,
+              .join("; ")}`,
           enableHiding: false,
           enableColumnFilter: true,
           Cell: ({ row, renderedCellValue }) => {
@@ -87,7 +87,7 @@ const WorkStaffList = () => {
                 (p: { first_name: string; last_name: string }) =>
                   `${p.last_name} ${p.first_name}`
               )
-              .join(", ");
+              .join("; ");
 
             return (
               <ETParagraph enableTooltip enableEllipsis tooltip={staff}>
