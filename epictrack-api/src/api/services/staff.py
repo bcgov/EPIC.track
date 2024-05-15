@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Staffs."""
-
+from datetime import datetime
 from typing import IO, List
 
 import pandas as pd
@@ -77,6 +77,14 @@ class StaffService:
         if not staff:
             raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
         staff = staff.update(payload)
+        return staff
+
+    @classmethod
+    def update_last_active(cls, staff_id: int):
+        """Update staff's last active time."""
+        staff = Staff.find_by_id(staff_id)
+        staff.last_active_at = datetime.now()
+        staff.save()
         return staff
 
     @classmethod
