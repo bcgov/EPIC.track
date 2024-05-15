@@ -99,8 +99,8 @@ class Staff(Resource):
         return 'Staff successfully deleted', HTTPStatus.OK
 
 
-@cors_preflight('PUT')
-@API.route('/<int:staff_id>/last_active_at', methods=['PUT', 'OPTIONS'])
+@cors_preflight('PATCH')
+@API.route('/<int:staff_id>/last_active_at', methods=['PATCH', 'OPTIONS'])
 class StaffLastActiveAt(Resource):
     """Endpoint resource to return staff last active time."""
 
