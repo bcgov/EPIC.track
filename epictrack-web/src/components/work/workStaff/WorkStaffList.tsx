@@ -75,7 +75,7 @@ const WorkStaffList = () => {
               .filter((p: { role: { name: any } }) => p.role.name === rolename)
               .map(
                 (p: { first_name: string; last_name: string }) =>
-                  `${p.first_name} ${p.last_name}`
+                  `${p.last_name} ${p.first_name}`
               )
               .join(", ")}`,
           enableHiding: false,
@@ -85,7 +85,7 @@ const WorkStaffList = () => {
               .filter((p: { role: { name: any } }) => p.role.name === rolename)
               .map(
                 (p: { first_name: string; last_name: string }) =>
-                  `${p.first_name} ${p.last_name}`
+                  `${p.last_name} ${p.first_name}`
               )
               .join(", ");
 
@@ -196,17 +196,8 @@ const WorkStaffList = () => {
         header: "Responsible EPD",
         filterVariant: "multi-select",
         filterSelectOptions: responsibleEpdFilter,
-        Cell: ({ row, renderedCellValue }) => {
-          const { responsible_epd } = row.original;
-          return (
-            <ETParagraph
-              enableTooltip
-              enableEllipsis
-              tooltip={`${responsible_epd?.first_name} ${responsible_epd?.last_name}`}
-            >
-              {renderedCellValue}
-            </ETParagraph>
-          );
+        Cell: ({ renderedCellValue }) => {
+          return renderedCellValue;
         },
       },
       {
@@ -214,16 +205,8 @@ const WorkStaffList = () => {
         header: "Team",
         filterVariant: "multi-select",
         filterSelectOptions: teamFilter,
-        Cell: ({ row, renderedCellValue }) => {
-          return (
-            <ETParagraph
-              enableTooltip
-              enableEllipsis
-              tooltip={row.original.eao_team.name}
-            >
-              {renderedCellValue}
-            </ETParagraph>
-          );
+        Cell: ({ renderedCellValue }) => {
+          return renderedCellValue;
         },
       },
       {
@@ -234,17 +217,8 @@ const WorkStaffList = () => {
         header: "Work Lead",
         filterVariant: "multi-select",
         filterSelectOptions: workLeadFilter,
-        Cell: ({ row, renderedCellValue }) => {
-          const { work_lead } = row.original;
-          return (
-            <ETParagraph
-              enableTooltip
-              enableEllipsis
-              tooltip={`${work_lead?.first_name} ${work_lead?.last_name}`}
-            >
-              {renderedCellValue}
-            </ETParagraph>
-          );
+        Cell: ({ renderedCellValue }) => {
+          return renderedCellValue;
         },
       },
       ...setRoleColumns(),
