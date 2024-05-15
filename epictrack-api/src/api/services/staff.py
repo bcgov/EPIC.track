@@ -23,6 +23,7 @@ from api.models import Staff, db
 from api.models.position import Position
 from api.schemas.response import StaffResponseSchema
 from api.utils.token_info import TokenInfo
+from api.utils.utcnow import utcnow
 
 
 class StaffService:
@@ -83,7 +84,7 @@ class StaffService:
     def update_last_active(cls, staff_id: int):
         """Update staff's last active time."""
         staff = Staff.find_by_id(staff_id)
-        staff.last_active_at = datetime.now()
+        staff.last_active_at = utcnow()
         staff.save()
         return staff
 
