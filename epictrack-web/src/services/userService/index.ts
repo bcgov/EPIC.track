@@ -125,7 +125,6 @@ const updateLastActiveTime = async (userId: number) => {
     );
   } catch (error) {
     console.error("Error updating last active time:", error);
-    // Handle errors if necessary
   }
 };
 
