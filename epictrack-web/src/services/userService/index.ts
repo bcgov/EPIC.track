@@ -120,7 +120,7 @@ const updateUserGroup = async (
 };
 const updateLastActiveTime = async (userId: number) => {
   try {
-    await http.PutRequest(
+    await http.PatchRequest(
       `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`
     );
   } catch (error) {

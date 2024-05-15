@@ -108,7 +108,7 @@ class StaffLastActiveAt(Resource):
     @cors.crossdomain(origin='*')
     @auth.require
     @profiletime
-    def put(staff_id):
+    def patch(staff_id):
         """Update staff's last active time."""
         req.StaffIdPathParameterSchema().load(request.view_args)
         StaffService.update_last_active(staff_id)
