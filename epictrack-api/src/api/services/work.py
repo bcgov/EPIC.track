@@ -15,7 +15,6 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
 from io import BytesIO
-from itertools import product
 from typing import Dict, List, Optional
 
 import pandas as pd
@@ -52,6 +51,7 @@ from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
+from api.models.indigenous_work_queries import find_all_by_project_id
 from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.special_field import EntityEnum
@@ -834,13 +834,21 @@ class WorkService:  # pylint: disable=too-many-public-methods
         ).update({"is_active": True})
         current_app.logger.info(f"Enabled {enabled_count} IndigenousWorks")
 
-        keys = ("work_id", "indigenous_nation_id")
-        indigenous_works = [
-            task_assignee
-            for i, j in product([work_id], indigenous_nation_ids)
-            if (task_assignee := dict(zip(keys, (i, j)))) not in existing_first_nations
+        work = Work.find_by_id(work_id)
+        nations_in_same_project = find_all_by_project_id(work.project_id)
+        selected_nations = [
+            nation for nation in nations_in_same_project
+            if nation.indigenous_nation_id in indigenous_nation_ids
         ]
-        db.session.bulk_insert_mappings(IndigenousWork, mappings=indigenous_works)
+        nations_to_insert = [
+            {
+                'work_id': work.id,
+                'indigenous_nation_id': nation.indigenous_nation_id,
+                'indigenous_consultation_level_id': nation.indigenous_consultation_level_id,
+            }
+            for nation in selected_nations
+        ]
+        db.session.bulk_insert_mappings(IndigenousWork, mappings=nations_to_insert)
         db.session.commit()
         return "Imported successfully"
 
