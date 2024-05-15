@@ -282,11 +282,8 @@ def versioned_session(session):
     @event.listens_for(session, "after_flush")
     def after_flush(session, *args, **kwargs):
         for obj in versioned_objects(session.new):
-            print('------------11')
             create_version(obj, session, new=True)
         for obj in versioned_objects(session.dirty):
-            print('------------22')
             create_version(obj, session)
         for obj in versioned_objects(session.deleted):
-            print('------------33')
             create_version(obj, session, deleted=True)
