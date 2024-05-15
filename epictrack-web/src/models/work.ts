@@ -1,4 +1,5 @@
 import { ListType } from "./code";
+import { FederalInvolvement } from "./federalInvolvement";
 import { Ministry } from "./ministry";
 import { Staff } from "./staff";
 import { MasterBase } from "./type";
@@ -50,7 +51,7 @@ export interface Work extends MasterBase {
   ministry: Ministry;
   ea_act: ListType;
   eao_team: ListType;
-  federal_involvement: ListType;
+  federal_involvement: FederalInvolvement;
   responsible_epd: Staff;
   work_lead: Staff;
   work_type: ListType;
