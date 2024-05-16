@@ -24,7 +24,6 @@ from api.services import StaffService
 from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
-
 API = Namespace("staffs", description="Staffs")
 
 
@@ -98,6 +97,22 @@ class Staff(Resource):
         req.StaffIdPathParameterSchema().load(request.view_args)
         StaffService.delete_staff(staff_id)
         return 'Staff successfully deleted', HTTPStatus.OK
+
+
+@cors_preflight('PATCH')
+@API.route('/<int:staff_id>/last_active_at', methods=['PATCH', 'OPTIONS'])
+class StaffLastActiveAt(Resource):
+    """Endpoint resource to return staff last active time."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def patch(staff_id):
+        """Update staff's last active time."""
+        req.StaffIdPathParameterSchema().load(request.view_args)
+        StaffService.update_last_active(staff_id)
+        return 'Staff Last Active time successfully updated', HTTPStatus.OK
 
 
 @cors_preflight('GET')
