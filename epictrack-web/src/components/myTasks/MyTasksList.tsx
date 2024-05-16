@@ -79,7 +79,16 @@ export default function MyTasksList() {
       );
 
       if (taskResult.status === 200) {
-        setMyTasks(taskResult.data as MyTask[]);
+        const tasksWithEndDates = (taskResult.data as MyTask[]).map((task) => {
+          const startDate = new Date(task.start_date);
+          const endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + task.number_of_days);
+          return {
+            ...task,
+            end_date: dateUtils.formatDate(String(endDate), MONTH_DAY_YEAR),
+          };
+        });
+        setMyTasks(tasksWithEndDates);
       }
     } catch (e) {
       setLoading(false);
@@ -113,6 +122,7 @@ export default function MyTasksList() {
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
   );
+
   const endDateFilterOptions = getSelectFilterOptions(
     myTasks,
     "end_date",
