@@ -113,7 +113,7 @@ export default function AnticipatedEAOSchedule() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, fetchReportData]);
+  }, [reportDate, fetchReportData, selectedTypes]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
