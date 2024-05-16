@@ -7,13 +7,13 @@ const sort = (collection: any[], sortField: string) => {
     sensitivity: "base",
   });
   const keys = sortField.split(".");
-  if (keys && keys.length === 0) {
+  if (keys.length > 1) {
     return collection.sort(function (a, b) {
-      return collator.compare(a[sortField], b[sortField]);
+      return collator.compare(a[keys[0]][keys[1]], b[keys[0]][keys[1]]);
     });
   } else {
     return collection.sort(function (a, b) {
-      return collator.compare(a[keys[0]][keys[1]], b[keys[0]][keys[1]]);
+      return collator.compare(a[sortField], b[sortField]);
     });
   }
 };
