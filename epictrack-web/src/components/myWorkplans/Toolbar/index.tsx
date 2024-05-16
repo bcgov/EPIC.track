@@ -5,6 +5,7 @@ import icons from "components/icons";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import { MY_WORKPLAN_VIEW } from "../type";
 import { ViewIcon } from "./ViewIcon";
+import TrackPopper from "components/common/Trackpopper";
 
 const AppsIcon = icons["Apps"];
 const GanttIcon = icons["Gantt"];
@@ -14,15 +15,17 @@ export const Toolbar = () => {
   return (
     <Stack direction={"row"} spacing={1}>
       <AssigneeToggle />
-      <IconButton
-        onClick={() => setMyWorkPlanView(MY_WORKPLAN_VIEW.CARDS)}
-        disableRipple
-      >
-        <ViewIcon
-          active={myWorkPlanView === MY_WORKPLAN_VIEW.CARDS}
-          icon={AppsIcon}
-        />
-      </IconButton>
+      <TrackPopper followCursor content={<h1>This is content</h1>}>
+        <IconButton
+          onClick={() => setMyWorkPlanView(MY_WORKPLAN_VIEW.CARDS)}
+          disableRipple
+        >
+          <ViewIcon
+            active={myWorkPlanView === MY_WORKPLAN_VIEW.CARDS}
+            icon={AppsIcon}
+          />
+        </IconButton>
+      </TrackPopper>
       <IconButton
         onClick={() => setMyWorkPlanView(MY_WORKPLAN_VIEW.GANTT)}
         disableRipple

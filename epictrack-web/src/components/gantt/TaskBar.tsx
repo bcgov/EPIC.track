@@ -5,6 +5,7 @@ import { GanttItem } from "./types";
 import { ETCaption3 } from "components/shared";
 import { Tooltip } from "@mui/material";
 import { useGanttContext } from "./GanttContext";
+import TrackPopper from "components/common/Trackpopper";
 
 type TaskBar = {
   task: GanttItem;
