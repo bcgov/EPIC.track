@@ -51,7 +51,7 @@ export default function MyTasksList() {
     [
       {
         id: "status",
-        value: ["In Progress", "Not Started"],
+        value: [EVENT_STATUS.INPROGRESS, EVENT_STATUS.NOT_STARTED],
       },
       {
         id: "assigned",
@@ -166,7 +166,7 @@ export default function MyTasksList() {
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
               <ETGridTitle
-                to={"#"}
+                to={`/work-plan?work_id=${row.original.work.id}`}
                 onClick={() => onEdit(row.original.id)}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
@@ -184,6 +184,31 @@ export default function MyTasksList() {
         filterVariant: "multi-select",
         filterSelectOptions: startDateFilterOptions,
         size: 140,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > startDateFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(
+            dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+          );
+        },
         Cell: ({ cell, row }) => (
           <ETParagraph enableEllipsis={true}>
             {dateUtils.formatDate(cell.getValue<string>(), MONTH_DAY_YEAR)}
@@ -196,6 +221,33 @@ export default function MyTasksList() {
         header: "End Date",
         filterVariant: "multi-select",
         filterSelectOptions: endDateFilterOptions,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > endDateFilterOptions.length // select all is selected
+          ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(
+            value === ""
+              ? value
+              : dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+          );
+        },
         Cell: ({ cell, row }) => (
           <ETParagraph enableEllipsis={true}>
             {cell.getValue<string>() &&
@@ -303,9 +355,10 @@ export default function MyTasksList() {
       },
       {
         accessorKey: "notes",
-        muiTableHeadCellFilterTextFieldProps: { placeholder: "Search" },
         header: "Notes",
         size: 250,
+        filterFn: searchFilter,
+        sortingFn: "sortFn",
         Cell: ({ cell, row }) => (
           <ETParagraph
             enableEllipsis
@@ -330,8 +383,18 @@ export default function MyTasksList() {
             {row.original.work.title}
           </ETParagraph>
         ),
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
         sortingFn: "sortFn",
-        filterFn: searchFilter,
       },
     ],
     [staffs, myTasks, work, assigned, startDates, endDates, progress]
