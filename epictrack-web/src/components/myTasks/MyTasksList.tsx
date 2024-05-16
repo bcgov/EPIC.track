@@ -55,11 +55,10 @@ export default function MyTasksList() {
       },
       {
         id: "assigned",
-        value: [user.lastName + ", " + user.firstName],
+        value: [`${user.firstName} ${user.lastName}`],
       },
     ]
   );
-  const [staffs, setStaffs] = useState<Staff[]>([]);
   const ctx = useContext(MasterContext);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -407,24 +406,8 @@ export default function MyTasksList() {
         sortingFn: "sortFn",
       },
     ],
-    [staffs, myTasks, work, assigned, startDates, endDates, progress]
+    [myTasks, work, assigned, startDates, endDates, progress]
   );
-
-  const getStaffs = async () => {
-    try {
-      const staffsResult = await staffService.getAll();
-      if (staffsResult.status === 200) {
-        setStaffs(staffsResult.data as never);
-      }
-    } catch (error) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-  useEffect(() => {
-    getStaffs();
-  }, []);
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
     if (!filters) {
