@@ -85,10 +85,16 @@ export default function AnticipatedEAOSchedule() {
   const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
+      let filtersToSend = {};
+
+      if (selectedTypes.length > 0) {
+        filtersToSend = { exclude: selectedTypes }; // Add selected types to excluded list
+      }
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.EA_REFERRAL,
         {
           report_date: reportDate,
+          filters: filtersToSend,
         }
       );
       const url = window.URL.createObjectURL(
@@ -194,7 +200,10 @@ export default function AnticipatedEAOSchedule() {
               autoFocus
               multiple
               value={selectedTypes}
-              onChange={(e, value) => setSelectedTypes(value)}
+              onChange={(e, value) => {
+                console.log("Selected Types:", value); // Check if value is correct
+                setSelectedTypes(value);
+              }}
               options={typeFilter}
               renderInput={(params) => (
                 <TextField {...params} variant="standard" />
