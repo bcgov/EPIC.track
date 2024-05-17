@@ -5,7 +5,6 @@ import { ETCaption2 } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import { CustomSwitch } from "../../shared/CustomSwitch";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
-import TrackPopper from "components/common/Trackpopper";
 
 export const AssigneeToggle = () => {
   const user = useAppSelector((state) => state.user.userDetail);
@@ -40,9 +39,7 @@ export const AssigneeToggle = () => {
         <ETCaption2 bold color={Palette.neutral.dark}>
           {user.firstName}'s{" "}
         </ETCaption2>
-        <TrackPopper followCursor content={<h1>This is content</h1>}>
-          <ETCaption2 color={Palette.neutral.dark}>Workplans</ETCaption2>
-        </TrackPopper>
+        <ETCaption2 color={Palette.neutral.dark}>Workplans</ETCaption2>
       </>
       <CustomSwitch
         color="primary"

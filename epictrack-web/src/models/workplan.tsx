@@ -1,6 +1,21 @@
 import { WorkPhase } from "./work";
 import { WorkType } from "./workType";
 
+export type PhaseInfo = {
+  days_left: number;
+  milestone_progress: number;
+  next_milestone: string;
+  total_number_of_days: number;
+  work_phase: {
+    name: string;
+    id: number;
+    phase: {
+      color: string;
+    };
+    start_date: string;
+    end_date: string;
+  };
+};
 export interface WorkPlan {
   id: number;
   title: string;
@@ -14,21 +29,7 @@ export interface WorkPlan {
     name: string;
   };
 
-  phase_info: {
-    days_left: number;
-    milestone_progress: number;
-    next_milestone: string;
-    total_number_of_days: number;
-    work_phase: {
-      name: string;
-      id: number;
-      phase: {
-        color: string;
-      };
-      start_date: string;
-      end_date: string;
-    };
-  }[];
+  phase_info: PhaseInfo[];
 
   federal_involvement: {
     name: string;

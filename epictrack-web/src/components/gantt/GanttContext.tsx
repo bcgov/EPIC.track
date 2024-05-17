@@ -2,6 +2,7 @@ import React, { createContext, useMemo, useRef } from "react";
 import { GanttItem, GanttRow } from "./types";
 import moment from "moment";
 import { barHeight, maxSectionHeight } from "./constants";
+import { TaskBarTooltipProps } from ".";
 
 interface GanttContextProps {
   start: Date;
@@ -13,6 +14,7 @@ interface GanttContextProps {
   totalRows?: number;
   onLazyLoad?: () => void;
   ganttChartRef?: React.RefObject<HTMLDivElement> | null;
+  CustomTaskBarTooltip?: React.FC<TaskBarTooltipProps>;
 }
 
 export const GanttContext = createContext<GanttContextProps>({
@@ -27,6 +29,7 @@ export const GanttContext = createContext<GanttContextProps>({
   },
   isLoadingMore: false,
   ganttChartRef: null,
+  CustomTaskBarTooltip: () => null,
 });
 
 type GanttProviderProps = {
@@ -36,6 +39,7 @@ type GanttProviderProps = {
   totalRows?: number;
   onLazyLoad?: () => void;
   isLoadingMore?: boolean;
+  CustomTaskBarTooltip?: React.FC<TaskBarTooltipProps>;
 };
 export const GanttProvider = ({
   rows,
@@ -44,6 +48,7 @@ export const GanttProvider = ({
   totalRows,
   onLazyLoad,
   isLoadingMore,
+  CustomTaskBarTooltip,
 }: GanttProviderProps) => {
   const tasks = useMemo(() => rows.map((row) => row.tasks).flat(), [rows]);
   const ganttChartRef = useRef<HTMLDivElement>(null);
@@ -81,6 +86,7 @@ export const GanttProvider = ({
       onLazyLoad,
       isLoadingMore,
       ganttChartRef,
+      CustomTaskBarTooltip,
     }),
     [
       start,
@@ -92,6 +98,7 @@ export const GanttProvider = ({
       onLazyLoad,
       isLoadingMore,
       ganttChartRef,
+      CustomTaskBarTooltip,
     ]
   );
   return (
