@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { Container } from "@mui/system";
 import {
   Accordion,
@@ -6,6 +6,7 @@ import {
   AccordionSummary,
   Alert,
   Box,
+  Chip,
   Grid,
   Skeleton,
   Tab,
@@ -22,11 +23,17 @@ import {
   RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
+  StalenessEnum,
+  REPORT_STALENESS_THRESHOLD,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
+import Icons from "../../icons";
+import { IconProps } from "../../icons/type";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
+import { staleLevel } from "utils/uiUtils";
 
+const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 export default function ThirtySixtyNinety() {
   const [reports, setReports] = React.useState({});
   const [showReportDateBanner, setShowReportDateBanner] =
@@ -34,7 +41,6 @@ export default function ThirtySixtyNinety() {
   const [selectedTab, setSelectedTab] = React.useState(0);
   const [reportDate, setReportDate] = React.useState<string>();
   const [resultStatus, setResultStatus] = React.useState<string>();
-
   const FILENAME_PREFIX = "30_60_90_Report";
   React.useEffect(() => {
     const diff = dateUtils.diff(
@@ -55,9 +61,20 @@ export default function ThirtySixtyNinety() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setReports((reportData.data as never)["data"]);
+        const result = (reportData.data as never)["data"];
+        Object.keys(result).forEach((key) => {
+          (result[key] as []).forEach((resultItem: any) => {
+            (resultItem.work_issues as []).forEach((workIssue: any) => {
+              if (stalenessLevel(workIssue) === StalenessEnum.CRITICAL)
+                workIssue["staleness"] = StalenessEnum.CRITICAL;
+              else if (stalenessLevel(workIssue) === StalenessEnum.WARN)
+                workIssue["staleness"] = StalenessEnum.WARN;
+              else workIssue["staleness"] = StalenessEnum.GOOD;
+            });
+          });
+        });
+        setReports(result);
       }
-
       if (reportData.status === 204) {
         setResultStatus(RESULT_STATUS.NO_RECORD);
       }
@@ -65,6 +82,27 @@ export default function ThirtySixtyNinety() {
       setResultStatus(RESULT_STATUS.ERROR);
     }
   }, [reportDate]);
+
+  const isStaleIndicatorRequired = (reportItem: any) => {
+    return (reportItem["work_issues"] as []).some(
+      (workIssue) => stalenessLevel(workIssue) === StalenessEnum.CRITICAL
+    );
+  };
+  const stalenessLevel = (workIssue: any) => {
+    const stalenessThreshold =
+      REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90];
+    const diffDays = dateUtils.diff(
+      reportDate || "",
+      workIssue["start_date"],
+      "days"
+    );
+    if (diffDays > stalenessThreshold[StalenessEnum.CRITICAL])
+      return StalenessEnum.CRITICAL;
+    else if (diffDays > stalenessThreshold[StalenessEnum.WARN])
+      return StalenessEnum.WARN;
+    else return StalenessEnum.GOOD;
+  };
+
   const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
@@ -171,6 +209,21 @@ export default function ThirtySixtyNinety() {
                               <Tab label="Basic" />
                               <Tab label="Work Short Description" />
                               <Tab label="Status" />
+                              <Tab
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "0.5rem",
+                                }}
+                                label={
+                                  <>
+                                    Issues
+                                    {isStaleIndicatorRequired(item) && (
+                                      <IndicatorIcon />
+                                    )}
+                                  </>
+                                }
+                              />
                               <Tab label="Decision Information" />
                             </Tabs>
                             <TabPanel value={selectedTab} index={0}>
@@ -211,6 +264,38 @@ export default function ThirtySixtyNinety() {
                               {item["work_status_text"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={3}>
+                              <Table>
+                                <TableBody>
+                                  {(item["work_issues"] as []).map((issue) => (
+                                    <TableRow>
+                                      <TableCell width={"15%"}>
+                                        <Chip
+                                          style={{
+                                            marginRight: "0.5rem",
+                                            borderRadius: "4px",
+                                            fontSize: "12px",
+                                            width: "100px",
+                                            ...staleLevel(issue["staleness"]),
+                                          }}
+                                          label={
+                                            <>
+                                              <b>
+                                                {dateUtils.formatDate(
+                                                  issue["start_date"],
+                                                  DISPLAY_DATE_FORMAT
+                                                )}
+                                              </b>
+                                            </>
+                                          }
+                                        />
+                                      </TableCell>
+                                      <TableCell>{issue["title"]}</TableCell>
+                                    </TableRow>
+                                  ))}
+                                </TableBody>
+                              </Table>
+                            </TabPanel>
+                            <TabPanel value={selectedTab} index={4}>
                               {item["decision_information"]}
                             </TabPanel>
                           </AccordionDetails>
