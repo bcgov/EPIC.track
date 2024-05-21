@@ -1,6 +1,7 @@
 export type GanttItem = {
   id: string;
   name: string;
+  rowName?: string;
   start: Date;
   end: Date;
   progress: string;
