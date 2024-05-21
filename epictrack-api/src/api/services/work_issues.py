@@ -118,7 +118,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             if new_data.get('start_date').timestamp() > new_data.get('expected_resolution_date').timestamp():
                 raise BadRequestError('expected resolution date cannot be before the start date')
 
-        earliest_issue_update_date = min([update.posted_date for update in work_issue_db.updates])
+        earliest_issue_update_date = min(update.posted_date for update in work_issue_db.updates)
         if new_data.get('start_date').timestamp() > earliest_issue_update_date.timestamp():
             raise BadRequestError('issue start date cannot be after an update date')
 
