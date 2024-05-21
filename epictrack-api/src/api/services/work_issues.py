@@ -112,14 +112,25 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         return work_issue_update
 
     @classmethod
+    def _check_valid_issue_edit_data(cls, new_data, work_issue_db):
+        """Check if the issue data is valid for editing"""
+        if new_data.get('expected_resolution_date'):
+            if new_data.get('start_date').timestamp() > new_data.get('expected_resolution_date').timestamp():
+                raise BadRequestError('expected resolution date cannot be before the start date')
+
+        earliest_issue_update_date = min([update.posted_date for update in work_issue_db.updates])
+        if new_data.get('start_date').timestamp() > earliest_issue_update_date.timestamp():
+            raise BadRequestError('issue start date cannot be after an update date')
+
+    @classmethod
     def edit_issue(cls, work_id, issue_id, issue_data):
         """Edit an existing work issue, and save it only if there are changes."""
         work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
 
         if not work_issue:
             raise ResourceNotFoundError("Work issue doesnt exist")
-
         cls._check_edit_auth(work_id)
+        cls._check_valid_issue_edit_data(issue_data, work_issue)
 
         # Create a flag to track changes on work_issues
         has_changes_to_work_issue = False
