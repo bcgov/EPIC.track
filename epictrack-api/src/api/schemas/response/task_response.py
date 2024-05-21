@@ -118,8 +118,11 @@ class TaskEventByStaffResponseSchema(
 
     def get_work(self, obj):
         """Get work value"""
+        project_name = obj.work_phase.work.project.name
+        work_type_name = obj.work_phase.work.work_type.name
+        simple_title = obj.work_phase.work.simple_title
         return {
             "id": obj.work_phase.work.id,
-            "title": f'{obj.work_phase.work.project.name} - {obj.work_phase.work.work_type.name} - {obj.work_phase.work.simple_title}',
+            "title": f'{project_name} - {work_type_name} - {simple_title}',
             'notes': obj.work_phase.work.first_nation_notes,
         }

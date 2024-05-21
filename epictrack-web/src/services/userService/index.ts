@@ -89,6 +89,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     dispatch(userToken(KeycloakData.token));
     dispatch(userAuthentication(Boolean(KeycloakData.authenticated)));
     refreshToken(dispatch);
+    updateLastActiveTime(userDetail.staffId);
   } catch (err) {
     console.error(err);
     dispatch(userAuthentication(false));
@@ -117,6 +118,16 @@ const updateUserGroup = async (
     JSON.stringify(updateUserGroup)
   );
 };
+const updateLastActiveTime = async (userId: number) => {
+  try {
+    await http.PatchRequest(
+      `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`
+    );
+  } catch (error) {
+    console.error("Error updating last active time:", error);
+  }
+};
+
 const UserService = {
   keycloakData: KeycloakData,
   initKeycloak,

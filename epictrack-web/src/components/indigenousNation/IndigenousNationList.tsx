@@ -30,11 +30,6 @@ import { debounce } from "lodash";
 import { Palette } from "styles/theme";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { exportToCsv } from "../shared/MasterTrackTable/utils";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
-
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const firstNationsColumnFiltersCacheKey =
   "first-nations-listing-column-filters";
@@ -281,42 +276,23 @@ export default function IndigenousNationList() {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
+            tableName="first-nations-listing"
+            enableExport
             renderTopToolbarCustomActions={({ table }) => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                errorProps={{ disabled: true }}
               >
-                <Restricted
-                  allowed={[ROLES.CREATE]}
-                  errorProps={{ disabled: true }}
+                <Button
+                  onClick={() => {
+                    ctx.setShowModalForm(true);
+                    setIndigenousNationID(undefined);
+                  }}
+                  variant="contained"
                 >
-                  <Button
-                    onClick={() => {
-                      ctx.setShowModalForm(true);
-                      setIndigenousNationID(undefined);
-                    }}
-                    variant="contained"
-                  >
-                    Create First Nation
-                  </Button>
-                </Restricted>
-                <Tooltip title="Export to csv">
-                  <IButton
-                    onClick={() =>
-                      exportToCsv({
-                        table,
-                        downloadDate: new Date().toISOString(),
-                        filenamePrefix: "first-nations-listing",
-                      })
-                    }
-                  >
-                    <DownloadIcon className="icon" />
-                  </IButton>
-                </Tooltip>
-              </Box>
+                  Create First Nation
+                </Button>
+              </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
           />

@@ -30,6 +30,7 @@ from api.models.phase_code import PhaseVisibilityEnum
 from api.models.special_field import EntityEnum, SpecialField
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
+from api.models.role import RoleEnum
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
 from api.utils.constants import CANADA_TIMEZONE
@@ -63,6 +64,9 @@ class EAResourceForeCastReport(ReportFactory):
             "ea_type_label",
             "sector(sub)",
             "ea_type_sort_order",
+            # "responsible_epd",
+            # "cairt_lead",
+            # "work_lead",
             "fte_positions_construction",
             "fte_positions_operation",
             "work_type_id",
@@ -235,7 +239,6 @@ class EAResourceForeCastReport(ReportFactory):
                 env_region.name.label("env_region"),
                 nrs_region.name.label("nrs_region"),
                 Work.id.label("work_id"),
-                Work.id.label("work_id"),
                 func.concat(SubType.short_name, " (", Type.short_name, ")").label(
                     "sector(sub)"
                 ),
@@ -339,8 +342,10 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._filter_data(data)
         for values in data:
             work_data = values[0]
-            staffs, cairt_lead = self._get_work_team_members(work_data["work_id"])
+            staffs, cairt_lead, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
             work_data["cairt_lead"] = cairt_lead
+            work_data["responsible_epd"] = responsible_epd
+            work_data["work_lead"] = work_lead
             work_data["work_team_members"] = "; ".join(staffs)
             if work_data.get("capital_investment", None):
                 work_data["capital_investment"] = (
@@ -672,6 +677,8 @@ class EAResourceForeCastReport(ReportFactory):
         """Fetch and return team members by work id"""
         staffs = []
         cairt_lead = ""
+        responsible_epd = ""
+        work_lead = ""
         work_team_members = (
             db.session.query(StaffWorkRole)
             .filter(StaffWorkRole.work_id == work_id)
@@ -679,19 +686,24 @@ class EAResourceForeCastReport(ReportFactory):
             .add_columns(
                 Staff.first_name.label("first_name"),
                 Staff.last_name.label("last_name"),
+                Staff.full_name.label("full_name"),
                 StaffWorkRole.role_id.label("role_id"),
             )
         )
         for work_team_member in work_team_members:
             first_name = work_team_member.first_name
             last_name = work_team_member.last_name
-            if work_team_member.role_id == 4:
-                cairt_lead = f"{last_name}, {first_name}"
-            elif work_team_member.role_id in [3, 5]:
+            if work_team_member.role_id == RoleEnum.FN_CAIRT.value:
+                cairt_lead = work_team_member.full_name
+            if work_team_member.role_id == RoleEnum.TEAM_LEAD.value:
+                work_lead = work_team_member.full_name
+            if work_team_member.role_id == RoleEnum.RESPONSIBLE_EPD.value:
+                responsible_epd = work_team_member.full_name
+            elif work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
                 staffs.append({"first_name": first_name, "last_name": last_name})
         staffs = sorted(staffs, key=lambda x: x["last_name"])
         staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
-        return staffs, cairt_lead
+        return staffs, cairt_lead, responsible_epd, work_lead
 
     def _get_styles(self) -> Tuple[dict, dict]:
         """Returns basic styles needed for the PDF report."""
@@ -738,7 +750,7 @@ class EAResourceForeCastReport(ReportFactory):
                 for cell in cells:
                     row.append(
                         Paragraph(
-                            project[cell] if project[cell] else "", body_text_style
+                            str(project[cell]) if project[cell] else "", body_text_style
                         )
                     )
                 month_cell_start = len(cells)
