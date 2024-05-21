@@ -4,6 +4,7 @@ import { WorkType } from "./workType";
 export type PhaseInfo = {
   days_left: number;
   milestone_progress: number;
+  current_milestone: string;
   next_milestone: string;
   total_number_of_days: number;
   work_phase: {
@@ -14,6 +15,7 @@ export type PhaseInfo = {
     };
     start_date: string;
     end_date: string;
+    is_completed: boolean;
   };
 };
 export interface WorkPlan {
