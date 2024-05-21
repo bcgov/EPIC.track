@@ -16,6 +16,7 @@ from sqlalchemy import and_
 from api.models import WorkIssues, db
 
 
+# pylint: disable=too-few-public-methods
 class WorkIssueQuery:
     """Query module for complex work issue queries"""
 
