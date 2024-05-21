@@ -98,6 +98,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     globalFilterFn: "contains",
     enableHiding: false,
     enableGlobalFilter: false,
+    enableColumnResizing: true,
     enableStickyHeader: true,
     enableDensityToggle: false,
     enableColumnFilters: true,
