@@ -1,24 +1,28 @@
 // TaskBar.js
+import React from "react";
 import moment from "moment";
 import { dayWidth } from "./constants";
 import { GanttItem } from "./types";
 import { ETCaption3 } from "components/shared";
-import { Tooltip } from "@mui/material";
 import { useGanttContext } from "./GanttContext";
+import TaskBarTooltip from "./TaskBarTooltip";
 
 type TaskBar = {
   task: GanttItem;
 };
 
 const TaskBar = ({ task }: TaskBar) => {
-  const { start } = useGanttContext();
+  const { start, CustomTaskBarTooltip } = useGanttContext();
   const momentStart = moment(start);
   const momentTaskStart = moment(task.start);
   const daysDiff = momentTaskStart.diff(momentStart, "days");
 
   const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
 
-  const today = moment().startOf("day");
+  const TooltipWrapper = !!CustomTaskBarTooltip
+    ? CustomTaskBarTooltip
+    : TaskBarTooltip;
+
   return (
     <div
       style={{
@@ -30,15 +34,7 @@ const TaskBar = ({ task }: TaskBar) => {
         alignItems: "center",
       }}
     >
-      <Tooltip
-        title={
-          <div>
-            <p>{task.name}</p>
-            <p>{task.progress}</p>
-          </div>
-        }
-        followCursor
-      >
+      <TooltipWrapper task={task}>
         <div
           id="task-bar"
           style={{
@@ -84,7 +80,7 @@ const TaskBar = ({ task }: TaskBar) => {
             </ETCaption3>
           )}
         </div>
-      </Tooltip>
+      </TooltipWrapper>
     </div>
   );
 };

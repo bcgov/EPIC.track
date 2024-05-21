@@ -7,6 +7,7 @@ import Color from "color";
 import { useNavigate } from "react-router-dom";
 import { WORKPLAN_TAB } from "components/workPlan/constants";
 import { getDaysLeft } from "./util";
+import WorkplanGanttTooltip from "./WorkplanGanttTooltip";
 
 export const MyWorkplanGantt = () => {
   const { workplans, setLoadingMoreWorkplans, totalWorkplans } =
@@ -30,6 +31,7 @@ export const MyWorkplanGantt = () => {
           return {
             id: phaseInfo.work_phase.name,
             name: phaseInfo.work_phase.name,
+            rowName: workplan.title,
             start: moment(phaseInfo.work_phase.start_date).toDate(),
             end: moment(phaseInfo.work_phase.end_date).toDate(),
             progress: getDaysLeft(phaseInfo),
@@ -63,6 +65,7 @@ export const MyWorkplanGantt = () => {
       enableLazyLoading
       onLazyLoad={() => setLoadingMoreWorkplans(true)}
       totalRows={totalWorkplans}
+      CustomTaskBarTooltip={WorkplanGanttTooltip}
     />
   );
 };
