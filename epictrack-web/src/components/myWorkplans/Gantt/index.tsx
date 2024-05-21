@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import moment from "moment";
 import { Palette } from "styles/theme";
@@ -7,6 +7,7 @@ import Color from "color";
 import { useNavigate } from "react-router-dom";
 import { WORKPLAN_TAB } from "components/workPlan/constants";
 import { getDaysLeft } from "./util";
+import WorkplanGanttTooltip from "./WorkplanGanttTooltip";
 
 export const MyWorkplanGantt = () => {
   const { workplans, setLoadingMoreWorkplans, totalWorkplans } =
@@ -14,39 +15,42 @@ export const MyWorkplanGantt = () => {
   const navigate = useNavigate();
 
   const tasks = workplans.map((workplan) => {
-    let phaseInfo: any;
+    let phaseInfo: any[];
     if (!Array.isArray(workplan.phase_info)) {
       phaseInfo = [workplan.phase_info];
     } else {
-      phaseInfo = workplan.phase_info;
+      phaseInfo = workplan.phase_info || [];
     }
 
     return {
       id: String(workplan.id),
       name: workplan.title,
-      tasks: phaseInfo.map((phaseInfo: any) => {
-        return {
-          id: phaseInfo.work_phase.name,
-          name: phaseInfo.work_phase.name,
-          start: moment(phaseInfo.work_phase.start_date).toDate(),
-          end: moment(phaseInfo.work_phase.end_date).toDate(),
-          progress: getDaysLeft(phaseInfo),
-          style: {
-            bar: {
-              backgroundColor: Color(phaseInfo.work_phase.phase.color)
-                .alpha(0.25)
-                .string(),
-              borderBottom: `2px solid ${phaseInfo.work_phase.phase.color}`,
+      tasks: phaseInfo
+        .filter((phaseInfo) => Boolean(phaseInfo))
+        .map((phaseInfo: any) => {
+          return {
+            id: phaseInfo.work_phase.name,
+            name: phaseInfo.work_phase.name,
+            rowName: workplan.title,
+            start: moment(phaseInfo.work_phase.start_date).toDate(),
+            end: moment(phaseInfo.work_phase.end_date).toDate(),
+            progress: getDaysLeft(phaseInfo),
+            style: {
+              bar: {
+                backgroundColor: Color(phaseInfo.work_phase.phase.color)
+                  .alpha(0.25)
+                  .string(),
+                borderBottom: `2px solid ${phaseInfo.work_phase.phase.color}`,
+              },
+              progress: {
+                color:
+                  phaseInfo.days_left > 0
+                    ? Palette.success.main
+                    : Palette.error.main,
+              },
             },
-            progress: {
-              color:
-                phaseInfo.days_left > 0
-                  ? Palette.success.main
-                  : Palette.error.main,
-            },
-          },
-        };
-      }),
+          };
+        }),
       onClick: () => {
         navigate(`/work-plan?work_id=${workplan.id}`, {
           state: { tabIndex: WORKPLAN_TAB.ABOUT.index },
@@ -61,6 +65,7 @@ export const MyWorkplanGantt = () => {
       enableLazyLoading
       onLazyLoad={() => setLoadingMoreWorkplans(true)}
       totalRows={totalWorkplans}
+      CustomTaskBarTooltip={WorkplanGanttTooltip}
     />
   );
 };

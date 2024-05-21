@@ -13,13 +13,18 @@ import {
   MRT_TableOptions,
   useMaterialReactTable,
 } from "material-react-table";
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container, Tooltip, Typography } from "@mui/material";
 import SearchIcon from "../../../assets/images/search.svg";
 import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
-import { ETHeading2 } from "..";
+import { ETHeading2, IButton } from "..";
 import { FiltersCache } from "./FiltersCache";
 import { set } from "lodash";
+import { exportToCsv } from "./utils";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+
+const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
@@ -67,6 +72,8 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   data: TData[];
   setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
   onCacheFilters?: (columnFilters: any) => void;
+  enableExport?: boolean;
+  tableName?: string;
 }
 
 const MasterTrackTable = <TData extends MRT_RowData>({
@@ -74,6 +81,9 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   data,
   setTableInstance,
   onCacheFilters,
+  tableName,
+  enableExport,
+  renderTopToolbarCustomActions,
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const { initialState, state, icons, ...otherProps } = rest;
@@ -88,6 +98,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     globalFilterFn: "contains",
     enableHiding: false,
     enableGlobalFilter: false,
+    enableColumnResizing: true,
     enableStickyHeader: true,
     enableDensityToggle: false,
     enableColumnFilters: true,
@@ -202,6 +213,35 @@ const MasterTrackTable = <TData extends MRT_RowData>({
       },
     },
     renderEmptyRowsFallback: ({ table }) => <NoDataComponent table={table} />,
+    renderTopToolbarCustomActions: ({ table }) => {
+      return (
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "right",
+          }}
+        >
+          {renderTopToolbarCustomActions &&
+            renderTopToolbarCustomActions({ table })}
+          {enableExport && (
+            <Tooltip title="Export to csv">
+              <IButton
+                onClick={() =>
+                  exportToCsv({
+                    table,
+                    downloadDate: new Date().toISOString(),
+                    filenamePrefix: tableName || "exported-data",
+                  })
+                }
+              >
+                <DownloadIcon className="icon" />
+              </IButton>
+            </Tooltip>
+          )}
+        </Box>
+      );
+    }, // Provide an empty function as the initializer
     initialState: {
       showColumnFilters: true,
       density: "compact",

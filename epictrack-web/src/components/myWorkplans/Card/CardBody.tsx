@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Grid, Stack } from "@mui/material";
+import { Box, Divider, Grid, Stack, Tooltip } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -30,12 +30,12 @@ const CardBody = ({ workplan }: CardProps) => {
   }`;
 
   const currentWorkPhaseInfo = useMemo(() => {
+    if (!workplan.phase_info) return null;
     const currentPhaseInfo = workplan.phase_info.filter(
       (p) => p.work_phase.id === workplan.current_work_phase_id
     );
     return currentPhaseInfo[0];
   }, [workplan]);
-  console.log("CURRENT WORKPHASE INFO", currentWorkPhaseInfo);
 
   return (
     <Grid
@@ -73,7 +73,7 @@ const CardBody = ({ workplan }: CardProps) => {
       </Grid>
 
       <Grid item container direction="row" spacing={1} sx={{ height: "26px" }}>
-        <When condition={Boolean(currentWorkPhaseInfo)}>
+        {!!currentWorkPhaseInfo && (
           <Grid item xs={12}>
             <Stack
               direction={"row"}
@@ -123,50 +123,71 @@ const CardBody = ({ workplan }: CardProps) => {
               </ETCaption2>
             </Stack>
           </Grid>
-        </When>
+        )}
       </Grid>
       <Grid container sx={{ height: "64px" }} spacing={1}>
-        <When condition={Boolean(currentWorkPhaseInfo)}>
-          <Grid item container direction="row" spacing={1}>
-            <Grid
-              item
-              sx={{
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <ETCaption1 color={Palette.neutral.main}>
-                {`UPCOMING MILESTONE ${dayjs(new Date())
-                  .add(currentWorkPhaseInfo?.days_left, "days")
-                  .format(MONTH_DAY_YEAR)
-                  .toUpperCase()}`}
-              </ETCaption1>
-            </Grid>
-          </Grid>
-          <Grid item container direction="row" spacing={1}>
-            <Grid item sx={{ overflow: "hidden" }}>
-              <ETParagraph
-                bold
-                color={Palette.neutral.dark}
+        {!!currentWorkPhaseInfo && (
+          <>
+            <Grid item container direction="row" spacing={1}>
+              <Grid
+                item
                 sx={{
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                 }}
               >
-                {currentWorkPhaseInfo?.next_milestone}
-              </ETParagraph>
+                <ETCaption1 color={Palette.neutral.main}>
+                  {`UPCOMING MILESTONE ${dayjs(new Date())
+                    .add(currentWorkPhaseInfo?.days_left, "days")
+                    .format(MONTH_DAY_YEAR)
+                    .toUpperCase()}`}
+                </ETCaption1>
+              </Grid>
             </Grid>
-          </Grid>
-        </When>
+            <Grid item container direction="row" spacing={1}>
+              <Grid item sx={{ overflow: "hidden" }}>
+                <ETParagraph
+                  bold
+                  color={Palette.neutral.dark}
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {currentWorkPhaseInfo?.next_milestone}
+                </ETParagraph>
+              </Grid>
+            </Grid>
+          </>
+        )}
       </Grid>
 
       <Grid item container direction="row" spacing={1}>
         <Grid item>
-          <ETCaption1 color={Palette.neutral.main}>
-            LAST STATUS UPDATE
-          </ETCaption1>
+          <Tooltip
+            title={
+              <Grid
+                container
+                sx={{ backgroundColor: "white", color: "black" }}
+                spacing={2}
+              >
+                <Grid item>Jordan Solar and Energy Storage</Grid>
+                <Divider
+                  sx={{
+                    width: "100%",
+                    color: "red",
+                    backgroundColor: "red",
+                  }}
+                />
+              </Grid>
+            }
+            placement="bottom"
+            open={true}
+          >
+            <p>LAST STATUS UPDATE</p>
+          </Tooltip>
         </Grid>
         <When condition={workplan?.status_info?.posted_date}>
           <Grid item>

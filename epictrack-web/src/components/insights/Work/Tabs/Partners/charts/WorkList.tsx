@@ -38,9 +38,19 @@ const WorkList = () => {
       showNotification("Error fetching works", { type: "error" });
     }
   }, [error]);
-
   const federalInvolvements = useMemo(() => {
-    return Array.from(new Set(works.map((w) => w?.federal_involvement?.name)));
+    return Array.from(
+      new Set(
+        [...works]
+          .sort(
+            (a, b) =>
+              Number(a?.federal_involvement?.sort_order) -
+              Number(b?.federal_involvement?.sort_order)
+          )
+          .filter((p) => p.federal_involvement)
+          .map((w) => w?.federal_involvement?.name)
+      )
+    );
   }, [works]);
 
   const ministries = useMemo(() => {

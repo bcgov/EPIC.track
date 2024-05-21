@@ -345,42 +345,23 @@ const WorkList = () => {
               isLoading: loadingWorks,
               showGlobalFilter: true,
             }}
+            tableName="work-listing"
+            enableExport
             renderTopToolbarCustomActions={({ table }) => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                errorProps={{ disabled: true }}
               >
-                <Restricted
-                  allowed={[ROLES.CREATE]}
-                  errorProps={{ disabled: true }}
+                <Button
+                  onClick={() => {
+                    setShowWorkDialogForm(true);
+                    setWorkId(undefined);
+                  }}
+                  variant="contained"
                 >
-                  <Button
-                    onClick={() => {
-                      setShowWorkDialogForm(true);
-                      setWorkId(undefined);
-                    }}
-                    variant="contained"
-                  >
-                    Create Work
-                  </Button>
-                </Restricted>
-                <Tooltip title="Export to csv">
-                  <IButton
-                    onClick={() =>
-                      exportToCsv({
-                        table,
-                        downloadDate: new Date().toISOString(),
-                        filenamePrefix: "all-works-listing",
-                      })
-                    }
-                  >
-                    <DownloadIcon className="icon" />
-                  </IButton>
-                </Tooltip>
-              </Box>
+                  Create Work
+                </Button>
+              </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
           />

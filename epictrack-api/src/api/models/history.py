@@ -198,15 +198,42 @@ def create_version(obj, session, new=False, deleted=False):
 
     attr = {}
 
+    # Get the names of fields that are being updated
+    updated_fields = set()
+
+    # Get the names of fields that should be excluded from version tracking
+    exclude_from_tracking = getattr(obj.__class__, '__exclude_from_tracking_history__', set())
+
+    # Get the names of fields that are being updated
+    updated_fields = set()
+
+    # Check which attributes of the object have been modified
+    for modified_attrs in obj_state.attrs:
+        if modified_attrs.history.has_changes():
+            updated_fields.add(modified_attrs.key)
+
+    # Print the updated fields
+
+    # Check if all updated fields are excluded from tracking
+    if updated_fields and not updated_fields - exclude_from_tracking:
+        print("All updated fields are excluded from tracking. Skipping version creation.")
+        return
+
     for om, hm in zip(obj_mapper.iterate_to_root(), history_mapper.iterate_to_root()):
         if hm.single:
             continue
+
+        # Accessing __exclude_from_tracking_history__ attribute of the class
+        exclude_from_tracking = getattr(obj.__class__, '__exclude_from_tracking_history__', set())
 
         for hist_col in hm.local_table.c:
             if _is_versioning_col(hist_col):
                 continue
 
             obj_col = om.local_table.c[hist_col.key]
+            # Check if the field is excluded from versioning
+            if obj_col.key in exclude_from_tracking:
+                continue
 
             # get the value of the
             # attribute based on the MapperProperty related to the

@@ -15,10 +15,11 @@
 
 from typing import List
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func, DateTime
 from sqlalchemy.orm import column_property, relationship
 
 from api.models.base_model import BaseModelVersioned
+from api.utils.utcnow import utcnow
 
 
 class Staff(BaseModelVersioned):
@@ -38,6 +39,10 @@ class Staff(BaseModelVersioned):
     position = relationship("Position", foreign_keys=[position_id], lazy="select")
 
     full_name = column_property(last_name + ", " + first_name)
+    last_active_at = Column(DateTime(timezone=True), server_default=utcnow())
+
+    # Define the excluded fields from versioning
+    __exclude_from_tracking_history__ = {'last_active_at'}
 
     def as_dict(self):  # pylint: disable=arguments-differ
         """Return Json representation."""

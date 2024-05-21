@@ -196,42 +196,23 @@ const StaffList = () => {
               isLoading: ctx.loading,
               showGlobalFilter: true,
             }}
+            tableName={"staff-listing"}
+            enableExport
             renderTopToolbarCustomActions={({ table }) => (
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "right",
-                }}
+              <Restricted
+                allowed={[ROLES.CREATE]}
+                errorProps={{ disabled: true }}
               >
-                <Restricted
-                  allowed={[ROLES.CREATE]}
-                  errorProps={{ disabled: true }}
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    ctx.setShowModalForm(true);
+                    setStaffId(undefined);
+                  }}
                 >
-                  <Button
-                    variant="contained"
-                    onClick={() => {
-                      ctx.setShowModalForm(true);
-                      setStaffId(undefined);
-                    }}
-                  >
-                    Create Staff
-                  </Button>
-                </Restricted>
-                <Tooltip title="Export to csv">
-                  <IButton
-                    onClick={() =>
-                      exportToCsv({
-                        table,
-                        downloadDate: new Date().toISOString(),
-                        filenamePrefix: "staff-listing",
-                      })
-                    }
-                  >
-                    <DownloadIcon className="icon" />
-                  </IButton>
-                </Tooltip>
-              </Box>
+                  Create Staff
+                </Button>
+              </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
           />
