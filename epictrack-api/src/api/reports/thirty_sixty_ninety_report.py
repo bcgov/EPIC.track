@@ -7,6 +7,7 @@ from typing import Dict, List
 from pytz import utc
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
+from operator import attrgetter
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
@@ -222,7 +223,17 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 if issue.work_id == result_item["work_id"]
                 and issue.is_high_priority is True
             ]
-            result_item["work_issues"] = res.WorkIssuesResponseSchema(many=True, exclude=["updates"]).dump(
+            for issue in issue_per_work:
+                latest_update = max(
+                    [
+                        issue_update
+                        for issue_update in issue.updates
+                        if issue_update.is_approved
+                    ],
+                    key=attrgetter("posted_date"),
+                )
+                setattr(issue, "latest_update", latest_update)
+            result_item["work_issues"] = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
                 issue_per_work
             )
         return data

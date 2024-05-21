@@ -7,6 +7,7 @@ import {
   Alert,
   Box,
   Chip,
+  Divider,
   Grid,
   Skeleton,
   Tab,
@@ -93,7 +94,7 @@ export default function ThirtySixtyNinety() {
       REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90];
     const diffDays = dateUtils.diff(
       reportDate || "",
-      workIssue["start_date"],
+      workIssue["latest_update"]["posted_date"],
       "days"
     );
     if (diffDays > stalenessThreshold[StalenessEnum.CRITICAL])
@@ -264,11 +265,19 @@ export default function ThirtySixtyNinety() {
                               {item["work_status_text"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={3}>
-                              <Table>
-                                <TableBody>
-                                  {(item["work_issues"] as []).map((issue) => (
-                                    <TableRow>
-                                      <TableCell width={"15%"}>
+                              <Grid
+                                container
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "column",
+                                  justifyContent: "space-between",
+                                  gap: "1rem",
+                                }}
+                              >
+                                {(item["work_issues"] as []).map((issue) => (
+                                  <Box>
+                                    <Grid container>
+                                      <Grid item xs={2}>
                                         <Chip
                                           style={{
                                             marginRight: "0.5rem",
@@ -281,19 +290,27 @@ export default function ThirtySixtyNinety() {
                                             <>
                                               <b>
                                                 {dateUtils.formatDate(
-                                                  issue["start_date"],
+                                                  issue["latest_update"][
+                                                    "posted_date"
+                                                  ],
                                                   DISPLAY_DATE_FORMAT
                                                 )}
                                               </b>
                                             </>
                                           }
                                         />
-                                      </TableCell>
-                                      <TableCell>{issue["title"]}</TableCell>
-                                    </TableRow>
-                                  ))}
-                                </TableBody>
-                              </Table>
+                                      </Grid>
+                                      <Grid item xs={10}>
+                                        {issue["title"]}
+                                      </Grid>
+                                      <Grid item xs={12}>
+                                        {issue["latest_update"]["description"]}
+                                      </Grid>
+                                    </Grid>
+                                    <Divider flexItem />
+                                  </Box>
+                                ))}
+                              </Grid>
                             </TabPanel>
                             <TabPanel value={selectedTab} index={4}>
                               {item["decision_information"]}
