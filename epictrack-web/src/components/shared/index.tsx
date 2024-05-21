@@ -258,6 +258,7 @@ export const ETCaption2 = ({
       }}
       variant="caption"
       {...rest}
+      align="left"
     >
       {children}
     </Typography>

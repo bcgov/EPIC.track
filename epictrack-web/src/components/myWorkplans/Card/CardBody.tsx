@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Grid, Stack } from "@mui/material";
+import { Box, Divider, Grid, Stack, Tooltip } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -166,9 +166,28 @@ const CardBody = ({ workplan }: CardProps) => {
 
       <Grid item container direction="row" spacing={1}>
         <Grid item>
-          <ETCaption1 color={Palette.neutral.main}>
-            LAST STATUS UPDATE
-          </ETCaption1>
+          <Tooltip
+            title={
+              <Grid
+                container
+                sx={{ backgroundColor: "white", color: "black" }}
+                spacing={2}
+              >
+                <Grid item>Jordan Solar and Energy Storage</Grid>
+                <Divider
+                  sx={{
+                    width: "100%",
+                    color: "red",
+                    backgroundColor: "red",
+                  }}
+                />
+              </Grid>
+            }
+            placement="bottom"
+            open={true}
+          >
+            <p>LAST STATUS UPDATE</p>
+          </Tooltip>
         </Grid>
         <When condition={workplan?.status_info?.posted_date}>
           <Grid item>
