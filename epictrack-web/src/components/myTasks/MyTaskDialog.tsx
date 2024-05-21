@@ -11,7 +11,7 @@ import { ROLES } from "constants/application-constant";
 type MyTaskDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  task?: MyTask;
+  task?: MyTask | null;
   setTask: (task: MyTask | null) => void;
   saveMyTaskCallback?: () => void;
   closeCallback?: () => void;
@@ -32,24 +32,10 @@ export const MyTaskDialog = ({
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
   const [disableSave, setDisableSave] = useState(!canEdit);
 
-  const editMyTask = async (data: any) => {
-    if (!task) return;
-    await taskEventService.update(data, task.id);
-  };
-
   const saveTask = async (data: any) => {
-    try {
-      task ? await editMyTask(data) : null;
-      showNotification("MyTask saved successfully", {
-        type: "success",
-      });
-      setOpen(false);
-      saveMyTaskCallback();
-    } catch (error) {
-      showNotification("Could not save MyTask", {
-        type: "error",
-      });
-    }
+    setOpen(false);
+    setTask(null);
+    saveMyTaskCallback();
   };
 
   return (
@@ -74,16 +60,10 @@ export const MyTaskDialog = ({
       }}
       formId={"myTask-form"}
       saveButtonProps={{
-        disabled: !canEdit || disableSave,
+        disabled: disableSave,
       }}
     >
-      {task && (
-        <MyTaskForm
-          taskEvent={task}
-          onSave={saveTask}
-          setDisableDialogSave={setDisableSave}
-        />
-      )}
+      {task && <MyTaskForm taskEvent={task} onSave={saveTask} />}
     </TrackDialog>
   );
 };

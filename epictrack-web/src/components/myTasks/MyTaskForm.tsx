@@ -61,11 +61,11 @@ const TaskForm = ({
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const endDateRef = useRef();
   const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.id]);
-  const assigneeIds = (taskEvent?.assignees || []).map((assignee: Assignee) =>
-    String(assignee.id)
+  const assigneeIds = taskEvent?.assignees?.map((assignee) =>
+    assignee.assignee_id.toString()
   );
-  const responsibilityIds = (taskEvent?.responsibilities || []).map(
-    (responsibility: Responsibility) => String(responsibility.id)
+  const responsibilityIds = taskEvent?.responsibilities?.map((responsibility) =>
+    responsibility.responsibility_id.toString()
   );
 
   const defaultValues: TaskEventForm = {
@@ -185,7 +185,7 @@ const TaskForm = ({
       <FormProvider {...methods}>
         <Grid
           component={"form"}
-          id="task-form"
+          id="myTask-form"
           container
           sx={{
             margin: 0,

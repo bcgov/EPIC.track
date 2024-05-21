@@ -70,7 +70,7 @@ export default function MyTasksList() {
   const [progress, setProgress] = useState<[]>([]);
   const [assigned, setAssigned] = useState<[]>([]);
   const [work, setWork] = useState<[]>([]);
-  const [task, setTask] = useState<MyTask>(null);
+  const [task, setTask] = useState<MyTask | null>(null);
   const [showModalForm, setShowModalForm] = useState<boolean>(false);
 
   const getMyTasks = async (): Promise<MyTask[]> => {
