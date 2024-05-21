@@ -20,6 +20,7 @@ import AuthGate from "./AuthGate";
 import Unauthorized from "./Unauthorized";
 import MyWorkPlans from "../components/myWorkplans";
 import Insights from "components/insights";
+import MyTasksList from "components/myTasks/MyTasksList";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -44,6 +45,7 @@ const AuthenticatedRoutes = () => {
         path="/reports/referral-schedule"
         element={<AnticipatedEAOSchedule />}
       />
+      <Route path="/my-tasks" element={<MyTasksList />} />
       <Route path="/reports/resource-forecast" element={<ResourceForecast />} />
       <Route path="/reports/30-60-90" element={<ThirtySixtyNinety />} />
       <Route path="/reports/event-calendar" element={<EventCalendar />} />
