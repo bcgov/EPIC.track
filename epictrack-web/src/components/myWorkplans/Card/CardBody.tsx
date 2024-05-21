@@ -166,28 +166,9 @@ const CardBody = ({ workplan }: CardProps) => {
 
       <Grid item container direction="row" spacing={1}>
         <Grid item>
-          <Tooltip
-            title={
-              <Grid
-                container
-                sx={{ backgroundColor: "white", color: "black" }}
-                spacing={2}
-              >
-                <Grid item>Jordan Solar and Energy Storage</Grid>
-                <Divider
-                  sx={{
-                    width: "100%",
-                    color: "red",
-                    backgroundColor: "red",
-                  }}
-                />
-              </Grid>
-            }
-            placement="bottom"
-            open={true}
-          >
-            <p>LAST STATUS UPDATE</p>
-          </Tooltip>
+          <ETCaption1 color={Palette.neutral.main}>
+            LAST STATUS UPDATE
+          </ETCaption1>
         </Grid>
         <When condition={workplan?.status_info?.posted_date}>
           <Grid item>
