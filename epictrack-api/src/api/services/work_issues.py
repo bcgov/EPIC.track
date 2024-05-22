@@ -20,6 +20,7 @@ from api.models import WorkIssues as WorkIssuesModel
 from api.utils import TokenInfo
 from api.utils.roles import Role as KeycloakRole, Membership
 from api.services import authorisation
+from api.models.queries import WorkIssueQuery
 
 
 class WorkIssuesService:  # pylint: disable=too-many-public-methods
@@ -38,6 +39,12 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Find all status related to a work"""
         results = WorkIssuesModel.find_by_params({"work_id": work_id, "id": issue_id})
         return results[0] if results else None
+
+    @classmethod
+    def find_work_issues_by_work_ids(cls, work_ids):
+        """Find all work issues by work ids"""
+        results = WorkIssueQuery.find_work_issues_by_work_ids(work_ids)
+        return results
 
     @classmethod
     def create_work_issue_and_updates(cls, work_id, issue_data: Dict):
