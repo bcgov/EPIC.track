@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Dict, List
 
+from operator import attrgetter
 from pytz import utc
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -21,7 +22,10 @@ from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
 from api.models.special_field import EntityEnum
 from api.models.work import WorkStateEnum
+from api.models.work_issues import WorkIssues
 from api.services.special_field import SpecialFieldService
+from api.services.work_issues import WorkIssuesService
+from api.schemas import response as res
 
 from .report_factory import ReportFactory
 
@@ -157,6 +161,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _format_data(self, data):
         data = super()._format_data(data)
+        data = self._update_work_issues(data)
         response = {
             "30": [],
             "60": [],
@@ -206,6 +211,32 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     work["project_name"] = special_history.field_value
                 response["90"].append(work)
         return response
+
+    def _update_work_issues(self, data) -> List[WorkIssues]:
+        """Combine the result with work issues"""
+        work_ids = set((work["work_id"] for work in data))
+        work_issues = WorkIssuesService.find_work_issues_by_work_ids(work_ids)
+        for result_item in data:
+            issue_per_work = [
+                issue
+                for issue in work_issues
+                if issue.work_id == result_item["work_id"]
+                and issue.is_high_priority is True
+            ]
+            for issue in issue_per_work:
+                latest_update = max(
+                    (
+                        issue_update
+                        for issue_update in issue.updates
+                        if issue_update.is_approved
+                    ),
+                    key=attrgetter("posted_date"),
+                )
+                setattr(issue, "latest_update", latest_update)
+            result_item["work_issues"] = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
+                issue_per_work
+            )
+        return data
 
     def generate_report(
         self, report_date: datetime, return_type

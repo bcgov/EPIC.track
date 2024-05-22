@@ -20,6 +20,7 @@ from api.models import WorkIssues as WorkIssuesModel
 from api.utils import TokenInfo
 from api.utils.roles import Role as KeycloakRole, Membership
 from api.services import authorisation
+from api.models.queries import WorkIssueQuery
 
 
 class WorkIssuesService:  # pylint: disable=too-many-public-methods
@@ -38,6 +39,12 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Find all status related to a work"""
         results = WorkIssuesModel.find_by_params({"work_id": work_id, "id": issue_id})
         return results[0] if results else None
+
+    @classmethod
+    def find_work_issues_by_work_ids(cls, work_ids):
+        """Find all work issues by work ids"""
+        results = WorkIssueQuery.find_work_issues_by_work_ids(work_ids)
+        return results
 
     @classmethod
     def create_work_issue_and_updates(cls, work_id, issue_data: Dict):
@@ -112,14 +119,25 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         return work_issue_update
 
     @classmethod
+    def _check_valid_issue_edit_data(cls, new_data, work_issue_db):
+        """Check if the issue data is valid for editing"""
+        if new_data.get('expected_resolution_date'):
+            if new_data.get('start_date').timestamp() > new_data.get('expected_resolution_date').timestamp():
+                raise BadRequestError('expected resolution date cannot be before the start date')
+
+        earliest_issue_update_date = min(update.posted_date for update in work_issue_db.updates)
+        if new_data.get('start_date').timestamp() > earliest_issue_update_date.timestamp():
+            raise BadRequestError('issue start date cannot be after an update date')
+
+    @classmethod
     def edit_issue(cls, work_id, issue_id, issue_data):
         """Edit an existing work issue, and save it only if there are changes."""
         work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
 
         if not work_issue:
             raise ResourceNotFoundError("Work issue doesnt exist")
-
         cls._check_edit_auth(work_id)
+        cls._check_valid_issue_edit_data(issue_data, work_issue)
 
         # Create a flag to track changes on work_issues
         has_changes_to_work_issue = False

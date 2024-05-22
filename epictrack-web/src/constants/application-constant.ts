@@ -131,3 +131,14 @@ export enum StalenessEnum {
   WARN = "WARN",
   GOOD = "GOOD",
 }
+
+export const REPORT_STALENESS_THRESHOLD = {
+  [REPORT_TYPE.EA_REFERRAL]: {
+    [StalenessEnum.CRITICAL]: 10,
+    [StalenessEnum.WARN]: 5,
+  },
+  [REPORT_TYPE.REPORT_30_60_90]: {
+    [StalenessEnum.CRITICAL]: 10,
+    [StalenessEnum.WARN]: 7,
+  },
+};

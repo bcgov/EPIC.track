@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -13,6 +13,7 @@ import { EditIssueForm } from "../types";
 import moment from "moment";
 import ControlledDatePicker from "../../../shared/controlledInputComponents/ControlledDatePicker";
 import { ETFormLabel } from "../../../shared";
+import dayjs from "dayjs";
 
 const InfoIcon: React.FC<IconProps> = Icons["InfoIcon"];
 
@@ -39,6 +40,19 @@ const EditIssue = () => {
     },
     mode: "onSubmit",
   });
+
+  const maxStartDate = useMemo(() => {
+    if (!issueToEdit) {
+      return undefined;
+    }
+
+    // find the min date of updates
+    const updatesPostedDates = issueToEdit.updates.map((update) =>
+      moment(update.posted_date)
+    );
+    const minPostedDate = moment.min(updatesPostedDates).toDate();
+    return dayjs(minPostedDate);
+  }, [issueToEdit]);
 
   const { handleSubmit, watch } = methods;
 
@@ -131,7 +145,12 @@ const EditIssue = () => {
         </Grid>
         <Grid item xs={6}>
           <ETFormLabel required>Start Date</ETFormLabel>
-          <ControlledDatePicker name="start_date" />
+          <ControlledDatePicker
+            name="start_date"
+            datePickerProps={{
+              maxDate: maxStartDate,
+            }}
+          />
         </Grid>
         <Grid item xs={6}>
           <ETFormLabel required>Expected Resolution Date</ETFormLabel>

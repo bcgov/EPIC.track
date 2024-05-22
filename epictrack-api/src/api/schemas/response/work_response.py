@@ -223,3 +223,18 @@ class WorkIssuesResponseSchema(
         unknown = EXCLUDE
 
     updates = fields.Nested(WorkIssueUpdatesResponseSchema(many=True), dump_default=[])
+
+
+class WorkIssuesLatestUpdateResponseSchema(
+    AutoSchemaBase
+):  # pylint: disable=too-many-ancestors,too-few-public-methods
+    """Work Issues model schema class"""
+
+    class Meta(AutoSchemaBase.Meta):
+        """Meta information"""
+
+        model = WorkIssues
+        include_fk = True
+        unknown = EXCLUDE
+
+    latest_update = fields.Nested(WorkIssueUpdatesResponseSchema(), dump_default=[])

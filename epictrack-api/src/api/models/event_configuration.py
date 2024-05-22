@@ -48,12 +48,12 @@ class EventConfiguration(BaseModelVersioned):
     work_phase = relationship('WorkPhase', foreign_keys=[work_phase_id], lazy='select')
 
     @classmethod
-    def find_by_phase_id(cls, _phase_id):
+    def find_by_work_phase_id(cls, _work_phase_id):
         """Returns the event configurations based on phase id"""
         events = db.session.query(
             EventConfiguration
         ).filter_by(
-            phase_id=_phase_id,
+            work_phase_id=_work_phase_id,
             is_active=True
         ).order_by(
             EventConfiguration.sort_order.asc()
