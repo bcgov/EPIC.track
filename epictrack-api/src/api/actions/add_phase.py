@@ -1,12 +1,18 @@
 """Disable work start date action handler"""
+
 from datetime import timedelta
 from typing import List
+from operator import attrgetter
 from sqlalchemy import and_
 
 from api.actions.base import ActionFactory
 from api.models import Event, EventConfiguration, WorkPhase, Work, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
-from api.models.event_template import EventTemplateVisibilityEnum, EventPositionEnum
+from api.models.event_template import (
+    EventTemplateVisibilityEnum,
+    EventPositionEnum,
+)
+from api.models.event_category import PRIMARY_CATEGORIES
 from api.services.event_template import EventTemplateService
 from api.schemas import response as res
 
@@ -24,7 +30,10 @@ class AddPhase(ActionFactory):
         number_of_phases = len(params)
         # Push the sort order of the existing work phases after the new ones
         self.preset_sort_order(source_event, number_of_phases)
-        phase_start_date = source_event.actual_date + timedelta(days=1)
+        number_of_days_to_be_added = self._get_number_of_days_to_be_added(source_event)
+        phase_start_date = source_event.actual_date + timedelta(
+            days=number_of_days_to_be_added
+        )
         sort_order = source_event.event_configuration.work_phase.sort_order + 1
         total_number_of_days = 0
         for param in params:
@@ -43,22 +52,15 @@ class AddPhase(ActionFactory):
                     "sort_order": sort_order,
                 }
             )
-            event_templates_for_the_phase = EventTemplateService.find_by_phase_id(work_phase_data.get("phase_id"))
-            event_templates_for_the_phase_json = res.EventTemplateResponseSchema(many=True).dump(
-                event_templates_for_the_phase
+            event_templates_for_the_phase = EventTemplateService.find_by_phase_id(
+                work_phase_data.get("phase_id")
             )
-            # event_configurations = self.get_configurations(source_event, param)
-            # work_phase = WorkPhase.flush(WorkPhase(**work_phase_data))
-            # event_configurations = res.EventConfigurationResponseSchema(many=True).dump(
-            #     event_configurations
-            # )
-            work_phase = WorkService.create_events_by_template(work_phase_data, event_templates_for_the_phase_json)
-            # new_event_configurations = WorkService.create_configurations(
-            #     work_phase, event_configurations, False
-            # )
-            # WorkService.create_events_by_configuration(
-            #     work_phase, new_event_configurations
-            # )
+            event_templates_for_the_phase_json = res.EventTemplateResponseSchema(
+                many=True
+            ).dump(event_templates_for_the_phase)
+            work_phase = WorkService.create_events_by_template(
+                work_phase_data, event_templates_for_the_phase_json
+            )
             sort_order = sort_order + 1
             phase_start_date = end_date + timedelta(days=1)
         # update the current work phase
@@ -72,6 +74,32 @@ class AddPhase(ActionFactory):
 
         if work_phase:
             self.update_susequent_work_phases(work_phase)
+
+    def _get_number_of_days_to_be_added(self, source_event) -> int:
+        """Returns the phase start date"""
+        if source_event.event_position == EventPositionEnum.INTERMEDIATE.value:
+            work_phase_id = source_event.event_configuration.work_phase.id
+            event_configurations = EventConfiguration.find_by_params(
+                {
+                    "work_phase_id": work_phase_id,
+                    "visibility": EventTemplateVisibilityEnum.MANDATORY.value,
+                }
+            )
+            primary_categories = list(map(lambda x: x.value, PRIMARY_CATEGORIES))
+            filtered_configurations = [
+                template
+                for template in event_configurations
+                if template.event_category_id in primary_categories
+                and template.sort_order > source_event.event_configuration.sort_order
+            ]
+            last_mandatory_configuration = max(
+                filtered_configurations, key=attrgetter("sort_order")
+            )
+            return (
+                int(last_mandatory_configuration.start_at)
+                - int(source_event.event_configuration.start_at)
+            ) + 1
+        return 1
 
     def preset_sort_order(self, source_event, number_of_new_work_phases: int) -> None:
         """Adjust the sort order of the existing work phases for the new ones"""
@@ -130,9 +158,9 @@ class AddPhase(ActionFactory):
             # Update the start event anticipated date by the number of total days added by all the new phases
             # This will push all the susequent work phases and all the events
             start_event_dict = start_event.as_dict(recursive=False)
-            start_event_dict[
-                "anticipated_date"
-            ] = latest_work_phase_added.end_date + timedelta(days=1)
+            start_event_dict["anticipated_date"] = (
+                latest_work_phase_added.end_date + timedelta(days=1)
+            )
             EventService.update_event(
                 start_event_dict, start_event.id, True, commit=False
             )
@@ -159,7 +187,9 @@ class AddPhase(ActionFactory):
         }
         return work_phase_data
 
-    def get_configurations(self, source_event: Event, params) -> List[EventConfiguration]:
+    def get_configurations(
+        self, source_event: Event, params
+    ) -> List[EventConfiguration]:
         """Find the latest event configurations per the given params"""
         work_phase = (
             db.session.query(WorkPhase)

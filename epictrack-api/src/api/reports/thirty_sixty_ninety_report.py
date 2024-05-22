@@ -212,7 +212,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 response["90"].append(work)
         return response
 
-    def _update_work_issues(self, data) -> list[WorkIssues]:
+    def _update_work_issues(self, data) -> List[WorkIssues]:
         """Combine the result with work issues"""
         work_ids = set((work["work_id"] for work in data))
         work_issues = WorkIssuesService.find_work_issues_by_work_ids(work_ids)
