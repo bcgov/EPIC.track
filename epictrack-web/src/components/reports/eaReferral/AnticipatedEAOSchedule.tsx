@@ -27,13 +27,13 @@ import {
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
   MILESTONE_TYPES,
-  StalenessEnum,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import moment from "moment";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import { Palette } from "styles/theme";
+import { staleLevel } from "utils/uiUtils";
 
 export default function AnticipatedEAOSchedule() {
   const [reports, setReports] = React.useState({});
@@ -113,24 +113,24 @@ export default function AnticipatedEAOSchedule() {
     setSelectedTab(newValue);
   };
 
-  const staleLevel = React.useCallback(
-    (staleness: string) => {
-      if (staleness == StalenessEnum.CRITICAL) {
-        return {
-          background: Palette.error.main,
-        };
-      } else if (staleness == StalenessEnum.WARN) {
-        return {
-          background: Palette.secondary.main,
-        };
-      } else {
-        return {
-          background: Palette.success.main,
-        };
-      }
-    },
-    [reportDate]
-  );
+  // const staleLevel = React.useCallback(
+  //   (staleness: string) => {
+  //     if (staleness == StalenessEnum.CRITICAL) {
+  //       return {
+  //         background: Palette.error.main,
+  //       };
+  //     } else if (staleness == StalenessEnum.WARN) {
+  //       return {
+  //         background: Palette.secondary.main,
+  //       };
+  //     } else {
+  //       return {
+  //         background: Palette.success.main,
+  //       };
+  //     }
+  //   },
+  //   [reportDate]
+  // );
 
   interface TabPanelProps {
     children?: React.ReactNode;
