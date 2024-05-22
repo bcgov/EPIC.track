@@ -8,26 +8,20 @@ import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 
+type MyTaskData = {
+  data: MyTaskDialogProps;
+};
+
 type MyTaskDialogProps = {
   open: boolean;
   setOpen: (open: boolean) => void;
   task?: MyTask | null;
   setTask: (task: MyTask | null) => void;
-  saveMyTaskCallback?: () => void;
-  closeCallback?: () => void;
+  saveMyTaskCallback: () => void;
 };
-export const MyTaskDialog = ({
-  task,
-  open,
-  setOpen,
-  setTask,
-  saveMyTaskCallback = () => {
-    return;
-  },
-  closeCallback = () => {
-    return;
-  },
-}: MyTaskDialogProps) => {
+
+export const MyTaskDialog = ({ data }: MyTaskData) => {
+  const { open, setOpen, task, setTask, saveMyTaskCallback } = data;
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
   const [disableSave, setDisableSave] = useState(!canEdit);
@@ -45,7 +39,6 @@ export const MyTaskDialog = ({
       onClose={() => {
         setOpen(false);
         setTask(null);
-        closeCallback();
       }}
       disableEscapeKeyDown
       fullWidth
@@ -56,7 +49,6 @@ export const MyTaskDialog = ({
       onCancel={() => {
         setOpen(false);
         setTask(null);
-        closeCallback();
       }}
       formId={"myTask-form"}
       saveButtonProps={{

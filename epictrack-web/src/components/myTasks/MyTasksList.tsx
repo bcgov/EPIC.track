@@ -175,6 +175,7 @@ export default function MyTasksList() {
       {
         accessorKey: "name",
         header: "Task",
+        size: 400,
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
               <ETGridTitle
@@ -454,11 +455,13 @@ export default function MyTasksList() {
         </Grid>
       </ETPageContainer>
       <MyTaskDialog
-        task={task}
-        setTask={setTask}
-        open={showModalForm}
-        setOpen={setShowModalForm}
-        saveMyTaskCallback={getMyTasks}
+        data={{
+          open: showModalForm,
+          setOpen: setShowModalForm,
+          task,
+          setTask,
+          saveMyTaskCallback: getMyTasks,
+        }}
       />
     </>
   );
