@@ -102,8 +102,9 @@ export default function MyTasksList() {
     ctx.setForm(<></>);
   }, []);
 
-  const onEdit = (id: number) => {
-    ctx.setShowModalForm(true);
+  const handleEdit = (task: MyTask) => {
+    setTask(task);
+    setShowModalForm(true);
   };
 
   useEffect(() => {
@@ -181,8 +182,7 @@ export default function MyTasksList() {
               <ETGridTitle
                 to={`/my-tasks`}
                 onClick={() => {
-                  setTask(row.original);
-                  setShowModalForm(true);
+                  handleEdit(row.original);
                 }}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
