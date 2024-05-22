@@ -436,14 +436,7 @@ export default function MyTasksList() {
             columns={columns}
             data={myTasks}
             initialState={{
-              sorting: [
-                {
-                  id: "name",
-                  desc: false,
-                },
-                { id: "start_date", desc: false },
-                { id: "work.title", desc: false },
-              ],
+              sorting: [{ id: "start_date", desc: false }],
               columnFilters,
             }}
             state={{
