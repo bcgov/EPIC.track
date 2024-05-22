@@ -2,6 +2,10 @@ export type GanttItem = {
   id: string;
   name: string;
   rowName?: string;
+  currentMilestone: string;
+  nextMilestone: string;
+  is_completed: boolean;
+  is_current: boolean;
   start: Date;
   end: Date;
   progress: string;

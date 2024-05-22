@@ -150,6 +150,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 only=(
                     "work_phase.name",
                     "total_number_of_days",
+                    "current_milestone",
                     "next_milestone",
                     "milestone_progress",
                     "days_left",
@@ -157,6 +158,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "work_phase.phase.color",
                     "work_phase.start_date",
                     "work_phase.end_date",
+                    "work_phase.is_completed",
                 ),
                 many=True,
             ).dump(work_phase)
