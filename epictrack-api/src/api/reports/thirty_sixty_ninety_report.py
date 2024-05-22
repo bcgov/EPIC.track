@@ -8,7 +8,6 @@ from operator import attrgetter
 from pytz import utc
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
-from operator import attrgetter
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle

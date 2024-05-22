@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Model to handle all complex operations related to Work Issues."""
+from typing import List
 from sqlalchemy import and_
 from api.models import WorkIssues, db
 
@@ -21,7 +22,7 @@ class WorkIssueQuery:
     """Query module for complex work issue queries"""
 
     @classmethod
-    def find_work_issues_by_work_ids(cls, work_ids: list[int]) -> list[WorkIssues]:
+    def find_work_issues_by_work_ids(cls, work_ids: List[int]) -> List[WorkIssues]:
         """Find work issues by work ids"""
         results = (
             db.session.query(WorkIssues)
