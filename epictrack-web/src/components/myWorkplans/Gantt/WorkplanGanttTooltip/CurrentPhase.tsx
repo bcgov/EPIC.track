@@ -3,8 +3,11 @@ import { GanttItem } from "components/gantt/types";
 import { ETCaption2 } from "components/shared";
 import { Palette } from "styles/theme";
 import { Grid } from "@mui/material";
+import { MONTH_DAY_YEAR } from "constants/application-constant";
+import { dateUtils } from "utils";
 
 export const CurrentPhase = ({ task }: { task: GanttItem }) => {
+  const { formatDate } = dateUtils;
   return (
     <Grid container alignItems={"flex-start"} textAlign={"left"}>
       <Grid
@@ -46,7 +49,9 @@ export const CurrentPhase = ({ task }: { task: GanttItem }) => {
               <ETCaption2>Phase Start:</ETCaption2>
             </Grid>
             <Grid item xs={6}>
-              <ETCaption2>{task.start.toDateString()}</ETCaption2>
+              <ETCaption2>
+                {formatDate(task.start.toDateString(), MONTH_DAY_YEAR)}
+              </ETCaption2>
             </Grid>
           </Grid>
           <Grid
@@ -60,7 +65,9 @@ export const CurrentPhase = ({ task }: { task: GanttItem }) => {
               <ETCaption2>Anticipated End:</ETCaption2>
             </Grid>
             <Grid item xs={6}>
-              <ETCaption2>{task.end.toDateString()}</ETCaption2>
+              <ETCaption2>
+                {formatDate(task.end.toDateString(), MONTH_DAY_YEAR)}
+              </ETCaption2>
             </Grid>
           </Grid>
 

@@ -4,8 +4,11 @@ import { GanttItem } from "components/gantt/types";
 import { ETCaption2 } from "components/shared";
 import moment from "moment";
 import { Palette } from "styles/theme";
+import { MONTH_DAY_YEAR } from "constants/application-constant";
+import { dateUtils } from "utils";
 
 export const FuturePhase = ({ task }: { task: GanttItem }) => {
+  const { formatDate } = dateUtils;
   const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
   return (
     <Grid container alignItems={"flex-start"} textAlign={"left"}>
@@ -55,7 +58,9 @@ export const FuturePhase = ({ task }: { task: GanttItem }) => {
               <ETCaption2>Phase Start:</ETCaption2>
             </Grid>
             <Grid item xs={6}>
-              <ETCaption2>{task.start.toDateString()}</ETCaption2>
+              <ETCaption2>
+                {formatDate(task.start.toDateString(), MONTH_DAY_YEAR)}
+              </ETCaption2>
             </Grid>
           </Grid>
           <Grid item xs={12} container alignItems="flex-start">
@@ -63,7 +68,9 @@ export const FuturePhase = ({ task }: { task: GanttItem }) => {
               <ETCaption2>Phase End:</ETCaption2>
             </Grid>
             <Grid item xs={6}>
-              <ETCaption2>{task.end.toDateString()}</ETCaption2>
+              <ETCaption2>
+                {formatDate(task.end.toDateString(), MONTH_DAY_YEAR)}
+              </ETCaption2>
             </Grid>
           </Grid>
 
