@@ -41,6 +41,7 @@ import {
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 import { getTextFromDraftJsContentState } from "components/shared/richTextEditor/utils";
 import { dateUtils } from "utils";
+import { MyTaskDialog } from "./MyTaskDialog";
 
 const myTasksListColumnFiltersCacheKey = "myTasks-listing-column-filters";
 
@@ -69,6 +70,8 @@ export default function MyTasksList() {
   const [progress, setProgress] = useState<[]>([]);
   const [assigned, setAssigned] = useState<[]>([]);
   const [work, setWork] = useState<[]>([]);
+  const [task, setTask] = useState<MyTask | null>(null);
+  const [showModalForm, setShowModalForm] = useState<boolean>(false);
 
   const getMyTasks = async (): Promise<MyTask[]> => {
     const result: [] = [];
@@ -99,8 +102,9 @@ export default function MyTasksList() {
     ctx.setForm(<></>);
   }, []);
 
-  const onEdit = (id: number) => {
-    ctx.setShowModalForm(true);
+  const handleEdit = (task: MyTask) => {
+    setTask(task);
+    setShowModalForm(true);
   };
 
   useEffect(() => {
@@ -172,11 +176,14 @@ export default function MyTasksList() {
       {
         accessorKey: "name",
         header: "Task",
+        size: 400,
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
               <ETGridTitle
-                to={`/work-plan?work_id=${row.original.work.id}`}
-                onClick={() => onEdit(row.original.id)}
+                to={`/my-tasks`}
+                onClick={() => {
+                  handleEdit(row.original);
+                }}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
               >
@@ -447,6 +454,15 @@ export default function MyTasksList() {
           />
         </Grid>
       </ETPageContainer>
+      <MyTaskDialog
+        data={{
+          open: showModalForm,
+          setOpen: setShowModalForm,
+          task,
+          setTask,
+          saveMyTaskCallback: getMyTasks,
+        }}
+      />
     </>
   );
 }
