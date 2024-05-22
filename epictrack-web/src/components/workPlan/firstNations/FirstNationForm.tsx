@@ -225,7 +225,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
           <ETFormLabel required>Nation</ETFormLabel>
           <ControlledSelectV2
             name="indigenous_nation_id"
-            placeholder="Search for a first nation"
+            placeholder="Search for a First Nation"
             helperText={errors?.indigenous_nation_id?.message?.toString()}
             defaultValue={workFirstNation?.indigenous_nation_id}
             options={firstNations || []}
