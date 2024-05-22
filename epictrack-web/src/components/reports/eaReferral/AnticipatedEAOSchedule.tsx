@@ -88,7 +88,7 @@ export default function AnticipatedEAOSchedule() {
       let filtersToSend = {};
 
       if (selectedTypes.length > 0) {
-        filtersToSend = { exclude: selectedTypes }; // Add selected types to excluded list
+        filtersToSend = { exclude: selectedTypes };
       }
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.EA_REFERRAL,
@@ -201,7 +201,6 @@ export default function AnticipatedEAOSchedule() {
               multiple
               value={selectedTypes}
               onChange={(e, value) => {
-                console.log("Selected Types:", value); // Check if value is correct
                 setSelectedTypes(value);
               }}
               options={typeFilter}
