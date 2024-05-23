@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
@@ -9,7 +9,6 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box } from "@mui/material";
-import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
@@ -17,9 +16,6 @@ import { IconProps } from "components/icons/type";
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
-  const [phases, setPhases] = React.useState<string[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<string[]>([]);
-  const [projects, setProjects] = React.useState<string[]>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
@@ -35,34 +31,44 @@ const WorkList = () => {
     }));
   }, [works]);
 
-  const codeTypes: { [x: string]: any } = {
-    work_type: setWorkTypes,
-    project: setProjects,
-    current_work_phase: setPhases,
-  };
+  const workTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          works
+            .map((work) => work?.work_type?.name || "")
+            .filter((type) => type)
+            .sort()
+        )
+      ),
+    [works]
+  );
 
-  React.useEffect(() => {
-    Object.keys(codeTypes).forEach((key: string) => {
-      let accessor = "name";
-      let sort_key = "sort_order";
-      if (key == "project") {
-        sort_key = "name";
-      }
-      if (key == "ministry") {
-        accessor = "abbreviation";
-      }
-      sort_key = key + "." + sort_key;
-      const codes = sort([...works], sort_key)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        .map((w) => (w[key] ? w[key][accessor] : null))
-        .filter(
-          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
-        );
+  const projects = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          works
+            .map((work) => work?.project?.name || "")
+            .filter((project) => project)
+            .sort()
+        )
+      ),
+    [works]
+  );
 
-      codeTypes[key](codes);
-    });
-  }, [works]);
+  const phases = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          works
+            .map((work) => work?.current_work_phase?.name || "")
+            .filter((phase) => phase)
+            .sort()
+        )
+      ),
+    [works]
+  );
 
   useEffect(() => {
     if (error) {
