@@ -1,8 +1,8 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import dayjs from "dayjs";
 import { EARLIEST_WORK_DATE } from "../../../constants/application-constant";
@@ -42,7 +42,10 @@ const StatusForm = () => {
     return dayjs(sortedStatuses[1]?.posted_date || EARLIEST_WORK_DATE);
   };
 
-  const postedDateMin = getPostedDateMin();
+  const postedDateMin = useMemo(
+    () => getPostedDateMin(),
+    [statuses, statusToEdit, isCloning]
+  );
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
   React.useEffect(() => {
