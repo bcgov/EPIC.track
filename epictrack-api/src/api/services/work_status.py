@@ -15,6 +15,8 @@
 from datetime import datetime
 from typing import Dict
 
+from api import ResourceNotFoundError
+from api.exceptions import BadRequestError
 from api.models import WorkStatus as WorkStatusModel
 from api.utils import TokenInfo
 from api.utils.roles import Membership
@@ -39,12 +41,34 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         return results[0] if results else None
 
     @classmethod
-    def create_work_status(cls, work_id, work_status: Dict):
+    def _check_update_date_validity(cls, work_id, update_data, status_update_id=None):
+        """Check if edited date is valid"""
+        work_statuses = cls.find_all_work_status(work_id)
+
+        other_approved_updates_dates = [
+            update.posted_date for update in work_statuses
+            if update.id != status_update_id and update.is_approved
+        ]
+        if other_approved_updates_dates:
+            if update_data.get('posted_date').timestamp() <= max(other_approved_updates_dates).timestamp():
+                raise BadRequestError('posted date must be greater than last update')
+
+        other_unapproved_updates_dates = [
+            update.posted_date for update in work_statuses
+            if update.id != status_update_id and not update.is_approved
+        ]
+        if other_unapproved_updates_dates:
+            if update_data.get('posted_date').timestamp() >= max(other_unapproved_updates_dates).timestamp():
+                raise BadRequestError('Cannot exceed the posted date of a pending unapproved update')
+
+    @classmethod
+    def create_work_status(cls, work_id, work_status_data: Dict):
         """Creates a work status."""
         cls._check_create_auth(work_id)
+        cls._check_update_date_validity(work_id, work_status_data)
 
         work_status = WorkStatusModel(
-            **work_status,
+            **work_status_data,
             posted_by=TokenInfo.get_username(),
             work_id=work_id
         )
@@ -62,10 +86,14 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
 
     @classmethod
-    def update_work_status(cls, work_status: WorkStatusModel, work_status_data: dict):
+    def update_work_status(cls, work_id, status_id, work_status_data: dict):
         """Update an existing work status."""
-        # TODO Add Super user check
+        work_status = cls.find_work_status_by_id(work_id, status_id)
+        if work_status is None:
+            raise ResourceNotFoundError("Work status not found")
+
         cls._check_update_work_status_auth(work_status)
+        cls._check_update_date_validity(work_id, work_status_data, status_id)
 
         work_status.update(work_status_data)
 
