@@ -27,3 +27,4 @@ pandas==2.0.2
 openpyxl==3.0.10
 matplotlib==3.7.4
 natsort==8.4.0
+marshmallow_enum=1.5.1

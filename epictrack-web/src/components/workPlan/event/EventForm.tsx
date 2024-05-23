@@ -28,6 +28,7 @@ import eventService from "../../../services/eventService/eventService";
 import {
   EventCategory,
   EventPosition,
+  EventTemplateVisibility,
   EventType,
   EventsGridModel,
   MilestoneEvent,
@@ -382,7 +383,7 @@ const EventForm = ({
     try {
       const result = await configurationService.getAll(
         Number(selectedWorkPhase?.work_phase.id),
-        event === undefined ? false : true
+        [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED]
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);

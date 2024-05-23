@@ -1,6 +1,8 @@
 """Event resource's input validations"""
 from marshmallow import fields, validate
 
+from api.schemas.request.custom_fields import CommaSeparatedEnumList
+from api.models.event_template import EventTemplateVisibilityEnum
 from .base import RequestBodyParameterSchema, RequestQueryParameterSchema
 
 
@@ -13,6 +15,7 @@ class EventConfigurationQueryParamSchema(RequestQueryParameterSchema):
         required=True,
     )
 
+    visibility_modes = CommaSeparatedEnumList(EventTemplateVisibilityEnum, required=True)
     mandatory = fields.Bool(
         metadata={"description": "Mandatory configurations or not"},
     )
