@@ -25,6 +25,9 @@ import {
 } from "../../../constants/application-constant";
 import dayjs from "dayjs";
 import MasterTrackTable from "../MasterTrackTable";
+import { useDispatch } from "react-redux";
+import { showNotification } from "../notificationProvider";
+import { getErrorMessage } from "utils/axiosUtils";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 const EditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -71,6 +74,8 @@ export const SpecialFieldGrid = ({
   });
   const [tableInstance, setTableInstance] =
     useState<MRT_TableInstance<SpecialField>>();
+
+  const dispatch = useDispatch();
   const tableState = useMemo<MRT_TableState<SpecialField> | undefined>(() => {
     if (tableInstance) {
       return tableInstance.getState();
@@ -258,7 +263,10 @@ export const SpecialFieldGrid = ({
         table.setEditingRow(null); //exit editing mode
         resetErrors();
       } catch (error) {
-        console.log(error);
+        const message = getErrorMessage(error);
+        showNotification(message, {
+          type: "error",
+        });
       }
     };
 
@@ -274,7 +282,10 @@ export const SpecialFieldGrid = ({
         table.setCreatingRow(null); //exit creating mode
         resetErrors();
       } catch (error) {
-        console.log(error);
+        const message = getErrorMessage(error);
+        showNotification(message, {
+          type: "error",
+        });
       }
     };
 
