@@ -16,3 +16,4 @@
 
 
 from .work_issue_queries import WorkIssueQuery
+from .event_configuration_queries import EventConfigurationQuery

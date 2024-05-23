@@ -41,10 +41,40 @@ class EventConfigurations(Resource):
         """Return all task templates."""
         args = req.EventConfigurationQueryParamSchema().load(request.args)
         work_phase_id = args.get("work_phase_id")
-        mandatory = args.get("mandatory")
-        configurations = EventConfigurationService.find_configurations(work_phase_id,
-                                                                       mandatory, PRIMARY_CATEGORIES)
+        visibility_modes = args.get("visibility_modes")
+        configurations = EventConfigurationService.find_configurations(
+            work_phase_id, visibility_modes, PRIMARY_CATEGORIES
+        )
         return (
-            jsonify(res.EventConfigurationResponseSchema(many=True).dump(configurations)),
+            jsonify(
+                res.EventConfigurationResponseSchema(many=True).dump(configurations)
+            ),
+            HTTPStatus.OK,
+        )
+
+
+@cors_preflight("GET")
+@API.route("/addable", methods=["GET", "OPTIONS"])
+class EventConfigurationsForAdding(Resource):
+    """Endpoint to return event configurations for adding new events"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Gets the event configurations for adding new events"""
+        args = req.EventConfigurationQueryParamSchema().load(request.args)
+        work_phase_id = args.get("work_phase_id")
+        visibility_modes = args.get("visibility_modes")
+        configurations = (
+            EventConfigurationService.find_configurations_for_adding_new_milestone(
+                work_phase_id, visibility_modes, PRIMARY_CATEGORIES
+            )
+        )
+        return (
+            jsonify(
+                res.EventConfigurationResponseSchema(many=True).dump(configurations)
+            ),
             HTTPStatus.OK,
         )
