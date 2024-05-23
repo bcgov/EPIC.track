@@ -49,14 +49,15 @@ class EventConfigurationQuery:  # pylint: disable=dangerous-default-value,too-ma
         return configurations
 
     @classmethod
-    def find_deleted_suggested_configurations(cls, work_phase_id):
+    def find_active_suggested_configurations(cls, work_phase_id):
         """Find the SUGGESTED configurations for which the events are deleted"""
         return (
             db.session.query(EventConfiguration)
             .outerjoin(Event, EventConfiguration.id == Event.event_configuration_id)
             .filter(
                 and_(
-                    Event.is_deleted.is_(True),
+                    Event.is_deleted.is_(False),
+                    Event.is_active.is_(True),
                     EventConfiguration.visibility
                     == EventTemplateVisibilityEnum.SUGGESTED.value,
                     EventConfiguration.work_phase_id == work_phase_id,
