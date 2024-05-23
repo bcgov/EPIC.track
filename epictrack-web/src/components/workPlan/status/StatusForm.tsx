@@ -26,20 +26,21 @@ const StatusForm = () => {
   const { getWorkStatuses, statuses } = useContext(WorkplanContext);
 
   const getPostedDateMin = () => {
-    const sortedStatuses = [...statuses]
-      .filter((status) => statusToEdit?.id !== status.id)
-      .sort((statusA, statusB) =>
-        dayjs(statusB.posted_date).diff(dayjs(statusA.posted_date))
-      );
-
-    if (isCloning) {
+    const sortedStatuses = [...statuses].sort((statusA, statusB) =>
+      // sort descending by posted_date
+      dayjs(statusB.posted_date).diff(dayjs(statusA.posted_date))
+    );
+    if (isCloning || !statusToEdit) {
       return dayjs(sortedStatuses[0].posted_date);
     }
-    if (sortedStatuses.length === 1 && sortedStatuses[0]?.is_approved) {
-      return dayjs(EARLIEST_WORK_DATE);
-    }
 
-    return dayjs(sortedStatuses[1]?.posted_date || EARLIEST_WORK_DATE);
+    const previousStatus = sortedStatuses.find(
+      (status) =>
+        status.id !== statusToEdit.id &&
+        dayjs(status.posted_date) < dayjs(statusToEdit.posted_date)
+    );
+
+    return dayjs(previousStatus?.posted_date || EARLIEST_WORK_DATE);
   };
 
   const postedDateMin = useMemo(
