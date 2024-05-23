@@ -144,10 +144,15 @@ const EventForm = ({
       }),
     [selectedConfiguration, actualAdded]
   );
-  const disableAnticipatedDate = Boolean(
-    selectedConfiguration?.id &&
-      selectedWorkPhase?.work_phase.legislated &&
-      selectedConfiguration?.event_position === EventPosition.END
+  const disableAnticipatedDate = useMemo(
+    () =>
+      isFormFieldsLocked ||
+      Boolean(
+        selectedConfiguration?.id &&
+          selectedWorkPhase?.work_phase.legislated &&
+          selectedConfiguration?.event_position === EventPosition.END
+      ),
+    [selectedConfiguration, selectedWorkPhase]
   );
   const isHighPriorityActive = useMemo(() => {
     if (event) {
@@ -709,6 +714,7 @@ const EventForm = ({
               <ETFormLabel>{actualDateLabel}</ETFormLabel>
               <ControlledDatePicker
                 name="actual_date"
+                disabled={isFormFieldsLocked}
                 defaultValue={
                   event?.actual_date ? dayjs(event?.actual_date).format() : ""
                 }
