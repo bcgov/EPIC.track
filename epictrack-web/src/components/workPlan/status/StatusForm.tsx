@@ -22,26 +22,32 @@ const CHARACTER_LIMIT = 1000;
 const StatusForm = () => {
   const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
-  const { status, onSave, isCloning } = useContext(StatusContext);
+  const { status: statusToEdit, onSave, isCloning } = useContext(StatusContext);
   const { getWorkStatuses, statuses } = useContext(WorkplanContext);
 
   const getPostedDateMin = () => {
+    const sortedStatuses = [...statuses]
+      .filter((status) => statusToEdit?.id !== status.id)
+      .sort((statusA, statusB) =>
+        dayjs(statusB.posted_date).diff(dayjs(statusA.posted_date))
+      );
+
     if (isCloning) {
-      return dayjs(statuses[0].posted_date);
+      return dayjs(sortedStatuses[0].posted_date);
     }
-    if (statuses.length === 1 && statuses[0]?.is_approved) {
+    if (sortedStatuses.length === 1 && sortedStatuses[0]?.is_approved) {
       return dayjs(EARLIEST_WORK_DATE);
     }
 
-    return dayjs(statuses[1]?.posted_date || EARLIEST_WORK_DATE);
+    return dayjs(sortedStatuses[1]?.posted_date || EARLIEST_WORK_DATE);
   };
 
   const postedDateMin = getPostedDateMin();
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
   React.useEffect(() => {
-    if (status) {
-      setDescription(status?.description);
+    if (statusToEdit) {
+      setDescription(statusToEdit?.description);
       if (isCloning) {
         reset({ posted_date: Moment().format() });
       }
@@ -50,7 +56,7 @@ const StatusForm = () => {
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: status ?? {},
+    defaultValues: statusToEdit ?? {},
     mode: "onBlur",
   });
 
@@ -83,7 +89,9 @@ const StatusForm = () => {
           <ETFormLabel required>Date</ETFormLabel>
           <ControlledDatePicker
             name="posted_date"
-            defaultValue={dayjs(status?.posted_date ? status?.posted_date : "")}
+            defaultValue={dayjs(
+              statusToEdit?.posted_date ? statusToEdit?.posted_date : ""
+            )}
             datePickerProps={{
               minDate: postedDateMin,
               maxDate: postedDateMax,
