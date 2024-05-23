@@ -27,6 +27,7 @@ from api.services.event_configuration import EventConfigurationService
 from api.services.phaseservice import PhaseService
 from api.models.project import Project as ProjectModel
 from api.models.work_type import WorkType as WorkTypeModel
+from api.models.event_template import EventTemplateVisibilityEnum
 from api.services.role import RoleService
 from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum
 from tests.utilities.factory_utils import (
@@ -178,7 +179,7 @@ def test_work_plan(client, auth_header):
     for index, work_phase in enumerate(work_phase_json):
         # Verify mandatory milestones
         mandatory_event_configurations = EventConfigurationService.find_configurations(
-            work_phase_id=work_phase["work_phase"]["id"], mandatory=True
+            work_phase_id=work_phase["work_phase"]["id"], visibility_modes=[EventTemplateVisibilityEnum.MANDATORY.value]
         )
         work_milestone_events = EventService.find_milestone_events_by_work_phase(
             work_phase["work_phase"]["id"]
