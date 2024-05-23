@@ -83,7 +83,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
         next_pecp_query = self._get_next_pcp_query(start_date)
         referral_event_query = self._get_referral_event_query(start_date)
         latest_status_updates = self._get_latest_status_update_query()
-
+        exclude_phase_names = []
+        if self.filters and "exclude" in self.filters:
+            exclude_phase_names = self.filters["exclude"]
         results_qry = (
             db.session.query(Work)
             .join(Event, Event.work_id == Work.id)
@@ -132,6 +134,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Work.work_state.in_(
                     [WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]
                 ),
+                # Filter out specific WorkPhase names
+                ~WorkPhase.name.in_(exclude_phase_names)
             )
             .add_columns(
                 PhaseCode.name.label("phase_name"),

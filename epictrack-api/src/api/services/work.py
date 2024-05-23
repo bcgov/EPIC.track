@@ -150,6 +150,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 only=(
                     "work_phase.name",
                     "total_number_of_days",
+                    "current_milestone",
                     "next_milestone",
                     "milestone_progress",
                     "days_left",
@@ -157,6 +158,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                     "work_phase.phase.color",
                     "work_phase.start_date",
                     "work_phase.end_date",
+                    "work_phase.is_completed",
                 ),
                 many=True,
             ).dump(work_phase)
@@ -814,6 +816,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 ).all(),
             )
         )
+        existing_first_nations_ids = [nation["indigenous_nation_id"] for nation in existing_first_nations]
 
         # Mark removed entries as inactive
         disabled_count = existing_first_nations_qry.filter(
@@ -836,9 +839,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
         work = Work.find_by_id(work_id)
         nations_in_same_project = find_all_by_project_id(work.project_id)
+
+        new_nations_ids = [nation_id for nation_id in indigenous_nation_ids
+                           if nation_id not in existing_first_nations_ids]
         selected_nations = [
             nation for nation in nations_in_same_project
-            if nation.indigenous_nation_id in indigenous_nation_ids
+            if nation.indigenous_nation_id in new_nations_ids
         ]
         nations_to_insert = [
             {

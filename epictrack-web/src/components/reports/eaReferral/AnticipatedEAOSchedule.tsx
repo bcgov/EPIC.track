@@ -85,10 +85,16 @@ export default function AnticipatedEAOSchedule() {
   const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
+      let filtersToSend = {};
+
+      if (selectedTypes.length > 0) {
+        filtersToSend = { exclude: selectedTypes };
+      }
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.EA_REFERRAL,
         {
           report_date: reportDate,
+          filters: filtersToSend,
         }
       );
       const url = window.URL.createObjectURL(
@@ -107,7 +113,7 @@ export default function AnticipatedEAOSchedule() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, fetchReportData]);
+  }, [reportDate, fetchReportData, selectedTypes]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -194,7 +200,9 @@ export default function AnticipatedEAOSchedule() {
               autoFocus
               multiple
               value={selectedTypes}
-              onChange={(e, value) => setSelectedTypes(value)}
+              onChange={(e, value) => {
+                setSelectedTypes(value);
+              }}
               options={typeFilter}
               renderInput={(params) => (
                 <TextField {...params} variant="standard" />
