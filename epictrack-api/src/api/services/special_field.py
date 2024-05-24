@@ -20,7 +20,7 @@ from psycopg2.extras import DateTimeTZRange
 from sqlalchemy import func, or_
 from sqlalchemy.dialects.postgresql.ranges import Range
 
-from api.exceptions import ResourceNotFoundError
+from api.exceptions import ResourceNotFoundError, BadRequestError
 from api.models import SpecialField, db
 from api.models.role import RoleEnum
 from api.models.special_field import EntityEnum
@@ -105,6 +105,11 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
                     payload["active_from"] + timedelta(days=-1),
                     "[)",
                 )
+
+                if new_range.lower == new_range.upper:
+                    raise BadRequestError(
+                        "Invalid from date entry."
+                    )
                 existing_entry.time_range = new_range
                 db.session.add(existing_entry)
         return upper_limit
