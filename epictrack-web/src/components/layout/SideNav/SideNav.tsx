@@ -22,11 +22,12 @@ import { useAppDispatch, useAppSelector } from "../../../hooks";
 import Icons from "../../icons";
 import { groupBy } from "../../../utils";
 import { IconProps } from "../../icons/type";
-import { ETSubhead } from "../../shared";
+import { ETHeading4, ETSubhead } from "../../shared";
 import { hasPermission } from "../../shared/restricted";
 import { toggleDrawer } from "styles/uiStateSlice";
 import MiniDrawer from "./MiniDrawer";
 import NavOpenButton from "./NavOpenButton";
+import { AppConfig } from "config";
 
 const ListItemStyled = styled(ListItem)({
   padding: "0px 0px 0px 0px",
@@ -126,7 +127,10 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
         overflowX: "hidden",
         height: "100%",
         background: Palette.primary.main,
-        padding: "16px 0px 57px 0px",
+        padding: "16px 0px 0px 0px",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
       }}
     >
       <List
@@ -239,6 +243,17 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
           })}
         </>
       </List>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          color: Palette.white,
+        }}
+      >
+        <ETHeading4>{AppConfig.version}</ETHeading4>
+      </Box>
     </Box>
   );
 };
