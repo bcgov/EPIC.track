@@ -29,7 +29,10 @@ import ControlledTextField from "../../shared/controlledInputComponents/Controll
 import responsibilityService from "services/responsibilityService/responsibilityService";
 
 const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
+  name: yup
+    .string()
+    .required("Name is required")
+    .max(80, "Maximum characters allowed to task title is 80"),
   start_date: yup.string().required("Please select start date"),
   status: yup.string().required("Please select status"),
   number_of_days: yup.number().required("Please enter number of days"),

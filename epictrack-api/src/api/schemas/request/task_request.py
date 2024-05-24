@@ -158,6 +158,7 @@ class TaskEventBodyParamSchema(RequestBodyParameterSchema):
     name = fields.Str(
         metadata={"description": "Name of the task"},
         required=True,
+        validate=validate.Length(max=80)
     )
 
     work_phase_id = fields.Int(
