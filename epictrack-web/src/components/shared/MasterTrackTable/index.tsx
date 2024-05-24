@@ -88,7 +88,6 @@ const MasterTrackTable = <TData extends MRT_RowData>({
 }: MaterialReactTableProps<TData>) => {
   const { initialState, state, icons, ...otherProps } = rest;
   const [otherPropsData, setOtherPropsData] = useState(otherProps);
-
   useEffect(() => {
     setOtherPropsData(otherProps);
   }, [columns, data]);
@@ -97,6 +96,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     data: data,
     globalFilterFn: "contains",
     enableHiding: false,
+    layoutMode: "grid",
     enableGlobalFilter: false,
     enableColumnResizing: true,
     enableStickyHeader: true,
