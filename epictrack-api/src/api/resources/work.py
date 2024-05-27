@@ -130,10 +130,8 @@ class WorkResources(Resource):
         """Return all resource and work details"""
         args = req.BasicRequestQueryParameterSchema().load(request.args)
         works = WorkService.find_allocated_resources(args.get("is_active"))
-        return (
-            jsonify(res.WorkResourceResponseSchema(many=True).dump(works)),
-            HTTPStatus.OK,
-        )
+        response = jsonify(res.WorkResourceResponseSchema(many=True).dump(works)), HTTPStatus.OK
+        return response
 
 
 @cors_preflight("GET, DELETE, PUT")
