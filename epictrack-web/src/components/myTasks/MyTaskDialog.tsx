@@ -42,7 +42,7 @@ export const MyTaskDialog = ({ data }: MyTaskData) => {
       }}
       disableEscapeKeyDown
       fullWidth
-      maxWidth="lg"
+      maxWidth="md"
       okButtonText="Save"
       cancelButtonText="Cancel"
       isActionsRequired
