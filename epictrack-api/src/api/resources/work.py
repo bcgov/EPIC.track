@@ -116,6 +116,7 @@ class Works(Resource):
         work = WorkService.create_work(request_json)
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
+
 @cors_preflight("GET")
 @API.route("/resources", methods=["GET", "OPTIONS"])
 class WorkResources(Resource):
