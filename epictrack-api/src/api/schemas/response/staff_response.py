@@ -32,7 +32,14 @@ class StaffResponseSchema(
 
     full_name = fields.Method("get_full_name", dump_only=True)
     position = fields.Nested(PositionSchema(), dump_only=True)
-
+    last_active_at = fields.Method("get_last_active_at", dump_only=True)
+      
     def get_full_name(self, instance):
         """Get the full name"""
         return f"{instance.last_name}, {instance.first_name}"
+    
+    def get_last_active_at(self, instance):
+        """Get the last active at"""
+        if instance.last_active_at is None:
+            return None
+        return instance.last_active_at
