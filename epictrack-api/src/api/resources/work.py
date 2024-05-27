@@ -116,7 +116,6 @@ class Works(Resource):
         work = WorkService.create_work(request_json)
         return res.WorkResponseSchema().dump(work), HTTPStatus.CREATED
 
-
 @cors_preflight("GET")
 @API.route("/resources", methods=["GET", "OPTIONS"])
 class WorkResources(Resource):
@@ -128,12 +127,14 @@ class WorkResources(Resource):
     @profiletime
     def get():
         """Return all resource and work details"""
+        print("GET request received for WorkResources")
         args = req.BasicRequestQueryParameterSchema().load(request.args)
+        print(f"Request arguments: {args}")
         works = WorkService.find_allocated_resources(args.get("is_active"))
-        return (
-            jsonify(res.WorkResourceResponseSchema(many=True).dump(works)),
-            HTTPStatus.OK,
-        )
+        print(f"Found {len(works)} works")
+        response = jsonify(res.WorkResourceResponseSchema(many=True).dump(works)), HTTPStatus.OK
+        print("Response created")
+        return response
 
 
 @cors_preflight("GET, DELETE, PUT")

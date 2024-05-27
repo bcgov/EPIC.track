@@ -176,9 +176,12 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
+        print("Method started")
         lead = aliased(Staff)
         epd = aliased(Staff)
+        print("Aliases created for Staff")
         if is_active is None:
+            print("is_active is None")
             query = (
                 Work.query.filter(Work.is_deleted.is_(False))
                 .join(Project)
@@ -188,6 +191,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 .outerjoin(epd, epd.id == Work.responsible_epd_id)
             )
         else:
+            print("is_active is not None")
             query = Work.query.join(
                 StaffWorkRole,
                 and_(
@@ -200,7 +204,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 Work.is_completed.is_(False),
                 StaffWorkRole.is_active.is_(True),
             )
+        print("Query created")
         work_result = query.all()
+        print(f"Query executed, {len(work_result)} results found")
         works = [
             {
                 "id": work.id,
@@ -212,7 +218,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             }
             for work in work_result
         ]
+        print("Works list created")
         work_ids = [work["id"] for work in works]
+        print("Work IDs extracted")
         staff_result = (
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
@@ -225,9 +233,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .add_columns(StaffWorkRole.work_id)
             .all()
         )
+        print(f"Staff query executed, {len(staff_result)} results found")
         for work in works:
             staffs = [staff for staff in staff_result if staff.work_id == work["id"]]
             work["staff"] = staffs
+        print("Staff added to works")
         return works
 
     @classmethod
