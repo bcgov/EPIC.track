@@ -118,6 +118,7 @@ const EventList = () => {
       openExtensionWarningBox,
     [selectedWorkPhase, openExtensionWarningBox]
   );
+
   const isEventFormFieldLocked = React.useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
@@ -128,6 +129,7 @@ const EventList = () => {
       dispatch(showConfetti(false));
     }, 5000);
   }, [isConfettiShown]);
+
   React.useEffect(() => {
     getCombinedEvents();
   }, [work?.id, selectedWorkPhase?.work_phase.id]);

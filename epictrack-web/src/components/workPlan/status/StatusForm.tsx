@@ -1,8 +1,8 @@
-import React, { useContext, useRef } from "react";
+import React, { useContext, useMemo, useRef } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Grid, TextField } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
 import dayjs from "dayjs";
 import { EARLIEST_WORK_DATE } from "../../../constants/application-constant";
@@ -22,26 +22,36 @@ const CHARACTER_LIMIT = 1000;
 const StatusForm = () => {
   const [description, setDescription] = React.useState<string>("");
   const startDateRef = useRef();
-  const { status, onSave, isCloning } = useContext(StatusContext);
+  const { status: statusToEdit, onSave, isCloning } = useContext(StatusContext);
   const { getWorkStatuses, statuses } = useContext(WorkplanContext);
 
   const getPostedDateMin = () => {
-    if (isCloning) {
-      return dayjs(statuses[0].posted_date);
-    }
-    if (statuses.length === 1 && statuses[0]?.is_approved) {
-      return dayjs(EARLIEST_WORK_DATE);
+    const sortedStatuses = [...statuses].sort((statusA, statusB) =>
+      // sort descending by posted_date
+      dayjs(statusB.posted_date).diff(dayjs(statusA.posted_date))
+    );
+    if (isCloning || !statusToEdit) {
+      return dayjs(sortedStatuses[0].posted_date);
     }
 
-    return dayjs(statuses[1]?.posted_date || EARLIEST_WORK_DATE);
+    const previousStatus = sortedStatuses.find(
+      (status) =>
+        status.id !== statusToEdit.id &&
+        dayjs(status.posted_date) < dayjs(statusToEdit.posted_date)
+    );
+
+    return dayjs(previousStatus?.posted_date || EARLIEST_WORK_DATE);
   };
 
-  const postedDateMin = getPostedDateMin();
+  const postedDateMin = useMemo(
+    () => getPostedDateMin(),
+    [statuses, statusToEdit, isCloning]
+  );
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
   React.useEffect(() => {
-    if (status) {
-      setDescription(status?.description);
+    if (statusToEdit) {
+      setDescription(statusToEdit?.description);
       if (isCloning) {
         reset({ posted_date: Moment().format() });
       }
@@ -50,7 +60,7 @@ const StatusForm = () => {
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: status ?? {},
+    defaultValues: statusToEdit ?? {},
     mode: "onBlur",
   });
 
@@ -83,7 +93,9 @@ const StatusForm = () => {
           <ETFormLabel required>Date</ETFormLabel>
           <ControlledDatePicker
             name="posted_date"
-            defaultValue={dayjs(status?.posted_date ? status?.posted_date : "")}
+            defaultValue={dayjs(
+              statusToEdit?.posted_date ? statusToEdit?.posted_date : ""
+            )}
             datePickerProps={{
               minDate: postedDateMin,
               maxDate: postedDateMax,

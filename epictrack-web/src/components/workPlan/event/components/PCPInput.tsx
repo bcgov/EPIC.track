@@ -1,21 +1,11 @@
 import React from "react";
-import { Controller, useFormContext } from "react-hook-form";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import Moment from "moment";
+import { useFormContext } from "react-hook-form";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
 import { Grid, TextField } from "@mui/material";
-import { DATE_FORMAT } from "../../../../constants/application-constant";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 
-interface PCPInputProps {
-  isFormFieldsLocked: boolean;
-}
-const PCPInput = ({ isFormFieldsLocked }: PCPInputProps) => {
+const PCPInput = () => {
   const {
     register,
-    unregister,
-    control,
     formState: { errors },
   } = useFormContext();
   const [topicCount, setTopicCount] = React.useState<number>(0);
@@ -28,7 +18,6 @@ const PCPInput = ({ isFormFieldsLocked }: PCPInputProps) => {
         <ETFormLabel>Number of Responses</ETFormLabel>
         <TextField
           fullWidth
-          disabled={isFormFieldsLocked}
           helperText={errors?.number_of_responses?.message?.toString()}
           error={!!errors?.number_of_responses?.message}
           InputProps={{
@@ -49,7 +38,6 @@ const PCPInput = ({ isFormFieldsLocked }: PCPInputProps) => {
         </ETFormLabelWithCharacterLimit>
         <TextField
           fullWidth
-          disabled={isFormFieldsLocked}
           helperText={errors?.topic?.message?.toString()}
           error={!!errors?.topic?.message}
           InputProps={{

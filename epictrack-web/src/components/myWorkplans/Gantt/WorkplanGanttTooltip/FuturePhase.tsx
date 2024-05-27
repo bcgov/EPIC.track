@@ -55,7 +55,7 @@ export const FuturePhase = ({ task }: { task: GanttItem }) => {
         >
           <Grid item xs={12} container alignItems="flex-start">
             <Grid item xs={6}>
-              <ETCaption2>Phase Start:</ETCaption2>
+              <ETCaption2>Anticipated Start:</ETCaption2>
             </Grid>
             <Grid item xs={6}>
               <ETCaption2>
@@ -65,7 +65,7 @@ export const FuturePhase = ({ task }: { task: GanttItem }) => {
           </Grid>
           <Grid item xs={12} container alignItems="flex-start">
             <Grid item xs={6}>
-              <ETCaption2>Phase End:</ETCaption2>
+              <ETCaption2>Anticipated End:</ETCaption2>
             </Grid>
             <Grid item xs={6}>
               <ETCaption2>

@@ -55,8 +55,8 @@ class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-
         configurations = EventConfigurationQuery.find_configurations(
             work_phase_id, visibility_modes, event_categories
         )
-        deleted_configurations = (
-            EventConfigurationQuery.find_deleted_suggested_configurations(work_phase_id)
+        suggested_active_configurations = (
+            EventConfigurationQuery.find_active_suggested_configurations(work_phase_id)
         )
         optional_configurations = [
             config
@@ -64,7 +64,7 @@ class EventConfigurationService:  # pylint: disable=dangerous-default-value,too-
             if config.visibility == EventTemplateVisibilityEnum.OPTIONAL
             or (
                 config.visibility == EventTemplateVisibilityEnum.SUGGESTED
-                and config in deleted_configurations
+                and config not in suggested_active_configurations
             )
         ]
         return optional_configurations

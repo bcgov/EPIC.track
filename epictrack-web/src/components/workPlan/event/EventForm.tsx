@@ -786,7 +786,7 @@ const EventForm = ({
                 )
               }
             >
-              <PCPInput isFormFieldsLocked={isFormFieldsLocked} />
+              <PCPInput />
             </When>
             <When
               condition={[
@@ -794,7 +794,7 @@ const EventForm = ({
                 EventType.VIRTUAL_OPEN_HOUSE,
               ].includes(Number(selectedConfiguration?.event_type_id))}
             >
-              <SingleDayPCPInput isFormFieldsLocked={isFormFieldsLocked} />
+              <SingleDayPCPInput />
             </When>
             <When
               condition={
