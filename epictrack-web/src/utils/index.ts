@@ -1,19 +1,22 @@
 import dateUtils from "./dateUtils";
 
+export const naturalSortCollator = new Intl.Collator("en-GB", {
+  numeric: true,
+  ignorePunctuation: true,
+  sensitivity: "base",
+});
 const sort = (collection: any[], sortField: string) => {
-  const collator = new Intl.Collator("en-GB", {
-    numeric: true,
-    ignorePunctuation: true,
-    sensitivity: "base",
-  });
   const keys = sortField.split(".");
   if (keys.length > 1) {
     return collection.sort(function (a, b) {
-      return collator.compare(a[keys[0]][keys[1]], b[keys[0]][keys[1]]);
+      return naturalSortCollator.compare(
+        a[keys[0]][keys[1]],
+        b[keys[0]][keys[1]]
+      );
     });
   } else {
     return collection.sort(function (a, b) {
-      return collator.compare(a[sortField], b[sortField]);
+      return naturalSortCollator.compare(a[sortField], b[sortField]);
     });
   }
 };
