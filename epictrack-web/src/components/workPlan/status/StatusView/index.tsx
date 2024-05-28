@@ -13,7 +13,7 @@ import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 
 const StatusView = () => {
-  const { statuses, team } = React.useContext(WorkplanContext);
+  const { statuses, team, work } = React.useContext(WorkplanContext);
   const { setShowStatusForm } = React.useContext(StatusContext);
 
   const { email, roles: currentRoles } = useAppSelector(
@@ -31,9 +31,9 @@ const StatusView = () => {
     setShowStatusForm(true);
   };
 
-  const statusOutOfDate = isStatusOutOfDate(
-    statuses.find((status) => status.is_approved)
-  );
+  const latestApprovedStatus = statuses.find((status) => status.is_approved);
+  const statusOutOfDate =
+    !work?.is_complete && isStatusOutOfDate(latestApprovedStatus);
 
   return (
     <>
