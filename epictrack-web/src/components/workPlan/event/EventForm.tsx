@@ -115,7 +115,10 @@ const EventForm = ({
           .required("Please select milestone type"),
         anticipated_date: yup.string().required("Please select start date"),
         number_of_days: yup.string().when([], {
-          is: () => selectedConfiguration?.multiple_days === true,
+          is: () =>
+            selectedConfiguration?.multiple_days === true ||
+            selectedConfiguration?.event_category_id ===
+              EventCategory.EXTENSION,
           then: () => yup.string().required("Number of days is required"),
           otherwise: () => yup.string().nullable(),
         }),
@@ -168,7 +171,6 @@ const EventForm = ({
       return true;
     }
   }, [selectedConfiguration, event]);
-
   /**
    * If the event is the last decision event, then, the decision maker
    * position id has to be selected from the decision make position id
@@ -225,7 +227,8 @@ const EventForm = ({
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
-      selectedWorkPhase?.work_phase.legislated,
+      selectedWorkPhase?.work_phase.legislated &&
+      selectedConfiguration?.event_category_id !== EventCategory.EXTENSION,
     [dateCheckStatus, selectedWorkPhase]
   );
   const isMilestoneTypeDisabled = useMemo(
@@ -287,7 +290,7 @@ const EventForm = ({
       return dayjs(selectedWorkPhase.work_phase.end_date);
     }
     return dayjs(new Date());
-  }, [selectedWorkPhase, selectedConfiguration]);
+  }, [selectedWorkPhase?.work_phase, selectedConfiguration]);
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,

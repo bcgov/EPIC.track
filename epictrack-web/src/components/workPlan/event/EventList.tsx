@@ -76,6 +76,7 @@ const EventList = () => {
     selectedWorkPhase,
     setSelectedWorkPhase,
     setWorkPhases,
+    workPhases,
     team,
     work,
     setWork,
@@ -318,21 +319,23 @@ const EventList = () => {
       );
       const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
       setWorkPhases(workPhases);
-      // if (selectedWorkPhase) {
-      //   const selectedWp = workPhases.filter(
-      //     (p) => p.work_phase.id === selectedWorkPhase.work_phase.id
-      //   )[0];
-      //   setSelectedWorkPhase(selectedWp);
-      // }
       setLoading(false);
     }
   }, []);
-  const getWorkById = async () => {
+
+  const getWorkById = React.useCallback(async () => {
     if (work?.id) {
       const result = await workService.getById(String(work.id));
-      setWork(result.data as Work);
+      const workResult = result.data as Work;
+      setWork(workResult);
+      if (selectedWorkPhase) {
+        const selectedWp = workPhases.filter(
+          (p) => p.work_phase.id === workResult.current_work_phase_id
+        )[0];
+        setSelectedWorkPhase(selectedWp);
+      }
     }
-  };
+  }, [workPhases]);
 
   const onSaveHandler = () => {
     setShowTaskForm(false);
