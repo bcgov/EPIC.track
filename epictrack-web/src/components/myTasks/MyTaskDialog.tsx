@@ -54,11 +54,7 @@ export const MyTaskDialog = ({ data }: MyTaskData) => {
       saveButtonProps={{
         disabled: disableSave,
       }}
-      sx={{
-        "& .MuiDialogContent-root": {
-          padding: 0,
-        },
-      }}
+      noPadding
     >
       {task && <MyTaskForm taskEvent={task} onSave={saveTask} />}
     </TrackDialog>

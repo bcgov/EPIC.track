@@ -902,11 +902,7 @@ const EventList = () => {
         isActionsRequired
         onCancel={() => onCancelHandler()}
         formId="task-form"
-        sx={{
-          "& .MuiDialogContent-root": {
-            padding: 0,
-          },
-        }}
+        noPadding
       >
         <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
       </TrackDialog>
@@ -921,11 +917,7 @@ const EventList = () => {
         isActionsRequired
         onCancel={() => onCancelHandler()}
         formId="event-form"
-        sx={{
-          "& .MuiDialogContent-root": {
-            padding: 0,
-          },
-        }}
+        noPadding
         additionalActions={deleteAction}
       >
         <EventForm
@@ -946,11 +938,7 @@ const EventList = () => {
         isCancelRequired={false}
         onCancel={() => onCancelHandler()}
         isActionsRequired
-        sx={{
-          "& .MuiDialogContent-root": {
-            padding: 0,
-          },
-        }}
+        noPadding
       >
         <ImportTaskEvent onSave={onTemplateFormSaveHandler} />
       </TrackDialog>

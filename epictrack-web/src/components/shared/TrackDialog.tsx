@@ -29,6 +29,7 @@ export type TrackDialogProps = {
   formId?: string;
   externalSubmitButtonUsed?: boolean;
   saveButtonProps?: ButtonProps;
+  noPadding?: boolean;
 } & DialogProps;
 
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
@@ -48,6 +49,8 @@ const TrackDialog: FC<TrackDialogProps> = ({
   additionalActions,
   externalSubmitButtonUsed = false,
   saveButtonProps,
+  noPadding,
+  sx,
   ...props
 }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
@@ -62,10 +65,20 @@ const TrackDialog: FC<TrackDialogProps> = ({
     onCancel = () => setOpenDialog(false);
   }
 
+  const dialogStyles = noPadding
+    ? {
+        ...sx,
+        "& .MuiDialogContent-root": {
+          padding: 0,
+        },
+      }
+    : sx;
+
   return (
     <Dialog
       open={openDialog}
       {...props}
+      sx={dialogStyles}
       PaperProps={{
         sx: {
           maxHeight: "80vh",
