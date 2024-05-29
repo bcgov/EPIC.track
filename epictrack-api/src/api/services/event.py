@@ -114,8 +114,6 @@ class EventService:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
-        # if current_work_phase.is_completed:
-        #     raise UnprocessableEntityError("Events cannot be added to completed phase")
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
@@ -397,6 +395,10 @@ class EventService:
                     end_event_index = util.find_index_in_array(
                         phase_events, end_event
                     )
+                    # In this case, we will be extensing the end event as well
+                    # Index is decremented by one to include the end event also to be pushed
+                    if end_event_index > 0:
+                        end_event_index = end_event_index - 1
                 cls._push_work_phases(
                     current_future_work_phases,
                     all_work_events,
@@ -486,11 +488,6 @@ class EventService:
     @classmethod
     def _find_actual_date_max(cls, current_work_phase: WorkPhase, event: Event):
         """Return the max date of actual date"""
-        # date_diff_days = (
-        #     (current_work_phase.end_date - current_work_phase.start_date).days
-        #     if current_work_phase.legislated
-        #     else 0
-        # )
         actual_date_max = (
             current_work_phase.end_date
             if current_work_phase.legislated
@@ -800,11 +797,6 @@ class EventService:
         for event_to_update in phase_events:
             if event_to_update.id != event.id:
                 event_from_db = Event.find_by_id(event_to_update.id)
-                # if event_from_db.actual_date:
-                #     event_from_db.actual_date = event_from_db.actual_date + timedelta(
-                #         days=number_of_days_to_be_pushed
-                #     )
-                # elif event_from_db.anticipated_date:
                 if not event_from_db.actual_date:  # do not modify already locked milestones
                     event_from_db.anticipated_date = (
                         event_from_db.anticipated_date
@@ -926,9 +918,15 @@ class EventService:
             phase_events = sorted(
                 phase_events, key=functools.cmp_to_key(cls.event_compare_func)
             )
+            previous_event = phase_events[event_index - 1]
             if (
                 event_index > 0
-                and not phase_events[event_index - 1].actual_date
+                and not previous_event.actual_date
+                and not (
+                    event.event_configuration.event_category_id
+                    == EventCategoryEnum.EXTENSION.value
+                    and previous_event.event_position == EventPositionEnum.END.value
+                )
                 # and not phase_events[event_index - 1].event_position
                 # == EventPositionEnum.END.value
             ):

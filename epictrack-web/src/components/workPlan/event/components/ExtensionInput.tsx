@@ -109,6 +109,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
         <ETFormLabel required>End Date</ETFormLabel>
         <ControlledDatePicker
           name="phase_end_date"
+          disabled={props.isFormFieldsLocked}
           datePickerProps={{
             disabled: props.isFormFieldsLocked,
             onDateChange: (event: any, defaultOnChange: any) => {
