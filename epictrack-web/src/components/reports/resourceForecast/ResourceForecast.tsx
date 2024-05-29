@@ -457,6 +457,17 @@ export default function ResourceForecast() {
               paddingRight: "2px",
             },
           }}
+          muiTableContainerProps={{
+            sx: {
+              maxHeight: {
+                xs: "calc(100vh - 200px)",
+                sm: "calc(100vh - 250px)",
+                md: "calc(100vh - 300px)",
+                lg: "calc(100vh - 350px)",
+                xl: "calc(100vh - 400px)",
+              },
+            },
+          }}
           onColumnFiltersChange={setColumnFilters}
           onColumnVisibilityChange={setColumnVisibility}
           onGlobalFilterChange={setGlobalFilter}
