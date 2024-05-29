@@ -187,10 +187,7 @@ const TaskForm = ({
           component={"form"}
           id="myTask-form"
           container
-          sx={{
-            margin: 0,
-            width: "100%",
-          }}
+          spacing={2}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
           <Grid
@@ -199,7 +196,8 @@ const TaskForm = ({
             rowSpacing={2}
             sx={{
               backgroundColor: Palette.neutral.bg.light,
-              padding: "24px 40px",
+              px: 1,
+              py: 3,
             }}
           >
             <Grid item xs={12}>
@@ -275,7 +273,8 @@ const TaskForm = ({
             columnSpacing={2}
             rowSpacing={2}
             sx={{
-              padding: "0px 40px 16px 40px",
+              px: 1,
+              py: 0,
               mt: 0,
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}

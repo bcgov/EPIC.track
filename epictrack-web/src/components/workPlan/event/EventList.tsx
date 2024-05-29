@@ -902,7 +902,6 @@ const EventList = () => {
         isActionsRequired
         onCancel={() => onCancelHandler()}
         formId="task-form"
-        noPadding
       >
         <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
       </TrackDialog>
@@ -917,7 +916,6 @@ const EventList = () => {
         isActionsRequired
         onCancel={() => onCancelHandler()}
         formId="event-form"
-        noPadding
         additionalActions={deleteAction}
       >
         <EventForm
@@ -938,7 +936,6 @@ const EventList = () => {
         isCancelRequired={false}
         onCancel={() => onCancelHandler()}
         isActionsRequired
-        noPadding
       >
         <ImportTaskEvent onSave={onTemplateFormSaveHandler} />
       </TrackDialog>

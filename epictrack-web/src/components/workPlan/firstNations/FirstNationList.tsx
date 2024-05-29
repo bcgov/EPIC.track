@@ -496,7 +496,6 @@ const FirstNationList = () => {
         isCancelRequired={true}
         onCancel={() => onCancelHandler()}
         isActionsRequired
-        noPadding
       >
         <ImportFirstNation onSave={onTemplateFormSaveHandler} />
       </TrackDialog>

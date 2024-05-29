@@ -54,7 +54,6 @@ export const MyTaskDialog = ({ data }: MyTaskData) => {
       saveButtonProps={{
         disabled: disableSave,
       }}
-      noPadding
     >
       {task && <MyTaskForm taskEvent={task} onSave={saveTask} />}
     </TrackDialog>
