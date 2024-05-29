@@ -496,11 +496,6 @@ const FirstNationList = () => {
         isCancelRequired={true}
         onCancel={() => onCancelHandler()}
         isActionsRequired
-        sx={{
-          "& .MuiDialogContent-root": {
-            padding: 0,
-          },
-        }}
       >
         <ImportFirstNation onSave={onTemplateFormSaveHandler} />
       </TrackDialog>

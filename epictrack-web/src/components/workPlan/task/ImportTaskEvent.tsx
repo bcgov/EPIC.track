@@ -100,6 +100,8 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
           sx={{
             height: "350px",
             overflowY: "hidden",
+            px: 1,
+            py: 1,
           }}
           onSubmit={handleSubmit(onSubmitHandler)}
         >
