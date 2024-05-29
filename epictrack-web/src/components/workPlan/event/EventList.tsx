@@ -11,7 +11,7 @@ import {
 import Moment from "moment";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_RowSelectionState } from "material-react-table";
-import { dateUtils } from "../../../utils";
+import { dateUtils, naturalSortCollator } from "../../../utils";
 import { Box, Button, Divider, Grid, Tooltip, Typography } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
@@ -231,7 +231,7 @@ const EventList = () => {
                 (eventX.type === EVENT_TYPE.TASK &&
                   eventY.type === EVENT_TYPE.TASK)
               ) {
-                return eventX.id < eventY.id ? -1 : 1;
+                return naturalSortCollator.compare(eventX.name, eventY.name);
               }
               // MILESTONE should shows first, then TASK
               if (
