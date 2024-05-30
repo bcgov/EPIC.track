@@ -607,14 +607,11 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def generate_workplan(
             cls,
             work_phase_id: int,
-            include_milestones=False
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
-        milestone_events = []
-        if include_milestones:
-            milestone_events = EventService.find_milestone_events_by_work_phase(
-                work_phase_id
-            )
+        milestone_events = EventService.find_milestone_events_by_work_phase(
+            work_phase_id
+        )
         task_events = TaskService.find_task_events(work_phase_id)
 
         work_plan_schema = WorkPlanSchema(many=True)

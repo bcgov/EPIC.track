@@ -77,6 +77,7 @@ class TaskService:
             "Name": "name",
             "Days": "number_of_days",
             "Start Date": "start_date",
+            "Type": 'type'
         }
         data_frame = pd.read_excel(template_file)
         data_frame.rename(column_map, axis="columns", inplace=True)
@@ -89,6 +90,8 @@ class TaskService:
         """Prepare a task event object"""
         tasks = []
         for task in data:
+            if task.get('type', None) != 'Task':
+                continue
             task_data = {
                 "name": task.get("name", ''),
                 "start_date": parse(task.get("start_date")).astimezone(CANADA_TIMEZONE)
