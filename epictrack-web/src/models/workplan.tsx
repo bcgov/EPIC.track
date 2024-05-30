@@ -5,7 +5,11 @@ export type PhaseInfo = {
   days_left: number;
   milestone_progress: number;
   current_milestone: string;
+  decision_milestone: string;
+  decision_milestone_date: string;
+  decision: string;
   next_milestone: string;
+  next_milestone_date: string;
   total_number_of_days: number;
   work_phase: {
     name: string;

@@ -1,21 +1,89 @@
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { Box, Divider, Grid, Stack, Tooltip } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
-import { CardProps } from "./type";
+import {
+  CardProps,
+  MilestoneInfoSectionEnum,
+  MilestoneInfoSectionProps,
+} from "./type";
 import WorkState from "../../workPlan/WorkState";
 import dayjs from "dayjs";
-import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
+import {
+  DATE_FORMAT,
+  DISPLAY_DATE_FORMAT,
+  MONTH_DAY_YEAR,
+} from "../../../constants/application-constant";
 import { isStatusOutOfDate } from "../../workPlan/status/shared";
 import { Status } from "../../../models/status";
-import { When } from "react-if";
+import { Else, If, Then, When } from "react-if";
 import { daysLeft } from "./util";
+import { dateUtils } from "utils";
+import { WorkStateEnum } from "models/work";
+import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
-
+const decisionWorkStates = [
+  WorkStateEnum.CLOSED,
+  WorkStateEnum.COMPLETED,
+  WorkStateEnum.TERMINATED,
+  WorkStateEnum.WITHDRAWN,
+];
+const MilestoneInfoSection = (props: MilestoneInfoSectionProps) => {
+  let dateTitle, name, date;
+  if (props.infoType === MilestoneInfoSectionEnum.DECISION) {
+    dateTitle = "DECISION TAKEN";
+    name = props.phaseInfo?.decision;
+    date = props.phaseInfo?.decision_milestone_date;
+  } else {
+    dateTitle = "UPCOMING MILESTONE";
+    name = props.phaseInfo?.next_milestone;
+    date = props.phaseInfo?.next_milestone_date;
+  }
+  return (
+    <>
+      {!!props.phaseInfo && (
+        <>
+          <Grid item container direction="row" spacing={1}>
+            <Grid
+              item
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <ETCaption1 color={Palette.neutral.main}>
+                {`${dateTitle} `}
+                {dateUtils.formatDate(String(date), DISPLAY_DATE_FORMAT)}
+              </ETCaption1>
+            </Grid>
+          </Grid>
+          <Grid item container direction="row" spacing={1}>
+            <Grid item sx={{ overflow: "hidden" }}>
+              <ETParagraph
+                bold
+                enableTooltip={true}
+                tooltip={name}
+                color={Palette.neutral.dark}
+                sx={{
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {name}
+              </ETParagraph>
+            </Grid>
+          </Grid>
+        </>
+      )}
+    </>
+  );
+};
 const CardBody = ({ workplan }: CardProps) => {
   const phase_color = Palette.primary.main;
   const statusOutOfDate =
@@ -30,7 +98,7 @@ const CardBody = ({ workplan }: CardProps) => {
   }`;
 
   const currentWorkPhaseInfo = useMemo(() => {
-    if (!workplan.phase_info) return null;
+    if (!workplan.phase_info) return undefined;
     const currentPhaseInfo = workplan.phase_info.filter(
       (p) => p.work_phase.id === workplan.current_work_phase_id
     );
@@ -126,60 +194,50 @@ const CardBody = ({ workplan }: CardProps) => {
         )}
       </Grid>
       <Grid container sx={{ height: "64px" }} spacing={1}>
-        {!!currentWorkPhaseInfo && (
-          <>
-            <Grid item container direction="row" spacing={1}>
-              <Grid
-                item
-                sx={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                <ETCaption1 color={Palette.neutral.main}>
-                  {`UPCOMING MILESTONE ${dayjs(new Date())
-                    .add(currentWorkPhaseInfo?.days_left, "days")
-                    .format(MONTH_DAY_YEAR)
-                    .toUpperCase()}`}
-                </ETCaption1>
-              </Grid>
-            </Grid>
-            <Grid item container direction="row" spacing={1}>
-              <Grid item sx={{ overflow: "hidden" }}>
-                <ETParagraph
-                  bold
-                  color={Palette.neutral.dark}
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {currentWorkPhaseInfo?.next_milestone}
-                </ETParagraph>
-              </Grid>
-            </Grid>
-          </>
-        )}
+        <If
+          condition={decisionWorkStates.includes(
+            WorkStateEnum[workplan?.work_state as keyof typeof WorkStateEnum]
+          )}
+        >
+          <Then>
+            <MilestoneInfoSection
+              infoType={MilestoneInfoSectionEnum.DECISION}
+              phaseInfo={currentWorkPhaseInfo}
+            />
+          </Then>
+          <Else>
+            <MilestoneInfoSection
+              infoType={MilestoneInfoSectionEnum.MILESTONE}
+              phaseInfo={currentWorkPhaseInfo}
+            />
+          </Else>
+        </If>
       </Grid>
 
       <Grid item container direction="row" spacing={1}>
-        <Grid item>
-          <ETCaption1 color={Palette.neutral.main}>
-            LAST STATUS UPDATE
-          </ETCaption1>
-        </Grid>
         <When condition={workplan?.status_info?.posted_date}>
+          <Grid item>
+            <ETCaption1 color={Palette.neutral.main}>
+              LAST STATUS UPDATE
+            </ETCaption1>
+          </Grid>
           <Grid item>
             <ETCaption1 color={Palette.neutral.main}>
               {lastStatusUpdate}
             </ETCaption1>
           </Grid>
         </When>
-        <Grid item sx={{ marginTop: "2px" }}>
-          {statusOutOfDate && <IndicatorSmallIcon />}
-        </Grid>
+        <When
+          condition={
+            !decisionWorkStates.includes(
+              WorkStateEnum[workplan?.work_state as keyof typeof WorkStateEnum]
+            )
+          }
+        >
+          <Grid item sx={{ marginTop: "2px" }}>
+            {statusOutOfDate && <IndicatorSmallIcon />}
+          </Grid>
+        </When>
       </Grid>
       <Grid item>
         <ETParagraph

@@ -20,10 +20,12 @@ from typing import List, Dict, Any, Union
 
 from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
+from api.models.event_category import EventCategoryEnum
 from api.schemas.work_v2 import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
+from .common_service import event_compare_func
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -133,7 +135,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             .all()
         )
         total_work_phases = len(work_phases_dict)
-        work_phases_dict = list(filter(lambda x: x[1].is_active is True, work_phases_dict))
+        work_phases_dict = list(
+            filter(lambda x: x[1].is_active is True, work_phases_dict)
+        )
         result_dict = defaultdict(list)
         for work_id, work_phase in work_phases_dict:
             result_dict[work_id].append(work_phase)
@@ -157,11 +161,13 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             suspended_days = functools.reduce(
                 lambda x, y: x + y,
                 map(
-                    lambda x: x.number_of_days
-                    if x.event_configuration.event_type_id
-                    == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
-                    and x.actual_date is not None
-                    else 0,
+                    lambda x: (
+                        x.number_of_days
+                        if x.event_configuration.event_type_id
+                        == EventTypeEnum.TIME_LIMIT_RESUMPTION.value
+                        and x.actual_date is not None
+                        else 0
+                    ),
                     work_phase_events,
                 ),
             )
@@ -179,14 +185,46 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
     @classmethod
     def _get_milestone_information(cls, work_phase_events):
         result = {}
+        completed_milestone_events = [
+            event for event in work_phase_events if event.actual_date
+        ]
+        result["current_milestone"] = (
+            completed_milestone_events[-1].name if completed_milestone_events else None
+        )
 
-        completed_milestone_events = [event for event in work_phase_events if event.actual_date]
-        result["current_milestone"] = completed_milestone_events[-1].name if completed_milestone_events else None
+        remaining_milestone_events = [
+            event for event in work_phase_events if event.actual_date is None
+        ]
+        result["next_milestone"] = (
+            remaining_milestone_events[0].name if remaining_milestone_events else None
+        )
+        result["next_milestone_date"] = (
+            remaining_milestone_events[0].anticipated_date
+            if remaining_milestone_events
+            else None
+        )
 
-        remaining_milestone_events = [event for event in work_phase_events if event.actual_date is None]
-        result["next_milestone"] = remaining_milestone_events[0].name if remaining_milestone_events else None
+        decision_milestones = [
+            event
+            for event in work_phase_events
+            if event.event_configuration.event_category_id
+            == EventCategoryEnum.DECISION.value
+            and event.actual_date
+        ]
 
-        result["milestone_progress"] = cls._calculate_milestone_progress(work_phase_events)
+        result["decision_milestone"] = (
+            decision_milestones[-1].name if decision_milestones else None
+        )
+        result["decision"] = (
+            decision_milestones[-1].outcome.name if decision_milestones else None
+        )
+        result["decision_milestone_date"] = (
+            decision_milestones[-1].actual_date if decision_milestones else None
+        )
+
+        result["milestone_progress"] = cls._calculate_milestone_progress(
+            work_phase_events
+        )
 
         return result
 
@@ -203,7 +241,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             x for x in events if x.event_configuration.work_phase_id == work_phase.id
         ]
         work_phase_events = sorted(
-            work_phase_events, key=functools.cmp_to_key(EventService.event_compare_func)
+            work_phase_events, key=functools.cmp_to_key(event_compare_func)
         )
         return work_phase_events
 
