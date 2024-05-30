@@ -75,7 +75,6 @@ const ProjectList = () => {
       ),
     [projects]
   );
-  console.log("rerender");
   const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {

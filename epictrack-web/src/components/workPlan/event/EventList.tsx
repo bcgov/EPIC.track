@@ -415,7 +415,6 @@ const EventList = () => {
   const handleTaskFileUpload = async (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    console.log("HEre");
     const file = event.target.files?.[0];
     if (!file || !selectedWorkPhase?.work_phase.id) {
       return;
@@ -927,7 +926,6 @@ const EventList = () => {
                   hidden
                   accept=".xls, .xlsx"
                   onChange={handleTaskFileUpload}
-                  onClick={() => console.log("clicked")}
                 />
               </Button>
             </Tooltip>
