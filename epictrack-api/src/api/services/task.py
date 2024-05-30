@@ -14,8 +14,11 @@
 """Service to manage Tasks"""
 from datetime import timedelta
 from itertools import product
-from typing import List
+from typing import List, IO
 
+import numpy as np
+import pandas as pd
+from dateutil.parser import parse
 from flask import current_app
 from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
@@ -31,6 +34,7 @@ from api.models import (
 )
 from api.models.task_event_responsibility import TaskEventResponsibility
 from ..models.queries.task_event_queries import find_by_staff_work_role_staff_id
+from ..utils.constants import CANADA_TIMEZONE
 
 from ..utils.roles import Membership
 from ..utils.roles import Role as KeycloakRole
@@ -40,6 +44,67 @@ from .task_template import TaskTemplateService
 
 class TaskService:
     """Service to manage task related operations"""
+
+    @classmethod
+    def create_task_events_bulk(cls, data: list, work_phase_id: int) -> list[TaskEvent]:
+        """Create task events in bulk"""
+        work_phase = WorkPhase.find_by_id(work_phase_id)
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.name,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
+
+        if cls._get_task_count(work_phase_id) > 0:
+            raise UnprocessableEntityError("Tasks already added for the phase")
+        task_events = []
+        for task in data:
+            task_data = {
+                **task,
+                "work_phase_id": work_phase_id,
+            }
+            task_event = TaskEvent(**task_data)
+            task_event.flush()
+            task_events.append(task_event)
+        db.session.commit()
+        return task_events
+
+    @classmethod
+    def _read_excel(cls, template_file: IO) -> list:
+        """Read the template excel file"""
+        column_map = {
+            "Name": "name",
+            "Days": "number_of_days",
+            "Start Date": "start_date",
+        }
+        data_frame = pd.read_excel(template_file)
+        data_frame.rename(column_map, axis="columns", inplace=True)
+        data_frame = data_frame.replace({np.nan: None})
+        data_frame = data_frame.replace({np.NaN: None})
+        return data_frame.to_dict('records')
+
+    @classmethod
+    def _prepare_task_from_import(cls, data: list) -> list:
+        """Prepare a task event object"""
+        tasks = []
+        for task in data:
+            task_data = {
+                "name": task.get("name", ''),
+                "start_date": parse(task.get("start_date")).astimezone(CANADA_TIMEZONE)
+                if task.get("start_date") else None,
+                "number_of_days": task.get("number_of_days", 0),
+            }
+            tasks.append(task_data)
+        return tasks
+
+    @classmethod
+    def create_task_events_from_sheet(cls, work_phase_id: int, sheet: IO):
+        """Create task events from excel sheet"""
+        read_tasks_data = cls._read_excel(sheet)
+        task_events_data = cls._prepare_task_from_import(read_tasks_data)
+        task_events = cls.create_task_events_bulk(task_events_data, work_phase_id)
+        return task_events
 
     @classmethod
     def create_task_event(cls, data: dict, commit: bool = True) -> TaskEvent:

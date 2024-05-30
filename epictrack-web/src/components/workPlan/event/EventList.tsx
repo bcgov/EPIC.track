@@ -392,7 +392,7 @@ const EventList = () => {
       });
     }
   };
-  const downloadPDFReport = React.useCallback(async () => {
+  const handleExportToSheet = React.useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
         Number(selectedWorkPhase?.work_phase.id)
@@ -411,6 +411,32 @@ const EventList = () => {
       });
     } catch (error) {}
   }, [work?.id, selectedWorkPhase?.work_phase.phase.id]);
+
+  const handleTaskFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    console.log("HEre");
+    const file = event.target.files?.[0];
+    if (!file || !selectedWorkPhase?.work_phase.id) {
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      await taskEventService.importTasks(selectedWorkPhase?.work_phase.id, {
+        template_file: file,
+      });
+      showNotification("Tasks imported successfully", {
+        type: "success",
+      });
+      getCombinedEvents();
+    } catch (e) {
+      const message = getErrorMessage(e);
+      showNotification(message, {
+        type: "error",
+      });
+    }
+  };
 
   const onRowClick = async (event: any, row: EventsGridModel) => {
     event.preventDefault();
@@ -880,11 +906,32 @@ const EventList = () => {
               errorProps={{ disabled: true }}
               exception={userIsTeamMember}
             >
-              <IButton onClick={downloadPDFReport}>
+              <IButton onClick={handleExportToSheet}>
                 <DownloadIcon className="icon" />
               </IButton>
             </Restricted>
           </Tooltip>
+          <Restricted
+            allowed={[ROLES.EXTENDED_EDIT]}
+            exception={userIsTeamMember}
+          >
+            <Tooltip title="Import tasks from an excel sheet">
+              <Button
+                variant="outlined"
+                component="label"
+                startIcon={<ImportFileIcon />}
+              >
+                Import from excel
+                <input
+                  type="file"
+                  hidden
+                  accept=".xls, .xlsx"
+                  onChange={handleTaskFileUpload}
+                  onClick={() => console.log("clicked")}
+                />
+              </Button>
+            </Tooltip>
+          </Restricted>
         </Grid>
       </Grid>
       <Grid item xs={12}>

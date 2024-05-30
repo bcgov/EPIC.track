@@ -63,6 +63,14 @@ class TaskEventService {
   async deleteTasks(params: any) {
     return await http.DeleteRequest(Endpoints.TaskEvents.EVENTS, params);
   }
+
+  importTasks = async (work_phase_id: number, data: any) => {
+    const url = Endpoints.TaskEvents.IMPORT_TASKS.replace(
+      ":work_phase_id",
+      work_phase_id.toString()
+    );
+    return await http.MultipartFormPostRequest(url, data);
+  };
 }
 
 export default new TaskEventService();

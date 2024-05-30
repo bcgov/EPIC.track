@@ -126,6 +126,22 @@ class Event(Resource):
         return res.TaskEventResponseSchema().dump(task_event), HTTPStatus.OK
 
 
+@cors_preflight("GET,POST")
+@API.route("/work_phase/<int:work_phase_id>/sheet", methods=["GET", "POST", "OPTIONS"])
+class Templates(Resource):
+    """Endpoint resource to return all task templates"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post(work_phase_id):
+        """Create new task template"""
+        template_file = request.files["template_file"]
+        task_template = TaskService.create_task_events_from_sheet(work_phase_id, template_file)
+        return res.TaskTemplateResponseSchema().dump(task_template), HTTPStatus.CREATED
+
+
 @cors_preflight("POST")
 @API.route("/templates/<int:template_id>/events", methods=["POST", "OPTIONS"])
 class TemplateEvents(Resource):
