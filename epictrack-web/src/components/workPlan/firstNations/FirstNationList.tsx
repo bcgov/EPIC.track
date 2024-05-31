@@ -43,12 +43,10 @@ import { Restricted, hasPermission } from "../../shared/restricted";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { useAppSelector } from "../../../hooks";
 import { debounce } from "lodash";
+import { basePIPUrl } from "../../../constants/application-constant";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
-const basePIPUrl =
-  "https://apps.nrs.gov.bc.ca/int/fnp/FirstNationDetail.xhtml?name=";
-
 const FirstNationList = () => {
   const ctx = React.useContext(WorkplanContext);
   const [workFirstNationId, setWorkFirstNationId] = React.useState<
