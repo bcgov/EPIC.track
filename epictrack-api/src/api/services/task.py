@@ -35,6 +35,7 @@ from api.models import (
 from api.models.task_event_responsibility import TaskEventResponsibility
 from ..models.queries.task_event_queries import find_by_staff_work_role_staff_id
 from ..utils.constants import CANADA_TIMEZONE
+from ..utils.datetime_helper import get_start_of_day
 
 from ..utils.roles import Membership
 from ..utils.roles import Role as KeycloakRole
@@ -92,9 +93,10 @@ class TaskService:
         for task in data:
             if task.get('type', None) != 'Task':
                 continue
+            start_date = parse(task.get("start_date")).astimezone(CANADA_TIMEZONE)
             task_data = {
                 "name": task.get("name", ''),
-                "start_date": parse(task.get("start_date")).astimezone(CANADA_TIMEZONE)
+                "start_date": get_start_of_day(start_date)
                 if task.get("start_date") else None,
                 "number_of_days": task.get("number_of_days", 0),
             }
