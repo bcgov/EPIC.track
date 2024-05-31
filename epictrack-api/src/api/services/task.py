@@ -46,7 +46,7 @@ class TaskService:
     """Service to manage task related operations"""
 
     @classmethod
-    def create_task_events_bulk(cls, data: list, work_phase_id: int) -> list[TaskEvent]:
+    def create_task_events_bulk(cls, data: list, work_phase_id: int):
         """Create task events in bulk"""
         work_phase = WorkPhase.find_by_id(work_phase_id)
 
