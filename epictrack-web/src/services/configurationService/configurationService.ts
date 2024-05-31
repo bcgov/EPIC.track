@@ -7,7 +7,7 @@ class ConfigurationService {
     work_phase_id: number,
     visiblity_modes: EventTemplateVisibility[]
   ) {
-    const url = `${Endpoints.Configurations.CONFIGURATIONS}/addable?work_phase_id=${work_phase_id}&visibility_modes=${visiblity_modes}`;
+    const url = `${Endpoints.Configurations.CONFIGURATIONS}/?work_phase_id=${work_phase_id}&visibility_modes=${visiblity_modes}&configurable=true`;
     return await http.GetRequest(url);
   }
 }
