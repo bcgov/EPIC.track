@@ -53,7 +53,7 @@ class TaskService:
 
         one_of_roles = (
             Membership.TEAM_MEMBER.name,
-            KeycloakRole.CREATE.value,
+            KeycloakRole.EXTENDED_EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
 
