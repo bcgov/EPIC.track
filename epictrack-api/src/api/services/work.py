@@ -605,7 +605,8 @@ class WorkService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def generate_workplan(
-            cls, work_phase_id: int
+            cls,
+            work_phase_id: int,
     ):  # pylint: disable=unsupported-assignment-operation,unsubscriptable-object
         """Generate the workplan excel file for given work and phase"""
         milestone_events = EventService.find_milestone_events_by_work_phase(
