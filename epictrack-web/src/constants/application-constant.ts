@@ -142,3 +142,5 @@ export const REPORT_STALENESS_THRESHOLD = {
     [StalenessEnum.WARN]: 7,
   },
 };
+
+export const basePIPUrl = "https://apps.nrs.gov.bc.ca/int/fnp/#/organizations/";
