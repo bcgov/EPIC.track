@@ -226,17 +226,19 @@ const CardBody = ({ workplan }: CardProps) => {
               {lastStatusUpdate}
             </ETCaption1>
           </Grid>
-        </When>
-        <When
-          condition={
-            !decisionWorkStates.includes(
-              WorkStateEnum[workplan?.work_state as keyof typeof WorkStateEnum]
-            )
-          }
-        >
-          <Grid item sx={{ marginTop: "2px" }}>
-            {statusOutOfDate && <IndicatorSmallIcon />}
-          </Grid>
+          <When
+            condition={
+              !decisionWorkStates.includes(
+                WorkStateEnum[
+                  workplan?.work_state as keyof typeof WorkStateEnum
+                ]
+              )
+            }
+          >
+            <Grid item sx={{ marginTop: "2px" }}>
+              {statusOutOfDate && <IndicatorSmallIcon />}
+            </Grid>
+          </When>
         </When>
       </Grid>
       <Grid item>
