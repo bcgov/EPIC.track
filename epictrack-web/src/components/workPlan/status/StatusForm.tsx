@@ -26,6 +26,9 @@ const StatusForm = () => {
   const { getWorkStatuses, statuses } = useContext(WorkplanContext);
 
   const getPostedDateMin = () => {
+    if (statuses.length === 0) {
+      return dayjs(EARLIEST_WORK_DATE);
+    }
     const sortedStatuses = [...statuses].sort((statusA, statusB) =>
       // sort descending by posted_date
       dayjs(statusB.posted_date).diff(dayjs(statusA.posted_date))
@@ -49,6 +52,14 @@ const StatusForm = () => {
   );
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: statusToEdit ?? {},
+    mode: "onBlur",
+  });
+
+  const { handleSubmit, reset } = methods;
+
   React.useEffect(() => {
     if (statusToEdit) {
       setDescription(statusToEdit?.description);
@@ -57,14 +68,6 @@ const StatusForm = () => {
       }
     }
   }, []);
-
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: statusToEdit ?? {},
-    mode: "onBlur",
-  });
-
-  const { handleSubmit, reset } = methods;
 
   const handleDescriptionChange = (event: any) => {
     setDescription(event.target.value);
@@ -93,9 +96,6 @@ const StatusForm = () => {
           <ETFormLabel required>Date</ETFormLabel>
           <ControlledDatePicker
             name="posted_date"
-            defaultValue={dayjs(
-              statusToEdit?.posted_date ? statusToEdit?.posted_date : ""
-            )}
             datePickerProps={{
               minDate: postedDateMin,
               maxDate: postedDateMax,
