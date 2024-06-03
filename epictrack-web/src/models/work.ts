@@ -100,3 +100,12 @@ export const defaultWork = {
   report_description:
     "On [date], [initiator] submitted a [work type] to [rationale/desired result/description of change].",
 };
+
+export enum WorkStateEnum {
+  SUSPENDED,
+  IN_PROGRESS,
+  WITHDRAWN,
+  TERMINATED,
+  CLOSED,
+  COMPLETED,
+}

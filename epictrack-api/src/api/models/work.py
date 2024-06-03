@@ -18,7 +18,20 @@ from __future__ import annotations
 import enum
 from typing import List, Tuple
 
-from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Integer, String, Text, and_, exists, func, or_
+from sqlalchemy import (
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    and_,
+    exists,
+    func,
+    or_
+)
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -36,6 +49,15 @@ class WorkStateEnum(enum.Enum):
 
     SUSPENDED = "SUSPENDED"
     IN_PROGRESS = "IN_PROGRESS"
+    WITHDRAWN = "WITHDRAWN"
+    TERMINATED = "TERMINATED"
+    CLOSED = "CLOSED"
+    COMPLETED = "COMPLETED"
+
+
+class EndingWorkStateEnum(enum.Enum):
+    """Ending states for work"""
+
     WITHDRAWN = "WITHDRAWN"
     TERMINATED = "TERMINATED"
     CLOSED = "CLOSED"
@@ -143,10 +165,7 @@ class Work(BaseModelVersioned):
         search_filters: WorkplanDashboardSearchOptions = None
     ) -> Tuple[List[Work], int]:
         """Fetch all active works."""
-        query = cls.query.filter_by(is_active=True, is_deleted=False)
-
-        query = cls.filter_by_search_criteria(query, search_filters)
-
+        query = cls.filter_by_search_criteria(cls.query, search_filters)
         query = query.order_by(Work.start_date.desc())
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
@@ -233,5 +252,37 @@ class Work(BaseModelVersioned):
     @classmethod
     def _filter_by_work_states(cls, query, work_states):
         if work_states:
-            query = query.filter(Work.work_state.in_(work_states))
+            ending_states = [state.value for state in EndingWorkStateEnum]
+            filtered_ending_states = [work_state for work_state in work_states if work_state in ending_states]
+            filtered_non_ending_states = [
+                work_state
+                for work_state in work_states
+                if work_state not in ending_states
+            ]
+            ending_state_query = None
+            if filtered_ending_states:
+                ending_state_query = query.filter(
+                    and_(
+                        Work.work_state.in_(filtered_ending_states),
+                        Work.is_active.is_(False),
+                        Work.is_deleted.is_(False),
+                    )
+                )
+            if filtered_non_ending_states:
+                query = query.filter(
+                    and_(
+                        Work.work_state.in_(filtered_non_ending_states),
+                        Work.is_active.is_(True),
+                        Work.is_deleted.is_(False),
+                    )
+                )
+            if ending_state_query:
+                if (
+                    not filtered_non_ending_states
+                ):  # if non ending state query is not pressent
+                    query = ending_state_query
+                else:  # if both state queries are present
+                    query = query.union(ending_state_query)
+        else:
+            query = query.filter_by(is_active=True, is_deleted=False)
         return query

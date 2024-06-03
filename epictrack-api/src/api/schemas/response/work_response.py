@@ -166,7 +166,13 @@ class WorkPhaseAdditionalInfoResponseSchema(Schema):
     )
     current_milestone = fields.Str(metadata={"description": "Current milestone in the phase"})
     next_milestone = fields.Str(metadata={"description": "Next milestone in the phase"})
+    next_milestone_date = fields.DateTime(metadata={"description": "Anticipated date of the next milestone"})
     milestone_progress = fields.Number(metadata={"description": "Milestone progress"})
+    decision_milestone = fields.Str(metadata={"description": "Last completed decision milestone in the phase"})
+    decision = fields.Str(metadata={"description": "Decision taken in the decision milestone"})
+    decision_milestone_date = fields.DateTime(
+        metadata={"description": "Actual date of last completed decision milestone in the phase"}
+    )
     is_last_phase = fields.Number(metadata={"description": "Indicate if this the last phase of the work"})
     days_left = fields.Number(
         metadata={"description": "Number of days left in the phase"}
