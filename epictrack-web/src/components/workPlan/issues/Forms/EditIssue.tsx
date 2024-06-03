@@ -33,8 +33,8 @@ const EditIssue = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       title: issueToEdit?.title || "",
-      is_active: issueToEdit?.is_active || true,
-      is_high_priority: issueToEdit?.is_high_priority || false,
+      is_active: Boolean(issueToEdit?.is_active),
+      is_high_priority: Boolean(issueToEdit?.is_high_priority),
       start_date: issueToEdit?.start_date || "",
       expected_resolution_date: issueToEdit?.expected_resolution_date || "",
     },
