@@ -40,7 +40,7 @@ const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
 const schema = yup.object().shape({
   indigenous_nation_id: yup
     .string()
-    .required("Please select the first nation")
+    .required("Please select a First Nation")
     .test({
       name: "checkDuplicateNationWorkAssociation",
       exclusive: true,
