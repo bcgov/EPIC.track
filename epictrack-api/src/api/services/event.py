@@ -891,32 +891,26 @@ class EventService:
                     raise UnprocessableEntityError(
                         "Previous phase should be completed to proceed"
                     )
-            event_index = cls.find_event_index(
-                all_work_events,
-                event_old if event_old else event,
-                all_work_phases[current_work_phase_index],
-            )
-            phase_events = cls._find_work_phase_events(
-                all_work_events, event.event_configuration.work_phase_id
-            )
-            phase_events = sorted(
-                phase_events, key=functools.cmp_to_key(event_compare_func)
-            )
-            previous_event = phase_events[event_index - 1]
             if (
-                event_index > 0
-                and not previous_event.actual_date
-                and not (
-                    event.event_configuration.event_category_id
-                    == EventCategoryEnum.EXTENSION.value
-                    and previous_event.event_position == EventPositionEnum.END.value
-                )
-                # and not phase_events[event_index - 1].event_position
-                # == EventPositionEnum.END.value
+                event.event_configuration.event_category_id
+                != EventCategoryEnum.EXTENSION.value
             ):
-                raise UnprocessableEntityError(
-                    "Previous event should be completed to proceed"
+                event_index = cls.find_event_index(
+                    all_work_events,
+                    event_old if event_old else event,
+                    all_work_phases[current_work_phase_index],
                 )
+                phase_events = cls._find_work_phase_events(
+                    all_work_events, event.event_configuration.work_phase_id
+                )
+                phase_events = sorted(
+                    phase_events, key=functools.cmp_to_key(event_compare_func)
+                )
+                previous_event = phase_events[event_index - 1]
+                if event_index > 0 and not previous_event.actual_date:
+                    raise UnprocessableEntityError(
+                        "Previous event should be completed to proceed"
+                    )
 
     @classmethod
     def _handle_child_events(
