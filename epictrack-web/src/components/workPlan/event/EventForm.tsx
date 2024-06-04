@@ -158,6 +158,12 @@ const EventForm = ({
       ),
     [selectedConfiguration, selectedWorkPhase]
   );
+  const pushRequired = useMemo(
+    () =>
+      dateCheckStatus?.subsequent_event_push_required &&
+      event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
+    [dateCheckStatus, event]
+  );
   const isHighPriorityActive = useMemo(() => {
     if (event) {
       return event.high_priority;
@@ -430,7 +436,6 @@ const EventForm = ({
 
   const onSubmitHandler = async (submittedData: MilestoneEvent) => {
     try {
-      const pushRequired = dateCheckStatus?.subsequent_event_push_required;
       if (pushRequired) {
         setShowEventPushConfirmation(pushRequired);
       } else if (showLockConfirmDialog(submittedData)) {
@@ -509,6 +514,9 @@ const EventForm = ({
     pushEventConfirmed = false,
     confirmSaveInLocked = false
   ) => {
+    pushEventConfirmed =
+      pushEventConfirmed ||
+      event?.event_configuration.event_category_id === EventCategory.EXTENSION;
     try {
       const formData = data ?? getValues();
       const dataToBeSubmitted = {

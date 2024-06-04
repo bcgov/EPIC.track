@@ -165,7 +165,8 @@ class Work(BaseModelVersioned):
         search_filters: WorkplanDashboardSearchOptions = None
     ) -> Tuple[List[Work], int]:
         """Fetch all active works."""
-        query = cls.filter_by_search_criteria(cls.query, search_filters)
+        query = cls.query.filter_by(is_deleted=False)
+        query = cls.filter_by_search_criteria(query, search_filters)
         query = query.order_by(Work.start_date.desc())
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
@@ -264,8 +265,6 @@ class Work(BaseModelVersioned):
                 ending_state_query = query.filter(
                     and_(
                         Work.work_state.in_(filtered_ending_states),
-                        Work.is_active.is_(False),
-                        Work.is_deleted.is_(False),
                     )
                 )
             if filtered_non_ending_states:
@@ -273,7 +272,6 @@ class Work(BaseModelVersioned):
                     and_(
                         Work.work_state.in_(filtered_non_ending_states),
                         Work.is_active.is_(True),
-                        Work.is_deleted.is_(False),
                     )
                 )
             if ending_state_query:
