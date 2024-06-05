@@ -28,7 +28,6 @@ class WorkBodyParameterSchema(RequestBodyParameterSchema):
 
     report_description = fields.Str(
         metadata={"description": "Report description of work"},
-        validate=validate.Length(max=500),
         required=True,
     )
     epic_description = fields.Str(

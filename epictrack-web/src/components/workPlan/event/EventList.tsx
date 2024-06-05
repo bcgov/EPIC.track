@@ -342,8 +342,7 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-    getWorkById();
-    getWorkPhases();
+    getWorkPhases().then(() => getWorkById());
     getTemplateUploadStatus();
     if (
       milestoneEvent?.event_configuration?.event_position === EventPosition.END
