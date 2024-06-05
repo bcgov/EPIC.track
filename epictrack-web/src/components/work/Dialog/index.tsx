@@ -35,6 +35,14 @@ export const WorkDialog = ({
     if (!workId) return;
     try {
       const response = await workService.getById(String(workId));
+
+      const fetchedWork = response.data;
+
+      // set simple_title to empty string if it is null
+      if (fetchedWork.simple_title === null) {
+        fetchedWork.simple_title = "";
+      }
+
       setWork(response.data);
     } catch (error) {
       showNotification("Could not load Work", {
@@ -42,7 +50,7 @@ export const WorkDialog = ({
       });
     }
   };
-
+  
   const createWork = async (data: any) => {
     await workService.create(data);
   };
