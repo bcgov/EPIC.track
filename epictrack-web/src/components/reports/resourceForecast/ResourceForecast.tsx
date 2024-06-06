@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -18,7 +18,6 @@ import {
 } from "material-react-table";
 import { json2csv } from "json-2-csv";
 import {
-  RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
   COMMON_ERROR_MESSAGE,
@@ -27,7 +26,6 @@ import ReportService from "../../../services/reportService";
 import { dateUtils } from "../../../utils";
 import { ResourceForecastModel } from "./type";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer, ETParagraph, IButton } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -35,9 +33,6 @@ import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { PRE_EA_TYPE } from "./constants";
-import { lab } from "color";
-
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 export default function ResourceForecast() {
@@ -181,20 +176,7 @@ export default function ResourceForecast() {
     [rfData]
   );
 
-  const eaTypeFilter = useMemo(() => {
-    const preEA = rfData
-      .filter((rf) => rf.pre_ea)
-      .map((rf) => ({ label: PRE_EA_TYPE, value: rf.ea_type }));
-    const eaTypes = Array.from(
-      new Set(rfData.filter((rf) => !rf.pre_ea).map((rf) => rf.ea_type))
-    );
-
-    return [
-      preEA[0],
-      ...eaTypes.map((eaType) => ({ label: eaType, value: eaType })),
-    ].filter((value) => value);
-  }, [rfData]);
-
+  const eaTypeFilter = filterFn("ea_type");
   const workFilter = filterFn("work_title");
   const projectPhaseFilter = filterFn("project_phase");
   const eaActFilter = filterFn("ea_act");
@@ -265,16 +247,6 @@ export default function ResourceForecast() {
         enableHiding: false,
         filterVariant: "select",
         filterSelectOptions: eaTypeFilter,
-
-        Cell: ({ row }: any) => (
-          <ETParagraph
-            enableEllipsis
-            enableTooltip
-            tooltip={row.original.project_phase}
-          >
-            {row.original.pre_ea ? PRE_EA_TYPE : row.original.ea_type}
-          </ETParagraph>
-        ),
       },
       {
         header: "Project Phase",
@@ -408,9 +380,9 @@ export default function ResourceForecast() {
       setRFData([]);
     }
   }, [reportDate]);
+
   const downloadPDFReport = React.useCallback(async () => {
     try {
-      fetchReportData();
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.RESOURCE_FORECAST,
         {
@@ -437,7 +409,8 @@ export default function ResourceForecast() {
         type: "error",
       });
     }
-  }, [reportDate, filters, fetchReportData]);
+  }, [reportDate, filters]);
+
   return (
     <ETPageContainer
       direction="row"
