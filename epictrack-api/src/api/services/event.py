@@ -371,6 +371,8 @@ class EventService:
         )
         cls._handle_child_events(all_work_event_configurations, event)
         current_future_work_phases = all_work_phases[current_work_phase_index:]
+        # if the phase is legislated, only start event, extension or suspension can push
+        # all the subsequent events in all the subsequent phases
         if current_work_phase.legislated:
             phase_events = cls._find_work_phase_events(
                 all_work_events, current_work_phase.id
@@ -385,7 +387,10 @@ class EventService:
                 ]
             ):
                 end_event_index = None
-                if find_event_date(event) >= current_work_phase.end_date:
+                if event.event_configuration.event_category_id in [
+                    EventCategoryEnum.EXTENSION.value,
+                    EventCategoryEnum.SUSPENSION.value,
+                ]:
                     end_event = next(
                         filter(
                             lambda x: x.event_configuration.event_position.value
@@ -394,7 +399,7 @@ class EventService:
                         )
                     )
                     end_event_index = util.find_index_in_array(phase_events, end_event)
-                    # In this case, we will be extensing the end event as well
+                    # In this case, we will be extending the end event as well
                     # Index is decremented by one to include the end event also to be pushed
                     if end_event_index > 0:
                         end_event_index = end_event_index - 1

@@ -184,10 +184,7 @@ const CardBody = ({ workplan }: CardProps) => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {daysLeft(
-                  currentWorkPhaseInfo?.days_left,
-                  currentWorkPhaseInfo?.total_number_of_days
-                )}
+                {daysLeft(currentWorkPhaseInfo)}
               </ETCaption2>
             </Stack>
           </Grid>

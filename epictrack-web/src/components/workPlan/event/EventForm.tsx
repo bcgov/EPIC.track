@@ -523,6 +523,11 @@ const EventForm = ({
         ...formData,
         notes: notes,
       };
+      pushEventConfirmed =
+        pushEventConfirmed ||
+        (event?.event_configuration.event_category_id ===
+          EventCategory.EXTENSION &&
+          !!dataToBeSubmitted?.actual_date);
       if (showLockConfirmDialog(dataToBeSubmitted) && !confirmSaveInLocked) {
         setShowEventLockDialog(true);
       } else {

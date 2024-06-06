@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useCallback } from "react";
 import { EVENT_TYPE } from "../phase/type";
 import eventService from "../../../services/eventService/eventService";
 import Icons from "../../icons";
@@ -311,6 +311,19 @@ const EventList = () => {
     return Promise.resolve(result);
   };
 
+  // update the selectedworkphase state in the context when the state of the work or workphases changes
+  useEffect(() => {
+    updateSelectedWorkPhaseState();
+  }, [workPhases, work]);
+
+  const updateSelectedWorkPhaseState = useCallback(() => {
+    if (selectedWorkPhase) {
+      const selectedWp = workPhases.filter(
+        (p) => p.work_phase.id === work?.current_work_phase_id
+      )[0];
+      setSelectedWorkPhase(selectedWp);
+    }
+  }, [work, workPhases]);
   const getWorkPhases = React.useCallback(async () => {
     if (work?.id) {
       setLoading(true);
@@ -328,12 +341,6 @@ const EventList = () => {
       const result = await workService.getById(String(work.id));
       const workResult = result.data as Work;
       setWork(workResult);
-      if (selectedWorkPhase) {
-        const selectedWp = workPhases.filter(
-          (p) => p.work_phase.id === workResult.current_work_phase_id
-        )[0];
-        setSelectedWorkPhase(selectedWp);
-      }
     }
   }, [workPhases]);
 
@@ -342,8 +349,7 @@ const EventList = () => {
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-    getWorkById();
-    getWorkPhases();
+    getWorkPhases().then(() => getWorkById());
     getTemplateUploadStatus();
     if (
       milestoneEvent?.event_configuration?.event_position === EventPosition.END

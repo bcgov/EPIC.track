@@ -21,7 +21,7 @@ from .base_model import BaseModel
 class LinkedWork(BaseModel):
     """Model for linked works"""
 
-    __tablename__ = "LinkedWorks"
+    __tablename__ = "linked_works"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     source_work_id = Column(ForeignKey("works.id"), nullable=False)
