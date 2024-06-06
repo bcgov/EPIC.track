@@ -35,9 +35,6 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     op.drop_table('LinkedWorks')
-    with op.batch_alter_table('special_fields_history', schema=None) as batch_op:
-        batch_op.create_index('entity_field_index', ['entity', 'entity_id', 'field_name', 'time_range'], unique=False)
-
     with op.batch_alter_table('staffs', schema=None) as batch_op:
         batch_op.alter_column('last_active_at',
                existing_type=postgresql.TIMESTAMP(),
@@ -68,9 +65,6 @@ def downgrade():
                existing_type=sa.DateTime(timezone=True),
                type_=postgresql.TIMESTAMP(),
                existing_nullable=True)
-
-    with op.batch_alter_table('special_fields_history', schema=None) as batch_op:
-        batch_op.drop_index('entity_field_index')
 
     op.create_table('LinkedWorks',
     sa.Column('id', sa.INTEGER(), server_default=sa.text('nextval(\'"LinkedWorks_id_seq"\'::regclass)'), autoincrement=True, nullable=False),
