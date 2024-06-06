@@ -57,7 +57,10 @@ const WorkList = () => {
     return (
       workStaffs
         ?.map((workStaff) => workStaff.work_lead.full_name)
-        .filter((lead) => lead)
+        .filter(
+          (lead, index, arr) =>
+            lead && arr && arr.findIndex((t) => t === lead) === index
+        )
         .sort() || []
     );
   }, [workStaffs]);
@@ -66,7 +69,10 @@ const WorkList = () => {
     return (
       workStaffs
         ?.map((workStaff) => workStaff.eao_team.name)
-        .filter((team) => team)
+        .filter(
+          (team, index, arr) =>
+            team && arr && arr.findIndex((t) => t === team) == index
+        )
         .sort() || []
     );
   }, [workStaffs]);
