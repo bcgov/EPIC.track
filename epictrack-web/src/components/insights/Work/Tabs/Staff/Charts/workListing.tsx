@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
@@ -14,6 +14,7 @@ import { sort } from "utils";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -25,7 +26,9 @@ const WorkList = () => {
     pageSize: 10,
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
-
+  const [workRoles, setWorkRoles] = React.useState<
+    MRT_ColumnDef<WorkStaffWithWork>[]
+  >([]);
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
   const { data: works } = useGetWorksQuery();
 
@@ -66,6 +69,103 @@ const WorkList = () => {
         .filter((team) => team)
         .sort() || []
     );
+  }, [workStaffs]);
+
+  const filteredStaffByPosition = useCallback(
+    (position: WorkStaffRole) => {
+      if (!workStaffs) return [];
+      const staff = workStaffs.flatMap((row: any) =>
+        row.staff
+          ? row.staff.filter((p: { role: Role }) => p.role.id === position)
+          : []
+      );
+      const staffSorted = sort(staff, "full_name");
+      const uniqueStaffNames = Array.from(
+        new Set(
+          staffSorted.map(
+            (staffEntry: any) =>
+              `${staffEntry.last_name}, ${staffEntry.first_name}`
+          )
+        )
+      );
+      return uniqueStaffNames;
+    },
+    [workStaffs]
+  );
+
+  const coLeadOptions = filteredStaffByPosition(WorkStaffRole.TEAM_CO_LEAD);
+  const officerAnalystOptions = filteredStaffByPosition(
+    WorkStaffRole.OFFICER_ANALYST
+  );
+
+  const roleFilterFunction = (row: any, id: any, filterValue: any) => {
+    const options =
+      id === WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST]
+        ? officerAnalystOptions
+        : coLeadOptions;
+    if (
+      !filterValue.length ||
+      filterValue.length > options.length // select all is selected
+    ) {
+      return true;
+    }
+
+    const value: string = row.getValue(id) || "";
+    // Split the cell value into individual names
+    const names = value.split("; ");
+
+    // Check if any name includes the filter value
+    return names.some((name) => filterValue.includes(name));
+  };
+
+  const getRolfilterOptions = (role: WorkStaffRole) => {
+    return role === WorkStaffRole.OFFICER_ANALYST
+      ? officerAnalystOptions
+      : coLeadOptions;
+  };
+
+  const tableColumns = React.useMemo(() => {
+    const cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
+    if (workStaffs && workStaffs.length > 0) {
+      const roles = [WorkStaffRole.TEAM_CO_LEAD, WorkStaffRole.OFFICER_ANALYST];
+      roles.forEach((role, index) => {
+        const roleName = WorkStaffRoleNames[role];
+        cols.push({
+          header: roleName,
+          id: `${WorkStaffRoleNames[role]}`,
+          filterSelectOptions: getRolfilterOptions(role),
+          accessorFn: (row: any) => {
+            if (!row.staff) {
+              return "";
+            }
+            const staffRowWithRole = row.staff.filter(
+              (p: { role: Role }) => p.role.id === role
+            );
+            return staffRowWithRole
+              .map((staff: any) => `${staff.last_name}, ${staff.first_name}`)
+              .join("; ");
+          },
+          Cell: ({ renderedCellValue }) => renderedCellValue,
+          enableHiding: false,
+          enableColumnFilter: true,
+          sortingFn: "sortFn",
+          filterVariant: "multi-select",
+          Filter: ({ header, column }) => {
+            return (
+              <TableFilter
+                isMulti
+                header={header}
+                column={column}
+                variant="inline"
+                name="rolesFilter"
+              />
+            );
+          },
+          filterFn: roleFilterFunction,
+        });
+      });
+    }
+    setWorkRoles(cols);
   }, [workStaffs]);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {
@@ -149,8 +249,10 @@ const WorkList = () => {
           return filterValue.includes(value);
         },
       },
+      ...workRoles,
     ];
-  }, [workLeads, teams, workStaffs]);
+  }, [workLeads, teams, workStaffs, workRoles]);
+
   return (
     <MasterTrackTable
       columns={columns}

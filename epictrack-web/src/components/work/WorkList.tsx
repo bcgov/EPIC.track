@@ -28,19 +28,22 @@ const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const WorkList = () => {
   const [workId, setWorkId] = React.useState<number>();
   const [showWorkDialogForm, setShowWorkDialogForm] = React.useState(false);
-
   const [phases, setPhases] = React.useState<string[]>([]);
   const [eaActs, setEAActs] = React.useState<string[]>([]);
   const [workTypes, setWorkTypes] = React.useState<string[]>([]);
   const [projects, setProjects] = React.useState<string[]>([]);
   const [ministries, setMinistries] = React.useState<string[]>([]);
   const [teams, setTeams] = React.useState<string[]>([]);
-
   const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
   const [works, setWorks] = React.useState<Work[]>([]);
   const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
     All_WORKS_FILTERS_CACHE_KEY,
-    []
+    [
+      {
+        id: "is_active",
+        value: [true],
+      },
+    ]
   );
 
   const loadWorks = async () => {
