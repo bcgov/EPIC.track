@@ -72,31 +72,6 @@ interface ExportToCsvOptions<T extends MRT_RowData> {
   filenamePrefix: string;
 }
 
-function getStaffNamesByRole(row: any, roleName: string): string {
-  return row.staff
-    .filter(
-      (staffMember: { role: { name: string } }) =>
-        staffMember.role.name === roleName
-    )
-    .map(
-      (staffMember: { first_name: string; last_name: string }) =>
-        `${staffMember.last_name} ${staffMember.first_name}`
-    )
-    .join("; ");
-}
-
-const customAccessors: { [key: string]: (row: any) => any } = {
-  "Responsible EPD": (row) =>
-    `${row.responsible_epd?.first_name} ${row.responsible_epd?.last_name}`,
-  "Work Lead": (row) =>
-    /* custom logic */ `${row.work_lead?.first_name} ${row.work_lead?.last_name}`,
-  Other: (row) => /* custom logic */ `${getStaffNamesByRole(row, "Other")}`,
-  "Officer / Analyst": (row) =>
-    `${getStaffNamesByRole(row, "Officer / Analyst")}`,
-  "FN CAIRT": (row) => `${getStaffNamesByRole(row, "FN CAIRT")}`,
-  Role: (row) => /* custom logic */ `${row?.role?.name}`,
-};
-
 export async function exportToCsv<T extends MRT_RowData>({
   table,
   downloadDate,
@@ -105,22 +80,22 @@ export async function exportToCsv<T extends MRT_RowData>({
   const columns = table
     .getVisibleFlatColumns()
     .map((p) => p.columnDef.id?.toString());
-  const filteredResult = table.getFilteredRowModel().flatRows.map((row) => {
-    const newRow = { ...row.original };
+
+  const csvRows = table.getFilteredRowModel().flatRows.map((row) => {
+    const csvRow: { [key: string]: any } = {};
     columns.forEach((column: string | undefined) => {
-      if (column && customAccessors[column]) {
-        newRow[column as keyof typeof newRow] = customAccessors[column](
-          row.original
-        );
+      if (column) {
+        csvRow[column] = row.getValue(column);
       }
     });
-    return newRow;
+    return csvRow;
   });
 
-  const csv = await json2csv(filteredResult, {
+  const csv = await json2csv(csvRows, {
     emptyFieldValue: "",
     keys: columns as string[],
   });
+
   const url = window.URL.createObjectURL(new Blob([csv as any]));
   const link = document.createElement("a");
   link.href = url;
