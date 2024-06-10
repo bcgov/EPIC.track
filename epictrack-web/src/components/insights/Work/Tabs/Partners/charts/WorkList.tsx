@@ -38,6 +38,7 @@ const WorkList = () => {
       showNotification("Error fetching works", { type: "error" });
     }
   }, [error]);
+
   const federalInvolvements = useMemo(() => {
     return Array.from(
       new Set(
@@ -160,7 +161,7 @@ const WorkList = () => {
         },
       },
       {
-        accessorKey: "indigenous_nations",
+        accessorKey: "indigenous_works.name",
         header: "First nations",
         size: 200,
         filterVariant: "multi-select",
