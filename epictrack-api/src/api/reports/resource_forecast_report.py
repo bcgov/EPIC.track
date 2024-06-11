@@ -345,7 +345,7 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _format_ea_type(self, work_data):
         """Format the capital investment"""
-        if work_data.get("project_phase", None) == 'Pre-Early Engagement':
+        if work_data.get("project_phase", None) == 'Pre-EA (EAC Assessment)':
             work_data["ea_type"] = 'Pre-EA'
         return work_data
 
