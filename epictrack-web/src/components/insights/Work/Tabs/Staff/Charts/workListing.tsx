@@ -54,29 +54,28 @@ const WorkList = () => {
   }, [workStaffs, works]);
 
   const workLeads = useMemo(() => {
-    return (
-      workStaffs
-        ?.map((workStaff) => workStaff.work_lead.full_name)
-        .filter((lead) => lead)
-        .sort() || []
+    return Array.from(
+      new Set(
+        workStaffs?.map((workStaff) => workStaff.work_lead.full_name).sort() ||
+          []
+      )
     );
   }, [workStaffs]);
 
   const teams = useMemo(() => {
-    return (
-      workStaffs
-        ?.map((workStaff) => workStaff.eao_team.name)
-        .filter((team) => team)
-        .sort() || []
+    return Array.from(
+      new Set(
+        workStaffs?.map((workStaff) => workStaff.eao_team.name).sort() || []
+      )
     );
   }, [workStaffs]);
 
   const filteredStaffByPosition = useCallback(
-    (position: WorkStaffRole) => {
+    (roleId: number) => {
       if (!workStaffs) return [];
       const staff = workStaffs.flatMap((row: any) =>
         row.staff
-          ? row.staff.filter((p: { role: Role }) => p.role.id === position)
+          ? row.staff.filter((p: { role: Role }) => p.role.id === roleId)
           : []
       );
       const staffSorted = sort(staff, "full_name");
@@ -118,12 +117,13 @@ const WorkList = () => {
     return names.some((name) => filterValue.includes(name));
   };
 
-  const getRolfilterOptions = (role: WorkStaffRole) => {
+  const getRolefilterOptions = (role: WorkStaffRole) => {
     return role === WorkStaffRole.OFFICER_ANALYST
       ? officerAnalystOptions
       : coLeadOptions;
   };
-
+  console.log("OFFICER ANALYST ", officerAnalystOptions);
+  console.log("CO-LEAD ", coLeadOptions);
   const tableColumns = React.useMemo(() => {
     const cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
     if (workStaffs && workStaffs.length > 0) {
@@ -133,7 +133,7 @@ const WorkList = () => {
         cols.push({
           header: roleName,
           id: `${WorkStaffRoleNames[role]}`,
-          filterSelectOptions: getRolfilterOptions(role),
+          filterSelectOptions: getRolefilterOptions(role),
           accessorFn: (row: any) => {
             if (!row.staff) {
               return "";
