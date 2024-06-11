@@ -335,6 +335,20 @@ class EAResourceForeCastReport(ReportFactory):
                 return filtered_result
         return data_items
 
+    def _format_capital_investment(self, work_data):
+        """Format the capital investment"""
+        if work_data.get("capital_investment", None):
+            work_data["capital_investment"] = (
+                f"{work_data['capital_investment']:,.0f}"
+            )
+        return work_data
+
+    def _format_ea_type(self, work_data):
+        """Format the capital investment"""
+        if work_data.get("project_phase", None) == 'Pre-EA (EAC Assessment)':
+            work_data["ea_type"] = 'Pre-EA'
+        return work_data
+
     def _format_data(self, data):
         """Format the data into required format"""
         response = []
@@ -347,11 +361,9 @@ class EAResourceForeCastReport(ReportFactory):
             work_data["responsible_epd"] = responsible_epd
             work_data["work_lead"] = work_lead
             work_data["work_team_members"] = "; ".join(staffs)
-            if work_data.get("capital_investment", None):
-                work_data["capital_investment"] = (
-                    f"{work_data['capital_investment']:,.0f}"
-                )
+            work_data = self._format_capital_investment(work_data)
             work_data = self._handle_months(work_data)
+            work_data = self._format_ea_type(work_data)
             response.append(work_data)
         return response
 

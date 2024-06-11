@@ -18,7 +18,6 @@ import {
 } from "material-react-table";
 import { json2csv } from "json-2-csv";
 import {
-  RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
   COMMON_ERROR_MESSAGE,
@@ -27,7 +26,6 @@ import ReportService from "../../../services/reportService";
 import { dateUtils } from "../../../utils";
 import { ResourceForecastModel } from "./type";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer, ETParagraph, IButton } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -35,7 +33,6 @@ import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 export default function ResourceForecast() {
@@ -179,8 +176,8 @@ export default function ResourceForecast() {
     [rfData]
   );
 
-  const workFilter = filterFn("work_title");
   const eaTypeFilter = filterFn("ea_type");
+  const workFilter = filterFn("work_title");
   const projectPhaseFilter = filterFn("project_phase");
   const eaActFilter = filterFn("ea_act");
   const iaacFilter = filterFn("iaac");
@@ -383,9 +380,9 @@ export default function ResourceForecast() {
       setRFData([]);
     }
   }, [reportDate]);
+
   const downloadPDFReport = React.useCallback(async () => {
     try {
-      fetchReportData();
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.RESOURCE_FORECAST,
         {
@@ -412,7 +409,8 @@ export default function ResourceForecast() {
         type: "error",
       });
     }
-  }, [reportDate, filters, fetchReportData]);
+  }, [reportDate, filters]);
+
   return (
     <ETPageContainer
       direction="row"

@@ -22,6 +22,7 @@ export type ResourceForecastModel = {
   type: string;
   work_id: number;
   months: Array<MonthColumn>;
+  pre_ea: boolean;
 };
 
 interface MonthColumn {
