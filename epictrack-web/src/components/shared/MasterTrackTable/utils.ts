@@ -77,16 +77,25 @@ export async function exportToCsv<T extends MRT_RowData>({
   downloadDate,
   filenamePrefix,
 }: ExportToCsvOptions<T>) {
-  const filteredResult = table
-    .getFilteredRowModel()
-    .flatRows.map((p) => p.original);
   const columns = table
     .getVisibleFlatColumns()
     .map((p) => p.columnDef.id?.toString());
-  const csv = await json2csv(filteredResult, {
+
+  const csvRows = table.getFilteredRowModel().flatRows.map((row) => {
+    const csvRow: { [key: string]: any } = {};
+    columns.forEach((column: string | undefined) => {
+      if (column) {
+        csvRow[column] = row.getValue(column);
+      }
+    });
+    return csvRow;
+  });
+
+  const csv = await json2csv(csvRows, {
     emptyFieldValue: "",
     keys: columns as string[],
   });
+
   const url = window.URL.createObjectURL(new Blob([csv as any]));
   const link = document.createElement("a");
   link.href = url;
