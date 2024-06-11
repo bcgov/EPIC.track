@@ -98,7 +98,7 @@ class Work(BaseModelVersioned):
     responsible_epd_id = Column(ForeignKey('staffs.id'), nullable=False)
     work_lead_id = Column(ForeignKey('staffs.id'), nullable=False)
     work_type_id = Column(ForeignKey('work_types.id'), nullable=False)
-    current_work_phase_id = Column(ForeignKey('work_phases.id'), nullable=True, default=None)
+    current_work_phase_id = Column(Integer, nullable=True, default=None)
     substitution_act_id = Column(ForeignKey('substitution_acts.id'), nullable=True, default=None)
     eac_decision_by_id = Column(ForeignKey('staffs.id'), nullable=True)
     decision_by_id = Column(ForeignKey('staffs.id'), nullable=False)
@@ -113,8 +113,12 @@ class Work(BaseModelVersioned):
     federal_involvement = relationship('FederalInvolvement', foreign_keys=[federal_involvement_id], lazy='select')
     responsible_epd = relationship('Staff', foreign_keys=[responsible_epd_id], lazy='select')
     work_lead = relationship('Staff', foreign_keys=[work_lead_id], lazy='select')
-    work_type = relationship('WorkType', foreign_keys=[work_type_id], lazy='select')
-    current_work_phase = relationship("WorkPhase", foreign_keys=[current_work_phase_id], lazy='select')
+    work_type = relationship("WorkType", foreign_keys=[work_type_id], lazy="select")
+    current_work_phase = relationship(
+        "WorkPhase",
+        primaryjoin="WorkPhase.id == foreign(Work.current_work_phase_id)",
+        lazy="select",
+    )
     substitution_act = relationship("SubstitutionAct", foreign_keys=[substitution_act_id], lazy='select')
     eac_decision_by = relationship("Staff", foreign_keys=[eac_decision_by_id], lazy='select')
     decision_by = relationship("Staff", foreign_keys=[decision_by_id], lazy='select')
