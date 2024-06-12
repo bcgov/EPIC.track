@@ -544,13 +544,14 @@ const EventList = () => {
 
   const getWorkPhaseById = React.useCallback(async () => {
     const workPhaseId = selectedWorkPhase?.work_phase.id;
+    const wasCompleted = selectedWorkPhase?.work_phase.is_completed;
     if (workPhaseId) {
       try {
         const workPhase = (await workService.getWorkPhaseById(
           Number(workPhaseId)
         )) as WorkPhase;
 
-        if (workPhase?.is_completed) {
+        if (workPhase?.is_completed && !wasCompleted) {
           dispatch(showConfetti(true));
         }
       } catch (error) {
