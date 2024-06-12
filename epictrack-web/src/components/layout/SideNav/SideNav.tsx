@@ -22,7 +22,7 @@ import { useAppDispatch, useAppSelector } from "../../../hooks";
 import Icons from "../../icons";
 import { groupBy } from "../../../utils";
 import { IconProps } from "../../icons/type";
-import { ETHeading4, ETSubhead } from "../../shared";
+import { ETSubhead } from "../../shared";
 import { hasPermission } from "../../shared/restricted";
 import { toggleDrawer } from "styles/uiStateSlice";
 import MiniDrawer from "./MiniDrawer";
@@ -250,9 +250,12 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
           flexDirection: "row",
           justifyContent: "center",
           color: Palette.white,
+          marginBottom: "2em",
         }}
       >
-        <ETHeading4>{AppConfig.version}</ETHeading4>
+        <ETSubhead>
+          {open ? `Version: ${AppConfig.version}` : AppConfig.version}
+        </ETSubhead>
       </Box>
     </Box>
   );
