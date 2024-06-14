@@ -21,6 +21,7 @@ class CreateWork(ActionFactory):
             "ea_act_id": source_event.work.ea_act_id,
             "work_type_id": params.get("work_type"),
             "start_date": start_date,
+            "simple_title": "",
             "report_description": "",
             "project_id": source_event.work.project_id,
             "ministry_id": source_event.work.ministry_id,
