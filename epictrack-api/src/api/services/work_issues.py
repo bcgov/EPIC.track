@@ -35,10 +35,9 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         return work_issues
 
     @classmethod
-    def find_work_issue_by_id(cls, work_id, issue_id):
+    def find_work_issue_by_id(cls, issue_id):
         """Find all status related to a work"""
-        results = WorkIssuesModel.find_by_params({"work_id": work_id, "id": issue_id})
-        return results[0] if results else None
+        return WorkIssuesModel.find_by_id(issue_id)
 
     @classmethod
     def find_work_issues_by_work_ids(cls, work_ids):
@@ -132,7 +131,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     @classmethod
     def edit_issue(cls, work_id, issue_id, issue_data):
         """Edit an existing work issue, and save it only if there are changes."""
-        work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
+        work_issue = WorkIssuesService.find_work_issue_by_id(issue_id)
 
         if not work_issue:
             raise ResourceNotFoundError("Work issue doesnt exist")
@@ -160,9 +159,9 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
 
     @classmethod
-    def edit_issue_update(cls, work_id, issue_id, issue_update_id, issue_update_data):
+    def edit_issue_update(cls, issue_id, issue_update_id, issue_update_data):
         """Edit an existing work issue update."""
-        work_issue = WorkIssuesService.find_work_issue_by_id(work_id, issue_id)
+        work_issue = WorkIssuesService.find_work_issue_by_id(issue_id)
 
         if not work_issue:
             raise ResourceNotFoundError("Work issue doesnt exist")

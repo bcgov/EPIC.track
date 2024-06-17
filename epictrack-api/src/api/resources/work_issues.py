@@ -95,7 +95,7 @@ class EditIssues(Resource):
     def patch(work_id, issue_id, update_id):
         """Approve a work status."""
         request_dict = req.WorkIssuesUpdateEditSchema().load(API.payload)
-        edited_issue_update = WorkIssuesService.edit_issue_update(work_id, issue_id, update_id, request_dict)
+        edited_issue_update = WorkIssuesService.edit_issue_update(issue_id, update_id, request_dict)
 
         return res.WorkIssueUpdatesResponseSchema().dump(edited_issue_update), HTTPStatus.OK
 
