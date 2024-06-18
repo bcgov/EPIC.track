@@ -23,6 +23,7 @@ from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
 from api.schemas.work_v2 import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
+from api.models.event_template import EventPositionEnum
 from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
 from .common_service import event_compare_func
@@ -195,9 +196,23 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         remaining_milestone_events = [
             event for event in work_phase_events if event.actual_date is None
         ]
-        result["next_milestone"] = (
-            remaining_milestone_events[0].name if remaining_milestone_events else None
+        next_milestone = (
+            remaining_milestone_events[0] if remaining_milestone_events else None
         )
+        end_milestone = next(
+            (
+                event
+                for event in remaining_milestone_events
+                if event.event_position == EventPositionEnum.END.value
+            ),
+            None,
+        )
+        if next_milestone and end_milestone and next_milestone.id == end_milestone.id:
+            if end_milestone.id == remaining_milestone_events[-1].id:
+                next_milestone = end_milestone
+            else:
+                next_milestone = remaining_milestone_events[0]
+        result["next_milestone"] = next_milestone.name if next_milestone else None
         result["next_milestone_date"] = (
             remaining_milestone_events[0].anticipated_date
             if remaining_milestone_events
