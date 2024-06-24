@@ -1,20 +1,22 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](../LICENSE)
 [![Report API CI](https://github.com/bcgov/eao-project-reports/actions/workflows/reports-api-ci.yml/badge.svg)](https://github.com/bcgov/eao-project-reports/actions/workflows/reports-api-ci.yml)
 
-
 # REPORTS API
 
 EAO Project report services.
 
-
 # EpicTrack Local Setup
 
 ## GitHub Repository
+
 [EPIC.track GitHub](https://github.com/bcgov/EPIC.track)
+
 - Fork a new branch and point to the `develop` branch.
 
 ## Required Access
+
 Zenhub, Openshift, Keycloak
+
 - You will need access. For now, contact dinesh.pb@aot-technologies.com
 
 ## Development Environment Setup
@@ -22,6 +24,7 @@ Zenhub, Openshift, Keycloak
 ### Windows
 
 #### Database
+
 - Set up a Postgres database locally: [Docker Postgres](https://hub.docker.com/_/postgres)
 - If you don’t have Docker, install it from: [Docker Desktop Install](https://docs.docker.com/desktop/install/windows-install/)
 
@@ -39,21 +42,25 @@ Zenhub, Openshift, Keycloak
 6. Switch your interpreter correctly. Refer to the image below:
    ![Interpreter Switch](path/to/image)
 7. Set up environment variables in your system:
+
    - `FLASK_APP`
    - `FLASK_ENV`
 
    Example:
+
    ```sh
    export FLASK_APP=manage.py
    export FLASK_ENV=development
    ```
-8. Configure `PYTHONPATH` to your project's folder location up to `reports-api/src`.
 
-9. Create a `.env` file in your `reports-api` folder. Example content:
+8. Configure `PYTHONPATH` to your project's folder location up to `epictrack-api/src`.
+
+9. Create a `.env` file in your `epictrack-api` folder. Example content:
+
    ```env
    # Environment-specific settings for python-dotenv
 
-   # ===== reports-api =====
+   # ===== epictrack-api =====
 
    # Connection to dev database.
    DATABASE_URL="postgresql://postgres@localhost:8432/postgres"
@@ -119,7 +126,6 @@ Zenhub, Openshift, Keycloak
 
 The application will open up on the port specified in the `.env` file.
 
-
 ## Running Liniting
 
 1. Run `make flake8` or `flake8 src/api tests`.
@@ -128,4 +134,4 @@ The application will open up on the port specified in the `.env` file.
 ## Running Unit Tests
 
 1. Tests are run from the Status bar at the bottom of the workbench in VS Code or `pytest` command.
-2. Next run `make coverage` to generate the coverage report, which appears in the *htmlcov* directory.
+2. Next run `make coverage` to generate the coverage report, which appears in the _htmlcov_ directory.
