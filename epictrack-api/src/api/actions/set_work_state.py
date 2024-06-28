@@ -1,5 +1,6 @@
 """Set work state action handler"""
 
+from datetime import datetime
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.work import Work, WorkStateEnum, EndingWorkStateEnum
@@ -25,8 +26,10 @@ class SetWorkState(ActionFactory):
             }
             change_phase_end_event.run(source_event, change_phase_end_event_param)
         is_active = True
+        work_decision_date = None
         if work_state in [state.value for state in EndingWorkStateEnum]:
             is_active = False
+            work_decision_date = datetime.now()
         db.session.query(Work).filter(Work.id == source_event.work_id).update(
-            {Work.work_state: work_state, Work.is_active: is_active}
+            {Work.work_state: work_state, Work.is_active: is_active, Work.work_decision_date: work_decision_date}
         )

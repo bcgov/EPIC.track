@@ -9,6 +9,18 @@ export type WorkByType = {
   work_type_id: number;
 };
 
+export type WorkByYear = {
+  id: number;
+  count: number;
+  year: string;
+};
+
+export type WorkStateByYear = {
+  count: number;
+  year: string;
+  work_state: string;
+};
+
 export type AssessmentByPhase = {
   count: number;
   phase: string;

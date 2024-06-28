@@ -12,6 +12,9 @@ from api.insights.work_ministry_insight import WorkMinistryInsightGenerator
 from api.insights.work_staff_insight import WorkStaffInsightGenerator
 from api.insights.work_team_insight import WorkTeamInsightGenerator
 from api.insights.work_type_insight import WorkByTypeInsightGenerator
+from api.insights.work_year_created_insight import WorkByYearOpenedInsightGenerator
+from api.insights.work_year_completed_insight import WorkByYearCompletedInsightGenerator
+from api.insights.work_closure_by_work_state import WorkClosureByWorkState
 
 
 def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
@@ -26,6 +29,9 @@ def get_insight_generator(resource: str, group_by: str) -> InsightGenerator:
             "first_nation": WorkFirstNationInsightGenerator,
             "type": WorkByTypeInsightGenerator,
             "assessment_by_phase": AssessmentWorksByPhaseInsightGenerator,
+            "year_opened": WorkByYearOpenedInsightGenerator,
+            "year_completed": WorkByYearCompletedInsightGenerator,
+            "work_closure_breakdown": WorkClosureByWorkState
         },
         "projects": {
             "region": ProjectByRegionInsightGenerator,

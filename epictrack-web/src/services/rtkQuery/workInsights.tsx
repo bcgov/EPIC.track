@@ -10,6 +10,8 @@ import {
   WorkByNation,
   WorkByStaff,
   AssessmentByPhase,
+  WorkByYear,
+  WorkStateByYear,
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
@@ -26,6 +28,9 @@ export const workInsightsApi = createApi({
     "WorksByNation",
     "WorksWithNations",
     "AssessmentsByPhase",
+    "WorksByYearOpened",
+    "WorksByYearCompleted",
+    "WorkClosureBreakdown",
   ],
   reducerPath: "workInsightsApi",
   baseQuery: fetchBaseQuery({
@@ -166,6 +171,15 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByStaff", id: "LIST" }],
     }),
+    getWorksByYearOpened: builder.query<WorkByYear[], void>({
+      query: () => `insights/works?group_by=year_opened`,
+    }),
+    getWorksByYearCompleted: builder.query<WorkByYear[], void>({
+      query: () => `insights/works?group_by=year_completed`,
+    }),
+    getWorkClosureBreakdown: builder.query<WorkStateByYear[], void>({
+      query: () => `insights/works?group_by=work_closure_breakdown`,
+    }),
   }),
   refetchOnMountOrArgChange: 300,
 });
@@ -181,4 +195,7 @@ export const {
   useGetWorksByStaffQuery,
   useGetWorksWithNationsQuery,
   useGetAssessmentsByPhaseQuery,
+  useGetWorksByYearOpenedQuery,
+  useGetWorksByYearCompletedQuery,
+  useGetWorkClosureBreakdownQuery,
 } = workInsightsApi;
