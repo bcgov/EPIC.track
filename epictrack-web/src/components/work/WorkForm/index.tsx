@@ -485,7 +485,7 @@ export default function WorkForm({
             fetchWork();
           }}
           options={epds || []}
-          disabled={!canEdit}
+          disabled={!canEdit || isWorkLeadFieldUnlocked}
         >
           <ControlledSelectV2
             disabled={work?.responsible_epd_id != undefined}
@@ -507,7 +507,7 @@ export default function WorkForm({
             fetchWork();
           }}
           options={leads || []}
-          disabled={!canEdit}
+          disabled={!canEdit || isEpdFieldUnlocked}
         >
           <ControlledSelectV2
             disabled={work?.work_lead_id != undefined}
