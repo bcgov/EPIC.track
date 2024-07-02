@@ -4,7 +4,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
-import { Staff } from "../../models/staff";
+import { Staff, defaultStaff } from "../../models/staff";
 import { ListType } from "../../models/code";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import { MasterContext } from "../shared/MasterContext";
@@ -68,7 +68,7 @@ export default function StaffForm({ ...props }) {
 
   const methods = useForm<Staff>({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item || { is_active: true },
+    defaultValues: ctx.item as Staff,
     mode: "onBlur",
   });
 
@@ -81,7 +81,7 @@ export default function StaffForm({ ...props }) {
   } = methods;
 
   React.useEffect(() => {
-    reset(ctx.item);
+    reset(ctx.item ?? defaultStaff);
   }, [ctx.item]);
 
   const getPositions = async () => {
