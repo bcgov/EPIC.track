@@ -85,6 +85,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
         className="modal-header"
       >
         <IconButton
+          autoFocus
           onClick={onCancel}
           sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
           disableRipple
@@ -158,8 +159,16 @@ const TrackDialog: FC<TrackDialogProps> = ({
                   backgroundColor: Palette.primary.light,
                 },
               }}
-              onClick={formId ? undefined : onOk}
-              autoFocus
+              onClick={(event: React.MouseEvent) => {
+                const isFocused =
+                  event?.currentTarget === document?.activeElement;
+                if (!isFocused) {
+                  event.preventDefault();
+                  event.stopPropagation();
+                  return;
+                }
+                return formId ? undefined : onOk;
+              }}
               size="large"
               type={formId ? "submit" : "button"}
               form={formId}
