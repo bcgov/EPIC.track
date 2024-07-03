@@ -28,3 +28,7 @@ export interface StaffWorkRole {
   is_active: boolean;
   status: string;
 }
+
+export const defaultStaff = {
+  is_active: true,
+};
