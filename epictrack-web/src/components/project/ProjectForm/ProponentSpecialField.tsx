@@ -48,7 +48,16 @@ export const ProponentSpecialField = ({
 
   return (
     <>
-      <Grid item xs={6}>
+      <Grid item xs={12} />
+      <Grid
+        item
+        xs={6}
+        sx={{
+          position: "absolute",
+          right: 2,
+          width: 372,
+        }}
+      >
         <SpecialFieldLock
           id={id}
           open={open}

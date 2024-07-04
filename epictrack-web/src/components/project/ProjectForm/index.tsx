@@ -226,6 +226,7 @@ export default function ProjectForm({
         container
         spacing={2}
         onSubmit={handleSubmit(onSubmitHandler)}
+        sx={{ position: "sticky" }}
       >
         <ProjectNameSpecialField
           id={project?.id}
