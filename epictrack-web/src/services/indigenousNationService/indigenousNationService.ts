@@ -37,9 +37,10 @@ class IndigenousNationService implements ServiceBase {
     );
   }
   async checkIndigenousNationExists(name: string, id: number) {
+    const encodedName = encodeURIComponent(name);
     return await http.GetRequest(
       Endpoints.IndigenousNations.INDIGENOUS_NATIONS +
-        `/exists?name=${name}${id ? "&indigenous_nation_id=" + id : ""}`
+        `/exists?name=${encodedName}${id ? "&indigenous_nation_id=" + id : ""}`
     );
   }
 }

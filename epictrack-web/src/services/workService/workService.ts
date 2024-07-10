@@ -35,9 +35,10 @@ class WorkService implements ServiceBase {
   }
 
   async checkWorkExists(title: string, id?: string) {
+    const encodedTitle = encodeURIComponent(title);
     return await http.GetRequest(
       Endpoints.Works.WORKS +
-        `/exists?title=${title}${id ? "&work_id=" + id : ""}`
+        `/exists?title=${encodedTitle}${id ? "&work_id=" + id : ""}`
     );
   }
 
