@@ -31,9 +31,10 @@ class ProponentService implements ServiceBase {
   }
 
   async checkProponentExists(name: string, id: number) {
+    const encodedName = encodeURIComponent(name);
     return await http.GetRequest(
       Endpoints.Proponents.PROPONENTS +
-        `/exists?name=${name}${id ? "&proponent_id=" + id : ""}`
+        `/exists?name=${encodedName}${id ? "&proponent_id=" + id : ""}`
     );
   }
 }
