@@ -5,6 +5,7 @@ import Staff from "./Staff";
 import { useWorkInsightsContext } from "../WorkInsightsContext";
 import General from "./General";
 import Partners from "./Partners";
+import Trends from "./Trends";
 
 const WorkInsightsTabs = () => {
   const { activeTab } = useWorkInsightsContext();
@@ -18,6 +19,9 @@ const WorkInsightsTabs = () => {
       </Case>
       <Case condition={activeTab === WORK_INSIGHTS_TAB.Partners}>
         <Partners />
+      </Case>
+      <Case condition={activeTab === WORK_INSIGHTS_TAB.Trends}>
+        <Trends />
       </Case>
     </Switch>
   );

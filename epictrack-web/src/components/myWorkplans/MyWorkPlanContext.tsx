@@ -108,7 +108,6 @@ export const MyWorkplansProvider = ({
         PAGE_SIZE,
         searchOptions
       );
-      console.log("WORK PLANS", result);
       let newWorkplans;
       if (shouldAppend) {
         newWorkplans = [...workplans, ...result.data.items];

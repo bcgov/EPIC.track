@@ -122,8 +122,7 @@ const WorkList = () => {
       ? officerAnalystOptions
       : coLeadOptions;
   };
-  console.log("OFFICER ANALYST ", officerAnalystOptions);
-  console.log("CO-LEAD ", coLeadOptions);
+
   const tableColumns = React.useMemo(() => {
     const cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
     if (workStaffs && workStaffs.length > 0) {
