@@ -26,6 +26,7 @@ from api.models.work_issues import WorkIssues
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
+from api.utils.constants import CANADA_TIMEZONE, StalenessEnum
 
 from .report_factory import ReportFactory
 
@@ -53,6 +54,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "event_title",
             "event_date",
             "project_id",
+            "date_updated",
         ]
         super().__init__(data_keys, filters=filters, color_intensity=color_intensity)
         self.report_date = None
@@ -85,17 +87,9 @@ class ThirtySixtyNinetyReport(ReportFactory):
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA 30-60-90 Report"""
         max_date = report_date + timedelta(days=90)
-        status_update_max_date_query = (
-            db.session.query(
-                WorkStatus.work_id,
-                func.max(WorkStatus.posted_date).label("max_posted_date"),
-            )
-            .filter(WorkStatus.posted_date <= report_date)
-            .group_by(WorkStatus.work_id)
-            .subquery()
-        )
         next_pecp_query = self._get_next_pcp_query(report_date, max_date)
         valid_event_ids = self._get_valid_event_ids(report_date, max_date)
+        latest_status_updates = self._get_latest_status_update_query()
 
         results_qry = (
             Work.query.filter(
@@ -118,6 +112,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 EventConfiguration,
                 EventConfiguration.id == Event.event_configuration_id,
             )
+            .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
             .outerjoin(
                 next_pecp_query,
                 and_(
@@ -125,14 +120,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 ),
             )
             .outerjoin(WorkStatus)
-            .outerjoin(
-                status_update_max_date_query,
-                and_(
-                    status_update_max_date_query.c.work_id == WorkStatus.work_id,
-                    status_update_max_date_query.c.max_posted_date
-                    == WorkStatus.posted_date,
-                ),
-            )
             .add_columns(
                 Project.name.label("project_name"),
                 WorkType.report_title.label("work_report_title"),
@@ -141,10 +128,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
                 Work.report_description.label("work_short_description"),
-                WorkStatus.description.label("work_status_text"),
                 Event.notes.label("decision_information"),
                 Event.description.label("event_description"),
                 next_pecp_query.c.topic.label("pecp_explanation"),
+                latest_status_updates.c.posted_date.label("date_updated"),
+                latest_status_updates.c.description.label("work_status_text"),
                 Work.id.label("work_id"),
                 Event.id.label("event_id"),
                 Event.name.label("event_title"),
@@ -156,7 +144,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
             )
         )
 
-        # print(results_qry.statement.compile(compile_kwargs={"literal_binds": True}))
         return results_qry.all()
 
     def _format_data(self, data):
@@ -245,6 +232,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
         self.report_date = report_date.astimezone(utc)
         data = self._fetch_data(report_date)
         data = self._format_data(data)
+        data = self._update_staleness(data, report_date)
         if return_type == "json" and data:
             return {"data": data}, None
         if not data:
@@ -507,3 +495,21 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 entity_ids=project_ids_by_period[period],
             )
         return periods
+
+    def _update_staleness(self, data: dict, report_date: datetime) -> dict:
+        """Calculate the staleness based on report date"""
+        date = report_date.astimezone(CANADA_TIMEZONE)
+        for _, work_type_data in data.items():
+            for work in work_type_data:
+                if work["date_updated"]:
+                    diff = (date - work["date_updated"]).days
+                    if diff > 10:
+                        work["status_staleness"] = StalenessEnum.CRITICAL.value
+                    elif diff > 5:
+                        work["status_staleness"] = StalenessEnum.WARN.value
+                    else:
+                        work["status_staleness"] = StalenessEnum.GOOD.value
+                else:
+                    work["status_staleness"] = StalenessEnum.CRITICAL.value
+        return data
+    

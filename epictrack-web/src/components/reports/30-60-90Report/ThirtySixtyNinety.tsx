@@ -84,7 +84,7 @@ export default function ThirtySixtyNinety() {
     }
   }, [reportDate]);
 
-  const isStaleIndicatorRequired = (reportItem: any) => {
+  const isIssueStaleIndicatorRequired = (reportItem: any) => {
     return (reportItem["work_issues"] as []).some(
       (workIssue) => stalenessLevel(workIssue) === StalenessEnum.CRITICAL
     );
@@ -162,6 +162,34 @@ export default function ThirtySixtyNinety() {
       </div>
     );
   }
+
+  const overallStalenessLevel = (
+    status_staleness: string,
+    work_issues: any
+  ) => {
+    const issuesStaleness = new Set(
+      work_issues.map((issue: any) => issue.staleness)
+    );
+
+    if (
+      status_staleness === StalenessEnum.CRITICAL ||
+      issuesStaleness.has(StalenessEnum.CRITICAL)
+    ) {
+      return StalenessEnum.CRITICAL;
+    } else if (
+      status_staleness === StalenessEnum.WARN ||
+      issuesStaleness.has(StalenessEnum.WARN)
+    ) {
+      return StalenessEnum.WARN;
+    } else if (
+      status_staleness === StalenessEnum.GOOD ||
+      issuesStaleness.has(StalenessEnum.GOOD)
+    ) {
+      return StalenessEnum.GOOD;
+    }
+    return StalenessEnum.CRITICAL;
+  };
+
   return (
     <ETPageContainer
       direction="row"
@@ -194,6 +222,32 @@ export default function ThirtySixtyNinety() {
                         <Accordion key={itemIndex}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography>
+                              <Chip
+                                style={{
+                                  marginRight: "0.5rem",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  width: "100px",
+                                  ...staleLevel(
+                                    overallStalenessLevel(
+                                      item["status_staleness"],
+                                      item["work_issues"]
+                                    )
+                                  ),
+                                }}
+                                label={
+                                  <>
+                                    <b>
+                                      {item["date_updated"]
+                                        ? dateUtils.formatDate(
+                                            item["date_updated"],
+                                            DISPLAY_DATE_FORMAT
+                                          )
+                                        : "Needs Status"}
+                                    </b>
+                                  </>
+                                }
+                              />
                               {item["project_name"]} - {item["event_title"]}:
                               {dateUtils.formatDate(
                                 item["event_date"],
@@ -209,7 +263,22 @@ export default function ThirtySixtyNinety() {
                             >
                               <Tab label="Basic" />
                               <Tab label="Work Short Description" />
-                              <Tab label="Status" />
+                              <Tab
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "0.5rem",
+                                }}
+                                label={
+                                  <>
+                                    Status
+                                    {item["status_staleness"] ===
+                                      StalenessEnum.CRITICAL && (
+                                      <IndicatorIcon />
+                                    )}
+                                  </>
+                                }
+                              />
                               <Tab
                                 sx={{
                                   display: "flex",
@@ -219,7 +288,7 @@ export default function ThirtySixtyNinety() {
                                 label={
                                   <>
                                     Issues
-                                    {isStaleIndicatorRequired(item) && (
+                                    {isIssueStaleIndicatorRequired(item) && (
                                       <IndicatorIcon />
                                     )}
                                   </>

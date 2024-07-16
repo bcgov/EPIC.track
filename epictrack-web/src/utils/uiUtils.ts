@@ -2,7 +2,6 @@ import { StalenessEnum } from "constants/application-constant";
 import { Palette } from "styles/theme";
 
 const staleLevel = (staleness: string) => {
-  console.log(staleness);
   if (staleness == StalenessEnum.CRITICAL) {
     return {
       background: Palette.error.main,
