@@ -61,17 +61,19 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     let staffProfile;
     try {
       const staffResult = await staffService.getByEmail(userInfo["email"]);
+      console.log(staffResult);
       if (staffResult.status == 200) {
         staffProfile = staffResult.data as Staff;
       }
     } catch (e) {
       console.log(e);
     }
-    const realmAccesRoles = KeycloakData.tokenParsed?.realm_access?.roles ?? [];
+    const realmAccessRoles =
+      KeycloakData.tokenParsed?.realm_access?.roles ?? [];
     const clientLevelRoles =
       KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]
         .roles ?? [];
-    const roles = [...realmAccesRoles, ...clientLevelRoles];
+    const roles = [...realmAccessRoles, ...clientLevelRoles];
 
     const userDetail = new UserDetail(
       userInfo["sub"],
@@ -81,6 +83,7 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       userInfo["family_name"],
       userInfo["email"],
       staffProfile?.id ?? 0,
+      staffProfile?.idir_user_id ?? "",
       staffProfile?.phone ?? "",
       staffProfile?.position?.name ?? "",
       roles

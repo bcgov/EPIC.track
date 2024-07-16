@@ -28,6 +28,7 @@ class Staff(BaseModelVersioned):
     __tablename__ = "staffs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    idir_user_id = Column(String(100), nullable=False, unique=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     phone = Column(String(), nullable=False)
@@ -35,19 +36,19 @@ class Staff(BaseModelVersioned):
     is_active = Column(Boolean(), default=True, nullable=False)
     position_id = Column(ForeignKey("positions.id"), nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
-
     position = relationship("Position", foreign_keys=[position_id], lazy="select")
 
     full_name = column_property(last_name + ", " + first_name)
     last_active_at = Column(DateTime(timezone=True), server_default=utcnow())
 
     # Define the excluded fields from versioning
-    __exclude_from_tracking_history__ = {'last_active_at'}
+    __exclude_from_tracking_history__ = {"last_active_at"}
 
     def as_dict(self):  # pylint: disable=arguments-differ
         """Return Json representation."""
         return {
             "id": self.id,
+            "idir_user_id": self.idir_user_id,
             "first_name": self.first_name,
             "last_name": self.last_name,
             "full_name": self.full_name,

@@ -4,6 +4,7 @@ import { MasterBase } from "./type";
 
 export interface Staff extends MasterBase {
   id: number;
+  idir_user_id: string;
   phone: string;
   email: string;
   is_active: boolean;
