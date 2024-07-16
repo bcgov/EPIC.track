@@ -5,6 +5,7 @@ from io import BytesIO
 from typing import Dict, List
 
 from operator import attrgetter
+from dateutil import parser
 from pytz import utc
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -26,7 +27,8 @@ from api.models.work_issues import WorkIssues
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
-from api.utils.constants import CANADA_TIMEZONE, StalenessEnum
+from api.utils.constants import CANADA_TIMEZONE
+from api.utils.enums import StalenessEnum
 
 from .report_factory import ReportFactory
 
@@ -54,7 +56,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "event_title",
             "event_date",
             "project_id",
-            "date_updated",
+            "status_date_updated",
         ]
         super().__init__(data_keys, filters=filters, color_intensity=color_intensity)
         self.report_date = None
@@ -131,7 +133,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 Event.notes.label("decision_information"),
                 Event.description.label("event_description"),
                 next_pecp_query.c.topic.label("pecp_explanation"),
-                latest_status_updates.c.posted_date.label("date_updated"),
+                latest_status_updates.c.posted_date.label("status_date_updated"),
                 latest_status_updates.c.description.label("work_status_text"),
                 Work.id.label("work_id"),
                 Event.id.label("event_id"),
@@ -220,9 +222,19 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     key=attrgetter("posted_date"),
                 )
                 setattr(issue, "latest_update", latest_update)
-            result_item["work_issues"] = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
+
+            issues = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
                 issue_per_work
             )
+            dates = [parser.isoparse(issue["latest_update"]["posted_date"]) for issue in issues]
+            dates.append(result_item["status_date_updated"])
+
+            if len(dates):
+                result_item["oldest_update"] = min(dates)
+            else:
+                result_item["oldest_update"] = None
+
+            result_item["work_issues"] = issues
         return data
 
     def generate_report(
@@ -501,8 +513,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
         date = report_date.astimezone(CANADA_TIMEZONE)
         for _, work_type_data in data.items():
             for work in work_type_data:
-                if work["date_updated"]:
-                    diff = (date - work["date_updated"]).days
+                if work["status_date_updated"]:
+                    diff = (date - work["status_date_updated"]).days
                     if diff > 10:
                         work["status_staleness"] = StalenessEnum.CRITICAL.value
                     elif diff > 5:
@@ -512,4 +524,3 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 else:
                     work["status_staleness"] = StalenessEnum.CRITICAL.value
         return data
-    

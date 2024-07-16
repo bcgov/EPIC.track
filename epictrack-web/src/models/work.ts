@@ -18,6 +18,7 @@ export interface Work extends MasterBase {
   start_date: string;
   anticipated_decision_date: string;
   decision_date: string;
+  work_decision_date: string;
   first_nation_notes: string;
   status_notes: string;
   work_state: string;

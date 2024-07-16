@@ -1,6 +1,5 @@
 """File representing constants used in the application"""
 
-from enum import Enum
 from pytz import timezone
 
 from api.models.project import Project, ProjectStateEnum
@@ -41,10 +40,3 @@ SPECIAL_FIELD_ENTITY_MODEL_MAPS = {
 }
 
 CANADA_TIMEZONE = timezone("US/Pacific")
-
-class StalenessEnum(Enum):
-    """Status update staleness level ENUM"""
-
-    CRITICAL = "CRITICAL"
-    WARN = "WARN"
-    GOOD = "GOOD"

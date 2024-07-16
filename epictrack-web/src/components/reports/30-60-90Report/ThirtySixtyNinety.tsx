@@ -33,6 +33,7 @@ import { IconProps } from "../../icons/type";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
+import { If } from "react-if";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 export default function ThirtySixtyNinety() {
@@ -85,8 +86,10 @@ export default function ThirtySixtyNinety() {
   }, [reportDate]);
 
   const isIssueStaleIndicatorRequired = (reportItem: any) => {
-    return (reportItem["work_issues"] as []).some(
-      (workIssue) => stalenessLevel(workIssue) === StalenessEnum.CRITICAL
+    return (reportItem["work_issues"] as []).some((workIssue) =>
+      [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
+        stalenessLevel(workIssue)
+      )
     );
   };
   const stalenessLevel = (workIssue: any) => {
@@ -238,11 +241,15 @@ export default function ThirtySixtyNinety() {
                                 label={
                                   <>
                                     <b>
-                                      {item["date_updated"]
-                                        ? dateUtils.formatDate(
-                                            item["date_updated"],
-                                            DISPLAY_DATE_FORMAT
-                                          )
+                                      {item["oldest_update"] && reportDate
+                                        ? dateUtils
+                                            .diff(
+                                              reportDate,
+                                              item["oldest_update"],
+                                              "days"
+                                            )
+                                            .toString()
+                                            .concat(" days ago")
                                         : "Needs Status"}
                                     </b>
                                   </>
@@ -331,6 +338,28 @@ export default function ThirtySixtyNinety() {
                               {item["work_short_description"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={2}>
+                              <If condition={item["status_date_updated"]}>
+                                <Chip
+                                  style={{
+                                    marginRight: "0.5rem",
+                                    borderRadius: "4px",
+                                    fontSize: "12px",
+                                    width: "100px",
+                                    ...staleLevel(item["status_staleness"]),
+                                  }}
+                                  label={
+                                    <>
+                                      <b>
+                                        {dateUtils.formatDate(
+                                          item["status_date_updated"],
+                                          DISPLAY_DATE_FORMAT
+                                        )}
+                                      </b>
+                                    </>
+                                  }
+                                />
+                              </If>
+
                               {item["work_status_text"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={3}>

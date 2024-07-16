@@ -23,7 +23,8 @@ from api.models.staff import Staff
 from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
-from api.utils.constants import CANADA_TIMEZONE, StalenessEnum
+from api.utils.constants import CANADA_TIMEZONE
+from api.utils.enums import StalenessEnum
 
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory

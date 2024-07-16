@@ -59,6 +59,7 @@ const generateMockWork = (): Work => {
     start_date: faker.date.past().toISOString(),
     anticipated_decision_date: faker.date.future().toISOString(),
     decision_date: faker.date.future().toISOString(),
+    work_decision_date: faker.date.future().toISOString(),
     first_nation_notes: faker.lorem.paragraph(),
     status_notes: faker.lorem.paragraph(),
     work_state: faker.random.word(),

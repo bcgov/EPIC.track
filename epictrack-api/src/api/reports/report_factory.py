@@ -4,9 +4,9 @@ from base64 import b64encode
 from collections import defaultdict
 from io import BytesIO
 from pathlib import Path
-from api.models import WorkStatus, db
 from sqlalchemy import and_, func
 
+from api.models import WorkStatus, db
 
 
 # pylint: disable=too-many-arguments
@@ -55,11 +55,7 @@ class ReportFactory(ABC):
             output_stream = BytesIO(template_file.read())
             output_stream = b64encode(output_stream.getvalue())
             return output_stream.decode("ascii")
-        
-    @abstractmethod
-    def _get_latest_status_update_query(self):
-        """Create and return the subquery to find latest status update."""
-        
+
     def _get_latest_status_update_query(self):
         """Create and return the subquery to find latest status update."""
         status_update_max_date_query = (
