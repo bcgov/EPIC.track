@@ -81,7 +81,6 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       userInfo["family_name"],
       userInfo["email"],
       staffProfile?.id ?? 0,
-      staffProfile?.idir_user_id ?? "",
       staffProfile?.phone ?? "",
       staffProfile?.position?.name ?? "",
       roles

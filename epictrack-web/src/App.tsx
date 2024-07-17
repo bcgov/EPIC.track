@@ -25,7 +25,6 @@ export function App() {
   const uiState = useAppSelector((state) => state.uiState);
   const drawerWidth = isMediumScreen ? uiState.drawerWidth : 0;
   React.useEffect(() => {
-    console.log(dispatch);
     UserService.initKeycloak(dispatch);
   }, [dispatch]);
   return (

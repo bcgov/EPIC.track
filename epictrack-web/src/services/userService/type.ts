@@ -31,7 +31,6 @@ export class UserDetail {
     lastName: string,
     email: string,
     staffId: number,
-    staffIDIR: string,
     phone: string,
     position: string,
     roles: string[]
@@ -42,7 +41,6 @@ export class UserDetail {
     this.lastName = lastName;
     this.email = email;
     this.staffId = staffId;
-    this.staffIDIR = staffIDIR;
     this.phone = phone;
     this.position = position;
     this.groups = groups.map((p) => p.substring(1, p.length));
