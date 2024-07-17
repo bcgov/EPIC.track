@@ -14,6 +14,7 @@ const staffs: Staff[] = [
     last_name: "", // Add the missing property
     phone: "",
     email: "",
+    idir_user_id: "",
     is_active: false,
     position_id: 2 /* add more missing properties here */,
     position: { name: "test", id: 1, sort_order: 0 }, // Add the missing property
@@ -25,6 +26,7 @@ const staffs: Staff[] = [
     last_name: "", // Add the missing property
     phone: "",
     email: "",
+    idir_user_id: "",
     is_active: false,
     position_id: 2 /* add more missing properties here */,
     position: { name: "test", id: 1, sort_order: 1 }, // Add the missing property

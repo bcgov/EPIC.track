@@ -20,6 +20,7 @@ const generateMockStaff = (): Staff => {
   staffCounter += 1;
   return {
     id: faker.datatype.number() + staffCounter,
+    idir_user_id: faker.datatype.uuid(),
     full_name: `${faker.name.firstName()} ${faker.name.lastName()} ${staffCounter}`,
     is_active: faker.datatype.boolean(),
     position_id: faker.datatype.number() + staffCounter,
