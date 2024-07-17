@@ -20,7 +20,6 @@ export class UserDetail {
   lastName: string;
   email: string;
   staffId: number;
-  staffIDIR: string;
   position: string;
   phone: string;
   roles: string[];
