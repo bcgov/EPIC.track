@@ -63,6 +63,7 @@ export const Palette = {
   },
   white: "#FFFFFF",
   black: "#000000",
+  purple: "#4006AC",
   hover: {
     light: "#4C81AF",
   },
