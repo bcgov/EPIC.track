@@ -31,6 +31,17 @@ class KeycloakService:
         """Get users"""
         response = KeycloakService._request_keycloak('users?max=2000')
         return response.json()
+    
+    @staticmethod
+    def get_user_by_email(email: str):
+        """Get a user by their email address. If the user does not exist, throw an error."""
+        encoded_email = requests.utils.quote(email)  # URL encode the email to handle special characters
+        response = KeycloakService._request_keycloak(f'users?email={encoded_email}')
+        users = response.json()
+        if not users:
+            raise ValueError(f"No user found with email: {email}")
+        print(users)
+        return users
 
     @staticmethod
     def get_group_members(group_id):

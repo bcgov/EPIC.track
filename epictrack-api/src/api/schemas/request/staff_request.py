@@ -98,26 +98,12 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     is_active = fields.Boolean(
         metadata={"description": "Active status of the staff"}, required=True
     )
-    
-    # New field for idir_user_id
-    idir_user_id = fields.Str(
-        metadata={"description": "IDIR User ID of the staff"},
-        required=True,
-    )   
 
     @pre_load
     def preprocess_data(self, data, **kwargs):
-        """Preprocess data for staff"""
-        # Convert email to lower case
+        # Normalize email
         if "email" in data:
             data["email"] = data["email"].lower()
-        
-        # Map idir_user_id to preferred_username if necessary
-        # Assuming 'preferred_username' is passed in the data and should be mapped to 'idir_user_id'
-        if "preferred_username" in data:
-            data["idir_user_id"] = data["preferred_username"]
-            del data["preferred_username"]  # Remove the original key if not needed
-
         return data
 
 

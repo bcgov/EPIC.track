@@ -55,6 +55,7 @@ class Staffs(Resource):
     @profiletime
     def post():
         """Create new staff"""
+        print('create staff ')
         request_json = req.StaffBodyParameterSchema().load(API.payload)
         staff = StaffService.create_staff(request_json)
         return res.StaffResponseSchema().dump(staff), HTTPStatus.CREATED

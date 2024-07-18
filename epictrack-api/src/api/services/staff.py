@@ -23,7 +23,7 @@ from api.models import Staff, db
 from api.models.position import Position
 from api.schemas.response import StaffResponseSchema
 from api.utils.token_info import TokenInfo
-
+from api.services.keycloak import KeycloakService
 
 class StaffService:
     """Service to manage Staff related operations."""
@@ -59,9 +59,20 @@ class StaffService:
     @classmethod
     def create_staff(cls, payload: dict):
         """Create a new staff."""
-        exists = cls.check_existence(payload["email"])
+        # Normalize the email and check for existence in the local database
+        email = payload["email"].lower()
+        exists = cls.check_existence(email)
+
         if exists:
             raise ResourceExistsError("Staff with same email already exists")
+        # Fetch user details from Keycloak
+        users = KeycloakService.get_user_by_email(email)
+        print(f"users: {users[0]}")
+        if not users:
+            raise ResourceNotFoundError(f"No user found with email: {email}")
+        # Assuming the first user returned is the correct one
+        payload["idir_user_id"] = users[0].get('id')
+        # Create the staff object
         staff = Staff(**payload)
         current_app.logger.info(f"Staff obj {dir(staff)}")
         staff.save()
