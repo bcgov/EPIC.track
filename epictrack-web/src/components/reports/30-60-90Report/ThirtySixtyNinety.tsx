@@ -33,6 +33,7 @@ import { IconProps } from "../../icons/type";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
+import { If } from "react-if";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 export default function ThirtySixtyNinety() {
@@ -84,9 +85,11 @@ export default function ThirtySixtyNinety() {
     }
   }, [reportDate]);
 
-  const isStaleIndicatorRequired = (reportItem: any) => {
-    return (reportItem["work_issues"] as []).some(
-      (workIssue) => stalenessLevel(workIssue) === StalenessEnum.CRITICAL
+  const isIssueStaleIndicatorRequired = (reportItem: any) => {
+    return (reportItem["work_issues"] as []).some((workIssue) =>
+      [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
+        stalenessLevel(workIssue)
+      )
     );
   };
   const stalenessLevel = (workIssue: any) => {
@@ -162,6 +165,34 @@ export default function ThirtySixtyNinety() {
       </div>
     );
   }
+
+  const overallStalenessLevel = (
+    status_staleness: string,
+    work_issues: any
+  ) => {
+    const issuesStaleness = new Set(
+      work_issues.map((issue: any) => issue.staleness)
+    );
+
+    if (
+      status_staleness === StalenessEnum.CRITICAL ||
+      issuesStaleness.has(StalenessEnum.CRITICAL)
+    ) {
+      return StalenessEnum.CRITICAL;
+    } else if (
+      status_staleness === StalenessEnum.WARN ||
+      issuesStaleness.has(StalenessEnum.WARN)
+    ) {
+      return StalenessEnum.WARN;
+    } else if (
+      status_staleness === StalenessEnum.GOOD ||
+      issuesStaleness.has(StalenessEnum.GOOD)
+    ) {
+      return StalenessEnum.GOOD;
+    }
+    return StalenessEnum.CRITICAL;
+  };
+
   return (
     <ETPageContainer
       direction="row"
@@ -194,6 +225,36 @@ export default function ThirtySixtyNinety() {
                         <Accordion key={itemIndex}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                             <Typography>
+                              <Chip
+                                style={{
+                                  marginRight: "0.5rem",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  width: "100px",
+                                  ...staleLevel(
+                                    overallStalenessLevel(
+                                      item["status_staleness"],
+                                      item["work_issues"]
+                                    )
+                                  ),
+                                }}
+                                label={
+                                  <>
+                                    <b>
+                                      {item["oldest_update"] && reportDate
+                                        ? dateUtils
+                                            .diff(
+                                              reportDate,
+                                              item["oldest_update"],
+                                              "days"
+                                            )
+                                            .toString()
+                                            .concat(" days ago")
+                                        : "Needs Status"}
+                                    </b>
+                                  </>
+                                }
+                              />
                               {item["project_name"]} - {item["event_title"]}:
                               {dateUtils.formatDate(
                                 item["event_date"],
@@ -209,7 +270,22 @@ export default function ThirtySixtyNinety() {
                             >
                               <Tab label="Basic" />
                               <Tab label="Work Short Description" />
-                              <Tab label="Status" />
+                              <Tab
+                                sx={{
+                                  display: "flex",
+                                  flexDirection: "row",
+                                  gap: "0.5rem",
+                                }}
+                                label={
+                                  <>
+                                    Status
+                                    {item["status_staleness"] ===
+                                      StalenessEnum.CRITICAL && (
+                                      <IndicatorIcon />
+                                    )}
+                                  </>
+                                }
+                              />
                               <Tab
                                 sx={{
                                   display: "flex",
@@ -219,7 +295,7 @@ export default function ThirtySixtyNinety() {
                                 label={
                                   <>
                                     Issues
-                                    {isStaleIndicatorRequired(item) && (
+                                    {isIssueStaleIndicatorRequired(item) && (
                                       <IndicatorIcon />
                                     )}
                                   </>
@@ -262,6 +338,28 @@ export default function ThirtySixtyNinety() {
                               {item["work_short_description"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={2}>
+                              <If condition={item["status_date_updated"]}>
+                                <Chip
+                                  style={{
+                                    marginRight: "0.5rem",
+                                    borderRadius: "4px",
+                                    fontSize: "12px",
+                                    width: "100px",
+                                    ...staleLevel(item["status_staleness"]),
+                                  }}
+                                  label={
+                                    <>
+                                      <b>
+                                        {dateUtils.formatDate(
+                                          item["status_date_updated"],
+                                          DISPLAY_DATE_FORMAT
+                                        )}
+                                      </b>
+                                    </>
+                                  }
+                                />
+                              </If>
+
                               {item["work_status_text"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={3}>

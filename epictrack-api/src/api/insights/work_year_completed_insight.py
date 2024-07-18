@@ -21,7 +21,7 @@ class WorkByYearCompletedInsightGenerator:
                 func.count().label('count'),
                 func.row_number().over(order_by=extract('year', Work.work_decision_date)).label('id')
             )
-            .filter( 
+            .filter(
                 Work.work_decision_date.isnot(None),
             )
             .group_by(extract('year', Work.work_decision_date))

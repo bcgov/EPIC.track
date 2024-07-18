@@ -38,3 +38,11 @@ class RegionEntityType(Enum):
 
     ENV = "ENV"
     FLNR = "FLNR"
+
+
+class StalenessEnum(Enum):
+    """Status update staleness level ENUM"""
+
+    CRITICAL = "CRITICAL"
+    WARN = "WARN"
+    GOOD = "GOOD"
