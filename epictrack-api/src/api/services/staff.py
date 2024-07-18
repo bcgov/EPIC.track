@@ -67,11 +67,10 @@ class StaffService:
             raise ResourceExistsError("Staff with same email already exists")
         # Fetch user details from Keycloak
         users = KeycloakService.get_user_by_email(email)
-        print(f"users: {users[0]}")
         if not users:
             raise ResourceNotFoundError(f"No user found with email: {email}")
         # Assuming the first user returned is the correct one
-        payload["idir_user_id"] = users[0].get('id')
+        payload["idir_user_id"] = users[0].get('username')
         # Create the staff object
         staff = Staff(**payload)
         current_app.logger.info(f"Staff obj {dir(staff)}")
@@ -81,9 +80,15 @@ class StaffService:
     @classmethod
     def update_staff(cls, staff_id: int, payload: dict):
         """Update existing staff."""
-        exists = cls.check_existence(payload["email"], staff_id)
+        email = payload["email"].lower()
+        exists = cls.check_existence(email, staff_id)
         if exists:
             raise ResourceExistsError("Staff with same email already exists")
+        users = KeycloakService.get_user_by_email(email)
+        if not users:
+            raise ResourceNotFoundError(f"No user found with email: {email}")
+        # Assuming the first user returned is the correct one
+        payload["idir_user_id"] = users[0].get('username')
         staff = Staff.find_by_id(staff_id)
         if not staff:
             raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
@@ -204,3 +209,31 @@ class StaffService:
         current_app.logger.info(f"Enabled {enabled_count} Staffs")
         # Remove updated indigenous_nations to avoid creating duplicates
         return data[~data["email"].isin(to_update)]
+  
+    @classmethod
+    def staff_idir_migration(cls, data):
+        """Marks old entries as deleted or active depending on their existence in input data.
+
+        Returns the DataFrame after filtering out updated entries.
+        """
+        existing_staffs_qry = db.session.query(Staff).filter()
+        existing_staffs = existing_staffs_qry.all()
+        for staff in existing_staffs:
+            email = staff.email
+            try:
+                # Fetch the user from Keycloak using the email
+                users = KeycloakService.get_user_by_email(email)
+                if not users:
+                    raise ResourceNotFoundError(f"No user found with email: {email}")
+                idir_user_id = users[0].get('username')
+
+                # Update the staff member's idir_user_id in the database
+                staff.idir_user_id = idir_user_id
+                db.session.add(staff)  # Mark the staff member for update
+
+            except ResourceNotFoundError as e:
+                # Handle the error as needed, e.g., log it, skip the current staff, etc.
+                print(e)
+
+        # Commit the changes to the database after updating all staff members
+        db.session.commit()
