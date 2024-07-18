@@ -100,8 +100,8 @@ class StaffBodyParameterSchema(RequestBodyParameterSchema):
     )
 
     @pre_load
-    def preprocess_data(self, data, **kwargs):
-        # Normalize email
+    def convert_email_to_lower(self, data, **kwargs):  # pylint: disable=unused-argument
+        """Converts staff email into lower case string"""
         if "email" in data:
             data["email"] = data["email"].lower()
         return data
