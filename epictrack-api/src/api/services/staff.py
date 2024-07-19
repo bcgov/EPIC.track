@@ -209,9 +209,9 @@ class StaffService:
         current_app.logger.info(f"Enabled {enabled_count} Staffs")
         # Remove updated indigenous_nations to avoid creating duplicates
         return data[~data["email"].isin(to_update)]
-  
+ 
     @classmethod
-    def staff_idir_migration(cls, data):
+    def staff_idir_migration(cls):
         """Marks old entries as deleted or active depending on their existence in input data.
 
         Returns the DataFrame after filtering out updated entries.
