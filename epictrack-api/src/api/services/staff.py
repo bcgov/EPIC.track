@@ -25,6 +25,7 @@ from api.schemas.response import StaffResponseSchema
 from api.utils.token_info import TokenInfo
 from api.services.keycloak import KeycloakService
 
+
 class StaffService:
     """Service to manage Staff related operations."""
 
