@@ -31,7 +31,7 @@ class KeycloakService:
         """Get users"""
         response = KeycloakService._request_keycloak('users?max=2000')
         return response.json()
-  
+
     @staticmethod
     def get_user_by_email(email: str):
         """Get a user by their email address. If the user does not exist, throw an error."""
