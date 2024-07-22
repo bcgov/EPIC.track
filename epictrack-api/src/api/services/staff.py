@@ -233,6 +233,7 @@ class StaffService:
     def validate_email_and_get_idir_user_id(cls, email):
         """
         Validates if the email is unique (excluding the current staff member) and tries to fetch the user from Keycloak.
+
         :param email: The email to validate and use for fetching the user from Keycloak.
         :return: The idir_user_id of the user found in Keycloak.
         :raises ResourceExistsError: If another staff member with the same email already exists.
