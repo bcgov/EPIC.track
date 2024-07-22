@@ -18,7 +18,7 @@ from typing import IO, List
 import pandas as pd
 from flask import current_app
 
-from api.exceptions import ResourceExistsError, ResourceNotFoundError
+from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import Staff, db
 from api.models.position import Position
 from api.schemas.response import StaffResponseSchema
@@ -62,16 +62,7 @@ class StaffService:
         """Create a new staff."""
         # Normalize the email and check for existence in the local database
         email = payload["email"].lower()
-        exists = cls.check_existence(email)
-
-        if exists:
-            raise ResourceExistsError("Staff with same email already exists")
-        # Fetch user details from Keycloak
-        users = KeycloakService.get_user_by_email(email)
-        if not users:
-            raise ResourceNotFoundError(f"No user found with email: {email}")
-        # Assuming the first user returned is the correct one
-        payload["idir_user_id"] = users[0].get('username')
+        payload["idir_user_id"] = cls.validate_email_and_get_idir_user_id(email)
         # Create the staff object
         staff = Staff(**payload)
         current_app.logger.info(f"Staff obj {dir(staff)}")
@@ -81,18 +72,17 @@ class StaffService:
     @classmethod
     def update_staff(cls, staff_id: int, payload: dict):
         """Update existing staff."""
-        email = payload["email"].lower()
-        exists = cls.check_existence(email, staff_id)
-        if exists:
-            raise ResourceExistsError("Staff with same email already exists")
-        users = KeycloakService.get_user_by_email(email)
-        if not users:
-            raise ResourceNotFoundError(f"No user found with email: {email}")
-        # Assuming the first user returned is the correct one
-        payload["idir_user_id"] = users[0].get('username')
         staff = Staff.find_by_id(staff_id)
         if not staff:
             raise ResourceNotFoundError(f"Staff with id '{staff_id}' not found")
+
+        new_email = payload["email"].lower()
+        # Check if the email has changed
+        if staff.email.lower() != new_email:
+            # Validate the new email and get idir_user_id from Keycloak
+            idir_user_id = cls.validate_email_and_get_idir_user_id(new_email)
+            payload["idir_user_id"] = idir_user_id
+
         staff = staff.update(payload)
         return staff
 
@@ -225,8 +215,8 @@ class StaffService:
                 # Fetch the user from Keycloak using the email
                 users = KeycloakService.get_user_by_email(email)
                 if not users:
-                    raise ResourceNotFoundError(f"No user found with email: {email}")
-                idir_user_id = users[0].get('username')
+                    raise UnprocessableEntityError(f"No user found with email: {email}")
+                idir_user_id = cls.validate_email_and_get_idir_user_id(email)
 
                 # Update the staff member's idir_user_id in the database
                 staff.idir_user_id = idir_user_id
@@ -238,3 +228,23 @@ class StaffService:
 
         # Commit the changes to the database after updating all staff members
         db.session.commit()
+
+    @classmethod
+    def validate_email_and_get_idir_user_id(cls, email):
+        """
+        Validates if the email is unique (excluding the current staff member) and tries to fetch the user from Keycloak.
+        :param email: The email to validate and use for fetching the user from Keycloak.
+        :param staff_id: The ID of the current staff member (to exclude from the uniqueness check).
+        :return: The idir_user_id of the user found in Keycloak.
+        :raises ResourceExistsError: If another staff member with the same email already exists.
+        :raises UnprocessableEntityError: If no user is found in Keycloak with the given email.
+        """
+        exists = cls.check_existence(email)
+        if exists:
+            raise ResourceExistsError("Staff with same email already exists")
+    
+        users = KeycloakService.get_user_by_email(email)
+        if not users:
+            raise UnprocessableEntityError(f"No user found with email: {email}")
+     
+        return users[0].get('username')
