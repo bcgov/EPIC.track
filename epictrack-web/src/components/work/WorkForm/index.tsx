@@ -137,6 +137,7 @@ export default function WorkForm({
     React.useState<boolean>(false);
 
   const isSpecialFieldUnlocked = isEpdFieldUnlocked || isWorkLeadFieldUnlocked;
+  const workHasBeenCreated = work?.id ? true : false;
 
   useEffect(() => {
     reset(work ?? defaultWork);
@@ -331,7 +332,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id.toString()}
             getOptionLabel={(o: ListType) => o.name}
             {...register("work_type_id")}
-            disabled={!canEdit || isSpecialFieldUnlocked}
+            disabled={!canEdit || workHasBeenCreated}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={4}>
@@ -340,9 +341,9 @@ export default function WorkForm({
           </ETFormLabel>
           <ControlledDatePicker
             name="start_date"
+            disabled={!canEdit || isSpecialFieldUnlocked}
             datePickerProps={{
               minDate: dayjs(MIN_WORK_START_DATE),
-              disabled: !canEdit || isSpecialFieldUnlocked,
             }}
           />
         </Grid>
@@ -358,7 +359,7 @@ export default function WorkForm({
             getOptionValue={(o: ListType) => o?.id?.toString()}
             getOptionLabel={(o: ListType) => o?.name}
             {...register("project_id")}
-            disabled={!canEdit || isSpecialFieldUnlocked}
+            disabled={!canEdit || workHasBeenCreated}
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>

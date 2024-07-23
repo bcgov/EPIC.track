@@ -714,7 +714,6 @@ const EventForm = ({
                   referenceDate: dayjs(
                     selectedWorkPhase?.work_phase.start_date
                   ),
-                  disabled: isFormFieldsLocked,
                   minDate: anticipatedMinDate,
                   onDateChange: (event: any, defaultOnChange: any) => {
                     const d = event ? event["$d"] : null;
@@ -739,7 +738,6 @@ const EventForm = ({
                 }
                 datePickerProps={{
                   referenceDate: dayjs(acutalReferenceDate),
-                  disabled: isFormFieldsLocked,
                   minDate: actualDateMin,
                   maxDate: actualDateMax,
                   onDateChange: (event: any, defaultOnChange: any) => {

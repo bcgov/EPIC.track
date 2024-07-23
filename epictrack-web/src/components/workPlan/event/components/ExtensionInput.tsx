@@ -111,7 +111,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           name="phase_end_date"
           disabled={props.isFormFieldsLocked}
           datePickerProps={{
-            disabled: props.isFormFieldsLocked,
             onDateChange: (event: any, defaultOnChange: any) => {
               const d = event ? event["$d"] : null;
               defaultOnChange(d);
