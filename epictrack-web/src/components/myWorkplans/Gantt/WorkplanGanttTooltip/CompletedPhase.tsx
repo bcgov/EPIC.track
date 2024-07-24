@@ -1,15 +1,15 @@
 import React from "react";
 import { GanttItem } from "components/gantt/types";
 import { ETCaption2 } from "components/shared";
-import moment from "moment";
 import { Palette } from "styles/theme";
 import { Grid } from "@mui/material";
 import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
+import { getTaskSpan } from "../util";
 
 export const CompletedPhase = ({ task }: { task: GanttItem }) => {
   const { formatDate } = dateUtils;
-  const taskSpan = moment(task.end).diff(moment(task.start), "days") + 1;
+  const taskSpan = getTaskSpan(task.start, task.end);
 
   return (
     <Grid container alignItems={"flex-start"} textAlign={"left"}>
