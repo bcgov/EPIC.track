@@ -100,6 +100,15 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
     [phase]
   );
 
+  const getPhaseOverdueColour = (daysLeft: number, isLegislated: boolean) => {
+    if (daysLeft >= 0) return Palette.neutral.dark;
+    if (isLegislated) {
+      return Palette.error.dark;
+    } else {
+      return Palette.purple;
+    }
+  };
+
   return (
     <>
       <Box
@@ -164,10 +173,10 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
                         bold={isSelectedPhase}
                         sx={{
                           ...summaryContentStyle,
-                          color:
-                            phase.days_left < 0
-                              ? Palette.error.dark
-                              : Palette.neutral.dark,
+                          color: getPhaseOverdueColour(
+                            phase.days_left,
+                            phase.work_phase.legislated
+                          ),
                         }}
                       >
                         {phase.work_phase.is_completed && (

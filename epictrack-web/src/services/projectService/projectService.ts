@@ -37,9 +37,10 @@ class ProjectService implements ServiceBase {
   }
 
   async checkProjectExists(name: string, id: number) {
+    const encodedName = encodeURIComponent(name);
     return await http.GetRequest(
       Endpoints.Projects.PROJECTS +
-        `/exists?name=${name}${id ? "&project_id=" + id : ""}`
+        `/exists?name=${encodedName}${id ? "&project_id=" + id : ""}`
     );
   }
 

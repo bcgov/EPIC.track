@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { SpecialFieldGrid } from "../../shared/specialField";
 import {
+  EPIC_SUPPORT_LINKS,
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
@@ -68,7 +69,10 @@ export const EPDSpecialField = ({
             description={
               <ETCaption3>
                 Update the Responsible EPD of this work.{" "}
-                <Link>Click this link</Link> for detailed instructions.
+                <Link href={EPIC_SUPPORT_LINKS.SPECIAL_HISTORY} target="_blank">
+                  Click this link
+                </Link>{" "}
+                for detailed instructions.
               </ETCaption3>
             }
             options={selectOptions}

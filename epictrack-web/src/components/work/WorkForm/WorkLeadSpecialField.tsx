@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
 import { SpecialFieldGrid } from "../../shared/specialField";
 import {
+  EPIC_SUPPORT_LINKS,
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
 import { ETCaption3, ETFormLabel } from "../../shared";
-import { Grid } from "@mui/material";
+import { Grid, Link } from "@mui/material";
 import { When } from "react-if";
 import { Staff } from "../../../models/staff";
 import { SpecialFieldLock } from "../../shared/specialField/components/SpecialFieldLock";
@@ -69,7 +70,10 @@ export const WorkLeadSpecialField = ({
             description={
               <ETCaption3>
                 Update the Work Lead of this work.{" "}
-                <a href="#">Click this link</a> for detailed instructions.
+                <Link href={EPIC_SUPPORT_LINKS.SPECIAL_HISTORY} target="_blank">
+                  Click this link
+                </Link>{" "}
+                for detailed instructions.
               </ETCaption3>
             }
             options={selectOptions}

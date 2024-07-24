@@ -32,6 +32,12 @@ const ButtonBar = () => {
       >
         Partners
       </TabButton>
+      <TabButton
+        active={activeTab === WORK_INSIGHTS_TAB.Trends}
+        onClick={() => setActiveTab(WORK_INSIGHTS_TAB.Trends)}
+      >
+        Trends
+      </TabButton>
     </Stack>
   );
 };

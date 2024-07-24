@@ -1,6 +1,5 @@
 """Classes for specific report types."""
 from datetime import datetime, timedelta
-from enum import Enum
 
 from flask import jsonify
 from pytz import timezone
@@ -24,22 +23,14 @@ from api.models.staff import Staff
 from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
-from api.models.work_status import WorkStatus
 from api.utils.constants import CANADA_TIMEZONE
+from api.utils.enums import StalenessEnum
 
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
 
 
 # pylint:disable=not-callable
-
-
-class StalenessEnum(Enum):
-    """Status update staleness level ENUM"""
-
-    CRITICAL = "CRITICAL"
-    WARN = "WARN"
-    GOOD = "GOOD"
 
 
 class EAAnticipatedScheduleReport(ReportFactory):
@@ -255,33 +246,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 func.coalesce(Event.actual_date, Event.anticipated_date) >= start_date,
             )
             .group_by(Event.work_id)
-            .subquery()
-        )
-
-    def _get_latest_status_update_query(self):
-        """Create and return the subquery to find latest status update."""
-        status_update_max_date_query = (
-            db.session.query(
-                WorkStatus.work_id,
-                func.max(WorkStatus.posted_date).label("max_posted_date"),
-            )
-            .filter(WorkStatus.is_approved.is_(True))
-            .group_by(WorkStatus.work_id)
-            .subquery()
-        )
-        return (
-            WorkStatus.query.filter(
-                WorkStatus.is_approved.is_(True),
-                WorkStatus.is_active.is_(True),
-                WorkStatus.is_deleted.is_(False),
-            )
-            .join(
-                status_update_max_date_query,
-                and_(
-                    WorkStatus.work_id == status_update_max_date_query.c.work_id,
-                    WorkStatus.posted_date == status_update_max_date_query.c.max_posted_date,
-                ),
-            )
             .subquery()
         )
 
