@@ -25,10 +25,11 @@ def upgrade():
 
     with op.batch_alter_table("staffs_history", schema=None) as batch_op:
         batch_op.add_column(
-            sa.Column("idir_user_id", sa.String(length=100), autoincrement=False)
+            sa.Column("idir_user_id", sa.String(
+                length=100), autoincrement=False)
         )
-           
-    StaffService.update_idir_user_id()
+
+    StaffService.staff_idir_migration()
 
     # ### end Alembic commands ###
 
