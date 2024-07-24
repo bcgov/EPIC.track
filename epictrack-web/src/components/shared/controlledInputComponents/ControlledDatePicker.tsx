@@ -13,7 +13,6 @@ type ControlledDatePickerProps = {
     referenceDate?: dayjs.Dayjs;
     minDate?: dayjs.Dayjs | undefined;
     maxDate?: dayjs.Dayjs | undefined;
-    disabled?: boolean;
     onDateChange?: (
       value: dayjs.Dayjs | null,
       defaultOnChangeFunc: (value: dayjs.Dayjs | null) => void

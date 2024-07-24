@@ -7,6 +7,7 @@ import { store } from "store";
 import { UserDetail } from "services/userService/type";
 import { AppConfig } from "config";
 import { setupIntercepts } from "../../../../../cypress/support/utils";
+import { WORK_STATE } from "components/shared/constants";
 
 const generateFakePosition = () => {
   return {
@@ -179,6 +180,145 @@ const endpoints = [
   },
 ];
 
+const mockWork = {
+  id: faker.number.int(),
+  title: faker.lorem.words(3),
+  simple_title: faker.lorem.word(),
+  report_description: faker.lorem.sentence(),
+  epic_description: faker.lorem.sentence(),
+  is_cac_recommended: false,
+  is_active: true,
+  is_complete: false,
+  is_high_priority: false,
+  is_deleted: false,
+  start_date: faker.date.past().toISOString(),
+  anticipated_decision_date: faker.date.future().toISOString(),
+  decision_date: faker.date.future().toISOString(),
+  work_decision_date: faker.date.future().toISOString(),
+  first_nation_notes: faker.lorem.paragraph(),
+  status_notes: faker.lorem.paragraph(),
+  work_state: WORK_STATE.IN_PROGRESS.value,
+  project_id: faker.number.int(),
+  ministry_id: faker.number.int(),
+  ea_act_id: faker.number.int(),
+  eao_team_id: faker.number.int(),
+  federal_involvement_id: faker.number.int(),
+  responsible_epd_id: faker.number.int(),
+  work_lead_id: faker.number.int(),
+  work_type_id: faker.number.int(),
+  current_work_phase_id: faker.number.int(),
+  substitution_act_id: faker.number.int(),
+  eac_decision_by_id: faker.number.int(),
+  decision_by_id: faker.number.int(),
+  decision_maker_position_id: faker.number.int(),
+  start_date_locked: faker.datatype.boolean(),
+  created_at: faker.date.past().toISOString(),
+  project: {
+    id: faker.number.int(),
+    name: faker.lorem.words(2),
+    created_at: faker.date.past().toISOString(),
+    description: faker.lorem.sentence(),
+    address: faker.lorem.word(),
+    abbreviation: faker.lorem.word(),
+    type: { id: faker.number.int(), name: faker.lorem.word() },
+    sub_type: { id: faker.number.int(), name: faker.lorem.word() },
+    proponent: { id: faker.number.int(), name: faker.lorem.word() },
+    region_env: { id: faker.number.int(), name: faker.lorem.word() },
+    region_flnro: { id: faker.number.int(), name: faker.lorem.word() },
+  },
+  ministry: {
+    id: faker.number.int(),
+    name: faker.lorem.word(),
+    abbreviation: faker.lorem.word(),
+    combined: faker.lorem.word(),
+    minister: {
+      id: faker.number.int(),
+      phone: faker.lorem.word(),
+      email: faker.internet.email(),
+      is_active: true,
+      position_id: faker.number.int(),
+      first_name: faker.lorem.word(),
+      last_name: faker.lorem.word(),
+      full_name: faker.lorem.word(),
+      position: {
+        id: faker.number.int(),
+        name: faker.lorem.word(),
+        sort_order: faker.number.int(),
+      },
+    },
+    sort_order: 1,
+  },
+  ea_act: { id: faker.number.int(), name: faker.lorem.word() },
+  eao_team: { id: faker.number.int(), name: faker.lorem.word() },
+  federal_involvement: {
+    id: faker.number.int(),
+    name: faker.lorem.word(),
+  },
+  responsible_epd: {
+    id: faker.number.int(),
+    phone: faker.lorem.word(),
+    email: faker.internet.email(),
+    is_active: true,
+    position_id: faker.number.int(),
+    first_name: faker.lorem.word(),
+    last_name: faker.lorem.word(),
+    full_name: faker.lorem.word(),
+    position: {
+      id: faker.number.int(),
+      name: faker.lorem.word(),
+      sort_order: faker.number.int(),
+    },
+  },
+  work_lead: {
+    id: faker.number.int(),
+    phone: faker.lorem.word(),
+    email: faker.internet.email(),
+    is_active: true,
+    position_id: faker.number.int(),
+    first_name: faker.lorem.word(),
+    last_name: faker.lorem.word(),
+    full_name: faker.lorem.word(),
+    position: {
+      id: faker.number.int(),
+      name: faker.lorem.word(),
+      sort_order: faker.number.int(),
+    },
+  },
+  work_type: { id: faker.number.int(), name: faker.lorem.word() },
+  current_work_phase: { id: faker.number.int(), name: faker.lorem.word() },
+  substitution_act: { id: faker.number.int(), name: faker.lorem.word() },
+  eac_decision_by: {
+    id: faker.number.int(),
+    phone: faker.lorem.word(),
+    email: faker.internet.email(),
+    is_active: true,
+    position_id: faker.number.int(),
+    first_name: faker.lorem.word(),
+    last_name: faker.lorem.word(),
+    full_name: faker.lorem.word(),
+    position: {
+      id: faker.number.int(),
+      name: faker.lorem.word(),
+      sort_order: faker.number.int(),
+    },
+  },
+  decision_by: {
+    id: faker.number.int(),
+    phone: faker.lorem.word(),
+    email: faker.internet.email(),
+    is_active: true,
+    position_id: faker.number.int(),
+    first_name: faker.lorem.word(),
+    last_name: faker.lorem.word(),
+    full_name: faker.lorem.word(),
+    position: {
+      id: faker.number.int(),
+      name: faker.lorem.word(),
+      sort_order: faker.number.int(),
+    },
+  },
+};
+
 describe("WorkForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
@@ -198,19 +338,23 @@ describe("WorkForm", () => {
         )
       )
     );
+  });
 
+  it("renders the form", () => {
     cy.mount(
       <Provider store={store}>
         <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
       </Provider>
     );
-  });
-
-  it("renders the form", () => {
     cy.get("form").should("be.visible");
   });
 
   it("The title is created from project name and work type", () => {
+    cy.mount(
+      <Provider store={store}>
+        <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
+      </Provider>
+    );
     cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
     const workTypeSelect = cy
       .get("label")
@@ -243,5 +387,35 @@ describe("WorkForm", () => {
     cy.get("p")
       .contains(`${mockProject.name} - ${mockWorkType.name} -`)
       .should("be.visible");
+  });
+
+  it("WorkType select should be disabled when a work exists", () => {
+    cy.mount(
+      <Provider store={store}>
+        <WorkForm work={mockWork} fetchWork={cy.stub()} saveWork={cy.stub()} />
+      </Provider>
+    );
+    const workTypeSelect = cy
+      .get("label")
+      .contains("Worktype")
+      .parent()
+      .find("input")
+      .first();
+    workTypeSelect.should("have.attr", "disabled");
+  });
+
+  it("Project select should be disabled when a work exists", () => {
+    cy.mount(
+      <Provider store={store}>
+        <WorkForm work={mockWork} fetchWork={cy.stub()} saveWork={cy.stub()} />
+      </Provider>
+    );
+    const projectSelect = cy
+      .get("label")
+      .contains("Project")
+      .parent()
+      .find("input")
+      .first();
+    projectSelect.should("have.attr", "disabled");
   });
 });
