@@ -1,7 +1,7 @@
 """set up idir
 
 Revision ID: 19227722dffc
-Revises: f554f142190f
+Revises: 87cef5c064d8
 Create Date: 2024-07-17 11:32:40.595014
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = "19227722dffc"
-down_revision = "f554f142190f"
+down_revision = "87cef5c064d8"
 branch_labels = None
 depends_on = None
 
