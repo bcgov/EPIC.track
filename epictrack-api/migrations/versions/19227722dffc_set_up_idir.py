@@ -27,7 +27,7 @@ def upgrade():
     # Performing the migration logic for the staff_idir_migration
     existing_staffs_query = "SELECT * FROM staffs"
     conn = op.get_bind()
-    metadata = sa.MetaData(bind=conn)
+    metadata = sa.MetaData()
     staff_table = sa.Table('staffs', metadata, autoload_with=conn)
     res = conn.execute(text(existing_staffs_query))
 
