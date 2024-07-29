@@ -235,9 +235,8 @@ class StaffService:
         Validates if the email is unique (excluding the current staff member) and tries to fetch the user from Keycloak.
 
         :param email: The email to validate and use for fetching the user from Keycloak.
-        :return: The idir_user_id of the user found in Keycloak.
+        :return: The idir_user_id of the user found in Keycloak, or an empty string if no user is found.
         :raises ResourceExistsError: If another staff member with the same email already exists.
-        :raises UnprocessableEntityError: If no user is found in Keycloak with the given email.
         """
         exists = cls.check_existence(email)
         if exists:
@@ -245,6 +244,6 @@ class StaffService:
 
         users = KeycloakService.get_user_by_email(email)
         if not users:
-            raise UnprocessableEntityError(f"No user found with email: {email}")
+            return ""
 
-        return users[0].get('username')
+        return users[0].get('username', "")

@@ -28,7 +28,7 @@ class Staff(BaseModelVersioned):
     __tablename__ = "staffs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    idir_user_id = Column(String(100), nullable=False, unique=True)
+    idir_user_id = Column(String(100), nullable=True)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     phone = Column(String(), nullable=False)
