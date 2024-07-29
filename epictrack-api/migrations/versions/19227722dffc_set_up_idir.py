@@ -35,7 +35,7 @@ def upgrade():
         email = staff.email
         users = KeycloakService.get_user_by_email(email)
         idir_user_id = users[0].get('username', "")
-         
+     
         # Update the staff member's idir_user_id in the database
         if idir_user_id:
             conn.execute(
