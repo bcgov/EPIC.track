@@ -25,3 +25,13 @@ export const getDaysLeft = (phaseInfo: WorkPlan["phase_info"][0]) => {
     phaseInfo.total_number_of_days
   }`;
 };
+
+export const getTaskSpan = (start: Date, end: Date) => {
+  start.setHours(0, 0, 0, 0);
+  end.setHours(0, 0, 0, 0);
+
+  const diffInMilliseconds = end.getTime() - start.getTime();
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+
+  return Math.round(diffInMilliseconds / millisecondsPerDay);
+};
