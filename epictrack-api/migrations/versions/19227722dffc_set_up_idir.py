@@ -7,10 +7,9 @@ Create Date: 2024-07-17 11:32:40.595014
 """
 
 from alembic import op
-from api.services import StaffService
+from flask import g
 import sqlalchemy as sa
 from sqlalchemy import text
-from sqlalchemy.dialects.postgresql.ranges import Range
 from api.services.keycloak import KeycloakService
 
 # revision identifiers, used by Alembic.
@@ -24,6 +23,7 @@ def upgrade():
     with op.batch_alter_table("staffs", schema=None) as batch_op:
         batch_op.add_column(sa.Column("idir_user_id", sa.String(length=100)))
 
+    g.jwt_oidc_token_info = {"email": 'system'}
     # Performing the migration logic for the staff_idir_migration
     existing_staffs_query = "SELECT * FROM staffs"
     conn = op.get_bind()
@@ -35,7 +35,7 @@ def upgrade():
         email = staff.email
         users = KeycloakService.get_user_by_email(email)
         idir_user_id = users[0].get('username', "")
-           
+         
         # Update the staff member's idir_user_id in the database
         if idir_user_id:
             conn.execute(
