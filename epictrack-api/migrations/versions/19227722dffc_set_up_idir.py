@@ -26,27 +26,22 @@ def upgrade():
 
     # Performing the migration logic for the staff_idir_migration
     existing_staffs_query = "SELECT * FROM staffs"
-    staff_table = sa.Table(
-        'staffs', sa.MetaData(),
-        autoload=True, autoload_with=op.get_bind()
-    )
     conn = op.get_bind()
+    metadata = sa.MetaData(bind=conn)
+    staff_table = sa.Table('staffs', metadata, autoload_with=conn)
     res = conn.execute(text(existing_staffs_query))
 
     for staff in res.fetchall():
         email = staff.email
         users = KeycloakService.get_user_by_email(email)
         idir_user_id = users[0].get('username', "")
-            
+           
         # Update the staff member's idir_user_id in the database
         if idir_user_id:
-            staff_data = {
-                "idir_user_id": idir_user_id
-            }
             conn.execute(
-                staff_table.update().where(staff_table.c.id == staff.id).values(staff_data)
+                staff_table.update().where(staff_table.c.id == staff.id)
+                .values(idir_user_id=idir_user_id)
             )
-
     # Commit the changes to the database
     op.get_bind().commit()
 
