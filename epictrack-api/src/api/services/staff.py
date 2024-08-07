@@ -241,9 +241,9 @@ class StaffService:
         exists = cls.check_existence(email)
         if exists:
             raise ResourceExistsError("Staff with same email already exists")
-
-        users = KeycloakService.get_user_by_email(email)
-        if not users:
-            return ""
-
-        return users[0].get('username', "")
+        try:
+            users = KeycloakService.get_user_by_email(email)
+            return users[0].get('username', "") if users else ""
+        except ValueError:
+            current_app.logger.debug(f"Error while reading user details from keycloak with email: {email}")
+        return ""
