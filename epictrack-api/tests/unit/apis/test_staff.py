@@ -26,6 +26,7 @@ from tests.utilities.factory_utils import factory_staff_model
 API_BASE_URL = "/api/v1/"
 CONFIG = get_named_config('testing')
 
+
 def test_get_staff_by_positions(client, auth_header):
     """Test get staff by position."""
     url = urljoin(API_BASE_URL, "staffs?positions=3")
