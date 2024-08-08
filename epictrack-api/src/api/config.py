@@ -201,6 +201,11 @@ NrQw+2OdQACBJiEHsdZzAkBcsTk7frTH4yGx0VfHxXDPjfTj4wmD6gZIlcIr9lZg
 -----END RSA PRIVATE KEY-----"""
     CACHE_TYPE = constants.NULL_CACHE_TYPE
 
+    KEYCLOAK_BASE_URL = _get_config('KEYCLOAK_BASE_URL')
+    KEYCLOAK_REALM_NAME = _get_config('KEYCLOAK_REALM_NAME')
+    KEYCLOAK_ADMIN_CLIENT = _get_config('KEYCLOAK_ADMIN_CLIENT')
+    KEYCLOAK_ADMIN_SECRET = _get_config('KEYCLOAK_ADMIN_SECRET')
+
 
 class ProdConfig(_Config):  # pylint: disable=too-few-public-methods
     """Production environment configuration."""
@@ -227,6 +232,10 @@ class MigrationConfig(_Config):  # pylint: disable=too-few-public-methods
     DB_NAME = _get_config('DATABASE_NAME')
     DB_HOST = _get_config('DATABASE_HOST')
     DB_PORT = _get_config('DATABASE_PORT', default='5432')
+    KEYCLOAK_BASE_URL = _get_config('KEYCLOAK_BASE_URL')
+    KEYCLOAK_REALM_NAME = _get_config('KEYCLOAK_REALM_NAME')
+    KEYCLOAK_ADMIN_CLIENT = _get_config('KEYCLOAK_ADMIN_CLIENT')
+    KEYCLOAK_ADMIN_SECRET = _get_config('KEYCLOAK_ADMIN_SECRET')
     SQLALCHEMY_DATABASE_URI = f'postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{int(DB_PORT)}/{DB_NAME}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     CACHE_TYPE = constants.NULL_CACHE_TYPE

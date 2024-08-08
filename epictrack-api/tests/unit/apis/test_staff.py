@@ -16,7 +16,7 @@
 from http import HTTPStatus
 from pathlib import Path
 from urllib.parse import urljoin
-
+from api.config import get_named_config
 from werkzeug.datastructures import FileStorage
 
 from tests.utilities.factory_scenarios import TestStaffInfo
@@ -24,6 +24,7 @@ from tests.utilities.factory_utils import factory_staff_model
 
 
 API_BASE_URL = "/api/v1/"
+CONFIG = get_named_config('testing')
 
 
 def test_get_staff_by_positions(client, auth_header):

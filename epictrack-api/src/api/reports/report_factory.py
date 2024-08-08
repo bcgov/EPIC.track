@@ -61,7 +61,7 @@ class ReportFactory(ABC):
         status_update_max_date_query = (
             db.session.query(
                 WorkStatus.work_id,
-                func.max(WorkStatus.posted_date).label("max_posted_date"),
+                func.max(WorkStatus.posted_date).label("max_posted_date"),  # pylint: disable=not-callable
             )
             .filter(WorkStatus.is_approved.is_(True))
             .group_by(WorkStatus.work_id)
