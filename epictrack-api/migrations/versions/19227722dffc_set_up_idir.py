@@ -33,15 +33,18 @@ def upgrade():
 
     for staff in res.fetchall():
         email = staff.email
-        users = KeycloakService.get_user_by_email(email)
-        idir_user_id = users[0].get('username', "")
-     
-        # Update the staff member's idir_user_id in the database
-        if idir_user_id:
-            conn.execute(
-                staff_table.update().where(staff_table.c.id == staff.id)
-                .values(idir_user_id=idir_user_id)
-            )
+        try:
+            users = KeycloakService.get_user_by_email(email)
+            idir_user_id = users[0].get('username', "")
+        
+            # Update the staff member's idir_user_id in the database
+            if idir_user_id:
+                conn.execute(
+                    staff_table.update().where(staff_table.c.id == staff.id)
+                    .values(idir_user_id=idir_user_id)
+                )
+        except ValueError:
+            pass
     # Commit the changes to the database
     op.get_bind().commit()
 
