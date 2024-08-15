@@ -167,7 +167,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
                   event.stopPropagation();
                   return;
                 }
-                return formId ? undefined : onOk;
+                return formId ? undefined : onOk?.(null);
               }}
               size="large"
               type={formId ? "submit" : "button"}
