@@ -233,6 +233,7 @@ const mockWork = {
     combined: faker.lorem.word(),
     minister: {
       id: faker.number.int(),
+      idir_user_id: faker.lorem.word(),
       phone: faker.lorem.word(),
       email: faker.internet.email(),
       is_active: true,
@@ -256,6 +257,7 @@ const mockWork = {
   },
   responsible_epd: {
     id: faker.number.int(),
+    idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
     email: faker.internet.email(),
     is_active: true,
@@ -271,6 +273,7 @@ const mockWork = {
   },
   work_lead: {
     id: faker.number.int(),
+    idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
     email: faker.internet.email(),
     is_active: true,
@@ -289,6 +292,7 @@ const mockWork = {
   substitution_act: { id: faker.number.int(), name: faker.lorem.word() },
   eac_decision_by: {
     id: faker.number.int(),
+    idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
     email: faker.internet.email(),
     is_active: true,
@@ -304,6 +308,7 @@ const mockWork = {
   },
   decision_by: {
     id: faker.number.int(),
+    idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
     email: faker.internet.email(),
     is_active: true,
