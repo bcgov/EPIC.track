@@ -149,3 +149,18 @@ export const REPORT_STALENESS_THRESHOLD = {
 };
 
 export const basePIPUrl = "https://apps.nrs.gov.bc.ca/int/fnp/#/organizations/";
+
+export const DATE_CALCULATION_TYPES = [
+  {
+    label: "Day Zero",
+    value: "dayZero",
+  },
+  {
+    label: "Calendar",
+    value: "regular",
+  },
+  {
+    label: "Suspension",
+    value: "suspended",
+  },
+];

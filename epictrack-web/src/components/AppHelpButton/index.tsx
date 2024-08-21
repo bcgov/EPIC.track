@@ -3,6 +3,7 @@ import QuestionMarkIcon from "@mui/icons-material/QuestionMark";
 import { Fab, Menu } from "@mui/material";
 import SupportCenterMenuItem from "./SupportCenterMenuItem";
 import { Palette } from "styles/theme";
+import { DateCalculatorMenuItem } from "./DateCalculator/DateCalculatorMenuItem";
 
 export default function AppHelpButton() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -45,6 +46,7 @@ export default function AppHelpButton() {
         }}
         disableScrollLock
       >
+        <DateCalculatorMenuItem />
         <SupportCenterMenuItem />
       </Menu>
     </>
