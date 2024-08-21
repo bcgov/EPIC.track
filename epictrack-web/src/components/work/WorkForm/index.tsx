@@ -547,7 +547,6 @@ export default function WorkForm({
         <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
-            defaultChecked={work?.is_high_priority}
             name="is_high_priority"
             disabled={!canEdit || isSpecialFieldUnlocked}
           />
