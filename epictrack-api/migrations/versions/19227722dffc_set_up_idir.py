@@ -22,7 +22,6 @@ def upgrade():
     # Adding the new column to the 'staffs' table
     with op.batch_alter_table("staffs", schema=None) as batch_op:
         batch_op.add_column(sa.Column("idir_user_id", sa.String(length=100)))
-        batch_op.create_unique_constraint("uq_staffs_idir_user_id", ["idir_user_id"])
 
     with op.batch_alter_table("staffs_history", schema=None) as batch_op:
         batch_op.add_column(sa.Column("idir_user_id", sa.String(length=100)))
@@ -56,6 +55,5 @@ def downgrade():
         batch_op.drop_column("idir_user_id")
 
     with op.batch_alter_table("staffs", schema=None) as batch_op:
-        batch_op.drop_constraint("uq_staffs_idir_user_id", type_="unique")
         batch_op.drop_column("idir_user_id")
     # ### end Alembic commands ###
