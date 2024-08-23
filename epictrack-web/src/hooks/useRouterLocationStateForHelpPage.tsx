@@ -20,6 +20,7 @@ const useRouterLocationStateForHelpPage = (
 
     navigate(`${location.pathname}${location.search}`, {
       state: { helpPageTags: newtags },
+      replace: true, // modify current entry in history stack rather than adding duplicate
     });
   }, dependencies);
 };
