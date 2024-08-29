@@ -9,7 +9,7 @@ on:
 
 defaults:
   run:
-    shell: bash
+    shell: bash  
     working-directory: ./epictrack-api
 
 jobs:
@@ -91,7 +91,7 @@ jobs:
          if: github.event_name == 'pull_request'
           
        - name: Upload coverage to Codecov
-         uses: codecov/codecov-action@v3
+         uses: codecov/test-results-action@v1
          with:
           flags: epictrack-api
           name: codecov-epictrack-api
