@@ -14,7 +14,7 @@
 """Model to manage Project."""
 import enum
 
-from sqlalchemy import Boolean, Column, Enum, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, Column, Date, Enum, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
@@ -64,6 +64,8 @@ class Project(BaseModelVersioned):
     region_id_env = Column(ForeignKey("regions.id"), nullable=True)
     region_id_flnro = Column(ForeignKey("regions.id"), nullable=True)
     abbreviation = Column(String(10), nullable=True, unique=True)
+    eac_signed = Column(Date(), nullable=True)
+    eac_expires = Column(Date(), nullable=True)
     sub_type = relationship("SubType", foreign_keys=[sub_type_id], lazy="select")
     type = relationship("Type", foreign_keys=[type_id], lazy="select")
     proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")

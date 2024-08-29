@@ -118,6 +118,18 @@ class ProjectBodyParameterSchema(RequestBodyParameterSchema):
         load_default=None
     )
 
+    eac_signed = fields.Date(
+        metadata={"description": "Date the EAC was signed on"},
+        allow_none=True,
+        load_default=None
+    )
+
+    eac_expires = fields.Date(
+        metadata={"description": "Date the EAC expires on"},
+        allow_none=True,
+        load_default=None
+    )
+
     is_active = fields.Bool(metadata={"description": "Active state of the project"})
     is_project_closed = fields.Bool(metadata={"description": "Closed state of the project"}, default=False)
 

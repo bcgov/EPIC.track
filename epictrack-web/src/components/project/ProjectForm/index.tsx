@@ -26,6 +26,7 @@ import typeService from "services/typeService";
 import proponentService from "services/proponentService/proponentService";
 import { useAppSelector } from "hooks";
 import { sort } from "utils";
+import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
 
 const schema = yup.object().shape({
   name: yup
@@ -448,6 +449,20 @@ export default function ProjectForm({
               disabled={shouldDisableFormField}
             />
           </Restricted>
+        </Grid>
+        <Grid item xs={6}>
+          <ETFormLabel>EAC Signed</ETFormLabel>
+          <ControlledDatePicker
+            name="eac_signed"
+            disabled={shouldDisableFormField}
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <ETFormLabel>EAC Expires</ETFormLabel>
+          <ControlledDatePicker
+            name="eac_expires"
+            disabled={shouldDisableFormField}
+          />
         </Grid>
         <Grid
           item

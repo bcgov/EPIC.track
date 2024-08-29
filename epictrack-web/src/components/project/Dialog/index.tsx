@@ -67,6 +67,12 @@ export const ProjectDialog = ({
   };
 
   const saveProject = async (data: any) => {
+    if (data.eac_signed) {
+      data.eac_signed = new Date(data.eac_signed).toISOString().split("T")[0];
+    }
+    if (data.eac_expires) {
+      data.eac_expires = new Date(data.eac_expires).toISOString().split("T")[0];
+    }
     if (projectId) {
       await editProject(data);
     } else {
