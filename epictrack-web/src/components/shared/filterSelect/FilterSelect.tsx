@@ -131,7 +131,7 @@ const FilterSelect = (props: SelectProps) => {
   const adjustDropdownPosition = () => {
     if (menuRef?.current) {
       const menuRect = menuRef.current.getBoundingClientRect();
-      const windowWidth = window.innerWidth - 50;
+      const windowWidth = window.innerWidth - 60;
       const rightEdgeOfMenu = menuRect.left + menuRect.width;
 
       if (rightEdgeOfMenu > windowWidth) {
