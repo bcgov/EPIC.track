@@ -51,6 +51,19 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "AssessmentsByPhase", id: "LIST" }],
     }),
+    getAllWorks: builder.query<Work[], boolean | void>({
+      query: (is_active = true) => `works`,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ id }) => ({
+                type: "Works" as const,
+                id,
+              })),
+              { type: "Works", id: "LIST" },
+            ]
+          : [{ type: "Works", id: "LIST" }],
+    }),
     getWorks: builder.query<Work[], boolean | void>({
       query: (is_active = true) => `works?is_active=${is_active}`,
       providesTags: (result) =>
@@ -198,4 +211,5 @@ export const {
   useGetWorksByYearOpenedQuery,
   useGetWorksByYearCompletedQuery,
   useGetWorkClosureBreakdownQuery,
+  useGetAllWorksQuery,
 } = workInsightsApi;
