@@ -85,6 +85,7 @@ class WorkResponseSchema(
     decision_by = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_state = fields.Method("get_work_state")
     indigenous_works = fields.List(fields.Nested(IndigenousWorkResponseSchema, dump_only=True))
+    min_anticipated_date = fields.Method("get_min_anticipated_date")
 
     title = fields.Method("get_title")
 
@@ -95,6 +96,13 @@ class WorkResponseSchema(
     def get_title(self, obj: Work) -> str:
         """Return the title"""
         return obj.title
+
+    def get_min_anticipated_date(self, obj) -> str:
+        """Return the refferal date"""
+        min_date = getattr(obj, 'min_anticipated_date', None)
+        if min_date is None:
+            return None
+        return obj.min_anticipated_date if obj.min_anticipated_date else None
 
 
 class WorkStaffRoleReponseSchema(

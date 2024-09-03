@@ -213,6 +213,7 @@ const mockWork = {
   decision_maker_position_id: faker.number.int(),
   start_date_locked: faker.datatype.boolean(),
   created_at: faker.date.past().toISOString(),
+  min_anticipated_date: faker.date.future().toISOString(),
   project: {
     id: faker.number.int(),
     name: faker.lorem.words(2),
