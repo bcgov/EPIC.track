@@ -69,7 +69,7 @@ class Staff(BaseModelVersioned):
         """Return active staffs by position ids."""
         return cls.query.filter(
             Staff.position_id.in_(position_ids), Staff.is_active.is_(True)
-        ).order_by(asc(Staff.first_name), asc(Staff.last_name))
+        ).order_by(asc(Staff.last_name), asc(Staff.first_name))
 
     @classmethod
     def find_all_active_staff(cls):
