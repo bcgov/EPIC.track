@@ -15,7 +15,7 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import datetime
 import enum
 from typing import List, Tuple
 
@@ -144,7 +144,6 @@ class Work(BaseModelVersioned):
         """SQL expression for title."""
         from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
         return func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title)  # pylint:disable=not-callable
-    
 
     @hybrid_property
     def anticipated_refferal_date(self):
@@ -160,7 +159,7 @@ class Work(BaseModelVersioned):
             )
             .filter(
                 Event.work_id == self.id,
-                Event.actual_date == None,
+                Event.actual_date is None,
                 func.coalesce(Event.actual_date, Event.anticipated_date) >= datetime.today(),
             )
             .scalar()

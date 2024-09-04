@@ -13,13 +13,13 @@
 # limitations under the License.
 """Service to manage Works."""
 from collections import defaultdict
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Dict, List, Optional
 
 import pandas as pd
 from flask import current_app
-from sqlalchemy import and_, func
+from sqlalchemy import and_
 from sqlalchemy import tuple_
 from sqlalchemy.orm import aliased
 
@@ -49,7 +49,6 @@ from api.models import (
 from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
-from api.models.event_type import EventTypeEnum
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
 from api.models.indigenous_work_queries import find_all_by_project_id
@@ -588,25 +587,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
         return work
-    
-    @classmethod
-    def _get_referral_event_query(cls, work_id):
-        """Create and return the subquery to find next referral event"""
-        return (
-            db.session.query(func.min(Event.anticipated_date).label("min_anticipated_date"))
-            .join(
-                EventConfiguration,
-                and_(
-                    Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                ),
-            )
-            .filter(
-                Event.work_id == work_id,
-                func.coalesce(Event.actual_date, Event.anticipated_date) >= date.today(),
-            )
-            .scalar()
-        )
 
     @classmethod
     def update_work(cls, work_id: int, payload: dict):
