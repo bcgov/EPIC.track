@@ -52,8 +52,6 @@ const WorkDetails = () => {
 
   if (loadingWork) return <WorkDetailsSkeleton />;
 
-  console.log(work);
-
   return (
     <>
       <GrayBox>
