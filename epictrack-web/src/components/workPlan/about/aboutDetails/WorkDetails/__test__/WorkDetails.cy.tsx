@@ -74,7 +74,9 @@ describe("About", () => {
     cy.get("p").contains(mockWork.ministry.name).should("be.visible");
     cy.get("p").contains(mockWork.decision_by.full_name).should("be.visible");
     cy.get("p")
-      .contains(mockWork.anticipated_decision_date)
+      .contains(
+        dayjs(mockWork.anticipated_refferal_date).format(MONTH_DAY_YEAR)
+      )
       .should("be.visible");
     cy.get("p")
       .contains(dayjs(mockWork.start_date).format(MONTH_DAY_YEAR))

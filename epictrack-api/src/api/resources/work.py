@@ -146,7 +146,7 @@ class Work(Resource):
     def get(work_id):
         """Return a work detail based on id."""
         req.WorkIdPathParameterSchema().load(request.view_args)
-        work = WorkService.find_by_id(work_id, exclude_deleted=True, get_refferal_date=True)
+        work = WorkService.find_by_id(work_id, exclude_deleted=True)
         return res.WorkResponseSchema().dump(work), HTTPStatus.OK
 
     @staticmethod

@@ -579,21 +579,16 @@ class WorkService:  # pylint: disable=too-many-public-methods
         }
 
     @classmethod
-    def find_by_id(cls, work_id, exclude_deleted=False, get_refferal_date=False):
+    def find_by_id(cls, work_id, exclude_deleted=False):
         """Find work by id."""
         query = db.session.query(Work).filter(Work.id == work_id)
-        print(min_referral_event)
         if exclude_deleted:
             query = query.filter(Work.is_deleted.is_(False))
         work = query.one_or_none()
         if not work:
             raise ResourceNotFoundError(f"Work with id '{work_id}' not found")
-        if get_refferal_date:
-            min_referral_event = cls._get_referral_event_query(work_id)
-            work.min_anticipated_date = min_referral_event
         return work
     
-
     @classmethod
     def _get_referral_event_query(cls, work_id):
         """Create and return the subquery to find next referral event"""

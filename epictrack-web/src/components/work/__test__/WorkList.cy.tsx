@@ -78,7 +78,7 @@ const generateMockWork = (): Work => {
     decision_maker_position_id: faker.datatype.number(),
     start_date_locked: faker.datatype.boolean(),
     created_at: faker.date.past().toISOString(),
-    min_anticipated_date: faker.date.future().toISOString(),
+    anticipated_refferal_date: faker.date.future().toISOString(),
     project: {
       created_at: faker.date.past().toISOString(),
       description: faker.lorem.paragraph(),
