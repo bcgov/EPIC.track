@@ -15,7 +15,7 @@
 
 from typing import List
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, func, DateTime
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, asc, func, DateTime
 from sqlalchemy.orm import column_property, relationship
 
 from api.models.base_model import BaseModelVersioned
@@ -69,7 +69,7 @@ class Staff(BaseModelVersioned):
         """Return active staffs by position ids."""
         return cls.query.filter(
             Staff.position_id.in_(position_ids), Staff.is_active.is_(True)
-        )
+        ).order_by(asc(Staff.first_name), asc(Staff.last_name))
 
     @classmethod
     def find_all_active_staff(cls):

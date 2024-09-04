@@ -11,18 +11,18 @@ from api.models.work import Work
 # pylint: disable=not-callable
 # pylint: disable=too-few-public-methods
 class WorkByYearOpenedInsightGenerator:
-    """Insight generator for work resource grouped by Work creation year"""
+    """Insight generator for work resource grouped by Work start year"""
 
     def fetch_data(self) -> List[dict]:
         """Fetch data from db"""
         year_query = (
             db.session.query(
-                extract('year', Work.created_at).label('year'),
+                extract('year', Work.start_date).label('year'),
                 func.count().label('count'),
-                func.row_number().over(order_by=extract('year', Work.created_at)).label('id')
+                func.row_number().over(order_by=extract('year', Work.start_date)).label('id')
             )
-            .group_by(extract('year', Work.created_at))
-            .order_by(extract('year', Work.created_at).desc())
+            .group_by(extract('year', Work.start_date))
+            .order_by(extract('year', Work.start_date).desc())
             .all()
         )
         return self._format_data(year_query)

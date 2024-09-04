@@ -6,14 +6,15 @@ import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { useGetWorksQuery } from "services/rtkQuery/workInsights";
+import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { Tooltip, Box } from "@mui/material";
-import { ETGridTitle, IButton } from "components/shared";
+import { Tooltip, Box, Grid } from "@mui/material";
+import { ETCaption1, ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
+import WorkState from "components/workPlan/WorkState";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -22,7 +23,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 10,
   });
-  const { data, error, isLoading } = useGetWorksQuery();
+  const { data, error, isLoading } = useGetAllWorksQuery();
 
   const works = data || [];
 
@@ -72,17 +73,17 @@ const WorkList = () => {
     [works]
   );
 
-  const created_years = useMemo(
+  const started_years = useMemo(
     () =>
       Array.from(
         new Set(
-          works.map((work) => dateUtils.formatDate(work?.created_at, "YYYY"))
+          works.map((work) => dateUtils.formatDate(work?.start_date, "YYYY"))
         )
-      ),
+      ).sort((a, b) => parseInt(b) - parseInt(a)),
     [works]
   );
 
-  const ended_years = useMemo(
+  const closed_years = useMemo(
     () =>
       Array.from(
         new Set(
@@ -92,7 +93,7 @@ const WorkList = () => {
             )
             .filter((year) => year !== "Invalid date")
         )
-      ),
+      ).sort((a, b) => parseInt(b) - parseInt(a)),
     [works]
   );
 
@@ -109,7 +110,6 @@ const WorkList = () => {
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
-          // <Link to={`/work-plan?work_id=${row.original.id}`}>
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
@@ -118,7 +118,6 @@ const WorkList = () => {
           >
             {renderedCellValue}
           </ETGridTitle>
-          // </Link>
         ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
@@ -154,8 +153,8 @@ const WorkList = () => {
         },
       },
       {
-        accessorKey: "created_at",
-        header: "Created on",
+        accessorKey: "start_date",
+        header: "Started",
         Cell: ({ row, renderedCellValue }) => {
           return dateUtils.formatDate(
             renderedCellValue?.toString() || "",
@@ -163,7 +162,7 @@ const WorkList = () => {
           );
         },
         filterVariant: "multi-select",
-        filterSelectOptions: created_years,
+        filterSelectOptions: started_years,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -178,7 +177,7 @@ const WorkList = () => {
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length > created_years.length // select all is selected
+            filterValue.length > started_years.length // select all is selected
           ) {
             return true;
           }
@@ -191,7 +190,7 @@ const WorkList = () => {
       },
       {
         accessorKey: "work_decision_date",
-        header: "Ended on",
+        header: "Closed",
         Cell: ({ row, renderedCellValue }) => {
           return renderedCellValue
             ? dateUtils.formatDate(
@@ -201,7 +200,7 @@ const WorkList = () => {
             : "";
         },
         filterVariant: "multi-select",
-        filterSelectOptions: ended_years,
+        filterSelectOptions: closed_years,
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -216,7 +215,7 @@ const WorkList = () => {
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length > ended_years.length // select all is selected
+            filterValue.length > closed_years.length // select all is selected
           ) {
             return true;
           }
@@ -255,9 +254,18 @@ const WorkList = () => {
 
           return filterValue.includes(value);
         },
+        Cell: ({ row }) => {
+          return (
+            <Grid container item>
+              <ETCaption1 bold>
+                <WorkState work_state={row.getValue("work_state")} />
+              </ETCaption1>
+            </Grid>
+          );
+        },
       },
     ],
-    [projects, phases, workStates, created_years, ended_years]
+    [projects, phases, workStates, started_years, closed_years]
   );
   return (
     <MasterTrackTable
