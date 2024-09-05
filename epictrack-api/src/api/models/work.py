@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 import enum
 from typing import List, Tuple
 
@@ -35,7 +36,11 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
+from api.models import db
 from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
+from api.models.event_configuration import EventConfiguration
+from api.models.event_type import EventTypeEnum
+from api.models.event import Event
 from api.models.project import Project
 from api.models.staff_work_role import StaffWorkRole
 
@@ -139,6 +144,26 @@ class Work(BaseModelVersioned):
         """SQL expression for title."""
         from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
         return func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title)  # pylint:disable=not-callable
+
+    @hybrid_property
+    def anticipated_refferal_date(self):
+        """Dynamically create the anticipated refferal date."""
+        return (
+            db.session.query(func.min(Event.anticipated_date).label("min_anticipated_date"))
+            .join(
+                EventConfiguration,
+                and_(
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                ),
+            )
+            .filter(
+                Event.work_id == self.id,
+                Event.actual_date is None,
+                func.coalesce(Event.actual_date, Event.anticipated_date) >= datetime.today(),
+            )
+            .scalar()
+        )
 
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
