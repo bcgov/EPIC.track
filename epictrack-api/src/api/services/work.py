@@ -476,7 +476,6 @@ class WorkService:  # pylint: disable=too-many-public-methods
             cls.update_work_staff(work_staff.id, update_data, commit=False)
 
         upserted_work_staff = cls.upsert_work_staff(work_id, data, commit=False)
-        db.session.commit()
         return upserted_work_staff
 
     @classmethod
