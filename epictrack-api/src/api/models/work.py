@@ -146,8 +146,8 @@ class Work(BaseModelVersioned):
         return func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title)  # pylint:disable=not-callable
 
     @hybrid_property
-    def anticipated_refferal_date(self):
-        """Dynamically create the anticipated refferal date."""
+    def anticipated_referral_date(self):
+        """Dynamically create the anticipated referral date."""
         return (
             db.session.query(func.min(Event.anticipated_date).label("min_anticipated_date"))
             .join(
@@ -159,7 +159,6 @@ class Work(BaseModelVersioned):
             )
             .filter(
                 Event.work_id == self.id,
-                Event.actual_date is None,
                 func.coalesce(Event.actual_date, Event.anticipated_date) >= datetime.today(),
             )
             .scalar()
