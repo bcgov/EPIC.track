@@ -109,8 +109,8 @@ const WorkDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
-              {work.anticipated_refferal_date
-                ? dayjs(work.anticipated_refferal_date).format(MONTH_DAY_YEAR)
+              {work.anticipated_referral_date
+                ? dayjs(work.anticipated_referral_date).format(MONTH_DAY_YEAR)
                 : "-"}
             </ETParagraph>
           </Grid>
