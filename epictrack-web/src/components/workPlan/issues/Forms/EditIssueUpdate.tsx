@@ -106,7 +106,6 @@ const EditIssueUpdate = () => {
               maxLength: descriptionCharacterLimit,
             }}
             multiline
-            rows={4}
           />
         </Grid>
       </Grid>

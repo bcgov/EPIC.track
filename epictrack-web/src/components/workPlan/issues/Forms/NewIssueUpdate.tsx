@@ -89,7 +89,6 @@ const NewIssueUpdate = () => {
               maxLength: descriptionCharacterLimit,
             }}
             multiline
-            rows={4}
           />
         </Grid>
       </Grid>

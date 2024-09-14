@@ -125,7 +125,6 @@ const CreateIssue = () => {
               maxLength: descriptionCharacterLimit,
             }}
             multiline
-            rows={4}
           />
         </Grid>
         <Grid item xs={12}>

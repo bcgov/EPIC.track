@@ -109,6 +109,8 @@ export const generateMockWork = (): Work => ({
   current_work_phase: generateMockListType(),
   substitution_act: generateMockListType(),
   indigenous_works: [generateMockListType(), generateMockListType()],
+  work_decision_date: "",
+  anticipated_referral_date: faker.date.future().toISOString(),
 });
 
 export const generateMockWorkPhase = (): WorkPhase => ({
