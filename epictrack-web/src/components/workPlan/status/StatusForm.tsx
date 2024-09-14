@@ -116,9 +116,9 @@ const StatusForm = () => {
           <ControlledTextField
             name="description"
             multiline
-            rows={4}
             onChange={handleDescriptionChange}
             fullWidth
+            minRows={4}
             inputProps={{
               maxLength: CHARACTER_LIMIT,
             }}
