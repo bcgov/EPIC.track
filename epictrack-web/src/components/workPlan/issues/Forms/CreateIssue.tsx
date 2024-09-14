@@ -121,6 +121,7 @@ const CreateIssue = () => {
             name="description"
             fullWidth
             size="small"
+            minRows={4}
             inputProps={{
               maxLength: descriptionCharacterLimit,
             }}

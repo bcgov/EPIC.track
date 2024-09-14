@@ -102,6 +102,7 @@ const EditIssueUpdate = () => {
             name="description"
             fullWidth
             size="small"
+            minRows={4}
             inputProps={{
               maxLength: descriptionCharacterLimit,
             }}
