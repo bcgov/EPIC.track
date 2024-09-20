@@ -85,11 +85,11 @@ const NewIssueUpdate = () => {
             name="description"
             fullWidth
             size="small"
+            minRows={4}
             inputProps={{
               maxLength: descriptionCharacterLimit,
             }}
             multiline
-            rows={4}
           />
         </Grid>
       </Grid>
