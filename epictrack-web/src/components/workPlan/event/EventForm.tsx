@@ -271,7 +271,7 @@ const EventForm = ({
       : selectedWorkPhase?.work_phase.start_date;
   }, [event, selectedWorkPhase]);
 
-  const acutalReferenceDate = useMemo(() => {
+  const actualReferenceDate = useMemo(() => {
     return event ? event.anticipated_date : anticipatedDefaultValue;
   }, [event, anticipatedDefaultValue]);
   const anticipatedMinDate = useMemo(
@@ -288,15 +288,6 @@ const EventForm = ({
         : dayjs(selectedWorkPhase?.work_phase.start_date),
     [selectedWorkPhase, isStartEvent, isStartPhase]
   );
-  const actualDateMax = useMemo(() => {
-    if (
-      selectedWorkPhase?.work_phase.legislated &&
-      selectedConfiguration?.event_category_id !== EventCategory.EXTENSION
-    ) {
-      return dayjs(selectedWorkPhase.work_phase.end_date);
-    }
-    return dayjs(new Date());
-  }, [selectedWorkPhase?.work_phase, selectedConfiguration]);
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: event,
@@ -411,7 +402,7 @@ const EventForm = ({
 
   /**
    * Check if the selected event configuration cause date to exceed the phase
-   * or push susequent events
+   * or push subsequent events
    */
   const eventDateCheck = async () => {
     try {
@@ -565,7 +556,7 @@ const EventForm = ({
 
   /**
    * Unregister various fields which might have already loaded
-   * based on diffrent milestone type. This is required or else
+   * based on different milestone type. This is required or else
    * such hidden fields would be submitted to the server
    */
   const unregisterOptionalFields = () => {
@@ -737,9 +728,9 @@ const EventForm = ({
                   event?.actual_date ? dayjs(event?.actual_date).format() : ""
                 }
                 datePickerProps={{
-                  referenceDate: dayjs(acutalReferenceDate),
+                  referenceDate: dayjs(actualReferenceDate),
                   minDate: actualDateMin,
-                  maxDate: actualDateMax,
+                  maxDate: dayjs(new Date()),
                   onDateChange: (event: any, defaultOnChange: any) => {
                     const d = event ? event["$d"] : null;
                     defaultOnChange(d);
