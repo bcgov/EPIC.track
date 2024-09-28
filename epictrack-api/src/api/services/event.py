@@ -1014,6 +1014,7 @@ class EventService:
             )
             .filter(
                 Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
                 Event.work_id == work_id,
                 EventConfiguration.is_active.is_(True),
             )
