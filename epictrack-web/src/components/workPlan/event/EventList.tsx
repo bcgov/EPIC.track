@@ -82,8 +82,9 @@ const EventList = () => {
     setWork,
   } = useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
-  const userIsTeamMember = useMemo(
-    () => team.some((member) => member.staff.email === email),
+  const userIsActiveTeamMember = useMemo(
+    () =>
+      team.some((member) => member.staff.email === email && member.is_active),
     [team, email]
   );
   const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
@@ -798,7 +799,7 @@ const EventList = () => {
           <Restricted
             allowed={[ROLES.CREATE]}
             errorProps={{ disabled: true }}
-            exception={userIsTeamMember}
+            exception={userIsActiveTeamMember}
           >
             <Button variant="contained" onClick={() => setShowTaskForm(true)}>
               Add Task
@@ -809,7 +810,7 @@ const EventList = () => {
           <Restricted
             allowed={[ROLES.CREATE]}
             errorProps={{ disabled: true }}
-            exception={userIsTeamMember}
+            exception={userIsActiveTeamMember}
           >
             <Button variant="outlined" onClick={onAddMilestone}>
               Add Milestone
@@ -910,7 +911,7 @@ const EventList = () => {
             <Restricted
               allowed={[ROLES.EDIT]}
               errorProps={{ disabled: true }}
-              exception={userIsTeamMember}
+              exception={userIsActiveTeamMember}
             >
               <IButton onClick={handleExportToSheet}>
                 <DownloadIcon className="icon" />
@@ -919,7 +920,7 @@ const EventList = () => {
           </Tooltip>
           <Restricted
             allowed={[ROLES.EXTENDED_EDIT]}
-            exception={userIsTeamMember}
+            exception={userIsActiveTeamMember}
           >
             <Tooltip title="Import tasks from an excel sheet">
               <Button
