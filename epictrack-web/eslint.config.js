@@ -29,10 +29,9 @@ module.exports = {
   rules: {
     // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
     "linebreak-style": ["error", "unix"],
-    "prettier/prettier": ["error", { endOfLine: "auto" }],
+    "prettier/prettier": ["error", { endOfLine: "lf"}],
     "@typescript-eslint/no-unused-vars": ["warn", { args: "none" }],
     "@typescript-eslint/no-explicit-any": "off",
-    "max-len": ["error", { code: 120 }],
     "import/no-anonymous-default-export": "off",
     quotes: ["error", "single"],
     },

@@ -76,8 +76,11 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     } catch (e) {
       console.log(e);
     }
-    const realmAccessRoles = KeycloakData.tokenParsed?.realm_access?.roles ?? [];
-    const clientLevelRoles = KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]?.roles ?? [];
+    const realmAccessRoles =
+      KeycloakData.tokenParsed?.realm_access?.roles ?? [];
+    const clientLevelRoles =
+      KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]
+        ?.roles ?? [];
     const roles = [...realmAccessRoles, ...clientLevelRoles];
     console.log("My Roles:", roles);
     const userDetail = new UserDetail(
