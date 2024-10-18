@@ -1,36 +1,40 @@
 @charset "UTF-8";
 
-  
 #main {
   margin-top: 10px;
 }
 
 @font-face {
-  font-family: 'BCSans';
-  src: url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff') format('woff'),
-       url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff2') format('woff2'),
-       url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff') format('woff'),
-       url('../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff2') format('woff2'),
+  font-family: "BCSans";
+  src: url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff")
+      format("woff"),
+    url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Regular.woff2")
+      format("woff2"),
+    url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff")
+      format("woff"),
+    url("../assets/fonts/BC_Sans/bc-sans-font-all/BC-Sans-Font-all/BCSans-Bold.woff2")
+      format("woff2");
 }
 body {
   margin: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-family: 'BCSans', 'Noto Sans', Verdana, Arial, sans-serif;
+  font-family: "BCSans", "Noto Sans", Verdana, Arial, sans-serif;
   font-size: 1.25em;
   line-height: 1.3em;
   letter-spacing: -0.32px;
   font-weight: 400;
-  color: #494949
+  color: #494949;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
 }
 
-@media (max-width:576px){
+@media (max-width: 576px) {
   .MuiContainer-root {
     padding-left: 0;
     padding-right: 0;
-  }  
+  }
 }

@@ -8,6 +8,16 @@ import { UserDetail, UserGroupUpdate } from "./type";
 import staffService from "../staffService/staffService";
 import { Staff } from "../../models/staff";
 
+// Interface for UserInfo object.
+interface UserInfo {
+  sub: string;
+  preferred_username: string;
+  groups: string[];
+  given_name: string;
+  family_name: string;
+  email: string;
+}
+
 const KeycloakData: Keycloak = new Keycloak({
   clientId: AppConfig.keycloak.clientId,
   realm: AppConfig.keycloak.realm,
@@ -56,11 +66,11 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       return;
     }
 
-    const userInfo: any = await KeycloakData.loadUserInfo();
+    const userInfo: UserInfo = (await KeycloakData.loadUserInfo()) as UserInfo;
     let staffProfile;
     try {
       const staffResult = await staffService.getByEmail(userInfo["email"]);
-      if (staffResult.status == 200) {
+      if (staffResult.status === 200) {
         staffProfile = staffResult.data as Staff;
       }
     } catch (e) {
@@ -69,7 +79,8 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
     const realmAccessRoles =
       KeycloakData.tokenParsed?.realm_access?.roles ?? [];
     const clientLevelRoles =
-      KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]?.roles ?? [];
+      KeycloakData.tokenParsed?.resource_access?.[AppConfig.keycloak.clientId]
+        ?.roles ?? [];
     const roles = [...realmAccessRoles, ...clientLevelRoles];
     console.log("My Roles:", roles);
     const userDetail = new UserDetail(
