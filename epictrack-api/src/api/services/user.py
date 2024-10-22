@@ -18,6 +18,7 @@ from api.utils import TokenInfo
 
 from .keycloak import KeycloakService
 
+
 class UserService:
     """User Service"""
 
@@ -71,6 +72,7 @@ class UserService:
     @classmethod
     def update_user_group(cls, user_id, user_group_request):
         """
+
         Updates the user's group based on the provided user group request.
         Args:
           cls: The class instance.
