@@ -27,6 +27,20 @@ class KeycloakService:
         return response.json()
 
     @staticmethod
+    def get_sub_groups(group_id):
+        """
+        Return the subgroups of a given group.
+
+        Args:
+          group_id (str): The ID of the group for which to retrieve subgroups.
+
+        Returns:
+          list: A list of subgroups for the given group.
+        """
+        response = KeycloakService._request_keycloak(f"groups/{group_id}/children")
+        return response.json()
+
+    @staticmethod
     def get_users():
         """Get users"""
         response = KeycloakService._request_keycloak('users?max=2000')
