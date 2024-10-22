@@ -26,12 +26,30 @@ class UserGroupResponseSchema(Schema):
     display_name = fields.Method("get_display_name")
 
     def get_level(self, instance):
-        """Get the full name"""
-        return int(instance["attributes"]["level"][0])
+        """
+        Retrieve the level attribute from the given instance.
+
+        Args:
+          instance (dict): A dictionary representing the instance, which is expected to have an "attributes" key.
+
+        Returns:
+          int: The level value extracted from the instance's attributes. Defaults to 0 if not found.
+        """
+        return int(instance.get("attributes", {}).get("level", [0])[0] or 0)
 
     def get_display_name(self, instance):
-        """Get the display name of the group"""
-        return instance["attributes"]["display_name"][0]
+        """
+        Retrieve the display name of the group from the given instance.
+
+        Args:
+          instance (dict): A dictionary representing the group instance,
+                   which should contain an "attributes" key.
+
+        Returns:
+          str: The display name of the group. If the display name is not
+             found, an empty string is returned.
+        """
+        return instance.get("attributes", {}).get("display_name", [""])[0] or ""
 
     def get_path(self, instance):
         """Format the path of the group from keycloak"""

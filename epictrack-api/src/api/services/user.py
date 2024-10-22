@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """User service"""
+from flask import current_app
 from api.exceptions import BusinessError, PermissionDeniedError
 from api.utils import TokenInfo
 
@@ -39,23 +40,51 @@ class UserService:
 
     @classmethod
     def get_groups(cls):
-        """Get groups that has "level" attribute set up"""
+        """
+        Retrieve groups that have the "level" attribute set up.
+
+        This method fetches all groups from the Keycloak service and filters them
+        to include only those groups that have sub-groups. It logs the groups and
+        sub-groups at various stages for debugging purposes.
+
+        Returns:
+          list: A list of filtered groups that have sub-groups.
+        """
+        # Fetch all groups from the Keycloak service
         groups = KeycloakService.get_groups()
+        current_app.logger.debug(f"Groups: {groups}")
         filtered_groups = []
+
         for group in groups:
-            if group.get("subGroups"):
-                filtered_groups = filtered_groups + [
-                    sub_group
-                    for sub_group in group.get("subGroups")
-                    if "level" in sub_group["attributes"]
-                ]
-            elif "level" in group["attributes"]:
-                filtered_groups.append(group)
+            current_app.logger.info(f"group: {group}")
+
+            # Check if the group has sub-groups by looking at the "subGroupCount" attribute
+            if group.get("subGroupCount", 0) > 0:
+
+                # Fetch the sub-groups for the current group
+                sub_groups = KeycloakService.get_sub_groups(group["id"])
+                current_app.logger.debug(f"sub_groups: {sub_groups}")
+                filtered_groups.extend(sub_groups)
+
+        current_app.logger.debug(f"filtered_groups: {filtered_groups}")
         return filtered_groups
 
     @classmethod
     def update_user_group(cls, user_id, user_group_request):
-        """Update the group of a user"""
+        """
+        Updates the user's group based on the provided user group request.
+
+        Args:
+          cls: The class instance.
+          user_id (str): The ID of the user to update.
+          user_group_request (dict): A dictionary containing the group update request details.
+            Expected keys:
+              - "group_id_to_update" (str): The ID of the group to update.
+        Raises:
+          PermissionDeniedError: If the requester does not have permission to update the group.
+        Returns:
+          dict: The result of the group update operation from KeycloakService.
+        """
         token_groups = TokenInfo.get_user_data()["groups"]
         groups = cls.get_groups()
         requesters_group = next(
@@ -118,5 +147,20 @@ class UserService:
 
     @classmethod
     def _get_level(cls, group):
-        """Gets the level from the group"""
-        return group["attributes"]["level"][0]
+        """
+        Retrieves the level from the given group.
+
+        Args:
+          group (dict): A dictionary representing the group, which should contain
+                  an "attributes" key with a nested "level" key.
+
+        Returns:
+          int: The level extracted from the group. If the level is not found or
+             cannot be converted to an integer, returns 0.
+        """
+        level_str = group["attributes"].get("level", [0])[0]
+        try:
+            return int(level_str)
+        except (KeyError, IndexError, TypeError) as e:
+            current_app.logger.error(f"Error getting level from group: {e}. Returning 0.")
+            return 0
