@@ -42,11 +42,11 @@ class UserGroupResponseSchema(Schema):
         Retrieve the display name of the group from the given instance.
 
         Args:
-          instance (dict): A dictionary representing the group instance, 
+          instance (dict): A dictionary representing the group instance,
                    which should contain an "attributes" key.
 
         Returns:
-          str: The display name of the group. If the display name is not 
+          str: The display name of the group. If the display name is not
              found, an empty string is returned.
         """
         return instance.get("attributes", {}).get("display_name", [""])[0] or ""
