@@ -15,8 +15,8 @@
 from api.exceptions import BusinessError, PermissionDeniedError
 from api.utils import TokenInfo
 
-from .keycloak import KeycloakService
 from flask import current_app
+from .keycloak import KeycloakService
 
 class UserService:
     """User Service"""
@@ -60,16 +60,29 @@ class UserService:
             # Check if the group has sub-groups by looking at the "subGroupCount" attribute
             if group.get("subGroupCount", 0) > 0:
 
-              # Fetch the sub-groups for the current group
-              sub_groups = KeycloakService.get_sub_groups(group["id"])
-              current_app.logger.debug(f"sub_groups: {sub_groups}")
-              filtered_groups.extend(sub_groups)
+                # Fetch the sub-groups for the current group
+                sub_groups = KeycloakService.get_sub_groups(group["id"])
+                current_app.logger.debug(f"sub_groups: {sub_groups}")
+                filtered_groups.extend(sub_groups)
 
         current_app.logger.debug(f"filtered_groups: {filtered_groups}")
         return filtered_groups
 
     @classmethod
     def update_user_group(cls, user_id, user_group_request):
+        """
+        Updates the user's group based on the provided user group request.
+        Args:
+          cls: The class instance.
+          user_id (str): The ID of the user to update.
+          user_group_request (dict): A dictionary containing the group update request details.
+            Expected keys:
+              - "group_id_to_update" (str): The ID of the group to update.
+        Raises:
+          PermissionDeniedError: If the requester does not have permission to update the group.
+        Returns:
+          dict: The result of the group update operation from KeycloakService.
+        """
         token_groups = TokenInfo.get_user_data()["groups"]
         groups = cls.get_groups()
         requesters_group = next(
