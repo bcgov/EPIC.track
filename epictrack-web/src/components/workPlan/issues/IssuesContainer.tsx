@@ -6,7 +6,7 @@ import { ETTab, ETTabs } from "../../shared/tab/Tab";
 import TabPanel from "../../shared/tab/TabPanel";
 import IssuesView from "./IssuesView";
 import { ReportsPreview } from "./ReportsPreview";
-import { Notes } from "./Notes";
+import Notes from "./Notes";
 import { titleStyle, tabStyle, tabPanelStyle } from "../common/styles";
 
 const IssuesContainer = () => {
