@@ -11,6 +11,7 @@ import { WORKPLAN_TAB } from "../constants";
 
 interface IssuesContextProps {
   isIssuesLoading: boolean;
+  workId: string | null;
   addIssue: (issueForm: CreateIssueForm) => Promise<void>;
   editIssue: (issueForm: EditIssueForm) => Promise<void>;
   editIssueUpdate: (issueForm: CloneForm) => Promise<void>;
@@ -42,6 +43,7 @@ interface IssueContainerRouteParams extends URLSearchParams {
 
 export const initialIssueContextValue = {
   isIssuesLoading: true,
+  workId: null,
   addIssue: (_: CreateIssueForm) => {
     return Promise.resolve();
   },
@@ -254,6 +256,7 @@ export const IssuesProvider = ({
     <IssuesContext.Provider
       value={{
         isIssuesLoading,
+        workId,
         addIssue,
         issueToApproveId,
         setIssueToApproveId,

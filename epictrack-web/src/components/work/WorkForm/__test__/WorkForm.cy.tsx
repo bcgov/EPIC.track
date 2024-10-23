@@ -197,6 +197,7 @@ const mockWork = {
   work_decision_date: faker.date.future().toISOString(),
   first_nation_notes: faker.lorem.paragraph(),
   status_notes: faker.lorem.paragraph(),
+  issue_notes: faker.lorem.sentence(),
   work_state: WORK_STATE.IN_PROGRESS.value,
   project_id: faker.number.int(),
   ministry_id: faker.number.int(),

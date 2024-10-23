@@ -85,6 +85,7 @@ export const generateMockWork = (): Work => ({
   decision_date: faker.date.future().toISOString(),
   first_nation_notes: faker.lorem.sentence(),
   status_notes: faker.lorem.sentence(),
+  issue_notes: faker.lorem.sentence(),
   work_state: faker.lorem.word(),
   project_id: faker.number.int(),
   ministry_id: faker.number.int(),
