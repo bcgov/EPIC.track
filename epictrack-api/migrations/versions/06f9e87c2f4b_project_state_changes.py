@@ -18,7 +18,7 @@ depends_on = None
 
 def upgrade():
     op.execute("ALTER TYPE projectstateenum ADD VALUE 'PRE_WORK'")
-
+    op.execute("COMMIT")
     with op.batch_alter_table('projects_history', schema=None) as batch_op:
         batch_op.add_column(sa.Column('project_state', sa.Enum('PRE_WORK', 'UNDER_EAC_ASSESSMENT', 'UNDER_EXEMPTION_REQUEST', 'UNDER_AMENDMENT', 'UNDER_DISPUTE_RESOLUTION', 'PRE_CONSTRUCTION', 'CONSTRUCTION', 'OPERATION', 'CARE_AND_MAINTENANCE', 'DECOMMISSION', 'UNKNOWN', 'CLOSED', 'UNDER_DESIGNATION', name='projectstateenum'), autoincrement=False, nullable=True))
     # ### end Alembic commands ###

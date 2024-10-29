@@ -28,6 +28,7 @@ from api.models.indigenous_work import IndigenousWork
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.region import Region
+from api.models.project_state import ProjectState
 from api.models.special_field import EntityEnum, SpecialField
 from api.models.sub_types import SubType
 from api.models.types import Type
@@ -35,7 +36,6 @@ from api.models.work import Work
 from api.models.work_type import WorkType
 from api.schemas.types import TypeSchema
 from api.services.special_field import SpecialFieldService
-from api.utils.constants import PROJECT_STATE_ENUM_MAPS
 from api.utils.enums import ProjectCodeMethod
 from api.utils.token_info import TokenInfo
 
@@ -66,7 +66,7 @@ class ProjectService:
         if exists:
             raise ResourceExistsError("Project with same name exists")
         project = Project(**payload)
-        project.project_state = ProjectStateEnum.PRE_WORK
+        project.project_state_id = ProjectStateEnum.PRE_WORK.value
         current_app.logger.info(f"Project obj {dir(project)}")
         project.flush()
         proponent_special_field_data = {
@@ -197,12 +197,14 @@ class ProjectService:
         sub_type_names = set(data["sub_type_id"].to_list())
         env_region_names = set(data["region_id_env"].to_list())
         flnro_region_names = set(data["region_id_flnro"].to_list())
+        project_state_names = set(data["project_state_id"].to_list())
 
-        proponents, types, sub_types, regions = cls._get_master_data(
+        proponents, types, sub_types, regions, project_states = cls._get_master_data(
             proponent_names,
             type_names,
             sub_type_names,
             env_region_names.union(flnro_region_names),
+            project_state_names,
         )
 
         data["proponent_id"] = data.apply(
@@ -220,8 +222,9 @@ class ProjectService:
         data["region_id_flnro"] = data.apply(
             lambda x: cls._find_region_id(x["region_id_flnro"], regions, "FLNR"), axis=1
         )
-        data["project_state"] = data.apply(
-            lambda x: PROJECT_STATE_ENUM_MAPS[x["project_state"]], axis=1
+        data["project_state_id"] = data.apply(
+            lambda x: cls._find_project_state_id(x["project_state_id"], project_states),
+            axis=1,
         )
 
         username = TokenInfo.get_username()
@@ -230,21 +233,23 @@ class ProjectService:
         data = data.to_dict("records")
         db.session.bulk_insert_mappings(Project, data)
         special_history_mappings = []
-        time_range = DateTimeTZRange(
-            datetime.now(), None, bounds="[)"
-        )
+        time_range = DateTimeTZRange(datetime.now(), None, bounds="[)")
         for project_data in data:
-            project = db.session.query(Project).filter(
-                Project.name == project_data["name"],
-                Project.proponent_id == project_data["proponent_id"],
-            ).first()
+            project = (
+                db.session.query(Project)
+                .filter(
+                    Project.name == project_data["name"],
+                    Project.proponent_id == project_data["proponent_id"],
+                )
+                .first()
+            )
             special_history_mappings.append(
                 {
                     "entity": EntityEnum.PROJECT,
                     "entity_id": project.id,
                     "field_name": "name",
                     "field_value": project.name,
-                    "time_range": time_range
+                    "time_range": time_range,
                 }
             )
         db.session.bulk_insert_mappings(SpecialField, special_history_mappings)
@@ -272,7 +277,7 @@ class ProjectService:
             "Project Closed": "is_project_closed",
             "FTE Positions Construction": "fte_positions_construction",
             "FTE Positions Operation": "fte_positions_operation",
-            "Project State": "project_state",
+            "Project State": "project_state_id",
         }
         data_frame = pd.read_excel(file)
         data_frame.rename(column_map, axis="columns", inplace=True)
@@ -328,6 +333,16 @@ class ProjectService:
         return region.id
 
     @classmethod
+    def _find_project_state_id(cls, name: str, project_states: List[Region]) -> int:
+        """Find and return the id of project state from given list"""
+        if name is None:
+            return None
+        state = next((x for x in project_states if x.name == name), None)
+        if state is None:
+            raise ResourceNotFoundError(f"Region with name {name} does not exist")
+        return state.id
+
+    @classmethod
     def _generate_project_abbreviation(
         cls, project_name: str, method: ProjectCodeMethod
     ):
@@ -372,8 +387,8 @@ class ProjectService:
 
     @classmethod
     def _get_master_data(
-        cls, proponent_names, type_names, sub_type_names, region_names
-    ):
+        cls, proponent_names, type_names, sub_type_names, region_names, p_states
+    ):  # pylint: disable=too-many-arguments
         proponents = (
             db.session.query(Proponent)
             .filter(Proponent.name.in_(proponent_names), Proponent.is_active.is_(True))
@@ -397,7 +412,12 @@ class ProjectService:
             )
             .all()
         )
-        return proponents, types, sub_types, regions
+        project_states = (
+            db.session.query(ProjectState)
+            .filter(ProjectState.name.in_(p_states), ProjectState.is_active.is_(True))
+            .all()
+        )
+        return proponents, types, sub_types, regions, project_states
 
     @classmethod
     def _update_or_delete_old_projects(cls, data) -> pd.DataFrame:

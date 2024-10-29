@@ -62,7 +62,7 @@ def factory_project_model(project_data: dict = TestProjectInfo.project1.value):
             latitude=project_data["latitude"],
             longitude=project_data["longitude"],
             abbreviation=project_data["abbreviation"],
-            project_state=ProjectStateEnum.PRE_WORK.value,
+            project_state_id=ProjectStateEnum.PRE_WORK.value,
         )
         project.save()
     return project

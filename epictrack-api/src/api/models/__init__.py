@@ -74,3 +74,4 @@ from .work_status import WorkStatus
 from .work_type import WorkType
 from .indigenous_consultation_levels import IndigenousConsultationLevel
 from .linked_work import LinkedWork
+from .project_state import ProjectState
