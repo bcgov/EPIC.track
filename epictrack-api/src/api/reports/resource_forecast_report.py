@@ -239,7 +239,7 @@ class EAResourceForeCastReport(ReportFactory):
                 env_region.name.label("env_region"),
                 nrs_region.name.label("nrs_region"),
                 Work.id.label("work_id"),
-                func.concat(SubType.short_name, " (", Type.short_name, ")").label(
+                func.concat(Type.short_name, " (", SubType.short_name, ")").label(
                     "sector(sub)"
                 ),
                 Project.fte_positions_operation.label("fte_positions_operation"),
