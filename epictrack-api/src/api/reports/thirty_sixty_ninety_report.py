@@ -29,6 +29,7 @@ from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
 from api.utils.constants import CANADA_TIMEZONE
 from api.utils.enums import StalenessEnum
+from api.utils.util import process_data
 
 from .report_factory import ReportFactory
 
@@ -245,10 +246,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
         data = self._fetch_data(report_date)
         data = self._format_data(data)
         data = self._update_staleness(data, report_date)
-        if return_type == "json" and data:
-            return {"data": data}, None
-        if not data:
-            return {}, None
+        if return_type == "json" or not data:
+            return process_data(data, return_type)
         pdf_stream = BytesIO()
         stylesheet = getSampleStyleSheet()
         doc = BaseDocTemplate(pdf_stream, pagesize=A4)
