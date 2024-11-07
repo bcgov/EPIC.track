@@ -17,7 +17,7 @@ def profiletime(profile_fn):
         diff = end_time - start_time
 
         current_app.logger.info(
-            f"API endpoint: {profile_fn.__qualname__} took {diff} seconds"
+            f"API endpoint: {profile_fn.__qualname__} took {diff:.2f} seconds"
         )
         return result
 
