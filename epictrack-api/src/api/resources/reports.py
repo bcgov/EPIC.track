@@ -16,7 +16,7 @@ from datetime import datetime
 from http import HTTPStatus
 from io import BytesIO
 
-from flask import jsonify, send_file
+from flask import jsonify, send_file, current_app
 from flask_restx import Namespace, Resource, cors
 
 from api.schemas.event_calendar import EventCalendarSchema
@@ -58,6 +58,9 @@ class Report(Resource):
     @profiletime
     def post(report_type):
         """Generate report from given date."""
+        current_app.logger.debug(f"Generating report of type: {report_type}")
+        current_app.logger.debug(f"Endpoint called: /reports/{report_type}")
+        current_app.logger.debug(f"Request payload: {API.payload}")
         report_date = datetime.strptime(API.payload["report_date"], "%Y-%m-%d")
         color_intensity = API.payload.get("color_intensity", None)
         filters = API.payload.get("filters", None)
