@@ -319,6 +319,14 @@ export default function AnticipatedEAOSchedule() {
                                 </Table>
                               </TabPanel>
                               <TabPanel value={selectedTab} index={1}>
+                                {item["report_description"] && (
+                                  <>
+                                    <b>Work Description:</b>{" "}
+                                    {item["report_description"]}
+                                    <Box sx={{ height: 20 }} />
+                                  </>
+                                )}
+                                <b>Project Description:</b>{" "}
                                 {item["project_description"]}
                               </TabPanel>
                               <TabPanel value={selectedTab} index={2}>
