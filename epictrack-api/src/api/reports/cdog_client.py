@@ -26,6 +26,13 @@ class CDOGClient:  # pylint: disable=too-few-public-methods
 
     def __init__(self) -> None:
         """Constructor"""
+        if not all([
+            os.environ.get('CDOGS_API_ENDPOINT'),
+            os.environ.get('CDOGS_TOKEN_END_POINT'),
+            os.environ.get('CDOGS_CLIENT_ID'),
+            os.environ.get('CDOGS_CLIENT_SECRET')
+        ]):
+            raise EnvironmentError("CDOGS environment variables are not set properly.")
         self.api_url = os.environ.get('CDOGS_API_ENDPOINT')
 
     def _authorize(self):

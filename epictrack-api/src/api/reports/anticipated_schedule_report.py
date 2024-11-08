@@ -1,7 +1,7 @@
 """Classes for specific report types."""
 from datetime import datetime, timedelta
 
-from flask import jsonify
+from flask import jsonify, current_app
 from pytz import timezone
 from sqlalchemy import and_, func, select
 from sqlalchemy.dialects.postgresql import INTERVAL
@@ -28,7 +28,7 @@ from api.utils.enums import StalenessEnum
 
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
-
+from api.utils.util import process_data
 
 # pylint:disable=not-callable
 
@@ -48,6 +48,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "ea_act",
             "substitution_act",
             "project_description",
+            "report_description",
             "anticipated_decision_date",
             "additional_info",
             "ministry_name",
@@ -66,6 +67,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
+        current_app.logger.info(f"Fetching data for {self.report_title} report")
         start_date = report_date + timedelta(days=-7)
         report_date = report_date.astimezone(timezone('US/Pacific'))
         eac_decision_by = aliased(Staff)
@@ -140,6 +142,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EAAct.name.label("ea_act"),
                 SubstitutionAct.name.label("substitution_act"),
                 Project.description.label("project_description"),
+                Work.report_description.label("report_description"),
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
@@ -166,23 +169,30 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
     def generate_report(self, report_date, return_type):
         """Generates a report and returns it"""
+        current_app.logger.info(f"Generating {self.report_title} report for {report_date}")
         data = self._fetch_data(report_date)
         data = self._format_data(data)
         data = self._update_staleness(data, report_date)
-        if return_type == "json" and data:
-            return {"data": data}, None
-        if not data:
-            return {}, None
+
+        if return_type == "json" or not data:
+            return process_data(data, return_type)
+
         api_payload = {
             "report_data": data,
             "report_title": self.report_title,
             "report_date": report_date,
         }
         template = self.generate_template()
-        report_client = CDOGClient()
-        report = report_client.generate_document(
-            self.report_title, jsonify(api_payload).json, template
-        )
+        # Calls out to the common services document generation service. Make sure your envs are set properly.
+        try:
+            report_client = CDOGClient()
+            report = report_client.generate_document(self.report_title, jsonify(api_payload).json, template)
+        except EnvironmentError as e:
+            # Fall through to return empty response if CDOGClient fails, but log the error
+            current_app.logger.error(f"Error initializing CDOGClient: {e}.")
+            return {}, None
+
+        current_app.logger.info(f"Generated {self.report_title} report for {report_date}")
         return report, f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
 
     def _get_next_pcp_query(self, start_date):

@@ -81,11 +81,11 @@ class EAResourceForeCastReport(ReportFactory):
         self.month_labels = []
         self.report_cells = {
             "[PROJECT BACKGROUND]": [
-                {"data_key": "work_title", "label": "WORK TITLE", "width": 0.050},
+                {"data_key": "work_title", "label": "WORK TITLE", "width": 0.055},
                 {
                     "data_key": "capital_investment",
                     "label": "EST. CAP. INVESTMENT",
-                    "width": 0.071,
+                    "width": 0.069,
                 },
                 {
                     "data_key": "fte_positions_construction",
@@ -103,13 +103,13 @@ class EAResourceForeCastReport(ReportFactory):
                     "width": 0.057,
                 },
                 {"data_key": "ea_act", "label": "EA ACT", "width": 0.03},
-                {"data_key": "iaac", "label": "IAAC", "width": 0.0355},
+                {"data_key": "iaac", "label": "IAAC", "width": 0.0395},
                 {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.038},
                 {"data_key": "env_region", "label": "MOE REGION", "width": 0.041},
                 {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.041},
             ],
             "[EAO RESOURCING]": [
-                {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.037},
+                {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.040},
                 {"data_key": "cairt_lead", "label": "FN CAIRT LEAD", "width": 0.0486},
                 {"data_key": "eao_team", "label": "TEAM", "width": 0.028},
                 {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.045},
@@ -124,7 +124,7 @@ class EAResourceForeCastReport(ReportFactory):
                 {
                     "data_key": "referral_timing",
                     "label": "Expected Referral Date",
-                    "width": 0.0725,
+                    "width": 0.0705,
                 }
             ],
         }
@@ -239,7 +239,7 @@ class EAResourceForeCastReport(ReportFactory):
                 env_region.name.label("env_region"),
                 nrs_region.name.label("nrs_region"),
                 Work.id.label("work_id"),
-                func.concat(SubType.short_name, " (", Type.short_name, ")").label(
+                func.concat(Type.short_name, " (", SubType.short_name, ")").label(
                     "sector(sub)"
                 ),
                 Project.fte_positions_operation.label("fte_positions_operation"),

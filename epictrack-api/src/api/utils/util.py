@@ -53,3 +53,11 @@ def generate_title(project_name, work_type_name, simple_title=''):
     if simple_title:
         parts.append(simple_title)
     return ' - '.join(parts)
+
+
+def process_data(data, return_type):
+    """Process data based on the return type."""
+    if return_type == "json" and data:
+        return {"data": data}, None
+    if not data:
+        return {}, None

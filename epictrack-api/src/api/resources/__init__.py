@@ -66,6 +66,7 @@ from .work import API as WORK_API
 from .work_issues import API as WORK_ISSUES_API
 from .work_status import API as WORK_STATUS_API
 from .work_type import API as WORK_TYPES_API
+from .project_state import API as PROJECT_STATE_API
 
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
@@ -138,3 +139,4 @@ API.add_namespace(ROLES_API, path='/roles')
 API.add_namespace(SUBSTITUTION_ACTS_API, path='/substitution-acts')
 API.add_namespace(PIP_ORG_TYPES_API, path='/pip-org-types')
 API.add_namespace(INSIGHTS_API, path='/insights')
+API.add_namespace(PROJECT_STATE_API, path='/project-states')

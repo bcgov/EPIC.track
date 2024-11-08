@@ -14,7 +14,7 @@
 """Model to manage Project."""
 import enum
 
-from sqlalchemy import Boolean, Column, Date, Enum, Float, ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, Column, Date, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
@@ -23,19 +23,24 @@ from .base_model import BaseModelVersioned
 class ProjectStateEnum(enum.Enum):
     """Enum for project state"""
 
-    PRE_WORK = "PRE_WORK"
-    UNDER_EAC_ASSESSMENT = "UNDER_EAC_ASSESSMENT"
-    UNDER_EXEMPTION_REQUEST = "UNDER_EXEMPTION_REQUEST"
-    UNDER_AMENDMENT = "UNDER_AMENDMENT"
-    UNDER_DISPUTE_RESOLUTION = "UNDER_DISPUTE_RESOLUTION"
-    PRE_CONSTRUCTION = "PRE_CONSTRUCTION"
-    CONSTRUCTION = "CONSTRUCTION"
-    OPERATION = "OPERATION"
-    CARE_AND_MAINTENANCE = "CARE_AND_MAINTENANCE"
-    DECOMMISSION = "DECOMMISSION"
-    UNKNOWN = "UNKNOWN"
-    CLOSED = "CLOSED"
-    UNDER_DESIGNATION = "UNDER_DESIGNATION"
+    POTENTIAL_WORK = 1
+    PRE_WORK = 2
+    UNDER_WORK = 3
+    WORK_PENDING = 4
+    UNDER_DISPUTE_RESOLUTION = 5
+    OTHER_WORK = 6
+    PROJECT_WITHDRAWN = 7
+    PROJECT_TERMINATED = 8
+    EAC_EXPIRED = 9
+    EAC_OR_ORDER_CANCELLED = 10
+    EAC_OR_ORDER_SUSPENDED = 11
+    INDETERMINATE = 12
+    PRECONSTRUCTION = 13
+    CONSTRUCTION = 14
+    OPERATION = 15
+    CARE_AND_MAINTENANCE = 16
+    DECOMMISSIONING = 17
+    CLOSED = 18
 
 
 class Project(BaseModelVersioned):
@@ -55,7 +60,6 @@ class Project(BaseModelVersioned):
     address = Column(Text, nullable=True, default=None)
     fte_positions_construction = Column(Integer(), nullable=True)
     fte_positions_operation = Column(Integer(), nullable=True)
-    project_state = Column(Enum(ProjectStateEnum))
 
     ea_certificate = Column(String(255), nullable=True, default=None)
     sub_type_id = Column(ForeignKey("sub_types.id"), nullable=False)
@@ -66,6 +70,7 @@ class Project(BaseModelVersioned):
     abbreviation = Column(String(10), nullable=True, unique=True)
     eac_signed = Column(Date(), nullable=True)
     eac_expires = Column(Date(), nullable=True)
+    project_state_id = Column(ForeignKey("project_states.id", name="projects_project_state_id_project_state_fk"))
     sub_type = relationship("SubType", foreign_keys=[sub_type_id], lazy="select")
     type = relationship("Type", foreign_keys=[type_id], lazy="select")
     proponent = relationship("Proponent", foreign_keys=[proponent_id], lazy="select")
@@ -103,5 +108,4 @@ class Project(BaseModelVersioned):
     def as_dict(self, recursive=True):
         """Return JSON Representation."""
         data = super().as_dict(recursive)
-        data["project_state"] = self.project_state.value
         return data
