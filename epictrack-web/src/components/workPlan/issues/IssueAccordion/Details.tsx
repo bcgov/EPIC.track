@@ -19,7 +19,7 @@ import {
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
 import { useAppSelector } from "hooks";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
+import { WorkplanContext } from "../../WorkPlanContext";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
@@ -157,7 +157,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   allowed={[
                     // latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
                     SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                    SPECIAL_FIELDS.WORK.WORK_LEAD,
+                    SPECIAL_FIELDS.WORK.TEAM_LEAD,
                     SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
                   ]}
                   exception={!latestUpdate.is_approved && isTeamMember}

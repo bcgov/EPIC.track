@@ -85,7 +85,7 @@ const StatusHistory = () => {
                     allowed={[
                       // ROLES.EXTENDED_EDIT,
                       SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                      SPECIAL_FIELDS.WORK.WORK_LEAD,
+                      SPECIAL_FIELDS.WORK.TEAM_LEAD,
                       SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
                     ]}
                     errorProps={{ disabled: true }}

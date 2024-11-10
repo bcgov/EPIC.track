@@ -139,7 +139,7 @@ const RecentStatus = () => {
           allowed={[
             // statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
             SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-            SPECIAL_FIELDS.WORK.WORK_LEAD,
+            SPECIAL_FIELDS.WORK.TEAM_LEAD,
             SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
           ]}
           errorProps={{ disabled: true }}
