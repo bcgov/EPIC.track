@@ -21,6 +21,7 @@ import { IssuesContext } from "../../IssuesContext";
 import {
   MONTH_DAY_YEAR,
   ROLES,
+  SPECIAL_FIELDS,
 } from "../../../../../constants/application-constant";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyIssueHistory } from "./EmptyIssueHistory";
@@ -93,7 +94,12 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 </If>
                 <When condition={isSuccess}>
                   <Restricted
-                    allowed={[ROLES.EXTENDED_EDIT]}
+                    allowed={[
+                      // ROLES.EXTENDED_EDIT,
+                      SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
+                      SPECIAL_FIELDS.WORK.WORK_LEAD,
+                      SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+                    ]}
                     errorProps={{ disabled: true }}
                   >
                     <Button
