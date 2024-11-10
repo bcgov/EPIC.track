@@ -5,7 +5,7 @@ from collections import defaultdict
 from io import BytesIO
 from pathlib import Path
 from sqlalchemy import and_, func
-
+from flask import current_app
 from api.models import WorkStatus, db
 
 
@@ -36,7 +36,8 @@ class ReportFactory(ABC):
             excluded_items = self.filters["exclude"]
         for item in data:
             obj = {
-                k: getattr(item, k) for k in self.data_keys if k not in excluded_items
+              k: (item[k] if k != "work_issues" else self._deserialize_work_issues(item[k]))
+              for k in self.data_keys if k not in excluded_items
             }
             if self.group_by:
                 obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
@@ -44,6 +45,21 @@ class ReportFactory(ABC):
             else:
                 formatted_data.append(obj)
         return formatted_data
+
+    def _deserialize_work_issues(self, work_issues):
+        """Deserialize work issues from the database format to a report-friendly format."""
+        current_app.logger.debug(f"Deserializing work issues: {work_issues}")
+        deserialized_issues = []
+        for issue in work_issues:
+            deserialized_issues.append({
+                "id": issue.id,
+                "title": issue.title,
+                "description": issue.description if hasattr(issue, 'description') else None,
+                "is_high_priority": issue.is_high_priority,
+                "created_at": issue.created_at.strftime("%Y-%m-%d %H:%M:%S") if issue.created_at else None,
+                "updated_at": issue.updated_at.strftime("%Y-%m-%d %H:%M:%S") if issue.updated_at else None,
+            })
+        return deserialized_issues
 
     @abstractmethod
     def generate_report(self, report_date, return_type):

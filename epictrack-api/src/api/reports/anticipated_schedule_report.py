@@ -12,6 +12,8 @@ from api.models.ea_act import EAAct
 from api.models.event import Event
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
+from api.models.work_issues import WorkIssues
+from api.models.work_issue_updates import WorkIssueUpdates
 from api.models.event_type import EventTypeEnum
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode
@@ -40,6 +42,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Initialize the ReportFactory"""
         data_keys = [
             "work_id",
+            "event_id",
+            "work_issues",
             "phase_name",
             "date_updated",
             "project_name",
@@ -191,6 +195,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
               ~WorkPhase.name.in_(exclude_phase_names)
             )
             .add_columns(
+                Event.id.label("event_id"),
                 Work.id.label("work_id"),
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
@@ -234,7 +239,34 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Generates a report and returns it"""
         current_app.logger.info(f"Generating {self.report_title} report for {report_date}")
         data = self._fetch_data(report_date)
-        data = self._format_data(data)
+
+        works_list = []
+        for item in data:
+            current_app.logger.debug(f"Work ID: {item[0]}")
+            work_issues = db.session.query(WorkIssues).filter_by(work_id=item.work_id).all()
+            current_app.logger.debug(f"Work Issues: {work_issues}")
+            item_dict = item._asdict()
+            item_dict['work_issues'] = work_issues
+            works_list.append(item_dict)
+
+            # go through all the work issues, find the update and add the description to the issue
+            for issue in work_issues:
+                work_issue_updates = (
+                    db.session.query(WorkIssueUpdates)
+                    .filter_by(
+                        work_issue_id=issue.id,
+                        is_active=True,
+                        is_approved=True
+                    )
+                    .order_by(WorkIssueUpdates.updated_at.desc())
+                    .first()
+                )
+                if work_issue_updates:
+                    for work_issue in item_dict['work_issues']:
+                        if work_issue.id == issue.id:
+                            work_issue.description = work_issue_updates.description
+
+        data = self._format_data(works_list)
         data = self._update_staleness(data, report_date)
 
         if return_type == "json" or not data:
