@@ -11,6 +11,7 @@ import { Else, If, Then, When } from "react-if";
 import {
   MONTH_DAY_YEAR,
   ROLES,
+  SPECIAL_FIELDS,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
 import { useAppSelector } from "hooks";
@@ -135,7 +136,12 @@ const RecentStatus = () => {
           </Else>
         </If>
         <Restricted
-          allowed={[statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT]}
+          allowed={[
+            // statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
+            SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
+            SPECIAL_FIELDS.WORK.WORK_LEAD,
+            SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+          ]}
           errorProps={{ disabled: true }}
           exception={!statuses[0].is_approved && isTeamMember}
         >
