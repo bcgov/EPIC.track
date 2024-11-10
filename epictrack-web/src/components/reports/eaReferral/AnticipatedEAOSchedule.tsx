@@ -390,19 +390,25 @@ export default function AnticipatedEAOSchedule() {
                                         {item["additional_info"]}
                                       </TableCell>
                                     </TableRow>
-                                    {
-                                    item["work_issues"] &&
-                                      (item["work_issues"] as any[]).map((issue, issueIndex) => {
-                                      if (issue.is_high_priority) {
-                                        return (
-                                        <TableRow key={issueIndex}>
-                                          <TableCell>High Priority Issue</TableCell>
-                                            <TableCell>{issue.title}:{issue.description}</TableCell>
-                                        </TableRow>
-                                        );
-                                      }
-                                      return null;
-                                      })}
+                                    {item["work_issues"] &&
+                                      (item["work_issues"] as any[]).map(
+                                        (issue, issueIndex) => {
+                                          if (issue.is_high_priority) {
+                                            return (
+                                              <TableRow key={issueIndex}>
+                                                <TableCell>
+                                                  High Priority Issue
+                                                </TableCell>
+                                                <TableCell>
+                                                  {issue.title}:
+                                                  {issue.description}
+                                                </TableCell>
+                                              </TableRow>
+                                            );
+                                          }
+                                          return null;
+                                        }
+                                      )}
                                   </TableBody>
                                 </Table>
                               </TabPanel>
