@@ -8,6 +8,7 @@ import moment from "moment";
 import {
   MONTH_DAY_YEAR,
   ROLES,
+  SPECIAL_FIELDS,
 } from "../../../../constants/application-constant";
 import { Else, If, Then, When } from "react-if";
 import icons from "../../../icons";
@@ -66,7 +67,12 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
         <Grid item xs={"auto"} container justifyContent={"flex-end"}>
           <AccordionSummaryItem title="Actions" enableTooltip={true}>
             <Restricted
-              allowed={[ROLES.EDIT]}
+              allowed={[
+                // ROLES.EXTENDED_EDIT,
+                SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
+                SPECIAL_FIELDS.WORK.WORK_LEAD,
+                SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+              ]}
               errorProps={{ disabled: true }}
               exception={isTeamMember}
             >
