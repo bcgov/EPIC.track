@@ -2,7 +2,7 @@
 
 from calendar import monthrange
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import partial
 from io import BytesIO
 from typing import IO, Dict, List, Tuple
@@ -31,6 +31,7 @@ from api.models.special_field import EntityEnum, SpecialField
 from api.models.work import WorkStateEnum
 from api.models.work_type import WorkTypeEnum
 from api.models.role import RoleEnum
+from api.services.staff import StaffService
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
 from api.utils.constants import CANADA_TIMEZONE
@@ -703,15 +704,19 @@ class EAResourceForeCastReport(ReportFactory):
                 StaffWorkRole.role_id.label("role_id"),
             )
         )
+        # Retrieve the responsible EPD and work lead that where active at that end date of the report period
+        # 7 day buffer period is added so if a new EPD/work lead is added at the very end its not their name on report
+        responsible_epd_query = StaffService.find_active_staff_from_special_history(
+            work_id, "responsible_epd_id", self.end_date - timedelta(days=7))
+        work_lead_query = StaffService.find_active_staff_from_special_history(
+            work_id, "work_lead_id", self.end_date - timedelta(days=7))
+        responsible_epd = responsible_epd_query.full_name if responsible_epd_query else ""
+        work_lead = work_lead_query.full_name if work_lead_query else ""
         for work_team_member in work_team_members:
             first_name = work_team_member.first_name
             last_name = work_team_member.last_name
             if work_team_member.role_id == RoleEnum.FN_CAIRT.value:
                 cairt_lead = work_team_member.full_name
-            if work_team_member.role_id == RoleEnum.TEAM_LEAD.value:
-                work_lead = work_team_member.full_name
-            if work_team_member.role_id == RoleEnum.RESPONSIBLE_EPD.value:
-                responsible_epd = work_team_member.full_name
             elif work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
                 staffs.append({"first_name": first_name, "last_name": last_name})
         staffs = sorted(staffs, key=lambda x: x["last_name"])
