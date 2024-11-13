@@ -29,10 +29,8 @@ import {
   MILESTONE_TYPES,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
-import moment from "moment";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
-import { Palette } from "styles/theme";
 import { staleLevel } from "utils/uiUtils";
 
 export default function AnticipatedEAOSchedule() {
@@ -231,6 +229,7 @@ export default function AnticipatedEAOSchedule() {
                     </AccordionSummary>
                     <AccordionDetails>
                       {((reports as any)[key] as []).map((item, itemIndex) => {
+                        console.log(item);
                         return (
                           <Accordion key={itemIndex} elevation={0}>
                             <AccordionSummary
@@ -319,6 +318,14 @@ export default function AnticipatedEAOSchedule() {
                                 </Table>
                               </TabPanel>
                               <TabPanel value={selectedTab} index={1}>
+                                {item["report_description"] && (
+                                  <>
+                                    <b>Work Description:</b>{" "}
+                                    {item["report_description"]}
+                                    <Box sx={{ height: 20 }} />
+                                  </>
+                                )}
+                                <b>Project Description:</b>{" "}
                                 {item["project_description"]}
                               </TabPanel>
                               <TabPanel value={selectedTab} index={2}>
@@ -383,6 +390,25 @@ export default function AnticipatedEAOSchedule() {
                                         {item["additional_info"]}
                                       </TableCell>
                                     </TableRow>
+                                    {item["work_issues"] &&
+                                      (item["work_issues"] as any[]).map(
+                                        (issue, issueIndex) => {
+                                          if (issue.is_high_priority) {
+                                            return (
+                                              <TableRow key={issueIndex}>
+                                                <TableCell>
+                                                  High Priority Issue
+                                                </TableCell>
+                                                <TableCell>
+                                                  {issue.title}:
+                                                  {issue.description}
+                                                </TableCell>
+                                              </TableRow>
+                                            );
+                                          }
+                                          return null;
+                                        }
+                                      )}
                                   </TableBody>
                                 </Table>
                               </TabPanel>

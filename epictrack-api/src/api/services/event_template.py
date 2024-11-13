@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Event Template."""
+import threading
+from flask import current_app
 import copy
 import json
 from typing import IO, Dict
@@ -46,172 +48,204 @@ class EventTemplateService:
     @classmethod
     def import_events_template(cls, configuration_file):
         """Import event configurations in to database"""
-        final_result = []
-        excel_dict = cls._read_excel(configuration_file=configuration_file)
-        (
-            work_types,
-            ea_acts,
-            event_types,
-            event_categories,
-            actions,
-        ) = cls._get_event_configuration_lookup_entities()
-        event_dict = excel_dict.get("Events")
-        phase_dict = excel_dict.get("Phases")
-        outcome_dict = excel_dict.get("Outcomes")
-        action_dict = excel_dict.get("Actions")
-        for event_type in event_types:
-            name = escape_characters(event_type.name, ["(", ")"])
-            event_dict = event_dict.replace(
-                {"event_type_id": rf"^{name}$"},
-                {"event_type_id": event_type.id},
-                regex=True,
-            )
-        for event_category in event_categories:
-            name = escape_characters(event_category.name, ["(", ")"])
-            event_dict = event_dict.replace(
-                {"event_category_id": rf"^{name}$"},
-                {"event_category_id": event_category.id},
-                regex=True,
-            )
-        for work_type in work_types:
-            name = escape_characters(work_type.name, ["(", ")"])
-            phase_dict = phase_dict.replace(
-                {"work_type_id": rf"^{name}$"},
-                {"work_type_id": work_type.id},
-                regex=True,
-            )
-        for ea_act in ea_acts:
-            name = escape_characters(ea_act.name, ["(", ")"])
-            phase_dict = phase_dict.replace(
-                {"ea_act_id": rf"^{name}$"}, {"ea_act_id": ea_act.id}, regex=True
-            )
-        for action in actions:
-            name = escape_characters(action.name, ["(", ")"])
-            action_dict = action_dict.replace(
-                {"action_id": rf"^{name}$"}, {"action_id": action.id}, regex=True
-            )
 
-        event_dict = event_dict.to_dict("records")
-        phase_dict = phase_dict.to_dict("records")
-        existing_phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
-            phase_dict[0]["ea_act_id"], phase_dict[0]["work_type_id"]
-        )
-        for phase in phase_dict:
-            selected_phase = next(
-                (p for p in existing_phases if p.name == phase["name"]), None
-            )
-            phase_obj = req.PhaseBodyParameterSchema().load(phase)
-            if selected_phase:
-                phase_result = selected_phase.update(phase_obj, commit=False)
-            else:
-                phase_result = PhaseCode(**phase_obj).flush()
-            phase_result_copy = res.PhaseResponseSchema().dump(phase_result)
-            phase_result_copy["events"] = []
-            parent_events = copy.deepcopy(
-                list(
-                    filter(
-                        lambda x, _phase_no=phase["no"]: "phase_no" in x
-                        and x["phase_no"] == _phase_no
-                        and not x["parent_id"],
-                        event_dict,
+        def _process(excel_dict: dict, app_context):
+            """Process the incoming excel"""
+            with app_context:
+                final_result = []
+                (
+                    work_types,
+                    ea_acts,
+                    event_types,
+                    event_categories,
+                    actions,
+                ) = cls._get_event_configuration_lookup_entities()
+                event_dict = excel_dict.get("Events")
+                phase_dict = excel_dict.get("Phases")
+                outcome_dict = excel_dict.get("Outcomes")
+                action_dict = excel_dict.get("Actions")
+                for event_type in event_types:
+                    name = escape_characters(event_type.name, ["(", ")"])
+                    event_dict = event_dict.replace(
+                        {"event_type_id": rf"^{name}$"},
+                        {"event_type_id": event_type.id},
+                        regex=True,
                     )
+                for event_category in event_categories:
+                    name = escape_characters(event_category.name, ["(", ")"])
+                    event_dict = event_dict.replace(
+                        {"event_category_id": rf"^{name}$"},
+                        {"event_category_id": event_category.id},
+                        regex=True,
+                    )
+                for work_type in work_types:
+                    name = escape_characters(work_type.name, ["(", ")"])
+                    phase_dict = phase_dict.replace(
+                        {"work_type_id": rf"^{name}$"},
+                        {"work_type_id": work_type.id},
+                        regex=True,
+                    )
+                for ea_act in ea_acts:
+                    name = escape_characters(ea_act.name, ["(", ")"])
+                    phase_dict = phase_dict.replace(
+                        {"ea_act_id": rf"^{name}$"},
+                        {"ea_act_id": ea_act.id},
+                        regex=True,
+                    )
+                for action in actions:
+                    name = escape_characters(action.name, ["(", ")"])
+                    action_dict = action_dict.replace(
+                        {"action_id": rf"^{name}$"},
+                        {"action_id": action.id},
+                        regex=True,
+                    )
+
+                event_dict = event_dict.to_dict("records")
+                phase_dict = phase_dict.to_dict("records")
+                existing_phases = PhaseService.find_phase_codes_by_ea_act_and_work_type(
+                    phase_dict[0]["ea_act_id"], phase_dict[0]["work_type_id"]
                 )
-            )
-            existing_events = EventTemplate.find_by_phase_id(phase_result.id)
-            template_ids = list(map(lambda x: x.id, existing_events))
-            existing_outcomes = OutcomeTemplate.find_by_template_ids(template_ids)
-            outcome_ids = list(map(lambda x: x.id, existing_outcomes))
-            existing_actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
-            for event in parent_events:
-                event["phase_id"] = phase_result.id
-                event["start_at"] = str(event["start_at"])
-                event_result = cls._save_event_template(
-                    existing_events, event, phase_result.id
-                )
-                child_events = copy.deepcopy(
-                    list(
-                        filter(
-                            lambda x, _parent_id=event["no"]: "parent_id" in x
-                            and x["parent_id"] == _parent_id,
-                            event_dict,
+                for phase in phase_dict:
+                    selected_phase = next(
+                        (p for p in existing_phases if p.name == phase["name"]), None
+                    )
+                    phase_obj = req.PhaseBodyParameterSchema().load(phase)
+                    if selected_phase:
+                        phase_result = selected_phase.update(phase_obj, commit=False)
+                    else:
+                        phase_result = PhaseCode(**phase_obj).flush()
+                    phase_result_copy = res.PhaseResponseSchema().dump(phase_result)
+                    phase_result_copy["events"] = []
+                    parent_events = copy.deepcopy(
+                        list(
+                            filter(
+                                lambda x, _phase_no=phase["no"]: "phase_no" in x
+                                and x["phase_no"] == _phase_no
+                                and not x["parent_id"],
+                                event_dict,
+                            )
                         )
                     )
-                )
-                outcome_dict.loc[
-                    outcome_dict["template_no"] == event["no"], "event_template_id"
-                ] = event_result.id
-                outcome_results = cls._handle_outcomes(
-                    outcome_dict,
-                    existing_outcomes,
-                    existing_actions,
-                    action_dict,
-                    event,
-                )
-                event_result_copy = res.EventTemplateResponseSchema().dump(event_result)
-                event_result_copy["outcomes"] = outcome_results
-                (phase_result_copy["events"]).append(event_result_copy)
-                for child in child_events:
-                    child["phase_id"] = phase_result.id
-                    child["parent_id"] = event_result.id
-                    child["start_at"] = str(child["start_at"])
-                    child_event_result = cls._save_event_template(
-                        existing_events, child, phase_result.id, event_result.id
+                    existing_events = EventTemplate.find_by_phase_id(phase_result.id)
+                    template_ids = list(map(lambda x: x.id, existing_events))
+                    existing_outcomes = OutcomeTemplate.find_by_template_ids(
+                        template_ids
                     )
-                    outcome_dict.loc[
-                        outcome_dict["template_no"] == child["no"], "event_template_id"
-                    ] = child_event_result.id
-                    outcome_results = cls._handle_outcomes(
-                        outcome_dict,
+                    outcome_ids = list(map(lambda x: x.id, existing_outcomes))
+                    existing_actions = ActionTemplate.find_by_outcome_ids(outcome_ids)
+                    for event in parent_events:
+                        event["phase_id"] = phase_result.id
+                        event["start_at"] = str(event["start_at"])
+                        event_result = cls._save_event_template(
+                            existing_events, event, phase_result.id
+                        )
+                        child_events = copy.deepcopy(
+                            list(
+                                filter(
+                                    lambda x, _parent_id=event["no"]: "parent_id" in x
+                                    and x["parent_id"] == _parent_id,
+                                    event_dict,
+                                )
+                            )
+                        )
+                        outcome_dict.loc[
+                            outcome_dict["template_no"] == event["no"],
+                            "event_template_id",
+                        ] = event_result.id
+                        outcome_results = cls._handle_outcomes(
+                            outcome_dict,
+                            existing_outcomes,
+                            existing_actions,
+                            action_dict,
+                            event,
+                        )
+                        event_result_copy = res.EventTemplateResponseSchema().dump(
+                            event_result
+                        )
+                        event_result_copy["outcomes"] = outcome_results
+                        (phase_result_copy["events"]).append(event_result_copy)
+                        for child in child_events:
+                            child["phase_id"] = phase_result.id
+                            child["parent_id"] = event_result.id
+                            child["start_at"] = str(child["start_at"])
+                            child_event_result = cls._save_event_template(
+                                existing_events, child, phase_result.id, event_result.id
+                            )
+                            outcome_dict.loc[
+                                outcome_dict["template_no"] == child["no"],
+                                "event_template_id",
+                            ] = child_event_result.id
+                            outcome_results = cls._handle_outcomes(
+                                outcome_dict,
+                                existing_outcomes,
+                                existing_actions,
+                                action_dict,
+                                child,
+                            )
+                            event_result_copy = res.EventTemplateResponseSchema().dump(
+                                child_event_result
+                            )
+                            event_result_copy["outcomes"] = outcome_results
+                            (phase_result_copy["events"]).append(event_result_copy)
+                        child_events = []
+                    final_result.append(phase_result_copy)
+                    cls._handle_deletion_templates(
+                        existing_events,
                         existing_outcomes,
                         existing_actions,
-                        action_dict,
-                        child,
+                        final_result,
+                        phase_result.id,
                     )
-                    event_result_copy = res.EventTemplateResponseSchema().dump(
-                        child_event_result
-                    )
-                    event_result_copy["outcomes"] = outcome_results
-                    (phase_result_copy["events"]).append(event_result_copy)
-                child_events = []
-            final_result.append(phase_result_copy)
-            cls._handle_deletion_templates(
-                existing_events,
-                existing_outcomes,
-                existing_actions,
-                final_result,
-                phase_result.id,
-            )
-        # deletion of phases
-        existing_set = set(list(map(lambda x: x.id, existing_phases)))
-        incoming_set = set(list(map(lambda x: x["id"], final_result)))
-        difference = list(existing_set.difference(incoming_set))
-        db.session.query(PhaseCode).filter(PhaseCode.id.in_(difference)).update(
-            {PhaseCode.is_active: False, PhaseCode.is_deleted: True}
-        )
-        # handling deletion of event templates, outcomes and actions of the deleted phases
-        templates_from_removed_phases = db.session.query(EventTemplate).filter(
-            EventTemplate.phase_id.in_(difference)
-        )
-        removed_template_ids = list(map(lambda x: x.id, templates_from_removed_phases))
-        outcomes_from_removed_templates = db.session.query(OutcomeTemplate).filter(
-            OutcomeTemplate.event_template_id.in_(removed_template_ids)
-        )
-        removed_outcome_ids = list(map(lambda x: x.id, outcomes_from_removed_templates))
-        actions_from_removed_outcomes = db.session.query(ActionTemplate).filter(
-            ActionTemplate.outcome_id.in_(removed_outcome_ids)
-        )
-        removed_action_ids = list(map(lambda x: x.id, actions_from_removed_outcomes))
-        db.session.query(EventTemplate).filter(
-            EventTemplate.id.in_(removed_template_ids)
-        ).update({EventTemplate.is_active: False, EventTemplate.is_deleted: True})
-        db.session.query(OutcomeTemplate).filter(
-            OutcomeTemplate.id.in_(removed_outcome_ids)
-        ).update({OutcomeTemplate.is_active: False, OutcomeTemplate.is_deleted: True})
-        db.session.query(ActionTemplate).filter(
-            ActionTemplate.id.in_(removed_action_ids)
-        ).update({ActionTemplate.is_active: False, ActionTemplate.is_deleted: True})
-        db.session.commit()
-        return final_result
+                # deletion of phases
+                existing_set = set(list(map(lambda x: x.id, existing_phases)))
+                incoming_set = set(list(map(lambda x: x["id"], final_result)))
+                difference = list(existing_set.difference(incoming_set))
+                db.session.query(PhaseCode).filter(PhaseCode.id.in_(difference)).update(
+                    {PhaseCode.is_active: False, PhaseCode.is_deleted: True}
+                )
+                # handling deletion of event templates, outcomes and actions of the deleted phases
+                templates_from_removed_phases = db.session.query(EventTemplate).filter(
+                    EventTemplate.phase_id.in_(difference)
+                )
+                removed_template_ids = list(
+                    map(lambda x: x.id, templates_from_removed_phases)
+                )
+                outcomes_from_removed_templates = db.session.query(
+                    OutcomeTemplate
+                ).filter(OutcomeTemplate.event_template_id.in_(removed_template_ids))
+                removed_outcome_ids = list(
+                    map(lambda x: x.id, outcomes_from_removed_templates)
+                )
+                actions_from_removed_outcomes = db.session.query(ActionTemplate).filter(
+                    ActionTemplate.outcome_id.in_(removed_outcome_ids)
+                )
+                removed_action_ids = list(
+                    map(lambda x: x.id, actions_from_removed_outcomes)
+                )
+                db.session.query(EventTemplate).filter(
+                    EventTemplate.id.in_(removed_template_ids)
+                ).update(
+                    {EventTemplate.is_active: False, EventTemplate.is_deleted: True}
+                )
+                db.session.query(OutcomeTemplate).filter(
+                    OutcomeTemplate.id.in_(removed_outcome_ids)
+                ).update(
+                    {OutcomeTemplate.is_active: False, OutcomeTemplate.is_deleted: True}
+                )
+                db.session.query(ActionTemplate).filter(
+                    ActionTemplate.id.in_(removed_action_ids)
+                ).update(
+                    {ActionTemplate.is_active: False, ActionTemplate.is_deleted: True}
+                )
+                db.session.commit()
+                current_app.logger.info("Process Completed.")
+                return final_result
+
+        excel_dict = cls._read_excel(configuration_file=configuration_file)
+        app_context = current_app._get_current_object().app_context()  # pylint: disable=protected-access
+        thread = threading.Thread(target=_process, args=(excel_dict, app_context))
+        thread.start()
+        return thread
 
     @classmethod
     def _handle_deletion_templates(
@@ -295,7 +329,8 @@ class EventTemplateService:
                 list(
                     filter(
                         lambda x, _outcome_no=outcome["no"]: x["outcome_no"]
-                        == _outcome_no and x["action_id"] != "NONE",
+                        == _outcome_no
+                        and x["action_id"] != "NONE",
                         action_dict.to_dict("records"),
                     )
                 )

@@ -43,7 +43,9 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     """Return a configured Flask App using the Factory method."""
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
-    app.logger.setLevel(logging.INFO)  # pylint: disable=no-member
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    app.logger.info(f'Current log level: {log_level}')
+    app.logger.setLevel(getattr(logging, log_level, logging.INFO))  # pylint: disable=no-member
     app.json_provider_class = CustomJSONEncoder
 
     db.init_app(app)

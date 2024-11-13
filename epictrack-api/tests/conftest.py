@@ -14,7 +14,6 @@
 
 """Common setup and fixtures for the py-test suite used by this service."""
 import os
-
 import pytest
 from flask import g
 from flask_migrate import Migrate, upgrade
@@ -99,7 +98,8 @@ def _load_templates():
     for root, dirs, files in os.walk(templates_folder):
         for file_name in files:
             file_path = os.path.join(root, file_name)
-            EventTemplateService.import_events_template(file_path)
+            thread = EventTemplateService.import_events_template(file_path)
+            thread.join()
 
 
 @pytest.fixture(scope="session")
