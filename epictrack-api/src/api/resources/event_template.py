@@ -13,8 +13,7 @@
 # limitations under the License.
 """Resource for Event Template endpoints."""
 from http import HTTPStatus
-
-from flask import jsonify, request
+from flask import request
 from flask_restx import Namespace, Resource, cors
 
 from api.services import EventTemplateService
@@ -37,5 +36,5 @@ class EventTemplates(Resource):
     def post():
         """Create new task template"""
         template_file = request.files["event_template"]
-        event_template = EventTemplateService.import_events_template(template_file)
-        return jsonify(event_template), HTTPStatus.CREATED
+        EventTemplateService.import_events_template(template_file)
+        return "Event template processing started", HTTPStatus.CREATED

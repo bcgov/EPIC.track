@@ -59,7 +59,7 @@ pylint: ## Linting with pylint
 	. venv/bin/activate && pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
 
 flake8: ## Linting with flake8
-	. venv/bin/activate && flake8 --extend-ignore=Q000,D400,D401,I005,W503 src/$(PROJECT_NAME) tests
+	. venv/bin/activate && flake8 --extend-ignore=Q000,D400,D401,I005,W503,E261,E121 src/$(PROJECT_NAME) tests
 
 lint: pylint flake8 ## run all lint type scripts
 

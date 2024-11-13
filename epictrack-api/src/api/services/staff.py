@@ -17,10 +17,12 @@ from typing import IO, List
 
 import pandas as pd
 from flask import current_app
+from sqlalchemy import Integer, cast, func, or_
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import Staff, db
 from api.models.position import Position
+from api.models.special_field import EntityEnum, SpecialField
 from api.schemas.response import StaffResponseSchema
 from api.utils.token_info import TokenInfo
 from api.services.keycloak import KeycloakService
@@ -247,3 +249,22 @@ class StaffService:
         except ValueError:
             current_app.logger.debug(f"Error while reading user details from keycloak with email: {email}")
         return ""
+
+    @classmethod
+    def find_active_staff_from_special_history(cls, work_id, field_name, date):
+        """Returns the staff that was active on the given date by querying the special history table."""
+        query = (
+          db.session.query(Staff)
+          .join(SpecialField, Staff.id == cast(SpecialField.field_value, Integer))
+          .filter(SpecialField.entity == EntityEnum.WORK.value)
+          .filter(SpecialField.entity_id == work_id)
+          .filter(SpecialField.field_name == field_name)
+          .filter(func.date(func.lower(SpecialField.time_range)) <= date)
+          .filter(
+              or_(
+                  func.date(func.upper(SpecialField.time_range)).is_(None),
+                  func.date(func.upper(SpecialField.time_range)) >= date
+              )
+          )
+        )
+        return query.one_or_none()

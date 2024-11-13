@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import jsonify, current_app
 from pytz import timezone
-from sqlalchemy import and_, func, select
+from sqlalchemy import and_, func, select, or_
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
@@ -12,6 +12,8 @@ from api.models.ea_act import EAAct
 from api.models.event import Event
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
+from api.models.work_issues import WorkIssues
+from api.models.work_issue_updates import WorkIssueUpdates
 from api.models.event_type import EventTypeEnum
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode
@@ -39,6 +41,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
+            "work_id",
+            "event_id",
+            "work_issues",
             "phase_name",
             "date_updated",
             "project_name",
@@ -59,6 +64,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "next_pecp_title",
             "next_pecp_short_description",
             "milestone_type",
+            "category_type",
+            "event_name"
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
@@ -79,6 +86,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
+
+        current_app.logger.debug(f"Executing query for {self.report_title} report")
         results_qry = (
             db.session.query(Work)
             .join(Event, Event.work_id == Work.id)
@@ -122,15 +131,72 @@ class EAAnticipatedScheduleReport(ReportFactory):
             )
             # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
             .filter(
-                Work.is_active.is_(True),
-                Work.is_deleted.is_(False),
-                Work.work_state.in_(
-                    [WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]
-                ),
-                # Filter out specific WorkPhase names
-                ~WorkPhase.name.in_(exclude_phase_names)
+              Work.is_active.is_(True),
+              Event.anticipated_date.between(report_date - timedelta(days=7), report_date + timedelta(days=366)),
+              or_(
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_type_id == 5, # EA Referral
+                        EventConfiguration.event_category_id == 1 # Milestone,
+                    )
+                  ),
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_category_id == 4, # Decision
+                        EventConfiguration.event_type_id == 14 # Minister
+                    )
+                  ),
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_category_id == 4, # Decision
+                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                        EventConfiguration.event_type_id == 15 # CEAO
+                    )
+                  ),
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_category_id == 4, # Decision
+                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                        EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
+                        EventConfiguration.event_type_id == 15 # CEAO
+                    )
+                  ),
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_category_id == 4, # Decision
+                        EventConfiguration.name != "Delegation of Amendment Decision",
+                        or_(
+                          EventConfiguration.event_type_id == 15, # CEAO
+                          EventConfiguration.event_type_id == 16 # ADM
+                        )
+                    )
+                  ),
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_category_id == 4, # Decision
+                        EventConfiguration.name != "Delegation of SubStart Decision to Minister",
+                        EventConfiguration.event_type_id == 15 # CEAO
+                    )
+                  ),
+                  Event.event_configuration_id.in_(
+                    db.session.query(EventConfiguration.id).filter(
+                        EventConfiguration.event_category_id == 4, # Decision
+                        EventConfiguration.name != "Delegation of Transfer Decision to Minister",
+                        or_(
+                          EventConfiguration.event_type_id == 15, # CEAO
+                          EventConfiguration.event_type_id == 16 # ADM
+                        )
+                    )
+                  )
+              ),
+              Work.is_deleted.is_(False),
+              Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
+              # Filter out specific WorkPhase names
+              ~WorkPhase.name.in_(exclude_phase_names)
             )
             .add_columns(
+                Event.id.label("event_id"),
+                Work.id.label("work_id"),
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
@@ -154,6 +220,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 eac_decision_by.full_name.label("eac_decision_by"),
                 decision_by.full_name.label("decision_by"),
                 EventConfiguration.event_type_id.label("milestone_type"),
+                EventConfiguration.event_category_id.label("category_type"),
+                EventConfiguration.name.label("event_name"),
                 func.coalesce(next_pecp_query.c.name, Event.name).label(
                     "next_pecp_title"
                 ),
@@ -171,7 +239,34 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Generates a report and returns it"""
         current_app.logger.info(f"Generating {self.report_title} report for {report_date}")
         data = self._fetch_data(report_date)
-        data = self._format_data(data)
+
+        works_list = []
+        for item in data:
+            current_app.logger.debug(f"Work ID: {item[0]}")
+            work_issues = db.session.query(WorkIssues).filter_by(work_id=item.work_id).all()
+            current_app.logger.debug(f"Work Issues: {work_issues}")
+            item_dict = item._asdict()
+            item_dict['work_issues'] = work_issues
+            works_list.append(item_dict)
+
+            # go through all the work issues, find the update and add the description to the issue
+            for issue in work_issues:
+                work_issue_updates = (
+                    db.session.query(WorkIssueUpdates)
+                    .filter_by(
+                        work_issue_id=issue.id,
+                        is_active=True,
+                        is_approved=True
+                    )
+                    .order_by(WorkIssueUpdates.updated_at.desc())
+                    .first()
+                )
+                if work_issue_updates:
+                    for work_issue in item_dict['work_issues']:
+                        if work_issue.id == issue.id:
+                            work_issue.description = work_issue_updates.description
+
+        data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)
 
         if return_type == "json" or not data:
