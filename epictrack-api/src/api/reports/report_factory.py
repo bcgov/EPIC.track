@@ -26,7 +26,7 @@ class ReportFactory(ABC):
     def _fetch_data(self, report_date):
         """Fetches the relevant data for the given report"""
 
-    def _format_data(self, data):
+    def _format_data(self, data, report_title=None):
         """Formats the given data for the given report"""
         formatted_data = []
         if self.group_by:
@@ -34,16 +34,28 @@ class ReportFactory(ABC):
         excluded_items = []
         if self.filters and "exclude" in self.filters:
             excluded_items = self.filters["exclude"]
-        for item in data:
-            obj = {
-              k: (item[k] if k != "work_issues" else self._deserialize_work_issues(item[k]))
-              for k in self.data_keys if k not in excluded_items
-            }
-            if self.group_by:
-                obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
-                formatted_data[obj.get(self.group_by)].append(obj)
-            else:
-                formatted_data.append(obj)
+        if report_title == "Anticipated EA Referral Schedule":
+            for item in data:
+                obj = {
+                  k: (item[k] if k != "work_issues" else self._deserialize_work_issues(item[k]))
+                  for k in self.data_keys if k not in excluded_items
+                }
+                if self.group_by:
+                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
+                    formatted_data[obj.get(self.group_by)].append(obj)
+                else:
+                    formatted_data.append(obj)
+        else:
+            for item in data:
+                obj = {
+                    k: getattr(item, k) for k in self.data_keys if k not in excluded_items
+                }
+                if self.group_by:
+                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
+                    formatted_data[obj.get(self.group_by)].append(obj)
+                else:
+                    formatted_data.append(obj)
+
         return formatted_data
 
     def _deserialize_work_issues(self, work_issues):

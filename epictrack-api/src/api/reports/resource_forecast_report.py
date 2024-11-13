@@ -36,9 +36,9 @@ from api.utils.color_utils import color_with_opacity
 from api.utils.constants import CANADA_TIMEZONE
 
 from .report_factory import ReportFactory
+from flask import current_app
 
-
-# pylint:disable=not-callable,cell-var-from-loop,too-many-locals,no-member
+# pylint:disable=not-callable,cell-var-from-loop,too-many-locals,no-member,too-many-lines
 
 daterange = partial(func.daterange, type_=DATERANGE)
 
@@ -178,13 +178,15 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _fetch_data(self, report_date: datetime):
         """Find and return works that are started before end date and did not end before report date"""
+        current_app.logger.info(f"Report Date: {report_date}")
         env_region = aliased(Region)
         nrs_region = aliased(Region)
         less_than_end_date_query = self._get_less_than_end_date_query()
+        current_app.logger.info(f"Less than end date query: {less_than_end_date_query}")
         greater_than_report_date_query = self._get_greater_than_report_date_query(
             report_date
         )
-
+        current_app.logger.info(f"Greater than report date query: {greater_than_report_date_query}")
         works = (
             Project.query.filter(
                 Project.is_project_closed.is_(False),
@@ -289,6 +291,7 @@ class EAResourceForeCastReport(ReportFactory):
             .group_by(WorkPhase.work_id)
             .subquery()
         )
+        current_app.logger.info(f"End work phase query: {end_work_phase_query}")
         return (
             db.session.query(Event.work_id)
             .join(
@@ -349,8 +352,9 @@ class EAResourceForeCastReport(ReportFactory):
             work_data["ea_type"] = 'Pre-EA'
         return work_data
 
-    def _format_data(self, data):
+    def _format_data(self, data, report_title=None):
         """Format the data into required format"""
+        current_app.logger.info(f"Report Title Formatting Data for: {report_title}")
         response = []
         data = data.values()
         data = self._filter_data(data)
@@ -364,6 +368,8 @@ class EAResourceForeCastReport(ReportFactory):
             work_data = self._format_capital_investment(work_data)
             work_data = self._handle_months(work_data)
             work_data = self._format_ea_type(work_data)
+            if report_title:
+                work_data["report_title"] = report_title
             response.append(work_data)
         return response
 
@@ -371,18 +377,34 @@ class EAResourceForeCastReport(ReportFactory):
         """Generates a report and returns it"""
         self._set_month_labels(report_date)
         works = self._fetch_data(report_date)
+        current_app.logger.info(f"Works: {works}")
         work_ids = set((work.work_id for work in works))
+        current_app.logger.info(f"Work IDs: {work_ids}")
         works = super()._format_data(works)
         events = self._get_events(work_ids)
+        current_app.logger.info(f"Events: {events}")
+
         start_events = self._filter_start_events(events)
+        current_app.logger.info(f"Start Events: {start_events}")
+
         start_events = {y: self._filter_work_events(y, start_events) for y in work_ids}
+        current_app.logger.info(f"Filtered Start Events: {start_events}")
+
         work_data = self._update_month_labels(works, start_events)
+        current_app.logger.info(f"Updated Work Data with Month Labels: {work_data}")
+
         special_histories = self._fetch_works_special_history(work_ids, report_date)
+        current_app.logger.info(f"Special Histories: {special_histories}")
+
         work_data = self._update_special_history(work_data, special_histories)
+        current_app.logger.info(f"Updated Work Data with Special Histories: {work_data}")
+
         data = self._format_data(work_data)
+        current_app.logger.info(f"Formatted Data: {data}")
         if not data:
             return {}, None
         second_phases = self._fetch_second_phases(events, work_ids)
+        current_app.logger.info(f"Second Phases: {second_phases}")
         data = self._sort_data(data, second_phases)
         if return_type == "json" and data:
             return data, None

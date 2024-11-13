@@ -32,6 +32,7 @@ from api.utils.enums import StalenessEnum
 from api.utils.util import process_data
 
 from .report_factory import ReportFactory
+from flask import current_app
 
 
 # pylint:disable=not-callable,no-member
@@ -149,7 +150,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
         return results_qry.all()
 
-    def _format_data(self, data):
+    def _format_data(self, data, report_title=None):
+        current_app.logger.debug(f"Formatting data for {self.report_title} report")
         data = super()._format_data(data)
         data = self._update_work_issues(data)
         response = {

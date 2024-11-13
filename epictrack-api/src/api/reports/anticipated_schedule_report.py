@@ -266,7 +266,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         if work_issue.id == issue.id:
                             work_issue.description = work_issue_updates.description
 
-        data = self._format_data(works_list)
+        data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)
 
         if return_type == "json" or not data:
