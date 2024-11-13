@@ -20,21 +20,9 @@ import { useAppSelector } from "hooks";
 const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
   const { setEditIssueFormIsOpen, setIssueToEdit } =
     React.useContext(IssuesContext);
-
-  // These are used in conjunction with /restricted/index.tsx for permission control.
   const { team } = React.useContext(WorkplanContext);
-  const activeTeam = team?.filter((member) => member.is_active);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const isTeamMember = team?.some((member) => member.staff.email === email);
-  const rolesArray = [
-    ROLES.RESPONSIBLE_EPD,
-    ROLES.TEAM_LEAD,
-    ROLES.TEAM_CO_LEAD,
-  ];
-  const userHasRole = activeTeam?.some(
-    (member) =>
-      member.staff.email === email && rolesArray.includes(member.role.name)
-  );
 
   const EditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   return (
@@ -78,9 +66,9 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
         <Grid item xs={"auto"} container justifyContent={"flex-end"}>
           <AccordionSummaryItem title="Actions" enableTooltip={true}>
             <Restricted
-              allowed={[ROLES.EXTENDED_EDIT]}
+              allowed={[ROLES.EDIT]}
               errorProps={{ disabled: true }}
-              exception={userHasRole}
+              exception={isTeamMember}
             >
               <Button
                 variant="text"

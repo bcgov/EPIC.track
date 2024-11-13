@@ -105,9 +105,6 @@ export const ROLES = {
   DEFAULT_ROLES_EAO_EPIC: "default-roles-eao-epic",
   MANAGE_USERS: "manage_users",
   EXTENDED_EDIT: "extended_edit",
-  RESPONSIBLE_EPD: "Responsible EPD",
-  TEAM_LEAD: "Team Lead",
-  TEAM_CO_LEAD: "Team Co-Lead",
 };
 
 export enum SpecialFieldEntityEnum {
@@ -126,8 +123,7 @@ export const SPECIAL_FIELDS = Object.freeze({
   },
   WORK: {
     RESPONSIBLE_EPD: "responsible_epd_id",
-    TEAM_LEAD: "team_lead_id",
-    TEAM_CO_LEAD: "team_co_lead_id",
+    WORK_LEAD: "work_lead_id",
   },
 });
 
