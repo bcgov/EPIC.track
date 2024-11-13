@@ -63,7 +63,7 @@ export const WorkLeadSpecialField = ({
           <SpecialFieldGrid
             entity={SpecialFieldEntityEnum.WORK}
             entity_id={id}
-            fieldName={SPECIAL_FIELDS.WORK.TEAM_LEAD}
+            fieldName={SPECIAL_FIELDS.WORK.WORK_LEAD}
             fieldLabel={"Work Lead"}
             fieldType={"select"}
             title={"Work Lead History"}
