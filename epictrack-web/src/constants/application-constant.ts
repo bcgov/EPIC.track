@@ -127,7 +127,6 @@ export const SPECIAL_FIELDS = Object.freeze({
   WORK: {
     RESPONSIBLE_EPD: "responsible_epd_id",
     WORK_LEAD: "work_lead_id",
-
   },
 });
 
