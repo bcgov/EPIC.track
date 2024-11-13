@@ -11,7 +11,6 @@ import { Else, If, Then, When } from "react-if";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
 import { useAppSelector } from "hooks";
@@ -28,9 +27,17 @@ const RecentStatus = () => {
     setStatus,
     setShowApproveStatusDialog,
   } = React.useContext(StatusContext);
+  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
   const { team } = React.useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const isTeamMember = team?.some((member) => member.staff.email === email);
+  console.log("Team Details:", team)
+  const userHasRole = team?.some((member) =>
+    member.staff.email === email && rolesArray.includes(member.role.name)
+  );
+  console.log("User has Editing Role?:", userHasRole);
+  const testingException = (!statuses[0].is_approved && isTeamMember) || userHasRole;
+  console.log("Is An Exception?:", testingException);
 
   return (
     <GrayBox
@@ -137,13 +144,10 @@ const RecentStatus = () => {
         </If>
         <Restricted
           allowed={[
-            // statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
-            SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-            SPECIAL_FIELDS.WORK.TEAM_LEAD,
-            SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+            statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
           ]}
           errorProps={{ disabled: true }}
-          exception={!statuses[0].is_approved && isTeamMember}
+          exception={(!statuses[0].is_approved && isTeamMember) || userHasRole}
         >
           <Button
             startIcon={<PencilEditIcon />}

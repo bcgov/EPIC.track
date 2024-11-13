@@ -18,7 +18,6 @@ import ReadMoreText from "../../../../shared/ReadMoreText";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../../constants/application-constant";
 import moment from "moment";
 import { Unless, When } from "react-if";
@@ -26,6 +25,7 @@ import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
 import { StatusContext } from "../../StatusContext";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyStatusHistory } from "./EmptyStatusHistory";
+import { useAppSelector } from "hooks";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -35,14 +35,21 @@ const StatusHistory = () => {
   const { setShowStatusForm, setStatus } = useContext(StatusContext);
   const [expand, setExpand] = useState(false);
   const theme = useTheme();
-
   const approvedStatuses = statuses.filter(
     (status) => status.is_approved && status.id != statuses?.[0]?.id
   );
   const highlightFirstInTimeLineApproved = !statuses?.[0]?.is_approved;
-
   const SHOW_MORE_THRESHOLD = 3;
-
+  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
+  const { team } = React.useContext(WorkplanContext);
+  const { email } = useAppSelector((state) => state.user.userDetail);
+  const userHasRole = team?.some((member) =>
+    member.staff.email === email && rolesArray.includes(member.role.name)
+  );
+  const testingException = userHasRole;
+  console.log("Team Details:", team)
+  console.log("User has Editing Role?:", userHasRole);
+  console.log("Is An Exception?:", testingException);
   if (approvedStatuses.length === 0) {
     return <EmptyStatusHistory />;
   }
@@ -83,12 +90,10 @@ const StatusHistory = () => {
                 <When condition={isSuccess}>
                   <Restricted
                     allowed={[
-                      // ROLES.EXTENDED_EDIT,
-                      SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                      SPECIAL_FIELDS.WORK.TEAM_LEAD,
-                      SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+                      ROLES.EXTENDED_EDIT,
                     ]}
                     errorProps={{ disabled: true }}
+                    exception={userHasRole}
                   >
                     <Button
                       variant="text"

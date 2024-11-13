@@ -21,15 +21,20 @@ import { IssuesContext } from "../../IssuesContext";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../../constants/application-constant";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyIssueHistory } from "./EmptyIssueHistory";
 import { WorkplanContext } from "../../../WorkPlanContext";
+import { useAppSelector } from "hooks";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
+  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
   const { team } = React.useContext(WorkplanContext);
+  const { email } = useAppSelector((state) => state.user.userDetail);
+  const userHasRole = team?.some((member) =>
+    member.staff.email === email && rolesArray.includes(member.role.name)
+  );
   const { setUpdateToEdit, setEditIssueUpdateFormIsOpen } =
     useContext(IssuesContext);
 
@@ -48,7 +53,10 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
     SHOW_MORE_THRESHOLD
   );
   const restOfUpdatesInTimeline = subsequentUpdates.slice(SHOW_MORE_THRESHOLD);
-
+  const testingException = userHasRole;
+  console.log("Team Details:", team)
+  console.log("User has Editing Role?:", userHasRole);
+  console.log("Is An Exception?:", testingException);
   if (firstNUpdatesInTimeline.length === 0) {
     return <EmptyIssueHistory />;
   }
@@ -97,12 +105,10 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 <When condition={isSuccess}>
                   <Restricted
                     allowed={[
-                      // ROLES.EXTENDED_EDIT,
-                      SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                      SPECIAL_FIELDS.WORK.TEAM_LEAD,
-                      SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+                      ROLES.EXTENDED_EDIT,
                     ]}
                     errorProps={{ disabled: true }}
+                    exception={userHasRole}
                   >
                     <Button
                       data-cy="edit-history-update-button"

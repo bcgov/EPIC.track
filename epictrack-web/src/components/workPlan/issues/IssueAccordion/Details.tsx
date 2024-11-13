@@ -26,9 +26,17 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
-
+  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
   const { team } = React.useContext(WorkplanContext);
-  console.log("team:", team);
+  const { email } = useAppSelector((state) => state.user.userDetail);
+  const isTeamMember = team?.some((member) => member.staff.email === email);
+  const userHasRole = team?.some((member) =>
+    member.staff.email === email && rolesArray.includes(member.role.name)
+  );
+  const testingException = ((!latestUpdate.is_approved && isTeamMember) && isTeamMember) || userHasRole;
+  console.log("Team Details:", team)
+  console.log("User has Editing Role?:", userHasRole);
+  console.log("Is An Exception?:", testingException);
 
   const {
     setEditIssueUpdateFormIsOpen,
@@ -39,9 +47,6 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     setUpdateToEdit,
     setNewIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
-
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
 
   const handleApproveIssue = () => {
     approveIssue(issue.id, latestUpdate.id);
@@ -155,13 +160,10 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               <Grid item>
                 <Restricted
                   allowed={[
-                    // latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
-                    SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                    SPECIAL_FIELDS.WORK.TEAM_LEAD,
-                    SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+                    latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
                   ]}
-                  exception={!latestUpdate.is_approved && isTeamMember}
                   errorProps={{ disabled: true }}
+                  exception={(!latestUpdate.is_approved && isTeamMember) || userHasRole}
                 >
                   <Button
                     data-cy="edit-issue-update-button"
