@@ -19,17 +19,15 @@ import { useAppSelector } from "hooks";
 
 const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
   const { setEditIssueFormIsOpen, setIssueToEdit } = React.useContext(IssuesContext);
-  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
+
+  // These are used in conjunction with /restricted/index.tsx for permission control.
   const { team } = React.useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const isTeamMember = team?.some((member) => member.staff.email === email);
+  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
   const userHasRole = team?.some((member) =>
     member.staff.email === email && rolesArray.includes(member.role.name)
   );
-  const testingException = isTeamMember || userHasRole;
-  console.log("Team Details:", team)
-  console.log("User has Editing Role?:", userHasRole);
-  console.log("Is An Exception?:", testingException);
 
   const EditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   return (
@@ -77,7 +75,7 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
                 ROLES.EXTENDED_EDIT,
               ]}
               errorProps={{ disabled: true }}
-              exception={isTeamMember || userHasRole}
+              exception={userHasRole}
             >
               <Button
                 variant="text"

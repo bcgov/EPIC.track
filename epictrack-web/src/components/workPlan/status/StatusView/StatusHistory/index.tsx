@@ -40,16 +40,15 @@ const StatusHistory = () => {
   );
   const highlightFirstInTimeLineApproved = !statuses?.[0]?.is_approved;
   const SHOW_MORE_THRESHOLD = 3;
-  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
+
+  // These are used in conjunction with /restricted/index.tsx for permission control.
   const { team } = React.useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
+  const rolesArray = [ROLES.RESPONSIBLE_EPD, ROLES.TEAM_LEAD, ROLES.TEAM_CO_LEAD];
   const userHasRole = team?.some((member) =>
     member.staff.email === email && rolesArray.includes(member.role.name)
   );
-  const testingException = userHasRole;
-  console.log("Team Details:", team)
-  console.log("User has Editing Role?:", userHasRole);
-  console.log("Is An Exception?:", testingException);
+
   if (approvedStatuses.length === 0) {
     return <EmptyStatusHistory />;
   }
