@@ -24,25 +24,11 @@ import {
 } from "../../../../../constants/application-constant";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyIssueHistory } from "./EmptyIssueHistory";
-import { WorkplanContext } from "../../../WorkPlanContext";
-import { useAppSelector } from "hooks";
+import { useUserHasRole } from "../../../utils";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
-
-  // These are used in conjunction with /restricted/index.tsx for permission control.
-  const { team } = React.useContext(WorkplanContext);
-  const activeTeam = team?.filter((member) => member.is_active);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const rolesArray = [
-    ROLES.RESPONSIBLE_EPD,
-    ROLES.TEAM_LEAD,
-    ROLES.TEAM_CO_LEAD,
-  ];
-  const userHasRole = activeTeam?.some(
-    (member) =>
-      member.staff.email === email && rolesArray.includes(member.role.name)
-  );
+  const userHasRole = useUserHasRole();
 
   const { setUpdateToEdit, setEditIssueUpdateFormIsOpen } =
     useContext(IssuesContext);

@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, Grid } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
-import { WorkStaffRole, WorkStaffRoleNames } from "../../../../models/role";
 import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
 import { ETChip } from "../../../shared/chip/ETChip";
@@ -15,32 +14,17 @@ import IssueHistory from "./IssueHistory";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
-import { WorkplanContext } from "../../WorkPlanContext";
+import { useIsTeamMember, useUserHasRole } from "../../utils";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
-
-  // These are used in conjunction with /restricted/index.tsx for permission control.
-  const { team } = React.useContext(WorkplanContext);
-  const activeTeam = team?.filter((member) => member.is_active);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
-  const rolesArray = [
-    ROLES.RESPONSIBLE_EPD,
-    ROLES.TEAM_LEAD,
-    ROLES.TEAM_CO_LEAD,
-  ];
-  const userHasRole = activeTeam?.some(
-    (member) =>
-      member.staff.email === email && rolesArray.includes(member.role.name)
-  );
+  const isTeamMember = useIsTeamMember();
+  const userHasRole = useUserHasRole();
 
   const {
     setEditIssueUpdateFormIsOpen,

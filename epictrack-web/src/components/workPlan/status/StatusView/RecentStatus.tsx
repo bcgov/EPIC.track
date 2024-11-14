@@ -13,7 +13,7 @@ import {
   ROLES,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
+import { useIsTeamMember, useUserHasRole } from "../../utils";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -28,20 +28,8 @@ const RecentStatus = () => {
     setShowApproveStatusDialog,
   } = React.useContext(StatusContext);
 
-  // These are used in conjunction with /restricted/index.tsx for permission control.
-  const { team } = React.useContext(WorkplanContext);
-  const activeTeam = team?.filter((member) => member.is_active);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
-  const rolesArray = [
-    ROLES.RESPONSIBLE_EPD,
-    ROLES.TEAM_LEAD,
-    ROLES.TEAM_CO_LEAD,
-  ];
-  const userHasRole = activeTeam?.some(
-    (member) =>
-      member.staff.email === email && rolesArray.includes(member.role.name)
-  );
+  const isTeamMember = useIsTeamMember();
+  const userHasRole = useUserHasRole();
 
   return (
     <GrayBox
