@@ -64,7 +64,7 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
         <Grid item xs={"auto"} container justifyContent={"flex-end"}>
           <AccordionSummaryItem title="Actions" enableTooltip={true}>
             <Restricted
-              allowed={[ROLES.EXTENDED_EDIT]}
+              allowed={[ROLES.EDIT]}
               errorProps={{ disabled: true }}
               exception={userHasRole}
             >
