@@ -21,13 +21,15 @@ import { IssuesContext } from "../../IssuesContext";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../../constants/application-constant";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyIssueHistory } from "./EmptyIssueHistory";
+import { useUserHasRole } from "../../../utils";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
+  const userHasRole = useUserHasRole();
+
   const { setUpdateToEdit, setEditIssueUpdateFormIsOpen } =
     useContext(IssuesContext);
 
@@ -94,13 +96,9 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                 </If>
                 <When condition={isSuccess}>
                   <Restricted
-                    allowed={[
-                      // ROLES.EXTENDED_EDIT,
-                      SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                      SPECIAL_FIELDS.WORK.WORK_LEAD,
-                      SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
-                    ]}
+                    allowed={[ROLES.EXTENDED_EDIT]}
                     errorProps={{ disabled: true }}
+                    exception={userHasRole}
                   >
                     <Button
                       data-cy="edit-history-update-button"

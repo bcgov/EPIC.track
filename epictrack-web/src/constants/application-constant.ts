@@ -105,6 +105,9 @@ export const ROLES = {
   DEFAULT_ROLES_EAO_EPIC: "default-roles-eao-epic",
   MANAGE_USERS: "manage_users",
   EXTENDED_EDIT: "extended_edit",
+  RESPONSIBLE_EPD: "Responsible EPD",
+  TEAM_LEAD: "Team Lead",
+  TEAM_CO_LEAD: "Team Co-Lead",
 };
 
 export enum SpecialFieldEntityEnum {

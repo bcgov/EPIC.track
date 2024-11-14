@@ -1,7 +1,6 @@
 import React from "react";
 import { Button, Grid } from "@mui/material";
 import { WorkIssue } from "../../../../models/Issue";
-import { WorkStaffRole, WorkStaffRoleNames } from "../../../../models/role";
 import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
 import { ETChip } from "../../../shared/chip/ETChip";
@@ -15,20 +14,17 @@ import IssueHistory from "./IssueHistory";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
+import { useIsTeamMember, useUserHasRole } from "../../utils";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
-
-  const { team } = React.useContext(WorkplanContext);
-  console.log("team:", team);
+  const isTeamMember = useIsTeamMember();
+  const userHasRole = useUserHasRole();
 
   const {
     setEditIssueUpdateFormIsOpen,
@@ -39,9 +35,6 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     setUpdateToEdit,
     setNewIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
-
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
 
   const handleApproveIssue = () => {
     approveIssue(issue.id, latestUpdate.id);
@@ -155,12 +148,11 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               <Grid item>
                 <Restricted
                   allowed={[
-                    // latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
-                    SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                    SPECIAL_FIELDS.WORK.WORK_LEAD,
-                    SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
+                    latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
                   ]}
-                  exception={!latestUpdate.is_approved && isTeamMember}
+                  exception={
+                    (!latestUpdate.is_approved && isTeamMember) || userHasRole
+                  }
                   errorProps={{ disabled: true }}
                 >
                   <Button

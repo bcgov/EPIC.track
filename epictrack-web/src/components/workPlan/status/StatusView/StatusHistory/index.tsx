@@ -18,7 +18,6 @@ import ReadMoreText from "../../../../shared/ReadMoreText";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../../constants/application-constant";
 import moment from "moment";
 import { Unless, When } from "react-if";
@@ -26,6 +25,7 @@ import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
 import { StatusContext } from "../../StatusContext";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyStatusHistory } from "./EmptyStatusHistory";
+import { useUserHasRole } from "../../../utils";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -37,11 +37,13 @@ const StatusHistory = () => {
   const theme = useTheme();
 
   const approvedStatuses = statuses.filter(
-    (status) => status.is_approved && status.id != statuses?.[0]?.id
+    (status) => status.is_approved && status.id !== statuses?.[0]?.id
   );
   const highlightFirstInTimeLineApproved = !statuses?.[0]?.is_approved;
 
   const SHOW_MORE_THRESHOLD = 3;
+
+  const userHasRole = useUserHasRole();
 
   if (approvedStatuses.length === 0) {
     return <EmptyStatusHistory />;
@@ -82,13 +84,9 @@ const StatusHistory = () => {
                 </ETPreviewText>
                 <When condition={isSuccess}>
                   <Restricted
-                    allowed={[
-                      // ROLES.EXTENDED_EDIT,
-                      SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                      SPECIAL_FIELDS.WORK.WORK_LEAD,
-                      SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
-                    ]}
+                    allowed={[ROLES.EXTENDED_EDIT]}
                     errorProps={{ disabled: true }}
+                    exception={userHasRole}
                   >
                     <Button
                       variant="text"

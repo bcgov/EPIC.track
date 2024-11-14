@@ -8,24 +8,21 @@ import moment from "moment";
 import {
   MONTH_DAY_YEAR,
   ROLES,
-  SPECIAL_FIELDS,
 } from "../../../../constants/application-constant";
 import { Else, If, Then, When } from "react-if";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { IssuesContext } from "../IssuesContext";
 import { Restricted } from "components/shared/restricted";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
-import { useAppSelector } from "hooks";
+import { useUserHasRole } from "../../utils";
 
 const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
   const { setEditIssueFormIsOpen, setIssueToEdit } =
     React.useContext(IssuesContext);
-  const { team } = React.useContext(WorkplanContext);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
 
   const EditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
+  const userHasRole = useUserHasRole();
+
   return (
     <Grid
       container
@@ -67,14 +64,9 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
         <Grid item xs={"auto"} container justifyContent={"flex-end"}>
           <AccordionSummaryItem title="Actions" enableTooltip={true}>
             <Restricted
-              allowed={[
-                // ROLES.EXTENDED_EDIT,
-                SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD,
-                SPECIAL_FIELDS.WORK.WORK_LEAD,
-                SPECIAL_FIELDS.WORK.TEAM_CO_LEAD,
-              ]}
+              allowed={[ROLES.EXTENDED_EDIT]}
               errorProps={{ disabled: true }}
-              exception={isTeamMember}
+              exception={userHasRole}
             >
               <Button
                 variant="text"
