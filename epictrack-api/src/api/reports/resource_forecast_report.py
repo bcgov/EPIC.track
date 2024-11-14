@@ -218,6 +218,7 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
+            # TODO: Make sure to add the region_id_env and region_id_flnro to the Project model
             .join(env_region, env_region.id == Project.region_id_env)
             .join(nrs_region, nrs_region.id == Project.region_id_flnro)
             .join(
@@ -270,8 +271,8 @@ class EAResourceForeCastReport(ReportFactory):
                 and_(
                     WorkPhase.id == EventConfiguration.work_phase_id,
                     WorkPhase.is_active.is_(True),
-                    WorkPhase.sort_order
-                    == 1,  # indicate the work phase is the first one
+                    # Temporarily removing this due to TRACK-171
+                    # WorkPhase.sort_order == 1,  # indicate the work phase is the first one
                     WorkPhase.is_deleted.is_(False),
                 ),
             )
@@ -378,34 +379,33 @@ class EAResourceForeCastReport(ReportFactory):
         """Generates a report and returns it"""
         self._set_month_labels(report_date)
         works = self._fetch_data(report_date)
-        current_app.logger.info(f"Works: {works}")
         work_ids = set((work.work_id for work in works))
         current_app.logger.info(f"Work IDs: {work_ids}")
         works = super()._format_data(works)
         events = self._get_events(work_ids)
-        current_app.logger.info(f"Events: {events}")
+        current_app.logger.debug(f"Events: {events}")
 
         start_events = self._filter_start_events(events)
-        current_app.logger.info(f"Start Events: {start_events}")
+        current_app.logger.debug(f"Start Events: {start_events}")
 
         start_events = {y: self._filter_work_events(y, start_events) for y in work_ids}
-        current_app.logger.info(f"Filtered Start Events: {start_events}")
+        current_app.logger.debug(f"Filtered Start Events: {start_events}")
 
         work_data = self._update_month_labels(works, start_events)
-        current_app.logger.info(f"Updated Work Data with Month Labels: {work_data}")
+        current_app.logger.debug(f"Updated Work Data with Month Labels: {work_data}")
 
         special_histories = self._fetch_works_special_history(work_ids, report_date)
-        current_app.logger.info(f"Special Histories: {special_histories}")
+        current_app.logger.debug(f"Special Histories: {special_histories}")
 
         work_data = self._update_special_history(work_data, special_histories)
-        current_app.logger.info(f"Updated Work Data with Special Histories: {work_data}")
+        current_app.logger.debug(f"Updated Work Data with Special Histories: {work_data}")
 
         data = self._format_data(work_data)
-        current_app.logger.info(f"Formatted Data: {data}")
+        current_app.logger.debug(f"Formatted Data: {data}")
         if not data:
             return {}, None
         second_phases = self._fetch_second_phases(events, work_ids)
-        current_app.logger.info(f"Second Phases: {second_phases}")
+        current_app.logger.debug(f"Second Phases: {second_phases}")
         data = self._sort_data(data, second_phases)
         if return_type == "json" and data:
             return data, None
