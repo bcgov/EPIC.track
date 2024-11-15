@@ -45,10 +45,13 @@ install: clean ## Install python virtrual environment
 	cat requirements/repo-libraries.txt >> requirements.txt ;\
 	pip install -Ur requirements/repo-libraries.txt ;\
 	pip install -Ur requirements/dev.txt  ;\
-	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
+	touch venv/bin/activate  ## update so it's as new as requirements/prod.txt
 
 install-dev: ## Install local application
 	. venv/bin/activate && pip install -e .
+
+db-update: install
+	export PYTHONPATH=$(CURRENT_ABS_DIR)/src flask db upgrade
 
 #################################################################################
 # COMMANDS - CI                                                                 #

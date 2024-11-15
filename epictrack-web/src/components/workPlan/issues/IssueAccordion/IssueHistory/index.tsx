@@ -24,9 +24,12 @@ import {
 } from "../../../../../constants/application-constant";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyIssueHistory } from "./EmptyIssueHistory";
+import { useUserHasRole } from "../../../utils";
 
 const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
   const theme = useTheme();
+  const userHasRole = useUserHasRole();
+
   const { setUpdateToEdit, setEditIssueUpdateFormIsOpen } =
     useContext(IssuesContext);
 
@@ -95,6 +98,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
                   <Restricted
                     allowed={[ROLES.EXTENDED_EDIT]}
                     errorProps={{ disabled: true }}
+                    exception={userHasRole}
                   >
                     <Button
                       data-cy="edit-history-update-button"
