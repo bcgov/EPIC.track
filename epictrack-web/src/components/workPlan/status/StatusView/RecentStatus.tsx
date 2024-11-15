@@ -13,7 +13,7 @@ import {
   ROLES,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
+import { useIsTeamMember, useUserHasRole } from "../../utils";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -27,9 +27,9 @@ const RecentStatus = () => {
     setStatus,
     setShowApproveStatusDialog,
   } = React.useContext(StatusContext);
-  const { team } = React.useContext(WorkplanContext);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
+
+  const isTeamMember = useIsTeamMember();
+  const userHasRole = useUserHasRole();
 
   return (
     <GrayBox
@@ -137,7 +137,7 @@ const RecentStatus = () => {
         <Restricted
           allowed={[statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT]}
           errorProps={{ disabled: true }}
-          exception={!statuses[0].is_approved && isTeamMember}
+          exception={(!statuses[0].is_approved && isTeamMember) || userHasRole}
         >
           <Button
             startIcon={<PencilEditIcon />}

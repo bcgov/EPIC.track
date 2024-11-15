@@ -1136,8 +1136,8 @@ class EventService:
             db.session.query(ActionConfiguration)
             .join(Action, Action.id == ActionConfiguration.action_id)
             .filter(
-                ActionConfiguration.outcome_configuration_id == outcome_id and
-                ActionConfiguration.is_active is True and
+                ActionConfiguration.outcome_configuration_id == outcome_id,
+                ActionConfiguration.is_active is True,
                 ActionConfiguration.is_deleted is False
             )
             .order_by(ActionConfiguration.sort_order)

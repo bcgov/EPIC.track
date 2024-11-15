@@ -16,16 +16,15 @@ import {
   ROLES,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
+import { useIsTeamMember, useUserHasRole } from "../../utils";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const latestUpdate = issue.updates[0];
   const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: React.FC<IconProps> = icons["AddIcon"];
-
-  const { team } = React.useContext(WorkplanContext);
+  const isTeamMember = useIsTeamMember();
+  const userHasRole = useUserHasRole();
 
   const {
     setEditIssueUpdateFormIsOpen,
@@ -36,9 +35,6 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     setUpdateToEdit,
     setNewIssueUpdateFormIsOpen,
   } = React.useContext(IssuesContext);
-
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
 
   const handleApproveIssue = () => {
     approveIssue(issue.id, latestUpdate.id);
@@ -154,7 +150,9 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   allowed={[
                     latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
                   ]}
-                  exception={!latestUpdate.is_approved && isTeamMember}
+                  exception={
+                    (!latestUpdate.is_approved && isTeamMember) || userHasRole
+                  }
                   errorProps={{ disabled: true }}
                 >
                   <Button
