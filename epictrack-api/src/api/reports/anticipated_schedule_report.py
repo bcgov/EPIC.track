@@ -27,10 +27,11 @@ from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
 from api.utils.constants import CANADA_TIMEZONE
 from api.utils.enums import StalenessEnum
-
+from collections import namedtuple
 from .cdog_client import CDOGClient
 from .report_factory import ReportFactory
 from api.utils.util import process_data
+import json
 
 # pylint:disable=not-callable
 
@@ -233,7 +234,30 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 next_pecp_query.c.notes.label("next_pecp_short_description"),
             )
         )
-        return results_qry.all()
+        results = results_qry.all()
+        current_app.logger.debug(f"Fetched data: {results}")
+        results_dict = [result._asdict() for result in results]
+        # Processes the 'next_pecp_short_description' field in the results:
+        #   - Logs the short description if it exists.
+        #   - Attempts to parse the short description as JSON.
+        #   - If successful, extracts and concatenates text from JSON blocks.
+        #   - Logs a warning if JSON parsing fails.
+        for result in results_dict:
+            if 'next_pecp_short_description' in result and result['next_pecp_short_description'] is not None:
+                current_app.logger.debug(f"Next PECP Short Description: {result['next_pecp_short_description']}")
+                try:
+                    short_description_json = json.loads(result['next_pecp_short_description'])
+                    result['next_pecp_short_description'] = ''
+                    if 'blocks' in short_description_json:
+                        for block in short_description_json['blocks']:
+                            current_app.logger.debug(f"Block: {block}")
+                            if 'text' in block:
+                                result['next_pecp_short_description'] += block['text'] + '\n'
+                except json.JSONDecodeError:
+                    current_app.logger.warning("Failed to decode JSON from next_pecp_short_description")
+        data_result = namedtuple('data_result', results_dict[0].keys())
+        results = [data_result(**result) for result in results_dict]
+        return results
 
     def generate_report(self, report_date, return_type):
         """Generates a report and returns it"""
