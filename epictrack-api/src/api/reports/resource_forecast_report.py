@@ -753,7 +753,6 @@ class EAResourceForeCastReport(ReportFactory):
         current_directory = path.dirname(path.abspath(__file__))
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
-        
         stylesheet = getSampleStyleSheet()
         normal_style = stylesheet["Normal"]
         normal_style.fontSize = 6.0
