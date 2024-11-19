@@ -36,10 +36,13 @@ class ReportFactory(ABC):
             excluded_items = self.filters["exclude"]
         if report_title == "Anticipated EA Referral Schedule":
             for item in data:
-                obj = {
-                  k: (item[k] if k != "work_issues" else self._deserialize_work_issues(item[k]))
-                  for k in self.data_keys if k not in excluded_items
-                }
+                obj = {}
+                for k in self.data_keys:
+                    if k not in excluded_items:
+                        if k == "work_issues":
+                            obj[k] = self._deserialize_work_issues(item[k])
+                        else:
+                            obj[k] = item[k]
                 if self.group_by:
                     obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
                     formatted_data[obj.get(self.group_by)].append(obj)
