@@ -20,7 +20,7 @@ Flask-Migrate==4.0.7
 Flask-Moment==1.0.6
 flask-restx==1.1.0
 Flask-SQLAlchemy==3.0.5
-fonttools==4.54.1
+fonttools==4.55.0
 greenlet==3.1.1
 gunicorn==23.0.0
 idna==3.10

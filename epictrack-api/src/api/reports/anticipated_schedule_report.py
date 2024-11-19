@@ -67,7 +67,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "milestone_type",
             "category_type",
             "event_name",
-            "notes"
+            "notes",
+            "event_number_of_days",
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
@@ -233,6 +234,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.actual_date,
                 ).label("next_pecp_date"),
                 next_pecp_query.c.notes.label("next_pecp_short_description"),
+                Event.number_of_days.label("event_number_of_days"),
             )
         )
         results = results_qry.all()
@@ -272,6 +274,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             current_app.logger.debug(f"Work Issues: {work_issues}")
             item_dict = item._asdict()
             item_dict['work_issues'] = work_issues
+            item_dict['event_number_of_days'] = item.event_number_of_days
             works_list.append(item_dict)
             item_dict['notes'] = ""
 
