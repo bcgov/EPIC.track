@@ -752,7 +752,9 @@ class EAResourceForeCastReport(ReportFactory):
         """Returns basic styles needed for the PDF report."""
         current_directory = path.dirname(path.abspath(__file__))
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
+        bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
+        pdfmetrics.registerFont(TTFont('BCSans-Bold', bold_font_path))
         stylesheet = getSampleStyleSheet()
         normal_style = stylesheet["Normal"]
         normal_style.fontSize = 6.0
@@ -885,7 +887,7 @@ class EAResourceForeCastReport(ReportFactory):
                     ("ALIGN", (0, 0), (-1, 1), "CENTER"),
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
-                    ("FONTNAME", (0, 0), (-1, 1), "BCSans"),
+                    ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
                 ]
                 + styles
                 + table_styles

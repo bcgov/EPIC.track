@@ -254,9 +254,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
         if return_type == "json" or not data:
             return process_data(data, return_type)
         pdf_stream = BytesIO()
-        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: Refactor to pull out style setup
+        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
+        bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
+        pdfmetrics.registerFont(TTFont('BCSans-Bold', bold_font_path))
         stylesheet = getSampleStyleSheet()
         doc = BaseDocTemplate(pdf_stream, pagesize=A4)
         doc.page_width = doc.width + doc.leftMargin * 2
@@ -298,8 +300,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("FONTSIZE", (0, 0), (-1, -1), 6.5),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 2), (-1, -1), 'BCSans'),
-                    ("FONTNAME", (0, 0), (-1, 1), 'BCSans'),
+                    ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
+                    ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
                 ]
                 + styles
             )
