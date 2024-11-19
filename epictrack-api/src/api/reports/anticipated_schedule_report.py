@@ -66,7 +66,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "next_pecp_short_description",
             "milestone_type",
             "category_type",
-            "event_name"
+            "event_name",
+            "notes"
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
@@ -272,6 +273,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             item_dict = item._asdict()
             item_dict['work_issues'] = work_issues
             works_list.append(item_dict)
+            item_dict['notes'] = ""
 
             # go through all the work issues, find the update and add the description to the issue
             for issue in work_issues:
@@ -289,6 +291,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     for work_issue in item_dict['work_issues']:
                         if work_issue.id == issue.id:
                             work_issue.description = work_issue_updates.description
+                            current_app.logger.debug(f"----Work title: {work_issue.title}")
+                            current_app.logger.debug(f"----Work description: {work_issue.description}")
+                            item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
 
         data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)
