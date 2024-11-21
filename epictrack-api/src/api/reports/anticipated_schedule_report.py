@@ -296,7 +296,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                             work_issue.description = work_issue_updates.description
                             current_app.logger.debug(f"----Work title: {work_issue.title}")
                             current_app.logger.debug(f"----Work description: {work_issue.description}")
-                            item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
+                            if work_issue.is_high_priority:
+                                item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
 
         data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)
