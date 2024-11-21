@@ -67,7 +67,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "milestone_type",
             "category_type",
             "event_name",
-            "notes"
+            "notes",
+            "event_number_of_days",
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
@@ -260,6 +261,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.actual_date,
                 ).label("next_pecp_date"),
                 next_pecp_query.c.notes.label("next_pecp_short_description"),
+                Event.number_of_days.label("event_number_of_days"),
             )
         )
         results = results_qry.all()
@@ -301,6 +303,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 current_app.logger.debug(f"Work Issues: {work_issues}")
                 item_dict = item._asdict()
                 item_dict['work_issues'] = work_issues
+                item_dict['event_number_of_days'] = item.event_number_of_days
                 works_list.append(item_dict)
                 item_dict['notes'] = ""
                 added_work_ids.add(item.work_id)
@@ -323,7 +326,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                                 work_issue.description = work_issue_updates.description
                                 current_app.logger.debug(f"----Work title: {work_issue.title}")
                                 current_app.logger.debug(f"----Work description: {work_issue.description}")
-                                item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
+                                if work_issue.is_high_priority:
+                                    item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
 
         data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)

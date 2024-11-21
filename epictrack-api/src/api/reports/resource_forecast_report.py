@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from functools import partial
 from io import BytesIO
 from typing import IO, Dict, List, Tuple
+from os import path
 
 from dateutil import rrule
 from reportlab.lib import colors
@@ -13,6 +14,8 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import A3, landscape
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
@@ -747,11 +750,18 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _get_styles(self) -> Tuple[dict, dict]:
         """Returns basic styles needed for the PDF report."""
+        current_directory = path.dirname(path.abspath(__file__))
+        font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
+        bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
+        pdfmetrics.registerFont(TTFont('BCSans', font_path))
+        pdfmetrics.registerFont(TTFont('BCSans-Bold', bold_font_path))
         stylesheet = getSampleStyleSheet()
         normal_style = stylesheet["Normal"]
         normal_style.fontSize = 6.0
+        normal_style.fontName = 'BCSans'
         body_text_style = stylesheet["BodyText"]
         body_text_style.fontSize = 6.0
+        body_text_style.fontName = 'BCSans'
         body_text_style.alignment = TA_LEFT
         body_text_style.wordWrap = None
         body_text_style.spaceShrinkage = 0.05
@@ -876,8 +886,8 @@ class EAResourceForeCastReport(ReportFactory):
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("ALIGN", (0, 0), (-1, 1), "CENTER"),
                     ("ALIGN", (0, 2), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
-                    ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
+                    ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
+                    ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
                 ]
                 + styles
                 + table_styles

@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta
 from io import BytesIO
 from typing import Dict, List
+from os import path
 
 from operator import attrgetter
 from dateutil import parser
@@ -11,6 +12,8 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
@@ -251,6 +254,11 @@ class ThirtySixtyNinetyReport(ReportFactory):
         if return_type == "json" or not data:
             return process_data(data, return_type)
         pdf_stream = BytesIO()
+        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup
+        font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
+        bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
+        pdfmetrics.registerFont(TTFont('BCSans', font_path))
+        pdfmetrics.registerFont(TTFont('BCSans-Bold', bold_font_path))
         stylesheet = getSampleStyleSheet()
         doc = BaseDocTemplate(pdf_stream, pagesize=A4)
         doc.page_width = doc.width + doc.leftMargin * 2
@@ -267,6 +275,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
         doc.addPageTemplates(page_template)
         heading_style = stylesheet["Heading2"]
+        heading_style.fontName = 'BCSans'
         heading_style.alignment = TA_CENTER
         story = [NextPageTemplate(["*", "LaterPages"])]
         story.append(Paragraph("30-60-90", heading_style))
@@ -279,6 +288,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
         normal_style = stylesheet["Normal"]
         normal_style.fontSize = 6.5
+        normal_style.fontName = 'BCSans'
         data, styles = self._get_table_data_and_styles(data, normal_style)
         table_data.extend(data)
         table = Table(table_data)
@@ -290,8 +300,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("FONTSIZE", (0, 0), (-1, -1), 6.5),
                     ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-                    ("FONTNAME", (0, 2), (-1, -1), "Helvetica"),
-                    ("FONTNAME", (0, 0), (-1, 1), "Helvetica-Bold"),
+                    ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
+                    ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
                 ]
                 + styles
             )
