@@ -138,8 +138,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
               or_(
                   Event.event_configuration_id.in_(
                     db.session.query(EventConfiguration.id).filter(
-                        EventConfiguration.event_type_id == 5, # EA Referral
-                        EventConfiguration.event_category_id == 1 # Milestone,
+                        EventConfiguration.event_category_id == 1, # Milestone
+                        EventConfiguration.event_type_id == 5 # EA Referral
                     )
                   ),
                   Event.event_configuration_id.in_(
@@ -148,45 +148,72 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         EventConfiguration.event_type_id == 14 # Minister
                     )
                   ),
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
-                        EventConfiguration.event_category_id == 4, # Decision
-                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                        EventConfiguration.event_type_id == 15 # CEAO
-                    )
-                  ),
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
-                        EventConfiguration.event_category_id == 4, # Decision
-                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                        EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
-                        EventConfiguration.event_type_id == 15 # CEAO
-                    )
-                  ),
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
-                        EventConfiguration.event_category_id == 4, # Decision
-                        EventConfiguration.name != "Delegation of Amendment Decision",
-                        or_(
-                          EventConfiguration.event_type_id == 15, # CEAO
-                          EventConfiguration.event_type_id == 16 # ADM
+                  and_(
+                    Event.is_active.is_(True),
+                    and_(
+                        Work.work_type_id == 5, # Exemption Order
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == 4, # Decision
+                                EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                                EventConfiguration.event_type_id == 15 # CEAO
+                            )
                         )
-                    )
-                  ),
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
-                        EventConfiguration.event_category_id == 4, # Decision
-                        EventConfiguration.name != "Delegation of SubStart Decision to Minister",
-                        EventConfiguration.event_type_id == 15 # CEAO
-                    )
-                  ),
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
-                        EventConfiguration.event_category_id == 4, # Decision
-                        EventConfiguration.name != "Delegation of Transfer Decision to Minister",
-                        or_(
-                          EventConfiguration.event_type_id == 15, # CEAO
-                          EventConfiguration.event_type_id == 16 # ADM
+                    ),
+                    and_(
+                        Work.work_type_id == 6, # Assessment
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == 4, # Decision
+                                EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                                EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
+                                EventConfiguration.event_type_id == 15 # CEAO
+                            )
+                        )
+                    ),
+                    and_(
+                        Work.work_type_id == 7, # Ammendment
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == 4, # Decision
+                                EventConfiguration.name != "Delegation of Amendment Decision",
+                                or_(
+                                    EventConfiguration.event_type_id == 15, # CEAO
+                                    EventConfiguration.event_type_id == 16 # ADM
+                                )
+                            )
+                        )
+                    ),
+                    and_(
+                        Work.work_type_id == 9, # EAC Extension
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == 4, # Decision
+                                EventConfiguration.event_type_id == 15 # CEAO
+                            )
+                        )
+                    ),
+                    and_(
+                        Work.work_type_id == 10, # Substantial Start Decision
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == 4, # Decision
+                                EventConfiguration.name != "Delegation of SubStart Decision to Minister",
+                                EventConfiguration.event_type_id == 15 # CEAO
+                            )
+                        )
+                    ),
+                    and_(
+                        Work.work_type_id == 11, # EAC/Order Transfer
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == 4, # Decision
+                                EventConfiguration.name != "Delegation of Transfer Decision to Minister",
+                                or_(
+                                    EventConfiguration.event_type_id == 15, # CEAO
+                                    EventConfiguration.event_type_id == 16 # ADM
+                                )
+                            )
                         )
                     )
                   )
@@ -266,34 +293,37 @@ class EAAnticipatedScheduleReport(ReportFactory):
         data = self._fetch_data(report_date)
 
         works_list = []
+        added_work_ids = set()
         for item in data:
             current_app.logger.debug(f"Work ID: {item[0]}")
-            work_issues = db.session.query(WorkIssues).filter_by(work_id=item.work_id).all()
-            current_app.logger.debug(f"Work Issues: {work_issues}")
-            item_dict = item._asdict()
-            item_dict['work_issues'] = work_issues
-            works_list.append(item_dict)
-            item_dict['notes'] = ""
+            if item.work_id not in added_work_ids:
+                work_issues = db.session.query(WorkIssues).filter_by(work_id=item.work_id).all()
+                current_app.logger.debug(f"Work Issues: {work_issues}")
+                item_dict = item._asdict()
+                item_dict['work_issues'] = work_issues
+                works_list.append(item_dict)
+                item_dict['notes'] = ""
+                added_work_ids.add(item.work_id)
 
-            # go through all the work issues, find the update and add the description to the issue
-            for issue in work_issues:
-                work_issue_updates = (
-                    db.session.query(WorkIssueUpdates)
-                    .filter_by(
-                        work_issue_id=issue.id,
-                        is_active=True,
-                        is_approved=True
+                # go through all the work issues, find the update and add the description to the issue
+                for issue in work_issues:
+                    work_issue_updates = (
+                        db.session.query(WorkIssueUpdates)
+                        .filter_by(
+                            work_issue_id=issue.id,
+                            is_active=True,
+                            is_approved=True
+                        )
+                        .order_by(WorkIssueUpdates.updated_at.desc())
+                        .first()
                     )
-                    .order_by(WorkIssueUpdates.updated_at.desc())
-                    .first()
-                )
-                if work_issue_updates:
-                    for work_issue in item_dict['work_issues']:
-                        if work_issue.id == issue.id:
-                            work_issue.description = work_issue_updates.description
-                            current_app.logger.debug(f"----Work title: {work_issue.title}")
-                            current_app.logger.debug(f"----Work description: {work_issue.description}")
-                            item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
+                    if work_issue_updates:
+                        for work_issue in item_dict['work_issues']:
+                            if work_issue.id == issue.id:
+                                work_issue.description = work_issue_updates.description
+                                current_app.logger.debug(f"----Work title: {work_issue.title}")
+                                current_app.logger.debug(f"----Work description: {work_issue.description}")
+                                item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
 
         data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)
