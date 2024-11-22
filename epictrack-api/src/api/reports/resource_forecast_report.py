@@ -508,8 +508,11 @@ class EAResourceForeCastReport(ReportFactory):
             if month.month == 12:
                 month_label += f"{month:%Y}"
             q2_month_labels.append(month_label)
+
+        # Add the year to the last month of the quarter
         if self.end_date.year > first_month.year:
-            q2_month_labels[-1] += f"{self.end_date:%Y}"
+            q2_month_labels[-1] += f"{self.end_date: %Y}"
+
         self.month_labels.append(", ".join(q2_month_labels))
 
     def _sort_data(self, data, second_phases) -> List:
