@@ -304,7 +304,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 item_dict = item._asdict()
                 item_dict['work_issues'] = work_issues
                 item_dict['next_pecp_number_of_days'] = item.next_pecp_number_of_days
-            works_list.append(item_dict)
+                works_list.append(item_dict)
                 item_dict['notes'] = ""
                 added_work_ids.add(item.work_id)
 
