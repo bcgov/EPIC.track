@@ -132,8 +132,8 @@ const EditIssue = () => {
               control={<ControlledSwitch name="is_high_priority" />}
               label={
                 <Stack direction="row" spacing={1}>
-                  <ETParagraph>High Priority</ETParagraph>
-                  <Tooltip title="Issue must be High Priority to appear on 30-60-90">
+                  <ETParagraph>High Profile</ETParagraph>
+                  <Tooltip title="Issue must be High Profile to appear on 30-60-90">
                     <Box component={"span"}>
                       <InfoIcon />
                     </Box>

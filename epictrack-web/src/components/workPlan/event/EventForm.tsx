@@ -686,9 +686,9 @@ const EventForm = ({
                       name="high_priority"
                     />
                   }
-                  label="High Priority"
+                  label="High Profile"
                 />
-                <Tooltip title="High Priority Milestones will appear on reports">
+                <Tooltip title="High Profile Milestones will appear on reports">
                   <Box component={"span"}>
                     <InfoIcon />
                   </Box>

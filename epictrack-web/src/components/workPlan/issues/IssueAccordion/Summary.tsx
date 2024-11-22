@@ -39,7 +39,7 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
           <Stack spacing={2} direction={"row"}>
             <ETParagraph data-cy="issue-title">{issue.title}</ETParagraph>
             <When condition={issue.is_high_priority}>
-              <ETChip highPriority label="High Priority" />
+              <ETChip highPriority label="High Profile" />
             </When>
             <If condition={issue.is_active}>
               <Then>

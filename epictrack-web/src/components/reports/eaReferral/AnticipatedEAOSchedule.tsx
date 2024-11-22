@@ -397,7 +397,7 @@ export default function AnticipatedEAOSchedule() {
                                             return (
                                               <TableRow key={issueIndex}>
                                                 <TableCell>
-                                                  High Priority Issue
+                                                  High Profile Issue
                                                 </TableCell>
                                                 <TableCell>
                                                   <b>{issue.title}</b>:

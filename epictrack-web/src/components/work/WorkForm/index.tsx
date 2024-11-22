@@ -550,10 +550,10 @@ export default function WorkForm({
             name="is_high_priority"
             disabled={!canEdit || isSpecialFieldUnlocked}
           />
-          <ETFormLabel id="is_watched">High Priority</ETFormLabel>
+          <ETFormLabel id="is_watched">High Profile</ETFormLabel>
           <Tooltip
             sx={{ paddingLeft: "2px" }}
-            title="Work marked High Priority will have extra milestones appear on Reports"
+            title="Work marked High Profile will have extra milestones appear on Reports"
           >
             <Box component={"span"}>
               <InfoIcon />
