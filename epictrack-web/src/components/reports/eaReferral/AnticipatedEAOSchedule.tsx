@@ -400,7 +400,7 @@ export default function AnticipatedEAOSchedule() {
                                                   High Priority Issue
                                                 </TableCell>
                                                 <TableCell>
-                                                  {issue.title}:
+                                                  <b>{issue.title}</b>:
                                                   {issue.description}
                                                 </TableCell>
                                               </TableRow>
