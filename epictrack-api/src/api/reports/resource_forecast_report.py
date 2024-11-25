@@ -93,12 +93,12 @@ class EAResourceForeCastReport(ReportFactory):
                 },
                 {
                     "data_key": "fte_positions_construction",
-                    "label": "Est. FTEs in constructions",
+                    "label": "Est. FTEs for construction",
                     "width": 0.075,
                 },
                 {
                     "data_key": "fte_positions_operation",
-                    "label": "Est. FTEs in operations",
+                    "label": "Est. FTEs for operation",
                     "width": 0.070,
                 },
                 {
