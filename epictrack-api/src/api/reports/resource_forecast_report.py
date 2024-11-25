@@ -369,7 +369,7 @@ class EAResourceForeCastReport(ReportFactory):
             work_data["cairt_lead"] = cairt_lead
             work_data["responsible_epd"] = responsible_epd
             work_data["work_lead"] = work_lead
-            work_data["work_team_members"] = "; ".join(staffs)
+            work_data["work_team_members"] = ", ".join(staffs)
             work_data = self._format_capital_investment(work_data)
             work_data = self._handle_months(work_data)
             work_data = self._format_ea_type(work_data)
@@ -738,17 +738,18 @@ class EAResourceForeCastReport(ReportFactory):
             work_id, "responsible_epd_id", self.end_date - timedelta(days=7))
         work_lead_query = StaffService.find_active_staff_from_special_history(
             work_id, "work_lead_id", self.end_date - timedelta(days=7))
-        responsible_epd = responsible_epd_query.full_name if responsible_epd_query else ""
-        work_lead = work_lead_query.full_name if work_lead_query else ""
+        responsible_epd = f"{responsible_epd_query.first_name} {responsible_epd_query.last_name}" \
+            if responsible_epd_query else ""
+        work_lead = f"{work_lead_query.first_name} {work_lead_query.last_name}" if work_lead_query else ""
         for work_team_member in work_team_members:
             first_name = work_team_member.first_name
             last_name = work_team_member.last_name
             if work_team_member.role_id == RoleEnum.FN_CAIRT.value:
-                cairt_lead = work_team_member.full_name
+                cairt_lead = f"{first_name} {last_name}"
             elif work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
                 staffs.append({"first_name": first_name, "last_name": last_name})
         staffs = sorted(staffs, key=lambda x: x["last_name"])
-        staffs = [f"{x['last_name']}, {x['first_name']}" for x in staffs]
+        staffs = [f"{x['first_name']} {x['last_name']}" for x in staffs]
         return staffs, cairt_lead, responsible_epd, work_lead
 
     def _get_styles(self) -> Tuple[dict, dict]:
