@@ -84,7 +84,7 @@ class EAResourceForeCastReport(ReportFactory):
         self.months = []
         self.month_labels = []
         self.report_cells = {
-            "[PROJECT BACKGROUND]": [
+            "PROJECT BACKGROUND": [
                 {"data_key": "work_title", "label": "WORK TITLE", "width": 0.055},
                 {
                     "data_key": "capital_investment",
@@ -112,7 +112,7 @@ class EAResourceForeCastReport(ReportFactory):
                 {"data_key": "env_region", "label": "MOE REGION", "width": 0.041},
                 {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.041},
             ],
-            "[EAO RESOURCING]": [
+            "EAO RESOURCING": [
                 {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.040},
                 {"data_key": "cairt_lead", "label": "FN CAIRT LEAD", "width": 0.0486},
                 {"data_key": "eao_team", "label": "TEAM", "width": 0.028},
@@ -981,7 +981,7 @@ class EAResourceForeCastReport(ReportFactory):
                     (cell_index + len(filtered_cells) - 1, 0),
                 )
             )
-            if section_heading == "[PROJECT BACKGROUND]":
+            if section_heading == "PROJECT BACKGROUND":
                 styles.append(
                     (
                         "BACKGROUND",
@@ -990,7 +990,7 @@ class EAResourceForeCastReport(ReportFactory):
                         (0.749, 0.749, 0.749),
                     )
                 )
-            elif section_heading == "[EAO RESOURCING]":
+            elif section_heading == "EAO RESOURCING":
                 styles.append(
                     (
                         "BACKGROUND",
