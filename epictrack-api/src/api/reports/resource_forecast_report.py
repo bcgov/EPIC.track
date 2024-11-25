@@ -784,7 +784,11 @@ class EAResourceForeCastReport(ReportFactory):
             table_data.append(
                 [
                     Paragraph(
-                        f"<b>{ea_type_label.upper()}({len(projects)})</b>", normal_style
+                        (
+                            f"<b>{ea_type_label.upper()} ({len(projects)} Active Work"
+                            f"{'s' if len(projects) > 1 else ''})</b>"
+                        ),
+                        normal_style
                     )
                 ]
                 + [""] * (column_count - 1)
