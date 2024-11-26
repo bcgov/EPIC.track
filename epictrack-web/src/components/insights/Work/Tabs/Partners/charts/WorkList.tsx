@@ -194,10 +194,12 @@ const WorkList = () => {
             return true;
           }
 
-          const value: string = row.getValue(id) || "";
+          // list of First Nations associated with the work
+          const workIndigenousNations: string[] =
+            row.original.indigenous_works?.map((work) => work.name) || [];
 
           return filterValues.some((filterValue: string) =>
-            value.includes(filterValue)
+            workIndigenousNations.includes(filterValue)
           );
         },
       },

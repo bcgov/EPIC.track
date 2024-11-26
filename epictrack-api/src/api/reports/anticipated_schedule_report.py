@@ -69,6 +69,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "event_name",
             "notes",
             "next_pecp_number_of_days",
+            "work_title",
+            "work_type_id"
         ]
         group_by = "phase_name"
         template_name = "anticipated_schedule.docx"
@@ -227,6 +229,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .add_columns(
                 Event.id.label("event_id"),
                 Work.id.label("work_id"),
+                Work.work_type_id.label("work_type_id"),
+                Work.title.label("work_title"),
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
