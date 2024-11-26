@@ -123,8 +123,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(EAAct, EAAct.id == Work.ea_act_id)
             .join(Ministry)
             .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
-            .outerjoin(eac_decision_by, Work.eac_decision_by)
-            .outerjoin(decision_by, Work.decision_by)
+            .outerjoin(eac_decision_by, Event.decision_maker_id == eac_decision_by.id)
+            .outerjoin(decision_by, Event.decision_maker_id == decision_by.id)
             .outerjoin(SubstitutionAct)
             .outerjoin(
                 next_pecp_query,
