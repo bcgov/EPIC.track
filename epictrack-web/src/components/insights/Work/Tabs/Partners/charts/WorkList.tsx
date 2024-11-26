@@ -195,7 +195,8 @@ const WorkList = () => {
           }
 
           // list of First Nations associated with the work
-          const workIndigenousNations: string[] = row.original.indigenous_works?.map((work) => work.name) || [];
+          const workIndigenousNations: string[] =
+            row.original.indigenous_works?.map((work) => work.name) || [];
 
           return filterValues.some((filterValue: string) =>
             workIndigenousNations.includes(filterValue)
