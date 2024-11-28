@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import jsonify, current_app
 from pytz import timezone
-from sqlalchemy import and_, func, select, or_
+from sqlalchemy import and_, case, func, select, or_
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
@@ -82,8 +82,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         current_app.logger.info(f"Fetching data for {self.report_title} report")
         start_date = report_date + timedelta(days=-7)
         report_date = report_date.astimezone(timezone('US/Pacific'))
-        eac_decision_by = aliased(Staff)
-        decision_by = aliased(Staff)
+        staff_decision_by = aliased(Staff)
 
         next_pecp_query = self._get_next_pcp_query(start_date)
         referral_event_query = self._get_referral_event_query(start_date)
@@ -125,8 +124,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(EAAct, EAAct.id == Work.ea_act_id)
             .join(Ministry)
             .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
-            .outerjoin(eac_decision_by, Event.decision_maker_id == eac_decision_by.id)
-            .outerjoin(decision_by, Event.decision_maker_id == decision_by.id)
+            .outerjoin(
+                staff_decision_by,  # Join staff alias
+                or_(
+                    and_(
+                        Event.decision_maker_id.isnot(None), staff_decision_by.id == Event.decision_maker_id
+                    ),
+                    and_(
+                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                        staff_decision_by.id == Work.eac_decision_by_id,
+                    ),
+                    staff_decision_by.id == Work.decision_by_id,  # Default case if event.decision_maker is not populated
+                )
+            )
             .outerjoin(SubstitutionAct)
             .outerjoin(
                 next_pecp_query,
@@ -251,8 +261,21 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("referral_date"),
-                eac_decision_by.full_name.label("eac_decision_by"),
-                decision_by.full_name.label("decision_by"),
+                case(
+                        (
+                            EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                            func.concat(Staff.first_name, " ", Staff.last_name)
+                        ),
+                        else_="",
+                ).label("eac_decision_by"),
+                staff_decision_by.first_name.label("eac_decision_by"),
+                case(
+                        (
+                            EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
+                            func.concat(staff_decision_by.first_name, " ", staff_decision_by.last_name)
+                        ),
+                        else_="",
+                ).label("decision_by"),
                 EventConfiguration.event_type_id.label("milestone_type"),
                 EventConfiguration.event_category_id.label("category_type"),
                 EventConfiguration.name.label("event_name"),
