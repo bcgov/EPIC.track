@@ -147,20 +147,23 @@ export default function ResourceForecast() {
           enableHiding: false,
           size: 200,
           enableColumnFilter: false,
-          Cell: ({ row }: any) => (
-            <Tooltip title={row.original.months[index].phase}>
-              <Box
-                sx={{
-                  bgcolor: row.original.months[index].color,
-                  overflow: "hidden",
-                  padding: "0.5rem 0.5rem 0.5rem 1rem",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {row.original.months[index].phase}
-              </Box>
-            </Tooltip>
-          ),
+          Cell: ({ row }: any) => {
+            const phase = row.original.months[index].phase;
+            return phase ? (
+              <Tooltip title={row.original.months[index].phase}>
+                <Box
+                  sx={{
+                    bgcolor: row.original.months[index].color,
+                    overflow: "hidden",
+                    padding: "0.5rem 0.5rem 0.5rem 1rem",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {phase}
+                </Box>
+              </Tooltip>
+            ) : null;
+          },
         } as MRT_ColumnDef<ResourceForecastModel>;
       });
     }

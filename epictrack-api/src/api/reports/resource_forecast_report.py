@@ -424,30 +424,33 @@ class EAResourceForeCastReport(ReportFactory):
         for work_id, work_data in works.items():
             work = work_data[0]
             for index, month in enumerate(self.months[1:]):
-                month_events = list(
-                    filter(
-                        lambda x: x["start_date"].date() <= month,
-                        start_events[work_id],
-                    )
+                month_start = month.replace(day=1)
+                month_end = (month_start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
+                event_to_show = {"event_phase": "", "phase_color": "#FFFFFF"}
+                work_events = start_events.get(work_id, [])
+                sorted_events = sorted(work_events, key=lambda x: x["phase_end"].date())
+                for event in sorted_events:
+                    phase_start = event["phase_start"].date()
+                    phase_end = event["phase_end"].date()
+                    if phase_start <= month_end and phase_end >= month_start:
+                        if phase_end.month == month_start.month and 1 <= phase_end.day <= 14:
+                            # Show the next phase if the phase ends in the early part of the month
+                            next_event = next(
+                                (e for e in sorted_events if e["phase_start"].date() > phase_end),
+                                None,
+                            )
+                            event_to_show = next_event or {"event_phase": "", "phase_color": "#FFFFFF"}
+                        else:
+                            event_to_show = event
+                phase_label = self.month_labels[index]
+                work.update(
+                    {
+                        phase_label: event_to_show["event_phase"],
+                        f"{phase_label}_color": color_with_opacity(
+                            event_to_show["phase_color"], self.color_intensity
+                        ),
+                    }
                 )
-                if month_events:
-                    month_events = sorted(month_events, key=lambda x: x["start_date"])
-                    latest_event = month_events[-1]
-                    work.update(
-                        {
-                            self.month_labels[index]: latest_event["event_phase"],
-                            f"{self.month_labels[index]}_color": color_with_opacity(
-                                latest_event["phase_color"], self.color_intensity
-                            ),
-                        }
-                    )
-                else:
-                    work.update(
-                        {
-                            self.month_labels[index]: "",
-                            f"{self.month_labels[index]}_color": "#FFFFFF",
-                        }
-                    )
             work_data[0] = work
             results[work_id] = work_data
         return results
@@ -461,6 +464,8 @@ class EAResourceForeCastReport(ReportFactory):
                     event.actual_date if event.actual_date else event.anticipated_date
                 ),
                 "event_phase": event.event_configuration.work_phase.name,
+                "phase_start": event.event_configuration.work_phase.start_date,
+                "phase_end": event.event_configuration.work_phase.end_date,
                 "phase_color": event.event_configuration.work_phase.phase.color,
             }
             for event in events
@@ -839,18 +844,7 @@ class EAResourceForeCastReport(ReportFactory):
         referral_date = self._get_referral_timing(work_data["work_id"])
         work_data["referral_timing"] = f"{referral_date:%B %d, %Y}"
         months = []
-        referral_month_index = len(self.month_labels)
-        referral_month = next(
-            (x for x in self.months if referral_date.date() <= x),
-            None,
-        )
-        if referral_month:
-            referral_month_index = self.months.index(referral_month)
-            for month in self.month_labels[referral_month_index:]:
-                month_data = work_data.pop(month)
-                color = work_data.pop(f"{month}_color")
-                months.append({"label": month, "phase": "Referred", "color": color})
-        for month in self.month_labels[:referral_month_index]:
+        for month in self.month_labels:
             month_data = work_data.pop(month)
             color = work_data.pop(f"{month}_color")
             months.append({"label": month, "phase": month_data, "color": color})
