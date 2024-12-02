@@ -727,9 +727,14 @@ class EAResourceForeCastReport(ReportFactory):
         work_lead = ""
         work_team_members = (
             db.session.query(StaffWorkRole)
-            .filter(StaffWorkRole.work_id == work_id)
-            .filter(StaffWorkRole.is_active.is_(True))
             .join(Staff, Staff.id == StaffWorkRole.staff_id)
+            .filter(
+                StaffWorkRole.work_id == work_id,
+                StaffWorkRole.is_deleted.is_(False),
+                StaffWorkRole.is_active.is_(True),
+                Staff.is_active.is_(True),
+                Staff.is_deleted.is_(False)
+            )
             .add_columns(
                 Staff.first_name.label("first_name"),
                 Staff.last_name.label("last_name"),
