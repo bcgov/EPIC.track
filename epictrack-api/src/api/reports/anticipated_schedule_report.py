@@ -69,7 +69,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "event_name",
             "notes",
             "next_pecp_number_of_days",
-            "work_title",
+            "amendment_title",
             "work_type_id"
         ]
         group_by = "phase_name"
@@ -240,7 +240,16 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Event.id.label("event_id"),
                 Work.id.label("work_id"),
                 Work.work_type_id.label("work_type_id"),
-                Work.title.label("work_title"),
+                case(
+                        (
+                            and_(
+                                Work.simple_title != "",
+                                Work.simple_title.is_not(None),
+                            ),
+                            func.concat(Project.name, " - ", Work.simple_title, " - Amendment")
+                        ),
+                        else_=func.concat(Project.name, " - Amendment")
+                ).label("amendment_title"),
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
