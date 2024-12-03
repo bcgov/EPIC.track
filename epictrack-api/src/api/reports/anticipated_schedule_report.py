@@ -12,8 +12,10 @@ from api.models.ea_act import EAAct
 from api.models.event import Event
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
+from api.models.federal_involvement import FederalInvolvement, FederalInvolvementEnum
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
+from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.event_type import EventTypeEnum
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode
@@ -52,6 +54,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "region",
             "location",
             "ea_act",
+            "ea_type",
             "substitution_act",
             "project_description",
             "report_description",
@@ -90,6 +93,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
+        formatted_phase_name = self._get_formatted_phase_name()
+        ea_type_column = self._get_ea_type_column(formatted_phase_name)
 
         current_app.logger.debug(f"Executing query for {self.report_title} report")
         results_qry = (
@@ -138,6 +143,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 )
             )
             .outerjoin(SubstitutionAct)
+            .outerjoin(FederalInvolvement, FederalInvolvement.id == Work.federal_involvement_id)
+            .outerjoin(WorkType, WorkType.id == Work.work_type_id)
             .outerjoin(
                 next_pecp_query,
                 and_(
@@ -250,6 +257,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         ),
                         else_=func.concat(Project.name, " - Amendment")
                 ).label("amendment_title"),
+                ea_type_column,
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
@@ -388,6 +396,40 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
         current_app.logger.info(f"Generated {self.report_title} report for {report_date}")
         return report, f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
+
+    def _get_ea_type_column(self, formatted_phase_name):
+        return case(
+                (
+                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    case(
+                        (
+                            FederalInvolvement.id != FederalInvolvementEnum.NONE.value,
+                            func.concat(
+                                formatted_phase_name, "; ", FederalInvolvement.name, " - ", SubstitutionAct.name
+                            ),
+                        ),
+                        else_=formatted_phase_name,
+                    ),
+                ),
+                (
+                    FederalInvolvement.id != FederalInvolvementEnum.NONE.value,
+                    func.concat(
+                        WorkType.name, "; ", FederalInvolvement.name, " - ", SubstitutionAct.name
+                    ),
+                ),
+                else_=WorkType.name,
+            ).label("ea_type")
+
+    def _get_formatted_phase_name(self):
+        """Returns an expression for the reformatted PhaseCode.name"""
+        return case(
+            # Case for 32.5
+            (
+                func.substring(PhaseCode.name, r"\((.*?)\)") == "32.5",
+                "32(5) Amendment"
+            ),
+            else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
+        ).label("formatted_phase_name")
 
     def _get_next_pcp_query(self, start_date):
         """Create and return the subquery for next PCP event based on start date"""

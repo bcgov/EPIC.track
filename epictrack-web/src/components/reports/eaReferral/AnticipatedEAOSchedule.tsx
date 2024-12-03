@@ -292,10 +292,7 @@ export default function AnticipatedEAOSchedule() {
                                     <TableRow>
                                       <TableCell>EA Type</TableCell>
                                       <TableCell>
-                                        {item["ea_act"]}
-                                        {item["substitution_act"]
-                                          ? ", " + item["substitution_act"]
-                                          : ""}
+                                        { item["ea_type"]}
                                       </TableCell>
                                     </TableRow>
                                     <TableRow>
