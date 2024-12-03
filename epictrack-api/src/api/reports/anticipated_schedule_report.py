@@ -246,9 +246,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
                                 Work.simple_title != "",
                                 Work.simple_title.is_not(None),
                             ),
-                            func.concat(Project.name, " - ", Work.simple_title, " - Amendment")
+                            func.concat(Project.name, " - ", Work.simple_title)
                         ),
-                        else_=func.concat(Project.name, " - Amendment")
+                        else_=Project.name
                 ).label("amendment_title"),
                 PhaseCode.name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
