@@ -291,9 +291,7 @@ export default function AnticipatedEAOSchedule() {
                                     </TableRow>
                                     <TableRow>
                                       <TableCell>EA Type</TableCell>
-                                      <TableCell>
-                                        { item["ea_type"]}
-                                      </TableCell>
+                                      <TableCell>{item["ea_type"]}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                       <TableCell>
