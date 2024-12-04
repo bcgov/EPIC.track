@@ -293,14 +293,29 @@ export default function AnticipatedEAOSchedule() {
                                       <TableCell>EA Type</TableCell>
                                       <TableCell>{item["ea_type"]}</TableCell>
                                     </TableRow>
-                                    <TableRow>
-                                      <TableCell>
-                                        Responsible Minister
-                                      </TableCell>
-                                      <TableCell>
-                                        {item["ministry_name"]}
-                                      </TableCell>
-                                    </TableRow>
+                                    {item["ministry"] && (
+                                      <TableRow>
+                                        {item["responsible_minister"] ? (
+                                          <>
+                                            <TableCell>
+                                              Responsible Minister
+                                            </TableCell>
+                                            <TableCell>
+                                              {item["responsible_minister"]}
+                                            </TableCell>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <TableCell>
+                                              Responsible Ministry
+                                            </TableCell>
+                                            <TableCell>
+                                              {item["ministry"]}
+                                            </TableCell>
+                                          </>
+                                        )}
+                                      </TableRow>
+                                    )}
                                     <TableRow>
                                       <TableCell>
                                         Decision to be made by

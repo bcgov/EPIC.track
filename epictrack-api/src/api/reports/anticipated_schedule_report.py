@@ -60,7 +60,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "report_description",
             "anticipated_decision_date",
             "additional_info",
-            "ministry_name",
+            "responsible_minister",
+            "ministry",
             "referral_date",
             "eac_decision_by",
             "decision_by",
@@ -86,6 +87,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         start_date = report_date + timedelta(days=-7)
         report_date = report_date.astimezone(timezone('US/Pacific'))
         staff_decision_by = aliased(Staff)
+        staff_minister = aliased(Staff)
 
         next_pecp_query = self._get_next_pcp_query(start_date)
         referral_event_query = self._get_referral_event_query(start_date)
@@ -95,6 +97,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             exclude_phase_names = self.filters["exclude"]
         formatted_phase_name = self._get_formatted_phase_name()
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
+        responsible_minister_column = self._get_responsible_minister_column(staff_minister)
 
         current_app.logger.debug(f"Executing query for {self.report_title} report")
         results_qry = (
@@ -128,6 +131,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(Region, Region.id == Project.region_id_env)
             .join(EAAct, EAAct.id == Work.ea_act_id)
             .join(Ministry)
+            .outerjoin(staff_minister, Ministry.minister_id == staff_minister.id)
             .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
             .outerjoin(
                 staff_decision_by,  # Join staff alias
@@ -274,7 +278,14 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
                 latest_status_updates.c.description.label("additional_info"),
-                Ministry.name.label("ministry_name"),
+                case(
+                    (
+                        Ministry.name != "Not Applicable",
+                        Ministry.name
+                    ),
+                    else_=""
+                ).label("ministry"),
+                responsible_minister_column,
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("referral_date"),
@@ -430,6 +441,22 @@ class EAAnticipatedScheduleReport(ReportFactory):
             ),
             else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
         ).label("formatted_phase_name")
+
+    def _get_responsible_minister_column(self, staff_minister):
+        """Returns an expression for the responsible minister"""
+        return case(
+                (
+                    Ministry.name != "Not Applicable",
+                    case(
+                        (
+                            func.concat(staff_minister.first_name, staff_minister.last_name) != "",
+                            func.concat(staff_minister.first_name, " ", staff_minister.last_name)
+                        ),
+                        else_=""
+                    )
+                ),
+                else_=None,
+        ).label("responsible_minister")
 
     def _get_next_pcp_query(self, start_date):
         """Create and return the subquery for next PCP event based on start date"""
