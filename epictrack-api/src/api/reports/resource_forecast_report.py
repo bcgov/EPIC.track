@@ -912,11 +912,13 @@ class EAResourceForeCastReport(ReportFactory):
             """Adds default information to the page."""
             normal_style, _ = self._get_styles()
             canvas.saveState()
+            normal_style.fontSize = 12
             heading = Paragraph(
-                "<b>Document Title: EAO Resource Forecast</b>", normal_style
+                f"<b>{self.report_title}</b>", normal_style
             )
             heading.wrap(doc.width, inch * 0.5)
             heading.drawOn(canvas, doc.leftMargin, doc.height + inch * 1.5)
+            normal_style.fontSize = 9
             # Draw subheading.
             subheading = Paragraph(f"Month of {report_date:%B %Y}", normal_style)
             subheading.wrap(doc.width, inch * 0.5)
