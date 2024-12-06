@@ -63,7 +63,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             "project_id",
             "status_date_updated",
         ]
-        super().__init__(data_keys, filters=filters, color_intensity=color_intensity)
+        super().__init__(data_keys=data_keys, filters=filters, color_intensity=color_intensity)
         self.report_date = None
         self.report_title = "30-60-90"
         self.pecp_configuration_ids = (

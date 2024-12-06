@@ -77,8 +77,16 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "work_type_id"
         ]
         group_by = "phase_name"
+        item_sort_key = "referral_date"
         template_name = "anticipated_schedule.docx"
-        super().__init__(data_keys, group_by, template_name, filters, color_intensity)
+        super().__init__(
+            data_keys=data_keys,
+            group_by=group_by,
+            item_sort_key=item_sort_key,
+            template_name=template_name,
+            filters=filters,
+            color_intensity=color_intensity
+                        )
         self.report_title = "Anticipated EA Referral Schedule"
 
     def _fetch_data(self, report_date):

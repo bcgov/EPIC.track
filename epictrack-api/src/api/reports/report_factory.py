@@ -13,10 +13,21 @@ from api.models import WorkStatus, db
 class ReportFactory(ABC):
     """Basic representation of report generator."""
 
-    def __init__(self, data_keys, group_by=None, template_name=None, filters=None, color_intensity=None):
+    def __init__(
+        self,
+        data_keys=None,
+        group_by=None,
+        group_sort_order=None,
+        item_sort_key=None,
+        template_name=None,
+        filters=None,
+        color_intensity=None
+    ):
         """Constructor"""
         self.data_keys = data_keys
         self.group_by = group_by
+        self.group_sort_order = group_sort_order  # Custom group order
+        self.item_sort_key = item_sort_key  # Sort items within groups
         if template_name is not None:
             self.template_path = Path(__file__, f"../report_templates/{template_name}")
         self.filters = filters
@@ -34,6 +45,7 @@ class ReportFactory(ABC):
         excluded_items = []
         if self.filters and "exclude" in self.filters:
             excluded_items = self.filters["exclude"]
+
         if report_title == "Anticipated EA Referral Schedule":
             for item in data:
                 obj = {}
@@ -44,8 +56,8 @@ class ReportFactory(ABC):
                         else:
                             obj[k] = item[k]
                 if self.group_by:
-                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
-                    formatted_data[obj.get(self.group_by)].append(obj)
+                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by, -1)]) + 1
+                    formatted_data[obj.get(self.group_by, -1)].append(obj)
                 else:
                     formatted_data.append(obj)
         else:
@@ -54,11 +66,28 @@ class ReportFactory(ABC):
                     k: getattr(item, k) for k in self.data_keys if k not in excluded_items
                 }
                 if self.group_by:
-                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by)]) + 1
-                    formatted_data[obj.get(self.group_by)].append(obj)
+                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by, -1)]) + 1
+                    formatted_data[obj.get(self.group_by, -1)].append(obj)
                 else:
                     formatted_data.append(obj)
-
+        if self.group_by:
+            # Sort items within each group
+            for group, items in formatted_data.items():
+                if self.item_sort_key:
+                    formatted_data[group] = sorted(
+                        items,
+                        key=lambda x: x[self.item_sort_key]
+                    )
+            # Sort groups
+            if self.group_sort_order:
+                formatted_data = dict(
+                    sorted(
+                        formatted_data.items(),
+                        key=lambda x: self.group_sort_order.index(x[0])
+                        if x[0] in self.group_sort_order
+                        else len(self.group_sort_order),  # Move other groups last
+                    )
+                )
         return formatted_data
 
     def _deserialize_work_issues(self, work_issues):

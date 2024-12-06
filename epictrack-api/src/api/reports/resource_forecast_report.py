@@ -68,15 +68,18 @@ class EAResourceForeCastReport(ReportFactory):
             "ea_type_label",
             "sector(sub)",
             "ea_type_sort_order",
-            # "responsible_epd",
-            # "cairt_lead",
-            # "work_lead",
             "fte_positions_construction",
             "fte_positions_operation",
             "work_type_id",
         ]
         group_by = "work_id"
-        super().__init__(data_keys, group_by, None, filters, color_intensity)
+        super().__init__(
+            data_keys=data_keys,
+            group_by=group_by,
+            template_name=None,
+            filters=filters,
+            color_intensity=color_intensity
+                        )
         self.excluded_items = []
         if self.filters and "exclude" in self.filters:
             self.excluded_items = self.filters["exclude"]
