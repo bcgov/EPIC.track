@@ -17,7 +17,6 @@ from api.models.federal_involvement import FederalInvolvement, FederalInvolvemen
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
 from api.models.work_type import WorkType, WorkTypeEnum
-from api.models.event_type import EventTypeEnum
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode
 from api.models.project import Project
@@ -203,27 +202,23 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.is_active.is_(True),
                     and_(
                         Work.work_type_id == 5, # Exemption Order
-                        or_(
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                                )
-                            ),
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                                EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                            )
                         )
                     ),
                     and_(
                         Work.work_type_id == 6, # Assessment
-                        or_(
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                                    EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                                )
-                            ),
+                        Event.event_configuration_id.in_(
+                            db.session.query(EventConfiguration.id).filter(
+                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                                EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
+                                EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                            )
                         )
                     ),
                     and_(
@@ -265,7 +260,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                                 EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                                 EventConfiguration.name != "Delegation of Transfer Decision to Minister",
                                 or_(
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
                                     EventConfiguration.event_type_id == EventTypeEnum.ADM.value
                                 )
                             )
