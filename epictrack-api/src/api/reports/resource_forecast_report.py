@@ -424,7 +424,9 @@ class EAResourceForeCastReport(ReportFactory):
     def _update_month_labels(self, works, start_events):
         """Update month labels in the work result"""
         results = defaultdict(list)
-        for work_id, work_data in works.items():
+        for group in works:
+            work_id = group.get("group")
+            work_data = group.get("items")
             work = work_data[0]
             for index, month in enumerate(self.months[1:]):
                 month_start = month.replace(day=1)

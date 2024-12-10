@@ -209,13 +209,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _update_work_issues(self, data) -> List[WorkIssues]:
         """Combine the result with work issues"""
-        work_ids = set((work["work_id"] for work in data))
+        work_ids = set((work.get("work_id") for work in data))
         work_issues = WorkIssuesService.find_work_issues_by_work_ids(work_ids)
         for result_item in data:
             issue_per_work = [
                 issue
                 for issue in work_issues
-                if issue.work_id == result_item["work_id"]
+                if issue.work_id == result_item.get("work_id")
                 and issue.is_high_priority is True
             ]
             for issue in issue_per_work:
@@ -233,7 +233,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 issue_per_work
             )
             dates = [parser.isoparse(issue["latest_update"]["posted_date"]) for issue in issues]
-            dates.append(result_item["status_date_updated"])
+            dates.append(result_item.get("status_date_updated"))
 
             if len(dates):
                 result_item["oldest_update"] = min(dates)

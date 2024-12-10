@@ -74,14 +74,31 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "notes",
             "next_pecp_number_of_days",
             "amendment_title",
-            "work_type_id"
+            "work_type_id",
+            "work_type"
         ]
-        group_by = "phase_name"
+        group_by = "work_type"
+        group_order = [
+            "Assessment",
+            "Typical Amendment",
+            "Complex Amendment",
+            "Simple Amendment",
+            "32(5) Amendment",
+            "Exemption Order",
+            "Project Notification",
+            "Minister's Designation",
+            "CEAO's Designation",
+            "EAC Extension",
+            "EAC/Order Transfer",
+            "Substantial Start Decision",
+            "EAC/Order Cancellation",
+        ]
         item_sort_key = "referral_date"
         template_name = "anticipated_schedule.docx"
         super().__init__(
             data_keys=data_keys,
             group_by=group_by,
+            group_sort_order=group_order,
             item_sort_key=item_sort_key,
             template_name=template_name,
             filters=filters,
@@ -104,6 +121,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
         formatted_phase_name = self._get_formatted_phase_name()
+        formatted_work_type = self._get_formatted_work_type_name()
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
         responsible_minister_column = self._get_responsible_minister_column(staff_minister)
 
@@ -259,6 +277,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Event.id.label("event_id"),
                 Work.id.label("work_id"),
                 Work.work_type_id.label("work_type_id"),
+                formatted_work_type.label("work_type"),
                 case(
                         (
                             and_(
@@ -270,7 +289,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         else_=Project.name
                 ).label("amendment_title"),
                 ea_type_column,
-                PhaseCode.name.label("phase_name"),
+                formatted_phase_name.label("phase_name"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
                 func.coalesce(
@@ -442,13 +461,36 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def _get_formatted_phase_name(self):
         """Returns an expression for the reformatted PhaseCode.name"""
         return case(
-            # Case for 32.5
-            (
-                func.substring(PhaseCode.name, r"\((.*?)\)") == "32.5",
-                "32(5) Amendment"
-            ),
-            else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
+                (
+                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    case(
+                        # Case for 32.5
+                        (
+                            func.substring(PhaseCode.name, r"\((.*?)\)") == "32.5",
+                            "32(5) Amendment"
+                        ),
+                        else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
+                    )
+                ),
+                else_=PhaseCode.name
         ).label("formatted_phase_name")
+
+    def _get_formatted_work_type_name(self):
+        """Returns an expression for the reformatted workType.name"""
+        return case(
+                (
+                    WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                    case(
+                        # Case for 32.5
+                        (
+                            func.substring(PhaseCode.name, r"\((.*?)\)") == "32.5",
+                            "32(5) Amendment"
+                        ),
+                        else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
+                    )
+                ),
+                else_=WorkType.name
+        ).label("formatted_work_type")
 
     def _get_responsible_minister_column(self, staff_minister):
         """Returns an expression for the responsible minister"""
@@ -531,12 +573,12 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .subquery()
         )
 
-    def _update_staleness(self, data: dict, report_date: datetime) -> dict:
+    def _update_staleness(self, data: list, report_date: datetime) -> list:
         """Calculate the staleness based on report date"""
         date = report_date.astimezone(CANADA_TIMEZONE)
-        for _, work_type_data in data.items():
-            for work in work_type_data:
-                if work["date_updated"]:
+        for group in data:
+            for work in group.get("items"):
+                if work.get("date_updated"):
                     diff = (date - work["date_updated"]).days
                     if diff > 10:
                         work["staleness"] = StalenessEnum.CRITICAL.value

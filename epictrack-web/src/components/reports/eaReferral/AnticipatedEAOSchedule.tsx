@@ -33,8 +33,17 @@ import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
 
+interface Group {
+  group: string;
+  items: any[];
+}
+
+interface ReportData {
+  data: Group[];
+}
+
 export default function AnticipatedEAOSchedule() {
-  const [reports, setReports] = React.useState({});
+  const [reports, setReports] = React.useState<Group[]>([]);
   const [showReportDateBanner, setShowReportDateBanner] =
     React.useState<boolean>(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -54,10 +63,10 @@ export default function AnticipatedEAOSchedule() {
   }, [reportDate]);
 
   React.useEffect(() => {
-    const filterTypes = Object.keys(reports).filter(
-      (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-    );
-    setTypeFilter(filterTypes);
+    if (reports) {
+      const filterTypes: string[] = reports.map((report) => report.group);
+      setTypeFilter(filterTypes);
+    }
   }, [reports]);
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
@@ -70,7 +79,8 @@ export default function AnticipatedEAOSchedule() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setReports((reportData.data as never)["data"]);
+        const reports = reportData.data as ReportData;
+        setReports(reports.data);
       }
 
       if (reportData.status === 204) {
@@ -117,25 +127,6 @@ export default function AnticipatedEAOSchedule() {
     setSelectedTab(newValue);
   };
 
-  // const staleLevel = React.useCallback(
-  //   (staleness: string) => {
-  //     if (staleness == StalenessEnum.CRITICAL) {
-  //       return {
-  //         background: Palette.error.main,
-  //       };
-  //     } else if (staleness == StalenessEnum.WARN) {
-  //       return {
-  //         background: Palette.secondary.main,
-  //       };
-  //     } else {
-  //       return {
-  //         background: Palette.success.main,
-  //       };
-  //     }
-  //   },
-  //   [reportDate]
-  // );
-
   interface TabPanelProps {
     children?: React.ReactNode;
     dir?: string;
@@ -180,7 +171,7 @@ export default function AnticipatedEAOSchedule() {
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>
-      {Object.keys(reports).length > 0 && (
+      {reports && reports.length > 0 && (
         <>
           <Grid item sm={2}>
             <FormLabel>Select Type to Hide</FormLabel>
@@ -211,9 +202,15 @@ export default function AnticipatedEAOSchedule() {
       )}
       <Grid item sm={12}>
         {resultStatus === RESULT_STATUS.LOADED &&
-          Object.keys(reports)
-            .filter((key) => !selectedTypes.includes(key))
-            .map((key) => {
+          reports &&
+          reports
+            .filter((report) => {
+              const groupName = report.group;
+              return !selectedTypes.includes(groupName);
+            })
+            .map((group, _) => {
+              const groupName = group.group;
+              const items = group.items;
               return (
                 <>
                   <Accordion
@@ -225,10 +222,10 @@ export default function AnticipatedEAOSchedule() {
                     elevation={0}
                   >
                     <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
-                      <Typography>{key}</Typography>
+                      <Typography>{groupName}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      {((reports as any)[key] as []).map((item, itemIndex) => {
+                      {items.map((item, itemIndex) => {
                         console.log(item);
                         return (
                           <Accordion key={itemIndex} elevation={0}>

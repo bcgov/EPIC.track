@@ -88,6 +88,8 @@ class ReportFactory(ABC):
                         else len(self.group_sort_order),  # Move other groups last
                     )
                 )
+            formatted_data = [{"group": group, "items": items} for group, items in formatted_data.items()]
+
         return formatted_data
 
     def _deserialize_work_issues(self, work_issues):
