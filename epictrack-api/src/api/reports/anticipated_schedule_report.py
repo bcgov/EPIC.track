@@ -63,6 +63,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "responsible_minister",
             "ministry",
             "referral_date",
+            "actual_date",
             "eac_decision_by",
             "decision_by",
             "next_pecp_date",
@@ -200,68 +201,70 @@ class EAAnticipatedScheduleReport(ReportFactory):
                   ),
                   and_(
                     Event.is_active.is_(True),
-                    and_(
-                        Work.work_type_id == 5, # Exemption Order
-                        Event.event_configuration_id.in_(
-                            db.session.query(EventConfiguration.id).filter(
-                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                                EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                    or_(
+                        and_(
+                            Work.work_type_id == 5, # Exemption Order
+                            Event.event_configuration_id.in_(
+                                db.session.query(EventConfiguration.id).filter(
+                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                                )
                             )
-                        )
-                    ),
-                    and_(
-                        Work.work_type_id == 6, # Assessment
-                        Event.event_configuration_id.in_(
-                            db.session.query(EventConfiguration.id).filter(
-                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                                EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
-                                EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                        ),
+                        and_(
+                            Work.work_type_id == 6, # Assessment
+                            Event.event_configuration_id.in_(
+                                db.session.query(EventConfiguration.id).filter(
+                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                                    EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
+                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                                )
                             )
-                        )
-                    ),
-                    and_(
-                        Work.work_type_id == 7, # Ammendment
-                        Event.event_configuration_id.in_(
-                            db.session.query(EventConfiguration.id).filter(
-                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                EventConfiguration.name != "Delegation of Amendment Decision",
-                                or_(
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
+                        ),
+                        and_(
+                            Work.work_type_id == 7, # Ammendment
+                            Event.event_configuration_id.in_(
+                                db.session.query(EventConfiguration.id).filter(
+                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                    EventConfiguration.name != "Delegation of Amendment Decision",
+                                    or_(
+                                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
+                                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                                    )
+                                )
+                            )
+                        ),
+                        and_(
+                            Work.work_type_id == 9, # EAC Extension
+                            Event.event_configuration_id.in_(
+                                db.session.query(EventConfiguration.id).filter(
+                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                                     EventConfiguration.event_type_id == EventTypeEnum.ADM.value
                                 )
                             )
-                        )
-                    ),
-                    and_(
-                        Work.work_type_id == 9, # EAC Extension
-                        Event.event_configuration_id.in_(
-                            db.session.query(EventConfiguration.id).filter(
-                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                            )
-                        )
-                    ),
-                    and_(
-                        Work.work_type_id == 10, # Substantial Start Decision
-                        Event.event_configuration_id.in_(
-                            db.session.query(EventConfiguration.id).filter(
-                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                EventConfiguration.name != "Delegation of SubStart Decision to Minister",
-                                EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                            )
-                        )
-                    ),
-                    and_(
-                        Work.work_type_id == 11, # EAC/Order Transfer
-                        Event.event_configuration_id.in_(
-                            db.session.query(EventConfiguration.id).filter(
-                                EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                EventConfiguration.name != "Delegation of Transfer Decision to Minister",
-                                or_(
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
+                        ),
+                        and_(
+                            Work.work_type_id == 10, # Substantial Start Decision
+                            Event.event_configuration_id.in_(
+                                db.session.query(EventConfiguration.id).filter(
+                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                    EventConfiguration.name != "Delegation of SubStart Decision to Minister",
                                     EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                                )
+                            )
+                        ),
+                        and_(
+                            Work.work_type_id == 11, # EAC/Order Transfer
+                            Event.event_configuration_id.in_(
+                                db.session.query(EventConfiguration.id).filter(
+                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                                    EventConfiguration.name != "Delegation of Transfer Decision to Minister",
+                                    or_(
+                                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
+                                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                                    )
                                 )
                             )
                         )
@@ -316,6 +319,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("referral_date"),
+                Event.actual_date.label("actual_date"),
                 case(
                         (
                             EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
@@ -375,41 +379,38 @@ class EAAnticipatedScheduleReport(ReportFactory):
         """Generates a report and returns it"""
         current_app.logger.info(f"Generating {self.report_title} report for {report_date}")
         data = self._fetch_data(report_date)
+        works_map = self._resolve_duplicates(data)
 
         works_list = []
-        added_work_ids = set()
-        for item in data:
-            current_app.logger.debug(f"Work ID: {item[0]}")
-            if item.work_id not in added_work_ids:
-                work_issues = db.session.query(WorkIssues).filter_by(work_id=item.work_id).all()
-                current_app.logger.debug(f"Work Issues: {work_issues}")
-                item_dict = item._asdict()
-                item_dict['work_issues'] = work_issues
-                item_dict['next_pecp_number_of_days'] = item.next_pecp_number_of_days
-                works_list.append(item_dict)
-                item_dict['notes'] = ""
-                added_work_ids.add(item.work_id)
+        for work_id, item in works_map.items():
+            work_issues = db.session.query(WorkIssues).filter_by(work_id=work_id).all()
+            current_app.logger.debug(f"Work Issues: {work_issues}")
+            item_dict = item._asdict()
+            item_dict['work_issues'] = work_issues
+            item_dict['next_pecp_number_of_days'] = item.next_pecp_number_of_days
+            item_dict['notes'] = ""
 
-                # go through all the work issues, find the update and add the description to the issue
-                for issue in work_issues:
-                    work_issue_updates = (
-                        db.session.query(WorkIssueUpdates)
-                        .filter_by(
-                            work_issue_id=issue.id,
-                            is_active=True,
-                            is_approved=True
-                        )
-                        .order_by(WorkIssueUpdates.updated_at.desc())
-                        .first()
+            # go through all the work issues, find the update and add the description to the issue
+            for issue in work_issues:
+                work_issue_updates = (
+                    db.session.query(WorkIssueUpdates)
+                    .filter_by(
+                        work_issue_id=issue.id,
+                        is_active=True,
+                        is_approved=True
                     )
-                    if work_issue_updates:
-                        for work_issue in item_dict['work_issues']:
-                            if work_issue.id == issue.id:
-                                work_issue.description = work_issue_updates.description
-                                current_app.logger.debug(f"----Work title: {work_issue.title}")
-                                current_app.logger.debug(f"----Work description: {work_issue.description}")
-                                if work_issue.is_high_priority:
-                                    item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
+                    .order_by(WorkIssueUpdates.updated_at.desc())
+                    .first()
+                )
+                if work_issue_updates:
+                    for work_issue in item_dict['work_issues']:
+                        if work_issue.id == issue.id:
+                            work_issue.description = work_issue_updates.description
+                            current_app.logger.debug(f"----Work title: {work_issue.title}")
+                            current_app.logger.debug(f"----Work description: {work_issue.description}")
+                            if work_issue.is_high_priority:
+                                item_dict['notes'] += f"{work_issue.title}: {work_issue.description} "
+            works_list.append(item_dict)
 
         data = self._format_data(works_list, self.report_title)
         data = self._update_staleness(data, report_date)
@@ -434,6 +435,22 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
         current_app.logger.info(f"Generated {self.report_title} report for {report_date}")
         return report, f"{self.report_title}_{report_date:%Y_%m_%d}.pdf"
+
+    def _resolve_duplicates(self, data):
+        """Resolve duplicate referral/decision event items for a work"""
+        works_map = {}
+        for item in data:
+            if item.work_id not in works_map:
+                works_map[item.work_id] = item
+            else: # Referral/Decision already exists
+                existing_item = works_map[item.work_id]
+                referral_item = item if item.milestone_type == EventTypeEnum.REFERRAL.value else existing_item
+                decision_item = item if item.category_type == EventCategoryEnum.DECISION.value else existing_item
+                if not referral_item.actual_date: # This is an upcoming Referral
+                    works_map[existing_item.work_id] = referral_item
+                else: # Referral has already been made, use decision
+                    works_map[existing_item.work_id] = decision_item
+        return works_map
 
     def _get_ea_type_column(self, formatted_phase_name):
         return case(
