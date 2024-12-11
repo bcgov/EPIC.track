@@ -56,7 +56,6 @@ class ReportFactory(ABC):
                         else:
                             obj[k] = item[k]
                 if self.group_by:
-                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by, -1)]) + 1
                     formatted_data[obj.get(self.group_by, -1)].append(obj)
                 else:
                     formatted_data.append(obj)
@@ -66,7 +65,6 @@ class ReportFactory(ABC):
                     k: getattr(item, k) for k in self.data_keys if k not in excluded_items
                 }
                 if self.group_by:
-                    obj["sl_no"] = len(formatted_data[obj.get(self.group_by, -1)]) + 1
                     formatted_data[obj.get(self.group_by, -1)].append(obj)
                 else:
                     formatted_data.append(obj)
@@ -78,6 +76,8 @@ class ReportFactory(ABC):
                         items,
                         key=lambda x: x[self.item_sort_key]
                     )
+                for index, item in enumerate(formatted_data[group], start=1):
+                    item['sl_no'] = index
             # Sort groups
             if self.group_sort_order:
                 formatted_data = dict(
