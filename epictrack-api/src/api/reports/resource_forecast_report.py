@@ -447,6 +447,7 @@ class EAResourceForeCastReport(ReportFactory):
                             event_to_show = next_event or {"event_phase": "", "phase_color": "#FFFFFF"}
                         else:
                             event_to_show = event
+                        break
                 phase_label = self.month_labels[index]
                 work.update(
                     {
