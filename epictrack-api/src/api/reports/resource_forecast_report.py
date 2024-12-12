@@ -439,6 +439,10 @@ class EAResourceForeCastReport(ReportFactory):
                     phase_end = event["phase_end"].date()
                     if phase_start <= month_end and phase_end >= month_start:
                         if phase_end.month == month_start.month and 1 <= phase_end.day <= 14:
+                            # If this is the last phase show it as long as it persists at least 5 days into the month
+                            if event == sorted_events[-1] and phase_end.day > 4:
+                                event_to_show = event
+                                break
                             # Show the next phase if the phase ends in the early part of the month
                             next_event = next(
                                 (e for e in sorted_events if e["phase_start"].date() > phase_end),
