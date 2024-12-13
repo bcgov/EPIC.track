@@ -47,7 +47,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "work_id",
             "event_id",
             "work_issues",
-            "phase_name",
             "date_updated",
             "project_name",
             "proponent",
@@ -64,7 +63,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "ministry",
             "referral_date",
             "actual_date",
-            "eac_decision_by",
+            "anticipated_date_label",
             "decision_by",
             "next_pecp_date",
             "next_pecp_title",
@@ -123,6 +122,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
             exclude_phase_names = self.filters["exclude"]
         formatted_phase_name = self._get_formatted_phase_name()
         formatted_work_type = self._get_formatted_work_type_name()
+        formatted_anticipated_date = self._get_formatted_date_label(formatted_work_type, formatted_phase_name)
+        anticipated_date_column = self._get_anticipated_date_column(formatted_anticipated_date)
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
         responsible_minister_column = self._get_responsible_minister_column(staff_minister)
 
@@ -292,7 +293,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         else_=Project.name
                 ).label("amendment_title"),
                 ea_type_column,
-                formatted_phase_name.label("phase_name"),
+                anticipated_date_column.label("anticipated_date_label"),
                 latest_status_updates.c.posted_date.label("date_updated"),
                 Project.name.label("project_name"),
                 func.coalesce(
@@ -320,14 +321,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("referral_date"),
                 Event.actual_date.label("actual_date"),
-                case(
-                        (
-                            EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
-                            func.concat(Staff.first_name, " ", Staff.last_name)
-                        ),
-                        else_="",
-                ).label("eac_decision_by"),
-                staff_decision_by.first_name.label("eac_decision_by"),
                 case(
                         (
                             EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
@@ -474,6 +467,41 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 ),
                 else_=WorkType.name,
             ).label("ea_type")
+
+    def _get_formatted_date_label(self, formatted_work_type, formatted_phase_name):
+        """Returns an expression for the date label"""
+        return case(
+                (
+                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                    case(
+                        (
+                            PhaseCode.name == "Effects Assessment & Recommendation",
+                            "EA Certificate Package",
+                        ),
+                        else_=formatted_phase_name,
+                    )
+                ),
+                else_=case(
+                            (
+                                EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                                "EA Certificate"
+                            ),
+                            else_=formatted_work_type,
+                    )
+        )
+
+    def _get_anticipated_date_column(self, formatted_anticipated_date):
+        """Returns an expression for the anticipated date"""
+        referral_postfix = " Referral Date"
+        decision_postfix = " Decision Date"
+        date_prefix = "Anticipated "
+        return case(
+                (
+                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                    func.concat(date_prefix, formatted_anticipated_date, referral_postfix)
+                ),
+                else_=func.concat(date_prefix, formatted_anticipated_date, decision_postfix),
+        ).label("anticipated_date_label")
 
     def _get_formatted_phase_name(self):
         """Returns an expression for the reformatted PhaseCode.name"""
