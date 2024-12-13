@@ -21,10 +21,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set Timestamp
+        id: timestamp
+        run: echo "::set-output name=ts::$(date +'%Y-%m-%d_%H-%M-%S')"
+
       - name: Login Openshift
         shell: bash
         run: |
           oc login --server=${{secrets.OPENSHIFT_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT_SA_TOKEN}}
+
+      - name: Backup Current Prod
+        if: ${{ github.event.inputs.environment == 'prod' }}
+        shell: bash
+        run: |
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
+          TIMESTAMP=${{ steps.timestamp.outputs.ts }}
+          oc tag epictrack-api:prod epictrack-api:prod-backup-${TIMESTAMP}
+          oc tag epictrack-web:prod epictrack-web:prod-backup-${TIMESTAMP}
 
       - name: Tag Images and Rollout
         shell: bash
