@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import jsonify, current_app
 from pytz import timezone
-from sqlalchemy import and_, case, func, select, or_
+from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
@@ -115,7 +115,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
         staff_minister = aliased(Staff)
 
         next_pecp_query = self._get_next_pcp_query(start_date)
-        referral_event_query = self._get_referral_event_query(start_date)
+        next_referral_event_query = self._get_referral_event_query(start_date)
+        next_decision_event_query = self._get_decision_event_query(start_date)
         latest_status_updates = self._get_latest_status_update_query()
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
@@ -131,18 +132,23 @@ class EAAnticipatedScheduleReport(ReportFactory):
         results_qry = (
             db.session.query(Work)
             .join(Event, Event.work_id == Work.id)
-            .join(
-                referral_event_query,
+            .outerjoin(
+                next_referral_event_query,
                 and_(
-                    Event.work_id == referral_event_query.c.work_id,
-                    Event.anticipated_date == referral_event_query.c.min_anticipated_date,
+                    Event.work_id == next_referral_event_query.c.work_id,
+                    Event.anticipated_date == next_referral_event_query.c.min_anticipated_date,
+                ),
+            )
+            .outerjoin(
+                next_decision_event_query,
+                and_(
+                    Event.work_id == next_decision_event_query.c.work_id,
+                    Event.anticipated_date == next_decision_event_query.c.min_anticipated_date,
                 ),
             )
             .join(
                 EventConfiguration,
-                and_(
-                    EventConfiguration.id == Event.event_configuration_id,
-                ),
+                EventConfiguration.id == Event.event_configuration_id
             )
             .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
@@ -185,97 +191,63 @@ class EAAnticipatedScheduleReport(ReportFactory):
             )
             # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
             .filter(
-              Work.is_active.is_(True),
-              Event.anticipated_date.between(report_date - timedelta(days=7), report_date + timedelta(days=366)),
-              or_(
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
+                Work.is_active.is_(True),
+                Event.anticipated_date.between(report_date - timedelta(days=7), report_date + timedelta(days=366)),
+                # At least one referral or decision event
+                or_(
+                    next_referral_event_query.c.work_id.isnot(None),
+                    next_decision_event_query.c.work_id.isnot(None),
+                ),
+                or_(
+                    and_(
                         EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
                         EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value
-                    )
-                  ),
-                  Event.event_configuration_id.in_(
-                    db.session.query(EventConfiguration.id).filter(
+                    ),
+                    and_(
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value
+                    ),
+                    and_(
+                        Work.work_type_id == 5, # Exemption Order
+                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                    ),
+                    and_(
+                        Work.work_type_id == 6, # Assessment
+                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                        EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
+                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                    ),
+                    and_(
+                        Work.work_type_id == 7, # Ammendment
+                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                        EventConfiguration.name != "Delegation of Amendment Decision",
+                        EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
+                    ),
+                    and_(
+                        Work.work_type_id == 9, # EAC Extension
+                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                    ),
+                    and_(
+                        Work.work_type_id == 10, # Substantial Start Decision
+                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                        EventConfiguration.name != "Delegation of SubStart Decision to Minister",
+                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                    ),
+                    and_(
+                        Work.work_type_id == 11, # EAC/Order Transfer
+                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                        EventConfiguration.name != "Delegation of Transfer Decision to Minister",
+                        EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
                     )
-                  ),
-                  and_(
-                    Event.is_active.is_(True),
-                    or_(
-                        and_(
-                            Work.work_type_id == 5, # Exemption Order
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                                )
-                            )
-                        ),
-                        and_(
-                            Work.work_type_id == 6, # Assessment
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                                    EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
-                                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                                )
-                            )
-                        ),
-                        and_(
-                            Work.work_type_id == 7, # Ammendment
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "Delegation of Amendment Decision",
-                                    or_(
-                                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
-                                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                                    )
-                                )
-                            )
-                        ),
-                        and_(
-                            Work.work_type_id == 9, # EAC Extension
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                                )
-                            )
-                        ),
-                        and_(
-                            Work.work_type_id == 10, # Substantial Start Decision
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "Delegation of SubStart Decision to Minister",
-                                    EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                                )
-                            )
-                        ),
-                        and_(
-                            Work.work_type_id == 11, # EAC/Order Transfer
-                            Event.event_configuration_id.in_(
-                                db.session.query(EventConfiguration.id).filter(
-                                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                                    EventConfiguration.name != "Delegation of Transfer Decision to Minister",
-                                    or_(
-                                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value,
-                                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                                    )
-                                )
-                            )
-                        )
-                    )
-                  )
-              ),
-              Work.is_deleted.is_(False),
-              Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
-              # Filter out specific WorkPhase names
-              ~WorkPhase.name.in_(exclude_phase_names)
+                ),
+                Work.is_deleted.is_(False),
+                Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
+                # Filter out specific WorkPhase names
+                ~WorkPhase.name.in_(exclude_phase_names)
             )
             .add_columns(
                 Event.id.label("event_id"),
@@ -609,8 +581,29 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
                     EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                ),
+                )
             )
+            .filter(
+                func.coalesce(Event.actual_date, Event.anticipated_date) >= start_date,
+            )
+            .group_by(Event.work_id)
+            .subquery()
+        )
+
+    def _get_decision_event_query(self, start_date):
+        """Create and return the subquery to find next decision/milestone event based on start date"""
+        return (
+            db.session.query(
+                Event.work_id,
+                func.min(Event.anticipated_date).label("min_anticipated_date"),
+            )
+            .join(
+                EventConfiguration,
+                and_(
+                    Event.event_configuration_id == EventConfiguration.id,
+                    EventConfiguration.event_category_id.in_([EventCategoryEnum.DECISION.value, EventCategoryEnum.MILESTONE.value])
+                )
+                   )
             .filter(
                 func.coalesce(Event.actual_date, Event.anticipated_date) >= start_date,
             )
