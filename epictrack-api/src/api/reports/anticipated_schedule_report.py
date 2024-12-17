@@ -336,7 +336,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                                 result['next_pecp_short_description'] += block['text'] + '\n'
                 except json.JSONDecodeError:
                     current_app.logger.warning("Failed to decode JSON from next_pecp_short_description")
-        data_result = namedtuple('data_result', results_dict[0].keys())
+        data_result = namedtuple('data_result', results_dict[0].keys()) if len(results_dict) > 0 else ()
         results = [data_result(**result) for result in results_dict]
         return results
 
