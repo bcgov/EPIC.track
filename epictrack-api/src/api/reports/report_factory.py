@@ -15,13 +15,13 @@ class ReportFactory(ABC):
 
     def __init__(
         self,
+        color_intensity=None,
         data_keys=None,
+        filters=None,
         group_by=None,
         group_sort_order=None,
         item_sort_key=None,
-        template_name=None,
-        filters=None,
-        color_intensity=None
+        template_name=None
     ):
         """Constructor"""
         self.data_keys = data_keys
@@ -62,7 +62,7 @@ class ReportFactory(ABC):
         else:
             for item in data:
                 obj = {
-                    k: getattr(item, k) for k in self.data_keys if k not in excluded_items
+                    k: getattr(item, k, None) for k in self.data_keys if k not in excluded_items
                 }
                 if self.group_by:
                     formatted_data[obj.get(self.group_by, -1)].append(obj)

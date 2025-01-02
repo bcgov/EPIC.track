@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React from "react";
 import { Container } from "@mui/system";
 import {
   Accordion,
@@ -35,9 +35,22 @@ import { ETPageContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
 import { If } from "react-if";
 
+interface Group {
+  group: string;
+  items: any[];
+}
+
+interface Period {
+  [key: string]: Group[];
+}
+
+interface ReportData {
+  data: Period;
+}
+
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 export default function ThirtySixtyNinety() {
-  const [reports, setReports] = React.useState({});
+  const [reports, setReports] = React.useState<Period>();
   const [showReportDateBanner, setShowReportDateBanner] =
     React.useState<boolean>(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -63,15 +76,20 @@ export default function ThirtySixtyNinety() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        const result = (reportData.data as never)["data"];
-        Object.keys(result).forEach((key) => {
-          (result[key] as []).forEach((resultItem: any) => {
-            (resultItem.work_issues as []).forEach((workIssue: any) => {
-              if (stalenessLevel(workIssue) === StalenessEnum.CRITICAL)
-                workIssue["staleness"] = StalenessEnum.CRITICAL;
-              else if (stalenessLevel(workIssue) === StalenessEnum.WARN)
-                workIssue["staleness"] = StalenessEnum.WARN;
-              else workIssue["staleness"] = StalenessEnum.GOOD;
+        const result = (reportData.data as ReportData).data;
+        // Iterate through each period: "30", "60", "90"
+        Object.keys(result).forEach((key: string) => {
+          const periodGroups = result[key] as Group[];
+          periodGroups.forEach((group) => {
+            // Check and set staleness for each work issue in the work
+            (group.items[0].work_issues as any[]).forEach((workIssue) => {
+              const staleness = stalenessLevel(workIssue);
+              workIssue.staleness =
+                staleness === StalenessEnum.CRITICAL
+                  ? StalenessEnum.CRITICAL
+                  : staleness === StalenessEnum.WARN
+                  ? StalenessEnum.WARN
+                  : StalenessEnum.GOOD;
             });
           });
         });
@@ -212,6 +230,7 @@ export default function ThirtySixtyNinety() {
       </Grid>
       <Grid item sm={12}>
         {resultStatus === RESULT_STATUS.LOADED &&
+          reports &&
           Object.keys(reports).map((key) => {
             return (
               <>
@@ -220,7 +239,10 @@ export default function ThirtySixtyNinety() {
                     <Typography>{key}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {((reports as any)[key] as []).map((item, itemIndex) => {
+                    {/* Iterate over groups within the period */}
+                    {reports[key].map((group, groupIndex) => {
+                      const item = group.items[0];
+                      const itemIndex = groupIndex;
                       return (
                         <Accordion key={itemIndex}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -255,7 +277,7 @@ export default function ThirtySixtyNinety() {
                                   </>
                                 }
                               />
-                              {item["project_name"]} - {item["event_title"]}:
+                              {item["project_name"]} - {item["event_title"]}:{" "}
                               {dateUtils.formatDate(
                                 item["event_date"],
                                 DISPLAY_DATE_FORMAT
@@ -322,11 +344,13 @@ export default function ThirtySixtyNinety() {
                                   </TableRow>
                                   <TableRow>
                                     <TableCell>
-                                      Anticipated Decision Date
+                                      {item["event_type"] === "work_issue"
+                                        ? "Work Issue Update Date"
+                                        : "Anticipated Decision Date"}{" "}
                                     </TableCell>
                                     <TableCell>
                                       {dateUtils.formatDate(
-                                        item["anticipated_decision_date"],
+                                        item["event_date"],
                                         DISPLAY_DATE_FORMAT
                                       )}
                                     </TableCell>

@@ -27,6 +27,8 @@ class EventTypeEnum(enum.Enum):
     # pylint: disable=C0103
     ADM = 16
     CEAO_DECISION = 15
+    COMMENT_PERIOD = 22
+    EAC_MINISTER = 13
     MINISTER_DECISION = 14
     REFERRAL = 5
     TIME_LIMIT_RESUMPTION = 38
