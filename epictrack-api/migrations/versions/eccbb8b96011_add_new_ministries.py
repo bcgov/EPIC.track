@@ -18,13 +18,13 @@ depends_on = None
 
 def upgrade():
     op.execute("UPDATE ministries SET sort_order = sort_order + 7 WHERE name != 'Not Applicable'")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Mining and Critical Minerals','MCM',1)")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Forests','FOR',2)")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Jobs, Economic Development and Innovation','JEDI',3)")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Tourism, Arts, Culture and Sport','TACS',4)")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Housing and Municipal Affairs','HOUS',5)")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Water, Land and Resource Stewardship','WLRS',6)")
-    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Transportation and Transit','MOTI',7)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Mining and Critical Minerals','MCM',2)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Forests','FOR',3)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Jobs, Economic Development and Innovation','JEDI',4)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Tourism, Arts, Culture and Sport','TACS',5)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Housing and Municipal Affairs','HOUS',6)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Water, Land and Resource Stewardship','WLRS',7)")
+    op.execute("INSERT INTO ministries (name,abbreviation,sort_order) values ('Transportation and Transit','MOTI',8)")
 
 
 def downgrade():
