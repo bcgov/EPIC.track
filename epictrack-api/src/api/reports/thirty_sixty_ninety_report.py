@@ -12,6 +12,7 @@ from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
@@ -332,7 +333,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
         data, styles = self._get_table_data_and_styles(data, normal_style, subheading_style)
         table_data.extend(data)
-        table = Table(table_data)
+        max_column_width = 4 * inch
+        table = Table(table_data, colWidths=[None, max_column_width])
         table.setStyle(
             TableStyle(
                 [
@@ -343,6 +345,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
                     ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
+                    ("WORDWRAP", (0, 0), (-1, -1)),
                 ]
                 + styles
             )
@@ -422,52 +425,62 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .join(EventConfiguration, Event.event_configuration)
             .join(Work, Event.work)
             .filter(
-                func.coalesce(Event.actual_date, Event.anticipated_date).between(
-                    start_date.date(), end_date.date()
-                ),
                 or_(
-                    Event.event_configuration_id.in_(self.decision_configuration_ids), # Decision events
-                    and_( # High profile work with pcp
-                        Work.is_high_priority.is_(True),
-                        EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.COMMENT_PERIOD.value
-                    ),
-                    and_( # High profile events
-                        Work.is_high_priority.is_(True),
-                        Event.high_priority.is_(True),
-                        EventConfiguration.event_category_id.not_in([EventCategoryEnum.CALENDAR.value, EventCategoryEnum.FINANCE.value])
+                    and_(
+                        # Keep Minister's decision with no actual date if anticipated date indicates it should have been made
+                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                        Event.actual_date.is_(None),
+                        Event.anticipated_date < start_date.date()
                     ),
                     and_(
-                        Work.work_type_id == 1, # Project Notification
-                        EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                        EventConfiguration.name == "Project Notification Report referred to Decision Maker",
-                    ),
-                    and_(
-                        Work.work_type_id == 2, # Minister's Designation
-                        EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                        EventConfiguration.name != "Minister's Designation Report referred to Decision Maker",
-                    ),
-                    and_(
-                        Work.work_type_id == 5, # Exemption Order
-                        EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                        EventConfiguration.name != "Exemption Request Package Referred to Minister",
-                    ),
-                    and_(
-                        Work.work_type_id == 6, # Assessment
-                        EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                        EventConfiguration.name.in_(["EAC Referral Package sent to Ministers", "Termination Package Referred to Minister"])
-                    ),
-                    and_(
-                        Work.work_type_id == 7, # Ammendment
-                        EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                        EventConfiguration.name == "Amendment Decision Package Referred to Decision Maker"
-                    ),
-                ),
+                        func.coalesce(Event.actual_date, Event.anticipated_date).between(
+                            start_date.date(), end_date.date()
+                        ),
+                        or_(
+                            Event.event_configuration_id.in_(self.decision_configuration_ids), # Decision events
+                            and_( # High profile work with pcp
+                                Work.is_high_priority.is_(True),
+                                EventConfiguration.event_category_id == EventCategoryEnum.PCP.value,
+                                EventConfiguration.event_type_id == EventTypeEnum.COMMENT_PERIOD.value
+                            ),
+                            and_( # High profile events
+                                Work.is_high_priority.is_(True),
+                                Event.high_priority.is_(True),
+                                EventConfiguration.event_category_id.not_in([EventCategoryEnum.CALENDAR.value, EventCategoryEnum.FINANCE.value])
+                            ),
+                            and_(
+                                Work.work_type_id == 1, # Project Notification
+                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                                EventConfiguration.name == "Project Notification Report referred to Decision Maker",
+                            ),
+                            and_(
+                                Work.work_type_id == 2, # Minister's Designation
+                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                                EventConfiguration.name != "Minister's Designation Report referred to Decision Maker",
+                            ),
+                            and_(
+                                Work.work_type_id == 5, # Exemption Order
+                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                                EventConfiguration.name != "Exemption Request Package Referred to Minister",
+                            ),
+                            and_(
+                                Work.work_type_id == 6, # Assessment
+                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                                EventConfiguration.name.in_(["EAC Referral Package sent to Ministers", "Termination Package Referred to Minister"])
+                            ),
+                            and_(
+                                Work.work_type_id == 7, # Ammendment
+                                EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                                EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                                EventConfiguration.name == "Amendment Decision Package Referred to Decision Maker"
+                            ),
+                        ),
+                    )
+                )
             )
         )
         return valid_events
