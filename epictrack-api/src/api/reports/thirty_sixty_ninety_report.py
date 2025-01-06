@@ -505,6 +505,18 @@ class ThirtySixtyNinetyReport(ReportFactory):
             ])
         return data
 
+    def _get_event_date_source(self, data):
+        """Return the date source"""
+        date_sources = {
+            "decision_referral": "Decision",
+            "work_issue": "Issue",
+            "pcp": "Comment Period",
+            "other": "Milestone",
+        }
+        if data["event_type_id"] == EventTypeEnum.REFERRAL.value:
+            return "Referral"
+        return date_sources[data["event_type"]]
+
     def _format_table_data(self, period_data, row_index, style):
         """Generates styled table rows for the given period data"""
         # Define a bold style for labels
@@ -518,6 +530,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             events = group["items"]
             events_data = self._format_table_data_events(events, style)
             work = events[0]
+            date_source_label = self._get_event_date_source(work) + " Date"
             data.append(
                 [
                     [
@@ -526,7 +539,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                             style_bold,
                         ),
                         Paragraph(
-                            f"{work['event_date']: %B %d, %Y}",
+                            f"{date_source_label}: {work['event_date']: %B %d, %Y}",
                             style,
                         ),
                     ],
