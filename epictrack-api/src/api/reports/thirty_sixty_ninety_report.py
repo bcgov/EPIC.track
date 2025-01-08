@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 from os import path
 from typing import Dict, List, Optional
+import copy
 
 from operator import attrgetter
 from dateutil import parser
@@ -123,8 +124,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
         """Fetches the relevant data for EA 30-60-90 Report"""
         max_date = report_date + timedelta(days=93)
         next_pecp_query = self._get_next_pcp_query(report_date, max_date)
-        valid_event_ids = self._get_valid_event_ids(report_date, max_date)
-        work_issue_work_ids = self._get_valid_work_issue_work_ids(report_date, max_date)
+        valid_event_ids = self._get_valid_event_ids(report_date)
+        work_issue_work_ids = self._get_valid_work_issue_work_ids(report_date)
         latest_status_updates = self._get_latest_status_update_query()
 
         results_qry = (
@@ -405,8 +406,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
         return next_pecp_query
 
-    def _get_valid_work_issue_work_ids(self, start_date, end_date):
+    def _get_valid_work_issue_work_ids(self, report_date):
         """Find and return set of valid work ids that have a high priority work issue"""
+        start_date = report_date + timedelta(days=-29)
+        end_date = report_date + timedelta(days=119)
         work_ids = (
             db.session.query(WorkIssues.work_id)
             .join(WorkIssueUpdates.work_issue)
@@ -418,8 +421,22 @@ class ThirtySixtyNinetyReport(ReportFactory):
         )
         return work_ids
 
-    def _get_valid_event_ids(self, start_date, end_date):
+    def _get_valid_event_ids(self, report_date):
         """Find and return set of valid decision or high priority event ids"""
+        start_date = report_date + timedelta(days=-3)
+        end_date = report_date + timedelta(days=93)
+        # Subquery to get referral events that have an anticipated date, but no actual (eg. Referral has not yet been made)
+        referral_exists_subquery = (
+            db.session.query(Event.id)
+            .filter(
+                Event.work_id == Work.id,
+                Event.event_configuration.has(event_type_id=EventTypeEnum.REFERRAL.value),
+                # Event.anticipated_date.isnot(None),
+                Event.actual_date.is_(None)
+            )
+            .correlate(Work)
+            .exists()
+        )
         valid_events = (
             db.session.query(Event.id)
             .join(EventConfiguration, Event.event_configuration)
@@ -431,6 +448,16 @@ class ThirtySixtyNinetyReport(ReportFactory):
                         EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
                         Event.actual_date.is_(None),
                         Event.anticipated_date < start_date.date()
+                    ),
+                    and_(
+                        # Keep decisions with no actual date if date has passed and referral was already made
+                        EventConfiguration.event_type_id == EventCategoryEnum.DECISION.value,
+                        Event.actual_date.is_(None),
+                        Event.anticipated_date.between(
+                            (report_date + timedelta(days=-1600)).date(),
+                            end_date.date()
+                        ),
+                        ~referral_exists_subquery,  # Exclude decisions if an anticipated referral exists
                     ),
                     and_(
                         func.coalesce(Event.actual_date, Event.anticipated_date).between(
@@ -488,6 +515,8 @@ class ThirtySixtyNinetyReport(ReportFactory):
     def _format_table_data_events(self, events, style):
         """Generates styled paragraphs for all events relating to the same work"""
         data = []
+        tabbed_style = copy.deepcopy(style)
+        tabbed_style.leftIndent = 8
         # List events in chronological order
         sorted_events = sorted(events, key=lambda event: event.get("event_date"))
         for event in sorted_events:
@@ -513,7 +542,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 ),
                 Paragraph(
                     f"{event_description_label}: {event_description}" if event_description else "",
-                    style,
+                    tabbed_style,
                 ),
             ])
         return data
@@ -656,14 +685,42 @@ class ThirtySixtyNinetyReport(ReportFactory):
             )
         return periods
 
-    def _categorize_event(self, event: dict, work_id: int) -> str:
+    def _categorize_event(self, event: dict) -> str:
         if event.get("event_configuration_id") in self.decision_configuration_ids or event.get("event_type_id") == EventTypeEnum.REFERRAL.value:
             return "decision_referral"
         if event.get("event_configuration_id") in self.pecp_configuration_ids:
             return "pcp"
-        if work_id in self.high_profile_work_issue_work_ids:
-            return "work_issue"
-        return "other"
+        if event.get("event_configuraiton_id", None):
+            return "other"
+        return "work_issue"
+
+    def _handle_work_issue_items(self, resolved_events: list, event: dict, work_id: int):
+        """Add separate item for each work_issue in event"""
+        work_issues = event.get("work_issues", [])
+        if not work_issues or work_id not in self.high_profile_work_issue_work_ids:
+            return
+        start_date = self.report_date + timedelta(days=-29)
+        end_date = self.report_date + timedelta(days=119)
+
+        for work_issue in work_issues:
+            latest_update = work_issue.get("latest_update", {})
+            posted_date = datetime.fromisoformat(latest_update.get("posted_date"))
+            if (
+                not work_issue.get("is_resolved", True)
+                and work_issue.get("is_active", False)
+                and work_issue.get("is_high_priority", False)
+                and (start_date <= posted_date <= end_date)
+            ):
+                # Add this work issue separately
+                work_issue_event = copy.deepcopy(event)
+                latest_update = work_issue.get("latest_update", {})
+                work_issue_event["event_type"] = "work_issue"
+                work_issue_event["event_id"] = None
+                work_issue_event["event_configuration_id"] = None
+                work_issue_event["event_date"] = datetime.fromisoformat(latest_update.get("posted_date"))
+                work_issue_event["event_title"] = work_issue.get("title")
+                work_issue_event["event_description"] = latest_update.get("description")
+                resolved_events.append(work_issue_event)
 
     def _resolve_multiple_events(self, data: List[Dict]) -> List[Dict]:
         """
@@ -678,31 +735,40 @@ class ThirtySixtyNinetyReport(ReportFactory):
             work_id = group['group']
             events = group['items']
             resolved_events = []
+            work_issues_handled = False
             decision_referral_event = None
             for event in events:
-                event_type = self._categorize_event(event, work_id)
+                event_type = self._categorize_event(event)
                 event["event_type"] = event_type
+                # if work has both a high profile issue and event on the same report
+                if event_type != "work_issue" and not work_issues_handled:
+                    # Add issues as separate items in the same work
+                    self._handle_work_issue_items(resolved_events, event, work_id)
+                    work_issues_handled = True
                 if event_type == "decision_referral":
-                    if not decision_referral_event:
-                        decision_referral_event = event
-                    elif event.get("event_type_id") == EventTypeEnum.REFERRAL.value and event.get("actual_date") is None:
+                    if not decision_referral_event or (
+                        event.get("event_type_id") == EventTypeEnum.REFERRAL.value
+                        and event.get("actual_date") is None
+                    ):
                         decision_referral_event = event
                     continue
-                if event_type == "work_issue":
-                    first_work_issue = event.get("work_issues")[0]
-                    latest_update = first_work_issue.get("latest_update")
-                    event["event_date"] = datetime.fromisoformat(latest_update.get("posted_date"))
-                    event["event_title"] = first_work_issue.get("title")
-                    event["event_description"] = latest_update.get("description")
+                if event_type == "work_issue" and not work_issues_handled:
+                    self._handle_work_issue_items(resolved_events, event, work_id)
+                    work_issues_handled = True
+                    continue
                 resolved_events.append(event)
+
             if decision_referral_event:
                 resolved_events.append(decision_referral_event)
+
+            if not resolved_events:
+                continue
             # Sort the events for each work
             sorted_events = sorted(
                 resolved_events,
                 key=lambda x: (
                     self.event_order.get(x['event_type']),
-                    x.get('anticipated_date', datetime.max)
+                    x.get('event_date', datetime.max)
                 )
             )
             resolved_data.append({
