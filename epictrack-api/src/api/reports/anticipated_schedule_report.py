@@ -246,6 +246,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     )
                 ),
                 Work.is_deleted.is_(False),
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
                 Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
                 # Filter out specific WorkPhase names
                 ~WorkPhase.name.in_(exclude_phase_names)
@@ -576,6 +578,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EventConfiguration.work_phase_id == WorkPhase.id
             )
             .filter(
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
                 Event.event_configuration_id.in_(pecp_configuration_ids),
             )
             .subquery()
