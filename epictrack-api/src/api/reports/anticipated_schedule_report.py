@@ -74,6 +74,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "notes",
             "next_pecp_number_of_days",
             "next_pecp_phase_name",
+            "next_event_name",
             "amendment_title",
             "work_type_id",
             "work_type"
@@ -116,6 +117,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         staff_minister = aliased(Staff)
 
         next_pecp_query = self._get_next_pcp_query(start_date)
+        next_event_query = self._get_next_event_query(report_date)
         next_referral_event_query = self._get_referral_event_query(start_date)
         next_decision_event_query = self._get_decision_event_query(start_date)
         latest_status_updates = self._get_latest_status_update_query()
@@ -188,6 +190,13 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 next_pecp_query,
                 and_(
                     next_pecp_query.c.work_id == Work.id,
+                ),
+            )
+            .outerjoin(
+                next_event_query,
+                and_(
+                    next_event_query.c.work_id == Work.id,
+                    next_event_query.c.rn == 1
                 ),
             )
             # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
@@ -317,6 +326,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 next_pecp_query.c.notes.label("next_pecp_short_description"),
                 next_pecp_query.c.phase_name.label("next_pecp_phase_name"),
                 func.coalesce(next_pecp_query.c.number_of_days, 0).label("next_pecp_number_of_days"),
+                func.coalesce(
+                    next_event_query.c.name,
+                    "None"
+                ).label("next_event_name")
             )
         )
         results = results_qry.all()
@@ -530,6 +543,35 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 ),
                 else_=None,
         ).label("responsible_minister")
+
+    def _get_next_event_query(self, start_date):
+        """
+        Create and return the subquery for the next event for a Work.
+
+        The next event is chosen based on the earliest anticipated_date or actual_date after the start_date
+        If there are two events for the same work with the same date, then event_id determines the first
+        """
+        next_event_query = (
+            db.session.query(
+                Event.work_id,
+                Event.name.label("name"),
+                func.coalesce(Event.actual_date, Event.anticipated_date).label("next_event_date"),
+                func.row_number().over(
+                    partition_by=Event.work_id,
+                    order_by=(
+                        func.coalesce(Event.actual_date, Event.anticipated_date),
+                        Event.id,
+                    ),
+                ).label("rn") # row number label
+            )
+            .filter(
+                func.coalesce(Event.actual_date, Event.anticipated_date) > start_date,
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
+            )
+            .subquery()
+        )
+        return next_event_query
 
     def _get_next_pcp_query(self, start_date):
         """Create and return the subquery for next PCP event based on start date"""
