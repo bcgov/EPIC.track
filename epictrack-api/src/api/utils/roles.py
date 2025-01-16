@@ -26,11 +26,12 @@ class Role(Enum):
 
 
 class Membership(Enum):
-    """User Position in EAO"""
+    """User Position/Roles in EAO"""
 
     EPD = 1
     LEAD = 2
-    OTHER = 3
+    ANALYST = 3
     FNCAIRT = 4
-    ANALYST = 5
+    OTHER = 5
+    TEAM_CO_LEAD = 6
     TEAM_MEMBER = 'TEAM_MEMBER'
