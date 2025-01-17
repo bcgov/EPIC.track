@@ -264,8 +264,9 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 issue_per_work
             )
             dates = [parser.isoparse(issue["latest_update"]["posted_date"]) for issue in issues]
-            dates.append(result_item.get("status_date_updated"))
-
+            status_date_updated = result_item.get("status_date_updated")
+            if status_date_updated:
+                dates.append(status_date_updated)
             if len(dates):
                 result_item["oldest_update"] = min(dates)
             else:
@@ -704,7 +705,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
         for work_issue in work_issues:
             latest_update = work_issue.get("latest_update", {})
-            posted_date = datetime.fromisoformat(latest_update.get("posted_date"))
+            posted_date = datetime.fromisoformat(latest_update.get("posted_date")) if latest_update.get("posted_date") else None
             if (
                 not work_issue.get("is_resolved", True)
                 and work_issue.get("is_active", False)
@@ -713,13 +714,12 @@ class ThirtySixtyNinetyReport(ReportFactory):
             ):
                 # Add this work issue separately
                 work_issue_event = copy.deepcopy(event)
-                latest_update = work_issue.get("latest_update", {})
                 work_issue_event["event_type"] = "work_issue"
                 work_issue_event["event_id"] = None
                 work_issue_event["event_configuration_id"] = None
-                work_issue_event["event_date"] = datetime.fromisoformat(latest_update.get("posted_date"))
+                work_issue_event["event_date"] = posted_date
                 work_issue_event["event_title"] = work_issue.get("title")
-                work_issue_event["event_description"] = latest_update.get("description")
+                work_issue_event["event_description"] = latest_update.get("description", "") if latest_update else ""
                 resolved_events.append(work_issue_event)
 
     def _resolve_multiple_events(self, data: List[Dict]) -> List[Dict]:
