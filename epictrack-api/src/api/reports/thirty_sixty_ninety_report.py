@@ -342,7 +342,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                     ("BOX", (0, 0), (-1, -1), 0.25, colors.black),
                     ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
                     ("FONTSIZE", (0, 0), (-1, -1), 6.5),
-                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
                     ("ALIGN", (0, 0), (-1, -1), "LEFT"),
                     ("FONTNAME", (0, 2), (-1, -1), "BCSans"),
                     ("FONTNAME", (0, 0), (-1, 1), "BCSans-Bold"),
