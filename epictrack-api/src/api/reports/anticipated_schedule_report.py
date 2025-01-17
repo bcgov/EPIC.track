@@ -83,10 +83,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         group_by = "group"
         group_order = [
             "EA Certificate Referrals",
-            "Typical Amendment Decisions",
-            "Complex Amendment Decisions",
-            "Simple Amendment Decisions",
-            "s.32(5) Amendment Decisions",
+            "Amendment Decisions",
             "Exemption Order Decisions",
             "EA Readiness Decisions",
             "Minister's Designation Decisions",
@@ -483,6 +480,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     ),
                     else_="EA Certificate Referrals"
                 ),
+            ),
+            (
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                "Amendment Decisions"
             ),
             else_=func.concat(formatted_work_type, "s")
         )
