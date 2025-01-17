@@ -221,37 +221,37 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value
                     ),
                     and_(
-                        Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value, # Exemption Order
+                        Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
                         EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
                     ),
                     and_(
-                        Work.work_type_id == WorkTypeEnum.ASSESSMENT.value, # Assessment
+                        Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
                         EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
                         EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
                     ),
                     and_(
-                        Work.work_type_id == WorkTypeEnum.AMENDMENT.value, # Ammendment
+                        Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "Delegation of Amendment Decision",
                         EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
                     ),
                     and_(
-                        Work.work_type_id == WorkTypeEnum.EAC_EXTENSION.value, # EAC Extension
+                        Work.work_type_id == WorkTypeEnum.EAC_EXTENSION.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.event_type_id == EventTypeEnum.ADM.value
                     ),
                     and_(
-                        Work.work_type_id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value, # Substantial Start Decision
+                        Work.work_type_id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "Delegation of SubStart Decision to Minister",
                         EventConfiguration.event_type_id == EventTypeEnum.ADM.value
                     ),
                     and_(
-                        Work.work_type_id == WorkTypeEnum.EAC_ORDER_TRANSFER.value, # EAC/Order Transfer
+                        Work.work_type_id == WorkTypeEnum.EAC_ORDER_TRANSFER.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "Delegation of Transfer Decision to Minister",
                         EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
