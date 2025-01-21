@@ -1018,7 +1018,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def _check_can_edit_or_team_member_auth(cls, work_id: int):
         """Check if user has edit role or is team member"""
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
@@ -1027,7 +1027,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     def _check_can_create_or_team_member_auth(cls, work_id: int):
         """Check if user has create role or is team member"""
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
