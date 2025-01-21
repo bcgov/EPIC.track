@@ -59,7 +59,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "group",
             "location",
             "milestone_type",
-            "ministry",
             "next_event_name",
             "next_pecp_date",
             "next_pecp_number_of_days",
@@ -73,7 +72,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "referral_date",
             "region",
             "report_description",
-            "responsible_minister",
             "substitution_act",
             "work_id",
             "work_issues",
@@ -129,7 +127,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
         group_column = self._get_grouped_column(formatted_work_type)
         anticipated_date_column = self._get_anticipated_date_column(formatted_anticipated_date)
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
-        responsible_minister_column = self._get_responsible_minister_column(staff_minister)
 
         current_app.logger.debug(f"Executing query for {self.report_title} report")
         results_qry = (
@@ -294,14 +291,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
                 latest_status_updates.c.description.label("additional_info"),
-                case(
-                    (
-                        Ministry.name != "Not Applicable",
-                        Ministry.name
-                    ),
-                    else_=""
-                ).label("ministry"),
-                responsible_minister_column,
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("referral_date"),
@@ -567,22 +556,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 ),
                 else_=func.concat(WorkType.name, " Decision")
         ).label("formatted_work_type")
-
-    def _get_responsible_minister_column(self, staff_minister):
-        """Returns an expression for the responsible minister"""
-        return case(
-                (
-                    Ministry.name != "Not Applicable",
-                    case(
-                        (
-                            func.concat(staff_minister.first_name, staff_minister.last_name) != "",
-                            func.concat(staff_minister.first_name, " ", staff_minister.last_name)
-                        ),
-                        else_=""
-                    )
-                ),
-                else_=None,
-        ).label("responsible_minister")
 
     def _get_next_event_query(self, start_date):
         """
