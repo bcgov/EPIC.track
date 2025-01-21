@@ -41,7 +41,7 @@ const schema = yup.object<Work>().shape({
   work_type_id: yup.number().required("Work type is required"),
   start_date: yup.date().required("Start date is required"),
   project_id: yup.number().required("Project is required"),
-  ministry_id: yup.number().required("Responsible Ministry is required"),
+  ministry_id: yup.number().required("2nd Responsible Ministry is required"),
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),
@@ -371,7 +371,7 @@ export default function WorkForm({
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel required>Responsible Ministry</ETFormLabel>
+          <ETFormLabel required>2nd Responsible Ministry</ETFormLabel>
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.ministry_id?.message?.toString()}

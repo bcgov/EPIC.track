@@ -185,7 +185,7 @@ const WorkDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETCaption1 bold color={Palette.primary.main}>
-              RESPONSIBLE MINISTRY
+              2ND RESPONSIBLE MINISTRY
             </ETCaption1>
           </Grid>
           <Grid item xs={12}>
