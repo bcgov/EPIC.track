@@ -335,7 +335,9 @@ export default function ResourceForecast() {
       {
         accessorKey: "referral_timing",
         accessorFn: (row) =>
-          dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT),
+          row.referral_timing
+            ? dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT)
+            : "",
         header: "Referral Timing",
         enableHiding: true,
       },

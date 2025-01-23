@@ -834,7 +834,8 @@ class EAResourceForeCastReport(ReportFactory):
                 month_cell_start = len(cells)
                 for month_index, month in enumerate(self.month_labels):
                     month_data = next(
-                        x for x in project["months"] if x["label"] == month
+                        (x for x in project.get("months", []) if x["label"] == month),
+                        {"phase": "", "color": "#FFFFFF"}  # Default
                     )
                     row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
@@ -849,7 +850,8 @@ class EAResourceForeCastReport(ReportFactory):
                         )
                     )
                 if "referral_timing" not in self.excluded_items:
-                    row.append(Paragraph(project["referral_timing"], body_text_style))
+                    referral_timing = project.get("referral_timing") or ""
+                    row.append(Paragraph(referral_timing, body_text_style))
                 table_data.append(row)
                 row_index += 1
         return table_data, styles
@@ -857,7 +859,11 @@ class EAResourceForeCastReport(ReportFactory):
     def _handle_months(self, work_data) -> dict:
         """Update the work data to include relevant month information."""
         referral_date = self._get_referral_timing(work_data["work_id"])
-        work_data["referral_timing"] = f"{referral_date:%B %d, %Y}"
+        if referral_date:
+            work_data["referral_timing"] = f"{referral_date:%Y-%m-%d}"
+        else:
+            current_app.logger.warning(f"No referral date found for work_id: {work_data['work_id']}")
+            work_data["referral_timing"] = None
         months = []
         for month in self.month_labels:
             month_data = work_data.pop(month)
