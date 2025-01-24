@@ -72,13 +72,13 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
+        if not work_issues:
+            raise ResourceNotFoundError("Work issue not found. It may be inactive.")
+
         work_issue = work_issues[0]
         work_issue_id = work_issue.id
 
         cls._check_create_auth(work_id)
-
-        if not work_issues:
-            raise ResourceNotFoundError("Work Issues not found")
 
         cls._check_update_date_validity(work_issue, data)
 
