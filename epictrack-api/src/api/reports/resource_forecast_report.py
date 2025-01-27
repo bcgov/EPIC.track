@@ -434,19 +434,21 @@ class EAResourceForeCastReport(ReportFactory):
                 event_to_show = {"event_phase": "", "phase_color": "#FFFFFF"}
                 work_events = start_events.get(work_id, [])
                 sorted_events = sorted(work_events, key=lambda x: x["phase_end"].date())
-                for event in sorted_events:
+                for i, event in enumerate(sorted_events):
                     phase_start = event["phase_start"].date()
                     phase_end = event["phase_end"].date()
                     if phase_start <= month_end and phase_end >= month_start:
                         if phase_end.month == month_start.month and 1 <= phase_end.day <= 14:
                             # If this is the last phase always show it
-                            if event == sorted_events[-1]:
+                            if i == len(sorted_events) - 1:
                                 event_to_show = event
                                 break
                             # Show the next phase if the phase ends in the early part of the month
-                            next_event = next(
-                                (e for e in sorted_events if e["phase_start"].date() > phase_end),
-                                None,
+                            next_event = (
+                                sorted_events[i + 1]
+                                if i + 1 < len(sorted_events)
+                                and sorted_events[i + 1]["phase_start"].date() >= phase_end
+                                else None
                             )
                             event_to_show = next_event or {"event_phase": "", "phase_color": "#FFFFFF"}
                         else:
