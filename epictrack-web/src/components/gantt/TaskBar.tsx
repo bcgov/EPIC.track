@@ -1,5 +1,4 @@
 // TaskBar.js
-import React from "react";
 import moment from "moment";
 import { dayWidth } from "./constants";
 import { GanttItem } from "./types";

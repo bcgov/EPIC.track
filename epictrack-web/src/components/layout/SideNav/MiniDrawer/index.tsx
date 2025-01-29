@@ -1,14 +1,11 @@
 import * as React from "react";
 import { styled, Theme, CSSObject, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
-import CssBaseline from "@mui/material/CssBaseline";
 import Divider from "@mui/material/Divider";
 import { DrawerBox } from "../SideNav";
 import { useAppSelector } from "hooks";
 import { drawerCollapsedWidth, drawerExpandedWidth } from "styles/uiStateSlice";
 import { Palette } from "styles/theme";
-import { Unless } from "react-if";
 
 const openedMixin = (theme: Theme): CSSObject => ({
   width: drawerExpandedWidth,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import WorkForm from "../WorkForm";
 import TrackDialog from "components/shared/TrackDialog";
 import { Work } from "models/work";

@@ -1,5 +1,5 @@
-import { useContext, useMemo } from "react";
-import { Box, Divider, Grid, Stack, Tooltip } from "@mui/material";
+import { useMemo } from "react";
+import { Grid, Stack } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -12,7 +12,6 @@ import {
 import WorkState from "../../workPlan/WorkState";
 import dayjs from "dayjs";
 import {
-  DATE_FORMAT,
   DISPLAY_DATE_FORMAT,
   MONTH_DAY_YEAR,
 } from "../../../constants/application-constant";
@@ -22,7 +21,6 @@ import { Else, If, Then, When } from "react-if";
 import { daysLeft } from "./util";
 import { dateUtils } from "utils";
 import { WorkStateEnum } from "models/work";
-import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];

@@ -9,7 +9,6 @@ import SingleValue from "./components/SingleValueContainer";
 import DropdownIndicator from "./components/DropDownIndicator";
 import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 import { useTheme } from "@mui/material";
-import { difference, differenceBy } from "lodash";
 
 const INPUT_SIZE = "0.875rem";
 const FilterSelect = (props: SelectProps) => {
@@ -263,7 +262,7 @@ const FilterSelect = (props: SelectProps) => {
             color: Palette.neutral.light,
             fontSize: INPUT_SIZE,
             lineHeight: "1rem",
-            ...(props.selectProps.filterProps?.variant == "bar" && {
+            ...(props.selectProps.filterProps?.variant === "bar" && {
               color: Palette.primary.accent.main,
               fontWeight: 700,
             }),

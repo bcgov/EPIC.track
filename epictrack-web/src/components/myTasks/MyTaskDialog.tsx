@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import MyTaskForm from "./MyTaskForm";
 import TrackDialog from "components/shared/TrackDialog";
-import taskEventService from "services/taskEventService/taskEventService";
 import { MyTask } from "models/task";
-import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";

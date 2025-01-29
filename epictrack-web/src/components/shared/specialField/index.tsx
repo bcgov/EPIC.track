@@ -6,13 +6,10 @@ import {
   MRT_TableInstance,
   MRT_TableOptions,
   MRT_TableState,
-  MaterialReactTable,
-  useMaterialReactTable,
 } from "material-react-table";
 import { Palette } from "../../../styles/theme";
 import { ETCaption2, ETCaption3, ETParagraph } from "..";
 import Icons from "../../icons";
-import { styled } from "@mui/system";
 import { IconProps } from "../../icons/type";
 import { SpecialField, SpecialFieldProps } from "./type";
 import specialFieldService from "../../../services/specialFieldService";
@@ -136,7 +133,7 @@ export const SpecialFieldGrid = ({
         Edit: ({ cell, column, row, table }) => {
           let value: any = cell.getValue<string>();
           if (fieldType === "select") {
-            value = options?.find((o) => row.original.field_value == o.value);
+            value = options?.find((o) => row.original.field_value === o.value);
           }
           const onBlur = (newValue: any) => {
             const value =

@@ -1,4 +1,3 @@
-import { Snackbar } from "@mui/material";
 import CopyButton from "../CopyButton";
 import ETNotificationProvider from "../notificationProvider/ETNotificationProvider";
 

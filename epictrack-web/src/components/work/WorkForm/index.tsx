@@ -497,7 +497,7 @@ export default function WorkForm({
           disabled={!canEdit || isWorkLeadFieldUnlocked}
         >
           <ControlledSelectV2
-            disabled={work?.responsible_epd_id != undefined}
+            disabled={work?.responsible_epd_id !== undefined}
             placeholder="Select"
             helperText={errors?.responsible_epd_id?.message?.toString()}
             defaultValue={work?.responsible_epd_id}
@@ -519,7 +519,7 @@ export default function WorkForm({
           disabled={!canEdit || isEpdFieldUnlocked}
         >
           <ControlledSelectV2
-            disabled={work?.work_lead_id != undefined}
+            disabled={work?.work_lead_id !== undefined}
             placeholder="Select"
             helperText={errors?.work_lead_id?.message?.toString()}
             defaultValue={work?.work_lead_id}

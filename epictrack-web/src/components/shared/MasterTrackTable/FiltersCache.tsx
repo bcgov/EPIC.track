@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { MRT_TableInstance, MRT_RowData } from "material-react-table";
 
 export const FiltersCache = <TData extends MRT_RowData>({

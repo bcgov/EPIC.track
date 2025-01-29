@@ -4,7 +4,7 @@ import Header from "./components/layout/Header/Header";
 import UserService from "./services/userService";
 import AuthenticatedRoutes from "./routes/AuthenticatedRoutes";
 import { useAppDispatch, useAppSelector } from "./hooks";
-import { Box, Theme, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Theme, useMediaQuery } from "@mui/material";
 import AxiosErrorHandler from "./components/axiosErrorHandler/AxiosErrorHandler";
 import ETNotificationProvider from "./components/shared/notificationProvider/ETNotificationProvider";
 import "./styles/App.scss";

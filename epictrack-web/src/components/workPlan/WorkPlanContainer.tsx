@@ -21,7 +21,6 @@ import About from "./about";
 import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
 import { StalenessEnum } from "constants/application-constant";
-import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 import { calculateStaleness } from "./utils";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];

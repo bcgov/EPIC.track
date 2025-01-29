@@ -1,11 +1,11 @@
-import React, { useState, useContext, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Moment from "moment";
 import { Grid } from "@mui/material";
 import { ETFormLabel } from "components/shared";
-import { TaskEvent, statusOptions } from "models/taskEvent";
+import { statusOptions } from "models/taskEvent";
 import dayjs, { Dayjs } from "dayjs";
 import ControlledSelectV2 from "components/shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "styles/theme";
@@ -24,8 +24,7 @@ import ControlledDatePicker from "components/shared/controlledInputComponents/Co
 import TrackDatePicker from "components/shared/DatePicker";
 import ControlledTextField from "components/shared/controlledInputComponents/ControlledTextField";
 import responsibilityService from "services/responsibilityService/responsibilityService";
-import { MyTask, Responsibility } from "models/task";
-import { Assignee } from "models/event";
+import { MyTask } from "models/task";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),

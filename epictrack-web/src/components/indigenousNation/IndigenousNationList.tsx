@@ -1,19 +1,10 @@
 import React, { useMemo } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  IconButton,
-  Stack,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation } from "../../models/firstNation";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETCaption2, ETGridTitle, ETPageContainer, IButton } from "../shared";
+import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
 import IndigenousNationForm from "./IndigenousNationForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";

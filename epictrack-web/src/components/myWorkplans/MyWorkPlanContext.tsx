@@ -6,10 +6,7 @@ import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
-import {
-  MY_WORKLAN_FILTERS,
-  MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
-} from "./constants";
+import { MY_WORKPLAN_CACHED_SEARCH_OPTIONS } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 
 interface MyWorkplanContextProps {

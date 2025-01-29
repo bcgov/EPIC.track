@@ -1,6 +1,5 @@
 import { Tooltip } from "@mui/material";
 import { TaskBarTooltipProps } from "components/gantt";
-import moment from "moment";
 
 const TaskBarTooltip = ({ task, children }: TaskBarTooltipProps) => {
   return (

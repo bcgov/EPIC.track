@@ -73,7 +73,7 @@ const WorkList = () => {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "ministry") {
+      if (key === "ministry") {
         accessor = "abbreviation";
       }
       const codes = works

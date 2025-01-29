@@ -1,4 +1,3 @@
-import React from "react";
 import CreateIssueDialog from "./CreateIssueDialog";
 import EditIssueDialog from "./EditIssueDialog";
 import NewIssueUpdateDialog from "./NewIssueUpdateDialog";

@@ -2,11 +2,7 @@ import React from "react";
 import { WorkplanContext } from "../WorkPlanContext";
 import { Grid } from "@mui/material";
 import { Palette } from "../../../styles/theme";
-import { ETCaption1, ETCaption2, ETSubhead } from "../../shared";
-import Icons from "../../icons/index";
-import { IconProps } from "../../icons/type";
-
-const EditIcon: React.FC<IconProps> = Icons["EditIcon"];
+import { ETCaption1, ETSubhead } from "../../shared";
 
 export interface TeamInfoBoxProps {
   title: string;
@@ -47,27 +43,6 @@ const TeamInfoBox = (props: TeamInfoBoxProps) => {
               {props.value}
             </ETSubhead>
           </Grid>
-          {/* <Grid
-            item
-            xs={2}
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-evenly",
-              cursor: "pointer",
-            }}
-          > */}
-          {/* Commenting this out as this has to bring back when we finalize what to do with this feature */}
-          {/* <EditIcon fill={Palette.primary.accent.main} /> */}
-          {/* <ETCaption2
-              bold
-              sx={{
-                color: Palette.primary.accent.main,
-              }}
-            >
-              Edit
-            </ETCaption2> */}
-          {/* </Grid> */}
         </Grid>
       </Grid>
     </Grid>

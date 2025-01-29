@@ -10,7 +10,6 @@ import { CloneForm } from "../types";
 import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
 import dayjs from "dayjs";
 import { descriptionCharacterLimit } from "./constants";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
 
 const schema = yup.object().shape({
   posted_date: yup.string().required("Date is required"),
