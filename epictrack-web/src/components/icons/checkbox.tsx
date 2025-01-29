@@ -33,7 +33,7 @@ export const CheckboxRegular = (props: IconProps) => {
         height="18"
         rx="1"
         stroke="#C2C4C5"
-        stroke-width="2"
+        strokeWidth="2"
       />
     </svg>
   );

@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
+import { Box, Button, Grid } from "@mui/material";
 import { Work } from "../../models/work";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer, IButton } from "../shared";
+import { ETGridTitle, ETPageContainer } from "../shared";
 import workService from "../../services/workService/workService";
 import { ETChip } from "../shared/chip/ETChip";
 import { Link } from "react-router-dom";
@@ -18,24 +18,22 @@ import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { sort } from "utils";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
 const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
-  const [workId, setWorkId] = React.useState<number>();
-  const [showWorkDialogForm, setShowWorkDialogForm] = React.useState(false);
-  const [phases, setPhases] = React.useState<string[]>([]);
-  const [eaActs, setEAActs] = React.useState<string[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<string[]>([]);
-  const [projects, setProjects] = React.useState<string[]>([]);
-  const [ministries, setMinistries] = React.useState<string[]>([]);
-  const [teams, setTeams] = React.useState<string[]>([]);
-  const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
-  const [works, setWorks] = React.useState<Work[]>([]);
+  const [workId, setWorkId] = useState<number>();
+  const [showWorkDialogForm, setShowWorkDialogForm] = useState(false);
+  const [phases, setPhases] = useState<string[]>([]);
+  const [eaActs, setEAActs] = useState<string[]>([]);
+  const [workTypes, setWorkTypes] = useState<string[]>([]);
+  const [projects, setProjects] = useState<string[]>([]);
+  const [ministries, setMinistries] = useState<string[]>([]);
+  const [teams, setTeams] = useState<string[]>([]);
+  const [loadingWorks, setLoadingWorks] = useState<boolean>(true);
+  const [works, setWorks] = useState<Work[]>([]);
   const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
     All_WORKS_FILTERS_CACHE_KEY,
     [
@@ -70,10 +68,11 @@ const WorkList = () => {
     current_work_phase: setPhases,
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!works.length) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "ministry") {
+      if (key === "ministry") {
         accessor = "abbreviation";
       }
       const codes = works
@@ -313,7 +312,7 @@ const WorkList = () => {
         ),
       },
     ],
-    [projects, phases, teams, ministries, workTypes, eaActs]
+    [eaActs, ministries, phases, projects, statuses, teams, workTypes]
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
@@ -335,6 +334,7 @@ const WorkList = () => {
           <MasterTrackTable
             columns={columns}
             data={works}
+            enableExport
             initialState={{
               sorting: [
                 {
@@ -344,12 +344,12 @@ const WorkList = () => {
               ],
               columnFilters: cachedFilters,
             }}
+            onCacheFilters={handleCacheFilters}
+            renderResultCount={true}
             state={{
               isLoading: loadingWorks,
               showGlobalFilter: true,
             }}
-            tableName="work-listing"
-            enableExport
             renderTopToolbarCustomActions={({ table }) => (
               <Restricted
                 allowed={[ROLES.CREATE]}
@@ -366,7 +366,7 @@ const WorkList = () => {
                 </Button>
               </Restricted>
             )}
-            onCacheFilters={handleCacheFilters}
+            tableName="work-listing"
           />
         </Grid>
       </ETPageContainer>
