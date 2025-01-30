@@ -9,6 +9,7 @@ import { IconProps } from "../../../icons/type";
 import { WorkIssue } from "../../../../models/Issue";
 import IssueSummary from "./Summary";
 import IssueDetails from "./Details";
+import { StalenessEnum } from "constants/application-constant";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 
@@ -29,22 +30,22 @@ const IssueAccordion = ({
 
   const iconStyles = React.useMemo(() => {
     switch (staleness) {
-      case "CRITICAL":
+      case StalenessEnum.CRITICAL:
         return {
           fill: Palette.error.dark,
           background: Palette.error.bg.light,
         };
-      case "WARN":
+      case StalenessEnum.WARN:
         return {
           fill: Palette.secondary.dark,
           background: Palette.secondary.bg.light,
         };
-      case "INACTIVE":
+      case StalenessEnum.INACTIVE:
         return {
           fill: Palette.neutral.main,
           background: Palette.neutral.bg.main,
         };
-      case "RESOLVED":
+      case StalenessEnum.RESOLVED:
         return {
           fill: Palette.neutral.main,
           background: Palette.neutral.bg.main,

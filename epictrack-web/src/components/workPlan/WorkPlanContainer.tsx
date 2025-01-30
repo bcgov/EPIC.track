@@ -22,6 +22,7 @@ import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
 import { StalenessEnum } from "constants/application-constant";
 import { issueListMaxStaleness, calculateStaleness } from "./utils";
+import { StalenessEnum } from "constants/application-constant";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 const ExclamationSmallIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
@@ -58,12 +59,12 @@ const WorkPlanContainer = () => {
   console.info("highestStaleness:", highestStaleness);
 
   const iconStyles = React.useMemo(() => {
-    if (highestStaleness === "CRITICAL") {
+    if (highestStaleness === StalenessEnum.CRITICAL) {
       return {
         fill: Palette.error.light,
       };
     }
-    if (highestStaleness === "WARN") {
+    if (highestStaleness === StalenessEnum.WARN) {
       return {
         fill: Palette.secondary.light,
       };
