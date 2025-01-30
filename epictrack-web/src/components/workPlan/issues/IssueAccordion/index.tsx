@@ -28,22 +28,33 @@ const IssueAccordion = ({
   const [expanded, setExpanded] = React.useState<boolean>(defaultOpen);
 
   const iconStyles = React.useMemo(() => {
-    if (staleness === "CRITICAL") {
-      return {
-        fill: Palette.error.dark,
-        background: Palette.error.bg.light,
-      };
+    switch (staleness) {
+      case "CRITICAL":
+        return {
+          fill: Palette.error.dark,
+          background: Palette.error.bg.light,
+        };
+      case "WARN":
+        return {
+          fill: Palette.secondary.dark,
+          background: Palette.secondary.bg.light,
+        };
+      case "INACTIVE":
+        return {
+          fill: Palette.neutral.main,
+          background: Palette.neutral.bg.main,
+        };
+      case "RESOLVED":
+        return {
+          fill: Palette.neutral.main,
+          background: Palette.neutral.bg.main,
+        };
+      default:
+        return {
+          fill: Palette.success.dark,
+          background: Palette.success.bg.light,
+        };
     }
-    if (staleness === "WARN") {
-      return {
-        fill: Palette.secondary.dark,
-        background: Palette.secondary.bg.light,
-      };
-    }
-    return {
-      fill: Palette.success.dark,
-      background: Palette.success.bg.light,
-    };
   }, [staleness]);
 
   return (

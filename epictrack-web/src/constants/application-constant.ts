@@ -138,6 +138,8 @@ export enum StalenessEnum {
   CRITICAL = "CRITICAL",
   WARN = "WARN",
   GOOD = "GOOD",
+  RESOLVED = "RESOLVED",
+  INACTIVE = "INACTIVE",
 }
 
 export const ISSUES_STALENESS_THRESHOLD = {

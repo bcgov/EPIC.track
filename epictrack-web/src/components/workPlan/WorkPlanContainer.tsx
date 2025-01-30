@@ -21,7 +21,7 @@ import About from "./about";
 import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
 import { StalenessEnum } from "constants/application-constant";
-import { calculateStaleness } from "./utils";
+import { issueListMaxStaleness, calculateStaleness } from "./utils";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 const ExclamationSmallIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
@@ -53,35 +53,7 @@ const WorkPlanContainer = () => {
     ctx.statuses.length === 0 ||
     isStatusOutOfDate(ctx.statuses.find((status) => status.is_approved));
 
-  const mapIssues = (issues: WorkIssue[]): StalenessEnum | null => {
-    const stalenessPriority = [
-      StalenessEnum.GOOD,
-      StalenessEnum.WARN,
-      StalenessEnum.CRITICAL,
-    ];
-
-    // Helper function to get the "highest" staleness
-    const getHigherStaleness = (
-      a: StalenessEnum,
-      b: StalenessEnum
-    ): StalenessEnum => {
-      return stalenessPriority.indexOf(a) > stalenessPriority.indexOf(b)
-        ? a
-        : b;
-    };
-
-    if (issues.length === 0) return StalenessEnum.GOOD; // No issues to check
-
-    const topStaleness = issues.reduce((currentHighest, issue) => {
-      const staleness = calculateStaleness(issue);
-      console.info("stalenessTab:", staleness);
-      return getHigherStaleness(currentHighest, staleness);
-    }, StalenessEnum.GOOD); // Start with GOOD as the "lowest" level
-
-    return topStaleness;
-  };
-
-  const highestStaleness = mapIssues(issues) ?? StalenessEnum.GOOD; // Fallback to GOOD
+  const highestStaleness = issueListMaxStaleness(issues);
 
   console.info("highestStaleness:", highestStaleness);
 
