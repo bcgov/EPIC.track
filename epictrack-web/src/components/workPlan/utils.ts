@@ -96,7 +96,6 @@ export const issueListMaxStaleness = (issues: WorkIssue[]): StalenessEnum => {
 
   const topStaleness = issues.reduce((currentHighest, issue) => {
     const staleness = calculateStaleness(issue);
-    console.info("stalenessTab:", staleness);
     return getHigherStaleness(currentHighest, staleness);
   }, StalenessEnum.GOOD); // Start with GOOD as the "lowest" level
 
