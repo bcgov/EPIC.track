@@ -134,10 +134,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(Event, Event.work_id == Work.id)
             .outerjoin(
                 next_referral_event_query,
-                and_(
-                    Event.work_id == next_referral_event_query.c.work_id,
-                    Event.anticipated_date == next_referral_event_query.c.min_anticipated_date,
-                ),
+                Event.id == next_referral_event_query.c.next_referral_event_id,
             )
             .outerjoin(
                 next_decision_event_query,
@@ -642,11 +639,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
         return next_pecp_query
 
     def _get_referral_event_query(self, start_date):
-        """Create and return the subquery to find next referral event based on start date"""
-        return (
+        """Create and return the subquery for the next referral event for a Work"""
+        referral_event_subquery = (
             db.session.query(
                 Event.work_id,
-                func.min(Event.anticipated_date).label("min_anticipated_date"),
+                Event.id.label("next_referral_event_id"),
+                func.coalesce(Event.actual_date, Event.anticipated_date).label("next_referral_date"),
+                func.row_number().over(
+                    partition_by=Event.work_id,
+                    order_by=(
+                        func.coalesce(Event.actual_date, Event.anticipated_date),
+                        Event.id,
+                    ),
+                ).label("row_num") # Assign 1 to the earliest event per work_id
             )
             .join(
                 EventConfiguration,
@@ -656,9 +661,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 )
             )
             .filter(
-                func.coalesce(Event.actual_date, Event.anticipated_date) >= start_date,
+                func.coalesce(Event.actual_date, Event.anticipated_date) > start_date,
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
             )
-            .group_by(Event.work_id)
+            .subquery()
+        )
+        # Filter to get only the first referral event
+        return (
+            db.session.query(
+                referral_event_subquery.c.work_id,
+                referral_event_subquery.c.next_referral_event_id
+            )
+            .filter(referral_event_subquery.c.row_num == 1)
             .subquery()
         )
 
