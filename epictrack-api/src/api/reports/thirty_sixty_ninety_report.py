@@ -36,6 +36,7 @@ from api.schemas import response as res
 from api.utils.constants import CANADA_TIMEZONE
 from api.utils.enums import StalenessEnum
 from api.utils.util import process_data
+from api.utils.draftjs_extractor import draftjs_extractor
 
 from .report_factory import ReportFactory
 
@@ -202,6 +203,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
         # Get work issues for work first event
         data = self._update_work_issues(data)
         data = self._resolve_multiple_events(data)
+        data = self._format_notes(data)
         response = {
             "30": [],
             "60": [],
@@ -776,6 +778,15 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 'items': sorted_events
             })
         return resolved_data
+
+    def _format_notes(self, data: List[Dict]) -> List[Dict]:
+        for group in data:
+            events = group['items']
+            for event in events:
+                event_notes = event.get("decision_information", "")
+                if event_notes:
+                    event["decision_information"] = draftjs_extractor(event_notes)
+        return data
 
     def _update_staleness(self, data: dict, report_date: datetime) -> dict:
         """Calculate the staleness based on report date"""
