@@ -1,4 +1,3 @@
-import React from "react";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 import { createContext } from "react";
 import { WORKPLAN_TAB } from "../constants";

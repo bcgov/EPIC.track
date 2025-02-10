@@ -52,7 +52,7 @@ class TaskService:
         work_phase = WorkPhase.find_by_id(work_phase_id)
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EXTENDED_EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
@@ -118,7 +118,7 @@ class TaskService:
         work_phase = WorkPhase.find_by_id(data.get("work_phase_id"))
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.CREATE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
@@ -148,7 +148,7 @@ class TaskService:
         work_phase = WorkPhase.find_by_id(data.get("work_phase_id"))
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
@@ -217,7 +217,7 @@ class TaskService:
         work_phase = WorkPhase.find_by_id(params.get("work_phase_id"))
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.CREATE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_phase.work_id)
@@ -338,7 +338,7 @@ class TaskService:
         """Bulk update task events"""
         work_id = data.get("work_id")
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
@@ -362,7 +362,7 @@ class TaskService:
     def bulk_delete_tasks(cls, task_ids: List, work_id: int):
         """Mark tasks as deleted"""
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.CREATE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)

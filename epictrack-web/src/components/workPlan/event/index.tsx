@@ -1,4 +1,3 @@
-import React from "react";
 import { EventProvider } from "./EventContext";
 import EventList from "./EventList";
 

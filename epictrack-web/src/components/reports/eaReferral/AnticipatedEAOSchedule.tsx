@@ -81,7 +81,6 @@ export default function AnticipatedEAOSchedule() {
       if (reportData.status === 200) {
         const reports = reportData.data as ReportData;
         setReports(reports.data);
-        console.info("ReportData:", reports);
       }
 
       if (reportData.status === 204) {
@@ -209,13 +208,13 @@ export default function AnticipatedEAOSchedule() {
               const groupName = report.group;
               return !selectedTypes.includes(groupName);
             })
-            .map((group, _) => {
+            .map((group, index) => {
               const groupName = group.group;
               const items = group.items;
-              console.info("group:", group);
               return (
                 <>
                   <Accordion
+                    key={index}
                     sx={{ mt: "15px", bgcolor: "rgba(0, 0, 0, .03)" }}
                     square
                     disableGutters
@@ -228,7 +227,6 @@ export default function AnticipatedEAOSchedule() {
                     </AccordionSummary>
                     <AccordionDetails>
                       {items.map((item, itemIndex) => {
-                        console.log("item:", item);
                         return (
                           <Accordion key={itemIndex} elevation={0}>
                             <AccordionSummary
@@ -292,29 +290,6 @@ export default function AnticipatedEAOSchedule() {
                                       <TableCell>EA Type</TableCell>
                                       <TableCell>{item["ea_type"]}</TableCell>
                                     </TableRow>
-                                    {item["ministry"] && (
-                                      <TableRow>
-                                        {item["responsible_minister"] ? (
-                                          <>
-                                            <TableCell>
-                                              Responsible Minister
-                                            </TableCell>
-                                            <TableCell>
-                                              {item["responsible_minister"]}
-                                            </TableCell>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <TableCell>
-                                              Responsible Ministry
-                                            </TableCell>
-                                            <TableCell>
-                                              {item["ministry"]}
-                                            </TableCell>
-                                          </>
-                                        )}
-                                      </TableRow>
-                                    )}
                                     <TableRow>
                                       <TableCell>
                                         Decision to be made by

@@ -1,17 +1,6 @@
 import React from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Menu,
-  PopoverOrigin,
-  SxProps,
-  Tooltip,
-} from "@mui/material";
-import { Palette } from "../../../styles/theme";
-import { ETCaption2 } from "..";
+import { Button, PopoverOrigin, SxProps } from "@mui/material";
 import { UserMenuProps } from "./type";
-import CopyButton from "../CopyButton";
 import UserMenu from "./UserMenu";
 
 const menuItemWrapper: SxProps = {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import TrackDialog from "components/shared/TrackDialog";
 import { Project } from "models/project";
 import projectService from "services/projectService/projectService";

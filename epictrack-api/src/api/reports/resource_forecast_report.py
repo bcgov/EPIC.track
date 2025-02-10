@@ -53,23 +53,23 @@ class EAResourceForeCastReport(ReportFactory):
     def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
-            "work_title",
             "capital_investment",
-            "ea_type",
-            "project_phase",
             "ea_act",
-            "iaac",
-            "sub_type",
-            "type",
+            "ea_type_label",
+            "ea_type_sort_order",
+            "ea_type",
             "eao_team",
             "env_region",
-            "nrs_region",
-            "work_id",
-            "ea_type_label",
-            "sector(sub)",
-            "ea_type_sort_order",
             "fte_positions_construction",
             "fte_positions_operation",
+            "iaac",
+            "nrs_region",
+            "project_phase",
+            "sector(sub)",
+            "sub_type",
+            "type",
+            "work_id",
+            "work_title",
             "work_type_id",
         ]
         group_by = "work_id"
@@ -117,7 +117,6 @@ class EAResourceForeCastReport(ReportFactory):
             ],
             "EAO RESOURCING": [
                 {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.040},
-                {"data_key": "cairt_lead", "label": "FN CAIRT LEAD", "width": 0.0486},
                 {"data_key": "eao_team", "label": "TEAM", "width": 0.028},
                 {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.045},
                 {
@@ -368,8 +367,7 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._filter_data(data)
         for values in data:
             work_data = values[0]
-            staffs, cairt_lead, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
-            work_data["cairt_lead"] = cairt_lead
+            staffs, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
             work_data["responsible_epd"] = responsible_epd
             work_data["work_lead"] = work_lead
             work_data["work_team_members"] = ", ".join(staffs)
@@ -386,7 +384,7 @@ class EAResourceForeCastReport(ReportFactory):
         self._set_month_labels(report_date)
         works = self._fetch_data(report_date)
         work_ids = set((work.work_id for work in works))
-        current_app.logger.info(f"Work IDs: {work_ids}")
+        current_app.logger.debug(f"Work IDs: {work_ids}")
         works = super()._format_data(works)
         events = self._get_events(work_ids)
         current_app.logger.debug(f"Events: {events}")
@@ -434,19 +432,21 @@ class EAResourceForeCastReport(ReportFactory):
                 event_to_show = {"event_phase": "", "phase_color": "#FFFFFF"}
                 work_events = start_events.get(work_id, [])
                 sorted_events = sorted(work_events, key=lambda x: x["phase_end"].date())
-                for event in sorted_events:
+                for i, event in enumerate(sorted_events):
                     phase_start = event["phase_start"].date()
                     phase_end = event["phase_end"].date()
                     if phase_start <= month_end and phase_end >= month_start:
                         if phase_end.month == month_start.month and 1 <= phase_end.day <= 14:
-                            # If this is the last phase show it as long as it persists at least 5 days into the month
-                            if event == sorted_events[-1] and phase_end.day > 4:
+                            # If this is the last phase always show it
+                            if i == len(sorted_events) - 1:
                                 event_to_show = event
                                 break
                             # Show the next phase if the phase ends in the early part of the month
-                            next_event = next(
-                                (e for e in sorted_events if e["phase_start"].date() > phase_end),
-                                None,
+                            next_event = (
+                                sorted_events[i + 1]
+                                if i + 1 < len(sorted_events)
+                                and sorted_events[i + 1]["phase_start"].date() >= phase_end
+                                else None
                             )
                             event_to_show = next_event or {"event_phase": "", "phase_color": "#FFFFFF"}
                         else:
@@ -732,7 +732,6 @@ class EAResourceForeCastReport(ReportFactory):
     def _get_work_team_members(self, work_id) -> Tuple[List[str], str]:
         """Fetch and return team members by work id"""
         staffs = []
-        cairt_lead = ""
         responsible_epd = ""
         work_lead = ""
         work_team_members = (
@@ -764,13 +763,11 @@ class EAResourceForeCastReport(ReportFactory):
         for work_team_member in work_team_members:
             first_name = work_team_member.first_name
             last_name = work_team_member.last_name
-            if work_team_member.role_id == RoleEnum.FN_CAIRT.value:
-                cairt_lead = f"{first_name} {last_name}"
-            elif work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
+            if work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
                 staffs.append({"first_name": first_name, "last_name": last_name})
         staffs = sorted(staffs, key=lambda x: x["last_name"])
         staffs = [f"{x['first_name']} {x['last_name']}" for x in staffs]
-        return staffs, cairt_lead, responsible_epd, work_lead
+        return staffs, responsible_epd, work_lead
 
     def _get_styles(self) -> Tuple[dict, dict]:
         """Returns basic styles needed for the PDF report."""
@@ -834,7 +831,8 @@ class EAResourceForeCastReport(ReportFactory):
                 month_cell_start = len(cells)
                 for month_index, month in enumerate(self.month_labels):
                     month_data = next(
-                        x for x in project["months"] if x["label"] == month
+                        (x for x in project.get("months", []) if x["label"] == month),
+                        {"phase": "", "color": "#FFFFFF"}  # Default
                     )
                     row.append(Paragraph(month_data["phase"], body_text_style))
                     cell_index = month_cell_start + month_index
@@ -849,7 +847,8 @@ class EAResourceForeCastReport(ReportFactory):
                         )
                     )
                 if "referral_timing" not in self.excluded_items:
-                    row.append(Paragraph(project["referral_timing"], body_text_style))
+                    referral_timing = project.get("referral_timing") or ""
+                    row.append(Paragraph(referral_timing, body_text_style))
                 table_data.append(row)
                 row_index += 1
         return table_data, styles
@@ -857,7 +856,11 @@ class EAResourceForeCastReport(ReportFactory):
     def _handle_months(self, work_data) -> dict:
         """Update the work data to include relevant month information."""
         referral_date = self._get_referral_timing(work_data["work_id"])
-        work_data["referral_timing"] = f"{referral_date:%B %d, %Y}"
+        if referral_date:
+            work_data["referral_timing"] = f"{referral_date:%Y-%m-%d}"
+        else:
+            current_app.logger.warning(f"No referral date found for work_id: {work_data['work_id']}")
+            work_data["referral_timing"] = None
         months = []
         for month in self.month_labels:
             month_data = work_data.pop(month)

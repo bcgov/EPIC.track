@@ -1,7 +1,5 @@
-import React from "react";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import { styled } from "@mui/material";
-import { Palette } from "../../../../styles/theme";
 import { AccordionStyledProps } from "../type";
 
 const ETAccordionDetails = styled(AccordionDetails)(
@@ -13,9 +11,6 @@ const ETAccordionDetails = styled(AccordionDetails)(
     flexShrink: 0,
     padding: "1rem 1.5rem",
     width: "100%",
-    // borderRadius: "4px",
-    // border: `1px solid ${Palette.primary.main}`,
-    // borderTop: props.expanded ? "0px" : "1px",
   })
 );
 

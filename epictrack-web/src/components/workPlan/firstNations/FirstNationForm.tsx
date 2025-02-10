@@ -2,14 +2,7 @@ import React from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  FormControlLabel,
-  Grid,
-  TextField,
-  Stack,
-  Tooltip,
-  Box,
-} from "@mui/material";
+import { Grid, TextField, Tooltip, Box } from "@mui/material";
 import { ETFormLabel } from "../../shared";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { showNotification } from "../../shared/notificationProvider";

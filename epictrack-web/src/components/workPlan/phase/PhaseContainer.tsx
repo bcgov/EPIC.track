@@ -8,7 +8,6 @@ import { Palette } from "../../../styles/theme";
 import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
-import { WORKPLAN_TAB } from "../constants";
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);

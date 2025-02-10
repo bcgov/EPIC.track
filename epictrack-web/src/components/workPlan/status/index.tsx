@@ -1,4 +1,3 @@
-import React from "react";
 import StatusContainer from "./StatusContainer";
 import { StatusProvider } from "./StatusContext";
 

@@ -12,7 +12,6 @@ import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSe
 import { MasterContext } from "../shared/MasterContext";
 import { PIPOrgType } from "../../models/pipOrgType";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
-import RichTextEditor from "../shared/richTextEditor";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import ControlledRichTextEditor from "components/shared/controlledInputComponents/ControlledRichTextEditor";

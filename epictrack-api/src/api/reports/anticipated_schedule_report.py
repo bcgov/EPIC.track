@@ -44,55 +44,53 @@ class EAAnticipatedScheduleReport(ReportFactory):
     def __init__(self, filters, color_intensity):
         """Initialize the ReportFactory"""
         data_keys = [
-            "work_id",
-            "event_id",
-            "work_issues",
+            "actual_date",
+            "additional_info",
+            "amendment_title",
+            "anticipated_date_label",
+            "anticipated_decision_date",
+            "category_type",
             "date_updated",
-            "project_name",
-            "proponent",
-            "region",
-            "location",
+            "decision_by",
             "ea_act",
             "ea_type",
-            "substitution_act",
-            "project_description",
-            "report_description",
-            "anticipated_decision_date",
-            "additional_info",
-            "responsible_minister",
-            "ministry",
-            "referral_date",
-            "actual_date",
-            "anticipated_date_label",
-            "decision_by",
-            "next_pecp_date",
-            "next_pecp_title",
-            "next_pecp_short_description",
-            "milestone_type",
-            "category_type",
+            "event_id",
             "event_name",
-            "notes",
+            "group",
+            "location",
+            "milestone_type",
+            "next_event_name",
+            "next_pecp_date",
             "next_pecp_number_of_days",
             "next_pecp_phase_name",
-            "amendment_title",
+            "next_pecp_short_description",
+            "next_pecp_title",
+            "notes",
+            "project_description",
+            "project_name",
+            "proponent",
+            "referral_date",
+            "region",
+            "report_description",
+            "substitution_act",
+            "work_id",
+            "work_issues",
             "work_type_id",
-            "work_type"
+            "work_type",
         ]
-        group_by = "work_type"
+        group_by = "group"
         group_order = [
-            "Assessment",
-            "Typical Amendment",
-            "Complex Amendment",
-            "Simple Amendment",
-            "32(5) Amendment",
-            "Exemption Order",
-            "Project Notification",
-            "Minister's Designation",
-            "CEAO's Designation",
-            "EAC Extension",
-            "EAC/Order Transfer",
-            "Substantial Start Decision",
-            "EAC/Order Cancellation",
+            "EA Certificate Referrals",
+            "Amendment Decisions",
+            "Exemption Order Decisions",
+            "EA Readiness Decisions",
+            "Minister's Designation Decisions",
+            "Project Notification Decisions",
+            "Transition Order Decisions",
+            "EAC Extension Request Decisions",
+            "EAC/Order Transfer Request Decisions",
+            "Substantial Start Decisions",
+            "EAC/Order Cancellation Decisions",
         ]
         item_sort_key = "referral_date"
         template_name = "anticipated_schedule.docx"
@@ -116,6 +114,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         staff_minister = aliased(Staff)
 
         next_pecp_query = self._get_next_pcp_query(start_date)
+        next_event_query = self._get_next_event_query(report_date)
         next_referral_event_query = self._get_referral_event_query(start_date)
         next_decision_event_query = self._get_decision_event_query(start_date)
         latest_status_updates = self._get_latest_status_update_query()
@@ -125,9 +124,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
         formatted_phase_name = self._get_formatted_phase_name()
         formatted_work_type = self._get_formatted_work_type_name()
         formatted_anticipated_date = self._get_formatted_date_label(formatted_work_type, formatted_phase_name)
+        group_column = self._get_grouped_column(formatted_work_type)
         anticipated_date_column = self._get_anticipated_date_column(formatted_anticipated_date)
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
-        responsible_minister_column = self._get_responsible_minister_column(staff_minister)
 
         current_app.logger.debug(f"Executing query for {self.report_title} report")
         results_qry = (
@@ -135,10 +134,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(Event, Event.work_id == Work.id)
             .outerjoin(
                 next_referral_event_query,
-                and_(
-                    Event.work_id == next_referral_event_query.c.work_id,
-                    Event.anticipated_date == next_referral_event_query.c.min_anticipated_date,
-                ),
+                Event.id == next_referral_event_query.c.next_referral_event_id,
             )
             .outerjoin(
                 next_decision_event_query,
@@ -190,6 +186,13 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     next_pecp_query.c.work_id == Work.id,
                 ),
             )
+            .outerjoin(
+                next_event_query,
+                and_(
+                    next_event_query.c.work_id == Work.id,
+                    next_event_query.c.rn == 1
+                ),
+            )
             # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
             .filter(
                 Work.is_active.is_(True),
@@ -209,43 +212,45 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value
                     ),
                     and_(
-                        Work.work_type_id == 5, # Exemption Order
+                        Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
                         EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
                     ),
                     and_(
-                        Work.work_type_id == 6, # Assessment
+                        Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
                         EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
                         EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
                     ),
                     and_(
-                        Work.work_type_id == 7, # Ammendment
+                        Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "Delegation of Amendment Decision",
                         EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
                     ),
                     and_(
-                        Work.work_type_id == 9, # EAC Extension
+                        Work.work_type_id == WorkTypeEnum.EAC_EXTENSION.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.event_type_id == EventTypeEnum.ADM.value
                     ),
                     and_(
-                        Work.work_type_id == 10, # Substantial Start Decision
+                        Work.work_type_id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "Delegation of SubStart Decision to Minister",
                         EventConfiguration.event_type_id == EventTypeEnum.ADM.value
                     ),
                     and_(
-                        Work.work_type_id == 11, # EAC/Order Transfer
+                        Work.work_type_id == WorkTypeEnum.EAC_ORDER_TRANSFER.value,
                         EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
                         EventConfiguration.name != "Delegation of Transfer Decision to Minister",
                         EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
                     )
                 ),
                 Work.is_deleted.is_(False),
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
                 Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
                 # Filter out specific WorkPhase names
                 ~WorkPhase.name.in_(exclude_phase_names)
@@ -255,6 +260,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Work.id.label("work_id"),
                 Work.work_type_id.label("work_type_id"),
                 formatted_work_type.label("work_type"),
+                group_column.label("group"),
                 case(
                         (
                             and_(
@@ -282,14 +288,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("anticipated_decision_date"),
                 latest_status_updates.c.description.label("additional_info"),
-                case(
-                    (
-                        Ministry.name != "Not Applicable",
-                        Ministry.name
-                    ),
-                    else_=""
-                ).label("ministry"),
-                responsible_minister_column,
                 (
                     Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
                 ).label("referral_date"),
@@ -315,6 +313,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 next_pecp_query.c.notes.label("next_pecp_short_description"),
                 next_pecp_query.c.phase_name.label("next_pecp_phase_name"),
                 func.coalesce(next_pecp_query.c.number_of_days, 0).label("next_pecp_number_of_days"),
+                func.coalesce(
+                    next_event_query.c.name,
+                    "None"
+                ).label("next_event_name")
             )
         )
         results = results_qry.all()
@@ -444,6 +446,34 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 else_=WorkType.name,
             ).label("ea_type")
 
+    def _get_grouped_column(self, formatted_work_type):
+        """Returns expression to create a custom column to group by"""
+        return case(
+            (
+                WorkType.id == WorkTypeEnum.ASSESSMENT.value,
+                case(
+                    (
+                        EventConfiguration.name == "Project Transitioning FROM the EA Act (2002)",
+                        "Transition Order Decisions"
+                    ),
+                    (
+                        or_(
+                            PhaseCode.name == "Readiness Decision",
+                            PhaseCode.name == "Further Readiness Decision",
+                            PhaseCode.name == "Termination Decision"
+                        ),
+                        "EA Readiness Decisions"
+                    ),
+                    else_="EA Certificate Referrals"
+                ),
+            ),
+            (
+                WorkType.id == WorkTypeEnum.AMENDMENT.value,
+                "Amendment Decisions"
+            ),
+            else_=func.concat(formatted_work_type, "s")
+        )
+
     def _get_formatted_date_label(self, formatted_work_type, formatted_phase_name):
         """Returns an expression for the date label"""
         return case(
@@ -488,7 +518,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         # Case for 32.5
                         (
                             func.substring(PhaseCode.name, r"\((.*?)\)") == "32.5",
-                            "32(5) Amendment"
+                            "s.32(5) Amendment"
                         ),
                         else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
                     )
@@ -505,29 +535,53 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         # Case for 32.5
                         (
                             func.substring(PhaseCode.name, r"\((.*?)\)") == "32.5",
-                            "32(5) Amendment"
+                            "s.32(5) Amendment Decision"
                         ),
-                        else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment"),
+                        else_=func.concat(func.substring(PhaseCode.name, r"\((.*?)\)"), " Amendment Decision"),
                     )
                 ),
-                else_=WorkType.name
+                (
+                    WorkType.id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value,
+                    "Substantial Start Decision"
+                ),
+                (
+                    or_(
+                        WorkType.id == WorkTypeEnum.EAC_EXTENSION.value,
+                        WorkType.id == WorkTypeEnum.EAC_ORDER_TRANSFER.value
+                    ),
+                    func.concat(WorkType.name, " Request Decision")
+                ),
+                else_=func.concat(WorkType.name, " Decision")
         ).label("formatted_work_type")
 
-    def _get_responsible_minister_column(self, staff_minister):
-        """Returns an expression for the responsible minister"""
-        return case(
-                (
-                    Ministry.name != "Not Applicable",
-                    case(
-                        (
-                            func.concat(staff_minister.first_name, staff_minister.last_name) != "",
-                            func.concat(staff_minister.first_name, " ", staff_minister.last_name)
-                        ),
-                        else_=""
-                    )
-                ),
-                else_=None,
-        ).label("responsible_minister")
+    def _get_next_event_query(self, start_date):
+        """
+        Create and return the subquery for the next event for a Work.
+
+        The next event is chosen based on the earliest anticipated_date or actual_date after the start_date
+        If there are two events for the same work with the same date, then event_id determines the first
+        """
+        next_event_query = (
+            db.session.query(
+                Event.work_id,
+                Event.name.label("name"),
+                func.coalesce(Event.actual_date, Event.anticipated_date).label("next_event_date"),
+                func.row_number().over(
+                    partition_by=Event.work_id,
+                    order_by=(
+                        func.coalesce(Event.actual_date, Event.anticipated_date),
+                        Event.id,
+                    ),
+                ).label("rn") # row number label
+            )
+            .filter(
+                func.coalesce(Event.actual_date, Event.anticipated_date) > start_date,
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
+            )
+            .subquery()
+        )
+        return next_event_query
 
     def _get_next_pcp_query(self, start_date):
         """Create and return the subquery for next PCP event based on start date"""
@@ -576,6 +630,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EventConfiguration.work_phase_id == WorkPhase.id
             )
             .filter(
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
                 Event.event_configuration_id.in_(pecp_configuration_ids),
             )
             .subquery()
@@ -583,11 +639,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
         return next_pecp_query
 
     def _get_referral_event_query(self, start_date):
-        """Create and return the subquery to find next referral event based on start date"""
-        return (
+        """Create and return the subquery for the next referral event for a Work"""
+        referral_event_subquery = (
             db.session.query(
                 Event.work_id,
-                func.min(Event.anticipated_date).label("min_anticipated_date"),
+                Event.id.label("next_referral_event_id"),
+                func.coalesce(Event.actual_date, Event.anticipated_date).label("next_referral_date"),
+                func.row_number().over(
+                    partition_by=Event.work_id,
+                    order_by=(
+                        func.coalesce(Event.actual_date, Event.anticipated_date),
+                        Event.id,
+                    ),
+                ).label("row_num") # Assign 1 to the earliest event per work_id
             )
             .join(
                 EventConfiguration,
@@ -597,9 +661,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 )
             )
             .filter(
-                func.coalesce(Event.actual_date, Event.anticipated_date) >= start_date,
+                func.coalesce(Event.actual_date, Event.anticipated_date) > start_date,
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
             )
-            .group_by(Event.work_id)
+            .subquery()
+        )
+        # Filter to get only the first referral event
+        return (
+            db.session.query(
+                referral_event_subquery.c.work_id,
+                referral_event_subquery.c.next_referral_event_id
+            )
+            .filter(referral_event_subquery.c.row_num == 1)
             .subquery()
         )
 

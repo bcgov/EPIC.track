@@ -9,7 +9,7 @@ import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../constants/application-constant";
-import { Else, If, Switch, Case, Then, When, Default } from "react-if";
+import { Switch, Case, When, Default } from "react-if";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { IssuesContext } from "../IssuesContext";

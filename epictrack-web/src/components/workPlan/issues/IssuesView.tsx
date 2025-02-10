@@ -12,7 +12,7 @@ import IssueDialogs from "./Dialogs";
 import { Restricted, hasPermission } from "components/shared/restricted";
 import { useAppSelector } from "hooks";
 import { ROLES, StalenessEnum } from "constants/application-constant";
-import { calculateStaleness } from "../utils";
+import { issueListMaxStaleness, calculateStaleness } from "../utils";
 import WarningBox from "../../shared/warningBox";
 
 const IssuesView = () => {
@@ -60,6 +60,8 @@ const IssuesView = () => {
     return <IssuesViewSkeleton />;
   }
 
+  const maxStaleness = issueListMaxStaleness(issues);
+
   return (
     <>
       <When condition={issues.length === 0}>
@@ -75,8 +77,8 @@ const IssuesView = () => {
       </When>
       <When
         condition={
-          "staleness === StalenessEnum.CRITICAL" ||
-          "staleness === StalenessEnum.WARN"
+          maxStaleness === StalenessEnum.CRITICAL ||
+          maxStaleness === StalenessEnum.WARN
         }
       >
         <Box sx={{ paddingBottom: "16px" }}>

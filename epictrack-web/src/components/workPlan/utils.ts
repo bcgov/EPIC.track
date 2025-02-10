@@ -8,7 +8,7 @@ import dateUtils from "../../utils/dateUtils";
 import { useContext } from "react";
 import { useAppSelector } from "hooks";
 import { WorkplanContext } from "./WorkPlanContext";
-
+import { WorkIssue } from "../../models/Issue";
 // Get the active team members
 export const useActiveTeam = () => {
   const { team } = useContext(WorkplanContext);
@@ -41,8 +41,17 @@ export const useUserHasRole = () => {
 export const calculateStaleness = (issue: {
   updates: { posted_date: string }[];
   type?: string;
+  is_active: boolean;
+  is_resolved: boolean;
 }) => {
   const now = moment();
+  // Check if the issue is inactive or resolved
+  if (issue.is_resolved) {
+    return StalenessEnum.RESOLVED;
+  }
+  if (!issue.is_active) {
+    return StalenessEnum.INACTIVE;
+  }
   // Check if there are no updates
   if (!issue.updates || issue.updates.length === 0) {
     return StalenessEnum.GOOD; // No update, consider it "GOOD"
@@ -63,4 +72,32 @@ export const calculateStaleness = (issue: {
   } else {
     return StalenessEnum.GOOD;
   }
+};
+
+// Helper function to get stalest level in issue list
+export const issueListMaxStaleness = (issues: WorkIssue[]): StalenessEnum => {
+  const stalenessPriority = [
+    StalenessEnum.GOOD,
+    StalenessEnum.INACTIVE,
+    StalenessEnum.RESOLVED,
+    StalenessEnum.WARN,
+    StalenessEnum.CRITICAL,
+  ];
+
+  // Helper function to get the "highest" staleness
+  const getHigherStaleness = (
+    a: StalenessEnum,
+    b: StalenessEnum
+  ): StalenessEnum => {
+    return stalenessPriority.indexOf(a) > stalenessPriority.indexOf(b) ? a : b;
+  };
+
+  if (issues.length === 0) return StalenessEnum.GOOD; // No issues to check
+
+  const topStaleness = issues.reduce((currentHighest, issue) => {
+    const staleness = calculateStaleness(issue);
+    return getHigherStaleness(currentHighest, staleness);
+  }, StalenessEnum.GOOD); // Start with GOOD as the "lowest" level
+
+  return topStaleness;
 };

@@ -1,10 +1,10 @@
-import { Button, Grid, Tooltip } from "@mui/material";
+import { Button, Grid } from "@mui/material";
 import React, { useMemo } from "react";
 import { StaffWorkRole } from "../../../models/staff";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
-import { ETGridTitle, IButton } from "../../shared";
+import { ETGridTitle } from "../../shared";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { showNotification } from "../../shared/notificationProvider";
 import {
@@ -20,13 +20,7 @@ import NoDataEver from "../../shared/NoDataEver";
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
-import { WorkStaffRole } from "models/role";
 import { unEditableTeamMembers } from "./constants";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import Icons from "../../icons";
-import { IconProps } from "components/icons/type";
-
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const TeamList = () => {
   const [roles, setRoles] = React.useState<string[]>([]);

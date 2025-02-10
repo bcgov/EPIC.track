@@ -1,4 +1,4 @@
-import React, { FC } from "react";
+import React from "react";
 import { Checkbox, CheckboxProps } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
 

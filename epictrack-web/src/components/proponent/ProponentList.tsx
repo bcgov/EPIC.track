@@ -1,17 +1,8 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Grid,
-  Stack,
-  Typography,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
+import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETCaption2, ETGridTitle, ETPageContainer, IButton } from "../shared";
+import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
 import ProponentForm from "./ProponentForm";
 import { Staff } from "../../models/staff";
 import staffService from "../../services/staffService/staffService";
@@ -32,11 +23,6 @@ import { Palette } from "styles/theme";
 import { debounce } from "lodash";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
-
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 

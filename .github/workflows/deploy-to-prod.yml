@@ -1,12 +1,7 @@
-name: Deploy
+name: Deploy to Prod
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: "Environment (test/prod)"
-        required: true
-        default: "test"
 
 defaults:
   run:
@@ -17,7 +12,7 @@ jobs:
   deployment:
     runs-on: ubuntu-20.04
     environment:
-      name: ${{ github.event.inputs.environment }}
+      name: prod
     steps:
       - uses: actions/checkout@v2
 
@@ -31,7 +26,6 @@ jobs:
           oc login --server=${{secrets.OPENSHIFT_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT_SA_TOKEN}}
 
       - name: Backup Current Prod
-        if: ${{ github.event.inputs.environment == 'prod' }}
         shell: bash
         run: |
           oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
@@ -43,8 +37,8 @@ jobs:
         shell: bash
         run: |
           oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
-          oc tag epictrack-api:latest epictrack-api:${{ github.event.inputs.environment }}
-          oc tag epictrack-web:latest epictrack-web:${{ github.event.inputs.environment }}
+          oc tag epictrack-api:test epictrack-api:prod
+          oc tag epictrack-web:test epictrack-web:prod
           
-          oc rollout status dc/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ github.event.inputs.environment }} -w
-          oc rollout status dc/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ github.event.inputs.environment }} -w
+          oc rollout status dc/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod -w
+          oc rollout status dc/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod -w

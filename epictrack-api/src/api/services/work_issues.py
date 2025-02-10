@@ -80,13 +80,13 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Add a new description to the existing Issue."""
         work_issues = WorkIssuesModel.find_by_params({"work_id": work_id,
                                                       "id": issue_id})
+        if not work_issues:
+            raise ResourceNotFoundError("Work issue not found. It may be inactive.")
+
         work_issue = work_issues[0]
         work_issue_id = work_issue.id
 
         cls._check_create_auth(work_id)
-
-        if not work_issues:
-            raise ResourceNotFoundError("Work Issues not found")
 
         cls._check_update_date_validity(work_issue, data)
 
@@ -102,7 +102,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     def _check_create_auth(cls, work_id):
         """Check if user has create role or is team member"""
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.CREATE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
@@ -176,7 +176,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
     def _check_edit_auth(cls, work_id):
         """Check if user has edit role or is team member"""
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
@@ -194,7 +194,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if not issue_update:
             raise ResourceNotFoundError("Issue Description doesnt exist")
 
-        cls._check_edit_update_auth(work_issue.id, issue_update)
+        cls._check_edit_update_auth(work_issue.work_id, issue_update)
         cls._check_update_date_validity(work_issue, issue_update_data, issue_update.id)
 
         issue_update.description = issue_update_data.get('description')

@@ -1,23 +1,13 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Grid, IconButton, Tooltip } from "@mui/material";
+import { Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
 import workService from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import {
-  ETGridTitle,
-  ETPageContainer,
-  ETParagraph,
-  IButton,
-} from "components/shared";
+import { ETGridTitle, ETPageContainer, ETParagraph } from "components/shared";
 import { WorkStaffRole } from "models/role";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
-
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {

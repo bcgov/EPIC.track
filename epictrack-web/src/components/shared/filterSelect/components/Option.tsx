@@ -1,4 +1,4 @@
-import React, { MouseEventHandler } from "react";
+import React from "react";
 import { components, OptionProps } from "react-select";
 import Checkbox from "@mui/material/Checkbox";
 import { OptionType } from "../type";

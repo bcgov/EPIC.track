@@ -1,4 +1,3 @@
-import React from "react";
 import IssuesContainer from "./IssuesContainer";
 import { IssuesProvider } from "./IssuesContext";
 

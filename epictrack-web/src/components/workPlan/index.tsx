@@ -1,4 +1,3 @@
-import React from "react";
 import { WorkplanProvider } from "./WorkPlanContext";
 import WorkPlanContainer from "./WorkPlanContainer";
 

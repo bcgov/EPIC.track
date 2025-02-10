@@ -1,17 +1,7 @@
-import React from "react";
 import { Grid, Box } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { BAR_COLOR } from "components/insights/utils";
-import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";

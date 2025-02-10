@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { ETCaption3 } from "components/shared";
-import { dayWidth, rowHeight, maxSectionHeight } from "./constants";
+import { dayWidth, rowHeight } from "./constants";
 import moment from "moment";
 import { Palette } from "styles/theme";
 import { useGanttContext } from "./GanttContext";

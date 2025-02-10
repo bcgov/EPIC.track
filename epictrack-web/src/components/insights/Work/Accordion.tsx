@@ -1,7 +1,6 @@
 import React from "react";
 import {
   InsightsAccordion,
-  InsightsAccordionCollapsableDetails,
   InsightsAccordionDetails,
   InsightsAccordionSummary,
 } from "../InsightsAccordion";

@@ -250,7 +250,7 @@ const WorkList = () => {
       },
       ...workRoles,
     ];
-  }, [workLeads, teams, workStaffs, workRoles]);
+  }, [workLeads, teams, workRoles]);
 
   return (
     <MasterTrackTable

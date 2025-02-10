@@ -9,6 +9,7 @@ import { IconProps } from "../../../icons/type";
 import { WorkIssue } from "../../../../models/Issue";
 import IssueSummary from "./Summary";
 import IssueDetails from "./Details";
+import { StalenessEnum } from "constants/application-constant";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 
@@ -28,22 +29,33 @@ const IssueAccordion = ({
   const [expanded, setExpanded] = React.useState<boolean>(defaultOpen);
 
   const iconStyles = React.useMemo(() => {
-    if (staleness === "CRITICAL") {
-      return {
-        fill: Palette.error.dark,
-        background: Palette.error.bg.light,
-      };
+    switch (staleness) {
+      case StalenessEnum.CRITICAL:
+        return {
+          fill: Palette.error.dark,
+          background: Palette.error.bg.light,
+        };
+      case StalenessEnum.WARN:
+        return {
+          fill: Palette.secondary.dark,
+          background: Palette.secondary.bg.light,
+        };
+      case StalenessEnum.INACTIVE:
+        return {
+          fill: Palette.neutral.main,
+          background: Palette.neutral.bg.main,
+        };
+      case StalenessEnum.RESOLVED:
+        return {
+          fill: Palette.neutral.main,
+          background: Palette.neutral.bg.main,
+        };
+      default:
+        return {
+          fill: Palette.success.dark,
+          background: Palette.success.bg.light,
+        };
     }
-    if (staleness === "WARN") {
-      return {
-        fill: Palette.secondary.dark,
-        background: Palette.secondary.bg.light,
-      };
-    }
-    return {
-      fill: Palette.success.dark,
-      background: Palette.success.bg.light,
-    };
   }, [staleness]);
 
   return (

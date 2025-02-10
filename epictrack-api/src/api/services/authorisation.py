@@ -43,7 +43,7 @@ def _has_team_membership(kwargs, team_permitted_roles) -> bool:
     if not work_roles:
         return False
 
-    if Membership.TEAM_MEMBER in team_permitted_roles:
+    if Membership.TEAM_MEMBER.value in team_permitted_roles:
         return bool(work_roles)
 
     membership_ids = {membership.value for membership in Membership}

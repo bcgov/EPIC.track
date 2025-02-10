@@ -1,20 +1,14 @@
-import React from "react";
 import MasterTrackTable from "../MasterTrackTable";
-import { Provider } from "react-redux";
 import { store } from "../../../store";
 import { Box, Button } from "@mui/material";
 import {
   mockStaffs,
   createMockMasterContext,
   generateMockProject,
-  testTableFiltering,
 } from "../../../../cypress/support/common";
-import { defaultFirstNation } from "models/firstNation";
 import { MasterContext } from "components/shared/MasterContext";
 import { ETGridTitle } from "..";
-import TableFilter from "../filterSelect/TableFilter";
 import { MRT_ColumnDef } from "material-react-table";
-import { FirstNation } from "models/firstNation";
 import { MemoryRouter as Router } from "react-router-dom";
 import { Project } from "models/project";
 import { AppConfig } from "config";
