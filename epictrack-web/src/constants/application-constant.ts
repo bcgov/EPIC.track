@@ -127,7 +127,15 @@ export const SPECIAL_FIELDS = Object.freeze({
   WORK: {
     RESPONSIBLE_EPD: "responsible_epd_id",
     WORK_LEAD: "work_lead_id",
+    DECISION_MAKER: "decision_by_id",
+    MINISTRY: "ministry_id",
   },
+});
+
+export const SPECIAL_FIELD_TYPES = Object.freeze({
+  STRING: "STRING",
+  INTEGER: "INTEGER",
+  BOOLEAN: "BOOLEAN",
 });
 
 export const MILESTONE_TYPES = Object.freeze({

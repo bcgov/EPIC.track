@@ -65,6 +65,7 @@ export const SpecialFieldGrid = ({
   description,
   options,
   onSave,
+  fieldValueType
 }: SpecialFieldProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [entries, setEntries] = useState<SpecialField[]>([]);
@@ -298,6 +299,7 @@ export const SpecialFieldGrid = ({
       entity,
       entity_id,
       field_name: fieldName,
+      field_type: fieldValueType,
     };
 
     if (objectId) {

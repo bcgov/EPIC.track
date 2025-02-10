@@ -12,6 +12,7 @@ export interface SpecialFieldBaseProps {
   entity_id: number;
   fieldLabel: string; // Display label
   fieldName: string; // Name in API requests
+  fieldValueType: string; // Type of value
   onSave?: () => any;
 }
 

@@ -54,7 +54,7 @@ from api.models.indigenous_work import IndigenousWork
 from api.models.indigenous_work_queries import find_all_by_project_id
 from api.models.pagination_options import PaginationOptions
 from api.models.phase_code import PhaseVisibilityEnum
-from api.models.special_field import EntityEnum
+from api.models.special_field import EntityEnum, FieldTypeEnum
 from api.models.work_status import WorkStatus
 from api.models.work_type import WorkType
 from api.schemas.request import (
@@ -304,18 +304,44 @@ class WorkService:  # pylint: disable=too-many-public-methods
         # pylint: disable=import-outside-toplevel,cyclic-import
         from api.services.special_field import SpecialFieldService
         work_epd_special_field_data = {
-            "entity": EntityEnum.WORK,
+            "entity": EntityEnum.WORK.value,
             "entity_id": work.id,
             "field_name": "responsible_epd_id",
             "field_value": work.responsible_epd_id,
             "active_from": work.start_date,
+            "field_type": FieldTypeEnum.INTEGER.value,
         }
         work_team_lead_special_field_data = {
-            "entity": EntityEnum.WORK,
+            "entity": EntityEnum.WORK.value,
             "entity_id": work.id,
             "field_name": "work_lead_id",
             "field_value": work.work_lead_id,
             "active_from": work.start_date,
+            "field_type": FieldTypeEnum.INTEGER.value,
+        }
+        ministry_special_field_data = {
+            "entity": EntityEnum.WORK.value,
+            "entity_id": work.id,
+            "field_name": "ministry_id",
+            "field_value": work.ministry_id,
+            "active_from": work.start_date,
+            "field_type": FieldTypeEnum.INTEGER.value,
+        }
+        decision_maker_special_field_data = {
+            "entity": EntityEnum.WORK.value,
+            "entity_id": work.id,
+            "field_name": "decision_by_id",
+            "field_value": work.decision_by_id,
+            "active_from": work.start_date,
+            "field_type": FieldTypeEnum.INTEGER.value,
+        }
+        work_state_special_field_data = {
+            "entity": EntityEnum.WORK.value,
+            "entity_id": work.id,
+            "field_name": "work_state",
+            "field_value": work.work_state.value,
+            "active_from": work.start_date,
+            "field_type": FieldTypeEnum.STRING.value
         }
 
         SpecialFieldService.create_special_field_entry(
@@ -323,6 +349,15 @@ class WorkService:  # pylint: disable=too-many-public-methods
         )
         SpecialFieldService.create_special_field_entry(
             work_team_lead_special_field_data, commit=False
+        )
+        SpecialFieldService.create_special_field_entry(
+            ministry_special_field_data, commit=False
+        )
+        SpecialFieldService.create_special_field_entry(
+            decision_maker_special_field_data, commit=False
+        )
+        SpecialFieldService.create_special_field_entry(
+            work_state_special_field_data, commit=False
         )
 
     @classmethod

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { SpecialFieldGrid } from "../../shared/specialField";
 import {
   EPIC_SUPPORT_LINKS,
+  SPECIAL_FIELD_TYPES,
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
@@ -74,6 +75,7 @@ export const ProponentSpecialField = ({
             entity={SpecialFieldEntityEnum.PROJECT}
             entity_id={id}
             fieldName={SPECIAL_FIELDS.PROJECT.PROPONENT}
+            fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
             fieldLabel={"Proponent Name"}
             fieldType={"select"}
             title={"Proponent History"}

@@ -14,7 +14,7 @@
 """Special field resource's input validations"""
 from marshmallow import EXCLUDE, fields, validate
 
-from api.models.special_field import EntityEnum
+from api.models.special_field import EntityEnum, FieldTypeEnum
 
 from .base import RequestBodyParameterSchema, RequestPathParameterSchema, RequestQueryParameterSchema
 
@@ -70,6 +70,12 @@ class SpecialFieldBodyParameterSchema(RequestBodyParameterSchema):
 
     active_from = fields.DateTime(
         metadata={"description": "Lower bound for time range"}, required=True
+    )
+
+    field_type = fields.Str(
+        metadata={"description": "Type of the special field"},
+        required=True,
+        validate=validate.OneOf([x.value for x in FieldTypeEnum]),
     )
 
     class Meta:  # pylint: disable=too-few-public-methods

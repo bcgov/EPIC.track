@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Work status."""
+from datetime import datetime, timezone
 from typing import Dict
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
@@ -21,6 +22,7 @@ from api.utils import TokenInfo
 from api.utils.roles import Role as KeycloakRole, Membership
 from api.services import authorisation
 from api.models.queries import WorkIssueQuery
+from api.models.special_field import EntityEnum, FieldTypeEnum
 
 
 class WorkIssuesService:  # pylint: disable=too-many-public-methods
@@ -56,6 +58,12 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
                                          work_id=work_id
                                          )
         new_work_issue.save()
+
+        cls.create_special_fields(
+            new_work_issue.id,
+            new_work_issue.is_active,
+            new_work_issue.start_date
+        )
 
         for update_description in updates:
             new_update = WorkIssueUpdatesModel(
@@ -138,6 +146,21 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         cls._check_edit_auth(work_id)
         cls._check_valid_issue_edit_data(issue_data, work_issue)
 
+        # If work_issue.is_active has been updated log in special history
+        if work_issue.is_active != issue_data.get('is_active'):
+            cls.create_special_fields(
+                issue_id,
+                issue_data.get('is_active'),
+                datetime.now(timezone.utc)
+            )
+
+        # If work_issue.start_date has been updated update the original special field entry
+        if work_issue.start_date != issue_data.get('start_date'):
+            cls.update_special_field(
+                issue_id,
+                issue_data.get('start_date'),
+            )
+
         # Create a flag to track changes on work_issues
         has_changes_to_work_issue = False
 
@@ -212,3 +235,48 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         if other_unapproved_updates_dates:
             if update_data.get('posted_date').timestamp() >= max(other_unapproved_updates_dates).timestamp():
                 raise BadRequestError('Cannot exceed the posted date of a pending unapproved update')
+
+    @classmethod
+    def create_special_fields(cls, entity_id, is_active, active_from):
+        """Create special fields for work issue"""
+        # pylint: disable=import-outside-toplevel,cyclic-import
+        from api.services.special_field import SpecialFieldService
+        work_issue_special_field_data = {
+            "entity": EntityEnum.ISSUE.value,
+            "entity_id": entity_id,
+            "field_name": "is_active",
+            "field_value": is_active,
+            "active_from": active_from,
+            "field_type": FieldTypeEnum.BOOLEAN.value,
+        }
+        SpecialFieldService.create_special_field_entry(
+            work_issue_special_field_data, commit=False
+        )
+
+    @classmethod
+    def update_special_field(cls, entity_id, active_from):
+        """Update the special entry field"""
+        # pylint: disable=import-outside-toplevel,cyclic-import
+        from api.services.special_field import SpecialFieldService
+        params = {
+            "entity": EntityEnum.ISSUE.value,
+            "entity_id": entity_id,
+            "field_name": "is_active",
+            "field_type": FieldTypeEnum.BOOLEAN.value,
+        }
+        # Get all special field entries for the work issue
+        entries = SpecialFieldService.find_all_by_params(params)
+        # No entries found, nothing to update
+        if not entries:
+            return
+        first_entry = min(entries, key=lambda x: x.created_at)
+        work_issue_special_field_data = {
+            "entity": EntityEnum.ISSUE.value,
+            "entity_id": entity_id,
+            "field_name": "is_active",
+            "active_from": active_from,
+        }
+        # Update the entry with the updated start date
+        SpecialFieldService.update_special_field_entry(
+            first_entry.id, work_issue_special_field_data, commit=False
+        )

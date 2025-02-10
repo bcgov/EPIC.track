@@ -20,12 +20,21 @@ from sqlalchemy.dialects.postgresql import TSTZRANGE
 from .base_model import BaseModelVersioned
 
 
+class FieldTypeEnum(enum.Enum):
+    """Enum for field types"""
+
+    STRING = "STRING"
+    INTEGER = "INTEGER"
+    BOOLEAN = "BOOLEAN"
+
+
 class EntityEnum(enum.Enum):
     """Enum for enities"""
 
     PROJECT = "PROJECT"
     PROPONENT = "PROPONENT"
     WORK = "WORK"
+    ISSUE = "ISSUE"
 
 
 class SpecialField(BaseModelVersioned):
@@ -38,6 +47,7 @@ class SpecialField(BaseModelVersioned):
     entity_id = Column(Integer, nullable=False)
     field_name = Column(String(100), nullable=False)
     field_value = Column(String, nullable=False)
+    field_type = Column(Enum(FieldTypeEnum), default=FieldTypeEnum.STRING.value)
     time_range = Column(TSTZRANGE, nullable=False)
 
     __table_args__ = (Index('entity_field_index', "entity", "entity_id", "field_name", "time_range"), )

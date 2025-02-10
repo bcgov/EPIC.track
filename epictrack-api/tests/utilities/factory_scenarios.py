@@ -20,7 +20,7 @@ from enum import Enum
 from faker import Faker
 
 from api.config import get_named_config
-from api.models.special_field import EntityEnum
+from api.models.special_field import EntityEnum, FieldTypeEnum
 from api.models.task_event import StatusEnum
 from api.utils.constants import CANADA_TIMEZONE
 from tests.constants import ASSESSMENT_WORK_TYPE
@@ -254,14 +254,16 @@ class TestSpecialField(Enum):
         "entity": EntityEnum.PROPONENT.value,
         "field_name": "name",
         "field_value": fake.word(),
-        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
+        "field_type": FieldTypeEnum.STRING.value
     }
 
     work_entity = {
         "entity": EntityEnum.WORK.value,
         "field_name": "work_lead_id",
         "field_value": fake.word(),
-        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
+        "field_type": FieldTypeEnum.INTEGER.value
     }
 
 
