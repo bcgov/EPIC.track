@@ -4,7 +4,10 @@ import { SpecialFieldLock } from "components/shared/specialField/components/Spec
 import { SpecialFieldGrid } from "components/shared/specialField";
 import { ETCaption3, ETFormLabel } from "components/shared";
 import { When } from "react-if";
-import { EPIC_SUPPORT_LINKS, SpecialFieldEntityEnum } from "constants/application-constant";
+import {
+  EPIC_SUPPORT_LINKS,
+  SpecialFieldEntityEnum,
+} from "constants/application-constant";
 import { ListType } from "models/code";
 import { Staff } from "models/staff";
 
@@ -35,7 +38,6 @@ export const WorkFormSpecialField = ({
   fieldLabel,
   fieldValueType,
 }: SpecialFieldProps) => {
-
   const selectOptions = useMemo(() => {
     return options.map((option) => ({
       label: "name" in option ? option.name : option.full_name,

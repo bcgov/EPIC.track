@@ -142,7 +142,10 @@ export default function WorkForm({
     useState<boolean>(false);
 
   const isSpecialFieldUnlocked =
-    isEpdFieldUnlocked || isWorkLeadFieldUnlocked || isMinistryFieldUnlocked || isDecisionMakerFieldUnlocked;
+    isEpdFieldUnlocked ||
+    isWorkLeadFieldUnlocked ||
+    isMinistryFieldUnlocked ||
+    isDecisionMakerFieldUnlocked;
   const workHasBeenCreated = work?.id ? true : false;
 
   useEffect(() => {

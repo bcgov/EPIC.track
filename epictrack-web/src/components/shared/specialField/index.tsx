@@ -62,7 +62,7 @@ export const SpecialFieldGrid = ({
   description,
   options,
   onSave,
-  fieldValueType
+  fieldValueType,
 }: SpecialFieldProps) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [entries, setEntries] = useState<SpecialField[]>([]);
