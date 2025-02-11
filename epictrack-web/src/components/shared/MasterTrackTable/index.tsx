@@ -219,10 +219,19 @@ const MasterTrackTable = <TData extends MRT_RowData>({
             alignItems: "center",
           }}
         >
-          <Box sx={{ flexGrow: 1 }}>
-            {renderResultCount && <Typography>Results: {rowCount}</Typography>}
-          </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          {renderResultCount && (
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography>Results: {rowCount}</Typography>
+            </Box>
+          )}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 2,
+              flexGrow: 1,
+            }}
+          >
             {renderTopToolbarCustomActions &&
               renderTopToolbarCustomActions({ table })}
             {enableExport && (
