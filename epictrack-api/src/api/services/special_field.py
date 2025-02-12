@@ -97,12 +97,18 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         upper_limit = None
         if existing_entry:
             if existing_entry.time_range.lower > payload["active_from"]:
-                upper_limit = existing_entry.time_range.lower + timedelta(days=-1)
+                upper_limit = existing_entry.time_range.lower - timedelta(days=1)
             else:
                 upper_limit = existing_entry.time_range.upper
+
+                if payload["active_from"] - timedelta(days=1) < existing_entry.time_range.lower:
+                    new_range_upper = payload["active_from"]
+                else:
+                    new_range_upper = payload["active_from"] - timedelta(days=1)
+
                 new_range = DateTimeTZRange(
                     existing_entry.time_range.lower,
-                    payload["active_from"] + timedelta(days=-1),
+                    new_range_upper,
                     "[)",
                 )
 
@@ -118,13 +124,18 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     def _update_original_model(cls, special_field_entry: SpecialField) -> None:
         """If `special_field_entry` is latest, update original table with new value"""
         if special_field_entry.time_range.upper is None:
-            model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[
-                EntityEnum(special_field_entry.entity)
-            ]
-
-            model_class.query.filter(
-                model_class.id == special_field_entry.entity_id
-            ).update({special_field_entry.field_name: special_field_entry.field_value})
+            # Only update the original model if it is listed in the SPECIAL_FIELD_ENTITY_MODEL_MAPS
+            # Some fields do not need to get updated here like WORK_ISSUES
+            try:
+                model_class = SPECIAL_FIELD_ENTITY_MODEL_MAPS[
+                    EntityEnum(special_field_entry.entity)
+                ]
+            except KeyError:
+                model_class = None
+            if model_class:
+                model_class.query.filter(
+                    model_class.id == special_field_entry.entity_id
+                ).update({special_field_entry.field_name: special_field_entry.field_value})
             cls.run_other_related_updates(special_field_entry)
 
     @classmethod

@@ -3,6 +3,7 @@ import { SpecialFieldGrid } from "../specialField";
 import {
   SpecialFieldEntityEnum,
   SPECIAL_FIELDS,
+  SPECIAL_FIELD_TYPES,
 } from "../../../constants/application-constant";
 import { setupIntercepts } from "../../../../cypress/support/utils";
 import { faker } from "@faker-js/faker";
@@ -39,6 +40,7 @@ describe("SpecialFieldGrid Component Tests", () => {
         entity={SpecialFieldEntityEnum.PROJECT}
         entity_id={1}
         fieldName={SPECIAL_FIELDS.PROJECT.NAME}
+        fieldValueType={SPECIAL_FIELD_TYPES.STRING}
         fieldLabel={"Name"}
         fieldType={"text"}
         title={"Title"}

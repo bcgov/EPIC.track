@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Grid, Divider, Tooltip, Box, InputAdornment } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -19,12 +19,13 @@ import projectService from "../../../services/projectService/projectService";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import { sort } from "../../../utils";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import { EPDSpecialField } from "./EPDSpecialField";
 import icons from "../../icons";
-import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
 import {
   MIN_WORK_START_DATE,
   ROLES,
+  SPECIAL_FIELD_TYPES,
+  SPECIAL_FIELDS,
+  SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
 import { Project } from "../../../models/project";
 import ministryService from "services/ministryService";
@@ -34,6 +35,7 @@ import federalInvolvementService from "services/federalInvolvementService";
 import substitutionActService from "services/substitutionActService";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
+import { WorkFormSpecialField } from "./WorkFormSpecialField";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -90,21 +92,19 @@ export default function WorkForm({
   saveWork,
   setDisableDialogSave,
 }: WorkFormProps) {
-  const [eaActs, setEAActs] = React.useState<ListType[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
-  const [projects, setProjects] = React.useState<ListType[]>([]);
-  const [ministries, setMinistries] = React.useState<ListType[]>([]);
-  const [federalInvolvements, setFederalInvolvements] = React.useState<
-    ListType[]
-  >([]);
-  const [substitutionActs, setSubstitutionActs] = React.useState<ListType[]>(
+  const [eaActs, setEAActs] = useState<ListType[]>([]);
+  const [workTypes, setWorkTypes] = useState<ListType[]>([]);
+  const [projects, setProjects] = useState<ListType[]>([]);
+  const [ministries, setMinistries] = useState<ListType[]>([]);
+  const [federalInvolvements, setFederalInvolvements] = useState<ListType[]>(
     []
   );
-  const [teams, setTeams] = React.useState<ListType[]>([]);
-  const [epds, setEPDs] = React.useState<Staff[]>([]);
-  const [leads, setLeads] = React.useState<Staff[]>([]);
-  const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
-  const [titlePrefix, setTitlePrefix] = React.useState<string>("");
+  const [substitutionActs, setSubstitutionActs] = useState<ListType[]>([]);
+  const [teams, setTeams] = useState<ListType[]>([]);
+  const [epds, setEPDs] = useState<Staff[]>([]);
+  const [leads, setLeads] = useState<Staff[]>([]);
+  const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
+  const [titlePrefix, setTitlePrefix] = useState<string>("");
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -130,26 +130,35 @@ export default function WorkForm({
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  const [isEpdFieldUnlocked, setIsEpdFieldUnlocked] =
-    React.useState<boolean>(false);
+  const [isEpdFieldUnlocked, setIsEpdFieldUnlocked] = useState<boolean>(false);
 
   const [isWorkLeadFieldUnlocked, setIsWorkLeadFieldUnlocked] =
-    React.useState<boolean>(false);
+    useState<boolean>(false);
 
-  const isSpecialFieldUnlocked = isEpdFieldUnlocked || isWorkLeadFieldUnlocked;
+  const [isMinistryFieldUnlocked, setIsMinistryFieldUnlocked] =
+    useState<boolean>(false);
+
+  const [isDecisionMakerFieldUnlocked, setIsDecisionMakerFieldUnlocked] =
+    useState<boolean>(false);
+
+  const isSpecialFieldUnlocked =
+    isEpdFieldUnlocked ||
+    isWorkLeadFieldUnlocked ||
+    isMinistryFieldUnlocked ||
+    isDecisionMakerFieldUnlocked;
   const workHasBeenCreated = work?.id ? true : false;
 
   useEffect(() => {
     reset(work ?? defaultWork);
   }, [work]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (setDisableDialogSave) {
       setDisableDialogSave(isSpecialFieldUnlocked);
     }
   }, [isSpecialFieldUnlocked, setDisableDialogSave]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
       ({ name }) => name === "None"
     );
@@ -242,7 +251,7 @@ export default function WorkForm({
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     const promises: any[] = [];
     Object.keys(staffByRoles).forEach(async (key) => {
       promises.push(getStaffByPosition(key));
@@ -286,7 +295,7 @@ export default function WorkForm({
     }
   }, [workTypeId, projectId, projects, workTypes]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (simple_title) {
       setValue("title", `${titlePrefix}${simple_title}`);
     } else {
@@ -370,8 +379,25 @@ export default function WorkForm({
             disabled={!canEdit || workHasBeenCreated}
           ></ControlledSelectV2>
         </Grid>
-        <Grid item xs={6}>
-          <ETFormLabel required>2nd Responsible Ministry</ETFormLabel>
+        <WorkFormSpecialField
+          id={work?.id}
+          onLockClick={() => setIsMinistryFieldUnlocked((prev) => !prev)}
+          open={isMinistryFieldUnlocked}
+          onSave={() => {
+            fetchWork();
+          }}
+          options={ministries || []}
+          disabled={
+            !canEdit ||
+            isEpdFieldUnlocked ||
+            isWorkLeadFieldUnlocked ||
+            isDecisionMakerFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.MINISTRY}
+          fieldLabel="2nd Responsible Ministry"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
+        >
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.ministry_id?.message?.toString()}
@@ -380,9 +406,9 @@ export default function WorkForm({
             getOptionValue={(o: Ministry) => o?.id.toString()}
             getOptionLabel={(o: Ministry) => o.name}
             {...register("ministry_id")}
-            disabled={!canEdit || isSpecialFieldUnlocked}
-          ></ControlledSelectV2>
-        </Grid>
+            disabled={work?.ministry_id != undefined}
+          />
+        </WorkFormSpecialField>
         <Grid item xs={6}>
           <ETFormLabel required>Federal Involvement</ETFormLabel>
           <ControlledSelectV2
@@ -485,8 +511,7 @@ export default function WorkForm({
             disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
-
-        <EPDSpecialField
+        <WorkFormSpecialField
           id={work?.id}
           onLockClick={() => setIsEpdFieldUnlocked((prev) => !prev)}
           open={isEpdFieldUnlocked}
@@ -494,7 +519,16 @@ export default function WorkForm({
             fetchWork();
           }}
           options={epds || []}
-          disabled={!canEdit || isWorkLeadFieldUnlocked}
+          disabled={
+            !canEdit ||
+            isWorkLeadFieldUnlocked ||
+            isMinistryFieldUnlocked ||
+            isDecisionMakerFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD}
+          fieldLabel="Responsible EPD"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
         >
           <ControlledSelectV2
             disabled={work?.responsible_epd_id !== undefined}
@@ -506,9 +540,8 @@ export default function WorkForm({
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("responsible_epd_id")}
           />
-        </EPDSpecialField>
-
-        <WorkLeadSpecialField
+        </WorkFormSpecialField>
+        <WorkFormSpecialField
           id={work?.id}
           onLockClick={() => setIsWorkLeadFieldUnlocked((prev) => !prev)}
           open={isWorkLeadFieldUnlocked}
@@ -516,7 +549,16 @@ export default function WorkForm({
             fetchWork();
           }}
           options={leads || []}
-          disabled={!canEdit || isEpdFieldUnlocked}
+          disabled={
+            !canEdit ||
+            isEpdFieldUnlocked ||
+            isMinistryFieldUnlocked ||
+            isDecisionMakerFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.WORK_LEAD}
+          fieldLabel="Work Lead"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
         >
           <ControlledSelectV2
             disabled={work?.work_lead_id !== undefined}
@@ -528,12 +570,28 @@ export default function WorkForm({
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("work_lead_id")}
           />
-        </WorkLeadSpecialField>
-
-        <Grid item xs={6}>
-          {/* TODO: Make the label dynamic */}
-          <ETFormLabel required>Decision Maker</ETFormLabel>
+        </WorkFormSpecialField>
+        <WorkFormSpecialField
+          id={work?.id}
+          onLockClick={() => setIsDecisionMakerFieldUnlocked((prev) => !prev)}
+          open={isDecisionMakerFieldUnlocked}
+          onSave={() => {
+            fetchWork();
+          }}
+          options={decisionMakers || []}
+          disabled={
+            !canEdit ||
+            isEpdFieldUnlocked ||
+            isWorkLeadFieldUnlocked ||
+            isMinistryFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.DECISION_MAKER}
+          fieldLabel="Decision Maker"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
+        >
           <ControlledSelectV2
+            disabled={work?.decision_by_id != undefined}
             placeholder="Select"
             helperText={errors?.decision_by_id?.message?.toString()}
             defaultValue={work?.decision_by_id}
@@ -541,9 +599,8 @@ export default function WorkForm({
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("decision_by_id")}
-            disabled={!canEdit || isSpecialFieldUnlocked}
-          ></ControlledSelectV2>
-        </Grid>
+          />
+        </WorkFormSpecialField>
         <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}

@@ -36,6 +36,7 @@ class SpecialFieldResponseSchema(
     entity = fields.Method("get_entity")
     active_from = fields.Method("get_active_from")
     active_to = fields.Method("get_active_to")
+    field_type = fields.Method("get_field_type")
 
     def get_entity(self, obj: SpecialField) -> str:
         """Get the entity name"""
@@ -48,3 +49,7 @@ class SpecialFieldResponseSchema(
     def get_active_to(self, obj: SpecialField) -> datetime:
         """Get the active to date"""
         return obj.time_range.upper.isoformat() if obj.time_range.upper else None
+
+    def get_field_type(self, obj: SpecialField) -> str:
+        """Get the field type"""
+        return obj.field_type.value
