@@ -45,17 +45,11 @@ import WarningBox from "../../shared/warningBox";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { setLoadingState } from "../../../services/loadingService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import {
-  COMMON_ERROR_MESSAGE,
-  ROLES,
-} from "../../../constants/application-constant";
-import { Restricted } from "components/shared/restricted";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { IButton } from "components/shared";
 import { showConfetti } from "styles/uiStateSlice";
-import { on } from "events";
 
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
 
 const EventList = () => {

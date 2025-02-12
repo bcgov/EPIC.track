@@ -29,12 +29,10 @@ import { searchFilter } from "../../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../../hooks";
 import { hasPermission, Restricted } from "../../shared/restricted";
 import { WorkplanContext } from "../WorkPlanContext";
-import { on } from "events";
 import { TemplateStatus } from "models/work";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
 const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const highlightedRowBGColor = "rgb(249, 249, 251)";
 
@@ -66,10 +64,8 @@ const EventListTable = ({
   userIsActiveTeamMember,
   onAddMilestone,
   onAddTask,
-  handleExportToSheet,
   handleTaskFileUpload,
   setShowTemplateForm,
-  setShowDeleteDialog,
 }: EventListTable) => {
   const { team } = useContext(WorkplanContext);
   const { highlightedRows } = useContext(EventContext);
@@ -535,7 +531,7 @@ const EventListTable = ({
       columns={columns}
       data={events}
       enableTopToolbar={true}
-      renderTopToolbarCustomActions={({ table }) => (
+      renderTopToolbarCustomActions={() => (
         <Grid container sx={{ display: "flex", gap: "1rem", width: "100%" }}>
           <Grid
             item
