@@ -27,7 +27,6 @@ const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 const WorkList = () => {
   const [eaActs, setEAActs] = useState<string[]>([]);
   const [loadingWorks, setLoadingWorks] = useState<boolean>(true);
-  const [ministries, setMinistries] = useState<string[]>([]);
   const [phases, setPhases] = useState<string[]>([]);
   const [projects, setProjects] = useState<string[]>([]);
   const [showWorkDialogForm, setShowWorkDialogForm] = useState(false);
@@ -65,7 +64,6 @@ const WorkList = () => {
     current_work_phase: setPhases,
     ea_act: setEAActs,
     eao_team: setTeams,
-    ministry: setMinistries,
     project: setProjects,
     work_state: setStates,
     work_type: setWorkTypes,
@@ -354,7 +352,7 @@ const WorkList = () => {
         ),
       },
     ],
-    [eaActs, ministries, phases, projects, states, statuses, teams, workTypes]
+    [eaActs, phases, projects, states, statuses, teams, workTypes]
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
@@ -392,7 +390,7 @@ const WorkList = () => {
               isLoading: loadingWorks,
               showGlobalFilter: true,
             }}
-            renderTopToolbarCustomActions={({ table }) => (
+            renderTopToolbarCustomActions={() => (
               <Restricted
                 allowed={[ROLES.CREATE]}
                 errorProps={{ disabled: true }}
