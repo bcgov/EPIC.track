@@ -25,6 +25,7 @@ const FilterSelect = (props: SelectProps) => {
     !!props.menuIsOpen
   );
   const [menuStyle, setMenuStyle] = React.useState<any>({}); // eslint-disable-line
+  const [overflowRight, setOverflowRight] = React.useState<number>(0);
   const selectRef = React.useRef<any | null>(null);
 
   const selectAllOption = React.useMemo(
@@ -37,10 +38,18 @@ const FilterSelect = (props: SelectProps) => {
 
   useEffect(() => {
     if (menuIsOpen) {
-      adjustDropdownPosition();
+      requestAnimationFrame(() => {
+        const documentWidth = document.documentElement.clientWidth;
+        const scrollWidth = document.documentElement.scrollWidth;
+        const overflowRight = Math.max(scrollWidth - documentWidth, 0);
+        setOverflowRight(overflowRight);
+      });
       updateSelectedOptions();
+      adjustDropdownPosition();
+    } else {
+      setOverflowRight(0);
     }
-  }, [menuIsOpen]);
+  }, [menuIsOpen, overflowRight]);
 
   const isSelectAllSelected = () =>
     selectedOptions.includes(selectAllOption.value);
@@ -127,18 +136,13 @@ const FilterSelect = (props: SelectProps) => {
     selectRef.current?.blur();
   };
 
+  // Adjust dropdown position based on overflow
   const adjustDropdownPosition = () => {
     if (menuRef?.current) {
-      const menuRect = menuRef.current.getBoundingClientRect();
-      const windowWidth = window.innerWidth - 60;
-      const rightEdgeOfMenu = menuRect.left + menuRect.width;
-
-      if (rightEdgeOfMenu > windowWidth) {
-        const overflow = rightEdgeOfMenu - windowWidth;
-        const newPosition = {
-          transform: `translateX(${-(overflow + 80)}px)`,
-        };
-        setMenuStyle(newPosition);
+      if (overflowRight > 0) {
+        setMenuStyle({
+          transform: `translateX(-${overflowRight}px)`, // Shift left by the overflow amount
+        });
       } else {
         setMenuStyle({});
       }
@@ -248,7 +252,7 @@ const FilterSelect = (props: SelectProps) => {
                 : "transparent",
             }),
           }),
-          menu: (base, props) => ({
+          menu: (base) => ({
             ...base,
             position: "relative",
             marginBlock: "0px",
@@ -267,12 +271,12 @@ const FilterSelect = (props: SelectProps) => {
               fontWeight: 700,
             }),
           }),
-          menuPortal: (base, props) => ({
+          menuPortal: (base) => ({
             ...base,
             zIndex: theme.zIndex.modal,
             marginTop: "4px",
           }),
-          input: (base, props) => ({
+          input: (base) => ({
             ...base,
             fontWeight: "400",
             fontSize: INPUT_SIZE,
@@ -280,6 +284,8 @@ const FilterSelect = (props: SelectProps) => {
         }}
         isClearable={false}
         menuPortalTarget={document.body}
+        menuPosition="absolute"
+        menuPlacement="auto"
         controlShouldRenderValue={props.controlShouldRenderValue}
         isLoading={props.isLoading}
         loadingMessage={() => "Loading..."}
