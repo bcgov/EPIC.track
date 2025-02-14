@@ -60,14 +60,17 @@ const WorkList = () => {
     loadWorks();
   }, []);
 
-  const codeTypes: { [x: string]: any } = {
-    current_work_phase: setPhases,
-    ea_act: setEAActs,
-    eao_team: setTeams,
-    project: setProjects,
-    work_state: setStates,
-    work_type: setWorkTypes,
-  };
+  const codeTypes = useMemo(
+    () => ({
+      current_work_phase: setPhases,
+      ea_act: setEAActs,
+      eao_team: setTeams,
+      project: setProjects,
+      work_state: setStates,
+      work_type: setWorkTypes,
+    }),
+    [setEAActs, setPhases, setProjects, setStates, setTeams, setWorkTypes]
+  );
 
   useEffect(() => {
     if (!works.length) return;
@@ -88,7 +91,7 @@ const WorkList = () => {
             (element, index, array) =>
               element && array.indexOf(element) === index
           );
-        codeTypes[key](codes);
+        codeTypes[key as keyof typeof codeTypes](codes);
         return;
       }
       const codes = works
@@ -99,9 +102,9 @@ const WorkList = () => {
         .filter(
           (element, index, array) => element && array.indexOf(element) === index
         );
-      codeTypes[key](codes);
+      codeTypes[key as keyof typeof codeTypes](codes);
     });
-  }, [works]);
+  }, [codeTypes, works]);
 
   const statuses = getSelectFilterOptions(
     works,
@@ -384,6 +387,7 @@ const WorkList = () => {
               ],
               columnFilters: cachedFilters,
             }}
+            loading={loadingWorks}
             onCacheFilters={handleCacheFilters}
             renderResultCount={true}
             state={{

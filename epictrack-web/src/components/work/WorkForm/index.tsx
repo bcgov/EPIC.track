@@ -1,25 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { Grid, Divider, Tooltip, Box, InputAdornment } from "@mui/material";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Box, Divider, Grid, InputAdornment, Tooltip } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
-import Moment from "moment";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Work, defaultWork } from "../../../models/work";
+import Moment from "moment";
+import dayjs from "dayjs";
 import { ListType } from "../../../models/code";
 import { Ministry } from "../../../models/ministry";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import { POSITION_ENUM } from "../../../models/position";
+import { Project } from "../../../models/project";
 import { Staff } from "../../../models/staff";
-import staffService from "../../../services/staffService/staffService";
-import dayjs from "dayjs";
-import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import workService from "../../../services/workService/workService";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { IconProps } from "../../icons/type";
+import { defaultWork, Work } from "../../../models/work";
 import projectService from "../../../services/projectService/projectService";
+import staffService from "../../../services/staffService/staffService";
+import workService from "../../../services/workService/workService";
+import eaActService from "services/eaActService";
+import EAOTeamService from "services/eao_team";
+import federalInvolvementService from "services/federalInvolvementService";
+import ministryService from "services/ministryService";
+import substitutionActService from "services/substitutionActService";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { sort } from "../../../utils";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import icons from "../../icons";
 import {
   MIN_WORK_START_DATE,
   ROLES,
@@ -27,14 +31,11 @@ import {
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
-import { Project } from "../../../models/project";
-import ministryService from "services/ministryService";
-import eaActService from "services/eaActService";
-import EAOTeamService from "services/eao_team";
-import federalInvolvementService from "services/federalInvolvementService";
-import substitutionActService from "services/substitutionActService";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
+import { sort } from "../../../utils";
+import { IconProps } from "../../icons/type";
+import icons from "../../icons";
 import { WorkFormSpecialField } from "./WorkFormSpecialField";
 
 const maxTitleLength = 150;
@@ -150,7 +151,7 @@ export default function WorkForm({
 
   useEffect(() => {
     reset(work ?? defaultWork);
-  }, [work]);
+  }, [reset, work]);
 
   useEffect(() => {
     if (setDisableDialogSave) {
@@ -172,21 +173,38 @@ export default function WorkForm({
     ) {
       setValue("substitution_act_id", noneSubstitutionAct?.id);
     }
-  }, [federalInvolvementId, substitutionActs, federalInvolvements]);
+  }, [federalInvolvementId, setValue, substitutionActs, federalInvolvements]);
 
-  const staffByRoles: { [x: string]: any } = {
-    "4,3": setLeads,
-    "3": setEPDs,
-    "1,2,8": setDecisionMakers,
-  };
+  const staffByRoles = useMemo(
+    () =>
+      new Map<POSITION_ENUM, (staff: Staff[]) => void>([
+        [POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR, setLeads],
+        [
+          POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
+          (staff) => {
+            setLeads(staff);
+            setEPDs(staff);
+          },
+        ],
+        [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, setDecisionMakers],
+        [POSITION_ENUM.ADM, setDecisionMakers],
+        [POSITION_ENUM.MINISTER, setDecisionMakers],
+      ]),
+    []
+  );
 
-  const getStaffByPosition = async (position: string) => {
-    const staffResult = await staffService.getStaffByPosition(position);
-    if (staffResult.status === 200) {
-      const data = sort(staffResult.data as never[], "full_name");
-      staffByRoles[position](data);
-    }
-  };
+  const getStaffByPosition = useMemo(
+    () => async (position: POSITION_ENUM) => {
+      const staffResult = await staffService.getStaffByPosition(
+        position.toString()
+      );
+      if (staffResult.status === 200) {
+        const data = sort(staffResult.data as never[], "full_name");
+        staffByRoles.get(position)?.(data);
+      }
+    },
+    [staffByRoles]
+  );
 
   const getProjects = async () => {
     const projectResult = await projectService.getAll("list_type");
@@ -252,19 +270,23 @@ export default function WorkForm({
   };
 
   useEffect(() => {
-    const promises: any[] = [];
-    Object.keys(staffByRoles).forEach(async (key) => {
-      promises.push(getStaffByPosition(key));
-    });
-    Promise.all(promises);
-    getProjects();
-    getMinistries();
-    getEAActs();
-    getWorkTypes();
-    getEAOTeams();
-    getFederalInvolvements();
-    getSubstitutionActs();
-  }, []);
+    const fetchStaff = async () => {
+      const promises = Object.keys(staffByRoles).map((key) =>
+        getStaffByPosition(Number(key) as POSITION_ENUM)
+      );
+      await Promise.all(promises);
+      await Promise.all([
+        getEAActs(),
+        getEAOTeams(),
+        getFederalInvolvements(),
+        getMinistries(),
+        getProjects(),
+        getSubstitutionActs(),
+        getWorkTypes(),
+      ]);
+    };
+    fetchStaff();
+  }, [getStaffByPosition, staffByRoles]);
 
   const onSubmitHandler = async (data: any) => {
     data.start_date = Moment(data.start_date).format();
@@ -273,7 +295,7 @@ export default function WorkForm({
 
   const simple_title = watch("simple_title");
   const titleSeparator = " - ";
-  const getTitlePrefix = () => {
+  const getTitlePrefix = useCallback(() => {
     let prefix = "";
     if (projectId) {
       const project = projects.find(
@@ -286,14 +308,14 @@ export default function WorkForm({
       prefix += `${workType?.name}${titleSeparator}`;
     }
     return prefix;
-  };
+  }, [projectId, workTypeId, projects, workTypes, titleSeparator]);
 
   useEffect(() => {
     if (projects.length > 0 && workTypes.length > 0) {
       const prefix = getTitlePrefix();
       setTitlePrefix(prefix);
     }
-  }, [workTypeId, projectId, projects, workTypes]);
+  }, [getTitlePrefix, projects, workTypes]);
 
   useEffect(() => {
     if (simple_title) {
@@ -305,7 +327,7 @@ export default function WorkForm({
         : titlePrefix;
       setValue("title", trimmedPrefix);
     }
-  }, [titlePrefix, simple_title]);
+  }, [titlePrefix, simple_title, setValue]);
 
   const handleProjectChange = async (id: string) => {
     if (id) {
@@ -406,7 +428,7 @@ export default function WorkForm({
             getOptionValue={(o: Ministry) => o?.id.toString()}
             getOptionLabel={(o: Ministry) => o.name}
             {...register("ministry_id")}
-            disabled={work?.ministry_id != undefined}
+            disabled={work?.ministry_id !== undefined}
           />
         </WorkFormSpecialField>
         <Grid item xs={6}>
@@ -535,7 +557,13 @@ export default function WorkForm({
             placeholder="Select"
             helperText={errors?.responsible_epd_id?.message?.toString()}
             defaultValue={work?.responsible_epd_id}
-            options={epds || []}
+            options={
+              // Ensure responsible_epd is included if it is locked
+              work?.responsible_epd_id &&
+              !epds.some((epd) => epd.id === work.responsible_epd_id)
+                ? [...epds, work.responsible_epd]
+                : epds || []
+            }
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("responsible_epd_id")}
@@ -565,7 +593,13 @@ export default function WorkForm({
             placeholder="Select"
             helperText={errors?.work_lead_id?.message?.toString()}
             defaultValue={work?.work_lead_id}
-            options={leads || []}
+            options={
+              // Ensure lead is included if it is locked
+              work?.work_lead_id &&
+              !leads.some((lead) => lead.id === work.work_lead_id)
+                ? [...leads, work.work_lead]
+                : leads || []
+            }
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("work_lead_id")}
@@ -591,11 +625,17 @@ export default function WorkForm({
           fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
         >
           <ControlledSelectV2
-            disabled={work?.decision_by_id != undefined}
+            disabled={work?.decision_by_id !== undefined}
             placeholder="Select"
             helperText={errors?.decision_by_id?.message?.toString()}
             defaultValue={work?.decision_by_id}
-            options={decisionMakers || []}
+            options={
+              // Ensure decision maker is included if it is locked
+              work?.decision_by_id &&
+              !decisionMakers.some((dm) => dm.id === work.decision_by_id)
+                ? [...decisionMakers, work.decision_by]
+                : decisionMakers || []
+            }
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("decision_by_id")}

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -17,7 +17,7 @@ import { exportToCsv } from "./utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
@@ -64,6 +64,7 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
   enableExport?: boolean;
+  loading?: boolean;
   onCacheFilters?: (columnFilters: any) => void;
   renderResultCount?: boolean;
   setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
@@ -74,6 +75,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
   data,
   enableExport,
+  loading,
   onCacheFilters,
   renderResultCount,
   renderTopToolbarCustomActions,
@@ -279,8 +281,8 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   });
 
   const rowCount = useMemo(
-    () => table.getRowModel().rows.length,
-    [table.getRowModel().rows]
+    () => (!loading ? table.getRowModel().rows.length : 0),
+    [loading, table]
   );
 
   useEffect(() => {
