@@ -1,10 +1,6 @@
-import { MasterContext } from "components/shared/MasterContext";
 import { defaultFirstNation } from "models/firstNation";
 import IndigenousNationForm from "../IndigenousNationForm";
-import {
-  mockStaffs,
-  createMockMasterContext,
-} from "../../../../cypress/support/common";
+import { mockStaffs } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
 import { setupIntercepts } from "../../../../cypress/support/utils";
 
@@ -52,12 +48,7 @@ describe("IndigenousNationForm", () => {
     setupIntercepts(endpoints);
 
     cy.mount(
-      <IndigenousNationForm
-        firstNation={null}
-        saveFirstNation={function (data: any): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
+      <IndigenousNationForm firstNation={null} saveFirstNation={cy.stub()} />
     );
   });
 

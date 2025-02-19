@@ -46,7 +46,7 @@ const ProponentList = () => {
     setLoadingProponents(true);
     try {
       const response = await proponentService.getAll();
-      setProponents(response.data);
+      setProponents((response.data as Proponent[]) || []);
       setLoadingProponents(false);
     } catch (error) {
       showNotification("Could not load Projects", { type: "error" });

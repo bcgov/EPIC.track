@@ -14,7 +14,6 @@ const endpoints = [
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
-
   {
     name: "getFirstNationsOptions",
     method: "OPTIONS",
@@ -24,7 +23,7 @@ const endpoints = [
     name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    response: { body: { data: mockStaffs } },
+    response: { body: mockStaffs },
   },
   {
     name: "getPIPType",
@@ -52,14 +51,7 @@ const staffs = [staff1];
 describe("StaffForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
-    cy.mount(
-      <StaffForm
-        staff={staff1}
-        saveStaff={function (data: any): void {
-          throw new Error("Function not implemented.");
-        }}
-      />
-    );
+    cy.mount(<StaffForm staff={staff1} saveStaff={cy.stub()} />);
   });
 
   it("renders the form", () => {

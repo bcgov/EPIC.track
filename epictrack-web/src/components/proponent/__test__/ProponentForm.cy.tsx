@@ -1,4 +1,3 @@
-import { MasterContext } from "components/shared/MasterContext";
 import { MasterBase } from "models/type";
 import ProponentForm from "../ProponentForm";
 import { Staff } from "models/staff";
@@ -100,12 +99,8 @@ describe("ProponentForm", () => {
     cy.mount(
       <ProponentForm
         proponent={null}
-        saveProponent={function (data: any): void {
-          throw new Error("Function not implemented.");
-        }}
-        setDisableDialogSave={function (disabled: boolean): void {
-          throw new Error("Function not implemented.");
-        }}
+        saveProponent={cy.stub()}
+        setDisableDialogSave={cy.stub()}
       />
     );
   });

@@ -2,10 +2,8 @@ import { MemoryRouter as Router } from "react-router-dom";
 import ProponentList from "../ProponentList";
 import { faker } from "@faker-js/faker";
 import { Proponent } from "models/proponent";
-import { MasterContext } from "components/shared/MasterContext";
 import { Staff } from "models/staff";
 import {
-  createMockMasterContext,
   mockStaffs,
   testTableFiltering,
 } from "../../../../cypress/support/common";
@@ -31,6 +29,14 @@ const proponent2 = generateMockProponent();
 const proponents = [proponent1, proponent2];
 
 const endpoints = [
+  {
+    name: "getProponents",
+    method: "GET",
+    url: `${AppConfig.apiUrl}proponents`,
+    response: {
+      body: proponents,
+    },
+  },
   {
     name: "getActiveStaffsOptions",
     method: "OPTIONS",

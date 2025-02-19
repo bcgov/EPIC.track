@@ -36,7 +36,7 @@ const StaffList = () => {
     setLoading(true);
     try {
       const response = await staffService.getAll();
-      setStaffs(response.data);
+      setStaffs((response.data as Staff[]) || []);
       setLoading(false);
     } catch (error) {
       showNotification("Could not load Staffs", { type: "error" });
