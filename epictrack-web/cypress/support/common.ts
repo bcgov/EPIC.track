@@ -1,8 +1,7 @@
 import { Staff } from "models/staff";
-import Sinon, { SinonStub } from "cypress/types/sinon";
+import Sinon from "cypress/types/sinon";
 import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
-import { ListType } from "models/code";
 import { Type } from "models/type";
 
 export const mockStaffs: Staff[] = [

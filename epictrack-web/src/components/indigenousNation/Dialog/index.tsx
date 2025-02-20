@@ -33,7 +33,6 @@ export const FirstNationDialog = ({
   }, [firstNationId]);
 
   const saveFirstNation = async (data: any) => {
-    console.log("in saveFirstNation");
     try {
       if (firstNationId) {
         await indigenousNationService.update(data, String(firstNationId));
@@ -47,7 +46,6 @@ export const FirstNationDialog = ({
         });
       }
       setOpen(false);
-      console.log("calling callback");
       saveFirstNationCallback();
     } catch (error) {
       showNotification("Could not save First Nation", { type: "error" });
