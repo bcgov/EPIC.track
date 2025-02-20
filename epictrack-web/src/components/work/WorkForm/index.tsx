@@ -196,8 +196,8 @@ export default function WorkForm({
     []
   );
 
-  const getStaffByPosition = useMemo(
-    () => async (position: POSITION_ENUM) => {
+  const getStaffByPosition = useCallback(
+    async (position: POSITION_ENUM) => {
       const staffResult = await staffService.getStaffByPosition(
         position.toString()
       );
@@ -274,8 +274,8 @@ export default function WorkForm({
 
   useEffect(() => {
     const fetchStaff = async () => {
-      const promises = Object.keys(staffByRoles).map((key) =>
-        getStaffByPosition(Number(key) as POSITION_ENUM)
+      const promises = Array.from(staffByRoles.keys()).map((key) =>
+        getStaffByPosition(key)
       );
       await Promise.all(promises);
       await Promise.all([
