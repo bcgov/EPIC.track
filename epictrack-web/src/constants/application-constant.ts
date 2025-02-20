@@ -78,7 +78,7 @@ export const FN_RESOURCES = [
 
 export const EPIC_SUPPORT_LINKS = {
   SPECIAL_HISTORY:
-    "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/reports#specialhistory",
+    "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/work-pages#specialhistory",
 };
 
 export const ABOUT_RESOURCES = [
