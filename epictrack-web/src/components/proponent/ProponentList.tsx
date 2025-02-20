@@ -1,57 +1,60 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
-import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
-import ProponentForm from "./ProponentForm";
+import MasterTrackTable from "components/shared/MasterTrackTable";
+import { ETCaption2, ETGridTitle, ETPageContainer } from "components/shared";
+import { ETChip } from "components/shared/chip/ETChip";
+import TableFilter from "components/shared/filterSelect/TableFilter";
 import { Staff } from "../../models/staff";
-import staffService from "../../services/staffService/staffService";
 import { Proponent } from "../../models/proponent";
-import { MasterContext } from "../shared/MasterContext";
+import staffService from "../../services/staffService/staffService";
 import proponentService from "../../services/proponentService/proponentService";
-import { ETChip } from "../shared/chip/ETChip";
-import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import TableFilter from "../shared/filterSelect/TableFilter";
-import { Restricted, hasPermission } from "../shared/restricted";
-import { ROLES } from "../../constants/application-constant";
-import { searchFilter } from "../shared/MasterTrackTable/filters";
+import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
+import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { debounce } from "lodash";
 import { useAppSelector } from "../../hooks";
+import { useCachedState } from "hooks/useCachedFilters";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
+import { COMMON_ERROR_MESSAGE, ROLES } from "constants/application-constant";
+import { hasPermission, Restricted } from "components/shared/restricted";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { Palette } from "styles/theme";
-import { debounce } from "lodash";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { useCachedState } from "hooks/useCachedFilters";
+import { ProponentDialog } from "./Dialog";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 
-export default function ProponentList() {
+const ProponentList = () => {
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     proponentsListColumnFiltersCacheKey,
     []
   );
+  const [loadingProponents, setLoadingProponents] = useState(true);
   const [proponentId, setProponentId] = useState<number>();
+  const [proponents, setProponents] = useState<Proponent[]>([]);
+  const [showFormDialog, setShowFormDialog] = useState(false);
   const [staffs, setStaffs] = useState<Staff[]>([]);
-  const ctx = useContext(MasterContext);
-  const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
-  const [userMenuAnchorEl, setUserMenuAnchorEl] =
-    React.useState<null | HTMLElement>(null);
+  const [relationshipHolder, setRelationshipHolder] = useState<Staff>();
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-  const menuHoverRef = React.useRef(false);
+  const menuHoverRef = useRef(false);
 
-  useEffect(() => {
-    ctx.setForm(<ProponentForm proponentId={proponentId} />);
-  }, [proponentId]);
-
-  const onEdit = (id: number) => {
-    setProponentId(id);
-    ctx.setShowModalForm(true);
+  const fetchProponents = async () => {
+    setLoadingProponents(true);
+    try {
+      const response = await proponentService.getAll();
+      setProponents((response.data as Proponent[]) || []);
+      setLoadingProponents(false);
+    } catch (error) {
+      showNotification("Could not load Projects", { type: "error" });
+    }
   };
 
   useEffect(() => {
-    ctx.setService(proponentService);
+    fetchProponents();
   }, []);
 
   const handleOpenUserMenu = (
@@ -67,9 +70,8 @@ export default function ProponentList() {
       setUserMenuAnchorEl(null);
       setRelationshipHolder(undefined);
     }
-  }, 100);
+  }, 100); // 100ms delay
 
-  const proponents = useMemo(() => ctx.data as Proponent[], [ctx.data]);
   const statusesOptions = getSelectFilterOptions(
     proponents,
     "is_active",
@@ -86,7 +88,10 @@ export default function ProponentList() {
           ? ({ cell, row, renderedCellValue }) => (
               <ETGridTitle
                 to={"#"}
-                onClick={() => onEdit(row.original.id)}
+                onClick={() => {
+                  setProponentId(row.original.id);
+                  setShowFormDialog(true);
+                }}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
               >
@@ -157,7 +162,7 @@ export default function ProponentList() {
                 header={header}
                 column={column}
                 variant="inline"
-                name="rolesFilter"
+                name="statusFilter"
               />
             </Box>
           );
@@ -182,7 +187,7 @@ export default function ProponentList() {
         ),
       },
     ],
-    [staffs, proponents, userMenuAnchorEl, relationshipHolder]
+    [canEdit, handleCloseUserMenu, staffs, statusesOptions]
   );
 
   const getStaffs = async () => {
@@ -209,77 +214,78 @@ export default function ProponentList() {
   };
 
   return (
-    <>
-      <ETPageContainer
-        direction="row"
-        container
-        columnSpacing={2}
-        rowSpacing={3}
-      >
-        <Grid item xs={12}>
-          <MasterTrackTable
-            columns={columns}
-            data={proponents}
-            initialState={{
-              sorting: [
-                {
-                  id: "name",
-                  desc: false,
-                },
-              ],
-              columnFilters,
-            }}
-            state={{
-              isLoading: ctx.loading,
-              showGlobalFilter: true,
-            }}
-            tableName={"proponent-listing"}
-            enableExport
-            renderTopToolbarCustomActions={({ table }) => (
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                errorProps={{ disabled: true }}
+    <ETPageContainer direction="row" container columnSpacing={2} rowSpacing={3}>
+      <Grid item xs={12}>
+        <MasterTrackTable
+          columns={columns}
+          data={proponents}
+          initialState={{
+            sorting: [
+              {
+                id: "name",
+                desc: false,
+              },
+            ],
+            columnFilters,
+          }}
+          state={{
+            isLoading: loadingProponents,
+            showGlobalFilter: true,
+          }}
+          tableName={"proponent-listing"}
+          enableExport
+          renderTopToolbarCustomActions={({ table }) => (
+            <Restricted
+              allowed={[ROLES.CREATE]}
+              errorProps={{ disabled: true }}
+            >
+              <Button
+                onClick={() => {
+                  setShowFormDialog(true);
+                  setProponentId(undefined);
+                }}
+                variant="contained"
               >
-                <Button
-                  onClick={() => {
-                    ctx.setShowModalForm(true);
-                    setProponentId(undefined);
-                  }}
-                  variant="contained"
-                >
-                  Create Proponent
-                </Button>
-              </Restricted>
-            )}
-            onCacheFilters={handleCacheFilters}
-          />
-        </Grid>
-        <UserMenu
-          anchorEl={userMenuAnchorEl}
-          email={relationshipHolder?.email || ""}
-          phone={relationshipHolder?.phone || ""}
-          position={relationshipHolder?.position?.name || ""}
-          firstName={relationshipHolder?.first_name || ""}
-          lastName={relationshipHolder?.last_name || ""}
-          onClose={handleCloseUserMenu}
-          onMouseEnter={(event) => {
-            event.stopPropagation();
-            event.preventDefault();
-            handleCloseUserMenu.cancel();
-            menuHoverRef.current = true;
-          }}
-          onMouseLeave={() => {
-            menuHoverRef.current = false;
-            handleCloseUserMenu();
-          }}
-          origin={{ vertical: "top", horizontal: "left" }}
-          sx={{
-            marginTop: "2.1em",
-            pointerEvents: "none",
-          }}
-          id={`relationship_holder_${relationshipHolder?.id || ""}`}
+                Create Proponent
+              </Button>
+            </Restricted>
+          )}
+          onCacheFilters={handleCacheFilters}
         />
-      </ETPageContainer>
-    </>
+      </Grid>
+      <UserMenu
+        anchorEl={userMenuAnchorEl}
+        email={relationshipHolder?.email || ""}
+        phone={relationshipHolder?.phone || ""}
+        position={relationshipHolder?.position?.name || ""}
+        firstName={relationshipHolder?.first_name || ""}
+        lastName={relationshipHolder?.last_name || ""}
+        onClose={handleCloseUserMenu}
+        onMouseEnter={(event) => {
+          event.stopPropagation();
+          event.preventDefault();
+          handleCloseUserMenu.cancel();
+          menuHoverRef.current = true;
+        }}
+        onMouseLeave={() => {
+          menuHoverRef.current = false;
+          handleCloseUserMenu();
+        }}
+        origin={{ vertical: "top", horizontal: "left" }}
+        sx={{
+          marginTop: "2.1em",
+          pointerEvents: "none",
+        }}
+        id={`relationship_holder_${relationshipHolder?.id || ""}`}
+      />
+      <ProponentDialog
+        proponentId={proponentId}
+        open={showFormDialog}
+        setOpen={setShowFormDialog}
+        saveProponentCallback={fetchProponents}
+      />
+    </ETPageContainer>
   );
-}
+};
+
+export default ProponentList;

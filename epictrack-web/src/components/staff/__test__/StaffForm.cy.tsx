@@ -1,9 +1,5 @@
-import { MasterContext } from "../../shared/MasterContext";
 import StaffForm from "../StaffForm";
-import {
-  createMockMasterContext,
-  mockStaffs,
-} from "../../../../cypress/support/common";
+import { mockStaffs } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
 import { setupIntercepts } from "../../../../cypress/support/utils";
 
@@ -18,7 +14,6 @@ const endpoints = [
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
-
   {
     name: "getFirstNationsOptions",
     method: "OPTIONS",
@@ -28,7 +23,7 @@ const endpoints = [
     name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    response: { body: { data: mockStaffs } },
+    response: { body: mockStaffs },
   },
   {
     name: "getPIPType",
@@ -55,14 +50,8 @@ const staffs = [staff1];
 
 describe("StaffForm", () => {
   beforeEach(() => {
-    const mockContext = createMockMasterContext(staffs, staffs);
     setupIntercepts(endpoints);
-
-    cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <StaffForm staffId={staff1.id} />
-      </MasterContext.Provider>
-    );
+    cy.mount(<StaffForm staff={staff1} saveStaff={cy.stub()} />);
   });
 
   it("renders the form", () => {

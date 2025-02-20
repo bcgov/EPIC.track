@@ -1,10 +1,6 @@
-import { MasterContext } from "components/shared/MasterContext";
 import { defaultFirstNation } from "models/firstNation";
 import IndigenousNationForm from "../IndigenousNationForm";
-import {
-  mockStaffs,
-  createMockMasterContext,
-} from "../../../../cypress/support/common";
+import { mockStaffs } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
 import { setupIntercepts } from "../../../../cypress/support/utils";
 
@@ -49,13 +45,10 @@ const firstNation = [defaultFirstNation];
 
 describe("IndigenousNationForm", () => {
   beforeEach(() => {
-    const mockContext = createMockMasterContext(firstNation, firstNation);
     setupIntercepts(endpoints);
 
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <IndigenousNationForm />
-      </MasterContext.Provider>
+      <IndigenousNationForm firstNation={null} saveFirstNation={cy.stub()} />
     );
   });
 

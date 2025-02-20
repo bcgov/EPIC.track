@@ -6,19 +6,20 @@ import {
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../constants/application-constant";
-import { ETCaption3 } from "../shared";
+import { ETCaption3, ETFormLabel } from "../shared";
 import { Grid, Link } from "@mui/material";
 import { When } from "react-if";
 import { SpecialFieldLock } from "../shared/specialField/components/SpecialFieldLock";
 
 interface ProponentNameSpecialFieldProps {
-  id: number;
+  id?: number;
   onSave: () => void;
   open: boolean;
   onLockClick: () => void;
   children?: React.ReactNode;
   title: string;
 }
+const LABEL = "Name";
 export const ProponentNameSpecialField = ({
   id,
   onSave,
@@ -27,6 +28,14 @@ export const ProponentNameSpecialField = ({
   children,
   title,
 }: ProponentNameSpecialFieldProps) => {
+  if (!id) {
+    return (
+      <Grid item xs={6}>
+        <ETFormLabel>{LABEL}</ETFormLabel>
+        {children}
+      </Grid>
+    );
+  }
   return (
     <>
       <Grid item xs={6}>

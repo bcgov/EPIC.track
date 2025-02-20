@@ -2,10 +2,11 @@ import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
 import ServiceBase from "../common/serviceBase";
 import { MasterBase } from "../../models/type";
+import { Proponent } from "models/proponent";
 
 class ProponentService implements ServiceBase {
   async getAll() {
-    return await http.GetRequest(Endpoints.Proponents.PROPONENTS);
+    return await http.GetRequest<Proponent[]>(Endpoints.Proponents.PROPONENTS);
   }
 
   async create(data: MasterBase) {
@@ -27,7 +28,9 @@ class ProponentService implements ServiceBase {
   }
 
   async getById(id: string) {
-    return await http.GetRequest(Endpoints.Proponents.PROPONENTS + `/${id}`);
+    return await http.GetRequest<Proponent>(
+      Endpoints.Proponents.PROPONENTS + `/${id}`
+    );
   }
 
   async checkProponentExists(name: string, id: number) {
@@ -38,4 +41,6 @@ class ProponentService implements ServiceBase {
     );
   }
 }
-export default new ProponentService();
+
+const proponentService = new ProponentService();
+export default proponentService;

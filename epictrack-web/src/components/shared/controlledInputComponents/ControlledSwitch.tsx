@@ -22,7 +22,7 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
       {...register(name)}
       control={control}
       name={name}
-      defaultValue={defaultValues?.[name] || ""}
+      defaultValue={defaultValues?.[name] || false}
       render={({ field }) => (
         <CustomSwitch
           sx={{
@@ -33,7 +33,7 @@ const ControlledSwitch: React.ForwardRefRenderFunction<
           {...field}
           ref={ref}
           disabled={otherProps.disabled}
-          checked={!!field.value || otherProps.defaultChecked}
+          checked={field.value || (otherProps.defaultChecked ?? false)}
         />
       )}
     />

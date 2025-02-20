@@ -1,26 +1,25 @@
-import React from "react";
-import { TextField, Grid, Box, Tooltip } from "@mui/material";
+import { FC, useEffect, useState } from "react";
+import { Box, Grid, TextField, Tooltip } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
+import { ListType } from "models/code";
 import { Staff } from "../../models/staff";
+import { PIPOrgType } from "../../models/pipOrgType";
+import staffService from "../../services/staffService/staffService";
+import pipOrgTypeService from "services/pipOrgTypeService";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation, defaultFirstNation } from "../../models/firstNation";
-import staffService from "../../services/staffService/staffService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
-import { MasterContext } from "../shared/MasterContext";
-import { PIPOrgType } from "../../models/pipOrgType";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import ControlledRichTextEditor from "components/shared/controlledInputComponents/ControlledRichTextEditor";
-import pipOrgTypeService from "services/pipOrgTypeService";
-import { ListType } from "models/code";
+import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { IconProps } from "components/icons/type";
 import icons from "components/icons";
 
-const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
+const InfoIcon: FC<IconProps> = icons["InfoIcon"];
 
 const schema = yup.object().shape({
   name: yup
@@ -48,26 +47,21 @@ const schema = yup.object().shape({
   notes: yup.string().nullable(),
 });
 
-export default function IndigenousNationForm({ ...props }) {
-  const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  const [pipOrgTypes, setPipOrgTypes] = React.useState<PIPOrgType[]>([]);
-  const ctx = React.useContext(MasterContext);
+type FirstNationFormProps = {
+  firstNation: FirstNation | null;
+  saveFirstNation: (data: any) => void;
+};
 
-  React.useEffect(() => {
-    ctx.setFormId("indigenous-nation-form");
-  }, []);
+export default function IndigenousNationForm({
+  firstNation,
+  saveFirstNation,
+}: FirstNationFormProps) {
+  const [staffs, setStaffs] = useState<Staff[]>([]);
+  const [pipOrgTypes, setPipOrgTypes] = useState<PIPOrgType[]>([]);
 
-  React.useEffect(() => {
-    ctx.setTitle(ctx.item ? (ctx.item as FirstNation)?.name : "Nation");
-  }, [ctx.title, ctx.item]);
-
-  React.useEffect(() => {
-    ctx.setId(props.indigenousNationID);
-  }, [ctx.id]);
-
-  const methods = useForm({
+  const methods = useForm<FirstNation>({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as FirstNation,
+    defaultValues: firstNation || defaultFirstNation,
     mode: "onBlur",
   });
 
@@ -78,9 +72,9 @@ export default function IndigenousNationForm({ ...props }) {
     reset,
   } = methods;
 
-  React.useEffect(() => {
-    reset(ctx.item ?? defaultFirstNation);
-  }, [ctx.item]);
+  useEffect(() => {
+    reset(firstNation ?? defaultFirstNation);
+  }, [firstNation, reset]);
 
   const getStaffs = async () => {
     try {
@@ -93,10 +87,6 @@ export default function IndigenousNationForm({ ...props }) {
         type: "error",
       });
     }
-  };
-
-  const codeTypes: { [x: string]: any } = {
-    pip_org_types: setPipOrgTypes,
   };
 
   const getPIPOrgTypes = async () => {
@@ -112,84 +102,73 @@ export default function IndigenousNationForm({ ...props }) {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getStaffs();
     getPIPOrgTypes();
   }, []);
 
-  const onSubmitHandler = async (data: any) => {
-    ctx.onSave(data, () => {
-      reset();
-    });
-    ctx.setId(undefined);
-  };
-
   return (
-    <>
-      <FormProvider {...methods}>
-        <Grid
-          component={"form"}
-          id="indigenous-nation-form"
-          container
-          spacing={2}
-          onSubmit={handleSubmit(onSubmitHandler)}
-        >
-          <Grid item xs={6}>
-            <ETFormLabel required>Name</ETFormLabel>
-            <TextField
-              placeholder="Name"
-              fullWidth
-              error={!!errors?.name?.message}
-              helperText={errors?.name?.message?.toString()}
-              {...register("name")}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <ETFormLabel>Relationship Holder</ETFormLabel>
-            <ControlledSelectV2
-              placeholder="Select a Relationship Holder"
-              defaultValue={
-                (ctx.item as FirstNation)?.relationship_holder_id || ""
-              }
-              getOptionLabel={(o: Staff) => (o ? o.full_name : "")}
-              getOptionValue={(o: Staff) => (o ? o.id.toString() : "")}
-              options={staffs}
-              {...register("relationship_holder_id")}
-            ></ControlledSelectV2>
-          </Grid>
-          <Grid item xs={6}>
-            <ETFormLabel>PIP Organization Type</ETFormLabel>
-            <ControlledSelectV2
-              placeholder="Select an Organization Type"
-              defaultValue={(ctx.item as FirstNation)?.pip_org_type_id || ""}
-              getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
-              getOptionValue={(o: PIPOrgType) => (o ? o.id.toString() : "")}
-              options={pipOrgTypes || []}
-              {...register("pip_org_type_id")}
-            ></ControlledSelectV2>
-          </Grid>
-          <Grid item xs={6}>
-            <ETFormLabel>PIP URL</ETFormLabel>
-            <TextField fullWidth {...register("pip_link")} />
-          </Grid>
-          <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-            <ControlledSwitch name="is_active" />
-            <ETFormLabel id="active">Active</ETFormLabel>
-            <Tooltip
-              sx={{ paddingLeft: "2px" }}
-              title="A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
-            >
-              <Box component={"span"}>
-                <InfoIcon />
-              </Box>
-            </Tooltip>
-          </Grid>
-          <Grid item xs={12}>
-            <ETFormLabel>Notes</ETFormLabel>
-            <ControlledRichTextEditor name="notes" />
-          </Grid>
+    <FormProvider {...methods}>
+      <Grid
+        component={"form"}
+        id="first-nation-form"
+        container
+        spacing={2}
+        onSubmit={handleSubmit(saveFirstNation)}
+      >
+        <Grid item xs={6}>
+          <ETFormLabel required>Name</ETFormLabel>
+          <TextField
+            placeholder="Name"
+            fullWidth
+            error={!!errors?.name?.message}
+            helperText={errors?.name?.message?.toString()}
+            {...register("name")}
+          />
         </Grid>
-      </FormProvider>
-    </>
+        <Grid item xs={6}>
+          <ETFormLabel>Relationship Holder</ETFormLabel>
+          <ControlledSelectV2
+            placeholder="Select a Relationship Holder"
+            defaultValue={firstNation?.relationship_holder_id}
+            getOptionLabel={(o: Staff) => (o ? o.full_name : "")}
+            getOptionValue={(o: Staff) => (o ? o.id.toString() : "")}
+            options={staffs}
+            {...register("relationship_holder_id")}
+          ></ControlledSelectV2>
+        </Grid>
+        <Grid item xs={6}>
+          <ETFormLabel>PIP Organization Type</ETFormLabel>
+          <ControlledSelectV2
+            placeholder="Select an Organization Type"
+            defaultValue={firstNation?.pip_org_type_id}
+            getOptionLabel={(o: PIPOrgType) => (o ? o.name : "")}
+            getOptionValue={(o: PIPOrgType) => (o ? o.id.toString() : "")}
+            options={pipOrgTypes || []}
+            {...register("pip_org_type_id")}
+          ></ControlledSelectV2>
+        </Grid>
+        <Grid item xs={6}>
+          <ETFormLabel>PIP URL</ETFormLabel>
+          <TextField fullWidth {...register("pip_link")} />
+        </Grid>
+        <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
+          <ControlledSwitch name="is_active" />
+          <ETFormLabel id="active">Active</ETFormLabel>
+          <Tooltip
+            sx={{ paddingLeft: "2px" }}
+            title="A Nation is considered INACTIVE if it is no longer being consulted/notified about the PROJECT"
+          >
+            <Box component={"span"}>
+              <InfoIcon />
+            </Box>
+          </Tooltip>
+        </Grid>
+        <Grid item xs={12}>
+          <ETFormLabel>Notes</ETFormLabel>
+          <ControlledRichTextEditor name="notes" />
+        </Grid>
+      </Grid>
+    </FormProvider>
   );
 }

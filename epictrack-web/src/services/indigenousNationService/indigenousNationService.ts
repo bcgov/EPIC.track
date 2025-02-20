@@ -1,18 +1,19 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
 import ServiceBase from "../common/serviceBase";
-import { MasterBase } from "../../models/type";
+import { MasterBase } from "models/type";
+import { FirstNation } from "models/firstNation";
 
 class IndigenousNationService implements ServiceBase {
   async getAll(is_active = false) {
-    return await http.GetRequest(
+    return await http.GetRequest<FirstNation[]>(
       Endpoints.IndigenousNations.INDIGENOUS_NATIONS,
       { is_active }
     );
   }
 
   async getById(id: string) {
-    return await http.GetRequest(
+    return await http.GetRequest<FirstNation>(
       Endpoints.IndigenousNations.INDIGENOUS_NATIONS + `/${id}`
     );
   }
@@ -44,4 +45,6 @@ class IndigenousNationService implements ServiceBase {
     );
   }
 }
-export default new IndigenousNationService();
+
+const indigenousNationService = new IndigenousNationService();
+export default indigenousNationService;

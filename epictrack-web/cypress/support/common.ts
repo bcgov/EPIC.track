@@ -1,8 +1,8 @@
 import { Staff } from "models/staff";
-import Sinon, { SinonStub } from "cypress/types/sinon";
+import Sinon from "cypress/types/sinon";
 import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
-import { ListType } from "models/code";
+import { Type } from "models/type";
 
 export const mockStaffs: Staff[] = [
   {
@@ -10,22 +10,24 @@ export const mockStaffs: Staff[] = [
     full_name: "John Doe",
     first_name: "", // Add the missing property
     last_name: "", // Add the missing property
-    phone: "",
-    email: "",
+    phone: "(123) 456-7890",
+    email: "email@example.com",
     is_active: false,
     position_id: 2 /* add more missing properties here */,
-    position: { name: "test", id: 1, sort_order: 0 }, // Add the missing property
+    position: { name: "test", id: 1, sort_order: 0 },
+    idir_user_id: ""
   },
   {
     id: 2,
     full_name: "Test Doe",
     first_name: "", // Add the missing property
     last_name: "", // Add the missing property
-    phone: "",
-    email: "",
+    phone: "(111) 111-1111",
+    email: "example@example.com",
     is_active: false,
     position_id: 2 /* add more missing properties here */,
-    position: { name: "test", id: 1, sort_order: 1 }, // Add the missing property
+    position: { name: "test", id: 1, sort_order: 1 },
+    idir_user_id: ""
   },
   // Add more mock Staff objects as needed
 ];
@@ -78,11 +80,12 @@ export const generateMockProject = (() => {
       sub_type: {
         id: faker.datatype.number() + projectCounter,
         name: `${faker.commerce.productMaterial()} ${projectCounter}`,
-        type: {} as ListType,
+        type: { sort_order: faker.datatype.number() } as Type,
       },
       type: {
         id: faker.datatype.number() + projectCounter,
         name: `${faker.commerce.product()} ${projectCounter}`,
+        sort_order: faker.datatype.number(),
       },
       is_active: faker.datatype.boolean(),
       description: `${faker.lorem.paragraph()} ${projectCounter}`,

@@ -6,11 +6,13 @@ import ServiceBase from "../common/serviceBase";
 
 class StaffService implements ServiceBase {
   async getAll(is_active = false) {
-    return await http.GetRequest(Endpoints.Staffs.STAFFS, { is_active });
+    return await http.GetRequest<Staff[]>(Endpoints.Staffs.STAFFS, {
+      is_active,
+    });
   }
 
   async getById(id: string) {
-    return await http.GetRequest(Endpoints.Staffs.STAFFS + `/${id}`);
+    return await http.GetRequest<Staff>(Endpoints.Staffs.STAFFS + `/${id}`);
   }
 
   async create(data: MasterBase) {
@@ -32,7 +34,7 @@ class StaffService implements ServiceBase {
   }
 
   async getStaffByPosition(position: string) {
-    return await http.GetRequest(
+    return await http.GetRequest<Staff[]>(
       Endpoints.Staffs.STAFFS + `?positions=${position}`
     );
   }
@@ -47,4 +49,5 @@ class StaffService implements ServiceBase {
   }
 }
 
-export default new StaffService();
+const staffService = new StaffService();
+export default staffService;

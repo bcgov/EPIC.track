@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -7,7 +7,6 @@ import { ETFormLabel } from "../shared/index";
 import { Staff, defaultStaff } from "../../models/staff";
 import { ListType } from "../../models/code";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
-import { MasterContext } from "../shared/MasterContext";
 import staffService from "../../services/staffService/staffService";
 import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
@@ -47,28 +46,17 @@ const schema = yup.object().shape({
   is_active: yup.boolean(),
 });
 
-export default function StaffForm({ ...props }) {
-  const [positions, setPositions] = React.useState<ListType[]>([]);
-  const ctx = React.useContext(MasterContext);
+type StaffFormProps = {
+  staff: Staff | null;
+  saveStaff: (data: any) => void;
+};
 
-  React.useEffect(() => {
-    ctx.setFormId("staff-form");
-  }, []);
-
-  React.useEffect(() => {
-    const staff = ctx?.item as Staff;
-    ctx.setTitle(
-      staff?.full_name ? staff?.full_name || "Edit Staff" : "Create Staff"
-    );
-  }, [ctx.item]);
-
-  React.useEffect(() => {
-    ctx.setId(props.staffId);
-  }, [ctx.id]);
+export default function StaffForm({ staff, saveStaff }: StaffFormProps) {
+  const [positions, setPositions] = useState<ListType[]>([]);
 
   const methods = useForm<Staff>({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as Staff,
+    defaultValues: staff || defaultStaff,
     mode: "onBlur",
   });
 
@@ -77,12 +65,11 @@ export default function StaffForm({ ...props }) {
     handleSubmit,
     formState: { errors },
     reset,
-    control,
   } = methods;
 
-  React.useEffect(() => {
-    reset(ctx.item ?? defaultStaff);
-  }, [ctx.item]);
+  useEffect(() => {
+    reset(staff ?? defaultStaff);
+  }, [reset, staff]);
 
   const getPositions = async () => {
     const positionResult = await positionService.getAll();
@@ -90,14 +77,11 @@ export default function StaffForm({ ...props }) {
       setPositions(positionResult.data as ListType[]);
     }
   };
-  React.useEffect(() => {
+
+  useEffect(() => {
     getPositions();
   }, []);
-  const onSubmitHandler = async (data: any) => {
-    ctx.onSave(data, () => {
-      reset();
-    });
-  };
+
   return (
     <FormProvider {...methods}>
       <Grid
@@ -105,7 +89,7 @@ export default function StaffForm({ ...props }) {
         id="staff-form"
         container
         spacing={2}
-        onSubmit={handleSubmit(onSubmitHandler)}
+        onSubmit={handleSubmit(saveStaff)}
       >
         <Grid item xs={6}>
           <ETFormLabel>First Name</ETFormLabel>
@@ -134,7 +118,7 @@ export default function StaffForm({ ...props }) {
             helperText={errors?.position_id?.message?.toString()}
             getOptionValue={(o: ListType) => o?.id?.toString()}
             getOptionLabel={(o: ListType) => o?.name}
-            defaultValue={(ctx.item as Staff)?.position_id}
+            defaultValue={staff?.position_id}
             options={positions}
             {...register("position_id")}
           />

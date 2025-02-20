@@ -1,4 +1,3 @@
-import { MasterContext } from "components/shared/MasterContext";
 import { MasterBase } from "models/type";
 import ProponentForm from "../ProponentForm";
 import { Staff } from "models/staff";
@@ -96,12 +95,13 @@ function createMockContext() {
 
 describe("ProponentForm", () => {
   beforeEach(() => {
-    const mockContext = createMockContext();
     setupIntercepts(endpoints);
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <ProponentForm />
-      </MasterContext.Provider>
+      <ProponentForm
+        proponent={null}
+        saveProponent={cy.stub()}
+        setDisableDialogSave={cy.stub()}
+      />
     );
   });
 
