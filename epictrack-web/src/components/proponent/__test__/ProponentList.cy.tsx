@@ -43,33 +43,10 @@ const endpoints = [
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
-    name: "getPIPTypeOptions",
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}codes/pip_org_types`,
-  },
-
-  {
-    name: "getFirstNationsOptions",
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}first_nations`,
-  },
-  {
     name: "getActiveStaff",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: mockStaffs },
-  },
-  {
-    name: "getPIPType",
-    method: "GET",
-    url: `${AppConfig.apiUrl}pip-org-types`,
-    response: { body: [] },
-  },
-  {
-    name: "getFirstNations",
-    method: "GET",
-    url: `${AppConfig.apiUrl}first_nations`,
-    response: { body: [] },
   },
 ];
 
