@@ -196,8 +196,8 @@ export default function WorkForm({
     []
   );
 
-  const getStaffByPosition = useMemo(
-    () => async (position: POSITION_ENUM) => {
+  const getStaffByPosition = useCallback(
+    async (position: POSITION_ENUM) => {
       const staffResult = await staffService.getStaffByPosition(
         position.toString()
       );
@@ -274,20 +274,27 @@ export default function WorkForm({
 
   useEffect(() => {
     const fetchStaff = async () => {
-      const promises = Object.keys(staffByRoles).map((key) =>
-        getStaffByPosition(Number(key) as POSITION_ENUM)
-      );
-      await Promise.all(promises);
-      await Promise.all([
-        getEAActs(),
-        getEAOTeams(),
-        getFederalInvolvements(),
-        getMinistries(),
-        getProjects(),
-        getSubstitutionActs(),
-        getWorkTypes(),
-      ]);
+      try {
+        const staffPromises = Array.from(staffByRoles.keys()).map((key) =>
+          getStaffByPosition(key as POSITION_ENUM)
+        );
+
+        const otherPromises = [
+          getEAActs(),
+          getEAOTeams(),
+          getFederalInvolvements(),
+          getMinistries(),
+          getProjects(),
+          getSubstitutionActs(),
+          getWorkTypes(),
+        ];
+
+        await Promise.all([...staffPromises, ...otherPromises]);
+      } catch (error) {
+        console.error("Error fetching staff and other data:", error);
+      }
     };
+
     fetchStaff();
   }, [getStaffByPosition, staffByRoles]);
 

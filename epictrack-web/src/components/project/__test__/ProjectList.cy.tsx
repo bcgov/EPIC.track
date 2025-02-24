@@ -2,7 +2,7 @@ import { MemoryRouter as Router } from "react-router-dom";
 import ProjectList from "../ProjectList";
 import { generateMockProject } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
 const project1 = generateMockProject();
 const project2 = generateMockProject();
@@ -22,7 +22,7 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
     });
 }
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getProjectsListType",
     method: "GET",

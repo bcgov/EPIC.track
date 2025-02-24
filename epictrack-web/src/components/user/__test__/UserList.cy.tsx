@@ -9,7 +9,7 @@ import {
   mockStaffs,
   testTableFiltering,
 } from "../../../../cypress/support/common";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 import { AppConfig } from "config";
 
 let userCounter = 0;
@@ -37,7 +37,7 @@ const user1 = generateMockUser();
 const user2 = generateMockUser();
 const users = [user1, user2];
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getInactiveStaffsOptions",
     method: "OPTIONS",

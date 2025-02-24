@@ -12,7 +12,7 @@ import { MRT_ColumnDef } from "material-react-table";
 import { MemoryRouter as Router } from "react-router-dom";
 import { Project } from "models/project";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
 // Mock reducer
 declare global {
@@ -21,7 +21,7 @@ declare global {
   }
 }
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffs",
     method: "GET",
