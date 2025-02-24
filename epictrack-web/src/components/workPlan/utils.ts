@@ -1,14 +1,15 @@
-import {
-  ROLES,
-  ISSUES_STALENESS_THRESHOLD,
-  StalenessEnum,
-} from "../../constants/application-constant";
-import moment from "moment";
-import dateUtils from "../../utils/dateUtils";
 import { useContext } from "react";
 import { useAppSelector } from "hooks";
+import moment from "moment";
+import {
+  ISSUES_STALENESS_THRESHOLD,
+  ROLES,
+  StalenessEnum,
+} from "../../constants/application-constant";
+import dateUtils from "../../utils/dateUtils";
 import { WorkplanContext } from "./WorkPlanContext";
 import { WorkIssue } from "../../models/Issue";
+
 // Get the active team members
 export const useActiveTeam = () => {
   const { team } = useContext(WorkplanContext);
@@ -38,12 +39,7 @@ export const useUserHasRole = () => {
 };
 
 // Helper function to calculate staleness
-export const calculateStaleness = (issue: {
-  updates: { posted_date: string }[];
-  type?: string;
-  is_active: boolean;
-  is_resolved: boolean;
-}) => {
+export const calculateStaleness = (issue: WorkIssue) => {
   const now = moment();
   // Check if the issue is inactive or resolved
   if (issue.is_resolved) {
@@ -52,15 +48,25 @@ export const calculateStaleness = (issue: {
   if (!issue.is_active) {
     return StalenessEnum.INACTIVE;
   }
-  // Check if there are no updates
-  if (!issue.updates || issue.updates.length === 0) {
+  const approvedUpdates =
+    issue.updates?.filter((update) => update.is_approved) || [];
+
+  // Check if there are no approved updates
+  if (approvedUpdates.length === 0) {
     return StalenessEnum.GOOD; // No update, consider it "GOOD"
   }
+
+  // Find the latest approved update by posted_date
+  const latestApprovedUpdate = approvedUpdates.reduce((latest, update) => {
+    return moment(update.posted_date).isAfter(moment(latest.posted_date))
+      ? update
+      : latest;
+  });
 
   // Calculate the difference in days from the latest update
   const diffDays = dateUtils.diff(
     now.toLocaleString(),
-    issue.updates[0]?.posted_date,
+    latestApprovedUpdate.posted_date,
     "days"
   );
 
