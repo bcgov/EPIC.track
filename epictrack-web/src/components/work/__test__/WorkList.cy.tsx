@@ -1,14 +1,13 @@
 import { MemoryRouter as Router } from "react-router-dom";
-import { SnackbarProvider } from "notistack";
 import WorkList from "../WorkList";
 import { faker } from "@faker-js/faker";
 import { Work } from "models/work";
 import { Staff } from "models/staff";
 import {
+  generateMockProject,
   mockStaffs,
-  testTableFiltering,
 } from "../../../../cypress/support/common";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 import { AppConfig } from "config";
 
 let workCounter = 0;
@@ -117,7 +116,7 @@ const generateMockWork = (): Work => {
 const work1 = generateMockWork();
 const work2 = generateMockWork();
 const works = [work1, work2];
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getEaActs",
     method: "GET",
@@ -222,7 +221,7 @@ const endpoints = [
   {
     name: "getStaffs1And2And8",
     method: "GET",
-    url: "${AppConfig.apiUrl}staffs?positions=1,2,8",
+    url: `${AppConfig.apiUrl}staffs?positions=1,2,8`,
     response: {
       body: [
         generateFakePosition(),
@@ -252,15 +251,13 @@ const endpoints = [
     method: "GET",
     url: `${AppConfig.apiUrl}projects/*`,
     response: {
-      body: {
-        description: faker.lorem.paragraph(1),
-      },
+      body: [generateMockProject()],
     },
   },
   {
     name: "checkWorkExists ",
     method: "GET",
-    url: "${AppConfig.apiUrl}works/exists*",
+    url: `${AppConfig.apiUrl}works/exists*`,
     response: {
       body: {
         exists: false,
@@ -270,7 +267,7 @@ const endpoints = [
   {
     name: "getWorks",
     method: "GET",
-    url: "${AppConfig.apiUrl}works",
+    url: `${AppConfig.apiUrl}works`,
     response: { body: works },
   },
 ];

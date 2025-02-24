@@ -8,7 +8,7 @@ import {
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
 //ensure first nations are never the same by incrementing the counter
 let firstNationCounter = 0;
@@ -33,7 +33,7 @@ const firstNation1 = generateMockFirstNation();
 const firstNation2 = generateMockFirstNation();
 const firstNations = [firstNation1, firstNation2];
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getFirstNations",
     method: "GET",

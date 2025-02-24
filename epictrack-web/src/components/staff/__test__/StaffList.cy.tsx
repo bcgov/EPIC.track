@@ -6,12 +6,12 @@ import {
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
 const staff1 = mockStaffs[0];
 const staff2 = mockStaffs[1];
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffsOptions",
     method: "OPTIONS",

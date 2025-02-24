@@ -1,9 +1,9 @@
 import StaffForm from "../StaffForm";
 import { mockStaffs } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffsOptions",
     method: "OPTIONS",
@@ -46,7 +46,6 @@ const endpoints = [
 ];
 
 const staff1 = mockStaffs[0];
-const staffs = [staff1];
 
 describe("StaffForm", () => {
   beforeEach(() => {

@@ -5,11 +5,11 @@ import {
   SPECIAL_FIELDS,
   SPECIAL_FIELD_TYPES,
 } from "../../../constants/application-constant";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 import { faker } from "@faker-js/faker";
 import { AppConfig } from "config";
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "SpecialFieldOptions",
     method: "OPTIONS",

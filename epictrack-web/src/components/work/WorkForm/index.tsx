@@ -274,20 +274,27 @@ export default function WorkForm({
 
   useEffect(() => {
     const fetchStaff = async () => {
-      const promises = Array.from(staffByRoles.keys()).map((key) =>
-        getStaffByPosition(key)
-      );
-      await Promise.all(promises);
-      await Promise.all([
-        getEAActs(),
-        getEAOTeams(),
-        getFederalInvolvements(),
-        getMinistries(),
-        getProjects(),
-        getSubstitutionActs(),
-        getWorkTypes(),
-      ]);
+      try {
+        const staffPromises = Array.from(staffByRoles.keys()).map((key) =>
+          getStaffByPosition(key as POSITION_ENUM)
+        );
+
+        const otherPromises = [
+          getEAActs(),
+          getEAOTeams(),
+          getFederalInvolvements(),
+          getMinistries(),
+          getProjects(),
+          getSubstitutionActs(),
+          getWorkTypes(),
+        ];
+
+        await Promise.all([...staffPromises, ...otherPromises]);
+      } catch (error) {
+        console.error("Error fetching staff and other data:", error);
+      }
     };
+
     fetchStaff();
   }, [getStaffByPosition, staffByRoles]);
 

@@ -6,7 +6,11 @@ import { userDetails } from "services/userService/userSlice";
 import { store } from "store";
 import { UserDetail } from "services/userService/type";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../../cypress/support/utils";
+import {
+  Endpoint,
+  setupIntercepts,
+} from "../../../../../cypress/support/utils";
+import { Method } from "cypress/types/net-stubbing";
 import { WORK_STATE } from "components/shared/constants";
 
 const generateFakePosition = () => {
@@ -41,10 +45,10 @@ const mockProject = {
   name: faker.lorem.word(),
 };
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getEaActs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}ea-acts`,
     response: {
       body: faker.lorem
@@ -58,7 +62,7 @@ const endpoints = [
   },
   {
     name: "getMinistries",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}ministries`,
     response: {
       body: faker.lorem
@@ -72,7 +76,7 @@ const endpoints = [
   },
   {
     name: "getWorkTypes",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}work-types`,
     response: {
       body: [mockWorkType],
@@ -80,7 +84,7 @@ const endpoints = [
   },
   {
     name: "getFederalActs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}federal-involvements`,
     response: {
       body: faker.lorem
@@ -94,7 +98,7 @@ const endpoints = [
   },
   {
     name: "getEaoTeams",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}eao-teams`,
     response: {
       body: faker.lorem
@@ -109,7 +113,7 @@ const endpoints = [
   },
   {
     name: "getSubstitutionActs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}substitution-acts`,
     response: {
       body: faker.lorem
@@ -123,7 +127,7 @@ const endpoints = [
   },
   {
     name: "getStaffsPosition",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}staffs?positions*`,
     response: {
       body: [
@@ -135,29 +139,29 @@ const endpoints = [
   },
   {
     name: "getProjectsListType",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}projects?return_type=list_type`,
     response: {
       body: [mockProject],
     },
   },
   {
-    name: "getProjectsAll",
-    method: "GET",
-    url: `${AppConfig.apiUrl}projects/*`,
-    response: {
-      body: {
-        description: faker.lorem.paragraph(1),
-      },
-    },
-  },
-  {
     name: "checkWorkExists",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}works/exists?title=*`,
     response: {
       body: {
         exists: false,
+      },
+    },
+  },
+  {
+    name: "getProjectsAll",
+    method: "GET" as Method,
+    url: `${AppConfig.apiUrl}projects/*`,
+    response: {
+      body: {
+        description: faker.lorem.paragraph(1),
       },
     },
   },
@@ -346,6 +350,10 @@ describe("WorkForm", () => {
       </Provider>
     );
     cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
+    cy.wait("@getProjectsListType")
+      .its("response.statusCode")
+      .should("eq", 200);
+
     // Find the input element for the worktype select and click first item
     cy.get("label")
       .contains("Worktype")
@@ -354,15 +362,11 @@ describe("WorkForm", () => {
       .first()
       .should("be.visible")
       .click({ force: true });
-
     cy.get("div")
       .contains(mockWorkType.name)
       .should("be.visible")
       .click({ force: true });
 
-    cy.wait("@getProjectsListType")
-      .its("response.statusCode")
-      .should("eq", 200);
     // Find the input element for the project select and click first item
     cy.get("label")
       .contains("Project")
@@ -371,11 +375,11 @@ describe("WorkForm", () => {
       .first()
       .should("be.visible")
       .click({ force: true });
-
     cy.get("div")
       .contains(mockProject.name)
       .should("be.visible")
       .click({ force: true });
+
     // Check if the work title is created correctly
     cy.get("p")
       .contains(`${mockProject.name} - ${mockWorkType.name} -`)
