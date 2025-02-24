@@ -92,7 +92,7 @@ const EditIssueUpdate = () => {
         </Grid>
         <Grid item xs={12}>
           <ETFormLabelWithCharacterLimit
-            characterCount={watchedDescription.length}
+            characterCount={watchedDescription ? watchedDescription.length : 0}
             maxCharacterLength={descriptionCharacterLimit}
             required
           >

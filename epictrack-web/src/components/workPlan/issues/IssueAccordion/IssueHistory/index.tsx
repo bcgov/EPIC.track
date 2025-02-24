@@ -1,28 +1,28 @@
-import React, { useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
+import moment from "moment";
+import { Else, If, Then, When, Unless } from "react-if";
+import { Button, Collapse, Grid, Stack, useTheme } from "@mui/material";
 import Timeline from "@mui/lab/Timeline";
 import TimelineItem from "@mui/lab/TimelineItem";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
 import TimelineConnector from "@mui/lab/TimelineConnector";
 import TimelineDot from "@mui/lab/TimelineDot";
 import TimelineOppositeContent from "@mui/lab/TimelineOppositeContent";
-import { WorkIssue } from "../../../../../models/Issue";
-import moment from "moment";
-import { Palette } from "../../../../../styles/theme";
-import { ETCaption1, ETCaption3, ETPreviewText } from "../../../../shared";
-import ReadMoreText from "../../../../shared/ReadMoreText";
 import TimelineContent, {
   timelineContentClasses,
 } from "@mui/lab/TimelineContent";
-import { Button, Collapse, Grid, Stack, useTheme } from "@mui/material";
-import { Else, If, Then, When, Unless } from "react-if";
+import { WorkIssue } from "../../../../../models/Issue";
+import { Palette } from "../../../../../styles/theme";
+import { ETCaption1, ETCaption3, ETPreviewText } from "../../../../shared";
+import ReadMoreText from "../../../../shared/ReadMoreText";
 import { IconProps } from "../../../../icons/type";
 import icons from "../../../../icons";
-import { IssuesContext } from "../../IssuesContext";
 import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../../constants/application-constant";
 import { Restricted } from "../../../../shared/restricted";
+import { IssuesContext } from "../../IssuesContext";
 import { EmptyIssueHistory } from "./EmptyIssueHistory";
 import { useUserHasRole } from "../../../utils";
 
@@ -35,11 +35,11 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
 
   const [expand, setExpand] = useState(false);
 
-  const latestUpdate = issue.updates[0];
+  const latestUpdate = issue.updates[0] ?? null;
   const subsequentUpdates = issue.updates.slice(1);
-  const highlightFirstInTimeLineApproved = !latestUpdate.is_approved;
-  const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
-  const ExpandIcon: React.FC<IconProps> = icons["ExpandIcon"];
+  const highlightFirstInTimeLineApproved = !latestUpdate?.is_approved;
+  const PencilEditIcon: FC<IconProps> = icons["PencilEditIcon"];
+  const ExpandIcon: FC<IconProps> = icons["ExpandIcon"];
 
   const SHOW_MORE_THRESHOLD = 3;
 

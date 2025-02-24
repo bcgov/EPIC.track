@@ -1,4 +1,4 @@
-import React from "react";
+import { useContext } from "react";
 import AddIcon from "@mui/icons-material/Add";
 import NoDataEver from "../../shared/NoDataEver";
 import { IssuesContext } from "./IssuesContext";
@@ -16,13 +16,13 @@ import { issueListMaxStaleness, calculateStaleness } from "../utils";
 import WarningBox from "../../shared/warningBox";
 
 const IssuesView = () => {
-  const { issues, team } = React.useContext(WorkplanContext) as {
+  const { issues, team } = useContext(WorkplanContext) as {
     issues: WorkIssue[];
     team: { staff: { email: string } }[];
   };
 
   const { isIssuesLoading, setCreateIssueFormIsOpen } =
-    React.useContext(IssuesContext);
+    useContext(IssuesContext);
 
   const { roles, email } = useAppSelector((state) => state.user.userDetail);
   const canCreate = hasPermission({ roles, allowed: [ROLES.CREATE] });
@@ -44,7 +44,7 @@ const IssuesView = () => {
   };
 
   const mapIssues = (issues: WorkIssue[]) => {
-    return issues.map((currentIssue, index) => {
+    return issues.map((currentIssue) => {
       const staleness = calculateStaleness(currentIssue);
       return (
         <Grid key={`accordion-${currentIssue.id}`} item xs={12}>
