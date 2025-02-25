@@ -1,9 +1,8 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Grid, Link } from "@mui/material";
 import { SpecialFieldLock } from "components/shared/specialField/components/SpecialFieldLock";
 import { SpecialFieldGrid } from "components/shared/specialField";
 import { ETCaption3, ETFormLabel } from "components/shared";
-import { When } from "react-if";
 import {
   EPIC_SUPPORT_LINKS,
   SpecialFieldEntityEnum,
@@ -12,31 +11,35 @@ import { ListType } from "models/code";
 import { Staff } from "models/staff";
 
 interface SpecialFieldProps {
-  id?: number;
-  options: ListType[] | Staff[];
-  onSave?: () => void;
-  open: boolean;
-  onLockClick: () => void;
   children?: React.ReactNode;
   disabled?: boolean;
   entity: SpecialFieldEntityEnum;
-  fieldName: string;
   fieldLabel: string;
+  fieldName: string;
   fieldValueType: string;
+  id?: number;
+  isPositionLeft?: boolean; // Is special field position leftmost
+  onLockClick: () => void;
+  onSave?: () => void;
+  open: boolean;
+  options: ListType[] | Staff[];
+  positionStyle?: React.CSSProperties; // Special position for locked position fields}
 }
 
 export const WorkFormSpecialField = ({
+  children,
+  disabled = false,
+  entity,
+  fieldLabel,
+  fieldName,
+  fieldValueType,
   id,
+  isPositionLeft = false,
+  onLockClick,
   onSave,
   open = false,
-  onLockClick,
   options,
-  disabled = false,
-  children,
-  entity,
-  fieldName,
-  fieldLabel,
-  fieldValueType,
+  positionStyle = {},
 }: SpecialFieldProps) => {
   const selectOptions = useMemo(() => {
     return options.map((option) => ({
@@ -56,19 +59,19 @@ export const WorkFormSpecialField = ({
 
   return (
     <>
-      <Grid item xs={6}>
+      <Grid item xs={6} sx={{ position: positionStyle }}>
         <SpecialFieldLock
-          id={id}
-          open={open}
-          onLockClick={onLockClick}
-          label={fieldLabel}
-          required
           disabled={disabled}
+          id={id}
+          label={fieldLabel}
+          onLockClick={onLockClick}
+          open={open}
+          required
         />
         {children}
       </Grid>
-      <When condition={open}>
-        <Grid item xs={12}>
+      {open && (
+        <Grid item xs={12} sx={{ order: isPositionLeft ? 1 : 0 }}>
           <SpecialFieldGrid
             entity={entity}
             entity_id={id}
@@ -90,7 +93,7 @@ export const WorkFormSpecialField = ({
             onSave={onSave}
           />
         </Grid>
-      </When>
+      )}
     </>
   );
 };
