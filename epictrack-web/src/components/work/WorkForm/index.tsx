@@ -1,28 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { Box, Divider, Grid, InputAdornment, Tooltip } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import Moment from "moment";
 import dayjs from "dayjs";
-import { ListType } from "../../../models/code";
-import { Ministry } from "../../../models/ministry";
-import { POSITION_ENUM } from "../../../models/position";
-import { Project } from "../../../models/project";
-import { Staff } from "../../../models/staff";
-import { defaultWork, Work } from "../../../models/work";
-import projectService from "../../../services/projectService/projectService";
-import staffService from "../../../services/staffService/staffService";
-import workService from "../../../services/workService/workService";
+import { defaultWork, Work } from "models/work";
+import { ListType } from "models/code";
+import { Ministry } from "models/ministry";
+import { POSITION_ENUM } from "models/position";
+import { Project } from "models/project";
+import { Staff } from "models/staff";
 import eaActService from "services/eaActService";
 import EAOTeamService from "services/eao_team";
 import federalInvolvementService from "services/federalInvolvementService";
 import ministryService from "services/ministryService";
+import projectService from "services/projectService/projectService";
+import staffService from "services/staffService/staffService";
 import substitutionActService from "services/substitutionActService";
+import workService from "services/workService/workService";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import { hasPermission } from "../../shared/restricted";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
 import {
   MIN_WORK_START_DATE,
@@ -30,9 +31,8 @@ import {
   SPECIAL_FIELD_TYPES,
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
-} from "../../../constants/application-constant";
+} from "constants/application-constant";
 import { useAppSelector } from "hooks";
-import { hasPermission } from "components/shared/restricted";
 import { sort } from "../../../utils";
 import { IconProps } from "../../icons/type";
 import icons from "../../icons";
@@ -79,7 +79,7 @@ const schema = yup.object<Work>().shape({
   decision_by_id: yup.number().required("Decision Maker is required"),
 });
 
-const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
+const InfoIcon: FC<IconProps> = icons["InfoIcon"];
 
 type WorkFormProps = {
   work: Work | null;
@@ -353,10 +353,10 @@ export default function WorkForm({
     <FormProvider {...methods}>
       <Grid
         component={"form"}
-        id="work-form"
         container
-        spacing={2}
+        id="work-form"
         onSubmit={handleSubmit(onSubmitHandler)}
+        spacing={2}
       >
         <Grid item xs={4}>
           <ETFormLabel required>EA Act</ETFormLabel>
@@ -597,6 +597,7 @@ export default function WorkForm({
           fieldName={SPECIAL_FIELDS.WORK.WORK_LEAD}
           fieldLabel="Work Lead"
           fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
+          isPositionLeft={true}
         >
           <ControlledSelectV2
             disabled={work?.work_lead_id !== undefined}
@@ -651,7 +652,14 @@ export default function WorkForm({
             {...register("decision_by_id")}
           />
         </WorkFormSpecialField>
-        <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+        <Grid
+          item
+          xs={3}
+          sx={{
+            order: isWorkLeadFieldUnlocked ? 1 : 0,
+            paddingTop: "30px !important",
+          }}
+        >
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name="is_active"
@@ -659,7 +667,14 @@ export default function WorkForm({
           />
           <ETFormLabel id="is_active">Active</ETFormLabel>
         </Grid>
-        <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
+        <Grid
+          item
+          xs={4}
+          sx={{
+            order: isWorkLeadFieldUnlocked ? 1 : 0,
+            paddingTop: "30px !important",
+          }}
+        >
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name="is_high_priority"
