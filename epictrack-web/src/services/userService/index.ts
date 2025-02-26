@@ -17,14 +17,16 @@ interface UserInfo {
   family_name: string;
   email: string;
 }
+// Initialize as null to placehold the Keycloak instance for cypress tests.
+let KeycloakData: Keycloak | null = null;
 
-const KeycloakData: Keycloak = new Keycloak({
-  clientId: AppConfig.keycloak.clientId,
-  realm: AppConfig.keycloak.realm,
-  url: `${AppConfig.keycloak.url}/auth`,
-});
-const doLogout = KeycloakData.logout;
+const doLogout = () => {
+  if (KeycloakData) {
+    KeycloakData.logout();
+  }
+};
 let refreshInterval: NodeJS.Timeout;
+
 /**
  * Logout function
  */
@@ -54,6 +56,14 @@ const refreshToken = (dispatch: Dispatch<Action>) => {
  *  Initializes Keycloak instance.
  */
 const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
+  if (!KeycloakData) {
+    // Initialize Keycloak only if it's not already initialized
+    KeycloakData = new Keycloak({
+      clientId: AppConfig.keycloak.clientId,
+      realm: AppConfig.keycloak.realm,
+      url: `${AppConfig.keycloak.url}/auth`,
+    });
+  }
   try {
     const authenticated = await KeycloakData.init({
       onLoad: "login-required",
@@ -106,8 +116,13 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
 };
 
 const getToken = () =>
-  KeycloakData.token ?? window.localStorage.getItem("authToken");
-const doLogin = () => KeycloakData.login;
+  KeycloakData?.token ?? window.localStorage.getItem("authToken");
+
+const doLogin = () => {
+  if (KeycloakData) {
+    KeycloakData.login();
+  }
+};
 
 // User management service methods
 const getUsers = async () => {
