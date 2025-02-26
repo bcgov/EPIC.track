@@ -37,7 +37,7 @@ import { sort } from "../../../utils";
 import { IconProps } from "../../icons/type";
 import icons from "../../icons";
 import { WorkFormSpecialField } from "./WorkFormSpecialField";
-import { useIsTeamMember } from "components/workPlan/utils";
+import { useIsActiveTeamMember } from "components/workPlan/utils";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -130,9 +130,9 @@ export default function WorkForm({
   const title = watch("title");
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = useIsTeamMember();
+  const isActiveTeamMember = useIsActiveTeamMember();
   const canEdit =
-    hasPermission({ roles, allowed: [ROLES.EDIT] }) || isTeamMember;
+    hasPermission({ roles, allowed: [ROLES.EDIT] }) || isActiveTeamMember;
 
   const [isEpdFieldUnlocked, setIsEpdFieldUnlocked] = useState<boolean>(false);
 

@@ -1,27 +1,25 @@
-import React from "react";
+import { useContext } from "react";
+import { Box, Grid } from "@mui/material";
+import { useAppSelector } from "hooks";
+import { hasPermission } from "components/shared/restricted";
 import NoDataEver from "../../../shared/NoDataEver";
+import WarningBox from "../../../shared/warningBox";
+import { isStatusOutOfDate } from "../shared";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
 import RecentStatus from "./RecentStatus";
-import { Box, Grid } from "@mui/material";
 import StatusHistory from "./StatusHistory";
-import WarningBox from "../../../shared/warningBox";
-import { When } from "react-if";
-import { isStatusOutOfDate } from "../shared";
-import { useAppSelector } from "hooks";
-import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 
 const StatusView = () => {
-  const { statuses, team, work } = React.useContext(WorkplanContext);
-  const { setShowStatusForm } = React.useContext(StatusContext);
+  const { isActiveTeamMember, statuses, work } = useContext(WorkplanContext);
+  const { setShowStatusForm } = useContext(StatusContext);
 
-  const { email, roles: currentRoles } = useAppSelector(
+  const { roles: currentRoles } = useAppSelector(
     (state) => state.user.userDetail
   );
-  const isTeamMember = team?.find((member) => member.staff.email === email);
   const canAddStatus =
-    isTeamMember ||
+    isActiveTeamMember ||
     hasPermission({
       roles: currentRoles,
       allowed: [ROLES.CREATE],
@@ -37,7 +35,7 @@ const StatusView = () => {
 
   return (
     <>
-      <When condition={statuses.length === 0}>
+      {statuses.length === 0 && (
         <NoDataEver
           title="You don't have any Statuses yet"
           subTitle="Create your first Status"
@@ -47,8 +45,8 @@ const StatusView = () => {
             disabled: !canAddStatus,
           }}
         />
-      </When>
-      <When condition={statusOutOfDate}>
+      )}
+      {statusOutOfDate && (
         <Box sx={{ paddingBottom: "16px" }}>
           <WarningBox
             title="The Work status is out of date"
@@ -56,17 +54,17 @@ const StatusView = () => {
             isTitleBold={true}
           />
         </Box>
-      </When>
-      <Grid container spacing={2}>
-        <When condition={statuses.length > 0}>
+      )}
+      {statuses.length > 0 && (
+        <Grid container spacing={2}>
           <Grid item xs={6}>
             <RecentStatus />
           </Grid>
           <Grid item xs={6}>
             <StatusHistory />
           </Grid>
-        </When>
-      </Grid>
+        </Grid>
+      )}
     </>
   );
 };

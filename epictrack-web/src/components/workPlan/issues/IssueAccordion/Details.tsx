@@ -15,7 +15,7 @@ import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../constants/application-constant";
-import { useIsTeamMember, useUserHasRole } from "../../utils";
+import { useIsActiveTeamMember, useUserHasRole } from "../../utils";
 import IssueHistory from "./IssueHistory";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
@@ -23,7 +23,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
   const CheckCircleIcon: FC<IconProps> = icons["CheckCircleIcon"];
   const PencilEditIcon: FC<IconProps> = icons["PencilEditIcon"];
   const AddIcon: FC<IconProps> = icons["AddIcon"];
-  const isTeamMember = useIsTeamMember();
+  const isActiveTeamMember = useIsActiveTeamMember();
   const userHasRole = useUserHasRole();
 
   const {
@@ -98,7 +98,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   <Grid item>
                     <Restricted
                       allowed={[ROLES.EDIT]}
-                      exception={isTeamMember}
+                      exception={isActiveTeamMember}
                       errorProps={{ disabled: true }}
                     >
                       <Button
@@ -122,7 +122,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   <Grid item>
                     <Restricted
                       allowed={[ROLES.CREATE]}
-                      exception={isTeamMember}
+                      exception={isActiveTeamMember}
                       errorProps={{ disabled: true }}
                     >
                       <Button
@@ -153,7 +153,8 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                       : ROLES.EDIT,
                   ]}
                   exception={
-                    (!latestUpdate?.is_approved && isTeamMember) || userHasRole
+                    (!latestUpdate?.is_approved && isActiveTeamMember) ||
+                    userHasRole
                   }
                   errorProps={{ disabled: true }}
                 >
