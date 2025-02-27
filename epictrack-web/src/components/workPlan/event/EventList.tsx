@@ -1,80 +1,94 @@
-import React, { useContext, useEffect, useMemo, useCallback } from "react";
-import { EVENT_TYPE } from "../phase/type";
-import eventService from "../../../services/eventService/eventService";
-import Icons from "../../icons";
+import {
+  ChangeEvent,
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { MRT_RowSelectionState } from "material-react-table";
+import { Box, Button, Divider, Grid, Tooltip, Typography } from "@mui/material";
+import { SnackbarKey, closeSnackbar } from "notistack";
+import Moment from "moment";
+import { When } from "react-if";
 import {
   EventPosition,
-  EventTemplateVisibility,
   EventsGridModel,
+  EventTemplateVisibility,
   MilestoneEvent,
-} from "../../../models/event";
-import Moment from "moment";
-import { WorkplanContext } from "../WorkPlanContext";
-import { MRT_RowSelectionState } from "material-react-table";
-import { dateUtils, naturalSortCollator } from "../../../utils";
-import { Box, Button, Divider, Grid, Tooltip, Typography } from "@mui/material";
-import { Palette } from "../../../styles/theme";
-import { IconProps } from "../../icons/type";
-import workService from "../../../services/workService/workService";
-import TrackDialog from "../../shared/TrackDialog";
-import TaskForm from "../task/TaskForm";
-import {
-  EVENT_STATUS,
-  TaskEvent,
-  statusOptions,
-} from "../../../models/taskEvent";
-import taskEventService from "../../../services/taskEventService/taskEventService";
-import { showNotification } from "../../shared/notificationProvider";
-import ImportTaskEvent from "../task/ImportTaskEvent";
+} from "models/event";
+import { EVENT_STATUS, statusOptions, TaskEvent } from "models/taskEvent";
 import {
   TemplateStatus,
   Work,
   WorkPhase,
   WorkPhaseAdditionalInfo,
-} from "../../../models/work";
-import { SnackbarKey, closeSnackbar } from "notistack";
+} from "models/work";
+import { ListType } from "models/code";
+import { setLoadingState } from "services/loadingService";
+import eventService from "services/eventService/eventService";
+import responsibilityService from "services/responsibilityService/responsibilityService";
+import taskEventService from "services/taskEventService/taskEventService";
+import workService from "services/workService/workService";
 import { OptionType } from "../../shared/filterSelect/type";
+import { showNotification } from "../../shared/notificationProvider";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
-import { ListType } from "../../../models/code";
-import responsibilityService from "../../../services/responsibilityService/responsibilityService";
+import TrackDialog from "../../shared/TrackDialog";
+import WarningBox from "../../shared/warningBox";
+import { IButton } from "components/shared";
+import { Palette } from "styles/theme";
+import { showConfetti } from "styles/uiStateSlice";
+import { useAppDispatch, useAppSelector } from "../../../hooks";
+import { getErrorMessage } from "../../../utils/axiosUtils";
+import { dateUtils, naturalSortCollator } from "../../../utils";
+import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
+import TaskForm from "../task/TaskForm";
+import ImportTaskEvent from "../task/ImportTaskEvent";
+import { IconProps } from "../../icons/type";
+import Icons from "../../icons";
+import { WorkplanContext } from "../WorkPlanContext";
+import { EventContext } from "./EventContext";
 import EventListTable from "./EventListTable";
 import EventForm from "./EventForm";
-import { EventContext } from "./EventContext";
-import { When } from "react-if";
-import WarningBox from "../../shared/warningBox";
-import { useAppDispatch, useAppSelector } from "../../../hooks";
-import { setLoadingState } from "../../../services/loadingService";
-import { getErrorMessage } from "../../../utils/axiosUtils";
-import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import { IButton } from "components/shared";
-import { showConfetti } from "styles/uiStateSlice";
+import { EVENT_TYPE } from "../phase/type";
 
-const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
-const DeleteIcon: React.FC<IconProps> = Icons["DeleteIcon"];
+const ImportFileIcon: FC<IconProps> = Icons["ImportFileIcon"];
+const DeleteIcon: FC<IconProps> = Icons["DeleteIcon"];
 
 const EventList = () => {
-  const dispatch = useAppDispatch();
-  const [events, setEvents] = React.useState<EventsGridModel[]>([]);
-  const [milestoneEvent, setMilestoneEvent] = React.useState<MilestoneEvent>();
-  const [taskEvent, setTaskEvent] = React.useState<TaskEvent>();
-  const [loading, setLoading] = React.useState<boolean>(true);
-  const [showTaskForm, setShowTaskForm] = React.useState<boolean>(false);
-  const [showMilestoneForm, setShowMilestoneForm] =
-    React.useState<boolean>(false);
+  const [events, setEvents] = useState<EventsGridModel[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [milestoneEvent, setMilestoneEvent] = useState<MilestoneEvent>();
+  const [openExtensionWarningBox, setOpenExtensionWarningBox] = useState(true);
+  const [responsibilities, setResponsibilities] = useState<OptionType[]>([]);
+  const [rowSelection, setRowSelection] = useState<MRT_RowSelectionState>({});
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number>();
+  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
+  const [showDeleteMilestoneButton, setShowDeleteMilestoneButton] =
+    useState<boolean>(false);
+  const [showMilestoneForm, setShowMilestoneForm] = useState<boolean>(false);
+  const [showSuspendedWarningBox, setShowSuspendedWarningBox] = useState(true);
+  const [showTaskForm, setShowTaskForm] = useState<boolean>(false);
   const [showTemplateConfirmation, setShowTemplateConfirmation] =
-    React.useState<boolean>(false);
-  const [selectedTemplateId, setSelectedTemplateId] = React.useState<number>();
-  const [showTemplateForm, setShowTemplateForm] =
-    React.useState<boolean>(false);
+    useState<boolean>(false);
+  const [showTemplateForm, setShowTemplateForm] = useState<boolean>(false);
+  const [staffSelectOptions, setStaffSelectOptions] = useState<OptionType[]>(
+    []
+  );
+  const [taskEvent, setTaskEvent] = useState<TaskEvent>();
+  const [templateAvailable, setTemplateAvailable] = useState<TemplateStatus>();
+  const dispatch = useAppDispatch();
 
   const {
     selectedWorkPhase,
     setSelectedWorkPhase,
+    setWork,
     setWorkPhases,
-    workPhases,
     team,
     work,
-    setWork,
+    workPhases,
   } = useContext(WorkplanContext);
   const { email } = useAppSelector((state) => state.user.userDetail);
   const userIsActiveTeamMember = useMemo(
@@ -84,29 +98,8 @@ const EventList = () => {
   );
   const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
   const { handleHighlightRows } = useContext(EventContext);
-  const [rowSelection, setRowSelection] = React.useState<MRT_RowSelectionState>(
-    {}
-  );
-  const notificationId = React.useRef<SnackbarKey | null>(null);
-  const [templateAvailable, setTemplateAvailable] =
-    React.useState<TemplateStatus>();
 
-  const [staffSelectOptions, setStaffSelectOptions] = React.useState<
-    OptionType[]
-  >([]);
-
-  const [responsibilities, setResponsibilities] = React.useState<OptionType[]>(
-    []
-  );
-
-  const [showDeleteMilestoneButton, setShowDeleteMilestoneButton] =
-    React.useState<boolean>(false);
-  const [showDeleteDialog, setShowDeleteDialog] =
-    React.useState<boolean>(false);
-  const [openExtensionWarningBox, setOpenExtensionWarningBox] =
-    React.useState(true);
-  const [showSuspendedWarningBox, setShowSuspendedWarningBox] =
-    React.useState(true);
+  const notificationId = useRef<SnackbarKey | null>(null);
 
   const showExtensionWarningBox = useMemo(
     () =>
@@ -116,22 +109,22 @@ const EventList = () => {
     [selectedWorkPhase, openExtensionWarningBox]
   );
 
-  const isEventFormFieldLocked = React.useMemo(() => {
+  const isEventFormFieldLocked = useMemo(() => {
     return !!milestoneEvent?.actual_date;
   }, [milestoneEvent]);
 
-  React.useEffect(() => setEvents([]), [selectedWorkPhase?.work_phase.id]);
-  React.useEffect(() => {
+  useEffect(() => setEvents([]), [selectedWorkPhase?.work_phase.id]);
+  useEffect(() => {
     setTimeout(() => {
       dispatch(showConfetti(false));
     }, 5000);
   }, [isConfettiShown]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getCombinedEvents();
   }, [work?.id, selectedWorkPhase?.work_phase.id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const options: OptionType[] = team
       .filter((staff) => staff.is_active)
       .map((staff) => {
@@ -147,13 +140,12 @@ const EventList = () => {
     setStaffSelectOptions(options);
   }, [team]);
 
-  const getCombinedEvents = React.useCallback(() => {
+  const getCombinedEvents = useCallback(() => {
     let result: EventsGridModel[] = [];
     if (work?.id && selectedWorkPhase?.work_phase.id) {
       setLoading(true);
       Promise.all([getMilestoneEvents(), getTaskEvents()]).then(
         (data: Array<EventsGridModel[]>) => {
-          setLoading(false);
           data.forEach((array: EventsGridModel[]) => {
             result = result.concat(array);
           });
@@ -246,6 +238,7 @@ const EventList = () => {
             return diff;
           });
           setEvents(result);
+          setLoading(false);
         }
       );
     }
@@ -320,7 +313,8 @@ const EventList = () => {
       setSelectedWorkPhase(selectedWp);
     }
   }, [work, workPhases]);
-  const getWorkPhases = React.useCallback(async () => {
+
+  const getWorkPhases = useCallback(async () => {
     if (work?.id) {
       setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(
@@ -332,7 +326,7 @@ const EventList = () => {
     }
   }, []);
 
-  const getWorkById = React.useCallback(async () => {
+  const getWorkById = useCallback(async () => {
     if (work?.id) {
       const result = await workService.getById(String(work.id));
       const workResult = result.data as Work;
@@ -394,7 +388,7 @@ const EventList = () => {
       });
     }
   };
-  const handleExportToSheet = React.useCallback(async () => {
+  const handleExportToSheet = useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
         Number(selectedWorkPhase?.work_phase.id)
@@ -414,9 +408,7 @@ const EventList = () => {
     } catch (error) {}
   }, [work?.id, selectedWorkPhase?.work_phase.phase.id]);
 
-  const handleTaskFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleTaskFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file || !selectedWorkPhase?.work_phase.id) {
       return;
@@ -502,7 +494,7 @@ const EventList = () => {
     }
   };
 
-  const getTemplateUploadStatus = React.useCallback(async () => {
+  const getTemplateUploadStatus = useCallback(async () => {
     if (work && selectedWorkPhase) {
       if (notificationId.current !== null) {
         closeSnackbar(notificationId.current);
@@ -544,7 +536,7 @@ const EventList = () => {
     }
   }, [selectedWorkPhase?.work_phase.phase.id]);
 
-  const getWorkPhaseById = React.useCallback(async () => {
+  const getWorkPhaseById = useCallback(async () => {
     const workPhaseId = selectedWorkPhase?.work_phase.id;
     const isCompleted = selectedWorkPhase?.work_phase.is_completed;
     if (workPhaseId) {
@@ -565,7 +557,7 @@ const EventList = () => {
     }
   }, [selectedWorkPhase?.work_phase.id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getTemplateUploadStatus();
   }, [selectedWorkPhase]);
 
@@ -587,7 +579,7 @@ const EventList = () => {
     return Promise.resolve(result);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     getResponsibilities();
 
     return () => {
@@ -600,7 +592,7 @@ const EventList = () => {
     };
   }, []);
 
-  const assignTasks = React.useCallback(
+  const assignTasks = useCallback(
     async (assignee_ids: any) => {
       assignee_ids = assignee_ids.filter(
         (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
@@ -634,7 +626,7 @@ const EventList = () => {
     [rowSelection]
   );
 
-  const assignResponsibility = React.useCallback(
+  const assignResponsibility = useCallback(
     async (responsibility_ids: any) => {
       responsibility_ids = responsibility_ids.filter(
         (responsibility_id: string) => responsibility_id !== "<SELECT_ALL>"
@@ -668,7 +660,7 @@ const EventList = () => {
     [rowSelection]
   );
 
-  const assignProgress = React.useCallback(
+  const assignProgress = useCallback(
     async (status: any) => {
       const data = {
         task_ids: Object.keys(rowSelection),
