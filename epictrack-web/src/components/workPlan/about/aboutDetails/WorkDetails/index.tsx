@@ -1,9 +1,9 @@
-import { useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { Button, Divider, Grid } from "@mui/material";
+import dayjs from "dayjs";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import { ETCaption1, ETParagraph, GrayBox } from "../../../../shared";
-import { Palette } from "../../../../../styles/theme";
-import dayjs from "dayjs";
+import { Palette } from "styles/theme";
 import {
   MONTH_DAY_YEAR,
   ROLES,
@@ -14,13 +14,12 @@ import { WorkDialog } from "components/work/Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import WorkDetailsSkeleton from "components/workPlan/about/aboutDetails/WorkDetails/Skeleton";
 import { Restricted } from "components/shared/restricted";
-import { useIsTeamMember } from "../../../utils";
 
 const WorkDetails = () => {
-  const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
+  const PencilEditIcon: FC<IconProps> = icons["PencilEditIcon"];
 
-  const { work, workPhases, loadData } = useContext(WorkplanContext);
-  const isTeamMember = useIsTeamMember();
+  const { isActiveTeamMember, loadData, work, workPhases } =
+    useContext(WorkplanContext);
   const [openWorkDialog, setOpenWorkDialog] = useState(false);
   const [loadingWork, setLoadingWork] = useState(false);
 
@@ -77,7 +76,7 @@ const WorkDetails = () => {
             <Grid item>
               <Restricted
                 allowed={[ROLES.EDIT]}
-                exception={isTeamMember}
+                exception={isActiveTeamMember}
                 errorProps={{
                   disabled: true,
                 }}

@@ -1,10 +1,11 @@
 import {
+  createContext,
   Dispatch,
   SetStateAction,
-  createContext,
+  useCallback,
   useEffect,
-  useState,
   useMemo,
+  useState,
 } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import workService from "../../services/workService/workService";
@@ -20,59 +21,63 @@ import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
 import statusService from "../../services/statusService/statusService";
 import issueService from "../../services/issueService";
+import { useAppSelector } from "hooks";
 
-interface WorkplanContextProps {
+export interface WorkplanContextProps {
+  firstNations: WorkFirstNation[];
+  getWorkById: () => Promise<void>;
+  getWorkStatuses: () => Promise<void>;
+  issues: WorkIssue[];
+  loadData: () => Promise<void>;
+  loading: boolean;
+  loadIssues: () => Promise<void>;
+  isActiveTeamMember: boolean;
+  selectedStaff?: StaffWorkRole;
   selectedWorkPhase?: WorkPhaseAdditionalInfo;
+  setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
+  setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
+  setSelectedStaff: Dispatch<SetStateAction<StaffWorkRole | undefined>>;
   setSelectedWorkPhase: Dispatch<
     SetStateAction<WorkPhaseAdditionalInfo | undefined>
   >;
-  loading: boolean;
-  team: StaffWorkRole[];
-  workPhases: WorkPhaseAdditionalInfo[];
-  setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
-  setWorkPhases: Dispatch<SetStateAction<WorkPhaseAdditionalInfo[]>>;
-  work: Work | undefined;
-  setWork: Dispatch<SetStateAction<Work | undefined>>;
-  firstNations: WorkFirstNation[];
-  setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
-  statuses: Status[];
   setStatuses: Dispatch<SetStateAction<Status[]>>;
-  getWorkStatuses: () => Promise<void>;
-  issues: WorkIssue[];
-  setIssues: Dispatch<SetStateAction<WorkIssue[]>>;
-  loadIssues: () => Promise<void>;
-  getWorkById: () => Promise<void>;
-  selectedStaff?: StaffWorkRole;
-  setSelectedStaff: Dispatch<SetStateAction<StaffWorkRole | undefined>>;
-  loadData: () => Promise<void>;
+  setTeam: Dispatch<SetStateAction<StaffWorkRole[]>>;
+  setWork: Dispatch<SetStateAction<Work | undefined>>;
+  setWorkPhases: Dispatch<SetStateAction<WorkPhaseAdditionalInfo[]>>;
+  statuses: Status[];
+  team: StaffWorkRole[];
+  work: Work | undefined;
+  workPhases: WorkPhaseAdditionalInfo[];
 }
 interface WorkPlanContainerRouteParams extends URLSearchParams {
   work_id: string;
 }
 
 export const initialWorkPlanContext: WorkplanContextProps = {
-  selectedWorkPhase: undefined,
-  setSelectedWorkPhase: () => ({}),
-  setTeam: () => ({}),
-  setWorkPhases: () => ({}),
-  loading: true,
-  team: [],
-  workPhases: [],
-  work: undefined,
-  setWork: () => ({}),
   firstNations: [],
-  setFirstNations: () => ({}),
-  statuses: [],
-  setStatuses: () => ({}),
-  issues: [],
-  setIssues: () => ({}),
-  getWorkStatuses: () => new Promise((resolve) => resolve),
-  loadIssues: () => new Promise((resolve) => resolve),
   getWorkById: () => new Promise((resolve) => resolve),
-  selectedStaff: undefined,
-  setSelectedStaff: () => ({}),
+  getWorkStatuses: () => new Promise((resolve) => resolve),
+  issues: [],
   loadData: () => new Promise((resolve) => resolve),
+  loading: true,
+  loadIssues: () => new Promise((resolve) => resolve),
+  isActiveTeamMember: false,
+  selectedStaff: undefined,
+  selectedWorkPhase: undefined,
+  setFirstNations: () => ({}),
+  setIssues: () => ({}),
+  setSelectedStaff: () => ({}),
+  setSelectedWorkPhase: () => ({}),
+  setStatuses: () => ({}),
+  setTeam: () => ({}),
+  setWork: () => ({}),
+  setWorkPhases: () => ({}),
+  statuses: [],
+  team: [],
+  work: undefined,
+  workPhases: [],
 };
+
 export const WorkplanContext = createContext<WorkplanContextProps>(
   initialWorkPlanContext
 );
@@ -94,6 +99,7 @@ export const WorkplanProvider = ({
   const workId = useMemo(() => query.get("work_id"), [query]);
   const [selectedStaff, setSelectedStaff] = useState<StaffWorkRole>();
   const [issues, setIssues] = useState<WorkIssue[]>([]);
+  const { email } = useAppSelector((state) => state.user.userDetail);
 
   const loadIssues = async () => {
     if (!workId) return;
@@ -101,11 +107,76 @@ export const WorkplanProvider = ({
       const response = await issueService.getAll(workId);
       setIssues(response.data);
     } catch (error) {
+      console.error("Failed to load Workplan issues", error);
       return;
     }
   };
 
-  const loadData = async () => {
+  const isActiveTeamMember = useMemo(() => {
+    return team?.some(
+      (member) => member.staff.email === email && member.is_active
+    );
+  }, [team, email]);
+
+  const getWorkById = useCallback(async () => {
+    if (workId) {
+      const work = await workService.getById(String(workId));
+      setWork(work.data as Work);
+    }
+  }, [workId]);
+
+  const getWorkPhases = useCallback(async () => {
+    if (workId) {
+      const workPhasesResult = await workService.getWorkPhases(String(workId));
+      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
+      setWorkPhases(workPhases);
+    }
+  }, [workId]);
+
+  const getWorkFirstNations = useCallback(async () => {
+    if (workId) {
+      const firstNationResult = await workService.getWorkFirstNations(
+        Number(workId)
+      );
+      if (firstNationResult.status === 200) {
+        const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
+          (p) => ({
+            ...p,
+            status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
+          })
+        );
+        setFirstNations(firstNations);
+      }
+    }
+  }, [workId]);
+
+  const getWorkStatuses = useCallback(async () => {
+    if (workId) {
+      const statusResult = await statusService.getAll(Number(workId));
+      if (statusResult.status === 200) {
+        setStatuses(statusResult.data);
+      }
+    }
+  }, [workId]);
+
+  const getWorkTeamMembers = useCallback(async () => {
+    if (!workId) return;
+    try {
+      const teamResult = await workService.getWorkTeamMembers(Number(workId));
+      if (teamResult.status === 200) {
+        const team = (teamResult.data as StaffWorkRole[]).map((p) => ({
+          ...p,
+          status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
+        }));
+        setTeam(team);
+      }
+    } catch (e) {
+      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    }
+  }, [workId]);
+
+  const loadData = useCallback(async () => {
+    if (!workId) return;
     try {
       await getWorkById();
       await getWorkTeamMembers();
@@ -114,109 +185,48 @@ export const WorkplanProvider = ({
       await getWorkStatuses();
       setLoading(false);
     } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
+      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    } finally {
       setLoading(false);
     }
-  };
+  }, [
+    getWorkById,
+    getWorkFirstNations,
+    getWorkPhases,
+    getWorkStatuses,
+    getWorkTeamMembers,
+    workId,
+  ]);
 
   useEffect(() => {
     loadData();
-  }, [workId]);
-
-  const getWorkTeamMembers = async () => {
-    try {
-      const teamResult = await workService.getWorkTeamMembers(Number(workId));
-      if (teamResult.status === 200) {
-        const team = (teamResult.data as StaffWorkRole[]).map((p) => {
-          return {
-            ...p,
-            status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
-          };
-        });
-        setTeam(team);
-        return Promise.resolve();
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
-
-  const getWorkById = async () => {
-    if (workId) {
-      const work = await workService.getById(String(workId));
-      setWork(work.data as Work);
-    }
-    return Promise.resolve();
-  };
-
-  const getWorkPhases = async () => {
-    if (workId) {
-      const workPhasesResult = await workService.getWorkPhases(String(workId));
-      const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
-      setWorkPhases(workPhases);
-    }
-    return Promise.resolve();
-  };
-
-  const getWorkFirstNations = async () => {
-    if (workId) {
-      const firstNationResult = await workService.getWorkFirstNations(
-        Number(workId)
-      );
-      if (firstNationResult.status === 200) {
-        const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
-          (p) => {
-            return {
-              ...p,
-              status: p.is_active
-                ? ACTIVE_STATUS.ACTIVE
-                : ACTIVE_STATUS.INACTIVE,
-            };
-          }
-        );
-        setFirstNations(firstNations);
-      }
-    }
-  };
-
-  const getWorkStatuses = async () => {
-    if (workId) {
-      const statusResult = await statusService.getAll(Number(workId));
-      if (statusResult.status === 200) {
-        setStatuses(statusResult.data);
-        return Promise.resolve();
-      }
-    }
-  };
+  }, [loadData]);
 
   return (
     <WorkplanContext.Provider
       value={{
-        selectedStaff,
-        setSelectedStaff,
-        setStatuses,
-        getWorkStatuses,
-        selectedWorkPhase,
-        setSelectedWorkPhase,
-        workPhases,
-        setWorkPhases,
-        loading,
-        work,
-        team,
-        setTeam,
         firstNations,
-        setFirstNations,
-        setWork,
-        statuses,
-        issues,
-        setIssues,
-        loadIssues,
         getWorkById,
+        getWorkStatuses,
+        issues,
         loadData,
+        loading,
+        loadIssues,
+        isActiveTeamMember,
+        selectedStaff,
+        selectedWorkPhase,
+        setFirstNations,
+        setIssues,
+        setSelectedStaff,
+        setSelectedWorkPhase,
+        setStatuses,
+        setTeam,
+        setWork,
+        setWorkPhases,
+        statuses,
+        team,
+        work,
+        workPhases,
       }}
     >
       {children}

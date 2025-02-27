@@ -28,7 +28,6 @@ import { MONTH_DAY_YEAR, ROLES } from "../../../constants/application-constant";
 import { searchFilter } from "../../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../../hooks";
 import { hasPermission, Restricted } from "../../shared/restricted";
-import { WorkplanContext } from "../WorkPlanContext";
 import { TemplateStatus } from "models/work";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
@@ -36,7 +35,7 @@ const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 
 const highlightedRowBGColor = "rgb(249, 249, 251)";
 
-interface EventListTable {
+interface EventListTableProps {
   onRowClick: (
     event: React.MouseEvent<HTMLAnchorElement>,
     rowOriginal: EventsGridModel
@@ -66,15 +65,11 @@ const EventListTable = ({
   onAddTask,
   handleTaskFileUpload,
   setShowTemplateForm,
-}: EventListTable) => {
-  const { team } = useContext(WorkplanContext);
+}: EventListTableProps) => {
   const { highlightedRows } = useContext(EventContext);
-  const { roles, email } = useAppSelector((state) => state?.user.userDetail);
-  const userIsTeamMember = Boolean(
-    team.find((member) => member.staff.email === email)
-  );
+  const { roles } = useAppSelector((state) => state?.user.userDetail);
   const canEdit =
-    hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsTeamMember;
+    hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsActiveTeamMember;
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -133,7 +128,7 @@ const EventListTable = ({
     events,
     "status",
     (value) =>
-      statusOptions.find((statusOption) => statusOption.value == value)
+      statusOptions.find((statusOption) => statusOption.value === value)
         ?.label ?? BLANK_OPTION
   );
 

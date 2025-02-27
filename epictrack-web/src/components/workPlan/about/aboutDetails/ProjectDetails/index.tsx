@@ -13,15 +13,12 @@ import { IconProps } from "components/icons/type";
 import { showNotification } from "components/shared/notificationProvider";
 import ProjectDetailsSkeleton from "./Skeleton";
 import { ProjectDialog } from "components/project/Dialog";
-import { useAppSelector } from "hooks";
 import { Restricted } from "components/shared/restricted";
 
 const ProjectDetails = () => {
   const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
 
-  const { work, getWorkById, team } = useContext(WorkplanContext);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.find((member) => member.staff.email === email);
+  const { getWorkById, isActiveTeamMember, work } = useContext(WorkplanContext);
 
   const [loadingWork, setLoadingWork] = useState(false);
   const [openProjectDialog, setOpenProjectDialog] = useState(false);
@@ -67,7 +64,7 @@ const ProjectDetails = () => {
             <Grid item>
               <Restricted
                 allowed={[ROLES.EDIT]}
-                exception={Boolean(isTeamMember)}
+                exception={Boolean(isActiveTeamMember)}
                 errorProps={{
                   disabled: true,
                 }}

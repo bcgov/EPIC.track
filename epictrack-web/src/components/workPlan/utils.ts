@@ -1,26 +1,27 @@
-import { useContext } from "react";
-import { useAppSelector } from "hooks";
 import moment from "moment";
+import { useAppSelector } from "hooks";
 import {
   ISSUES_STALENESS_THRESHOLD,
   ROLES,
   StalenessEnum,
 } from "../../constants/application-constant";
 import dateUtils from "../../utils/dateUtils";
-import { WorkplanContext } from "./WorkPlanContext";
 import { WorkIssue } from "../../models/Issue";
+import { useWorkplanSelector } from "./useWorkPlanSelector";
 
 // Get the active team members
 export const useActiveTeam = () => {
-  const { team } = useContext(WorkplanContext);
+  const team = useWorkplanSelector((context) => context.team);
   return team?.filter((member) => member.is_active) || [];
 };
 
-// Check if the current user is a team member
-export const useIsTeamMember = () => {
-  const { team } = useContext(WorkplanContext);
+// Check if the current user is an active team member
+export const useIsActiveTeamMember = () => {
+  const team = useWorkplanSelector((context) => context.team);
   const { email } = useAppSelector((state) => state.user.userDetail);
-  return team?.some((member) => member.staff.email === email) || false;
+  return team?.some(
+    (member) => member.staff.email === email && member.is_active
+  );
 };
 
 // Check if the current user has a specific role in the active team

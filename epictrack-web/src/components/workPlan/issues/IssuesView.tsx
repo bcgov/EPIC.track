@@ -12,11 +12,15 @@ import IssueDialogs from "./Dialogs";
 import { Restricted, hasPermission } from "components/shared/restricted";
 import { useAppSelector } from "hooks";
 import { ROLES, StalenessEnum } from "constants/application-constant";
-import { issueListMaxStaleness, calculateStaleness } from "../utils";
+import {
+  issueListMaxStaleness,
+  calculateStaleness,
+  useIsActiveTeamMember,
+} from "../utils";
 import WarningBox from "../../shared/warningBox";
 
 const IssuesView = () => {
-  const { issues, team } = useContext(WorkplanContext) as {
+  const { issues } = useContext(WorkplanContext) as {
     issues: WorkIssue[];
     team: { staff: { email: string } }[];
   };
@@ -24,9 +28,9 @@ const IssuesView = () => {
   const { isIssuesLoading, setCreateIssueFormIsOpen } =
     useContext(IssuesContext);
 
-  const { roles, email } = useAppSelector((state) => state.user.userDetail);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
   const canCreate = hasPermission({ roles, allowed: [ROLES.CREATE] });
-  const isTeamMember = team?.some((member) => member.staff.email === email);
+  const isActiveTeamMember = useIsActiveTeamMember();
 
   const sortIssues = (issues: WorkIssue[]): WorkIssue[] => {
     return [...issues].sort((a, b) => {
@@ -71,7 +75,7 @@ const IssuesView = () => {
           addNewButtonText="Add Issue"
           onAddNewClickHandler={() => setCreateIssueFormIsOpen(true)}
           addButtonProps={{
-            disabled: !canCreate && !isTeamMember,
+            disabled: !canCreate && !isActiveTeamMember,
           }}
         />
       </When>
@@ -94,7 +98,7 @@ const IssuesView = () => {
           <Grid item xs={12}>
             <Restricted
               allowed={[ROLES.CREATE]}
-              exception={isTeamMember}
+              exception={isActiveTeamMember}
               errorProps={{ disabled: true }}
             >
               <Button

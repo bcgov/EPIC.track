@@ -1,4 +1,14 @@
 import {
+  FC,
+  MouseEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
   Avatar,
   Button,
   Grid,
@@ -6,8 +16,6 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-
-import React, { useMemo } from "react";
 import workService from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
@@ -42,62 +50,53 @@ import { useAppSelector } from "../../../hooks";
 import { debounce } from "lodash";
 import { basePIPUrl } from "../../../constants/application-constant";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
-const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
+const ImportFileIcon: FC<IconProps> = Icons["ImportFileIcon"];
+
 const FirstNationList = () => {
-  const ctx = React.useContext(WorkplanContext);
-  const [workFirstNationId, setWorkFirstNationId] = React.useState<
+  const ctx = useContext(WorkplanContext);
+  const [workFirstNationId, setWorkFirstNationId] = useState<
     number | undefined
   >();
-  const [loading, setLoading] = React.useState<boolean>(true);
-  const [showNationForm, setShowNationForm] = React.useState<boolean>(false);
-  const [modalTitle, setModalTitle] = React.useState<string>("Add Nation");
-  const [consultationLevels, setConsultationLevels] = React.useState<
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showNationForm, setShowNationForm] = useState<boolean>(false);
+  const [modalTitle, setModalTitle] = useState<string>("Add Nation");
+  const [consultationLevels, setConsultationLevels] = useState<
     ConsultationLevel[]
   >([]);
-  const { roles, email } = useAppSelector((state) => state.user.userDetail);
-  const userIsTeamMember = useMemo(
-    () => ctx.team.some((member) => member.staff.email === email),
-    [ctx.team, email]
-  );
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const userIsActiveTeamMember = ctx.isActiveTeamMember;
   const canEdit =
-    userIsTeamMember || hasPermission({ roles, allowed: [ROLES.EDIT] });
+    userIsActiveTeamMember || hasPermission({ roles, allowed: [ROLES.EDIT] });
 
   const canCreate =
-    userIsTeamMember || hasPermission({ roles, allowed: [ROLES.CREATE] });
+    userIsActiveTeamMember || hasPermission({ roles, allowed: [ROLES.CREATE] });
 
-  const firstNations = React.useMemo(
-    () => ctx.firstNations,
-    [ctx.firstNations]
-  );
+  const firstNations = useMemo(() => ctx.firstNations, [ctx.firstNations]);
   const firstNation = firstNations.find((fN) => fN.id === workFirstNationId);
-  const [relationshipHolder, setRelationshipHolder] = React.useState<Staff>();
-  const [statusOptions, setStatusOptions] = React.useState<string[]>([]);
+  const [relationshipHolder, setRelationshipHolder] = useState<Staff>();
+  const [statusOptions, setStatusOptions] = useState<string[]>([]);
   const [showImportNationForm, setShowImportNationForm] =
-    React.useState<boolean>(false);
+    useState<boolean>(false);
   const [firstNationAvailable, setFirstNationAvailable] =
-    React.useState<boolean>(false);
-  const menuHoverRef = React.useRef(false);
+    useState<boolean>(false);
+  const menuHoverRef = useRef(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (workFirstNationId === undefined) {
       setModalTitle("Add Nation");
       return;
     }
     setModalTitle(firstNation?.indigenous_nation?.name || "");
-  }, [workFirstNationId]);
+  }, [firstNation, workFirstNationId]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(ctx.loading);
-  }, []);
+  }, [ctx.loading]);
 
-  const [userMenuAnchorEl, setUserMenuAnchorEl] =
-    React.useState<null | HTMLElement>(null);
-
-  React.useEffect(() => {
-    getStatusOptions();
-    getConsultationLevels();
-  }, [firstNations]);
+  const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
 
   const getStatusOptions = () => {
     const statuses = firstNations
@@ -117,21 +116,26 @@ const FirstNationList = () => {
     setConsultationLevels(Array.from(levelMap.values()));
   };
 
-  const getFirstNationAvailability = React.useCallback(async () => {
+  useEffect(() => {
+    getStatusOptions();
+    getConsultationLevels();
+  }, [firstNations, getConsultationLevels, getStatusOptions]);
+
+  const getFirstNationAvailability = useCallback(async () => {
     const response = await projectService.checkFirstNationAvailability(
       Number(ctx.work?.project_id),
       Number(ctx.work?.id)
     );
     const firstNationStatus = response.data as any;
     setFirstNationAvailable(firstNationStatus["first_nation_available"]);
-  }, [ctx.work?.project_id]);
+  }, [ctx.work]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getFirstNationAvailability();
   }, [ctx.work?.project_id]);
 
   const handleOpenUserMenu = (
-    event: React.MouseEvent<HTMLElement>,
+    event: MouseEvent<HTMLElement>,
     row: WorkFirstNation
   ) => {
     const staff = row.indigenous_nation.relationship_holder;
@@ -146,7 +150,7 @@ const FirstNationList = () => {
     }
   }, 100);
 
-  const columns = React.useMemo<MRT_ColumnDef<WorkFirstNation>[]>(
+  const columns = useMemo<MRT_ColumnDef<WorkFirstNation>[]>(
     () => [
       {
         accessorKey: "indigenous_nation.name",
@@ -337,7 +341,7 @@ const FirstNationList = () => {
     setLoading(false);
   };
 
-  const downloadPDFReport = React.useCallback(async () => {
+  const downloadPDFReport = useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadFirstNations(
         Number(ctx.work?.id)
@@ -385,7 +389,7 @@ const FirstNationList = () => {
           <Grid item xs={6}>
             <Restricted
               allowed={[ROLES.CREATE]}
-              exception={userIsTeamMember}
+              exception={userIsActiveTeamMember}
               errorProps={{ disabled: true }}
             >
               <Button
@@ -409,7 +413,7 @@ const FirstNationList = () => {
             <Tooltip title={"Import Nations from existing Works"}>
               <Restricted
                 allowed={[ROLES.CREATE]}
-                exception={userIsTeamMember}
+                exception={userIsActiveTeamMember}
                 errorProps={{
                   disabled: true,
                 }}
@@ -425,7 +429,7 @@ const FirstNationList = () => {
             <Tooltip title="Export first nations to excel">
               <Restricted
                 allowed={[ROLES.CREATE]}
-                exception={userIsTeamMember}
+                exception={userIsActiveTeamMember}
                 errorProps={{
                   disabled: true,
                 }}
