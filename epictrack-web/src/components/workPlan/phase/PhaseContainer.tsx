@@ -11,6 +11,9 @@ import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHe
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
+  const [expandedPhase, setExpandedPhase] = useState<number | null>(
+    ctx.selectedWorkPhase?.work_phase.id ?? null
+  );
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
 
   const currentAndFuturePhases: WorkPhaseAdditionalInfo[] = useMemo(
@@ -21,6 +24,10 @@ const PhaseContainer = () => {
     () => ctx.workPhases.filter((p) => p.work_phase.is_completed),
     [ctx.workPhases]
   );
+
+  const handleExpand = (phaseId: number) => {
+    setExpandedPhase(expandedPhase === phaseId ? null : phaseId);
+  };
 
   useEffect(() => {
     if (
@@ -33,6 +40,7 @@ const PhaseContainer = () => {
           workPhase.work_phase.id === ctx.work?.current_work_phase_id
       );
       ctx.setSelectedWorkPhase(phase);
+      setExpandedPhase(phase?.work_phase.id ?? null);
     }
   }, [ctx.workPhases, ctx.work]);
 
@@ -75,6 +83,8 @@ const PhaseContainer = () => {
           <Grid item xs={12}>
             <PhaseAccordion
               key={`phase-accordion-${phase.work_phase.id}`}
+              expanded={expandedPhase === phase.work_phase.id}
+              onExpandHandler={() => handleExpand(phase.work_phase.id)}
               phase={phase}
             />
           </Grid>
@@ -95,6 +105,8 @@ const PhaseContainer = () => {
         <Grid item xs={12}>
           <PhaseAccordion
             key={`phase-accordion-${phase.work_phase.id}`}
+            expanded={expandedPhase === phase.work_phase.id}
+            onExpandHandler={() => handleExpand(phase.work_phase.id)}
             phase={phase}
           />
         </Grid>
