@@ -20,6 +20,7 @@ import Unauthorized from "./Unauthorized";
 import MyWorkPlans from "../components/myWorkplans";
 import Insights from "components/insights";
 import MyTasksList from "components/myTasks/MyTasksList";
+import Settings from "components/settings";
 
 const AuthenticatedRoutes = () => {
   return (
@@ -77,8 +78,8 @@ const AuthenticatedRoutes = () => {
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route element={<AuthGate allowed={[ROLES.MANAGE_USERS]} />}>
         <Route path="/admin/users" element={<UserList />} />
+        <Route path="/admin/settings" element={<Settings />} />
       </Route>
-      <Route path="/admin/users" element={<UserList />} />
       <Route path="/" element={<MyWorkPlans />} />
       <Route path="/insights" element={<Insights />} />
       <Route path="/unauthorized" element={<Unauthorized />} />

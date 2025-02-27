@@ -124,6 +124,12 @@ export const Routes: RouteType[] = [
         allowedRoles: [ROLES.MANAGE_USERS],
         isAuthenticated: true,
       },
+      {
+        name: "Settings",
+        path: "/admin/settings",
+        allowedRoles: [ROLES.EXTENDED_EDIT],
+        isAuthenticated: true,
+      },
     ],
   },
 ];
