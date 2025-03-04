@@ -11,8 +11,10 @@ class StaffService implements ServiceBase {
     });
   }
 
-  async getById(id: string) {
-    return await http.GetRequest<Staff>(Endpoints.Staffs.STAFFS + `/${id}`);
+  async getById(id: string, is_active = true) {
+    return await http.GetRequest<Staff>(Endpoints.Staffs.STAFFS + `/${id}`, {
+      is_active,
+    });
   }
 
   async create(data: MasterBase) {
