@@ -41,9 +41,10 @@ class Auth:
             @Auth.require
             @wraps(f)
             def wrapper(*args, **kwargs):
+                # pylint: disable=no-value-for-parameter
                 if jwt.contains_role(roles):
                     return f(*args, **kwargs)
-
+                # pylint: enable=no-value-for-parameter
                 raise PermissionDeniedError("Access Denied", HTTPStatus.UNAUTHORIZED)
 
             return wrapper
@@ -53,7 +54,9 @@ class Auth:
     @classmethod
     def has_role(cls, role):
         """Method to validate the role."""
+        # pylint: disable=no-value-for-parameter
         return jwt.validate_roles(role)
+        # pylint: enable=no-value-for-parameter
 
 
 auth = (
