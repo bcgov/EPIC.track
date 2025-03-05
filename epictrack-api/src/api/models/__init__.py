@@ -28,6 +28,7 @@ from .code_table import CodeTableVersioned
 from .db import db  # noqa: I001
 from .ea_act import EAAct
 from .eao_team import EAOTeam
+from .elevated_role import ElevatedRole
 from .event import Event
 from .event_category import PRIMARY_CATEGORIES, EventCategory, EventCategoryEnum
 from .event_configuration import EventConfiguration
@@ -57,6 +58,7 @@ from .role import Role
 from .special_field import SpecialField
 from .staff import Staff
 from .staff_work_role import StaffWorkRole
+from .staff_elevated_role import StaffElevatedRole
 from .sub_types import SubType
 from .substitution_acts import SubstitutionAct
 from .task import Task

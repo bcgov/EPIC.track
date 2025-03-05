@@ -68,6 +68,10 @@ from .special_field_request import (
     SpecialFieldIdPathParameterSchema,
     SpecialFieldQueryParamSchema,
 )
+from .staff_elevated_role_request import (
+    StaffElevatedRoleBodyParamSchema,
+    StaffElevatedRoleIdPathParamSchema,
+)
 from .staff_request import (
     StaffBodyParameterSchema,
     StaffByPositionsQueryParamSchema,
