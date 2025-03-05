@@ -17,6 +17,7 @@ from .act_section import ActSectionService
 from .action_template import ActionTemplateService
 from .code import CodeService
 from .eao_team_service import EAOTeamService
+from .elevated_role import ElevatedRoleService
 from .event import EventService
 from .event_configuration import EventConfigurationService
 from .event_template import EventTemplateService
@@ -28,12 +29,14 @@ from .outcome_template import OutcomeTemplateService
 from .phaseservice import PhaseService
 from .position import PositionService
 from .project import ProjectService
+from .project_state import ProjectStateService
 from .proponent import ProponentService
 from .region import RegionService
 from .reminder_configuration import ReminderConfigurationService
 from .report import ReportService
 from .responsibility import ResponsibilityService
 from .staff import StaffService
+from .staff_elevated_role import StaffElevatedRoleService
 from .sub_type import SubTypeService
 from .task import TaskService
 from .task_template import TaskTemplateService
@@ -43,4 +46,3 @@ from .work import WorkService
 from .work_issues import WorkIssuesService
 from .work_phase import WorkPhaseService
 from .work_status import WorkStatusService
-from .project_state import ProjectStateService
