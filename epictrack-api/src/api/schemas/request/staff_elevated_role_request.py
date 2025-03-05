@@ -27,6 +27,16 @@ class StaffElevatedRoleBodyParamSchema(RequestBodyParameterSchema):
 class StaffElevatedRoleQueryParamSchema(RequestQueryParameterSchema):
     """StaffElevatedRole query parameter schema"""
 
+    staff_id = fields.Int(
+        metadata={"description": "Staff ID"},
+        validate=validate.Range(min=1),
+    )
+
+    elevated_role_id = fields.Int(
+        metadata={"description": "Elevated Role ID"},
+        validate=validate.Range(min=1),
+    )
+
     is_active = fields.Bool(
         metadata={"description": "Flag indicated whether to only return active staff elevated roles"},
     )

@@ -24,9 +24,8 @@ class StaffElevatedRoles(Resource):
     @profiletime
     def get():
         """Return all active staff elevated roles."""
-        args = StaffElevatedRoleBodyParamSchema().load(request.args)
-        query_args = StaffElevatedRoleQueryParamSchema().load(request.args)
-        is_active = query_args.get('is_active')
+        args = StaffElevatedRoleQueryParamSchema().load(request.args)
+        is_active = args.get('is_active')
         staff_id = args.get('staff_id')
         elevated_role_id = args.get('elevated_role_id')
         staff_elevated_role_id = args.get('staff_elevated_role_id')

@@ -1,7 +1,7 @@
 """Resource for Elevated Role endpoints."""
 from http import HTTPStatus
 
-from flask import current_app, jsonify
+from flask import jsonify
 from flask_restx import Namespace, Resource, cors
 
 from api.schemas import response as res
