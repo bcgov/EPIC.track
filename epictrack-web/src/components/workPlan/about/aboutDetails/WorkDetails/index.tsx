@@ -203,11 +203,12 @@ const WorkDetails = () => {
         </Grid>
       </GrayBox>
       <WorkDialog
-        workId={work.id}
+        isActiveTeamMember={isActiveTeamMember}
         open={openWorkDialog}
         setOpen={setOpenWorkDialog}
-        saveWorkCallback={handleLoadWork}
+        workId={work.id}
         closeCallback={handleLoadWork}
+        saveWorkCallback={handleLoadWork}
       />
     </>
   );
