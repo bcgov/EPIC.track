@@ -30,11 +30,11 @@ class StaffElevatedRoles(Resource):
         elevated_role_id = args.get('elevated_role_id')
         staff_elevated_role_id = args.get('staff_elevated_role_id')
         if staff_id:
-            staff_elevated_roles = StaffElevatedRoleService.find_by_staff_id(staff_id)
-        if elevated_role_id:
-            staff_elevated_roles = StaffElevatedRoleService.find_by_elevated_role_id(elevated_role_id)
-        if staff_elevated_role_id:
-            staff_elevated_roles = StaffElevatedRoleService.find_by_id(staff_elevated_role_id)
+            staff_elevated_roles = StaffElevatedRoleService.find_by_staff_id(staff_id, is_active)
+        elif elevated_role_id:
+            staff_elevated_roles = StaffElevatedRoleService.find_by_elevated_role_id(elevated_role_id, is_active)
+        elif staff_elevated_role_id:
+            staff_elevated_roles = StaffElevatedRoleService.find_by_id(staff_elevated_role_id, is_active)
         elif is_active is None or is_active:
             current_app.logger.debug('Find all active staff elevated roles')
             staff_elevated_roles = StaffElevatedRoleService.find_all_active()
