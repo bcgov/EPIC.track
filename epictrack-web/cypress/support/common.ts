@@ -12,7 +12,7 @@ export const mockStaffs: Staff[] = [
     last_name: "", // Add the missing property
     phone: "(123) 456-7890",
     email: "email@example.com",
-    is_active: false,
+    is_active: true,
     position_id: 2 /* add more missing properties here */,
     position: { name: "IPE", id: 1, sort_order: 0 },
     idir_user_id: ""
