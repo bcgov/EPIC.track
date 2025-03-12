@@ -60,7 +60,10 @@ const UserManagementList = () => {
       const response = await staffService.getAll();
       setStaffs((response.data as StaffWithElevatedRoles[]) || []);
     } catch (error) {
-      showNotification("Could not load Staffs", { duration: 3000, type: "error" });
+      showNotification("Could not load Staffs", {
+        duration: 3000,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -74,7 +77,7 @@ const UserManagementList = () => {
     } catch (error) {
       showNotification("Could not load Staff Additional Roles", {
         duration: 3000,
-        type: "error"
+        type: "error",
       });
     } finally {
       setLoading(false);
@@ -162,7 +165,7 @@ const UserManagementList = () => {
         accessorKey: "phone",
         enableEditing: false,
         header: "Phone Number",
-        size: 120
+        size: 120,
       },
       {
         accessorKey: "email",
@@ -198,7 +201,7 @@ const UserManagementList = () => {
         size: 110,
         Filter: ({ header, column }) => {
           return (
-            <Box >
+            <Box>
               <TableFilter
                 isMulti
                 header={header}
