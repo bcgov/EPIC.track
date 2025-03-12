@@ -23,6 +23,10 @@ class ElevatedRole(BaseModelVersioned):
     description = Column(String(500))
     sort_order = Column(Integer, nullable=False)
 
+    def as_dict(self):  # pylint:disable=arguments-differ
+        """Return Json representation."""
+        return super().as_dict(recursive=False)
+
     @classmethod
     def find_by_name(cls, name):
         """Find elevated role by name."""
