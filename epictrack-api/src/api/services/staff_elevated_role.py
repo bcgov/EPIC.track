@@ -46,7 +46,6 @@ class StaffElevatedRoleService:
         current_app.logger.debug("find staff elevated roles by staff_ID")
         staff_elevated_role = StaffElevatedRoleModel.find_by_staff_id(staff_id, include_inactive=not is_active)
         if staff_elevated_role:
-            current_app.logger.info(f"Found staff elevated role by staff_ID: {staff_elevated_role}")
             return staff_elevated_role
         raise ResourceNotFoundError(f"Staff Elevated Role with staff_id '{staff_id}' not found.")
 

@@ -1,6 +1,4 @@
 """Model for Staff Elevated Roles."""
-from flask import current_app
-
 from sqlalchemy import Boolean, Column, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 
@@ -64,7 +62,6 @@ class StaffElevatedRole(BaseModelVersioned):
     @classmethod
     def find_by_staff_id(cls, staff_id: int, include_inactive=False):
         """Return by staff id."""
-        current_app.logger.info(f"find staff elevated roles by staff_ID: {staff_id}")
         if include_inactive:
             return cls.query.filter_by(staff_id=staff_id).all()
         return cls.query.filter_by(staff_id=staff_id, is_active=True).all()

@@ -7,4 +7,5 @@ class ElevatedRoleService {
   }
 }
 
-export default new ElevatedRoleService();
+const elevatedRoleService = new ElevatedRoleService();
+export default elevatedRoleService;

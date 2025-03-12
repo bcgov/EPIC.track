@@ -20,7 +20,7 @@ import staffElevatedRoleService from "services/staffElevatedRoleService/staffEle
 import staffService from "services/staffService/staffService";
 import { ROLES } from "constants/application-constant";
 import { ElevatedRole } from "models/elevated_role";
-import { StaffElevatedRole, StaffWithElevatedRoles } from "models/staff";
+import { Staff, StaffElevatedRole, StaffWithElevatedRoles } from "models/staff";
 import { Palette } from "styles/theme";
 
 const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
@@ -49,16 +49,20 @@ const UserManagementList = () => {
   const [staffElevatedRoles, setStaffElevatedRoles] = useState<
     StaffElevatedRole[]
   >([]);
-  const [staffs, setStaffs] = useState<StaffWithElevatedRoles[]>([]);
+  const [staffs, setStaffs] = useState<Staff[]>([]);
+  const [staffsWithElevatedRoles, setStaffsWithElevatedRoles] = useState<
+    StaffWithElevatedRoles[]
+  >([]);
 
   const fetchStaffs = async () => {
     setLoading(true);
     try {
       const response = await staffService.getAll();
       setStaffs((response.data as StaffWithElevatedRoles[]) || []);
-      setLoading(false);
     } catch (error) {
-      showNotification("Could not load Staffs", { type: "error" });
+      showNotification("Could not load Staffs", { duration: 3000, type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,11 +71,13 @@ const UserManagementList = () => {
     try {
       const response = await staffElevatedRoleService.getAll();
       setStaffElevatedRoles((response.data as StaffElevatedRole[]) || []);
-      setLoading(false);
     } catch (error) {
-      showNotification("Could not load staff elevated roles", {
-        type: "error",
+      showNotification("Could not load Staff Additional Roles", {
+        duration: 3000,
+        type: "error"
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -131,9 +137,9 @@ const UserManagementList = () => {
           elevated_roles: roles,
         } as StaffWithElevatedRoles;
       });
-      setStaffs(updatedStaffs);
+      setStaffsWithElevatedRoles(updatedStaffs);
     }
-  }, [elevatedRoles, staffElevatedRoles]);
+  }, [elevatedRoles, staffElevatedRoles, staffs]);
 
   const statusesOptions = getSelectFilterOptions(
     staffs,
@@ -150,11 +156,13 @@ const UserManagementList = () => {
         filterFn: searchFilter,
         header: "Name",
         sortingFn: "sortFn",
+        size: 180,
       },
       {
         accessorKey: "phone",
         enableEditing: false,
         header: "Phone Number",
+        size: 120
       },
       {
         accessorKey: "email",
@@ -187,10 +195,10 @@ const UserManagementList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
-        size: 115,
+        size: 110,
         Filter: ({ header, column }) => {
           return (
-            <Box sx={{ width: "100px" }}>
+            <Box >
               <TableFilter
                 isMulti
                 header={header}
@@ -237,7 +245,8 @@ const UserManagementList = () => {
         filterSelectOptions: elevatedRoleOptions.map((option) =>
           String(option.label)
         ),
-        Edit: ({ cell, column, row, table }) => {
+        size: 200,
+        Edit: ({ column, row, table }) => {
           const onBlur = (newValue: any) => {
             const value = newValue.map((role: any) => role.value);
             row._valuesCache[column.id] = value;
@@ -359,7 +368,7 @@ const UserManagementList = () => {
       <Grid item xs={12}>
         <MasterTrackTable
           columns={columns}
-          data={staffs}
+          data={staffsWithElevatedRoles}
           editDisplayMode="row"
           enableEditing={true}
           enableRowActions={true}
