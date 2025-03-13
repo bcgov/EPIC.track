@@ -16,6 +16,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install OpenShift CLI
+        run: |
+          curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz"
+          tar -xvzf openshift-client-linux.tar.gz
+          sudo mv oc /usr/local/bin/
+          rm -f openshift-client-linux.tar.gz
+
       - name: Set Timestamp
         id: timestamp
         run: echo "::set-output name=ts::$(date +'%Y-%m-%d_%H-%M-%S')"
