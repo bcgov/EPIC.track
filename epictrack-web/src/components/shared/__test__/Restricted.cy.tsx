@@ -3,6 +3,7 @@ import { store } from "../../../store";
 import { Restricted } from "../restricted";
 import { ROLES } from "../../../constants/application-constant";
 import { userDetails } from "services/userService/userSlice";
+import { ElevatedRoleEnum } from "models/elevated_role";
 
 declare global {
   interface Window {
@@ -49,6 +50,38 @@ describe("Restricted Component", () => {
     cy.mount(
       <Provider store={store}>
         <Restricted allowed={["test"]}>
+          <div data-cy="restricted-content">Restricted Content</div>
+        </Restricted>
+      </Provider>
+    );
+
+    cy.get("[data-cy=restricted-content]").should("not.exist");
+  });
+
+  it("renders children when user has required elevated roles permissions", () => {
+    cy.mount(
+      <Provider store={store}>
+        <Restricted
+          allowed={["test"]}
+          elevatedRoles={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+          elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+          errorProps={{ disabled: true }}
+        >
+          <div data-cy="restricted-content">Restricted Content</div>
+        </Restricted>
+      </Provider>
+    );
+
+    cy.get("[data-cy=restricted-content]").should("be.visible");
+  });
+
+  it("renders error component when user does not have required elevated roles permissions", () => {
+    cy.mount(
+      <Provider store={store}>
+        <Restricted
+          allowed={["test"]}
+          elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+        >
           <div data-cy="restricted-content">Restricted Content</div>
         </Restricted>
       </Provider>

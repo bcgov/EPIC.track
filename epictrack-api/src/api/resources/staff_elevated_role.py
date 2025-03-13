@@ -26,6 +26,8 @@ class StaffElevatedRoles(Resource):
         """Return all active staff elevated roles."""
         args = StaffElevatedRoleQueryParamSchema().load(request.args)
         is_active = args.get('is_active')
+        if is_active is None:
+            is_active = True
         staff_id = args.get('staff_id')
         elevated_role_id = args.get('elevated_role_id')
         staff_elevated_role_id = args.get('staff_elevated_role_id')

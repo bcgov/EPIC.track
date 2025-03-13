@@ -3,11 +3,13 @@
 This module is to handle authorization related queries.
 """
 
+from flask import current_app
 from flask_restx import abort
 
 from api.utils import TokenInfo
 from api.utils.roles import Membership
 from api.models import Staff as StaffModel
+from api.models import StaffElevatedRole as StaffElevatedRoleModel
 from api.models import StaffWorkRole as StaffWorkRoleModel
 
 
@@ -25,7 +27,27 @@ def check_auth(**kwargs):
     if matching_memberships and _has_team_membership(kwargs, matching_memberships):
         return True
 
+    if permitted_roles and _has_elevated_role(permitted_roles):
+        return True
+
     abort(403)
+
+
+def _has_elevated_role(permitted_roles) -> bool:
+    email = TokenInfo.get_user_data()['email_id']
+    staff_model: StaffModel = StaffModel.find_by_email(email)
+
+    if not staff_model:
+        current_app.logger.warning(f"No staff found with email: {email}")
+        return False
+
+    elevated_roles = StaffElevatedRoleModel.find_by_params({"staff_id": staff_model.id})
+
+    if not elevated_roles:
+        current_app.logger.debug(f"No elevated roles found for staff {staff_model.id}")
+        return False
+
+    return any(role.elevated_role_id in permitted_roles for role in elevated_roles)
 
 
 def _has_team_membership(kwargs, team_permitted_roles) -> bool:
