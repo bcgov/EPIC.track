@@ -38,7 +38,7 @@ class TokenInfo:
             'email_id': token_info.get('email', None),
             'username': token_info.get('preferred_username', None),
             'identity_provider': token_info.get('identity_provider', ''),
-            'groups': [group[1:len(group)] for group in token_info.get('groups')]
+            'groups': [group[1:] for group in token_info.get('groups', [])]
         }
         return user_data
 
