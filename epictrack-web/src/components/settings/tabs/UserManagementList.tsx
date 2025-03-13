@@ -141,6 +141,15 @@ const UserManagementList = () => {
         } as StaffWithElevatedRoles;
       });
       setStaffsWithElevatedRoles(updatedStaffs);
+    } else if (staffs.length && !staffElevatedRoles.length) {
+      setStaffsWithElevatedRoles(
+        staffs.map((staff) => {
+          return {
+            ...staff,
+            elevated_roles: [],
+          } as StaffWithElevatedRoles;
+        })
+      );
     }
   }, [elevatedRoles, staffElevatedRoles, staffs]);
 
