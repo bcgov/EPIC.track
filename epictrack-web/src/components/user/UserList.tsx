@@ -67,7 +67,11 @@ const UserList = () => {
   >();
   const currentUserGroup = React.useMemo<Group>(() => {
     return groups
-      .filter((p) => userDetails.groups.includes(p.path))
+      .filter(
+        (p) =>
+          userDetails.groups.includes(p.path) ||
+          userDetails.groups.includes(p.path.split("/")[0])
+      )
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
 

@@ -13,9 +13,11 @@
 # limitations under the License.
 """User service"""
 from flask import current_app
-from api.exceptions import BusinessError, PermissionDeniedError
-from api.utils import TokenInfo
 
+from api.exceptions import BusinessError, PermissionDeniedError
+from api.services import authorisation
+from api.utils import TokenInfo
+from api.utils.roles import Role as KeycloakRole
 from .keycloak import KeycloakService
 
 
@@ -25,6 +27,7 @@ class UserService:
     @classmethod
     def get_all_users(cls):
         """Get all users"""
+        cls._check_auth()
         users = KeycloakService.get_users()
         for user in users:
             user["group"] = None
@@ -50,16 +53,17 @@ class UserService:
         Returns:
           list: A list of filtered groups that have sub-groups.
         """
+        cls._check_auth()
         # Fetch all groups from the Keycloak service
         groups = KeycloakService.get_groups()
-        current_app.logger.debug(f"Groups: {groups}")
+        current_app.logger.info(f"Groups: {groups}")
         filtered_groups = []
 
         for group in groups:
             # For some reason we get all the groups from keycloak instead of just requesting the
             # TRACK group. So we need to filter out the groups that are not TRACK based, otherwise
             # we will get all the groups in the system.
-            if group.get("name") != "TRACK":
+            if group.get("name", "") != "TRACK":
                 continue
 
             # Check if the group has sub-groups by looking at the "subGroupCount" attribute
@@ -89,6 +93,7 @@ class UserService:
         Returns:
           dict: The result of the group update operation from KeycloakService.
         """
+        cls._check_auth()
         token_groups = TokenInfo.get_user_data()["groups"]
         groups = cls.get_groups()
         requesters_group = next(
@@ -168,3 +173,11 @@ class UserService:
         except (KeyError, IndexError, TypeError) as e:
             current_app.logger.error(f"Error getting level from group: {e}. Returning 0.")
             return 0
+
+    @classmethod
+    def _check_auth(cls):
+        """Check if user has manage users role"""
+        one_of_roles = (
+            KeycloakRole.MANAGE_USERS.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
