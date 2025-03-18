@@ -56,7 +56,7 @@ class UserService:
         cls._check_auth()
         # Fetch all groups from the Keycloak service
         groups = KeycloakService.get_groups()
-        current_app.logger.info(f"Groups: {groups}")
+        current_app.logger.debug(f"Groups: {groups}")
         filtered_groups = []
 
         for group in groups:
