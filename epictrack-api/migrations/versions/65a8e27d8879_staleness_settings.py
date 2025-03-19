@@ -75,3 +75,4 @@ def downgrade():
     
     # Drop staleness_type enum
     op.execute('DROP TYPE staleness_type_enum')
+    

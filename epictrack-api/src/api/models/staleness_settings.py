@@ -1,7 +1,7 @@
 """Models for Staleness Settings."""
 
 import enum
-from sqlalchemy import Column, Integer, Boolean, Enum
+from sqlalchemy import Boolean, Column, Enum, Integer
 from .base_model import BaseModelVersioned
 
 

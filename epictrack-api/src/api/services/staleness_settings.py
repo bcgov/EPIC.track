@@ -72,5 +72,4 @@ class StalenessSettingsService:
         one_of_roles = (
             KeycloakRole.MANAGE_USERS.value,
         )
-        current_app.logger.debug(f"C HEHERE   he roles: {one_of_roles}")
         authorisation.check_auth(one_of_roles=one_of_roles)
