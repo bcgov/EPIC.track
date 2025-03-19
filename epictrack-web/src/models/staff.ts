@@ -1,6 +1,14 @@
+import { ElevatedRole } from "./elevated_role";
 import { ListType } from "./code";
-import { Role } from "./role";
 import { MasterBase } from "./type";
+import { Role } from "./role";
+
+export interface StaffElevatedRole {
+  id: number;
+  is_active: boolean;
+  staff_id: number;
+  elevated_role_id: number;
+}
 
 export interface Staff extends MasterBase {
   id: number;
@@ -28,6 +36,10 @@ export interface StaffWorkRole {
   work_id: number;
   is_active: boolean;
   status: string;
+}
+
+export interface StaffWithElevatedRoles extends Staff {
+  elevated_roles: ElevatedRole[];
 }
 
 export const defaultStaff = {

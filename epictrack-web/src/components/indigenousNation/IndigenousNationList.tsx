@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { debounce } from "lodash";
+import { AxiosError } from "axios";
 import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { ElevatedRoleEnum } from "models/elevated_role";
 import { FirstNation } from "models/firstNation";
 import { Staff } from "models/staff";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -14,6 +16,7 @@ import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { showNotification } from "components/shared/notificationProvider";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { ETCaption2, ETGridTitle, ETPageContainer } from "../shared";
+import staffElevatedRoleService from "services/staffElevatedRoleService/staffElevatedRoleService";
 import staffService from "services/staffService/staffService";
 import IndigenousNationService from "services/indigenousNationService/indigenousNationService";
 import {
@@ -33,6 +36,7 @@ const FirstNationList = () => {
     firstNationListColumnFiltersCacheKey,
     []
   );
+  const [elevatedRoles, setElevatedRoles] = useState<number[]>([]);
   const [firstNationId, setFirstNationId] = useState<number>();
   const [firstNations, setFirstNations] = useState<FirstNation[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,8 +47,13 @@ const FirstNationList = () => {
     null
   );
 
-  const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const { roles, staffId } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = hasPermission({
+    roles,
+    elevatedRoles,
+    allowed: [ROLES.EDIT],
+    elevatedAllowed: [ElevatedRoleEnum.MANAGE_FIRST_NATIONS],
+  });
   const menuHoverRef = useRef(false);
 
   const fetchFirstNations = async () => {
@@ -61,6 +70,28 @@ const FirstNationList = () => {
   useEffect(() => {
     fetchFirstNations();
   }, []);
+
+  useEffect(() => {
+    const fetchStaffElevatedRoles = async () => {
+      try {
+        const response =
+          await staffElevatedRoleService.getActiveStaffElevatedRoleByStaffId(
+            String(staffId)
+          );
+        setElevatedRoles(response.data.map((role) => role.elevated_role_id));
+      } catch (error) {
+        if ((error as AxiosError).response?.status === 404) {
+          setElevatedRoles([]);
+        } else {
+          showNotification("Could not load Additional Roles", {
+            type: "error",
+          });
+        }
+      }
+    };
+
+    fetchStaffElevatedRoles();
+  }, [staffId]);
 
   const orgTypes = useMemo(
     () =>
@@ -102,7 +133,12 @@ const FirstNationList = () => {
         header: "Name",
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
-              <Restricted allowed={[ROLES.EDIT]} RenderError={undefined}>
+              <Restricted
+                allowed={[ROLES.EDIT]}
+                elevatedRoles={elevatedRoles}
+                elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+                RenderError={undefined}
+              >
                 <ETGridTitle
                   to={"#"}
                   onClick={() => {
@@ -218,7 +254,14 @@ const FirstNationList = () => {
         ),
       },
     ],
-    [canEdit, handleCloseUserMenu, orgTypes, staffs, statusesOptions]
+    [
+      canEdit,
+      elevatedRoles,
+      handleCloseUserMenu,
+      orgTypes,
+      staffs,
+      statusesOptions,
+    ]
   );
 
   const getStaffs = async () => {
@@ -260,6 +303,8 @@ const FirstNationList = () => {
           renderTopToolbarCustomActions={() => (
             <Restricted
               allowed={[ROLES.CREATE]}
+              elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+              elevatedRoles={elevatedRoles}
               errorProps={{ disabled: true }}
             >
               <Button

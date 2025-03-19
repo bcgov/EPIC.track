@@ -23,6 +23,9 @@ from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import IndigenousNation, db
 from api.models.pip_org_type import PIPOrgType
 from api.models.staff import Staff
+from api.services import authorisation
+from api.utils.roles import ElevatedRole
+from api.utils.roles import Role as KeycloakRole
 from api.utils.token_info import TokenInfo
 
 
@@ -54,6 +57,8 @@ class IndigenousNationService:
     @classmethod
     def create_indigenous_nation(cls, payload: dict):
         """Create a new indigenous_nation."""
+        cls._check_can_create()
+
         exists = cls.check_existence(payload["name"])
         if exists:
             raise ResourceExistsError("Indigenous nation with same name exists")
@@ -64,6 +69,8 @@ class IndigenousNationService:
     @classmethod
     def update_indigenous_nation(cls, indigenous_nation_id: int, payload: dict):
         """Update existing indigenous_nation."""
+        cls._check_can_edit()
+
         exists = cls.check_existence(payload["name"], indigenous_nation_id)
         if exists:
             raise ResourceExistsError("Indigenous nation with same name exists")
@@ -78,6 +85,8 @@ class IndigenousNationService:
     @classmethod
     def delete_indigenous_nation(cls, indigenous_nation_id: int):
         """Delete indigenous_nation by id."""
+        cls._check_can_create()
+
         indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
         indigenous_nation.is_deleted = True
         indigenous_nation.save()
@@ -86,6 +95,8 @@ class IndigenousNationService:
     @classmethod
     def import_indigenous_nations(cls, file: IO):
         """Import indigenous nations"""
+        cls._check_can_create()
+
         data = cls._read_excel(file)
         data["relationship_holder_id"] = data["relationship_holder_id"].str.lower()
         relationship_holders = data["relationship_holder_id"].to_list()
@@ -175,3 +186,21 @@ class IndigenousNationService:
         current_app.logger.info(f"Enabled {enabled_count} IndigenousNations")
         # Remove updated indigenous_nations to avoid creating duplicates
         return data[~data["name"].isin(to_update)]
+
+    @classmethod
+    def _check_can_edit(cls):
+        """Check if user has edit role or has elevated role"""
+        one_of_roles = (
+            ElevatedRole.MANAGE_FIRST_NATIONS.value,
+            KeycloakRole.EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
+
+    @classmethod
+    def _check_can_create(cls):
+        """Check if user has create role or has elevated role"""
+        one_of_roles = (
+            ElevatedRole.MANAGE_FIRST_NATIONS.value,
+            KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)

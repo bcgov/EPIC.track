@@ -41,7 +41,7 @@ const FilterSelect = (props: SelectProps) => {
       requestAnimationFrame(() => {
         const documentWidth = document.documentElement.clientWidth;
         const scrollWidth = document.documentElement.scrollWidth;
-        const overflowRight = Math.max(scrollWidth - documentWidth, 0);
+        const overflowRight = Math.max(scrollWidth - documentWidth, 1);
         setOverflowRight(overflowRight);
       });
       updateSelectedOptions();
