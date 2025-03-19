@@ -37,6 +37,7 @@ from .report import ReportService
 from .responsibility import ResponsibilityService
 from .staff import StaffService
 from .staff_elevated_role import StaffElevatedRoleService
+from .staleness_settings import StalenessSettingsService
 from .sub_type import SubTypeService
 from .task import TaskService
 from .task_template import TaskTemplateService
