@@ -4,7 +4,7 @@ import { ETTab, ETTabs } from "../shared/tab/Tab";
 import { ETHeading2, ETPageContainer } from "../shared";
 import TabPanel from "../shared/tab/TabPanel";
 import GeneralSettings from "./tabs/GeneralSettings";
-import SpecialHistory from "./tabs/SpecialHistory";
+import SpecialHistory from "./tabs/SpecialHistory/index";
 import UserManagement from "./tabs/UserManagement";
 import { SETTINGS_TAB } from "./constants";
 import { Palette } from "styles/theme";

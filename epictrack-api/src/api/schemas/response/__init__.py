@@ -61,3 +61,4 @@ from .work_response import (
     WorkIssuesLatestUpdateResponseSchema,
 )
 from .project_state_response import ProjectStateResponseSchema
+from .ministry_response import MinistryResponseSchema

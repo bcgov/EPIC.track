@@ -226,7 +226,7 @@ export default function WorkForm({
   };
 
   const getMinistries = async () => {
-    const ministryResult = await ministryService.getAll();
+    const ministryResult = await ministryService.getAll("list_type");
     if (ministryResult.status === 200) {
       setMinistries(ministryResult.data as ListType[]);
     }

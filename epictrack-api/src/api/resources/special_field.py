@@ -33,7 +33,7 @@ API = Namespace("special-fields", description="Special fields")
 @cors_preflight("GET, POST")
 @API.route("", methods=["GET", "POST", "OPTIONS"])
 class SpecialFields(Resource):
-    """Endpoint resource to return spcial fields values."""
+    """Endpoint resource to return special fields values."""
 
     @staticmethod
     @cors.crossdomain(origin="*")
@@ -50,7 +50,7 @@ class SpecialFields(Resource):
     @auth.require
     @profiletime
     def post():
-        """Create new task template"""
+        """Create new special field entry"""
         request_json = req.SpecialFieldBodyParameterSchema().load(API.payload)
         entry = SpecialFieldService.create_special_field_entry(request_json)
         return res.SpecialFieldResponseSchema().dump(entry), HTTPStatus.CREATED
