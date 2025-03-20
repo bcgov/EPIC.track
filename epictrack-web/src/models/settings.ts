@@ -6,7 +6,6 @@ export interface StalenessSettings {
   sort_order: number;
 }
 
-//Typing matches console.log
 export enum StalenessSettingTypeEnum {
   ISSUES = "ISSUES",
   STATUS = "STATUS",

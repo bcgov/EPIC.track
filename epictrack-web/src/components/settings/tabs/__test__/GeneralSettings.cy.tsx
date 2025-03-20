@@ -6,7 +6,11 @@ import {
   setupIntercepts,
 } from "../../../../../cypress/support/utils";
 import GeneraSettings from "../GeneralSettings";
-import { StalenessSettings, StalenessSettingTypeEnum, StalenessSettingTypeNames } from "models/settings";
+import {
+  StalenessSettings,
+  StalenessSettingTypeEnum,
+  StalenessSettingTypeNames,
+} from "models/settings";
 
 export const mockStatusStalenessSettings: StalenessSettings = {
   id: 1,
@@ -68,11 +72,16 @@ describe("GeneralSettings", () => {
 
   it("should display the general settings", () => {
     cy.get("table")
-      .contains("tr", StalenessSettingTypeNames[StalenessSettingTypeEnum.ISSUES])
+      .contains(
+        "tr",
+        StalenessSettingTypeNames[StalenessSettingTypeEnum.ISSUES]
+      )
       .should("be.visible");
     cy.get("table")
-      .contains("tr", StalenessSettingTypeNames[StalenessSettingTypeEnum.STATUS])
+      .contains(
+        "tr",
+        StalenessSettingTypeNames[StalenessSettingTypeEnum.STATUS]
+      )
       .should("be.visible");
   });
-
 });

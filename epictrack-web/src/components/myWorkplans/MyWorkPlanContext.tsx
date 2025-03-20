@@ -5,8 +5,10 @@ import {
   useMemo,
   useState,
 } from "react";
-import { WorkPlan } from "../../models/workplan";
-import workplanService from "../../services/workplanService";
+import { WorkPlan } from "models/workplan";
+import { StalenessSettings } from "models/settings";
+import workplanService from "services/workplanService";
+import stalenessSettingsService from "services/stalenessSettingsService";
 import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
@@ -14,8 +16,6 @@ import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
 import { MY_WORKPLAN_CACHED_SEARCH_OPTIONS } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
-import { StalenessSettings } from "models/settings";
-import stalenessSettingsService from "services/stalenessSettingsService";
 
 interface MyWorkplanContextProps {
   workplans: WorkPlan[];
