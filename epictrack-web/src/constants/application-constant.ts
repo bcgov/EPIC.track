@@ -135,7 +135,7 @@ export const SPECIAL_FIELDS = Object.freeze({
     NAME: "name",
     MINISTER: "minister_id",
     ABBREVIATION: "abbreviation",
-  }
+  },
 });
 
 export const SPECIAL_FIELD_TYPES = Object.freeze({

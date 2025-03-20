@@ -12,11 +12,9 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
 const SpecialHistorySettings = () => {
-  const {
-    setCreateMinistryDialogOpen,
-    ministries,
-    setMinistry,
-  } = useContext(SpecialHistoryContext);
+  const { setCreateMinistryDialogOpen, ministries, setMinistry } = useContext(
+    SpecialHistoryContext
+  );
 
   const columns = useMemo<MRT_ColumnDef<Ministry>[]>(
     () => [

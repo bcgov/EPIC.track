@@ -39,7 +39,8 @@ export const SpecialHistoryProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [createMinistryDialogOpen, setCreateMinistryDialogOpen] = useState(false);
+  const [createMinistryDialogOpen, setCreateMinistryDialogOpen] =
+    useState(false);
   const [ministry, setMinistry] = useState<Ministry | null>(null);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
   const [ministers, setMinisters] = useState<Staff[]>([]);
@@ -132,7 +133,7 @@ export const SpecialHistoryProvider = ({
         }}
         isActionsRequired
       >
-        <MinistryForm setDisableDialogSave={setDisableSave}/>
+        <MinistryForm setDisableDialogSave={setDisableSave} />
       </TrackDialog>
     </SpecialHistoryContext.Provider>
   );

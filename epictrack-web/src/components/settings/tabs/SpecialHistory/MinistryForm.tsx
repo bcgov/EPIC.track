@@ -41,7 +41,8 @@ const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
   const [isMinisterUnLocked, setIsMinisterUnLocked] = useState(false);
   const [isMinistryUnlocked, setIsMinistryUnlocked] = useState(false);
 
-  const isSpecialFieldUnlocked: boolean = isAbbreviationUnLocked || isMinisterUnLocked || isMinistryUnlocked;
+  const isSpecialFieldUnlocked: boolean =
+    isAbbreviationUnLocked || isMinisterUnLocked || isMinistryUnlocked;
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -70,7 +71,7 @@ const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
     if (setDisableDialogSave) {
       setDisableDialogSave(isSpecialFieldUnlocked);
     }
-  }, [setDisableDialogSave, isSpecialFieldUnlocked])
+  }, [setDisableDialogSave, isSpecialFieldUnlocked]);
 
   return (
     <FormProvider {...methods}>
