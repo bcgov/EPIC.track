@@ -154,5 +154,10 @@ const Endpoints = {
     WORKS_ACTIVE: "/insights/works?isactive",
     ASSESSMENT_BY_PHASE: "/insights/works?group_by=assessment_by_phase",
   },
+  StalenessSettings: {
+    STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
+    STALENESS: "/staleness-settings",
+    UPDATE_STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
+  },
 };
 export default Endpoints;

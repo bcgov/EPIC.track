@@ -23,6 +23,7 @@ class StalenessSettings(BaseModelVersioned):
     staleness_length = Column(Integer, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     is_deleted = Column(Boolean, nullable=False, default=False)
+    sort_order = Column(Integer, nullable=False, default=0)
 
     def as_dict(self): # pylint:disable=arguments-differ
         """Return Json representation."""
@@ -32,6 +33,7 @@ class StalenessSettings(BaseModelVersioned):
             'warning_length': self.warning_length,
             'staleness_length': self.staleness_length,
             'is_active': self.is_active,
+            'sort_order': self.sort_order,
         }
 
     @classmethod

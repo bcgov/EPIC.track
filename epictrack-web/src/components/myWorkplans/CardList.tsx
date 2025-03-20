@@ -14,6 +14,7 @@ const CardList = () => {
     totalWorkplans,
     loadingMoreWorkplans,
     setLoadingMoreWorkplans,
+    statusStalenessSettings,
   } = useContext(MyWorkplansContext);
 
   if (loadingWorkplans) {
@@ -33,7 +34,10 @@ const CardList = () => {
       {workplans.map((workplan) => {
         return (
           <Grid key={workplan.id} item xs={4}>
-            <Card workplan={workplan} />
+            <Card
+              workplan={workplan}
+              statusStalenessSettings={statusStalenessSettings}
+            />
           </Grid>
         );
       })}

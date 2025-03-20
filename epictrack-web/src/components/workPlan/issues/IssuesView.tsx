@@ -18,11 +18,13 @@ import {
   useIsActiveTeamMember,
 } from "../utils";
 import WarningBox from "../../shared/warningBox";
+import { StalenessSettings } from "models/settings";
 
 const IssuesView = () => {
-  const { issues } = useContext(WorkplanContext) as {
+  const { issues, issueStalenessSetting } = useContext(WorkplanContext) as {
     issues: WorkIssue[];
     team: { staff: { email: string } }[];
+    issueStalenessSetting: StalenessSettings;
   };
 
   const { isIssuesLoading, setCreateIssueFormIsOpen } =
@@ -49,7 +51,11 @@ const IssuesView = () => {
 
   const mapIssues = (issues: WorkIssue[]) => {
     return issues.map((currentIssue) => {
-      const staleness = calculateStaleness(currentIssue);
+      const staleness = calculateStaleness(
+        currentIssue,
+        issueStalenessSetting?.staleness_length,
+        issueStalenessSetting?.warning_length
+      );
       return (
         <Grid key={`accordion-${currentIssue.id}`} item xs={12}>
           <IssueAccordion issue={currentIssue} staleness={staleness} />
@@ -64,7 +70,11 @@ const IssuesView = () => {
     return <IssuesViewSkeleton />;
   }
 
-  const maxStaleness = issueListMaxStaleness(issues);
+  const maxStaleness = issueListMaxStaleness(
+    issues,
+    issueStalenessSetting?.staleness_length,
+    issueStalenessSetting?.warning_length
+  );
 
   return (
     <>

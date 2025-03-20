@@ -1,9 +1,9 @@
-import React from "react";
+import { FC, useMemo, useState } from "react";
 import { Grid } from "@mui/material";
-import ETAccordion from "../../../shared/accordion/Accordion";
-import ETAccordionSummary from "../../../shared/accordion/components/AccordionSummary";
+import ETAccordion from "components/shared/accordion/Accordion";
+import ETAccordionDetails from "components/shared/accordion/components/AccordionDetails";
+import ETAccordionSummary from "components/shared/accordion/components/AccordionSummary";
 import { Palette } from "../../../../styles/theme";
-import ETAccordionDetails from "../../../shared/accordion/components/AccordionDetails";
 import Icons from "../../../icons/index";
 import { IconProps } from "../../../icons/type";
 import { WorkIssue } from "../../../../models/Issue";
@@ -11,7 +11,7 @@ import IssueSummary from "./Summary";
 import IssueDetails from "./Details";
 import { StalenessEnum } from "constants/application-constant";
 
-const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
+const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
 
 const IssueAccordion = ({
   issue,
@@ -26,9 +26,9 @@ const IssueAccordion = ({
   defaultOpen?: boolean;
   onInteraction?: () => void;
 }) => {
-  const [expanded, setExpanded] = React.useState<boolean>(defaultOpen);
+  const [expanded, setExpanded] = useState<boolean>(defaultOpen);
 
-  const iconStyles = React.useMemo(() => {
+  const iconStyles = useMemo(() => {
     switch (staleness) {
       case StalenessEnum.CRITICAL:
         return {
@@ -77,8 +77,10 @@ const IssueAccordion = ({
             className=""
             style={{
               ...iconStyles,
-              width: "20",
-              height: "20",
+              borderRadius: "4px",
+              padding: "2px",
+              width: "20px",
+              height: "20px",
             }}
           />
         }

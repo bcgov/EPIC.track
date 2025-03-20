@@ -19,9 +19,11 @@ import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
+import { StalenessSettings } from "models/settings";
 import statusService from "../../services/statusService/statusService";
 import issueService from "../../services/issueService";
 import { useAppSelector } from "hooks";
+import stalenessSettingsService from "services/stalenessSettingsService";
 
 export interface WorkplanContextProps {
   firstNations: WorkFirstNation[];
@@ -32,6 +34,7 @@ export interface WorkplanContextProps {
   loading: boolean;
   loadIssues: () => Promise<void>;
   isActiveTeamMember: boolean;
+  issueStalenessSetting: StalenessSettings | undefined;
   selectedStaff?: StaffWorkRole;
   selectedWorkPhase?: WorkPhaseAdditionalInfo;
   setFirstNations: Dispatch<SetStateAction<WorkFirstNation[]>>;
@@ -45,6 +48,7 @@ export interface WorkplanContextProps {
   setWork: Dispatch<SetStateAction<Work | undefined>>;
   setWorkPhases: Dispatch<SetStateAction<WorkPhaseAdditionalInfo[]>>;
   statuses: Status[];
+  statusStalenessSetting: StalenessSettings | undefined;
   team: StaffWorkRole[];
   work: Work | undefined;
   workPhases: WorkPhaseAdditionalInfo[];
@@ -62,6 +66,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
   loading: true,
   loadIssues: () => new Promise((resolve) => resolve),
   isActiveTeamMember: false,
+  issueStalenessSetting: undefined,
   selectedStaff: undefined,
   selectedWorkPhase: undefined,
   setFirstNations: () => ({}),
@@ -73,6 +78,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
   setWork: () => ({}),
   setWorkPhases: () => ({}),
   statuses: [],
+  statusStalenessSetting: undefined,
   team: [],
   work: undefined,
   workPhases: [],
@@ -99,9 +105,13 @@ export const WorkplanProvider = ({
   const workId = useMemo(() => query.get("work_id"), [query]);
   const [selectedStaff, setSelectedStaff] = useState<StaffWorkRole>();
   const [issues, setIssues] = useState<WorkIssue[]>([]);
+  const [issueStalenessSetting, setIssueStalenessSetting] =
+    useState<StalenessSettings>();
+  const [statusStalenessSetting, setStatusStalenessSetting] =
+    useState<StalenessSettings>();
   const { email } = useAppSelector((state) => state.user.userDetail);
 
-  const loadIssues = async () => {
+  const getIssues = useCallback(async () => {
     if (!workId) return;
     try {
       const response = await issueService.getAll(workId);
@@ -110,7 +120,7 @@ export const WorkplanProvider = ({
       console.error("Failed to load Workplan issues", error);
       return;
     }
-  };
+  }, [workId]);
 
   const isActiveTeamMember = useMemo(() => {
     return team?.some(
@@ -175,6 +185,22 @@ export const WorkplanProvider = ({
     }
   }, [workId]);
 
+  const getStalenessSettings = useCallback(async () => {
+    try {
+      const issueStalenessSetting =
+        await stalenessSettingsService.getIssueStaleness();
+      const statusStalenessSetting =
+        await stalenessSettingsService.getStatusStaleness();
+      setIssueStalenessSetting(issueStalenessSetting.data);
+      setStatusStalenessSetting(statusStalenessSetting.data);
+    } catch (error) {
+      showNotification("Could not load Staleness settings", {
+        duration: 3000,
+        type: "error",
+      });
+    }
+  }, []);
+
   const loadData = useCallback(async () => {
     if (!workId) return;
     try {
@@ -183,6 +209,8 @@ export const WorkplanProvider = ({
       await getWorkPhases();
       await getWorkFirstNations();
       await getWorkStatuses();
+      await getStalenessSettings();
+      await getIssues();
       setLoading(false);
     } catch (e) {
       showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
@@ -195,6 +223,8 @@ export const WorkplanProvider = ({
     getWorkPhases,
     getWorkStatuses,
     getWorkTeamMembers,
+    getStalenessSettings,
+    getIssues,
     workId,
   ]);
 
@@ -211,8 +241,9 @@ export const WorkplanProvider = ({
         issues,
         loadData,
         loading,
-        loadIssues,
+        loadIssues: getIssues,
         isActiveTeamMember,
+        issueStalenessSetting,
         selectedStaff,
         selectedWorkPhase,
         setFirstNations,
@@ -224,6 +255,7 @@ export const WorkplanProvider = ({
         setWork,
         setWorkPhases,
         statuses,
+        statusStalenessSetting,
         team,
         work,
         workPhases,
