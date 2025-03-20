@@ -8,13 +8,13 @@ export const mockStaffs: Staff[] = [
   {
     id: 1,
     full_name: "John Doe",
-    first_name: "", // Add the missing property
+    first_name: "John",
     last_name: "", // Add the missing property
     phone: "(123) 456-7890",
     email: "email@example.com",
-    is_active: false,
+    is_active: true,
     position_id: 2 /* add more missing properties here */,
-    position: { name: "test", id: 1, sort_order: 0 },
+    position: { name: "IPE", id: 1, sort_order: 0 },
     idir_user_id: ""
   },
   {
@@ -26,7 +26,19 @@ export const mockStaffs: Staff[] = [
     email: "example@example.com",
     is_active: false,
     position_id: 2 /* add more missing properties here */,
-    position: { name: "test", id: 1, sort_order: 1 },
+    position: { name: "Position1", id: 2, sort_order: 1 },
+    idir_user_id: ""
+  },
+  {
+    id: 3,
+    full_name: "Test Test",
+    first_name: "", // Add the missing property
+    last_name: "", // Add the missing property
+    phone: "(999) 999-9999",
+    email: "test.test@example.com",
+    is_active: true,
+    position_id: 1,
+    position: { name: "IPE", id: 1, sort_order: 0 },
     idir_user_id: ""
   },
   // Add more mock Staff objects as needed
@@ -65,8 +77,8 @@ export function testTableFiltering(
       // Within the table cell, find the div that includes 'the property to test' in its class name
       cy.wrap($tableCell)
         .find("input:first")
-        .click()
-        .type(`${propertyToTest}{enter}`); // Type into the input field and press Enter
+        .click({ force: true })
+        .type(`${propertyToTest}{enter}`, { force: true }); // Type into the input field and press Enter
     });
 }
 

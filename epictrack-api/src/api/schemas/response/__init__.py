@@ -38,6 +38,7 @@ from .special_field_response import SpecialFieldResponseSchema
 from .staff_elevated_role_response import StaffElevatedRoleResponseSchema
 from .staff_response import StaffResponseSchema
 from .staff_work_role_response import StaffWorkRoleResponseSchema
+from .staleness_settings_response import StalenessSettingsResponseSchema
 from .task_response import (
     TaskEventResponseSchema,
     TaskResponseSchema,

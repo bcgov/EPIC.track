@@ -84,6 +84,10 @@ from .staff_work_role_request import (
     StaffWorkExistenceCheckQueryParamSchema,
     StaffWorkPathParamSchema,
 )
+from .staleness_settings_request import (
+    StalenessSettingsBodyParamSchema,
+    StalenessSettingsQueryParamSchema,
+)
 from .task_request import (
     TaskTemplateBodyParameterSchema,
     TaskTemplateIdPathParameterSchema,

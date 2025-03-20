@@ -35,3 +35,9 @@ class Membership(Enum):
     OTHER = 5
     TEAM_CO_LEAD = 6
     TEAM_MEMBER = 'TEAM_MEMBER'
+
+
+class ElevatedRole(Enum):
+    """User Elevated Role"""
+
+    MANAGE_FIRST_NATIONS = 1

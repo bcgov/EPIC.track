@@ -4,14 +4,14 @@ import { ETTab, ETTabs } from "../shared/tab/Tab";
 import { ETHeading2, ETPageContainer } from "../shared";
 import TabPanel from "../shared/tab/TabPanel";
 import GeneralSettings from "./tabs/GeneralSettings";
-import SpecialHistory from "./tabs/SpecialHistory/index";
-import UserManagement from "./tabs/UserManagement";
+import SpecialHistory from "./tabs/SpecialHistory";
+import UserManagementList from "./tabs/UserManagementList";
 import { SETTINGS_TAB } from "./constants";
 import { Palette } from "styles/theme";
 
 const SettingsContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = useState(
-    SETTINGS_TAB.SPECIAL_HISTORY.index
+    SETTINGS_TAB.GENERAL.index
   );
 
   const handleTabSelected = (_event: SyntheticEvent, index: number) => {
@@ -55,7 +55,7 @@ const SettingsContainer = () => {
         index={SETTINGS_TAB.USER_MANAGEMENT.index}
         value={selectedTabIndex}
       >
-        <UserManagement />
+        <UserManagementList />
       </TabPanel>
     </ETPageContainer>
   );

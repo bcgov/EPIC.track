@@ -59,6 +59,7 @@ from .special_field import SpecialField
 from .staff import Staff
 from .staff_work_role import StaffWorkRole
 from .staff_elevated_role import StaffElevatedRole
+from .staleness_settings import StalenessSettings
 from .sub_types import SubType
 from .substitution_acts import SubstitutionAct
 from .task import Task

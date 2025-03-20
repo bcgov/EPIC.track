@@ -7,6 +7,12 @@ const Endpoints = {
   Staffs: {
     STAFFS: "staffs",
   },
+  ElevatedRoles: {
+    GET_ALL: "elevated-roles",
+  },
+  StaffsElevatedRoles: {
+    STAFF_ELEVATED_ROLES: "staff-elevated-roles",
+  },
   Projects: {
     PROJECTS: "projects",
     WORK_TYPES: "projects/:project_id/work-types",
