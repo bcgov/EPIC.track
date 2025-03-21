@@ -24,6 +24,8 @@ interface SpecialFieldProps {
   open: boolean;
   options: ListType[] | Staff[];
   positionStyle?: React.CSSProperties; // Special position for locked position fields}
+  gridSize?: number;
+  fieldType?: "select" | "text";
 }
 
 export const WorkFormSpecialField = ({
@@ -40,6 +42,8 @@ export const WorkFormSpecialField = ({
   open = false,
   options,
   positionStyle = {},
+  gridSize = 6,
+  fieldType = "select",
 }: SpecialFieldProps) => {
   const selectOptions = useMemo(() => {
     return options.map((option) => ({
@@ -50,7 +54,7 @@ export const WorkFormSpecialField = ({
 
   if (!id) {
     return (
-      <Grid item xs={6}>
+      <Grid item xs={gridSize}>
         <ETFormLabel required>{fieldLabel}</ETFormLabel>
         {children}
       </Grid>
@@ -59,7 +63,7 @@ export const WorkFormSpecialField = ({
 
   return (
     <>
-      <Grid item xs={6} sx={{ position: positionStyle }}>
+      <Grid item xs={gridSize} sx={{ position: positionStyle }}>
         <SpecialFieldLock
           disabled={disabled}
           id={id}
@@ -78,7 +82,7 @@ export const WorkFormSpecialField = ({
             fieldName={fieldName}
             fieldLabel={fieldLabel}
             fieldValueType={fieldValueType}
-            fieldType="select"
+            fieldType={fieldType}
             title={`${fieldLabel} History`}
             description={
               <ETCaption3>

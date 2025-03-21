@@ -13,7 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Ministry."""
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from .code_table import CodeTableVersioned
@@ -26,8 +26,11 @@ class Ministry(db.Model, CodeTableVersioned):
     __tablename__ = 'ministries'
 
     id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    name = Column(String())
     abbreviation = Column(String())
     minister_id = Column(ForeignKey('staffs.id'), nullable=True)
+    date_created = Column(DateTime())
+    date_closed = Column(DateTime(), nullable=True)
     sort_order = Column(Integer, nullable=False)
 
     minister = relationship('Staff', foreign_keys=[minister_id], lazy='select')

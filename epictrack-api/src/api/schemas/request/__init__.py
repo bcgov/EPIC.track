@@ -121,3 +121,7 @@ from .work_request import (
     WorkTypeIdQueryParamSchema,
     WorkQueryParameterSchema,
 )
+from .ministry_request import (
+    MinistryBodyParameterSchema,
+    MinistryUpdateParameterSchema,
+)

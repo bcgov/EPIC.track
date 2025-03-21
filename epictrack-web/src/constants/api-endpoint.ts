@@ -119,7 +119,7 @@ const Endpoints = {
     UPDATE: "/special-fields/:specialFieldId",
   },
   Ministry: {
-    GET_ALL: "/ministries",
+    MINISTRY: "/ministries",
   },
   EAAct: {
     GET_ALL: "/ea-acts",

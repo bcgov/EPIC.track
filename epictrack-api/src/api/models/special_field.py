@@ -35,6 +35,7 @@ class EntityEnum(enum.Enum):
     PROPONENT = "PROPONENT"
     WORK = "WORK"
     ISSUE = "ISSUE"
+    MINISTRY = "MINISTRY"
 
 
 class SpecialField(BaseModelVersioned):
