@@ -114,6 +114,7 @@ export enum SpecialFieldEntityEnum {
   PROJECT = "PROJECT",
   PROPONENT = "PROPONENT",
   WORK = "WORK",
+  MINISTRY = "MINISTRY",
 }
 
 export const SPECIAL_FIELDS = Object.freeze({
@@ -129,6 +130,11 @@ export const SPECIAL_FIELDS = Object.freeze({
     WORK_LEAD: "work_lead_id",
     DECISION_MAKER: "decision_by_id",
     MINISTRY: "ministry_id",
+  },
+  MINISTRY: {
+    NAME: "name",
+    MINISTER: "minister_id",
+    ABBREVIATION: "abbreviation",
   },
 });
 
