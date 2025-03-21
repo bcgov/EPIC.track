@@ -4,15 +4,16 @@ import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
 import NoDataEver from "../../../shared/NoDataEver";
 import WarningBox from "../../../shared/warningBox";
-import { isStatusOutOfDate } from "../shared";
+import { calculateStatusStaleness } from "../shared";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
 import RecentStatus from "./RecentStatus";
 import StatusHistory from "./StatusHistory";
-import { ROLES } from "constants/application-constant";
+import { ROLES, StalenessEnum } from "constants/application-constant";
 
 const StatusView = () => {
-  const { isActiveTeamMember, statuses, work } = useContext(WorkplanContext);
+  const { isActiveTeamMember, statuses, statusStalenessSetting, work } =
+    useContext(WorkplanContext);
   const { setShowStatusForm } = useContext(StatusContext);
 
   const { roles: currentRoles } = useAppSelector(
@@ -30,8 +31,13 @@ const StatusView = () => {
   };
 
   const latestApprovedStatus = statuses.find((status) => status.is_approved);
-  const statusOutOfDate =
-    !work?.is_complete && isStatusOutOfDate(latestApprovedStatus);
+  const statusStalenss = work?.is_complete
+    ? StalenessEnum.GOOD
+    : calculateStatusStaleness(
+        latestApprovedStatus,
+        statusStalenessSetting?.staleness_length,
+        statusStalenessSetting?.warning_length
+      );
 
   return (
     <>
@@ -46,7 +52,16 @@ const StatusView = () => {
           }}
         />
       )}
-      {statusOutOfDate && (
+      {statusStalenss === StalenessEnum.WARN && (
+        <Box sx={{ paddingBottom: "16px" }}>
+          <WarningBox
+            title="The Work status is almost out of date"
+            subTitle="Please provide an updated status"
+            isTitleBold={true}
+          />
+        </Box>
+      )}
+      {statusStalenss === StalenessEnum.CRITICAL && (
         <Box sx={{ paddingBottom: "16px" }}>
           <WarningBox
             title="The Work status is out of date"

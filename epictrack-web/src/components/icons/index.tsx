@@ -19,6 +19,14 @@ const AllIcon = (props: IconProps) => {
   );
 };
 
+const BulletIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props} fill={props.fill || "black"}>
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  );
+};
+
 const CheckListIcon = (props: IconProps) => {
   return (
     <svg {...commonProps} {...props}>
@@ -517,6 +525,7 @@ const Apps = ({ fill, sx, ...rest }: IconProps) => {
 
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
+  BulletIcon,
   DashboardIcon,
   ReportIcon,
   InsightIcon,

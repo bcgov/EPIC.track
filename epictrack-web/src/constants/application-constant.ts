@@ -165,6 +165,7 @@ export const ISSUES_STALENESS_THRESHOLD = {
 
 export const STATUS_STALENESS_THRESHOLD = {
   [StalenessEnum.CRITICAL]: 7,
+  [StalenessEnum.WARN]: 6,
 };
 
 export const REPORT_STALENESS_THRESHOLD = {

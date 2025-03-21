@@ -7,7 +7,7 @@ import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETChip } from "components/shared/chip/ETChip";
-import { ETParagraph } from "components/shared";
+import { ETSubhead } from "components/shared";
 import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
 import { Restricted } from "components/shared/restricted";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
@@ -376,7 +376,10 @@ const UserManagementList = () => {
 
   return (
     <Box sx={{ pt: 4 }}>
-      <ETParagraph bold> Assign Additional Roles to Users </ETParagraph>
+      <ETSubhead bold color={Palette.neutral.dark}>
+        {" "}
+        Assign Additional Roles to Users{" "}
+      </ETSubhead>
       <Grid item xs={12}>
         <MasterTrackTable
           columns={columns}

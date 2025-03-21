@@ -29,8 +29,8 @@ class StalenessSettingsResource(Resource):
         return jsonify(StalenessSettingsResponseSchema(many=True).dump(settings)), HTTPStatus.OK
 
 
-@cors_preflight("GET")
-@API.route("/<string:staleness_type>", methods=["GET", "OPTIONS"])
+@cors_preflight("GET, PUT")
+@API.route("/<string:staleness_type>", methods=["GET", "PUT", "OPTIONS"])
 class StalenessSettingResource(Resource):
     """Endpoint resource to return a staleness setting by type"""
 
@@ -45,12 +45,6 @@ class StalenessSettingResource(Resource):
             StalenessSettingsResponseSchema().dump(setting),
             HTTPStatus.OK,
         )
-
-
-@cors_preflight("PUT")
-@API.route("/<string:staleness_type>", methods=["PUT", "OPTIONS"])
-class UpdateWarningLengthResource(Resource):
-    """Endpoint resource to update warning_length for a given type"""
 
     @staticmethod
     @cors.crossdomain(origin="*")

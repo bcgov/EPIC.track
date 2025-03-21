@@ -1,22 +1,36 @@
 import moment from "moment";
 import dateUtils from "../../../utils/dateUtils";
 import { Status } from "../../../models/status";
+import {
+  StalenessEnum,
+  STATUS_STALENESS_THRESHOLD,
+} from "../../../constants/application-constant";
 
-const STATUS_DATE_THRESHOLD = 7;
-
-export const isStatusOutOfDate = (
-  lastApprovedStatus: Status | undefined
-): boolean => {
+export const calculateStatusStaleness = (
+  lastApprovedStatus: Status | undefined,
+  criticalThreshold?: number,
+  warningThreshold?: number
+): StalenessEnum => {
   if (!lastApprovedStatus) {
-    return false;
+    return StalenessEnum.GOOD;
   }
 
-  const daysAgo = moment().subtract(STATUS_DATE_THRESHOLD, "days");
+  const daysAgo = moment();
   const NDaysAgo = dateUtils.diff(
     daysAgo.toLocaleString(),
     lastApprovedStatus?.posted_date,
     "days"
   );
 
-  return NDaysAgo > 0;
+  if (
+    NDaysAgo > (criticalThreshold || STATUS_STALENESS_THRESHOLD["CRITICAL"])
+  ) {
+    return StalenessEnum.CRITICAL;
+  } else if (
+    NDaysAgo > (warningThreshold || STATUS_STALENESS_THRESHOLD["WARN"])
+  ) {
+    return StalenessEnum.WARN;
+  } else {
+    return StalenessEnum.GOOD;
+  }
 };

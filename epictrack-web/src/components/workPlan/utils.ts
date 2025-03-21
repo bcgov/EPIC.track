@@ -40,7 +40,11 @@ export const useUserHasRole = () => {
 };
 
 // Helper function to calculate staleness
-export const calculateStaleness = (issue: WorkIssue) => {
+export const calculateStaleness = (
+  issue: WorkIssue,
+  criticalThreshold?: number,
+  warningThreshold?: number
+) => {
   const now = moment();
   // Check if the issue is inactive or resolved
   if (issue.is_resolved) {
@@ -72,9 +76,15 @@ export const calculateStaleness = (issue: WorkIssue) => {
   );
 
   // Determine the staleness level
-  if (diffDays > ISSUES_STALENESS_THRESHOLD.StalenessEnum.CRITICAL) {
+  if (
+    diffDays >
+    (criticalThreshold || ISSUES_STALENESS_THRESHOLD.StalenessEnum.CRITICAL)
+  ) {
     return StalenessEnum.CRITICAL;
-  } else if (diffDays > ISSUES_STALENESS_THRESHOLD.StalenessEnum.WARN) {
+  } else if (
+    diffDays >
+    (warningThreshold || ISSUES_STALENESS_THRESHOLD.StalenessEnum.WARN)
+  ) {
     return StalenessEnum.WARN;
   } else {
     return StalenessEnum.GOOD;
@@ -82,7 +92,11 @@ export const calculateStaleness = (issue: WorkIssue) => {
 };
 
 // Helper function to get stalest level in issue list
-export const issueListMaxStaleness = (issues: WorkIssue[]): StalenessEnum => {
+export const issueListMaxStaleness = (
+  issues: WorkIssue[],
+  criticalThreshold?: number,
+  warningThreshold?: number
+): StalenessEnum => {
   const stalenessPriority = [
     StalenessEnum.GOOD,
     StalenessEnum.INACTIVE,
@@ -102,7 +116,11 @@ export const issueListMaxStaleness = (issues: WorkIssue[]): StalenessEnum => {
   if (issues.length === 0) return StalenessEnum.GOOD; // No issues to check
 
   const topStaleness = issues.reduce((currentHighest, issue) => {
-    const staleness = calculateStaleness(issue);
+    const staleness = calculateStaleness(
+      issue,
+      criticalThreshold,
+      warningThreshold
+    );
     return getHigherStaleness(currentHighest, staleness);
   }, StalenessEnum.GOOD); // Start with GOOD as the "lowest" level
 

@@ -1,24 +1,23 @@
 import React, { useContext } from "react";
-import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
-import { Palette } from "../../styles/theme";
-import { Box } from "@mui/system";
-import { ETTab, ETTabs } from "../shared/tab/Tab";
+import { useLocation } from "react-router-dom";
 import { SxProps } from "@mui/material";
+import { Box } from "@mui/system";
+import { Palette } from "../../styles/theme";
+import { ETCaption3, ETHeading2, ETPageContainer } from "../shared";
+import { ETTab, ETTabs } from "../shared/tab/Tab";
 import TabPanel from "../shared/tab/TabPanel";
-import PhaseContainer from "./phase/PhaseContainer";
 import { WorkplanContext } from "./WorkPlanContext";
-import TeamContainer from "./team/TeamContainer";
-import FirstNationContainer from "./firstNations/FirstNationContainer";
 import { WorkPlanSkeleton } from "./WorkPlanSkeleton";
+import About from "./about";
+import FirstNationContainer from "./firstNations/FirstNationContainer";
+import Issues from "./issues";
+import PhaseContainer from "./phase/PhaseContainer";
 import Status from "./status";
+import { calculateStatusStaleness } from "./status/shared";
+import TeamContainer from "./team/TeamContainer";
+import WorkState from "./WorkState";
 import Icons from "../icons";
 import { IconProps } from "../icons/type";
-import Issues from "./issues";
-import { WorkIssue } from "../../models/Issue";
-import WorkState from "./WorkState";
-import { isStatusOutOfDate } from "./status/shared";
-import About from "./about";
-import { useLocation } from "react-router-dom";
 import { WORKPLAN_TAB } from "./constants";
 import { StalenessEnum } from "constants/application-constant";
 import { issueListMaxStaleness } from "./utils";
@@ -37,10 +36,6 @@ const WorkPlanContainer = () => {
 
   const ctx = useContext(WorkplanContext);
 
-  const { issues } = useContext(WorkplanContext) as {
-    issues: WorkIssue[];
-  };
-
   const activeStaff = ctx.team.filter(
     (staffWorkRole) => staffWorkRole.is_active
   );
@@ -49,11 +44,20 @@ const WorkPlanContainer = () => {
     setSelectedTabIndex(index);
   };
 
-  const statusOutOfDate =
-    ctx.statuses.length === 0 ||
-    isStatusOutOfDate(ctx.statuses.find((status) => status.is_approved));
+  const statusStaleness =
+    ctx.statuses.length === 0
+      ? StalenessEnum.CRITICAL
+      : calculateStatusStaleness(
+          ctx.statuses.find((status) => status.is_approved),
+          ctx.statusStalenessSetting?.staleness_length,
+          ctx.statusStalenessSetting?.warning_length
+        );
 
-  const highestStaleness = issueListMaxStaleness(issues);
+  const highestStaleness = issueListMaxStaleness(
+    ctx.issues,
+    ctx.issueStalenessSetting?.staleness_length,
+    ctx.issueStalenessSetting?.warning_length
+  );
 
   const iconStyles = React.useMemo(() => {
     if (highestStaleness === StalenessEnum.CRITICAL) {
@@ -109,7 +113,10 @@ const WorkPlanContainer = () => {
               />
               <ETTab
                 label={WORKPLAN_TAB.STATUS.label}
-                icon={statusOutOfDate && <IndicatorIcon />}
+                icon={
+                  (statusStaleness === StalenessEnum.CRITICAL ||
+                    statusStaleness === StalenessEnum.WARN) && <IndicatorIcon />
+                }
               />
               <ETTab
                 label={WORKPLAN_TAB.ISSUES.label}
