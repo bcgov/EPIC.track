@@ -146,6 +146,21 @@ const GeneralSettings = () => {
         10
       );
 
+      if (warningLength < 1 || stalenessLength < 1) {
+        showNotification("Thresholds must be greater than 0.", {
+          type: "error",
+        });
+        return;
+      }
+
+      if (stalenessLength <= warningLength) {
+        showNotification(
+          "Staleness threshold must be greater than warning threshold.",
+          { type: "error", duration: 3000 }
+        );
+        return;
+      }
+
       try {
         if (stalenessType === StalenessSettingTypeEnum.ISSUES) {
           await stalenessSettingsService.updateIssueStaleness({
