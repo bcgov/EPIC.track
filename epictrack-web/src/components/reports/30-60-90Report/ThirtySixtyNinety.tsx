@@ -1,4 +1,11 @@
-import React from "react";
+import {
+  FC,
+  ReactNode,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { Container } from "@mui/system";
 import {
   Accordion,
@@ -33,7 +40,9 @@ import { IconProps } from "../../icons/type";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
-import { If } from "react-if";
+import { WorkIssue } from "models/Issue";
+import stalenessSettingsService from "services/stalenessSettingsService";
+import { StalenessSettings } from "models/settings";
 
 interface Group {
   group: string;
@@ -48,16 +57,20 @@ interface ReportData {
   data: Period;
 }
 
-const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
+const IndicatorIcon: FC<IconProps> = Icons["IndicatorIcon"];
+
 export default function ThirtySixtyNinety() {
-  const [reports, setReports] = React.useState<Period>();
+  const [reports, setReports] = useState<Period>();
   const [showReportDateBanner, setShowReportDateBanner] =
-    React.useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = React.useState(0);
-  const [reportDate, setReportDate] = React.useState<string>();
-  const [resultStatus, setResultStatus] = React.useState<string>();
+    useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [issueStalenessSettings, setIssueStalenessSettings] =
+    useState<StalenessSettings>();
+  const [reportDate, setReportDate] = useState<string>();
+  const [resultStatus, setResultStatus] = useState<string>();
   const FILENAME_PREFIX = "30_60_90_Report";
-  React.useEffect(() => {
+
+  useEffect(() => {
     const diff = dateUtils.diff(
       reportDate || "",
       new Date(2019, 11, 19).toISOString(),
@@ -65,7 +78,68 @@ export default function ThirtySixtyNinety() {
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
-  const fetchReportData = React.useCallback(async () => {
+
+  useEffect(() => {
+    const fetchStalenessSettings = async () => {
+      try {
+        const statusStalenessSetting =
+          await stalenessSettingsService.getIssueStaleness();
+        setIssueStalenessSettings(statusStalenessSetting.data);
+      } catch (error) {
+        console.warn("Could not load issue staleness settings");
+      }
+    };
+
+    fetchStalenessSettings();
+  }, []);
+
+  const isIssueStaleIndicatorRequired = (reportItem: any) => {
+    return (reportItem["work_issues"] as []).some((workIssue) =>
+      [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
+        issueStalenessLevel(workIssue)
+      )
+    );
+  };
+
+  const issueStalenessLevel = useCallback(
+    (workIssue: any) => {
+      const stalenessThreshold =
+        issueStalenessSettings?.staleness_length ||
+        REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90][
+          StalenessEnum.CRITICAL
+        ];
+      const warningThreshold =
+        issueStalenessSettings?.warning_length ||
+        REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90][
+          StalenessEnum.WARN
+        ];
+      const diffDays = dateUtils.diff(
+        reportDate || "",
+        workIssue["latest_update"]["posted_date"],
+        "days"
+      );
+
+      if (
+        workIssue.is_resolved &&
+        dateUtils.diff(
+          reportDate || "",
+          workIssue.expected_resolution_date,
+          "days"
+        ) > 0
+      ) {
+        return StalenessEnum.RESOLVED;
+      } else if (diffDays > stalenessThreshold) {
+        return StalenessEnum.CRITICAL;
+      } else if (diffDays > warningThreshold) {
+        return StalenessEnum.WARN;
+      } else {
+        return StalenessEnum.GOOD;
+      }
+    },
+    [issueStalenessSettings, reportDate]
+  );
+
+  const fetchReportData = useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const reportData = await ReportService.fetchReportData(
@@ -83,13 +157,7 @@ export default function ThirtySixtyNinety() {
           periodGroups.forEach((group) => {
             // Check and set staleness for each work issue in the work
             (group.items[0].work_issues as any[]).forEach((workIssue) => {
-              const staleness = stalenessLevel(workIssue);
-              workIssue.staleness =
-                staleness === StalenessEnum.CRITICAL
-                  ? StalenessEnum.CRITICAL
-                  : staleness === StalenessEnum.WARN
-                  ? StalenessEnum.WARN
-                  : StalenessEnum.GOOD;
+              workIssue.staleness = issueStalenessLevel(workIssue);
             });
           });
         });
@@ -101,31 +169,9 @@ export default function ThirtySixtyNinety() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate]);
+  }, [reportDate, issueStalenessLevel]);
 
-  const isIssueStaleIndicatorRequired = (reportItem: any) => {
-    return (reportItem["work_issues"] as []).some((workIssue) =>
-      [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
-        stalenessLevel(workIssue)
-      )
-    );
-  };
-  const stalenessLevel = (workIssue: any) => {
-    const stalenessThreshold =
-      REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90];
-    const diffDays = dateUtils.diff(
-      reportDate || "",
-      workIssue["latest_update"]["posted_date"],
-      "days"
-    );
-    if (diffDays > stalenessThreshold[StalenessEnum.CRITICAL])
-      return StalenessEnum.CRITICAL;
-    else if (diffDays > stalenessThreshold[StalenessEnum.WARN])
-      return StalenessEnum.WARN;
-    else return StalenessEnum.GOOD;
-  };
-
-  const downloadPDFReport = React.useCallback(async () => {
+  const downloadPDFReport = useCallback(async () => {
     try {
       fetchReportData();
       const binaryReponse = await ReportService.downloadPDF(
@@ -153,12 +199,12 @@ export default function ThirtySixtyNinety() {
     }
   }, [reportDate, fetchReportData]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (event: SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 
   interface TabPanelProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
     dir?: string;
     index: number;
     value: number;
@@ -186,10 +232,12 @@ export default function ThirtySixtyNinety() {
 
   const overallStalenessLevel = (
     status_staleness: string,
-    work_issues: any
+    work_issues: WorkIssue[]
   ) => {
     const issuesStaleness = new Set(
-      work_issues.map((issue: any) => issue.staleness)
+      work_issues
+        .filter((issue) => issue.is_active && !issue.is_resolved)
+        .map((issue: WorkIssue) => issueStalenessLevel(issue))
     );
 
     if (
@@ -362,7 +410,7 @@ export default function ThirtySixtyNinety() {
                               {item["work_short_description"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={2}>
-                              <If condition={item["status_date_updated"]}>
+                              {item["status_date_updated"] && (
                                 <Chip
                                   style={{
                                     marginRight: "0.5rem",
@@ -382,7 +430,7 @@ export default function ThirtySixtyNinety() {
                                     </>
                                   }
                                 />
-                              </If>
+                              )}
 
                               {item["work_status_text"]}
                             </TabPanel>
