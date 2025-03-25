@@ -27,6 +27,7 @@ from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
 from api.models.special_field import EntityEnum
+from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
 from api.models.work import WorkStateEnum
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
@@ -265,7 +266,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             issues = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
                 issue_per_work
             )
-            dates = [parser.isoparse(issue["latest_update"]["posted_date"]) for issue in issues]
+            dates = [parser.isoparse(issue["latest_update"]["posted_date"]) for issue in issues if not issue.get("is_resolved", False)]
             status_date_updated = result_item.get("status_date_updated")
             if status_date_updated:
                 dates.append(status_date_updated)
@@ -790,15 +791,18 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _update_staleness(self, data: dict, report_date: datetime) -> dict:
         """Calculate the staleness based on report date"""
+        staleness_settings = db.session.query(StalenessSettings).filter_by(is_active=True, staleness_type=StalenessTypeEnum.STATUS).one_or_none()
+        warning_length = getattr(staleness_settings, "warning_length", 7) or 7
+        staleness_length = getattr(staleness_settings, "staleness_length", 10) or 10
         date = report_date.astimezone(CANADA_TIMEZONE)
         for _, work_type_data in data.items():
             for group in work_type_data:
                 first_event = group["items"][0]
                 if first_event["status_date_updated"]:
                     diff = (date - first_event["status_date_updated"]).days
-                    if diff > 10:
+                    if diff > staleness_length:
                         first_event["status_staleness"] = StalenessEnum.CRITICAL.value
-                    elif diff > 5:
+                    elif diff > warning_length:
                         first_event["status_staleness"] = StalenessEnum.WARN.value
                     else:
                         first_event["status_staleness"] = StalenessEnum.GOOD.value

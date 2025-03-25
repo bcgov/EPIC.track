@@ -109,7 +109,6 @@ const GeneralSettings = () => {
           const onChange = (event: React.FocusEvent<HTMLInputElement>) => {
             const newValue = Number(event.target.value) || 0;
             row._valuesCache[column.id] = newValue;
-            console.log("New Value: ", newValue);
             table.setEditingRow(row);
           };
 
