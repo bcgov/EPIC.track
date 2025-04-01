@@ -8,6 +8,7 @@ import copy
 
 from operator import attrgetter
 from dateutil import parser
+from flask import current_app
 from pytz import utc
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER
@@ -253,27 +254,29 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 and issue.is_high_priority is True
             ]
             for issue in issue_per_work:
-                latest_update = max(
-                    (
-                        issue_update
-                        for issue_update in issue.updates
-                        if issue_update.is_approved
-                    ),
-                    key=attrgetter("posted_date"),
-                )
-                setattr(issue, "latest_update", latest_update)
+                approved_updates = [
+                    issue_update
+                    for issue_update in issue.updates
+                    if issue_update.is_approved
+                ]
+                if approved_updates:
+                    latest_update = max(approved_updates, key=attrgetter("posted_date"))
+                    setattr(issue, "latest_update", latest_update)
+                else:
+                    setattr(issue, "latest_update", {})
 
             issues = res.WorkIssuesLatestUpdateResponseSchema(many=True).dump(
                 issue_per_work
             )
-            dates = [parser.isoparse(issue["latest_update"]["posted_date"]) for issue in issues if not issue.get("is_resolved", False)]
+            dates = [
+                parser.isoparse(issue["latest_update"].get("posted_date"))
+                for issue in issues
+                if issue.get("latest_update") and not issue.get("is_resolved", False)
+            ]
             status_date_updated = result_item.get("status_date_updated")
             if status_date_updated:
                 dates.append(status_date_updated)
-            if len(dates):
-                result_item["oldest_update"] = min(dates)
-            else:
-                result_item["oldest_update"] = None
+            result_item["oldest_update"] = min(dates) if dates else None
 
             result_item["work_issues"] = issues
             # Update all works with the work issues
@@ -707,13 +710,24 @@ class ThirtySixtyNinetyReport(ReportFactory):
         end_date = self.report_date + timedelta(days=119)
 
         for work_issue in work_issues:
-            latest_update = work_issue.get("latest_update", {})
-            posted_date = datetime.fromisoformat(latest_update.get("posted_date")) if latest_update.get("posted_date") else None
+            latest_update = work_issue.get("latest_update")
+            if not latest_update:
+                current_app.logger.warning(f"Work Issue: {work_issue} missing latest_update.")
+                continue
+            posted_date_str = latest_update.get("posted_date")
+            if not posted_date_str:
+                current_app.logger.warning(f"Invalid posted_date for issue latest_update: {latest_update}")
+                continue
+            try:
+                posted_date = datetime.fromisoformat(posted_date_str)
+            except ValueError:
+                current_app.logger.warning(f"Invalid posted_date format: {posted_date_str}")
+                continue
             if (
                 not work_issue.get("is_resolved", True)
                 and work_issue.get("is_active", False)
                 and work_issue.get("is_high_priority", False)
-                and (start_date <= posted_date <= end_date)
+                and start_date <= posted_date <= end_date
             ):
                 # Add this work issue separately
                 work_issue_event = copy.deepcopy(event)
@@ -722,7 +736,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 work_issue_event["event_configuration_id"] = None
                 work_issue_event["event_date"] = posted_date
                 work_issue_event["event_title"] = work_issue.get("title")
-                work_issue_event["event_description"] = latest_update.get("description", "") if latest_update else ""
+                work_issue_event["event_description"] = latest_update.get("description", "")
                 resolved_events.append(work_issue_event)
 
     def _resolve_multiple_events(self, data: List[Dict]) -> List[Dict]:
