@@ -1,31 +1,30 @@
-import React from "react";
+import { FC, useContext } from "react";
+import { Else, If, Then } from "react-if";
 import { Button, Grid } from "@mui/material";
-import { WorkIssue } from "../../../../models/Issue";
-import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import moment from "moment";
-import { ETChip } from "../../../shared/chip/ETChip";
+import { WorkIssue } from "../../../../models/Issue";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { Palette } from "../../../../styles/theme";
-import { Else, If, Then } from "react-if";
 import { IssuesContext } from "../IssuesContext";
 import TrackDialog from "../../../shared/TrackDialog";
-import IssueHistory from "./IssueHistory";
+import { ETChip } from "../../../shared/chip/ETChip";
+import { Restricted } from "../../../shared/restricted";
+import { ETCaption1, ETHeading4, ETParagraph, GrayBox } from "../../../shared";
 import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../constants/application-constant";
-import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
+import { useIsActiveTeamMember, useUserHasRole } from "../../utils";
+import IssueHistory from "./IssueHistory";
 
 const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
-  const latestUpdate = issue.updates[0];
-  const CheckCircleIcon: React.FC<IconProps> = icons["CheckCircleIcon"];
-  const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
-  const AddIcon: React.FC<IconProps> = icons["AddIcon"];
-
-  const { team } = React.useContext(WorkplanContext);
+  const latestUpdate = issue.updates[0] ?? null;
+  const CheckCircleIcon: FC<IconProps> = icons["CheckCircleIcon"];
+  const PencilEditIcon: FC<IconProps> = icons["PencilEditIcon"];
+  const AddIcon: FC<IconProps> = icons["AddIcon"];
+  const isActiveTeamMember = useIsActiveTeamMember();
+  const userHasRole = useUserHasRole();
 
   const {
     setEditIssueUpdateFormIsOpen,
@@ -35,13 +34,10 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
     setUpdateToClone,
     setUpdateToEdit,
     setNewIssueUpdateFormIsOpen,
-  } = React.useContext(IssuesContext);
-
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
+  } = useContext(IssuesContext);
 
   const handleApproveIssue = () => {
-    approveIssue(issue.id, latestUpdate.id);
+    approveIssue(issue.id, latestUpdate?.id);
     setIssueToApproveId(null);
   };
 
@@ -60,12 +56,12 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               >
                 <Grid item xs={"auto"}>
                   <ETCaption1 bold color={Palette.neutral.dark}>
-                    {moment(latestUpdate.posted_date)
+                    {moment(latestUpdate?.posted_date)
                       .format(MONTH_DAY_YEAR)
                       .toUpperCase()}
                   </ETCaption1>
                 </Grid>
-                <If condition={latestUpdate.is_approved}>
+                <If condition={latestUpdate?.is_approved}>
                   <Then>
                     <Grid item xs="auto">
                       <ETChip
@@ -97,12 +93,12 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                 </ETParagraph>
               </Grid>
 
-              <If condition={!latestUpdate.is_approved}>
+              <If condition={!latestUpdate?.is_approved}>
                 <Then>
                   <Grid item>
                     <Restricted
                       allowed={[ROLES.EDIT]}
-                      exception={isTeamMember}
+                      exception={isActiveTeamMember}
                       errorProps={{ disabled: true }}
                     >
                       <Button
@@ -126,7 +122,7 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
                   <Grid item>
                     <Restricted
                       allowed={[ROLES.CREATE]}
-                      exception={isTeamMember}
+                      exception={isActiveTeamMember}
                       errorProps={{ disabled: true }}
                     >
                       <Button
@@ -152,9 +148,14 @@ const IssueDetails = ({ issue }: { issue: WorkIssue }) => {
               <Grid item>
                 <Restricted
                   allowed={[
-                    latestUpdate.is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT,
+                    latestUpdate?.is_approved
+                      ? ROLES.EXTENDED_EDIT
+                      : ROLES.EDIT,
                   ]}
-                  exception={!latestUpdate.is_approved && isTeamMember}
+                  exception={
+                    (!latestUpdate?.is_approved && isActiveTeamMember) ||
+                    userHasRole
+                  }
                   errorProps={{ disabled: true }}
                 >
                   <Button

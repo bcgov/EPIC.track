@@ -44,14 +44,22 @@ const PutRequest = <T>(url: string, data = {}, params = {}) => {
 };
 
 const PatchRequest = <T>(url: string, data = {}) => {
-  return instance.patch<T>(url, data, {
-    headers: {
-      "Content-type": "application/json",
-      Authorization: `Bearer ${
-        UserService.getToken() || window.localStorage.getItem("authToken")
-      }`,
-    },
-  });
+  return instance
+    .patch<T>(url, data, {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `Bearer ${
+          UserService.getToken() || window.localStorage.getItem("authToken")
+        }`,
+      },
+    })
+    .then((response) => {
+      return response;
+    })
+    .catch((error) => {
+      console.error("PatchRequest - Error:", error);
+      throw error;
+    });
 };
 
 const DeleteRequest = <T>(url: string, params = {}) => {

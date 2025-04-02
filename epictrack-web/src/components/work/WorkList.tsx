@@ -1,41 +1,40 @@
-import React, { useEffect } from "react";
-import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
-import { Work } from "../../models/work";
-import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer, IButton } from "../shared";
-import workService from "../../services/workService/workService";
-import { ETChip } from "../shared/chip/ETChip";
+import { FC, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import TableFilter from "../shared/filterSelect/TableFilter";
-import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted } from "../shared/restricted";
+import { Box, Button, Grid } from "@mui/material";
+import { MRT_ColumnDef } from "material-react-table";
+import { Work } from "../../models/work";
+import workService from "../../services/workService/workService";
+import MasterTrackTable from "components/shared/MasterTrackTable";
+import { ETGridTitle, ETPageContainer } from "components/shared";
+import { ETChip } from "components/shared/chip/ETChip";
+import TableFilter from "components/shared/filterSelect/TableFilter";
+import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
+import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { Restricted } from "components/shared/restricted";
 import { ROLES } from "../../constants/application-constant";
-import { searchFilter } from "../shared/MasterTrackTable/filters";
-import { WorkDialog } from "./Dialog";
+import { WORK_STATE } from "components/shared/constants";
 import { showNotification } from "components/shared/notificationProvider";
+import { WorkDialog } from "./Dialog";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { sort } from "utils";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
-const GoToIcon: React.FC<IconProps> = Icons["GoToIcon"];
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 
 const WorkList = () => {
-  const [workId, setWorkId] = React.useState<number>();
-  const [showWorkDialogForm, setShowWorkDialogForm] = React.useState(false);
-  const [phases, setPhases] = React.useState<string[]>([]);
-  const [eaActs, setEAActs] = React.useState<string[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<string[]>([]);
-  const [projects, setProjects] = React.useState<string[]>([]);
-  const [ministries, setMinistries] = React.useState<string[]>([]);
-  const [teams, setTeams] = React.useState<string[]>([]);
-  const [loadingWorks, setLoadingWorks] = React.useState<boolean>(true);
-  const [works, setWorks] = React.useState<Work[]>([]);
+  const [eaActs, setEAActs] = useState<string[]>([]);
+  const [loadingWorks, setLoadingWorks] = useState<boolean>(true);
+  const [phases, setPhases] = useState<string[]>([]);
+  const [projects, setProjects] = useState<string[]>([]);
+  const [showWorkDialogForm, setShowWorkDialogForm] = useState(false);
+  const [states, setStates] = useState<string[]>([]);
+  const [teams, setTeams] = useState<string[]>([]);
+  const [workId, setWorkId] = useState<number>();
+  const [works, setWorks] = useState<Work[]>([]);
+  const [workTypes, setWorkTypes] = useState<string[]>([]);
   const [cachedFilters, setCachedFilters] = useCachedState<ColumnFilter[]>(
     All_WORKS_FILTERS_CACHE_KEY,
     [
@@ -61,31 +60,51 @@ const WorkList = () => {
     loadWorks();
   }, []);
 
-  const codeTypes: { [x: string]: any } = {
-    ea_act: setEAActs,
-    work_type: setWorkTypes,
-    project: setProjects,
-    ministry: setMinistries,
-    eao_team: setTeams,
-    current_work_phase: setPhases,
-  };
+  const codeTypes = useMemo(
+    () => ({
+      current_work_phase: setPhases,
+      ea_act: setEAActs,
+      eao_team: setTeams,
+      project: setProjects,
+      work_state: setStates,
+      work_type: setWorkTypes,
+    }),
+    [setEAActs, setPhases, setProjects, setStates, setTeams, setWorkTypes]
+  );
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (!works.length) return;
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = "name";
-      if (key == "ministry") {
+      if (key === "ministry") {
         accessor = "abbreviation";
       }
+      // Look up work_state constant for label
+      if (key === "work_state") {
+        const codes = works
+          .map(
+            (w) =>
+              WORK_STATE[w.work_state as keyof typeof WORK_STATE]?.label ||
+              w.work_state
+          )
+          .filter(
+            (element, index, array) =>
+              element && array.indexOf(element) === index
+          );
+        codeTypes[key as keyof typeof codeTypes](codes);
+        return;
+      }
       const codes = works
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        .map((w) => (w[key] ? w[key][accessor] : null))
+        .map((w) => {
+          const workKey = key as keyof Work;
+          return w[workKey] ? (w[workKey] as any)[accessor] : null;
+        })
         .filter(
-          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
+          (element, index, array) => element && array.indexOf(element) === index
         );
-      codeTypes[key](codes);
+      codeTypes[key as keyof typeof codeTypes](codes);
     });
-  }, [works]);
+  }, [codeTypes, works]);
 
   const statuses = getSelectFilterOptions(
     works,
@@ -94,11 +113,11 @@ const WorkList = () => {
     (value) => value
   );
 
-  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
+  const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         header: " ",
-        size: 40,
+        size: 25,
         Cell: ({ row }) => (
           <Box>
             <Link to={`/work-plan?work_id=${row.original.id}`}>
@@ -111,7 +130,7 @@ const WorkList = () => {
         accessorKey: "title",
         header: "Name",
         size: 300,
-        Cell: ({ row, renderedCellValue }) => (
+        Cell: ({ row }) => (
           <ETGridTitle
             to="#"
             onClick={() => {
@@ -131,7 +150,7 @@ const WorkList = () => {
       {
         accessorKey: "project.name",
         header: "Project",
-        size: 200,
+        size: 180,
         filterVariant: "multi-select",
         filterSelectOptions: projects,
         Filter: ({ header, column }) => {
@@ -152,16 +171,14 @@ const WorkList = () => {
           ) {
             return true;
           }
-
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
         accessorKey: "ea_act.name",
         header: "EA Act",
-        size: 100,
+        size: 90,
         filterVariant: "multi-select",
         filterSelectOptions: eaActs,
         Filter: ({ header, column }) => {
@@ -171,7 +188,7 @@ const WorkList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="eaActFilter"
             />
           );
         },
@@ -182,15 +199,14 @@ const WorkList = () => {
           ) {
             return true;
           }
-
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
         accessorKey: "work_type.name",
         header: "Work type",
+        size: 120,
         filterVariant: "multi-select",
         filterSelectOptions: workTypes,
         Filter: ({ header, column }) => {
@@ -200,7 +216,7 @@ const WorkList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="typeFilter"
             />
           );
         },
@@ -211,16 +227,14 @@ const WorkList = () => {
           ) {
             return true;
           }
-
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
         accessorKey: "eao_team.name",
         header: "Team",
-        size: 80,
+        size: 60,
         filterVariant: "multi-select",
         filterSelectOptions: teams,
         Filter: ({ header, column }) => {
@@ -230,7 +244,7 @@ const WorkList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="teamFilter"
             />
           );
         },
@@ -241,15 +255,14 @@ const WorkList = () => {
           ) {
             return true;
           }
-
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
         accessorKey: "current_work_phase.name",
         header: "Current Phase",
+        size: 220,
         filterVariant: "multi-select",
         filterSelectOptions: phases,
         Filter: ({ header, column }) => {
@@ -259,7 +272,7 @@ const WorkList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="phaseFilter"
             />
           );
         },
@@ -270,16 +283,47 @@ const WorkList = () => {
           ) {
             return true;
           }
-
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
+        },
+      },
+      {
+        accessorKey: "work_state",
+        header: "Work state",
+        size: 80,
+        filterVariant: "multi-select",
+        filterSelectOptions: states,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="stateFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (
+            !filterValue.length ||
+            filterValue.length > states.length // select all is selected
+          ) {
+            return true;
+          }
+          const value: string = row.getValue(id) || "";
+          const label = WORK_STATE[value as keyof typeof WORK_STATE]?.label;
+          return filterValue.includes(label);
+        },
+        Cell: ({ cell }) => {
+          const stateValue = cell.getValue<keyof typeof WORK_STATE>();
+          return <span>{WORK_STATE[stateValue]?.label ?? stateValue}</span>;
         },
       },
       {
         accessorKey: "is_active",
         header: "Status",
-        size: 80,
+        size: 75,
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
         Filter: ({ header, column }) => {
@@ -289,7 +333,7 @@ const WorkList = () => {
               header={header}
               column={column}
               variant="inline"
-              name="rolesFilter"
+              name="statusFilter"
             />
           );
         },
@@ -300,9 +344,7 @@ const WorkList = () => {
           ) {
             return true;
           }
-
           const value: string = row.getValue(id);
-
           return filterValue.includes(value);
         },
         Cell: ({ cell }) => (
@@ -313,7 +355,7 @@ const WorkList = () => {
         ),
       },
     ],
-    [projects, phases, teams, ministries, workTypes, eaActs]
+    [eaActs, phases, projects, states, statuses, teams, workTypes]
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
@@ -335,6 +377,7 @@ const WorkList = () => {
           <MasterTrackTable
             columns={columns}
             data={works}
+            enableExport
             initialState={{
               sorting: [
                 {
@@ -344,13 +387,14 @@ const WorkList = () => {
               ],
               columnFilters: cachedFilters,
             }}
+            loading={loadingWorks}
+            onCacheFilters={handleCacheFilters}
+            renderResultCount={true}
             state={{
               isLoading: loadingWorks,
               showGlobalFilter: true,
             }}
-            tableName="work-listing"
-            enableExport
-            renderTopToolbarCustomActions={({ table }) => (
+            renderTopToolbarCustomActions={() => (
               <Restricted
                 allowed={[ROLES.CREATE]}
                 errorProps={{ disabled: true }}
@@ -366,7 +410,7 @@ const WorkList = () => {
                 </Button>
               </Restricted>
             )}
-            onCacheFilters={handleCacheFilters}
+            tableName="work-listing"
           />
         </Grid>
       </ETPageContainer>

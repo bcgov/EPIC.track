@@ -25,6 +25,7 @@ export const ThirtySixtyNinety = () => {
 
   const activeApprovedHighprioIssues = issues.filter(
     (issue) =>
+      !issue.is_resolved &&
       issue.is_active &&
       issue.is_high_priority &&
       issue.updates.find((update) => update.is_approved)

@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, createContext } from "react";
 import { MasterBase } from "../../models/type";
 import ServiceBase from "../../services/common/serviceBase";
 import TrackDialog, { TrackDialogProps } from "./TrackDialog";
-import { DialogProps, SxProps } from "@mui/material";
+import { SxProps } from "@mui/material";
 import { showNotification } from "./notificationProvider";
 import { getErrorMessage } from "../../utils/axiosUtils";
 import { Restricted } from "./restricted";
@@ -172,7 +172,7 @@ export const MasterProvider = ({
   }, []);
 
   const onDialogClose = (event: any = undefined, reason: any = undefined) => {
-    if (reason && reason == "backdropClick") return;
+    if (reason && reason === "backdropClick") return;
     setShowModalForm(false);
     setId(undefined);
     setItem(undefined);

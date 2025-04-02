@@ -65,8 +65,8 @@ export const DateCalculatorForm = () => {
   const handleCalculate = () => {
     try {
       const res = dateCalculator(
-        selectedCalculationType == "regular",
-        selectedCalculationType == "suspended",
+        selectedCalculationType === "regular",
+        selectedCalculationType === "suspended",
         numOfDays,
         startDate,
         endDate,
@@ -126,7 +126,7 @@ export const DateCalculatorForm = () => {
               </Then>
             </If>
           </Grid>
-          <If condition={selectedCalculationType == "suspended"}>
+          <If condition={selectedCalculationType === "suspended"}>
             <Then>
               <Grid item xs={6}>
                 <ETFormLabel>Suspension Date</ETFormLabel>
@@ -210,17 +210,17 @@ export const DateCalculatorForm = () => {
           <Grid item xs={12}>
             <ETFormLabel>Description</ETFormLabel>
             <Switch>
-              <Case condition={selectedCalculationType == "regular"}>
+              <Case condition={selectedCalculationType === "regular"}>
                 <ETDescription>
                   Start date is included in calculation.
                 </ETDescription>
               </Case>
-              <Case condition={selectedCalculationType == "suspended"}>
+              <Case condition={selectedCalculationType === "suspended"}>
                 <ETDescription>
                   Suspended dates are excluded from calculation.
                 </ETDescription>
               </Case>
-              <Case condition={selectedCalculationType == "dayZero"}>
+              <Case condition={selectedCalculationType === "dayZero"}>
                 <Grid
                   item
                   xs={12}
@@ -262,7 +262,7 @@ export const DateCalculatorForm = () => {
               </Case>
             </Switch>
           </Grid>
-          <If condition={selectedCalculationType == "dayZero"}>
+          <If condition={selectedCalculationType === "dayZero"}>
             <Then>
               <Grid item xs={12}>
                 <Collapse in={expand}>

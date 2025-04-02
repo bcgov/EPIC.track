@@ -1,4 +1,3 @@
-import React from "react";
 import { useAppSelector } from "../hooks";
 import { useLocation, Navigate, Outlet } from "react-router-dom";
 import { hasPermission } from "../components/shared/restricted";

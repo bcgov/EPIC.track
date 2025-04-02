@@ -1,5 +1,4 @@
 import React from "react";
-import clsx from "clsx";
 import { components, DropdownIndicatorProps } from "react-select";
 import { Palette } from "../../../../styles/theme";
 import { IconProps } from "../../../icons/type";

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Grid } from "@mui/material";
 import { NameFilter } from "./NameFilter";
 import { TeamFilter } from "./TeamFilter";

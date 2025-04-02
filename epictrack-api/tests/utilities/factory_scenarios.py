@@ -20,7 +20,7 @@ from enum import Enum
 from faker import Faker
 
 from api.config import get_named_config
-from api.models.special_field import EntityEnum
+from api.models.special_field import EntityEnum, FieldTypeEnum
 from api.models.task_event import StatusEnum
 from api.utils.constants import CANADA_TIMEZONE
 from tests.constants import ASSESSMENT_WORK_TYPE
@@ -207,6 +207,21 @@ class TestJwtClaims(dict, Enum):
             ]
         }
     }
+    manage_user_role = {
+        'iss': CONFIG.JWT_OIDC_TEST_ISSUER,
+        'sub': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'idp_userid': 'f7a4a1d3-73a8-4cbc-a40f-bb1145302064',
+        'preferred_username': f'{fake.user_name()}@idir',
+        'given_name': fake.first_name(),
+        'family_name': fake.last_name(),
+        'tenant_id': 1,
+        'email': 'example@example.com',
+        'realm_access': {
+            'roles': [
+                'manage_users'
+            ]
+        }
+    }
 
 
 class TestProponent(Enum):
@@ -254,14 +269,16 @@ class TestSpecialField(Enum):
         "entity": EntityEnum.PROPONENT.value,
         "field_name": "name",
         "field_value": fake.word(),
-        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
+        "field_type": FieldTypeEnum.STRING.value
     }
 
     work_entity = {
         "entity": EntityEnum.WORK.value,
         "field_name": "work_lead_id",
         "field_value": fake.word(),
-        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat()
+        "active_from": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
+        "field_type": FieldTypeEnum.INTEGER.value
     }
 
 
@@ -331,4 +348,51 @@ class TestTaskEnum(Enum):
         ), unique=True),
         "start_date": fake.date_time_this_decade(tzinfo=CANADA_TIMEZONE).isoformat(),
         "status": StatusEnum.NOT_STARTED.value
+    }
+
+
+class TestElevatedRoleEnum(Enum):
+    """Test elevated role enum"""
+
+    MANAGE_FIRST_NATIONS = 1
+
+
+class TestElevatedRole(Enum):
+    """Test scenarios for elevated roles"""
+
+    elevated_role1 = {
+        "id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
+        "name": fake.word(),
+        "description": fake.sentence(),
+        "sort_order": 1
+    }
+
+
+class TestStaffElevatedRole(Enum):
+    """Test scenarios for staff elevated roles"""
+
+    staff_elevated_role1 = {
+        "staff_id": fake.random_int(min=1, max=200),
+        "elevated_role_id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
+        "is_active": True
+    }
+
+    staff_elevated_role2 = {
+        "staff_id": fake.random_int(min=1, max=200),
+        "elevated_role_id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
+        "is_active": True
+    }
+
+    staff_elevated_role_active = {
+        "id": 1,
+        "staff_id": 234,
+        "elevated_role_id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
+        "is_active": True
+    }
+
+    staff_elevated_role_inactive = {
+        "id": 1,
+        "staff_id": 234,
+        "elevated_role_id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
+        "is_active": False
     }

@@ -1,53 +1,45 @@
-import { Button, Grid, Tooltip } from "@mui/material";
-import React, { useMemo } from "react";
-import { StaffWorkRole } from "../../../models/staff";
-import workService from "../../../services/workService/workService";
-import { WorkplanContext } from "../WorkPlanContext";
+import { useContext, useEffect, useMemo, useState } from "react";
+import { Button, Grid } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { MRT_ColumnDef } from "material-react-table";
-import { ETGridTitle, IButton } from "../../shared";
+import { StaffWorkRole } from "../../../models/staff";
+import { WorkplanContext } from "../WorkPlanContext";
+import { ETGridTitle } from "../../shared";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { showNotification } from "../../shared/notificationProvider";
+import { ETChip } from "../../shared/chip/ETChip";
+import TrackDialog from "../../shared/TrackDialog";
+import NoDataEver from "../../shared/NoDataEver";
+import TableFilter from "../../shared/filterSelect/TableFilter";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
   ROLES,
 } from "../../../constants/application-constant";
-import AddIcon from "@mui/icons-material/Add";
-import { ETChip } from "../../shared/chip/ETChip";
-import TrackDialog from "../../shared/TrackDialog";
+import workService from "../../../services/workService/workService";
 import TeamForm from "./TeamForm";
-import NoDataEver from "../../shared/NoDataEver";
-import TableFilter from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
-import { WorkStaffRole } from "models/role";
 import { unEditableTeamMembers } from "./constants";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import Icons from "../../icons";
-import { IconProps } from "components/icons/type";
-
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const TeamList = () => {
-  const [roles, setRoles] = React.useState<string[]>([]);
-  const [statuses, setStatuses] = React.useState<string[]>([]);
-  const [workStaffId, setWorkStaffId] = React.useState<number | undefined>();
-  const [loading, setLoading] = React.useState<boolean>(true);
-  const [showTeamForm, setShowTeamForm] = React.useState<boolean>(false);
-  const ctx = React.useContext(WorkplanContext);
+  const [roles, setRoles] = useState<string[]>([]);
+  const [statuses, setStatuses] = useState<string[]>([]);
+  const [workStaffId, setWorkStaffId] = useState<number | undefined>();
+  const [loading, setLoading] = useState<boolean>(true);
+  const [showTeamForm, setShowTeamForm] = useState<boolean>(false);
+  const ctx = useContext(WorkplanContext);
   const staff = ctx.selectedStaff?.staff;
-  const { email, roles: givenUserAuthRoles } = useAppSelector(
+  const { roles: givenUserAuthRoles } = useAppSelector(
     (state) => state.user.userDetail
   );
 
   const teamMembers = useMemo(() => ctx.team, [ctx.team]);
 
-  const userIsTeamMember = useMemo(
-    () => teamMembers.some((member) => member.staff.email === email),
-    [teamMembers, email]
-  );
+  const userIsActiveTeamMember = ctx.isActiveTeamMember;
+
   const canEdit =
-    userIsTeamMember ||
+    userIsActiveTeamMember ||
     hasPermission({ roles: givenUserAuthRoles, allowed: [ROLES.EDIT] });
 
   const canCreate = hasPermission({
@@ -55,11 +47,11 @@ const TeamList = () => {
     allowed: [ROLES.CREATE],
   });
 
-  React.useEffect(() => {
+  useEffect(() => {
     setLoading(ctx.loading);
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (teamMembers) {
       const roles = teamMembers
         .map((p) => p.role?.name)
@@ -73,7 +65,7 @@ const TeamList = () => {
     }
   }, [teamMembers]);
 
-  const columns = React.useMemo<MRT_ColumnDef<StaffWorkRole>[]>(
+  const columns = useMemo<MRT_ColumnDef<StaffWorkRole>[]>(
     () => [
       {
         accessorKey: "staff.full_name",
@@ -223,7 +215,7 @@ const TeamList = () => {
                   <Grid item xs={6}>
                     <Restricted
                       allowed={[ROLES.CREATE]}
-                      exception={userIsTeamMember}
+                      exception={userIsActiveTeamMember}
                       errorProps={{
                         disabled: true,
                       }}

@@ -1,6 +1,4 @@
-import React from "react";
 import { CypressStubFunction } from "../../../../cypress/support/common";
-import { Button } from "@mui/material";
 import UserMenuTest from "../userMenu/UserMenuTest";
 describe("UserMenu", () => {
   let onCloseHandler: CypressStubFunction;

@@ -1,5 +1,7 @@
-import { useContext, useMemo } from "react";
-import { Box, Divider, Grid, Stack, Tooltip } from "@mui/material";
+import { useMemo } from "react";
+import { Else, If, Then, When } from "react-if";
+import { Grid, Stack } from "@mui/material";
+import dayjs from "dayjs";
 import { Palette } from "../../../styles/theme";
 import { ETCaption1, ETCaption2, ETHeading4, ETParagraph } from "../../shared";
 import Icons from "../../icons";
@@ -10,28 +12,27 @@ import {
   MilestoneInfoSectionProps,
 } from "./type";
 import WorkState from "../../workPlan/WorkState";
-import dayjs from "dayjs";
 import {
-  DATE_FORMAT,
   DISPLAY_DATE_FORMAT,
   MONTH_DAY_YEAR,
+  StalenessEnum,
 } from "../../../constants/application-constant";
-import { isStatusOutOfDate } from "../../workPlan/status/shared";
-import { Status } from "../../../models/status";
-import { Else, If, Then, When } from "react-if";
+import { calculateStatusStaleness } from "../../workPlan/status/shared";
+import { Status } from "models/status";
+import { WorkStateEnum } from "models/work";
 import { daysLeft } from "./util";
 import { dateUtils } from "utils";
-import { WorkStateEnum } from "models/work";
-import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 const IndicatorSmallIcon: React.FC<IconProps> = Icons["IndicatorSmallIcon"];
 const ClockIcon: React.FC<IconProps> = Icons["ClockIcon"];
+
 const decisionWorkStates = [
   WorkStateEnum.CLOSED,
   WorkStateEnum.COMPLETED,
   WorkStateEnum.TERMINATED,
   WorkStateEnum.WITHDRAWN,
 ];
+
 const MilestoneInfoSection = (props: MilestoneInfoSectionProps) => {
   let dateTitle, name, date;
   if (props.infoType === MilestoneInfoSectionEnum.DECISION) {
@@ -84,11 +85,13 @@ const MilestoneInfoSection = (props: MilestoneInfoSectionProps) => {
     </>
   );
 };
-const CardBody = ({ workplan }: CardProps) => {
+const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
   const phase_color = Palette.primary.main;
-  const statusOutOfDate =
-    isStatusOutOfDate(workplan.status_info as Status) ||
-    !workplan.status_info?.posted_date;
+  const statusStaleness = calculateStatusStaleness(
+    (workplan.status_info as Status) || !workplan.status_info?.posted_date,
+    statusStalenessSettings?.staleness_length,
+    statusStalenessSettings?.warning_length
+  );
 
   const lastStatusUpdate = dayjs(workplan.status_info.posted_date).format(
     MONTH_DAY_YEAR
@@ -233,7 +236,10 @@ const CardBody = ({ workplan }: CardProps) => {
             }
           >
             <Grid item sx={{ marginTop: "2px" }}>
-              {statusOutOfDate && <IndicatorSmallIcon />}
+              {(statusStaleness === StalenessEnum.CRITICAL ||
+                statusStaleness === StalenessEnum.WARN) && (
+                <IndicatorSmallIcon />
+              )}
             </Grid>
           </When>
         </When>

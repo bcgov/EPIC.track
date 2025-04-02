@@ -23,6 +23,7 @@ from api.config import get_named_config
 from api.models import Staff
 from api.models import Work as WorkModel
 from api.models import WorkIssues, WorkIssueUpdates, WorkStatus
+from api.models.elevated_role import ElevatedRole
 from api.models.indigenous_nation import IndigenousNation
 from api.models.indigenous_work import IndigenousWork
 from api.models.pip_org_type import PIPOrgType
@@ -30,6 +31,7 @@ from api.models.project import Project as ProjectModel
 from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.special_field import SpecialField
+from api.models.staff_elevated_role import StaffElevatedRole
 from api.models.staff_work_role import StaffWorkRole
 from api.models.task_event import TaskEvent
 from api.models.task_template import TaskTemplate
@@ -37,7 +39,7 @@ from api.models.work_phase import WorkPhase
 from tests.utilities.factory_scenarios import (
     TestFirstNation, TestPipOrgType, TestProjectInfo, TestProponent, TestRoleEnum, TestSpecialField, TestStaffInfo,
     TestStatus, TestTaskEnum, TestTaskTemplateEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkIssuesInfo,
-    TestWorkIssueUpdatesInfo, WorkPhaseEnum)
+    TestWorkIssueUpdatesInfo, WorkPhaseEnum, TestElevatedRole, TestElevatedRoleEnum)
 
 
 CONFIG = get_named_config("testing")
@@ -216,6 +218,32 @@ def factory_special_field_model(
     )
     special_field.save()
     return special_field
+
+
+def factory_elevated_role_model(
+    elevated_role=TestElevatedRole.elevated_role1.value
+):
+    """Produce an elevated role model"""
+    elevated_role = ElevatedRole(
+        name=elevated_role["name"],
+        description=elevated_role["description"],
+        sort_order=elevated_role["sort_order"],
+    )
+    elevated_role.save()
+    return elevated_role
+
+
+def factory_staff_elevated_role_model(
+    staff_id=None, elevated_role_id=TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value
+):
+    """Produce an staff elevated role model"""
+    if staff_id is None:
+        staff_id = factory_staff_model().id
+    staff_elevated_role = StaffElevatedRole(
+        staff_id=staff_id, elevated_role_id=elevated_role_id, is_active=True
+    )
+    staff_elevated_role.save()
+    return staff_elevated_role
 
 
 def factory_staff_work_role_model(

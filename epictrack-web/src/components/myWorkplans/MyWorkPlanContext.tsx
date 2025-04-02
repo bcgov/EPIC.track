@@ -1,15 +1,20 @@
-import { createContext, useEffect, useMemo, useState } from "react";
-import { WorkPlan } from "../../models/workplan";
-import workplanService from "../../services/workplanService";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { WorkPlan } from "models/workplan";
+import { StalenessSettings } from "models/settings";
+import workplanService from "services/workplanService";
+import stalenessSettingsService from "services/stalenessSettingsService";
 import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { MY_WORKPLAN_VIEW, MyWorkPlanView } from "./type";
-import {
-  MY_WORKLAN_FILTERS,
-  MY_WORKPLAN_CACHED_SEARCH_OPTIONS,
-} from "./constants";
+import { MY_WORKPLAN_CACHED_SEARCH_OPTIONS } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 
 interface MyWorkplanContextProps {
@@ -19,6 +24,7 @@ interface MyWorkplanContextProps {
   totalWorkplans: number;
   searchOptions: WorkPlanSearchOptions;
   setSearchOptions: React.Dispatch<React.SetStateAction<WorkPlanSearchOptions>>;
+  statusStalenessSettings: StalenessSettings | undefined;
   loadingMoreWorkplans: boolean;
   setLoadingMoreWorkplans: React.Dispatch<React.SetStateAction<boolean>>;
   myWorkPlanView: MyWorkPlanView;
@@ -64,6 +70,7 @@ export const MyWorkplansContext = createContext<MyWorkplanContextProps>({
   setSearchOptions: () => {
     return;
   },
+  statusStalenessSettings: undefined,
   loadingMoreWorkplans: false,
   setLoadingMoreWorkplans: () => {
     return;
@@ -85,6 +92,8 @@ export const MyWorkplansProvider = ({
   const [loadingWorkplans, setLoadingWorkplans] = useState<boolean>(true);
   const [loadingMoreWorkplans, setLoadingMoreWorkplans] =
     useState<boolean>(false);
+  const [statusStalenessSettings, setStatusStalenessSettings] =
+    useState<StalenessSettings>();
   const [workplans, setWorkplans] = useState<WorkPlan[]>([]);
   const [totalWorkplans, setTotalWorkplans] = useState<number>(0);
   const [page, setPage] = useState<number>(1);
@@ -125,6 +134,23 @@ export const MyWorkplansProvider = ({
     }
   };
 
+  const getStalenessSettings = useCallback(async () => {
+    try {
+      const statusStalenessSetting =
+        await stalenessSettingsService.getStatusStaleness();
+      setStatusStalenessSettings(statusStalenessSetting.data);
+    } catch (error) {
+      showNotification("Could not load Staleness settings", {
+        duration: 3000,
+        type: "error",
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    getStalenessSettings();
+  }, [getStalenessSettings]);
+
   const loadWorkplans = async () => {
     setLoadingWorkplans(true);
     await fetchWorkplans(1);
@@ -157,6 +183,7 @@ export const MyWorkplansProvider = ({
       setSearchOptions,
       loadingMoreWorkplans,
       setLoadingMoreWorkplans,
+      statusStalenessSettings,
       myWorkPlanView,
       setMyWorkPlanView,
     }),
@@ -169,6 +196,7 @@ export const MyWorkplansProvider = ({
       setSearchOptions,
       loadingMoreWorkplans,
       setLoadingMoreWorkplans,
+      statusStalenessSettings,
       myWorkPlanView,
       setMyWorkPlanView,
     ]

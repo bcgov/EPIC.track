@@ -1,0 +1,51 @@
+name: Deploy to Prod
+
+on:
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./
+
+jobs:
+  deployment:
+    runs-on: ubuntu-24.04
+    environment:
+      name: prod
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install OpenShift CLI
+        run: |
+          curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz"
+          tar -xvzf openshift-client-linux.tar.gz
+          sudo mv oc /usr/local/bin/
+          rm -f openshift-client-linux.tar.gz
+
+      - name: Set Timestamp
+        id: timestamp
+        run: echo "::set-output name=ts::$(date +'%Y-%m-%d_%H-%M-%S')"
+
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT_SA_TOKEN}}
+
+      - name: Backup Current Prod
+        shell: bash
+        run: |
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
+          TIMESTAMP=${{ steps.timestamp.outputs.ts }}
+          oc tag epictrack-api:prod epictrack-api:prod-backup-${TIMESTAMP}
+          oc tag epictrack-web:prod epictrack-web:prod-backup-${TIMESTAMP}
+
+      - name: Tag Images and Rollout
+        shell: bash
+        run: |
+          oc project ${{ secrets.OPENSHIFT_REPOSITORY }}-tools
+          oc tag epictrack-api:test epictrack-api:prod
+          oc tag epictrack-web:test epictrack-web:prod
+          
+          oc rollout status dc/epictrack-api -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod -w
+          oc rollout status dc/epictrack-web -n ${{ secrets.OPENSHIFT_REPOSITORY }}-prod -w

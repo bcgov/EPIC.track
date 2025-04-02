@@ -29,7 +29,7 @@ from api.models.project import ProjectStateEnum
 from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.project_state import ProjectState
-from api.models.special_field import EntityEnum, SpecialField
+from api.models.special_field import EntityEnum, SpecialField, FieldTypeEnum
 from api.models.sub_types import SubType
 from api.models.types import Type
 from api.models.work import Work
@@ -69,22 +69,7 @@ class ProjectService:
         project.project_state_id = ProjectStateEnum.PRE_WORK.value
         current_app.logger.info(f"Project obj {dir(project)}")
         project.flush()
-        proponent_special_field_data = {
-            "entity": EntityEnum.PROJECT,
-            "entity_id": project.id,
-            "field_name": "proponent_id",
-            "field_value": project.proponent_id,
-            "active_from": project.created_at,
-        }
-        SpecialFieldService.create_special_field_entry(proponent_special_field_data)
-        project_name_special_field_data = {
-            "entity": EntityEnum.PROJECT,
-            "entity_id": project.id,
-            "field_name": "name",
-            "field_value": project.name,
-            "active_from": project.created_at,
-        }
-        SpecialFieldService.create_special_field_entry(project_name_special_field_data)
+        cls.create_project_special_fields(project)
         project.save()
         return project
 
@@ -446,3 +431,42 @@ class ProjectService:
         current_app.logger.info(f"Enabled {enabled_count} Projects")
         # Remove updated projects to avoid creating duplicates
         return data[~data["name"].isin(to_update)]
+
+    @classmethod
+    def create_project_special_fields(
+        cls, project
+    ):
+        """Create the special fields for the project when a project is created"""
+        proponent_special_field_data = {
+            "entity": EntityEnum.PROJECT.value,
+            "entity_id": project.id,
+            "field_name": "proponent_id",
+            "field_value": project.proponent_id,
+            "active_from": project.created_at,
+            "field_type": FieldTypeEnum.INTEGER.value,
+        }
+        project_name_special_field_data = {
+            "entity": EntityEnum.PROJECT.value,
+            "entity_id": project.id,
+            "field_name": "name",
+            "field_value": project.name,
+            "active_from": project.created_at,
+            "field_type": FieldTypeEnum.STRING.value,
+        }
+        project_state_special_field_data = {
+            "entity": EntityEnum.PROJECT.value,
+            "entity_id": project.id,
+            "field_name": "project_state_id",
+            "field_value": project.project_state_id,
+            "active_from": project.created_at,
+            "field_type": FieldTypeEnum.INTEGER.value,
+        }
+        SpecialFieldService.create_special_field_entry(
+          proponent_special_field_data, commit=False
+        )
+        SpecialFieldService.create_special_field_entry(
+          project_name_special_field_data, commit=False
+        )
+        SpecialFieldService.create_special_field_entry(
+          project_state_special_field_data, commit=False
+        )

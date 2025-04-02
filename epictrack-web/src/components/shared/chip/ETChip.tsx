@@ -11,6 +11,7 @@ interface StyledChipProps extends ChipProps {
   active?: boolean;
   inactive?: boolean;
   highPriority?: boolean;
+  resolved?: boolean;
   error?: boolean;
 }
 
@@ -19,11 +20,12 @@ const ETChip = styled(
     active = true,
     inactive = false,
     highPriority = false,
+    resolved = false,
     error = false,
     size = "small",
     ...other
   }: StyledChipProps) => <Chip size={size} {...other} />
-)(({ active, inactive, highPriority, error }: StyledChipProps) => {
+)(({ active, inactive, highPriority, resolved, error }: StyledChipProps) => {
   if (inactive) {
     return {
       background: "#F2F2F2",
@@ -35,6 +37,13 @@ const ETChip = styled(
     return {
       background: `${Palette.secondary.bg.light}`,
       color: `${Palette.secondary.dark}`,
+      ...chipStyles,
+    };
+  }
+  if (resolved) {
+    return {
+      background: `${Palette.neutral.bg.dark}`,
+      color: `${Palette.neutral.dark}`,
       ...chipStyles,
     };
   }

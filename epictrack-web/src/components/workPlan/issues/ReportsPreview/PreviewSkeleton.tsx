@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Skeleton } from "@mui/material";
 
 export const PreviewSkeleton = () => {

@@ -45,10 +45,13 @@ install: clean ## Install python virtrual environment
 	cat requirements/repo-libraries.txt >> requirements.txt ;\
 	pip install -Ur requirements/repo-libraries.txt ;\
 	pip install -Ur requirements/dev.txt  ;\
-	touch venv/bin/activate  # update so it's as new as requirements/prod.txt
+	touch venv/bin/activate  ## update so it's as new as requirements/prod.txt
 
 install-dev: ## Install local application
 	. venv/bin/activate && pip install -e .
+
+db-update: install
+	export PYTHONPATH=$(CURRENT_ABS_DIR)/src flask db upgrade
 
 #################################################################################
 # COMMANDS - CI                                                                 #
@@ -59,7 +62,7 @@ pylint: ## Linting with pylint
 	. venv/bin/activate && pylint --rcfile=setup.cfg  src/$(PROJECT_NAME)
 
 flake8: ## Linting with flake8
-	. venv/bin/activate && flake8 --extend-ignore=Q000,D400,D401,I005,W503,E261,E121 src/$(PROJECT_NAME) tests
+	. venv/bin/activate && flake8 --extend-ignore=Q000,D400,D401,I005,W503,E261,E121,R1702 src/$(PROJECT_NAME) tests
 
 lint: pylint flake8 ## run all lint type scripts
 

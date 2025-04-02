@@ -17,7 +17,7 @@ defaults:
 
 jobs:
   setup-job:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     if: github.repository == 'bcgov/EPIC.track'
 
@@ -25,9 +25,9 @@ jobs:
       - uses: actions/checkout@v2
       - run: "true"
 
-  linting:
+  web-linting:
     needs: setup-job
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       matrix:
@@ -47,9 +47,9 @@ jobs:
         run: |
           npm run lint
 
-  testing:
+  web-testing:
     needs: setup-job
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2
@@ -84,9 +84,9 @@ jobs:
       #     override_branch: ${{env.CODECOV_BRANCH}}
       #     token: ${{ secrets.CODECOV_TOKEN }}
 
-  build-check:
+  web-build-check:
     needs: setup-job
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2

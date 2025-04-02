@@ -14,6 +14,7 @@
 """Exposes all the response validation schemas"""
 from .act_section_response import ActSectionResponseSchema
 from .action_template_response import ActionTemplateResponseSchema
+from .elevated_role_response import ElevatedRoleResponseSchema
 from .event_configuration_response import EventConfigurationResponseSchema
 from .event_response import (
     EventDateChangePosibilityCheckResponseSchema,
@@ -34,8 +35,10 @@ from .proponent_response import ProponentResponseSchema
 from .responsibility_response import ResponsibilityResponseSchema
 from .role_response import RoleResponseSchema
 from .special_field_response import SpecialFieldResponseSchema
+from .staff_elevated_role_response import StaffElevatedRoleResponseSchema
 from .staff_response import StaffResponseSchema
 from .staff_work_role_response import StaffWorkRoleResponseSchema
+from .staleness_settings_response import StalenessSettingsResponseSchema
 from .task_response import (
     TaskEventResponseSchema,
     TaskResponseSchema,
@@ -59,3 +62,4 @@ from .work_response import (
     WorkIssuesLatestUpdateResponseSchema,
 )
 from .project_state_response import ProjectStateResponseSchema
+from .ministry_response import MinistryResponseSchema

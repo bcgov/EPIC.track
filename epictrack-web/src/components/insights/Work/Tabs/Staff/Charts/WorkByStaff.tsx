@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Grid } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByStaffQuery } from "services/rtkQuery/workInsights";
@@ -9,7 +8,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,

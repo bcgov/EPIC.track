@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, SxProps } from "@mui/material";
 import { ETHeading3 } from "../../shared";
 import { Palette } from "../../../styles/theme";

@@ -1,39 +1,43 @@
-import React, { useEffect } from "react";
-import { Grid, Divider, Tooltip, Box, InputAdornment } from "@mui/material";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { Box, Divider, Grid, InputAdornment, Tooltip } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
-import Moment from "moment";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Work, defaultWork } from "../../../models/work";
-import { ListType } from "../../../models/code";
-import { Ministry } from "../../../models/ministry";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
-import { Staff } from "../../../models/staff";
-import staffService from "../../../services/staffService/staffService";
+import Moment from "moment";
 import dayjs from "dayjs";
-import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import workService from "../../../services/workService/workService";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
-import { IconProps } from "../../icons/type";
-import projectService from "../../../services/projectService/projectService";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { sort } from "../../../utils";
-import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import { EPDSpecialField } from "./EPDSpecialField";
-import icons from "../../icons";
-import { WorkLeadSpecialField } from "./WorkLeadSpecialField";
-import {
-  MIN_WORK_START_DATE,
-  ROLES,
-} from "../../../constants/application-constant";
-import { Project } from "../../../models/project";
-import ministryService from "services/ministryService";
+import { defaultWork, Work } from "models/work";
+import { ListType } from "models/code";
+import { Ministry } from "models/ministry";
+import { POSITION_ENUM } from "models/position";
+import { Project } from "models/project";
+import { Staff } from "models/staff";
 import eaActService from "services/eaActService";
 import EAOTeamService from "services/eao_team";
 import federalInvolvementService from "services/federalInvolvementService";
+import ministryService from "services/ministryService";
+import projectService from "services/projectService/projectService";
+import staffService from "services/staffService/staffService";
 import substitutionActService from "services/substitutionActService";
+import workService from "services/workService/workService";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import { hasPermission } from "../../shared/restricted";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
+import {
+  MIN_WORK_START_DATE,
+  ROLES,
+  SPECIAL_FIELD_TYPES,
+  SPECIAL_FIELDS,
+  SpecialFieldEntityEnum,
+} from "constants/application-constant";
 import { useAppSelector } from "hooks";
-import { hasPermission } from "components/shared/restricted";
+import { sort } from "../../../utils";
+import { IconProps } from "../../icons/type";
+import icons from "../../icons";
+import { WorkFormSpecialField } from "./WorkFormSpecialField";
+import { useIsActiveTeamMember } from "components/workPlan/utils";
 
 const maxTitleLength = 150;
 const schema = yup.object<Work>().shape({
@@ -41,7 +45,7 @@ const schema = yup.object<Work>().shape({
   work_type_id: yup.number().required("Work type is required"),
   start_date: yup.date().required("Start date is required"),
   project_id: yup.number().required("Project is required"),
-  ministry_id: yup.number().required("Responsible Ministry is required"),
+  ministry_id: yup.number().required("2nd Responsible Ministry is required"),
   federal_involvement_id: yup
     .number()
     .required("Federal Involvement is required"),
@@ -75,7 +79,7 @@ const schema = yup.object<Work>().shape({
   decision_by_id: yup.number().required("Decision Maker is required"),
 });
 
-const InfoIcon: React.FC<IconProps> = icons["InfoIcon"];
+const InfoIcon: FC<IconProps> = icons["InfoIcon"];
 
 type WorkFormProps = {
   work: Work | null;
@@ -90,21 +94,19 @@ export default function WorkForm({
   saveWork,
   setDisableDialogSave,
 }: WorkFormProps) {
-  const [eaActs, setEAActs] = React.useState<ListType[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
-  const [projects, setProjects] = React.useState<ListType[]>([]);
-  const [ministries, setMinistries] = React.useState<ListType[]>([]);
-  const [federalInvolvements, setFederalInvolvements] = React.useState<
-    ListType[]
-  >([]);
-  const [substitutionActs, setSubstitutionActs] = React.useState<ListType[]>(
+  const [eaActs, setEAActs] = useState<ListType[]>([]);
+  const [workTypes, setWorkTypes] = useState<ListType[]>([]);
+  const [projects, setProjects] = useState<ListType[]>([]);
+  const [ministries, setMinistries] = useState<ListType[]>([]);
+  const [federalInvolvements, setFederalInvolvements] = useState<ListType[]>(
     []
   );
-  const [teams, setTeams] = React.useState<ListType[]>([]);
-  const [epds, setEPDs] = React.useState<Staff[]>([]);
-  const [leads, setLeads] = React.useState<Staff[]>([]);
-  const [decisionMakers, setDecisionMakers] = React.useState<Staff[]>([]);
-  const [titlePrefix, setTitlePrefix] = React.useState<string>("");
+  const [substitutionActs, setSubstitutionActs] = useState<ListType[]>([]);
+  const [teams, setTeams] = useState<ListType[]>([]);
+  const [epds, setEPDs] = useState<Staff[]>([]);
+  const [leads, setLeads] = useState<Staff[]>([]);
+  const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
+  const [titlePrefix, setTitlePrefix] = useState<string>("");
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -128,28 +130,39 @@ export default function WorkForm({
   const title = watch("title");
 
   const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const isActiveTeamMember = useIsActiveTeamMember();
+  const canEdit =
+    hasPermission({ roles, allowed: [ROLES.EDIT] }) || isActiveTeamMember;
 
-  const [isEpdFieldUnlocked, setIsEpdFieldUnlocked] =
-    React.useState<boolean>(false);
+  const [isEpdFieldUnlocked, setIsEpdFieldUnlocked] = useState<boolean>(false);
 
   const [isWorkLeadFieldUnlocked, setIsWorkLeadFieldUnlocked] =
-    React.useState<boolean>(false);
+    useState<boolean>(false);
 
-  const isSpecialFieldUnlocked = isEpdFieldUnlocked || isWorkLeadFieldUnlocked;
+  const [isMinistryFieldUnlocked, setIsMinistryFieldUnlocked] =
+    useState<boolean>(false);
+
+  const [isDecisionMakerFieldUnlocked, setIsDecisionMakerFieldUnlocked] =
+    useState<boolean>(false);
+
+  const isSpecialFieldUnlocked =
+    isEpdFieldUnlocked ||
+    isWorkLeadFieldUnlocked ||
+    isMinistryFieldUnlocked ||
+    isDecisionMakerFieldUnlocked;
   const workHasBeenCreated = work?.id ? true : false;
 
   useEffect(() => {
     reset(work ?? defaultWork);
-  }, [work]);
+  }, [reset, work]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (setDisableDialogSave) {
       setDisableDialogSave(isSpecialFieldUnlocked);
     }
   }, [isSpecialFieldUnlocked, setDisableDialogSave]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
       ({ name }) => name === "None"
     );
@@ -163,21 +176,38 @@ export default function WorkForm({
     ) {
       setValue("substitution_act_id", noneSubstitutionAct?.id);
     }
-  }, [federalInvolvementId, substitutionActs, federalInvolvements]);
+  }, [federalInvolvementId, setValue, substitutionActs, federalInvolvements]);
 
-  const staffByRoles: { [x: string]: any } = {
-    "4,3": setLeads,
-    "3": setEPDs,
-    "1,2,8": setDecisionMakers,
-  };
+  const staffByRoles = useMemo(
+    () =>
+      new Map<POSITION_ENUM, (staff: Staff[]) => void>([
+        [POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR, setLeads],
+        [
+          POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
+          (staff) => {
+            setLeads(staff);
+            setEPDs(staff);
+          },
+        ],
+        [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, setDecisionMakers],
+        [POSITION_ENUM.ADM, setDecisionMakers],
+        [POSITION_ENUM.MINISTER, setDecisionMakers],
+      ]),
+    []
+  );
 
-  const getStaffByPosition = async (position: string) => {
-    const staffResult = await staffService.getStaffByPosition(position);
-    if (staffResult.status === 200) {
-      const data = sort(staffResult.data as never[], "full_name");
-      staffByRoles[position](data);
-    }
-  };
+  const getStaffByPosition = useCallback(
+    async (position: POSITION_ENUM) => {
+      const staffResult = await staffService.getStaffByPosition(
+        position.toString()
+      );
+      if (staffResult.status === 200) {
+        const data = sort(staffResult.data as never[], "full_name");
+        staffByRoles.get(position)?.(data);
+      }
+    },
+    [staffByRoles]
+  );
 
   const getProjects = async () => {
     const projectResult = await projectService.getAll("list_type");
@@ -196,7 +226,7 @@ export default function WorkForm({
   };
 
   const getMinistries = async () => {
-    const ministryResult = await ministryService.getAll();
+    const ministryResult = await ministryService.getAll("list_type");
     if (ministryResult.status === 200) {
       setMinistries(ministryResult.data as ListType[]);
     }
@@ -242,20 +272,31 @@ export default function WorkForm({
     }
   };
 
-  React.useEffect(() => {
-    const promises: any[] = [];
-    Object.keys(staffByRoles).forEach(async (key) => {
-      promises.push(getStaffByPosition(key));
-    });
-    Promise.all(promises);
-    getProjects();
-    getMinistries();
-    getEAActs();
-    getWorkTypes();
-    getEAOTeams();
-    getFederalInvolvements();
-    getSubstitutionActs();
-  }, []);
+  useEffect(() => {
+    const fetchStaff = async () => {
+      try {
+        const staffPromises = Array.from(staffByRoles.keys()).map((key) =>
+          getStaffByPosition(key as POSITION_ENUM)
+        );
+
+        const otherPromises = [
+          getEAActs(),
+          getEAOTeams(),
+          getFederalInvolvements(),
+          getMinistries(),
+          getProjects(),
+          getSubstitutionActs(),
+          getWorkTypes(),
+        ];
+
+        await Promise.all([...staffPromises, ...otherPromises]);
+      } catch (error) {
+        console.error("Error fetching staff and other data:", error);
+      }
+    };
+
+    fetchStaff();
+  }, [getStaffByPosition, staffByRoles]);
 
   const onSubmitHandler = async (data: any) => {
     data.start_date = Moment(data.start_date).format();
@@ -264,7 +305,7 @@ export default function WorkForm({
 
   const simple_title = watch("simple_title");
   const titleSeparator = " - ";
-  const getTitlePrefix = () => {
+  const getTitlePrefix = useCallback(() => {
     let prefix = "";
     if (projectId) {
       const project = projects.find(
@@ -277,18 +318,26 @@ export default function WorkForm({
       prefix += `${workType?.name}${titleSeparator}`;
     }
     return prefix;
-  };
+  }, [projectId, workTypeId, projects, workTypes, titleSeparator]);
 
   useEffect(() => {
     if (projects.length > 0 && workTypes.length > 0) {
       const prefix = getTitlePrefix();
       setTitlePrefix(prefix);
     }
-  }, [workTypeId, projectId, projects, workTypes]);
+  }, [getTitlePrefix, projects, workTypes]);
 
-  React.useEffect(() => {
-    setValue("title", `${titlePrefix}${simple_title}`);
-  }, [titlePrefix, simple_title]);
+  useEffect(() => {
+    if (simple_title) {
+      setValue("title", `${titlePrefix}${simple_title}`);
+    } else {
+      // If simple_title is not set, remove the hanging separator
+      const trimmedPrefix = titlePrefix.endsWith(titleSeparator)
+        ? titlePrefix.slice(0, -titleSeparator.length)
+        : titlePrefix;
+      setValue("title", trimmedPrefix);
+    }
+  }, [titlePrefix, simple_title, setValue]);
 
   const handleProjectChange = async (id: string) => {
     if (id) {
@@ -304,10 +353,10 @@ export default function WorkForm({
     <FormProvider {...methods}>
       <Grid
         component={"form"}
-        id="work-form"
         container
-        spacing={2}
+        id="work-form"
         onSubmit={handleSubmit(onSubmitHandler)}
+        spacing={2}
       >
         <Grid item xs={4}>
           <ETFormLabel required>EA Act</ETFormLabel>
@@ -362,8 +411,25 @@ export default function WorkForm({
             disabled={!canEdit || workHasBeenCreated}
           ></ControlledSelectV2>
         </Grid>
-        <Grid item xs={6}>
-          <ETFormLabel required>Responsible Ministry</ETFormLabel>
+        <WorkFormSpecialField
+          id={work?.id}
+          onLockClick={() => setIsMinistryFieldUnlocked((prev) => !prev)}
+          open={isMinistryFieldUnlocked}
+          onSave={() => {
+            fetchWork();
+          }}
+          options={ministries || []}
+          disabled={
+            !canEdit ||
+            isEpdFieldUnlocked ||
+            isWorkLeadFieldUnlocked ||
+            isDecisionMakerFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.MINISTRY}
+          fieldLabel="2nd Responsible Ministry"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
+        >
           <ControlledSelectV2
             placeholder="Select"
             helperText={errors?.ministry_id?.message?.toString()}
@@ -372,9 +438,9 @@ export default function WorkForm({
             getOptionValue={(o: Ministry) => o?.id.toString()}
             getOptionLabel={(o: Ministry) => o.name}
             {...register("ministry_id")}
-            disabled={!canEdit || isSpecialFieldUnlocked}
-          ></ControlledSelectV2>
-        </Grid>
+            disabled={work?.ministry_id !== undefined}
+          />
+        </WorkFormSpecialField>
         <Grid item xs={6}>
           <ETFormLabel required>Federal Involvement</ETFormLabel>
           <ControlledSelectV2
@@ -477,8 +543,7 @@ export default function WorkForm({
             disabled={!canEdit || isSpecialFieldUnlocked}
           ></ControlledSelectV2>
         </Grid>
-
-        <EPDSpecialField
+        <WorkFormSpecialField
           id={work?.id}
           onLockClick={() => setIsEpdFieldUnlocked((prev) => !prev)}
           open={isEpdFieldUnlocked}
@@ -486,21 +551,35 @@ export default function WorkForm({
             fetchWork();
           }}
           options={epds || []}
-          disabled={!canEdit || isWorkLeadFieldUnlocked}
+          disabled={
+            !canEdit ||
+            isWorkLeadFieldUnlocked ||
+            isMinistryFieldUnlocked ||
+            isDecisionMakerFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.RESPONSIBLE_EPD}
+          fieldLabel="Responsible EPD"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
         >
           <ControlledSelectV2
-            disabled={work?.responsible_epd_id != undefined}
+            disabled={work?.responsible_epd_id !== undefined}
             placeholder="Select"
             helperText={errors?.responsible_epd_id?.message?.toString()}
             defaultValue={work?.responsible_epd_id}
-            options={epds || []}
+            options={
+              // Ensure responsible_epd is included if it is locked
+              work?.responsible_epd_id &&
+              !epds.some((epd) => epd.id === work.responsible_epd_id)
+                ? [...epds, work.responsible_epd]
+                : epds || []
+            }
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("responsible_epd_id")}
           />
-        </EPDSpecialField>
-
-        <WorkLeadSpecialField
+        </WorkFormSpecialField>
+        <WorkFormSpecialField
           id={work?.id}
           onLockClick={() => setIsWorkLeadFieldUnlocked((prev) => !prev)}
           open={isWorkLeadFieldUnlocked}
@@ -508,35 +587,79 @@ export default function WorkForm({
             fetchWork();
           }}
           options={leads || []}
-          disabled={!canEdit || isEpdFieldUnlocked}
+          disabled={
+            !canEdit ||
+            isEpdFieldUnlocked ||
+            isMinistryFieldUnlocked ||
+            isDecisionMakerFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.WORK_LEAD}
+          fieldLabel="Work Lead"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
+          isPositionLeft={true}
         >
           <ControlledSelectV2
-            disabled={work?.work_lead_id != undefined}
+            disabled={work?.work_lead_id !== undefined}
             placeholder="Select"
             helperText={errors?.work_lead_id?.message?.toString()}
             defaultValue={work?.work_lead_id}
-            options={leads || []}
+            options={
+              // Ensure lead is included if it is locked
+              work?.work_lead_id &&
+              !leads.some((lead) => lead.id === work.work_lead_id)
+                ? [...leads, work.work_lead]
+                : leads || []
+            }
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("work_lead_id")}
           />
-        </WorkLeadSpecialField>
-
-        <Grid item xs={6}>
-          {/* TODO: Make the label dynamic */}
-          <ETFormLabel required>Decision Maker</ETFormLabel>
+        </WorkFormSpecialField>
+        <WorkFormSpecialField
+          id={work?.id}
+          onLockClick={() => setIsDecisionMakerFieldUnlocked((prev) => !prev)}
+          open={isDecisionMakerFieldUnlocked}
+          onSave={() => {
+            fetchWork();
+          }}
+          options={decisionMakers || []}
+          disabled={
+            !canEdit ||
+            isEpdFieldUnlocked ||
+            isWorkLeadFieldUnlocked ||
+            isMinistryFieldUnlocked
+          }
+          entity={SpecialFieldEntityEnum.WORK}
+          fieldName={SPECIAL_FIELDS.WORK.DECISION_MAKER}
+          fieldLabel="Decision Maker"
+          fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
+        >
           <ControlledSelectV2
+            disabled={work?.decision_by_id !== undefined}
             placeholder="Select"
             helperText={errors?.decision_by_id?.message?.toString()}
             defaultValue={work?.decision_by_id}
-            options={decisionMakers || []}
+            options={
+              // Ensure decision maker is included if it is locked
+              work?.decision_by_id &&
+              !decisionMakers.some((dm) => dm.id === work.decision_by_id)
+                ? [...decisionMakers, work.decision_by]
+                : decisionMakers || []
+            }
             getOptionValue={(o: Staff) => o?.id.toString()}
             getOptionLabel={(o: Staff) => o.full_name}
             {...register("decision_by_id")}
-            disabled={!canEdit || isSpecialFieldUnlocked}
-          ></ControlledSelectV2>
-        </Grid>
-        <Grid item xs={3} sx={{ paddingTop: "30px !important" }}>
+          />
+        </WorkFormSpecialField>
+        <Grid
+          item
+          xs={3}
+          sx={{
+            order: isWorkLeadFieldUnlocked ? 1 : 0,
+            paddingTop: "30px !important",
+          }}
+        >
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name="is_active"
@@ -544,16 +667,23 @@ export default function WorkForm({
           />
           <ETFormLabel id="is_active">Active</ETFormLabel>
         </Grid>
-        <Grid item xs={4} sx={{ paddingTop: "30px !important" }}>
+        <Grid
+          item
+          xs={4}
+          sx={{
+            order: isWorkLeadFieldUnlocked ? 1 : 0,
+            paddingTop: "30px !important",
+          }}
+        >
           <ControlledSwitch
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
             name="is_high_priority"
             disabled={!canEdit || isSpecialFieldUnlocked}
           />
-          <ETFormLabel id="is_watched">High Priority</ETFormLabel>
+          <ETFormLabel id="is_watched">High Profile</ETFormLabel>
           <Tooltip
             sx={{ paddingLeft: "2px" }}
-            title="Work marked High Priority will have extra milestones appear on Reports"
+            title="Work marked High Profile will have extra milestones appear on Reports"
           >
             <Box component={"span"}>
               <InfoIcon />

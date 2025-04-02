@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import {
   Box,
   Button,
@@ -50,7 +50,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
   saveButtonProps,
   ...props
 }) => {
-  const [openDialog, setOpenDialog] = React.useState(false);
+  const [openDialog, setOpenDialog] = useState(false);
   useEffect(() => {
     setOpenDialog(open);
   }, [open]);
@@ -73,6 +73,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
       }}
     >
       <Box
+        className="modal-header"
         sx={{
           display: "flex",
           padding: "24px 24px 16px 40px",
@@ -82,10 +83,8 @@ const TrackDialog: FC<TrackDialogProps> = ({
           borderRadius: "4px 4px 0 0",
           borderBottom: `2px solid ${Palette.primary.main}`,
         }}
-        className="modal-header"
       >
         <IconButton
-          autoFocus
           onClick={onCancel}
           sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
           disableRipple
@@ -104,7 +103,6 @@ const TrackDialog: FC<TrackDialogProps> = ({
           gap: "1rem",
           alignItems: "flex-start",
           alignSelf: "stretch",
-          // overflowY: "auto",
           backgroundColor: Palette.neutral.bg.light,
         }}
       >

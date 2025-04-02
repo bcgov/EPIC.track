@@ -78,7 +78,7 @@ export const FN_RESOURCES = [
 
 export const EPIC_SUPPORT_LINKS = {
   SPECIAL_HISTORY:
-    "https://intranet.qa.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/reports#specialhistory",
+    "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/work-pages#specialhistory",
 };
 
 export const ABOUT_RESOURCES = [
@@ -105,12 +105,16 @@ export const ROLES = {
   DEFAULT_ROLES_EAO_EPIC: "default-roles-eao-epic",
   MANAGE_USERS: "manage_users",
   EXTENDED_EDIT: "extended_edit",
+  RESPONSIBLE_EPD: "Responsible EPD",
+  TEAM_LEAD: "Team Lead",
+  TEAM_CO_LEAD: "Team Co-Lead",
 };
 
 export enum SpecialFieldEntityEnum {
   PROJECT = "PROJECT",
   PROPONENT = "PROPONENT",
   WORK = "WORK",
+  MINISTRY = "MINISTRY",
 }
 
 export const SPECIAL_FIELDS = Object.freeze({
@@ -124,7 +128,20 @@ export const SPECIAL_FIELDS = Object.freeze({
   WORK: {
     RESPONSIBLE_EPD: "responsible_epd_id",
     WORK_LEAD: "work_lead_id",
+    DECISION_MAKER: "decision_by_id",
+    MINISTRY: "ministry_id",
   },
+  MINISTRY: {
+    NAME: "name",
+    MINISTER: "minister_id",
+    ABBREVIATION: "abbreviation",
+  },
+});
+
+export const SPECIAL_FIELD_TYPES = Object.freeze({
+  STRING: "STRING",
+  INTEGER: "INTEGER",
+  BOOLEAN: "BOOLEAN",
 });
 
 export const MILESTONE_TYPES = Object.freeze({
@@ -135,7 +152,21 @@ export enum StalenessEnum {
   CRITICAL = "CRITICAL",
   WARN = "WARN",
   GOOD = "GOOD",
+  RESOLVED = "RESOLVED",
+  INACTIVE = "INACTIVE",
 }
+
+export const ISSUES_STALENESS_THRESHOLD = {
+  StalenessEnum: {
+    CRITICAL: 36,
+    WARN: 29,
+  },
+};
+
+export const STATUS_STALENESS_THRESHOLD = {
+  [StalenessEnum.CRITICAL]: 7,
+  [StalenessEnum.WARN]: 6,
+};
 
 export const REPORT_STALENESS_THRESHOLD = {
   [REPORT_TYPE.EA_REFERRAL]: {

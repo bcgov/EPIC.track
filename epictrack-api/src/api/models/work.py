@@ -29,6 +29,7 @@ from sqlalchemy import (
     String,
     Text,
     and_,
+    case,
     exists,
     func,
     or_
@@ -143,7 +144,15 @@ class Work(BaseModelVersioned):
     def title(self):
         """SQL expression for title."""
         from api.models.work_type import WorkType  # pylint:disable=import-outside-toplevel
-        return func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title)  # pylint:disable=not-callable
+        return (
+            case(
+                    (
+                        func.coalesce(self.simple_title, "") != "",
+                        func.concat(Project.name, " - ", WorkType.name, " - ", self.simple_title),  # pylint:disable=not-callable
+                    ),
+                    else_=func.concat(Project.name, " - ", WorkType.name)
+                )
+        )
 
     @hybrid_property
     def anticipated_referral_date(self):

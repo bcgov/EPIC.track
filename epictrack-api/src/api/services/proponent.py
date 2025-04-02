@@ -22,7 +22,7 @@ from psycopg2.extras import DateTimeTZRange
 
 from api.exceptions import ResourceExistsError, ResourceNotFoundError
 from api.models import Proponent, db
-from api.models.special_field import EntityEnum, SpecialField
+from api.models.special_field import EntityEnum, SpecialField, FieldTypeEnum
 from api.models.staff import Staff
 from api.services.special_field import SpecialFieldService
 from api.utils.token_info import TokenInfo
@@ -62,11 +62,12 @@ class ProponentService:
         proponent = Proponent(**payload)
         proponent.flush()
         proponent_name_special_field_data = {
-            "entity": EntityEnum.PROPONENT,
+            "entity": EntityEnum.PROPONENT.value,
             "entity_id": proponent.id,
             "field_name": "name",
             "field_value": proponent.name,
-            "active_from": proponent.created_at
+            "active_from": proponent.created_at,
+            "field_type": FieldTypeEnum.STRING.value,
         }
         SpecialFieldService.create_special_field_entry(proponent_name_special_field_data)
         proponent.save()

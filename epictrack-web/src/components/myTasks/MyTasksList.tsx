@@ -1,19 +1,9 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Avatar, Box, Grid, Stack, Typography } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import {
-  ETCaption2,
-  ETGridTitle,
-  ETPageContainer,
-  ETParagraph,
-} from "../shared";
-import { Staff } from "../../models/staff";
-import staffService from "../../services/staffService/staffService";
-import { Proponent } from "../../models/proponent";
+import { ETGridTitle, ETPageContainer, ETParagraph } from "../shared";
 import { MasterContext } from "../shared/MasterContext";
-import proponentService from "../../services/proponentService/proponentService";
-import { ETChip } from "../shared/chip/ETChip";
 import {
   BLANK_OPTION,
   getSelectFilterOptions,
@@ -23,10 +13,7 @@ import { hasPermission } from "../shared/restricted";
 import { MONTH_DAY_YEAR, ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
-import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { Palette } from "styles/theme";
-import { debounce } from "lodash";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
 import taskEventService from "services/taskEventService/taskEventService";
@@ -38,7 +25,6 @@ import {
   InProgressIcon,
   NotStartedIcon,
 } from "components/icons/status";
-import { EVENT_TYPE } from "components/workPlan/phase/type";
 import { getTextFromDraftJsContentState } from "components/shared/richTextEditor/utils";
 import { dateUtils } from "utils";
 import { MyTaskDialog } from "./MyTaskDialog";
@@ -115,7 +101,7 @@ export default function MyTasksList() {
     myTasks,
     "status",
     (value) =>
-      statusOptions.find((statusOption) => statusOption.value == value)
+      statusOptions.find((statusOption) => statusOption.value === value)
         ?.label ?? BLANK_OPTION
   );
 
@@ -157,7 +143,7 @@ export default function MyTasksList() {
   React.useEffect(() => {
     Object.keys(codeTypes).forEach((key: string) => {
       let accessor = `${key}`;
-      if (key == "work") {
+      if (key === "work") {
         accessor = "title";
       }
       const codes = myTasks

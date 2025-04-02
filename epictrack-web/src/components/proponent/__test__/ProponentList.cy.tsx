@@ -2,15 +2,14 @@ import { MemoryRouter as Router } from "react-router-dom";
 import ProponentList from "../ProponentList";
 import { faker } from "@faker-js/faker";
 import { Proponent } from "models/proponent";
-import { MasterContext } from "components/shared/MasterContext";
 import { Staff } from "models/staff";
 import {
-  createMockMasterContext,
   mockStaffs,
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
+import { Method } from "cypress/types/net-stubbing";
 
 //ensure proponents are never the same by incrementing the counter
 let proponentCounter = 0;
@@ -30,40 +29,25 @@ const proponent1 = generateMockProponent();
 const proponent2 = generateMockProponent();
 const proponents = [proponent1, proponent2];
 
-const endpoints = [
+const endpoints: Endpoint[] = [
+  {
+    name: "getProponents",
+    method: "GET" as Method,
+    url: `${AppConfig.apiUrl}proponents`,
+    response: {
+      body: proponents,
+    },
+  },
   {
     name: "getActiveStaffsOptions",
-    method: "OPTIONS",
+    method: "OPTIONS" as Method,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-  },
-  {
-    name: "getPIPTypeOptions",
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}codes/pip_org_types`,
-  },
-
-  {
-    name: "getFirstNationsOptions",
-    method: "OPTIONS",
-    url: `${AppConfig.apiUrl}first_nations`,
   },
   {
     name: "getActiveStaff",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: mockStaffs },
-  },
-  {
-    name: "getPIPType",
-    method: "GET",
-    url: `${AppConfig.apiUrl}pip-org-types`,
-    response: { body: [] },
-  },
-  {
-    name: "getFirstNations",
-    method: "GET",
-    url: `${AppConfig.apiUrl}first_nations`,
-    response: { body: [] },
   },
 ];
 
@@ -72,11 +56,7 @@ describe("ProponentList", () => {
     setupIntercepts(endpoints);
     cy.mount(
       <Router>
-        <MasterContext.Provider
-          value={createMockMasterContext(proponents, proponents)}
-        >
-          <ProponentList />
-        </MasterContext.Provider>
+        <ProponentList />
       </Router>
     );
   });

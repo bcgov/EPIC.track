@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -21,8 +21,13 @@ const schema = yup.object().shape({
   title: yup.string().required("Title is required"),
   is_active: yup.boolean(),
   is_high_priority: yup.boolean(),
+  is_resolved: yup.boolean(),
   start_date: yup.string().required("Start date is required"),
-  expected_resolution_date: yup.string().nullable(),
+  expected_resolution_date: yup.string().when("is_resolved", {
+    is: true,
+    then: (schema) => schema.required("Missing Resolution Date"),
+    otherwise: (schema) => schema.nullable(),
+  }),
 });
 
 const EditIssue = () => {
@@ -35,6 +40,7 @@ const EditIssue = () => {
       title: issueToEdit?.title || "",
       is_active: Boolean(issueToEdit?.is_active),
       is_high_priority: Boolean(issueToEdit?.is_high_priority),
+      is_resolved: Boolean(issueToEdit?.is_resolved),
       start_date: issueToEdit?.start_date || "",
       expected_resolution_date: issueToEdit?.expected_resolution_date || "",
     },
@@ -66,6 +72,7 @@ const EditIssue = () => {
       expected_resolution_date,
       is_active,
       is_high_priority,
+      is_resolved,
     } = await schema.validate(data);
 
     const dataToBeSubmitted = {
@@ -76,6 +83,7 @@ const EditIssue = () => {
         : undefined,
       is_active: Boolean(is_active),
       is_high_priority: Boolean(is_high_priority),
+      is_resolved: Boolean(is_resolved),
     };
 
     editIssue(dataToBeSubmitted);
@@ -132,8 +140,21 @@ const EditIssue = () => {
               control={<ControlledSwitch name="is_high_priority" />}
               label={
                 <Stack direction="row" spacing={1}>
-                  <ETParagraph>High Priority</ETParagraph>
-                  <Tooltip title="Issue must be High Priority to appear on 30-60-90">
+                  <ETParagraph>High Profile</ETParagraph>
+                  <Tooltip title="Issue must be High Profile to appear on 30-60-90">
+                    <Box component={"span"}>
+                      <InfoIcon />
+                    </Box>
+                  </Tooltip>
+                </Stack>
+              }
+            />
+            <FormControlLabel
+              control={<ControlledSwitch name="is_resolved" />}
+              label={
+                <Stack direction="row" spacing={1}>
+                  <ETParagraph>Resolved</ETParagraph>
+                  <Tooltip title="Resolved Issues will not appear on any Report">
                     <Box component={"span"}>
                       <InfoIcon />
                     </Box>
@@ -153,7 +174,7 @@ const EditIssue = () => {
           />
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel required>Expected Resolution Date</ETFormLabel>
+          <ETFormLabel>Resolution Date</ETFormLabel>
           <ControlledDatePicker name="expected_resolution_date" />
         </Grid>
       </Grid>

@@ -71,7 +71,7 @@ export default function ResourceForecast() {
       (p) => !hiddenColumns.includes(p.id)
     );
     setColumnFilters(filteredColumnFilters);
-  }, [columnVisibility, setColumnFilters]);
+  }, [columnFilters, columnVisibility, setColumnFilters]);
 
   const exportToCsv = React.useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
@@ -147,20 +147,23 @@ export default function ResourceForecast() {
           enableHiding: false,
           size: 200,
           enableColumnFilter: false,
-          Cell: ({ row }: any) => (
-            <Tooltip title={row.original.months[index].phase}>
-              <Box
-                sx={{
-                  bgcolor: row.original.months[index].color,
-                  overflow: "hidden",
-                  padding: "0.5rem 0.5rem 0.5rem 1rem",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {row.original.months[index].phase}
-              </Box>
-            </Tooltip>
-          ),
+          Cell: ({ row }: any) => {
+            const phase = row.original.months[index].phase;
+            return phase ? (
+              <Tooltip title={row.original.months[index].phase}>
+                <Box
+                  sx={{
+                    bgcolor: row.original.months[index].color,
+                    overflow: "hidden",
+                    padding: "0.5rem 0.5rem 0.5rem 1rem",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {phase}
+                </Box>
+              </Tooltip>
+            ) : null;
+          },
         } as MRT_ColumnDef<ResourceForecastModel>;
       });
     }
@@ -187,7 +190,6 @@ export default function ResourceForecast() {
   const workLeadFilter = filterFn("work_lead");
   const epdFilter = filterFn("responsible_epd");
   const teamFilter = filterFn("eao_team");
-  const cairtLeadFilter = filterFn("cairt_lead");
 
   const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
@@ -235,11 +237,11 @@ export default function ResourceForecast() {
       },
       {
         accessorKey: "fte_positions_construction",
-        header: "Est. FTEs in construction",
+        header: "Est. FTEs for construction",
       },
       {
         accessorKey: "fte_positions_operation",
-        header: "Est. FTEs in operation",
+        header: "Est. FTEs for operation",
       },
       {
         accessorKey: "ea_type",
@@ -299,12 +301,6 @@ export default function ResourceForecast() {
         filterSelectOptions: epdFilter,
       },
       {
-        accessorKey: "cairt_lead",
-        header: "FN CAIRT Lead",
-        filterVariant: "select",
-        filterSelectOptions: cairtLeadFilter,
-      },
-      {
         accessorKey: "eao_team",
         header: "Lead's Team",
         filterVariant: "select",
@@ -332,14 +328,15 @@ export default function ResourceForecast() {
       {
         accessorKey: "referral_timing",
         accessorFn: (row) =>
-          dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT),
+          row.referral_timing
+            ? dateUtils.formatDate(row.referral_timing, DISPLAY_DATE_FORMAT)
+            : "",
         header: "Referral Timing",
         enableHiding: true,
       },
     ],
     [
       setMonthColumns,
-      cairtLeadFilter,
       eaActFilter,
       eaTypeFilter,
       envRegionFilter,

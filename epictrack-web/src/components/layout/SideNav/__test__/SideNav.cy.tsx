@@ -1,13 +1,9 @@
-import React from "react";
 import { MemoryRouter as Router } from "react-router-dom";
 import SideNav from "components/layout/SideNav/SideNav";
 import { Routes } from "components/layout/SideNav/SideNavElements";
 
 describe("<SideNav />", () => {
   it("renders and navigates correctly", () => {
-    const setOpen = cy.stub();
-    const open = true;
-    const drawerWidth = 240;
     cy.viewport(1980, 1080);
 
     cy.mount(

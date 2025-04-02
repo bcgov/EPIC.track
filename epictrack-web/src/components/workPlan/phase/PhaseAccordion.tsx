@@ -1,5 +1,5 @@
 import { Box, Grid, SxProps, Tooltip } from "@mui/material";
-import React, { useContext } from "react";
+import { FC, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import Moment from "moment";
 import ETAccordion from "../../shared/accordion/Accordion";
 import { PhaseAccordionProps } from "./type";
@@ -14,9 +14,9 @@ import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
 import { When } from "react-if";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
-const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
-const PauseIcon: React.FC<IconProps> = Icons["PauseIcon"];
-const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
+const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
+const PauseIcon: FC<IconProps> = Icons["PauseIcon"];
+const IndicatorIcon: FC<IconProps> = Icons["IndicatorIcon"];
 
 const summaryContentStyle: SxProps = {
   minHeight: "1.5rem",
@@ -30,7 +30,7 @@ interface SummaryItemProps {
   title: string;
   content?: string;
   maxLength?: number;
-  children?: React.ReactNode;
+  children?: ReactNode;
   enableTooltip?: boolean;
   sx?: SxProps;
 }
@@ -76,29 +76,24 @@ const SummaryItem = (props: SummaryItemProps) => {
   );
 };
 
-const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
-  const [expanded, setExpanded] = React.useState<boolean>(false);
+const PhaseAccordion = ({
+  phase,
+  expanded,
+  onExpandHandler,
+}: PhaseAccordionProps) => {
   const { selectedWorkPhase, setSelectedWorkPhase } =
     useContext(WorkplanContext);
-  const isSelectedPhase = React.useMemo<boolean>(
+
+  const isSelectedPhase = useMemo<boolean>(
     () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
-    [selectedWorkPhase]
-  );
-  React.useEffect(
-    () => setExpanded(phase.work_phase.id === selectedWorkPhase?.work_phase.id),
     [phase, selectedWorkPhase]
   );
-  const onExpandHandler = (expand: boolean) => {
-    setExpanded(expand);
-    setSelectedWorkPhase(phase);
-  };
-  const fromDate = React.useMemo(
-    () =>
-      Moment(phase.work_phase.start_date).isSameOrAfter(Moment())
-        ? Moment(phase.work_phase.start_date)
-        : Moment(),
-    [phase]
-  );
+
+  useEffect(() => {
+    if (expanded) {
+      setSelectedWorkPhase(phase);
+    }
+  }, [expanded, phase, setSelectedWorkPhase]);
 
   const getPhaseOverdueColour = (daysLeft: number, isLegislated: boolean) => {
     if (daysLeft >= 0) return Palette.neutral.dark;
@@ -121,7 +116,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
       >
         <ETAccordion
           expanded={expanded}
-          onChange={(e, expanded) => onExpandHandler(expanded)}
+          onChange={(_, expanded) => onExpandHandler(expanded)}
         >
           <ETAccordionSummary
             expanded={expanded}
@@ -241,7 +236,7 @@ const PhaseAccordion = ({ phase, ...rest }: PhaseAccordionProps) => {
               pt: "24px",
             }}
           >
-            <EventGrid />
+            {expanded && <EventGrid />}
           </ETAccordionDetails>
         </ETAccordion>
       </Box>

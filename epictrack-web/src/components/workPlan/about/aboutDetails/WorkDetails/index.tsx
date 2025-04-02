@@ -1,9 +1,9 @@
-import { useContext, useState } from "react";
+import { FC, useContext, useState } from "react";
 import { Button, Divider, Grid } from "@mui/material";
+import dayjs from "dayjs";
 import { WorkplanContext } from "../../../WorkPlanContext";
 import { ETCaption1, ETParagraph, GrayBox } from "../../../../shared";
-import { Palette } from "../../../../../styles/theme";
-import dayjs from "dayjs";
+import { Palette } from "styles/theme";
 import {
   MONTH_DAY_YEAR,
   ROLES,
@@ -13,16 +13,13 @@ import { IconProps } from "components/icons/type";
 import { WorkDialog } from "components/work/Dialog";
 import { showNotification } from "components/shared/notificationProvider";
 import WorkDetailsSkeleton from "components/workPlan/about/aboutDetails/WorkDetails/Skeleton";
-import { useAppSelector } from "hooks";
 import { Restricted } from "components/shared/restricted";
 
 const WorkDetails = () => {
-  const PencilEditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
+  const PencilEditIcon: FC<IconProps> = icons["PencilEditIcon"];
 
-  const { work, workPhases, loadData, team } = useContext(WorkplanContext);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team.find((member) => member.staff.email === email);
-
+  const { isActiveTeamMember, loadData, work, workPhases } =
+    useContext(WorkplanContext);
   const [openWorkDialog, setOpenWorkDialog] = useState(false);
   const [loadingWork, setLoadingWork] = useState(false);
 
@@ -79,7 +76,7 @@ const WorkDetails = () => {
             <Grid item>
               <Restricted
                 allowed={[ROLES.EDIT]}
-                exception={Boolean(isTeamMember)}
+                exception={isActiveTeamMember}
                 errorProps={{
                   disabled: true,
                 }}
@@ -185,7 +182,7 @@ const WorkDetails = () => {
           </Grid>
           <Grid item xs={12}>
             <ETCaption1 bold color={Palette.primary.main}>
-              RESPONSIBLE MINISTRY
+              2ND RESPONSIBLE MINISTRY
             </ETCaption1>
           </Grid>
           <Grid item xs={12}>
@@ -206,11 +203,12 @@ const WorkDetails = () => {
         </Grid>
       </GrayBox>
       <WorkDialog
-        workId={work.id}
+        isActiveTeamMember={isActiveTeamMember}
         open={openWorkDialog}
         setOpen={setOpenWorkDialog}
-        saveWorkCallback={handleLoadWork}
+        workId={work.id}
         closeCallback={handleLoadWork}
+        saveWorkCallback={handleLoadWork}
       />
     </>
   );

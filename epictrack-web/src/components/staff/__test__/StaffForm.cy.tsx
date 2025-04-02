@@ -1,14 +1,9 @@
-import { MasterContext } from "../../shared/MasterContext";
-import { Staff } from "models/staff";
 import StaffForm from "../StaffForm";
-import {
-  createMockMasterContext,
-  mockStaffs,
-} from "../../../../cypress/support/common";
+import { mockStaffs } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffsOptions",
     method: "OPTIONS",
@@ -19,7 +14,6 @@ const endpoints = [
     method: "OPTIONS",
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
-
   {
     name: "getFirstNationsOptions",
     method: "OPTIONS",
@@ -29,7 +23,7 @@ const endpoints = [
     name: "getActiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    response: { body: { data: mockStaffs } },
+    response: { body: mockStaffs },
   },
   {
     name: "getPIPType",
@@ -52,18 +46,11 @@ const endpoints = [
 ];
 
 const staff1 = mockStaffs[0];
-const staffs = [staff1];
 
 describe("StaffForm", () => {
   beforeEach(() => {
-    const mockContext = createMockMasterContext(staffs, staffs);
     setupIntercepts(endpoints);
-
-    cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <StaffForm staffId={staff1.id} />
-      </MasterContext.Provider>
-    );
+    cy.mount(<StaffForm staff={staff1} saveStaff={cy.stub()} />);
   });
 
   it("renders the form", () => {

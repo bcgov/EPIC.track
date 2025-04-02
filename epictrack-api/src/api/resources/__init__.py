@@ -28,6 +28,7 @@ from .apihelper import Api
 from .code import API as CODES_API
 from .ea_act import API as EA_ACT_API
 from .eao_team import API as EAO_TEAM_API
+from .elevated_role import API as ELEVATED_ROLE_API
 from .event import API as EVENT_API
 from .event_configuration import API as EVENT_CONFIGURATION_API
 from .event_template import API as EVENT_TEMPLATE_API
@@ -54,7 +55,9 @@ from .reports import API as REPORTS_API
 from .responsibility import API as RESPONSIBILITY_API
 from .role import API as ROLES_API
 from .special_field import API as SPECIAL_FIELD_API
+from .staff_elevated_role import API as STAFF_ELEVATED_ROLE_API
 from .staff import API as STAFF_API
+from .staleness_settings import API as STALENESS_SETTINGS_API
 from .sub_types import API as SUB_TYPES_API
 from .substitution_act import API as SUBSTITUTION_ACTS_API
 from .sync_form_data import API as SYNC_FORM_DATA_API
@@ -105,6 +108,9 @@ API.add_namespace(PROJECT_TYPES_API, path="/project-types")
 API.add_namespace(SYNC_FORM_DATA_API, path="/sync-form-data")
 API.add_namespace(PHASE_API, path="/phases")
 API.add_namespace(STAFF_API, path="/staffs")
+API.add_namespace(STALENESS_SETTINGS_API, path="/staleness-settings")
+API.add_namespace(ELEVATED_ROLE_API, path='/elevated-roles')
+API.add_namespace(STAFF_ELEVATED_ROLE_API, path="/staff-elevated-roles")
 API.add_namespace(OUTCOME_API, path="/outcomes")
 API.add_namespace(SUB_TYPES_API, path="/sub-types")
 API.add_namespace(INSPECTION_API, path="/inspections")

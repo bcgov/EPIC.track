@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 
 import FilterSelect from "./FilterSelect";
 import { TableFilterProps } from "./type";
@@ -8,14 +8,14 @@ const makeTableFilter =
     Component: React.ComponentType<SelectProps>
   ): React.FC<TableFilterProps> =>
   ({ header, column, ...props }: TableFilterProps) => {
-    const filterAppliedCallback = React.useCallback(
+    const filterAppliedCallback = useCallback(
       (selectedOptions: string[] | string) => {
         header.column.setFilterValue(selectedOptions);
       },
       [header]
     );
 
-    const filterClearedCallback = React.useCallback(
+    const filterClearedCallback = useCallback(
       (value: [] | string) => {
         header.column.setFilterValue(value);
       },
@@ -28,7 +28,7 @@ const makeTableFilter =
       }
       return { label: option, value: option };
     };
-    const options = React.useMemo(() => {
+    const options = useMemo(() => {
       let filterOptions = column.columnDef.filterSelectOptions;
       filterOptions = filterOptions.map(
         (

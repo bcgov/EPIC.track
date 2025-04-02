@@ -11,7 +11,6 @@ export type ResourceForecastModel = {
   env_region: string;
   nrs_region: string;
   responsible_epd: string;
-  cairt_lead: string;
   eao_team: string;
   work_lead: string;
   work_team_members: string;

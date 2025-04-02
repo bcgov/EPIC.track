@@ -1,6 +1,6 @@
 import React from "react";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, ButtonProps, Container, SxProps } from "@mui/material";
+import { Box, Button, ButtonProps, Container } from "@mui/material";
 import { ETHeading2, ETHeading3 } from ".";
 import FolderIcon from "../../assets/images/folder.svg";
 import { Palette } from "../../styles/theme";

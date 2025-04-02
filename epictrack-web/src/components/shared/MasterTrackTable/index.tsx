@@ -1,10 +1,4 @@
-import React, {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -19,12 +13,11 @@ import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2, IButton } from "..";
 import { FiltersCache } from "./FiltersCache";
-import { set } from "lodash";
 import { exportToCsv } from "./utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const NoDataComponent = ({ ...props }) => {
   const { table } = props;
@@ -70,27 +63,33 @@ export interface MaterialReactTableProps<TData extends MRT_RowData>
   extends MRT_TableOptions<TData> {
   columns: MRT_ColumnDef<TData>[];
   data: TData[];
-  setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
-  onCacheFilters?: (columnFilters: any) => void;
   enableExport?: boolean;
+  loading?: boolean;
+  onCacheFilters?: (columnFilters: any) => void;
+  renderResultCount?: boolean;
+  setTableInstance?: (instance: MRT_TableInstance<TData> | undefined) => void;
   tableName?: string;
 }
 
 const MasterTrackTable = <TData extends MRT_RowData>({
   columns,
   data,
-  setTableInstance,
-  onCacheFilters,
-  tableName,
   enableExport,
+  loading,
+  onCacheFilters,
+  renderResultCount,
   renderTopToolbarCustomActions,
+  setTableInstance,
+  tableName,
   ...rest
 }: MaterialReactTableProps<TData>) => {
   const { initialState, state, icons, ...otherProps } = rest;
   const [otherPropsData, setOtherPropsData] = useState(otherProps);
+
   useEffect(() => {
     setOtherPropsData(otherProps);
   }, [columns, data]);
+
   const table = useMaterialReactTable({
     columns: columns,
     data: data,
@@ -219,26 +218,40 @@ const MasterTrackTable = <TData extends MRT_RowData>({
           sx={{
             width: "100%",
             display: "flex",
-            justifyContent: "right",
+            alignItems: "center",
           }}
         >
-          {renderTopToolbarCustomActions &&
-            renderTopToolbarCustomActions({ table })}
-          {enableExport && (
-            <Tooltip title="Export to csv">
-              <IButton
-                onClick={() =>
-                  exportToCsv({
-                    table,
-                    downloadDate: new Date().toISOString(),
-                    filenamePrefix: tableName || "exported-data",
-                  })
-                }
-              >
-                <DownloadIcon className="icon" />
-              </IButton>
-            </Tooltip>
+          {renderResultCount && (
+            <Box sx={{ flexGrow: 1 }}>
+              <Typography>Results: {rowCount}</Typography>
+            </Box>
           )}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "flex-end",
+              gap: 2,
+              flexGrow: 1,
+            }}
+          >
+            {renderTopToolbarCustomActions &&
+              renderTopToolbarCustomActions({ table })}
+            {enableExport && (
+              <Tooltip title="Export to csv">
+                <IButton
+                  onClick={() =>
+                    exportToCsv({
+                      table,
+                      downloadDate: new Date().toISOString(),
+                      filenamePrefix: tableName || "exported-data",
+                    })
+                  }
+                >
+                  <DownloadIcon className="icon" />
+                </IButton>
+              </Tooltip>
+            )}
+          </Box>
         </Box>
       );
     }, // Provide an empty function as the initializer
@@ -267,11 +280,16 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     ...otherPropsData,
   });
 
+  const rowCount = useMemo(
+    () => (!loading ? table.getRowModel().rows.length : 0),
+    [loading, table]
+  );
+
   useEffect(() => {
     if (table && setTableInstance) {
       setTableInstance(table);
     }
-  }, [table]);
+  }, [setTableInstance, table]);
 
   return (
     <>

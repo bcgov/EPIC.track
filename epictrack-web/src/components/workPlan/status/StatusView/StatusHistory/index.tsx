@@ -25,6 +25,7 @@ import { Box, Button, Collapse, Grid, useTheme } from "@mui/material";
 import { StatusContext } from "../../StatusContext";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyStatusHistory } from "./EmptyStatusHistory";
+import { useUserHasRole } from "../../../utils";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
@@ -36,11 +37,13 @@ const StatusHistory = () => {
   const theme = useTheme();
 
   const approvedStatuses = statuses.filter(
-    (status) => status.is_approved && status.id != statuses?.[0]?.id
+    (status) => status.is_approved && status.id !== statuses?.[0]?.id
   );
   const highlightFirstInTimeLineApproved = !statuses?.[0]?.is_approved;
 
   const SHOW_MORE_THRESHOLD = 3;
+
+  const userHasRole = useUserHasRole();
 
   if (approvedStatuses.length === 0) {
     return <EmptyStatusHistory />;
@@ -83,6 +86,7 @@ const StatusHistory = () => {
                   <Restricted
                     allowed={[ROLES.EXTENDED_EDIT]}
                     errorProps={{ disabled: true }}
+                    exception={userHasRole}
                   >
                     <Button
                       variant="text"

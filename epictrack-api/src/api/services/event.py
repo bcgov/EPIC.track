@@ -66,7 +66,7 @@ class EventService:
         current_work_phase = WorkPhase.find_by_id(work_phase_id)
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.CREATE.value,
         )
         authorisation.check_auth(
@@ -101,7 +101,7 @@ class EventService:
         )
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(
@@ -1108,7 +1108,7 @@ class EventService:
             raise ResourceNotFoundError("No event found with given id")
 
         one_of_roles = (
-            Membership.TEAM_MEMBER.name,
+            Membership.TEAM_MEMBER.value,
             KeycloakRole.CREATE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=event.work_id)
@@ -1136,9 +1136,9 @@ class EventService:
             db.session.query(ActionConfiguration)
             .join(Action, Action.id == ActionConfiguration.action_id)
             .filter(
-                ActionConfiguration.outcome_configuration_id == outcome_id and
-                ActionConfiguration.is_active is True and
-                ActionConfiguration.is_deleted is False
+                ActionConfiguration.outcome_configuration_id == outcome_id,
+                ActionConfiguration.is_active.is_(True),
+                ActionConfiguration.is_deleted.is_(False)
             )
             .order_by(ActionConfiguration.sort_order)
             .all()

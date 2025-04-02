@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, IconButton } from "@mui/material";
-import clsx from "clsx";
 import { useSnackbar, SnackbarContent } from "notistack";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";

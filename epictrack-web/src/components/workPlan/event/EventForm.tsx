@@ -208,7 +208,18 @@ const EventForm = ({
     ];
   }, [work, workPhases, selectedWorkPhase, event, milestoneEvents]);
   const getDecisionMakers = useCallback(async () => {
-    if (!decisionMakerPositionIds || decisionMakerPositionIds.length === 0) {
+    if (isFormFieldsLocked && work?.decision_by_id) {
+      const result = await staffService.getById(
+        String(work?.decision_by_id),
+        false
+      );
+      if (result.status === 200) {
+        setDecisionMakers([result.data as Staff]);
+      }
+    } else if (
+      !decisionMakerPositionIds ||
+      decisionMakerPositionIds.length === 0
+    ) {
       const result = await staffService.getById(String(work?.decision_by_id));
       if (result.status === 200) {
         setDecisionMakers([result.data as Staff]);
@@ -686,9 +697,9 @@ const EventForm = ({
                       name="high_priority"
                     />
                   }
-                  label="High Priority"
+                  label="High Profile"
                 />
-                <Tooltip title="High Priority Milestones will appear on reports">
+                <Tooltip title="High Profile Milestones will appear on reports">
                   <Box component={"span"}>
                     <InfoIcon />
                   </Box>

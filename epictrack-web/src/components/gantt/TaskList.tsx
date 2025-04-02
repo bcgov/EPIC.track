@@ -1,13 +1,11 @@
 // TaskList.js
-import React from "react";
 import { barHeight, rowHeight, taskListWidth } from "./constants";
 import { ETParagraph } from "components/shared";
 import { Palette } from "styles/theme";
 import TaskListSkeleton from "./TaskListSkeleton";
 import { useGanttContext } from "./GanttContext";
 import TriggerOnViewed from "components/shared/DummyElement";
-import { Link as MuiLink, Tooltip } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Tooltip } from "@mui/material";
 
 const TaskList = () => {
   const { rows } = useGanttContext();

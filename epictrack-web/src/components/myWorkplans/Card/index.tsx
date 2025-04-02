@@ -5,7 +5,7 @@ import CardHeader from "./CardHeader";
 import { Palette } from "../../../styles/theme";
 import { CardProps } from "./type";
 
-const Card = ({ workplan }: CardProps) => {
+const Card = ({ workplan, statusStalenessSettings }: CardProps) => {
   return (
     <Box
       sx={{
@@ -14,7 +14,10 @@ const Card = ({ workplan }: CardProps) => {
       }}
     >
       <CardHeader workplan={workplan} />
-      <CardBody workplan={workplan} />
+      <CardBody
+        workplan={workplan}
+        statusStalenessSettings={statusStalenessSettings}
+      />
       <CardFooter workplan={workplan} />
     </Box>
   );

@@ -9,22 +9,20 @@ import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../constants/application-constant";
-import { Else, If, Then, When } from "react-if";
+import { Switch, Case, When, Default } from "react-if";
 import icons from "../../../icons";
 import { IconProps } from "../../../icons/type";
 import { IssuesContext } from "../IssuesContext";
 import { Restricted } from "components/shared/restricted";
-import { WorkplanContext } from "components/workPlan/WorkPlanContext";
-import { useAppSelector } from "hooks";
+import { useUserHasRole } from "../../utils";
 
 const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
   const { setEditIssueFormIsOpen, setIssueToEdit } =
     React.useContext(IssuesContext);
-  const { team } = React.useContext(WorkplanContext);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
 
   const EditIcon: React.FC<IconProps> = icons["PencilEditIcon"];
+  const userHasRole = useUserHasRole();
+
   return (
     <Grid
       container
@@ -41,16 +39,19 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
           <Stack spacing={2} direction={"row"}>
             <ETParagraph data-cy="issue-title">{issue.title}</ETParagraph>
             <When condition={issue.is_high_priority}>
-              <ETChip highPriority label="High Priority" />
+              <ETChip highPriority label="High Profile" />
             </When>
-            <If condition={issue.is_active}>
-              <Then>
+            <Switch>
+              <Case condition={issue.is_resolved}>
+                <ETChip resolved label="Resolved" />
+              </Case>
+              <Case condition={issue.is_active}>
                 <ETChip active label="Active" />
-              </Then>
-              <Else>
+              </Case>
+              <Default>
                 <ETChip inactive label="Inactive" />
-              </Else>
-            </If>
+              </Default>
+            </Switch>
           </Stack>
         </AccordionSummaryItem>
       </Grid>
@@ -68,7 +69,7 @@ const IssueSummary = ({ issue }: { issue: WorkIssue }) => {
             <Restricted
               allowed={[ROLES.EDIT]}
               errorProps={{ disabled: true }}
-              exception={isTeamMember}
+              exception={userHasRole}
             >
               <Button
                 variant="text"

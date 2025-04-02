@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import WorkForm from "../WorkForm";
 import TrackDialog from "components/shared/TrackDialog";
 import { Work } from "models/work";
@@ -9,26 +9,29 @@ import { hasPermission } from "components/shared/restricted";
 import { ROLES } from "constants/application-constant";
 
 type WorkDialogProps = {
+  isActiveTeamMember: boolean;
   open: boolean;
   setOpen: (open: boolean) => void;
   workId?: number;
-  saveWorkCallback?: () => void;
   closeCallback?: () => void;
+  saveWorkCallback?: () => void;
 };
 export const WorkDialog = ({
-  workId,
+  isActiveTeamMember,
   open,
   setOpen,
-  saveWorkCallback = () => {
+  workId,
+  closeCallback = () => {
     return;
   },
-  closeCallback = () => {
+  saveWorkCallback = () => {
     return;
   },
 }: WorkDialogProps) => {
   const [work, setWork] = useState<Work | null>(null);
   const { roles } = useAppSelector((state) => state.user.userDetail);
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const canEdit =
+    hasPermission({ roles, allowed: [ROLES.EDIT] }) || isActiveTeamMember;
   const [disableSave, setDisableSave] = useState(!canEdit);
 
   const fetchWork = async () => {

@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Box } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByLeadQuery } from "services/rtkQuery/workInsights";
@@ -9,14 +8,12 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 import type { WorkByLead } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
-import { BAR_COLOR } from "components/insights/utils";
 
 const WorkByLeadChart = () => {
   const {

@@ -6,6 +6,8 @@ from api.models.project import Project
 from api.models.proponent import Proponent
 from api.models.special_field import EntityEnum
 from api.models.work import Work
+from api.models.ministry import Ministry
+import os
 
 
 SCHEMA_MAPS = {
@@ -14,7 +16,8 @@ SCHEMA_MAPS = {
 }
 
 CACHE_DEFAULT_TIMEOUT = 300
-CACHE_DAY_TIMEOUT = 84600
+
+CACHE_DAY_TIMEOUT = int(os.getenv('CACHE_DAY_TIMEOUT', str(CACHE_DEFAULT_TIMEOUT)))
 CACHE_TYPE = 'SimpleCache'
 NULL_CACHE_TYPE = 'NullCache'
 
@@ -24,6 +27,7 @@ SPECIAL_FIELD_ENTITY_MODEL_MAPS = {
     EntityEnum.PROJECT: Project,
     EntityEnum.WORK: Work,
     EntityEnum.PROPONENT: Proponent,
+    EntityEnum.MINISTRY: Ministry,
 }
 
 CANADA_TIMEZONE = timezone("US/Pacific")

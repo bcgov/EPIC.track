@@ -1,43 +1,17 @@
 import { MemoryRouter as Router } from "react-router-dom";
 import { SnackbarProvider } from "notistack";
 import StaffList from "../StaffList";
-import { faker } from "@faker-js/faker";
-import { Staff } from "models/staff";
-import { MasterContext } from "components/shared/MasterContext";
-import staffService from "services/staffService/staffService";
 import {
-  createMockMasterContext,
   mockStaffs,
   testTableFiltering,
 } from "../../../../cypress/support/common";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
-//ensure staffs are never the same by incrementing the counter
-let staffCounter = 0;
+const staff1 = mockStaffs[0];
+const staff2 = mockStaffs[1];
 
-const generateMockStaff = (): Staff => {
-  staffCounter += 1;
-  return {
-    id: faker.datatype.number() + staffCounter,
-    idir_user_id: faker.datatype.uuid(),
-    full_name: `${faker.name.firstName()} ${faker.name.lastName()} ${staffCounter}`,
-    is_active: faker.datatype.boolean(),
-    position_id: faker.datatype.number() + staffCounter,
-    position: { name: "test", id: 1, sort_order: 0 },
-    phone: faker.phone.number(),
-    email: faker.internet.email(),
-    first_name: faker.name.firstName(),
-    last_name: faker.name.lastName(),
-    // ... other staff properties
-  };
-};
-
-const staff1 = generateMockStaff();
-const staff2 = generateMockStaff();
-const staffs = [staff1, staff2];
-
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffsOptions",
     method: "OPTIONS",
@@ -58,7 +32,7 @@ const endpoints = [
     name: "getInactiveStaffs",
     method: "GET",
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
-    response: { body: { data: mockStaffs } },
+    response: { body: mockStaffs },
   },
   {
     name: "getPIPType",
@@ -80,11 +54,7 @@ describe("StaffList", () => {
     cy.mount(
       <SnackbarProvider maxSnack={3}>
         <Router>
-          <MasterContext.Provider
-            value={createMockMasterContext(staffs, staffs)}
-          >
-            <StaffList />
-          </MasterContext.Provider>
+          <StaffList />
         </Router>
       </SnackbarProvider>
     );

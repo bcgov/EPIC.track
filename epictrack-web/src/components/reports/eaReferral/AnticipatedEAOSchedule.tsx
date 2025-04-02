@@ -29,14 +29,21 @@ import {
   MILESTONE_TYPES,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
-import moment from "moment";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
-import { Palette } from "styles/theme";
 import { staleLevel } from "utils/uiUtils";
 
+interface Group {
+  group: string;
+  items: any[];
+}
+
+interface ReportData {
+  data: Group[];
+}
+
 export default function AnticipatedEAOSchedule() {
-  const [reports, setReports] = React.useState({});
+  const [reports, setReports] = React.useState<Group[]>([]);
   const [showReportDateBanner, setShowReportDateBanner] =
     React.useState<boolean>(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
@@ -56,10 +63,10 @@ export default function AnticipatedEAOSchedule() {
   }, [reportDate]);
 
   React.useEffect(() => {
-    const filterTypes = Object.keys(reports).filter(
-      (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-    );
-    setTypeFilter(filterTypes);
+    if (reports) {
+      const filterTypes: string[] = reports.map((report) => report.group);
+      setTypeFilter(filterTypes);
+    }
   }, [reports]);
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
@@ -72,7 +79,8 @@ export default function AnticipatedEAOSchedule() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        setReports((reportData.data as never)["data"]);
+        const reports = reportData.data as ReportData;
+        setReports(reports.data);
       }
 
       if (reportData.status === 204) {
@@ -119,25 +127,6 @@ export default function AnticipatedEAOSchedule() {
     setSelectedTab(newValue);
   };
 
-  // const staleLevel = React.useCallback(
-  //   (staleness: string) => {
-  //     if (staleness == StalenessEnum.CRITICAL) {
-  //       return {
-  //         background: Palette.error.main,
-  //       };
-  //     } else if (staleness == StalenessEnum.WARN) {
-  //       return {
-  //         background: Palette.secondary.main,
-  //       };
-  //     } else {
-  //       return {
-  //         background: Palette.success.main,
-  //       };
-  //     }
-  //   },
-  //   [reportDate]
-  // );
-
   interface TabPanelProps {
     children?: React.ReactNode;
     dir?: string;
@@ -182,7 +171,7 @@ export default function AnticipatedEAOSchedule() {
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>
-      {Object.keys(reports).length > 0 && (
+      {reports && reports.length > 0 && (
         <>
           <Grid item sm={2}>
             <FormLabel>Select Type to Hide</FormLabel>
@@ -213,12 +202,19 @@ export default function AnticipatedEAOSchedule() {
       )}
       <Grid item sm={12}>
         {resultStatus === RESULT_STATUS.LOADED &&
-          Object.keys(reports)
-            .filter((key) => !selectedTypes.includes(key))
-            .map((key) => {
+          reports &&
+          reports
+            .filter((report) => {
+              const groupName = report.group;
+              return !selectedTypes.includes(groupName);
+            })
+            .map((group, index) => {
+              const groupName = group.group;
+              const items = group.items;
               return (
                 <>
                   <Accordion
+                    key={index}
                     sx={{ mt: "15px", bgcolor: "rgba(0, 0, 0, .03)" }}
                     square
                     disableGutters
@@ -227,10 +223,10 @@ export default function AnticipatedEAOSchedule() {
                     elevation={0}
                   >
                     <AccordionSummary expandIcon={<ArrowForwardIosSharpIcon />}>
-                      <Typography>{key}</Typography>
+                      <Typography>{groupName}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      {((reports as any)[key] as []).map((item, itemIndex) => {
+                      {items.map((item, itemIndex) => {
                         return (
                           <Accordion key={itemIndex} elevation={0}>
                             <AccordionSummary
@@ -269,7 +265,7 @@ export default function AnticipatedEAOSchedule() {
                               >
                                 <Tab label="Basic" />
                                 <Tab label="Project Description" />
-                                <Tab label="Anticipated Referral Date/Next PCP/Additional Information" />
+                                <Tab label="Anticipated Referral Date/Next PCP/Status" />
                               </Tabs>
                               <TabPanel value={selectedTab} index={0}>
                                 <Table>
@@ -292,20 +288,7 @@ export default function AnticipatedEAOSchedule() {
                                     </TableRow>
                                     <TableRow>
                                       <TableCell>EA Type</TableCell>
-                                      <TableCell>
-                                        {item["ea_act"]}
-                                        {item["substitution_act"]
-                                          ? ", " + item["substitution_act"]
-                                          : ""}
-                                      </TableCell>
-                                    </TableRow>
-                                    <TableRow>
-                                      <TableCell>
-                                        Responsible Minister
-                                      </TableCell>
-                                      <TableCell>
-                                        {item["ministry_name"]}
-                                      </TableCell>
+                                      <TableCell>{item["ea_type"]}</TableCell>
                                     </TableRow>
                                     <TableRow>
                                       <TableCell>
@@ -319,6 +302,14 @@ export default function AnticipatedEAOSchedule() {
                                 </Table>
                               </TabPanel>
                               <TabPanel value={selectedTab} index={1}>
+                                {item["report_description"] && (
+                                  <>
+                                    <b>Work Description:</b>{" "}
+                                    {item["report_description"]}
+                                    <Box sx={{ height: 20 }} />
+                                  </>
+                                )}
+                                <b>Project Description:</b>{" "}
                                 {item["project_description"]}
                               </TabPanel>
                               <TabPanel value={selectedTab} index={2}>
@@ -378,11 +369,30 @@ export default function AnticipatedEAOSchedule() {
                                       </TableRow>
                                     )}
                                     <TableRow>
-                                      <TableCell>Additional Info</TableCell>
+                                      <TableCell>Status</TableCell>
                                       <TableCell>
                                         {item["additional_info"]}
                                       </TableCell>
                                     </TableRow>
+                                    {item["work_issues"] &&
+                                      (item["work_issues"] as any[]).map(
+                                        (issue, issueIndex) => {
+                                          if (issue.is_high_priority) {
+                                            return (
+                                              <TableRow key={issueIndex}>
+                                                <TableCell>
+                                                  High Profile Issue
+                                                </TableCell>
+                                                <TableCell>
+                                                  <b>{issue.title}</b>:
+                                                  {issue.description}
+                                                </TableCell>
+                                              </TableRow>
+                                            );
+                                          }
+                                          return null;
+                                        }
+                                      )}
                                   </TableBody>
                                 </Table>
                               </TabPanel>

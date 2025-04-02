@@ -8,8 +8,7 @@ import TableFilter from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { FileDownload } from "@mui/icons-material";
-import { IconButton, Tooltip, Box } from "@mui/material";
+import { Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
@@ -194,10 +193,12 @@ const WorkList = () => {
             return true;
           }
 
-          const value: string = row.getValue(id) || "";
+          // list of First Nations associated with the work
+          const workIndigenousNations: string[] =
+            row.original.indigenous_works?.map((work) => work.name) || [];
 
           return filterValues.some((filterValue: string) =>
-            value.includes(filterValue)
+            workIndigenousNations.includes(filterValue)
           );
         },
       },

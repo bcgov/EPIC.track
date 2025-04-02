@@ -1,16 +1,15 @@
-import React from "react";
-import { TextField, Grid, Box } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Grid, TextField } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { ETFormLabel } from "../shared/index";
 import { Staff } from "../../models/staff";
-import { Proponent, defaultProponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
+import proponentService from "services/proponentService/proponentService";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
-import { MasterContext } from "../shared/MasterContext";
-import proponentService from "../../services/proponentService/proponentService";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
+import { defaultProponent, Proponent } from "models/proponent";
 import { ProponentNameSpecialField } from "./ProponentNameSpecialField";
 import { sort } from "utils";
 
@@ -34,33 +33,26 @@ const schema = yup.object().shape({
     }),
 });
 
-export default function ProponentForm({ ...props }) {
-  const [staffs, setStaffs] = React.useState<Staff[]>([]);
-  const [disabled, setDisabled] = React.useState<boolean>();
-  const ctx = React.useContext(MasterContext);
-  const [isNameFieldLocked, setIsNameFieldLocked] =
-    React.useState<boolean>(false);
+type ProponentFormProps = {
+  proponent: Proponent | null;
+  saveProponent: (data: any) => void;
+  setDisableDialogSave: (disabled: boolean) => void;
+};
 
-  React.useEffect(() => {
-    ctx.setFormId("proponent-form");
-  }, []);
-  React.useEffect(() => {
-    const name = (ctx?.item as Proponent)?.name;
-    setDisabled(props.proponentId ? true : false);
-    ctx.setTitle(name || "Create Proponent");
-  }, [ctx.title, ctx.item]);
+export default function ProponentForm({
+  proponent,
+  saveProponent,
+  setDisableDialogSave,
+}: ProponentFormProps) {
+  const [staffs, setStaffs] = useState<Staff[]>([]);
+  const [isNameFieldLocked, setIsNameFieldLocked] = useState(false);
 
-  React.useEffect(() => {
-    ctx.setId(props.proponentId);
-  }, [ctx.id]);
-
-  const proponent = ctx?.item as Proponent;
-
-  const methods = useForm({
+  const methods = useForm<Proponent>({
     resolver: yupResolver(schema),
-    defaultValues: ctx.item as Proponent,
+    defaultValues: proponent || defaultProponent,
     mode: "onBlur",
   });
+
   const {
     register,
     handleSubmit,
@@ -68,87 +60,76 @@ export default function ProponentForm({ ...props }) {
     reset,
   } = methods;
 
-  React.useEffect(() => {
-    reset(ctx.item ?? defaultProponent);
-  }, [ctx.item]);
+  useEffect(() => {
+    reset(proponent ?? defaultProponent);
+  }, [proponent, reset]);
 
   const getStaffs = async () => {
     const staffsResult = await staffService.getAll();
     if (staffsResult.status === 200) {
-      const data = sort(staffsResult.data as never, "full_name");
-      setStaffs(data);
+      setStaffs(sort(staffsResult.data as never, "full_name"));
     }
   };
-  React.useEffect(() => {
+
+  useEffect(() => {
     getStaffs();
   }, []);
-  const onSubmitHandler = async (data: any) => {
-    ctx.onSave(data, () => {
-      reset();
-    });
-  };
 
-  React.useEffect(() => {
-    ctx.setDialogProps({
-      saveButtonProps: {
-        disabled: isNameFieldLocked,
-      },
-    });
-  }, [isNameFieldLocked]);
+  useEffect(() => {
+    setDisableDialogSave(isNameFieldLocked);
+  }, [isNameFieldLocked, setDisableDialogSave]);
 
   return (
-    <>
-      <FormProvider {...methods}>
-        <Grid
-          component={"form"}
-          id="proponent-form"
-          container
-          spacing={2}
-          onSubmit={handleSubmit(onSubmitHandler)}
+    <FormProvider {...methods}>
+      <Grid
+        component="form"
+        id="proponent-form"
+        container
+        spacing={2}
+        onSubmit={handleSubmit(saveProponent)}
+      >
+        <ProponentNameSpecialField
+          id={proponent?.id}
+          onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
+          open={isNameFieldLocked}
+          onSave={() => {}}
+          title={proponent?.name || ""}
         >
-          <ProponentNameSpecialField
-            id={proponent?.id}
-            onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
-            open={isNameFieldLocked}
-            onSave={() => {
-              ctx.getById(proponent?.id.toString());
-            }}
-            title={proponent?.name}
-          >
-            <TextField
-              variant="outlined"
-              disabled={proponent?.name !== undefined}
-              placeholder="Proponent Name"
-              fullWidth
-              error={!!errors?.name?.message}
-              helperText={errors?.name?.message?.toString()}
-              {...register("name")}
-            />
-          </ProponentNameSpecialField>
-          <Grid item xs={6}>
-            <ETFormLabel>Relationship Holder</ETFormLabel>
-            <Box>
-              <ControlledSelectV2
-                disabled={Boolean(isNameFieldLocked)}
-                placeholder="Select"
-                defaultValue={(ctx.item as Proponent)?.relationship_holder_id}
-                options={staffs || []}
-                getOptionValue={(o: Staff) => o?.id.toString()}
-                getOptionLabel={(o: Staff) => o.full_name}
-                {...register("relationship_holder_id")}
-              ></ControlledSelectV2>
-            </Box>
-          </Grid>
-          <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
-            <ControlledSwitch
+          <TextField
+            variant="outlined"
+            disabled={proponent?.name !== undefined}
+            placeholder="Proponent Name"
+            fullWidth
+            error={!!errors?.name?.message}
+            helperText={errors?.name?.message?.toString()}
+            {...register("name")}
+          />
+        </ProponentNameSpecialField>
+
+        <Grid item xs={6}>
+          <ETFormLabel>Relationship Holder</ETFormLabel>
+          <Box>
+            <ControlledSelectV2
               disabled={Boolean(isNameFieldLocked)}
-              sx={{ paddingLeft: "0px", marginRight: "10px" }}
-              name="is_active"
+              placeholder="Select"
+              defaultValue={proponent?.relationship_holder_id}
+              options={staffs || []}
+              getOptionValue={(o: Staff) => o?.id.toString()}
+              getOptionLabel={(o: Staff) => o.full_name}
+              {...register("relationship_holder_id")}
             />
-            <ETFormLabel id="active">Active</ETFormLabel>
-          </Grid>
+          </Box>
         </Grid>
-      </FormProvider>
-    </>
+
+        <Grid item xs={6} sx={{ paddingTop: "30px !important" }}>
+          <ControlledSwitch
+            disabled={Boolean(isNameFieldLocked)}
+            sx={{ paddingLeft: "0px", marginRight: "10px" }}
+            name="is_active"
+          />
+          <ETFormLabel id="active">Active</ETFormLabel>
+        </Grid>
+      </Grid>
+    </FormProvider>
   );
 }

@@ -25,7 +25,9 @@ export const ReferralSchedule = () => {
 
   const activeApprovedIssues = issues.filter(
     (issue) =>
-      issue.is_active && issue.updates.find((update) => update.is_approved)
+      !issue.is_resolved &&
+      issue.is_active &&
+      issue.updates.find((update) => update.is_approved)
   );
 
   const issueUpdates = activeApprovedIssues

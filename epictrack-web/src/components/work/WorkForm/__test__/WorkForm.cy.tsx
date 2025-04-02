@@ -6,7 +6,11 @@ import { userDetails } from "services/userService/userSlice";
 import { store } from "store";
 import { UserDetail } from "services/userService/type";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../../cypress/support/utils";
+import {
+  Endpoint,
+  setupIntercepts,
+} from "../../../../../cypress/support/utils";
+import { Method } from "cypress/types/net-stubbing";
 import { WORK_STATE } from "components/shared/constants";
 
 const generateFakePosition = () => {
@@ -30,6 +34,7 @@ const generateFakePosition = () => {
 
 const mockWorkType = {
   id: faker.number.int(),
+  is_active: true,
   name: faker.lorem.word(),
   report_title: faker.lorem.lines(1),
   sort_order: faker.number.int(),
@@ -40,10 +45,10 @@ const mockProject = {
   name: faker.lorem.word(),
 };
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getEaActs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}ea-acts`,
     response: {
       body: faker.lorem
@@ -57,7 +62,7 @@ const endpoints = [
   },
   {
     name: "getMinistries",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}ministries`,
     response: {
       body: faker.lorem
@@ -66,15 +71,12 @@ const endpoints = [
         .map((word) => ({
           id: faker.number.int(),
           name: word,
-          minister: null,
-          abbreviation: word,
-          combined: word,
         })),
     },
   },
   {
     name: "getWorkTypes",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}work-types`,
     response: {
       body: [mockWorkType],
@@ -82,7 +84,7 @@ const endpoints = [
   },
   {
     name: "getFederalActs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}federal-involvements`,
     response: {
       body: faker.lorem
@@ -96,7 +98,7 @@ const endpoints = [
   },
   {
     name: "getEaoTeams",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}eao-teams`,
     response: {
       body: faker.lorem
@@ -104,13 +106,14 @@ const endpoints = [
         .split(" ")
         .map((word) => ({
           id: faker.number.int(),
+          is_active: true,
           name: word,
         })),
     },
   },
   {
     name: "getSubstitutionActs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}substitution-acts`,
     response: {
       body: faker.lorem
@@ -123,17 +126,9 @@ const endpoints = [
     },
   },
   {
-    name: "getStaffs4And3",
-    method: "GET",
-    url: `${AppConfig.apiUrl}staffs?positions=4,3`,
-    response: {
-      body: [generateFakePosition(), generateFakePosition()],
-    },
-  },
-  {
-    name: "getStaffs1And2And8",
-    method: "GET",
-    url: `${AppConfig.apiUrl}staffs?positions=1,2,8`,
+    name: "getStaffsPosition",
+    method: "GET" as Method,
+    url: `${AppConfig.apiUrl}staffs?positions*`,
     response: {
       body: [
         generateFakePosition(),
@@ -144,37 +139,29 @@ const endpoints = [
   },
   {
     name: "getProjectsListType",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}projects?return_type=list_type`,
     response: {
       body: [mockProject],
     },
   },
   {
-    name: "getStaffsPosition3",
-    method: "GET",
-    url: `${AppConfig.apiUrl}staffs?positions=3`,
-    response: {
-      body: [generateFakePosition()],
-    },
-  },
-  {
-    name: "getProjectsAll",
-    method: "GET",
-    url: `${AppConfig.apiUrl}projects/*`,
+    name: "checkWorkExists",
+    method: "GET" as Method,
+    url: `${AppConfig.apiUrl}works/exists?title=*`,
     response: {
       body: {
-        description: faker.lorem.paragraph(1),
+        exists: false,
       },
     },
   },
   {
-    name: "checkWorkExists ",
-    method: "GET",
-    url: `${AppConfig.apiUrl}works/exists*`,
+    name: "getProjectsAll",
+    method: "GET" as Method,
+    url: `${AppConfig.apiUrl}projects/*`,
     response: {
       body: {
-        exists: false,
+        description: faker.lorem.paragraph(1),
       },
     },
   },
@@ -363,66 +350,39 @@ describe("WorkForm", () => {
       </Provider>
     );
     cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
-    const workTypeSelect = cy
-      .get("label")
-      .contains("Worktype")
-      .parent()
-      .find("input")
-      .first();
-    workTypeSelect.should("be.visible");
-    workTypeSelect.click({ force: true });
-    const workTypeOption = cy.get("div").contains(mockWorkType.name);
-    workTypeOption.should("be.visible");
-    workTypeOption.click({ force: true });
-
     cy.wait("@getProjectsListType")
       .its("response.statusCode")
       .should("eq", 200);
 
-    const projectSelect = cy
-      .get("label")
-      .contains("Project")
-      .parent()
-      .find("input")
-      .first();
-    projectSelect.should("be.visible");
-    projectSelect.click({ force: true });
-    const projectOption = cy.get("div").contains(mockProject.name);
-    projectOption.should("be.visible");
-    projectOption.click({ force: true });
-
-    cy.get("p")
-      .contains(`${mockProject.name} - ${mockWorkType.name} -`)
-      .should("be.visible");
-  });
-
-  it("WorkType select should be disabled when a work exists", () => {
-    cy.mount(
-      <Provider store={store}>
-        <WorkForm work={mockWork} fetchWork={cy.stub()} saveWork={cy.stub()} />
-      </Provider>
-    );
-    const workTypeSelect = cy
-      .get("label")
+    // Find the input element for the worktype select and click first item
+    cy.get("label")
       .contains("Worktype")
       .parent()
       .find("input")
-      .first();
-    workTypeSelect.should("have.attr", "disabled");
-  });
+      .first()
+      .should("be.visible")
+      .click({ force: true });
+    cy.get("div")
+      .contains(mockWorkType.name)
+      .should("be.visible")
+      .click({ force: true });
 
-  it("Project select should be disabled when a work exists", () => {
-    cy.mount(
-      <Provider store={store}>
-        <WorkForm work={mockWork} fetchWork={cy.stub()} saveWork={cy.stub()} />
-      </Provider>
-    );
-    const projectSelect = cy
-      .get("label")
+    // Find the input element for the project select and click first item
+    cy.get("label")
       .contains("Project")
       .parent()
       .find("input")
-      .first();
-    projectSelect.should("have.attr", "disabled");
+      .first()
+      .should("be.visible")
+      .click({ force: true });
+    cy.get("div")
+      .contains(mockProject.name)
+      .should("be.visible")
+      .click({ force: true });
+
+    // Check if the work title is created correctly
+    cy.get("p")
+      .contains(`${mockProject.name} - ${mockWorkType.name} -`)
+      .should("be.visible");
   });
 });

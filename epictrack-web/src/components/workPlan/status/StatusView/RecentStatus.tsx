@@ -6,30 +6,33 @@ import { IconProps } from "../../../icons/type";
 import Icons from "../../../icons";
 import { Palette } from "../../../../styles/theme";
 import { StatusContext } from "../StatusContext";
-import { WorkplanContext } from "../../WorkPlanContext";
 import { Else, If, Then, When } from "react-if";
 import {
   MONTH_DAY_YEAR,
   ROLES,
 } from "../../../../constants/application-constant";
 import { Restricted } from "../../../shared/restricted";
-import { useAppSelector } from "hooks";
+import { useUserHasRole } from "../../utils";
+import { useWorkplanSelector } from "components/workPlan/useWorkPlanSelector";
 
 const CheckCircleIcon: React.FC<IconProps> = Icons["CheckCircleIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
 const RecentStatus = () => {
-  const { statuses } = React.useContext(WorkplanContext);
+  const { statuses, isActiveTeamMember } = useWorkplanSelector((context) => ({
+    statuses: context.statuses,
+    isActiveTeamMember: context.isActiveTeamMember,
+  }));
+
   const {
     setIsCloning,
     setShowStatusForm,
     setStatus,
     setShowApproveStatusDialog,
   } = React.useContext(StatusContext);
-  const { team } = React.useContext(WorkplanContext);
-  const { email } = useAppSelector((state) => state.user.userDetail);
-  const isTeamMember = team?.some((member) => member.staff.email === email);
+
+  const userHasRole = useUserHasRole();
 
   return (
     <GrayBox
@@ -97,7 +100,7 @@ const RecentStatus = () => {
       >
         <If condition={!statuses[0].is_approved}>
           <Then>
-            <Restricted allowed={[ROLES.EDIT]} exception={isTeamMember}>
+            <Restricted allowed={[ROLES.EDIT]} exception={isActiveTeamMember}>
               <Button
                 startIcon={<CheckCircleIcon />}
                 onClick={() => {
@@ -114,7 +117,7 @@ const RecentStatus = () => {
             </Restricted>
           </Then>
           <Else>
-            <Restricted allowed={[ROLES.CREATE]} exception={isTeamMember}>
+            <Restricted allowed={[ROLES.CREATE]} exception={isActiveTeamMember}>
               <Button
                 startIcon={
                   <AddIcon style={{ fill: Palette.primary.accent.main }} />
@@ -137,7 +140,9 @@ const RecentStatus = () => {
         <Restricted
           allowed={[statuses[0].is_approved ? ROLES.EXTENDED_EDIT : ROLES.EDIT]}
           errorProps={{ disabled: true }}
-          exception={!statuses[0].is_approved && isTeamMember}
+          exception={
+            (!statuses[0].is_approved && isActiveTeamMember) || userHasRole
+          }
         >
           <Button
             startIcon={<PencilEditIcon />}

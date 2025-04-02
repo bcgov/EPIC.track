@@ -1,4 +1,11 @@
-import React, { useCallback, useMemo } from "react";
+import {
+  FC,
+  ReactNode,
+  SyntheticEvent,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { Container } from "@mui/system";
 import {
   Accordion,
@@ -33,18 +40,37 @@ import { IconProps } from "../../icons/type";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
-import { If } from "react-if";
+import { WorkIssue } from "models/Issue";
+import stalenessSettingsService from "services/stalenessSettingsService";
+import { StalenessSettings } from "models/settings";
 
-const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
+interface Group {
+  group: string;
+  items: any[];
+}
+
+interface Period {
+  [key: string]: Group[];
+}
+
+interface ReportData {
+  data: Period;
+}
+
+const IndicatorIcon: FC<IconProps> = Icons["IndicatorIcon"];
+
 export default function ThirtySixtyNinety() {
-  const [reports, setReports] = React.useState({});
+  const [reports, setReports] = useState<Period>();
   const [showReportDateBanner, setShowReportDateBanner] =
-    React.useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = React.useState(0);
-  const [reportDate, setReportDate] = React.useState<string>();
-  const [resultStatus, setResultStatus] = React.useState<string>();
+    useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [issueStalenessSettings, setIssueStalenessSettings] =
+    useState<StalenessSettings>();
+  const [reportDate, setReportDate] = useState<string>();
+  const [resultStatus, setResultStatus] = useState<string>();
   const FILENAME_PREFIX = "30_60_90_Report";
-  React.useEffect(() => {
+
+  useEffect(() => {
     const diff = dateUtils.diff(
       reportDate || "",
       new Date(2019, 11, 19).toISOString(),
@@ -52,7 +78,68 @@ export default function ThirtySixtyNinety() {
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
-  const fetchReportData = React.useCallback(async () => {
+
+  useEffect(() => {
+    const fetchStalenessSettings = async () => {
+      try {
+        const statusStalenessSetting =
+          await stalenessSettingsService.getIssueStaleness();
+        setIssueStalenessSettings(statusStalenessSetting.data);
+      } catch (error) {
+        console.warn("Could not load issue staleness settings");
+      }
+    };
+
+    fetchStalenessSettings();
+  }, []);
+
+  const isIssueStaleIndicatorRequired = (reportItem: any) => {
+    return (reportItem["work_issues"] as []).some((workIssue) =>
+      [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
+        issueStalenessLevel(workIssue)
+      )
+    );
+  };
+
+  const issueStalenessLevel = useCallback(
+    (workIssue: any) => {
+      const stalenessThreshold =
+        issueStalenessSettings?.staleness_length ||
+        REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90][
+          StalenessEnum.CRITICAL
+        ];
+      const warningThreshold =
+        issueStalenessSettings?.warning_length ||
+        REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90][
+          StalenessEnum.WARN
+        ];
+      const diffDays = dateUtils.diff(
+        reportDate || "",
+        workIssue["latest_update"]["posted_date"],
+        "days"
+      );
+
+      if (
+        workIssue.is_resolved &&
+        dateUtils.diff(
+          reportDate || "",
+          workIssue.expected_resolution_date,
+          "days"
+        ) > 0
+      ) {
+        return StalenessEnum.RESOLVED;
+      } else if (diffDays > stalenessThreshold) {
+        return StalenessEnum.CRITICAL;
+      } else if (diffDays > warningThreshold) {
+        return StalenessEnum.WARN;
+      } else {
+        return StalenessEnum.GOOD;
+      }
+    },
+    [issueStalenessSettings, reportDate]
+  );
+
+  const fetchReportData = useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const reportData = await ReportService.fetchReportData(
@@ -63,15 +150,14 @@ export default function ThirtySixtyNinety() {
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
-        const result = (reportData.data as never)["data"];
-        Object.keys(result).forEach((key) => {
-          (result[key] as []).forEach((resultItem: any) => {
-            (resultItem.work_issues as []).forEach((workIssue: any) => {
-              if (stalenessLevel(workIssue) === StalenessEnum.CRITICAL)
-                workIssue["staleness"] = StalenessEnum.CRITICAL;
-              else if (stalenessLevel(workIssue) === StalenessEnum.WARN)
-                workIssue["staleness"] = StalenessEnum.WARN;
-              else workIssue["staleness"] = StalenessEnum.GOOD;
+        const result = (reportData.data as ReportData).data;
+        // Iterate through each period: "30", "60", "90"
+        Object.keys(result).forEach((key: string) => {
+          const periodGroups = result[key] as Group[];
+          periodGroups.forEach((group) => {
+            // Check and set staleness for each work issue in the work
+            (group.items[0].work_issues as any[]).forEach((workIssue) => {
+              workIssue.staleness = issueStalenessLevel(workIssue);
             });
           });
         });
@@ -83,31 +169,9 @@ export default function ThirtySixtyNinety() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate]);
+  }, [reportDate, issueStalenessLevel]);
 
-  const isIssueStaleIndicatorRequired = (reportItem: any) => {
-    return (reportItem["work_issues"] as []).some((workIssue) =>
-      [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
-        stalenessLevel(workIssue)
-      )
-    );
-  };
-  const stalenessLevel = (workIssue: any) => {
-    const stalenessThreshold =
-      REPORT_STALENESS_THRESHOLD[REPORT_TYPE.REPORT_30_60_90];
-    const diffDays = dateUtils.diff(
-      reportDate || "",
-      workIssue["latest_update"]["posted_date"],
-      "days"
-    );
-    if (diffDays > stalenessThreshold[StalenessEnum.CRITICAL])
-      return StalenessEnum.CRITICAL;
-    else if (diffDays > stalenessThreshold[StalenessEnum.WARN])
-      return StalenessEnum.WARN;
-    else return StalenessEnum.GOOD;
-  };
-
-  const downloadPDFReport = React.useCallback(async () => {
+  const downloadPDFReport = useCallback(async () => {
     try {
       fetchReportData();
       const binaryReponse = await ReportService.downloadPDF(
@@ -135,12 +199,12 @@ export default function ThirtySixtyNinety() {
     }
   }, [reportDate, fetchReportData]);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const handleTabChange = (event: SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
   };
 
   interface TabPanelProps {
-    children?: React.ReactNode;
+    children?: ReactNode;
     dir?: string;
     index: number;
     value: number;
@@ -168,10 +232,12 @@ export default function ThirtySixtyNinety() {
 
   const overallStalenessLevel = (
     status_staleness: string,
-    work_issues: any
+    work_issues: WorkIssue[]
   ) => {
     const issuesStaleness = new Set(
-      work_issues.map((issue: any) => issue.staleness)
+      work_issues
+        .filter((issue) => issue.is_active && !issue.is_resolved)
+        .map((issue: WorkIssue) => issueStalenessLevel(issue))
     );
 
     if (
@@ -212,6 +278,7 @@ export default function ThirtySixtyNinety() {
       </Grid>
       <Grid item sm={12}>
         {resultStatus === RESULT_STATUS.LOADED &&
+          reports &&
           Object.keys(reports).map((key) => {
             return (
               <>
@@ -220,7 +287,10 @@ export default function ThirtySixtyNinety() {
                     <Typography>{key}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    {((reports as any)[key] as []).map((item, itemIndex) => {
+                    {/* Iterate over groups within the period */}
+                    {reports[key].map((group, groupIndex) => {
+                      const item = group.items[0];
+                      const itemIndex = groupIndex;
                       return (
                         <Accordion key={itemIndex}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -255,7 +325,7 @@ export default function ThirtySixtyNinety() {
                                   </>
                                 }
                               />
-                              {item["project_name"]} - {item["event_title"]}:
+                              {item["project_name"]} - {item["event_title"]}:{" "}
                               {dateUtils.formatDate(
                                 item["event_date"],
                                 DISPLAY_DATE_FORMAT
@@ -322,11 +392,13 @@ export default function ThirtySixtyNinety() {
                                   </TableRow>
                                   <TableRow>
                                     <TableCell>
-                                      Anticipated Decision Date
+                                      {item["event_type"] === "work_issue"
+                                        ? "Work Issue Update Date"
+                                        : "Anticipated Decision Date"}{" "}
                                     </TableCell>
                                     <TableCell>
                                       {dateUtils.formatDate(
-                                        item["anticipated_decision_date"],
+                                        item["event_date"],
                                         DISPLAY_DATE_FORMAT
                                       )}
                                     </TableCell>
@@ -338,7 +410,7 @@ export default function ThirtySixtyNinety() {
                               {item["work_short_description"]}
                             </TabPanel>
                             <TabPanel value={selectedTab} index={2}>
-                              <If condition={item["status_date_updated"]}>
+                              {item["status_date_updated"] && (
                                 <Chip
                                   style={{
                                     marginRight: "0.5rem",
@@ -358,7 +430,7 @@ export default function ThirtySixtyNinety() {
                                     </>
                                   }
                                 />
-                              </If>
+                              )}
 
                               {item["work_status_text"]}
                             </TabPanel>

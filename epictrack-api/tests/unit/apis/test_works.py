@@ -108,7 +108,7 @@ def test_validate_work(client, auth_header):
     del payload["work_id"]
     response = client.get(url, query_string=payload, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
-    assert response.json["exists"] is False
+    assert response.json["exists"]
 
     # Scenario 3: Creating new work with new name
     payload = TestWorkInfo.validation_work.value

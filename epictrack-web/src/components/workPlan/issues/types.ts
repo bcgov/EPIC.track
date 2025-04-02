@@ -14,6 +14,7 @@ export interface EditIssueForm {
   expected_resolution_date?: string;
   is_active: boolean;
   is_high_priority: boolean;
+  is_resolved: boolean;
 }
 
 export interface EditIssueUpdateForm {

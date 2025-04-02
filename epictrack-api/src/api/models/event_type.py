@@ -25,11 +25,14 @@ class EventTypeEnum(enum.Enum):
     """Enum for event type"""
 
     # pylint: disable=C0103
-    TIME_LIMIT_SUSPENSION = 12
-    TIME_LIMIT_RESUMPTION = 38
-    REFERRAL = 5
-    MINISTER_DECISION = 14
+    ADM = 16
     CEAO_DECISION = 15
+    COMMENT_PERIOD = 22
+    EAC_MINISTER = 13
+    MINISTER_DECISION = 14
+    REFERRAL = 5
+    TIME_LIMIT_RESUMPTION = 38
+    TIME_LIMIT_SUSPENSION = 12
 
 
 class EventType(BaseModelVersioned):

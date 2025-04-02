@@ -11,6 +11,7 @@ const mockIssue: WorkIssue = {
   expected_resolution_date: "2021-10-01",
   is_active: true,
   is_high_priority: true,
+  is_resolved: false,
   work_id: 1,
   is_deleted: false,
   created_by: "John Doe",
@@ -72,31 +73,31 @@ describe("<IssueAccordion />", () => {
       </ContextWrapper>
     );
 
-    // Assert that the issue details are visible
+    // Assert that the issue details are hidden to start
     cy.get('[data-cy="issue-title"]')
       .should("be.visible")
       .contains(mockIssueOne.title);
     cy.get('[data-cy="issue-description"]')
-      .should("be.visible")
+      .should("not.be.visible")
       .contains(mockUpdates[0].description);
 
     cy.get('[data-cy="issue-title"]');
+
+    // Click to expand accordion
+    cy.get(`[data-cy="${mockIssue.id}-expand-icon"]`).click();
+
+    // Assert that the issue details are visible
+    cy.get('[data-cy="issue-title"]')
+      .should("be.visible")
+      .contains(mockIssue.title);
+    cy.get('[data-cy="issue-description"]')
+      .should("be.visible")
+      .contains(mockUpdates[0].description);
 
     cy.get('[data-cy="approved-chip"]');
     cy.get('[data-cy="new-issue-update-button"]');
     cy.get('[data-cy="edit-issue-update-button"]');
     cy.get('[data-cy="empty-issue-history"]');
-
-    // Click to collapse accordion
-    cy.get(`[data-cy="${mockIssue.id}-expand-icon"]`).click();
-
-    // Assert that the issue details are not visible
-    cy.get('[data-cy="issue-title"]')
-      .should("be.visible")
-      .contains(mockIssue.title);
-    cy.get('[data-cy="issue-description"]')
-      .should("not.be.visible")
-      .contains(mockUpdates[0].description);
   });
 
   it("unapproved update", () => {
@@ -114,6 +115,9 @@ describe("<IssueAccordion />", () => {
         <IssueAccordion issue={mockIssueOne} />
       </ContextWrapper>
     );
+
+    // Click to expand accordion
+    cy.get(`[data-cy="${mockIssue.id}-expand-icon"]`).click();
 
     // Assert that the issue details are visible
     cy.get('[data-cy="issue-title"]')
@@ -149,6 +153,9 @@ describe("<IssueAccordion />", () => {
         <IssueAccordion issue={mockIssueOne} />
       </ContextWrapper>
     );
+
+    // Click to expand accordion
+    cy.get(`[data-cy="${mockIssue.id}-expand-icon"]`).click();
 
     // Assert that the issue details are visible
     cy.get('[data-cy="issue-title"]')
@@ -196,6 +203,9 @@ describe("<IssueAccordion />", () => {
         <IssueAccordion issue={mockIssueOne} />
       </ContextWrapper>
     );
+
+    // Click to expand accordion
+    cy.get(`[data-cy="${mockIssue.id}-expand-icon"]`).click();
 
     // Assert that the issue details are visible
     cy.get('[data-cy="issue-title"]')

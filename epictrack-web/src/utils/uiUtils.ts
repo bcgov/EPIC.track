@@ -10,6 +10,10 @@ const staleLevel = (staleness: string) => {
     return {
       background: Palette.secondary.main,
     };
+  } else if (staleness === StalenessEnum.RESOLVED) {
+    return {
+      background: Palette.neutral.bg.dark,
+    };
   } else {
     return {
       background: Palette.success.main,

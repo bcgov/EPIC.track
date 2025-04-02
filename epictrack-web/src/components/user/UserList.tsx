@@ -1,18 +1,7 @@
-import React, { useEffect } from "react";
-import {
-  MaterialReactTable,
-  type MRT_ColumnDef,
-  type MRT_Row,
-} from "material-react-table";
-import {
-  Box,
-  Button,
-  IconButton,
-  FormHelperText,
-  Grid,
-  Tooltip,
-} from "@mui/material";
-import { Edit, FileDownload } from "@mui/icons-material";
+import React from "react";
+import { type MRT_ColumnDef } from "material-react-table";
+import { Box, IconButton, FormHelperText, Grid, Tooltip } from "@mui/material";
+import { Edit } from "@mui/icons-material";
 import { Group, User } from "../../models/user";
 import { RESULT_STATUS } from "../../constants/application-constant";
 import UserService from "../../services/userService";
@@ -78,7 +67,11 @@ const UserList = () => {
   >();
   const currentUserGroup = React.useMemo<Group>(() => {
     return groups
-      .filter((p) => userDetails.groups.includes(p.path))
+      .filter(
+        (p) =>
+          userDetails.groups.includes(p.path) ||
+          userDetails.groups.includes(p.path.split("/")[0])
+      )
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
 

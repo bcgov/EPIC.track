@@ -31,6 +31,7 @@ class WorkIssues(BaseModelVersioned):
     title = Column(String(500), nullable=False)
     is_active = Column(Boolean(), default=True, nullable=False)
     is_high_priority = Column(Boolean(), default=False, nullable=False)
+    is_resolved = Column(Boolean(), default=False, nullable=False)
     start_date = Column(DateTime(timezone=True), nullable=False)
     expected_resolution_date = Column(DateTime(timezone=True), nullable=True)
 

@@ -1,12 +1,5 @@
 import React from "react";
-import {
-  Avatar,
-  Box,
-  Menu,
-  PopoverOrigin,
-  SxProps,
-  Tooltip,
-} from "@mui/material";
+import { Avatar, Box, Menu, PopoverOrigin, SxProps } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { ETCaption2 } from "..";
 import { UserMenuProps } from "./type";

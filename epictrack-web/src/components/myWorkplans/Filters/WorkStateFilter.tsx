@@ -1,7 +1,7 @@
 import { useContext, useMemo } from "react";
 import { WORK_STATE } from "../../shared/constants";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
-import { DEFAULT_WORK_STATE, MyWorkplansContext } from "../MyWorkPlanContext";
+import { MyWorkplansContext } from "../MyWorkPlanContext";
 
 export const WorkStateFilter = () => {
   const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);

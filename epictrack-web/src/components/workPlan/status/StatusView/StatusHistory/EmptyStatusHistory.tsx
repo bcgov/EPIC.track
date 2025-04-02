@@ -1,4 +1,3 @@
-import React from "react";
 import { Stack } from "@mui/material";
 import icons from "../../../../icons";
 import { ETCaption2, ETCaption3 } from "../../../../shared";

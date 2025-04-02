@@ -4,9 +4,9 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import Icons from "../../icons";
 import { EventPosition, EventsGridModel } from "../../../models/event";
 import { MRT_ColumnDef, MRT_RowSelectionState } from "material-react-table";
-import { ETGridTitle, ETParagraph } from "../../shared";
+import { ETGridTitle, ETParagraph, IButton } from "../../shared";
 import { dateUtils } from "../../../utils";
-import { Box } from "@mui/material";
+import { Box, Button, Grid, Tooltip } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 import { IconProps } from "../../icons/type";
 import { EVENT_STATUS, statusOptions } from "../../../models/taskEvent";
@@ -27,35 +27,49 @@ import { EventContext } from "./EventContext";
 import { MONTH_DAY_YEAR, ROLES } from "../../../constants/application-constant";
 import { searchFilter } from "../../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../../hooks";
-import { hasPermission } from "../../shared/restricted";
-import { WorkplanContext } from "../WorkPlanContext";
+import { hasPermission, Restricted } from "../../shared/restricted";
+import { TemplateStatus } from "models/work";
 
 const LockIcon: React.FC<IconProps> = Icons["LockIcon"];
+const ImportFileIcon: React.FC<IconProps> = Icons["ImportFileIcon"];
 
 const highlightedRowBGColor = "rgb(249, 249, 251)";
 
-interface EventListTable {
-  onRowClick: (event: any, rowOriginal: any) => void;
+interface EventListTableProps {
+  onRowClick: (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    rowOriginal: EventsGridModel
+  ) => void;
   events: EventsGridModel[];
   loading: boolean;
   rowSelection: MRT_RowSelectionState;
   setRowSelection: React.Dispatch<React.SetStateAction<MRT_RowSelectionState>>;
+  templateAvailable: TemplateStatus | undefined;
+  userIsActiveTeamMember: boolean;
+  onAddTask: () => void;
+  onAddMilestone: () => void;
+  handleExportToSheet: () => void;
+  handleTaskFileUpload: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  setShowTemplateForm: (show: boolean) => void;
+  setShowDeleteDialog: (show: boolean) => void;
 }
 const EventListTable = ({
-  onRowClick,
-  events,
   loading,
+  events,
+  onRowClick,
   rowSelection,
   setRowSelection,
-}: EventListTable) => {
-  const { team } = useContext(WorkplanContext);
+  templateAvailable,
+  userIsActiveTeamMember,
+  onAddMilestone,
+  onAddTask,
+  handleTaskFileUpload,
+  setShowTemplateForm,
+}: EventListTableProps) => {
   const { highlightedRows } = useContext(EventContext);
-  const { roles, email } = useAppSelector((state) => state.user.userDetail);
-  const userIsTeamMember = Boolean(
-    team.find((member) => member.staff.email === email)
-  );
+  const { roles } = useAppSelector((state) => state?.user.userDetail);
   const canEdit =
-    hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsTeamMember;
+    hasPermission({ roles, allowed: [ROLES.EDIT] }) || userIsActiveTeamMember;
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -114,7 +128,7 @@ const EventListTable = ({
     events,
     "status",
     (value) =>
-      statusOptions.find((statusOption) => statusOption.value == value)
+      statusOptions.find((statusOption) => statusOption.value === value)
         ?.label ?? BLANK_OPTION
   );
 
@@ -465,9 +479,11 @@ const EventListTable = ({
 
   return (
     <MasterTrackTable
+      tableName="eventListTable"
       enableSorting={false}
       enableRowSelection={(row) => row.original.type !== "Milestone"}
       enableSelectAll={true}
+      enableExport={true}
       muiSelectAllCheckboxProps={{
         disabled: !canEdit,
       }}
@@ -509,7 +525,81 @@ const EventListTable = ({
       })}
       columns={columns}
       data={events}
-      enableTopToolbar={false}
+      enableTopToolbar={true}
+      renderTopToolbarCustomActions={() => (
+        <Grid container sx={{ display: "flex", gap: "1rem", width: "100%" }}>
+          <Grid
+            item
+            sx={{ display: "flex", gap: "1rem", alignContent: "left" }}
+          >
+            <Restricted
+              allowed={[ROLES.CREATE]}
+              errorProps={{ disabled: true }}
+              exception={userIsActiveTeamMember}
+            >
+              <Button
+                variant="contained"
+                onClick={onAddTask}
+                sx={{ alignSelf: "left" }}
+              >
+                Add Task
+              </Button>
+            </Restricted>
+            <Restricted
+              allowed={[ROLES.CREATE]}
+              errorProps={{ disabled: true }}
+              exception={userIsActiveTeamMember}
+            >
+              <Button
+                variant="outlined"
+                onClick={onAddMilestone}
+                sx={{ alignSelf: "left" }}
+              >
+                Add Milestone
+              </Button>
+            </Restricted>
+            {templateAvailable?.template_available && (
+              <Tooltip
+                title={
+                  templateAvailable.task_added
+                    ? "You've already used the template"
+                    : "Import tasks from template"
+                }
+              >
+                <IButton
+                  onClick={() => setShowTemplateForm(true)}
+                  disabled={templateAvailable?.task_added}
+                >
+                  <ImportFileIcon className="icon" />
+                </IButton>
+              </Tooltip>
+            )}
+          </Grid>
+          <Grid item sx={{ display: "flex", flexGrow: 1, gap: "1rem" }}></Grid>
+          <Grid item sx={{ display: "flex", gap: "1rem" }}>
+            <Restricted
+              allowed={[ROLES.EXTENDED_EDIT]}
+              exception={userIsActiveTeamMember}
+            >
+              <Tooltip title="Import tasks from an excel sheet">
+                <Button
+                  variant="outlined"
+                  component="label"
+                  startIcon={<ImportFileIcon />}
+                >
+                  Import from excel
+                  <input
+                    type="file"
+                    hidden
+                    accept=".xls, .xlsx"
+                    onChange={handleTaskFileUpload}
+                  />
+                </Button>
+              </Tooltip>
+            </Restricted>
+          </Grid>
+        </Grid>
+      )}
       onRowSelectionChange={setRowSelection}
       getRowId={(originalRow: EventsGridModel) => {
         return originalRow.type === EVENT_TYPE.MILESTONE

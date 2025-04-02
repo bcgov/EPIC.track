@@ -23,4 +23,4 @@ pylint
 pylint-flask
 pydocstyle
 isort
-Faker
+Faker==35.2.0

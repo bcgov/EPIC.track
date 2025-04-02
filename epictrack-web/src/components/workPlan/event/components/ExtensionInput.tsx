@@ -1,10 +1,7 @@
 import { Grid, TextField } from "@mui/material";
 import React from "react";
 import Moment from "moment";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs from "dayjs";
-import { Controller, useFormContext } from "react-hook-form";
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { useFormContext } from "react-hook-form";
 import { DATE_FORMAT } from "../../../../constants/application-constant";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { dateUtils } from "../../../../utils";

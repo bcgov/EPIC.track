@@ -4,12 +4,10 @@ import { ETFormLabel } from "../../../shared";
 import ControlledSelectV2 from "../../../shared/controlledInputComponents/ControlledSelectV2";
 import { useFormContext } from "react-hook-form";
 import { ListType } from "../../../../models/code";
-import staffService from "../../../../services/staffService/staffService";
 import { showNotification } from "../../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../../constants/application-constant";
 import outcomeConfigurationService from "../../../../services/outcomeConfigurationService/outcomeConfigurationService";
 import { Staff } from "../../../../models/staff";
-import { use } from "chai";
 import { OUTCOME_ID } from "../constants";
 
 export interface DecisionInputProps {

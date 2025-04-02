@@ -1,61 +1,52 @@
-import { MasterContext } from "components/shared/MasterContext";
-import { defaultFirstNation } from "models/firstNation";
 import IndigenousNationForm from "../IndigenousNationForm";
-import {
-  mockStaffs,
-  createMockMasterContext,
-} from "../../../../cypress/support/common";
+import { mockStaffs } from "../../../../cypress/support/common";
+import { Method } from "cypress/types/net-stubbing";
 import { AppConfig } from "config";
-import { setupIntercepts } from "../../../../cypress/support/utils";
+import { Endpoint, setupIntercepts } from "../../../../cypress/support/utils";
 
-const endpoints = [
+const endpoints: Endpoint[] = [
   {
     name: "getActiveStaffsOptions",
-    method: "OPTIONS",
+    method: "OPTIONS" as Method,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
   },
   {
     name: "getPIPTypeOptions",
-    method: "OPTIONS",
+    method: "OPTIONS" as Method,
     url: `${AppConfig.apiUrl}codes/pip_org_types`,
   },
 
   {
     name: "getFirstNationsOptions",
-    method: "OPTIONS",
+    method: "OPTIONS" as Method,
     url: `${AppConfig.apiUrl}first_nations`,
   },
   {
     name: "getActiveStaffs",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}staffs?is_active=false`,
     response: { body: mockStaffs },
   },
   {
     name: "getPIPType",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}pip-org-types`,
     response: { body: [] },
   },
   {
     name: "getFirstNations",
-    method: "GET",
+    method: "GET" as Method,
     url: `${AppConfig.apiUrl}first_nations`,
     response: { body: [] },
   },
 ];
 
-const firstNation = [defaultFirstNation];
-
 describe("IndigenousNationForm", () => {
   beforeEach(() => {
-    const mockContext = createMockMasterContext(firstNation, firstNation);
     setupIntercepts(endpoints);
 
     cy.mount(
-      <MasterContext.Provider value={mockContext}>
-        <IndigenousNationForm />
-      </MasterContext.Provider>
+      <IndigenousNationForm firstNation={null} saveFirstNation={cy.stub()} />
     );
   });
 

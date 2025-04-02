@@ -1,68 +1,56 @@
-import React from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { Box, Button, Grid, IconButton, Tooltip } from "@mui/material";
-import StaffForm from "./StaffForm";
+import { Box, Button, Grid } from "@mui/material";
 import { Staff } from "../../models/staff";
 import MasterTrackTable from "../shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer, IButton } from "../shared";
-import { MasterContext } from "../shared/MasterContext";
-import staffService from "../../services/staffService/staffService";
+import { searchFilter } from "../shared/MasterTrackTable/filters";
+import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
+import { hasPermission, Restricted } from "../shared/restricted";
 import { ETChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
-import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
-import { Restricted, hasPermission } from "../shared/restricted";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { showNotification } from "components/shared/notificationProvider";
+import { ETGridTitle, ETPageContainer } from "../shared";
+import staffService from "../../services/staffService/staffService";
 import { ROLES } from "../../constants/application-constant";
-import { searchFilter } from "../shared/MasterTrackTable/filters";
 import { useAppSelector } from "../../hooks";
 import { useCachedState } from "hooks/useCachedFilters";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
-
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+import { StaffDialog } from "./Dialog";
 
 const staffListColumnFiltersCacheKey = "staff-listing-column-filters";
+
 const StaffList = () => {
-  const [staffId, setStaffId] = React.useState<number>();
-  const [positions, setPositions] = React.useState<string[]>([]);
+  const [staffId, setStaffId] = useState<number>();
+  const [staffs, setStaffs] = useState<Staff[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showFormDialog, setShowFormDialog] = useState(false);
+  const [positions, setPositions] = useState<string[]>([]);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     staffListColumnFiltersCacheKey,
     []
   );
   const { roles } = useAppSelector((state) => state.user.userDetail);
-  const ctx = React.useContext(MasterContext);
+  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
 
-  React.useEffect(() => {
-    ctx.setForm(<StaffForm staffId={staffId} />);
-  }, [staffId]);
-
-  const onEdit = (id: number) => {
-    setStaffId(id);
-    ctx.setShowModalForm(true);
+  const fetchStaffs = async () => {
+    setLoading(true);
+    try {
+      const response = await staffService.getAll();
+      setStaffs((response.data as Staff[]) || []);
+      setLoading(false);
+    } catch (error) {
+      showNotification("Could not load Staffs", { type: "error" });
+    }
   };
 
-  React.useEffect(() => {
-    ctx.setService(staffService);
+  useEffect(() => {
+    fetchStaffs();
   }, []);
 
-  const staff = React.useMemo(() => ctx.data as Staff[], [ctx.data]);
-
-  const statusesOptions = React.useMemo(
-    () =>
-      getSelectFilterOptions(
-        staff,
-        "is_active",
-        (value) => (value ? "Active" : "Inactive"),
-        (value) => value
-      ),
-    [staff]
-  );
-
-  React.useEffect(() => {
-    if (staff) {
-      const positions = staff
-        .map((staff) => staff.position)
+  useEffect(() => {
+    if (staffs) {
+      const positions = staffs
+        .map((staffs) => staffs.position)
         .sort(
           (positionA, positionB) => positionA.sort_order - positionB.sort_order
         )
@@ -70,11 +58,16 @@ const StaffList = () => {
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
       setPositions(positions);
     }
-  }, [staff]);
+  }, [staffs]);
 
-  const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
+  const statusesOptions = getSelectFilterOptions(
+    staffs,
+    "is_active",
+    (value) => (value ? "Active" : "Inactive"),
+    (value) => value
+  );
 
-  const columns = React.useMemo<MRT_ColumnDef<Staff>[]>(
+  const columns = useMemo<MRT_ColumnDef<Staff>[]>(
     () => [
       {
         accessorKey: "full_name",
@@ -84,7 +77,10 @@ const StaffList = () => {
               <Restricted allowed={[ROLES.EDIT]} RenderError={undefined}>
                 <ETGridTitle
                   to={"#"}
-                  onClick={() => onEdit(row.original.id)}
+                  onClick={() => {
+                    setStaffId(row.original.id);
+                    setShowFormDialog(true);
+                  }}
                   enableTooltip={true}
                   tooltip={cell.getValue<string>()}
                 >
@@ -161,7 +157,7 @@ const StaffList = () => {
         ),
       },
     ],
-    [positions]
+    [canEdit, statusesOptions, positions]
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {
@@ -182,7 +178,7 @@ const StaffList = () => {
         <Grid item xs={12}>
           <MasterTrackTable
             columns={columns}
-            data={staff}
+            data={staffs}
             initialState={{
               sorting: [
                 {
@@ -193,7 +189,7 @@ const StaffList = () => {
               columnFilters,
             }}
             state={{
-              isLoading: ctx.loading,
+              isLoading: loading,
               showGlobalFilter: true,
             }}
             tableName={"staff-listing"}
@@ -206,7 +202,7 @@ const StaffList = () => {
                 <Button
                   variant="contained"
                   onClick={() => {
-                    ctx.setShowModalForm(true);
+                    setShowFormDialog(true);
                     setStaffId(undefined);
                   }}
                 >
@@ -218,6 +214,12 @@ const StaffList = () => {
           />
         </Grid>
       </ETPageContainer>
+      <StaffDialog
+        open={showFormDialog}
+        saveStaffCallback={fetchStaffs}
+        setOpen={setShowFormDialog}
+        staffId={staffId}
+      />
     </>
   );
 };

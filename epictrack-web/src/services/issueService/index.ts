@@ -26,7 +26,14 @@ class IssueService {
       workId
     )}`;
     query = query.replace(":issue_id", issue_id);
-    return await http.PatchRequest(query, JSON.stringify(data));
+
+    try {
+      const response = await http.PatchRequest(query, JSON.stringify(data));
+      return response;
+    } catch (error) {
+      console.error("Error in editIssue:", error);
+      throw error;
+    }
   }
 
   async editIssueUpdate(

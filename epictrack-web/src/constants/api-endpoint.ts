@@ -7,6 +7,12 @@ const Endpoints = {
   Staffs: {
     STAFFS: "staffs",
   },
+  ElevatedRoles: {
+    GET_ALL: "elevated-roles",
+  },
+  StaffsElevatedRoles: {
+    STAFF_ELEVATED_ROLES: "staff-elevated-roles",
+  },
   Projects: {
     PROJECTS: "projects",
     WORK_TYPES: "projects/:project_id/work-types",
@@ -113,7 +119,7 @@ const Endpoints = {
     UPDATE: "/special-fields/:specialFieldId",
   },
   Ministry: {
-    GET_ALL: "/ministries",
+    MINISTRY: "/ministries",
   },
   EAAct: {
     GET_ALL: "/ea-acts",
@@ -147,6 +153,11 @@ const Endpoints = {
     WORK_BY_PHASE: "/insights/works?group_by=phase",
     WORKS_ACTIVE: "/insights/works?isactive",
     ASSESSMENT_BY_PHASE: "/insights/works?group_by=assessment_by_phase",
+  },
+  StalenessSettings: {
+    STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
+    STALENESS: "/staleness-settings",
+    UPDATE_STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
   },
 };
 export default Endpoints;

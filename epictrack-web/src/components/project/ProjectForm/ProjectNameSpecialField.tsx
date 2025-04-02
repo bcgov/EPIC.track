@@ -2,6 +2,7 @@ import React from "react";
 import { SpecialFieldGrid } from "../../shared/specialField";
 import {
   EPIC_SUPPORT_LINKS,
+  SPECIAL_FIELD_TYPES,
   SPECIAL_FIELDS,
   SpecialFieldEntityEnum,
 } from "../../../constants/application-constant";
@@ -57,6 +58,7 @@ export const ProjectNameSpecialField = ({
             entity={SpecialFieldEntityEnum.PROJECT}
             entity_id={id}
             fieldName={SPECIAL_FIELDS.PROJECT.NAME}
+            fieldValueType={SPECIAL_FIELD_TYPES.STRING}
             fieldLabel={"Name"}
             fieldType={"text"}
             title={title}

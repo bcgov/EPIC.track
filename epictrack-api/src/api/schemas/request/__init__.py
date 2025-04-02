@@ -68,6 +68,10 @@ from .special_field_request import (
     SpecialFieldIdPathParameterSchema,
     SpecialFieldQueryParamSchema,
 )
+from .staff_elevated_role_request import (
+    StaffElevatedRoleBodyParamSchema,
+    StaffElevatedRoleIdPathParamSchema,
+)
 from .staff_request import (
     StaffBodyParameterSchema,
     StaffByPositionsQueryParamSchema,
@@ -79,6 +83,10 @@ from .staff_work_role_request import (
     StaffWorkBodyParamSchema,
     StaffWorkExistenceCheckQueryParamSchema,
     StaffWorkPathParamSchema,
+)
+from .staleness_settings_request import (
+    StalenessSettingsBodyParamSchema,
+    StalenessSettingsQueryParamSchema,
 )
 from .task_request import (
     TaskTemplateBodyParameterSchema,
@@ -112,4 +120,8 @@ from .work_request import (
     WorkStatusParameterSchema,
     WorkTypeIdQueryParamSchema,
     WorkQueryParameterSchema,
+)
+from .ministry_request import (
+    MinistryBodyParameterSchema,
+    MinistryUpdateParameterSchema,
 )

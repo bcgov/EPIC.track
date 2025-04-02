@@ -14,30 +14,60 @@
 """Resource for Ministry endpoints."""
 from http import HTTPStatus
 
-from flask import jsonify
+from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
 from api.schemas import response as res
+from api.schemas import request as req
 from api.services.ministry import MinistryService
-from api.utils import auth, constants, profiletime
-from api.utils.caching import AppCache
+from api.utils import auth, profiletime
 from api.utils.util import cors_preflight
 
 
 API = Namespace('ministries', description='Ministries')
 
 
-@cors_preflight('GET')
-@API.route('', methods=['GET', 'OPTIONS'])
+@cors_preflight('GET, POST')
+@API.route('', methods=['GET', 'POST', 'OPTIONS'])
 class Ministries(Resource):
     """Endpoints for the Ministries"""
 
     @staticmethod
     @cors.crossdomain(origin='*')
     @auth.require
-    @AppCache.cache.cached(timeout=constants.CACHE_DAY_TIMEOUT, query_string=True)
     @profiletime
     def get():
         """Return all ministries."""
         ministries = MinistryService.find_all()
-        return jsonify(res.ListTypeResponseSchema(many=True).dump(ministries)), HTTPStatus.OK
+        return_type = request.args.get("return_type", None)
+        if return_type == "list_type":
+            schema = res.ListTypeResponseSchema(many=True)
+        else:
+            schema = res.MinistryResponseSchema(many=True)
+        return jsonify(schema.dump(ministries)), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def post():
+        """Preflight options for Ministries."""
+        request_dict = req.MinistryBodyParameterSchema().load(API.payload)
+        ministry = MinistryService.create_ministry(request_dict)
+        return jsonify(res.MinistryResponseSchema().dump(ministry)), HTTPStatus.CREATED
+
+
+@cors_preflight('PUT')
+@API.route('/<int:ministry_id>', methods=['PUT', 'OPTIONS'])
+class Ministry(Resource):
+    """Endpoint resource to manage a ministry."""
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def put(ministry_id):
+        """Preflight options for Ministries."""
+        request_dict = req.MinistryUpdateParameterSchema().load(API.payload)
+        ministry = MinistryService.update_ministry(ministry_id, request_dict)
+        return jsonify(res.MinistryResponseSchema().dump(ministry)), HTTPStatus.OK

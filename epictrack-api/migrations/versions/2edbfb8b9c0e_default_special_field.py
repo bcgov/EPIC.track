@@ -7,10 +7,8 @@ Create Date: 2024-01-17 16:33:49.371022
 """
 from alembic import op
 from flask import current_app, g
-from sqlalchemy import text
+from sqlalchemy import text, inspect, MetaData, Table, Column
 from sqlalchemy.dialects.postgresql.ranges import Range
-
-from api.models import Project, Proponent, SpecialField, Work
 
 
 # revision identifiers, used by Alembic.
@@ -34,8 +32,13 @@ def upgrade():
     special_histories_map = _get_special_history_map()
     upper_limit = None
     g.jwt_oidc_token_info = {"email": 'system'}
-    special_field_table = SpecialField.metadata.tables["special_fields"]
     conn = op.get_bind()
+    inspector = inspect(conn)
+    metadata = MetaData()
+    columns = [
+        Column(col["name"], col["type"]) for col in inspector.get_columns("special_fields")
+    ]
+    special_field_table = Table("special_fields", metadata, *columns)
     for entity_info in entities:
         model_query = entity_info['model_query']
         field_names = entity_info['field_names']
