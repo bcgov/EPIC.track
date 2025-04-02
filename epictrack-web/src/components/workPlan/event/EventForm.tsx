@@ -177,62 +177,21 @@ const EventForm = ({
       return true;
     }
   }, [selectedConfiguration, event]);
-  /**
-   * If the event is the last decision event, then, the decision maker
-   * position id has to be selected from the decision make position id
-   * stored in Work model
-   */
-  const decisionMakerPositionIds = useMemo<number[]>(() => {
-    const lastDecisionIndex = milestoneEvents.findLastIndex(
-      (p: EventsGridModel) =>
-        p.event_configuration.event_category_id === EventCategory.DECISION
-    );
-    const currentEventIndex = milestoneEvents.findIndex(
-      (p: EventsGridModel) => p.id === event?.id
-    );
-    if (
-      selectedWorkPhase?.is_last_phase &&
-      lastDecisionIndex === currentEventIndex
-    ) {
-      if (work?.decision_maker_position_id) {
-        return [Number(work?.decision_maker_position_id)];
-      } else {
-        return [];
-      }
-    }
-    return [
-      POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
-      POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
-      POSITION_ENUM.ADM,
-      POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR,
-    ];
-  }, [work, workPhases, selectedWorkPhase, event, milestoneEvents]);
   const getDecisionMakers = useCallback(async () => {
-    if (isFormFieldsLocked && work?.decision_by_id) {
-      const result = await staffService.getById(
-        String(work?.decision_by_id),
-        false
-      );
-      if (result.status === 200) {
-        setDecisionMakers([result.data as Staff]);
+    const result = await staffService.getStaffByPosition(
+      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
+    );
+    if (result.status === 200) {
+      const decisionMakers = result.data as Staff[];
+      if (work?.responsible_epd) {
+        decisionMakers.push(work?.responsible_epd);
       }
-    } else if (
-      !decisionMakerPositionIds ||
-      decisionMakerPositionIds.length === 0
-    ) {
-      const result = await staffService.getById(String(work?.decision_by_id));
-      if (result.status === 200) {
-        setDecisionMakers([result.data as Staff]);
+      if (work?.decision_by) {
+        decisionMakers.unshift(work?.decision_by);
       }
-    } else {
-      const result = await staffService.getStaffByPosition(
-        decisionMakerPositionIds.join(",")
-      );
-      if (result.status === 200) {
-        setDecisionMakers(result.data as Staff[]);
-      }
+      setDecisionMakers(decisionMakers);
     }
-  }, [decisionMakerPositionIds, work]);
+  }, []);
   useEffect(() => {
     if (
       actualAdded &&
