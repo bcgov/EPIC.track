@@ -75,7 +75,6 @@ const EventForm = ({
     return;
   },
   event,
-  milestoneEvents,
   isFormFieldsLocked,
 }: EventFormProps) => {
   const [configurations, setConfigurations] = useState<EventConfiguration[]>(
@@ -164,75 +163,23 @@ const EventForm = ({
       event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
     [dateCheckStatus, event]
   );
-  const isHighPriorityActive = useMemo(() => {
-    if (event) {
-      return event.high_priority;
-    }
-    if (
-      [
-        EventType.TIME_LIMIT_SUSPENSION,
-        EventType.TIME_LIMIT_RESUMPTION,
-      ].includes(Number(selectedConfiguration?.event_type_id))
-    ) {
-      return true;
-    }
-  }, [selectedConfiguration, event]);
-  /**
-   * If the event is the last decision event, then, the decision maker
-   * position id has to be selected from the decision make position id
-   * stored in Work model
-   */
-  const decisionMakerPositionIds = useMemo<number[]>(() => {
-    const lastDecisionIndex = milestoneEvents.findLastIndex(
-      (p: EventsGridModel) =>
-        p.event_configuration.event_category_id === EventCategory.DECISION
-    );
-    const currentEventIndex = milestoneEvents.findIndex(
-      (p: EventsGridModel) => p.id === event?.id
-    );
-    if (
-      selectedWorkPhase?.is_last_phase &&
-      lastDecisionIndex === currentEventIndex
-    ) {
-      if (work?.decision_maker_position_id) {
-        return [Number(work?.decision_maker_position_id)];
-      } else {
-        return [];
-      }
-    }
-    return [
-      POSITION_ENUM.EXECUTIVE_PROJECT_DIRECTOR,
-      POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER,
-      POSITION_ENUM.ADM,
-      POSITION_ENUM.PROJECT_ASSESSMENT_DIRECTOR,
-    ];
-  }, [work, workPhases, selectedWorkPhase, event, milestoneEvents]);
+
   const getDecisionMakers = useCallback(async () => {
-    if (isFormFieldsLocked && work?.decision_by_id) {
-      const result = await staffService.getById(
-        String(work?.decision_by_id),
-        false
-      );
-      if (result.status === 200) {
-        setDecisionMakers([result.data as Staff]);
+    const result = await staffService.getStaffByPosition(
+      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
+    );
+    if (result.status === 200) {
+      const decisionMakers = result.data as Staff[];
+      if (work?.responsible_epd) {
+        decisionMakers.push(work?.responsible_epd);
       }
-    } else if (
-      !decisionMakerPositionIds ||
-      decisionMakerPositionIds.length === 0
-    ) {
-      const result = await staffService.getById(String(work?.decision_by_id));
-      if (result.status === 200) {
-        setDecisionMakers([result.data as Staff]);
+      if (work?.decision_by) {
+        decisionMakers.unshift(work?.decision_by);
       }
-    } else {
-      const result = await staffService.getStaffByPosition(
-        decisionMakerPositionIds.join(",")
-      );
-      if (result.status === 200) {
-        setDecisionMakers(result.data as Staff[]);
-      }
+      setDecisionMakers(decisionMakers);
     }
-  }, [decisionMakerPositionIds, work]);
+  }, [work]);
+
   useEffect(() => {
     if (
       actualAdded &&
@@ -311,7 +258,6 @@ const EventForm = ({
     unregister,
     formState: { errors },
     reset,
-    control,
     getValues,
   } = methods;
 
@@ -358,7 +304,7 @@ const EventForm = ({
       )[0];
       setSelectedConfiguration(config);
     }
-  }, [event, configurations]);
+  }, [configurations, event, setSelectedConfiguration]);
 
   /**
    * If the phase is suspended, the, when you try to add a new event
@@ -387,14 +333,6 @@ const EventForm = ({
     }
   }, [configurations, event]);
 
-  useEffect(() => {
-    if (!Boolean(event)) {
-      getConfigurations();
-    } else if (event) {
-      setConfigurations([(event as MilestoneEvent).event_configuration]);
-    }
-  }, [event]);
-
   const getConfigurations = async () => {
     try {
       const result = await configurationService.getAll(
@@ -410,6 +348,14 @@ const EventForm = ({
       });
     }
   };
+
+  useEffect(() => {
+    if (!Boolean(event)) {
+      getConfigurations();
+    } else if (event) {
+      setConfigurations([(event as MilestoneEvent).event_configuration]);
+    }
+  }, [event, getConfigurations]);
 
   /**
    * Check if the selected event configuration cause date to exceed the phase
@@ -473,7 +419,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [pushEvents]
+    [handleHighlightRows, pushEvents]
   );
 
   const updateEvent = useCallback(
@@ -498,7 +444,7 @@ const EventForm = ({
       ]);
       return updatedResult;
     },
-    [event, pushEvents]
+    [event, handleHighlightRows, pushEvents]
   );
 
   const saveEvent = useCallback(
@@ -509,7 +455,7 @@ const EventForm = ({
 
       return createEvent(data, pushEventConfirmed);
     },
-    [event, pushEvents]
+    [event, createEvent, pushEvents, updateEvent]
   );
   const handleSaveEvent = async (
     data?: MilestoneEvent,
@@ -644,7 +590,7 @@ const EventForm = ({
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
                 disabled={isMilestoneTypeDisabled}
-                onHandleChange={async (configuration_id) => {
+                onHandleChange={async (configuration_id: any) => {
                   await onChangeMilestoneType(configuration_id);
                   eventDateCheck();
                 }}
