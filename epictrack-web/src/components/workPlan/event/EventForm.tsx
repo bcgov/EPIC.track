@@ -163,8 +163,28 @@ const EventForm = ({
       event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
     [dateCheckStatus, event]
   );
+  const isHighPriorityActive = useMemo(() => {
+    if (event) {
+      return event.high_priority;
+    }
+    if (
+      [
+        EventType.TIME_LIMIT_SUSPENSION,
+        EventType.TIME_LIMIT_RESUMPTION,
+      ].includes(Number(selectedConfiguration?.event_type_id))
+    ) {
+      return true;
+    }
+  }, [selectedConfiguration, event]);
 
   const getDecisionMakers = useCallback(async () => {
+    const result = await staffService.getStaffByPosition(
+      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
+    );
+    if (result.status === 200) {
+      const decisionMakers = result.data as Staff[];
+      if (work?.responsible_epd) {
+        decisionMakers.push(work?.responsible_epd);
     const result = await staffService.getStaffByPosition(
       [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
     );
