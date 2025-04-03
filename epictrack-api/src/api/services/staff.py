@@ -22,8 +22,9 @@ from sqlalchemy import Integer, cast, func, or_
 from api.exceptions import ResourceExistsError, ResourceNotFoundError, UnprocessableEntityError
 from api.models import Staff, db
 from api.models.position import Position
-from api.models.special_field import EntityEnum, SpecialField
+from api.models.special_field import EntityEnum, FieldTypeEnum, SpecialField
 from api.schemas.response import StaffResponseSchema
+from api.services.special_field import SpecialFieldService
 from api.utils.token_info import TokenInfo
 from api.services.keycloak import KeycloakService
 
@@ -68,6 +69,8 @@ class StaffService:
         # Create the staff object
         staff = Staff(**payload)
         current_app.logger.info(f"Staff obj {dir(staff)}")
+        staff = staff.flush()
+        cls.create_staff_special_fields(staff)
         staff.save()
         return staff
 
@@ -268,3 +271,18 @@ class StaffService:
           )
         )
         return query.one_or_none()
+
+    @classmethod
+    def create_staff_special_fields(cls, staff):
+        """Create the special field for the staff position when a staff is created"""
+        staff_position_special_field_data = {
+            "entity": EntityEnum.STAFF.value,
+            "entity_id": staff.id,
+            "field_name": "position_id",
+            "field_value": staff.position_id,
+            "active_from": staff.created_at,
+            "field_type": FieldTypeEnum.INTEGER.value,
+        }
+        SpecialFieldService.create_special_field_entry(
+          staff_position_special_field_data, commit=False
+        )
