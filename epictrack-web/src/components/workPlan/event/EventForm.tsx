@@ -75,7 +75,6 @@ const EventForm = ({
     return;
   },
   event,
-  milestoneEvents,
   isFormFieldsLocked,
 }: EventFormProps) => {
   const [configurations, setConfigurations] = useState<EventConfiguration[]>(
@@ -164,19 +163,7 @@ const EventForm = ({
       event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
     [dateCheckStatus, event]
   );
-  const isHighPriorityActive = useMemo(() => {
-    if (event) {
-      return event.high_priority;
-    }
-    if (
-      [
-        EventType.TIME_LIMIT_SUSPENSION,
-        EventType.TIME_LIMIT_RESUMPTION,
-      ].includes(Number(selectedConfiguration?.event_type_id))
-    ) {
-      return true;
-    }
-  }, [selectedConfiguration, event]);
+
   const getDecisionMakers = useCallback(async () => {
     const result = await staffService.getStaffByPosition(
       [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
@@ -192,6 +179,7 @@ const EventForm = ({
       setDecisionMakers(decisionMakers);
     }
   }, [work]);
+
   useEffect(() => {
     if (
       actualAdded &&
@@ -270,7 +258,6 @@ const EventForm = ({
     unregister,
     formState: { errors },
     reset,
-    control,
     getValues,
   } = methods;
 
@@ -317,7 +304,7 @@ const EventForm = ({
       )[0];
       setSelectedConfiguration(config);
     }
-  }, [event, configurations]);
+  }, [configurations, event, setSelectedConfiguration]);
 
   /**
    * If the phase is suspended, the, when you try to add a new event
@@ -346,14 +333,6 @@ const EventForm = ({
     }
   }, [configurations, event]);
 
-  useEffect(() => {
-    if (!Boolean(event)) {
-      getConfigurations();
-    } else if (event) {
-      setConfigurations([(event as MilestoneEvent).event_configuration]);
-    }
-  }, [event]);
-
   const getConfigurations = async () => {
     try {
       const result = await configurationService.getAll(
@@ -369,6 +348,14 @@ const EventForm = ({
       });
     }
   };
+
+  useEffect(() => {
+    if (!Boolean(event)) {
+      getConfigurations();
+    } else if (event) {
+      setConfigurations([(event as MilestoneEvent).event_configuration]);
+    }
+  }, [event, getConfigurations]);
 
   /**
    * Check if the selected event configuration cause date to exceed the phase
@@ -432,7 +419,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [pushEvents]
+    [handleHighlightRows, pushEvents]
   );
 
   const updateEvent = useCallback(
@@ -457,7 +444,7 @@ const EventForm = ({
       ]);
       return updatedResult;
     },
-    [event, pushEvents]
+    [event, handleHighlightRows, pushEvents]
   );
 
   const saveEvent = useCallback(
@@ -468,7 +455,7 @@ const EventForm = ({
 
       return createEvent(data, pushEventConfirmed);
     },
-    [event, pushEvents]
+    [event, createEvent, pushEvents, updateEvent]
   );
   const handleSaveEvent = async (
     data?: MilestoneEvent,
@@ -603,7 +590,7 @@ const EventForm = ({
                 getOptionValue={(o: ListType) => o.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}
                 disabled={isMilestoneTypeDisabled}
-                onHandleChange={async (configuration_id) => {
+                onHandleChange={async (configuration_id: any) => {
                   await onChangeMilestoneType(configuration_id);
                   eventDateCheck();
                 }}
