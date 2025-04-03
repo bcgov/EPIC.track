@@ -23,19 +23,20 @@ from .base_model import BaseModelVersioned
 class FieldTypeEnum(enum.Enum):
     """Enum for field types"""
 
-    STRING = "STRING"
-    INTEGER = "INTEGER"
     BOOLEAN = "BOOLEAN"
+    INTEGER = "INTEGER"
+    STRING = "STRING"
 
 
 class EntityEnum(enum.Enum):
     """Enum for enities"""
 
-    PROJECT = "PROJECT"
-    PROPONENT = "PROPONENT"
-    WORK = "WORK"
     ISSUE = "ISSUE"
     MINISTRY = "MINISTRY"
+    PROJECT = "PROJECT"
+    PROPONENT = "PROPONENT"
+    STAFF = "STAFF"
+    WORK = "WORK"
 
 
 class SpecialField(BaseModelVersioned):

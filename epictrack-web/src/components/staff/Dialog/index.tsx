@@ -4,6 +4,8 @@ import { showNotification } from "components/shared/notificationProvider";
 import { Staff } from "models/staff";
 import staffService from "services/staffService/staffService";
 import StaffForm from "../StaffForm";
+import { useAppSelector } from "hooks";
+import { ROLES } from "constants/application-constant";
 
 type StaffDialogProps = {
   open: boolean;
@@ -14,11 +16,16 @@ type StaffDialogProps = {
 
 export const StaffDialog = ({
   open,
-  saveStaffCallback = () => {},
+  saveStaffCallback = () => {
+    return;
+  },
   setOpen,
   staffId,
 }: StaffDialogProps) => {
   const [staff, setStaff] = useState<Staff | null>(null);
+  const [disableSave, setDisableSave] = useState(false);
+  const { roles } = useAppSelector((state) => state.user.userDetail);
+  const canEdit = roles.includes(ROLES.EDIT);
 
   const fetchStaff = useCallback(async () => {
     if (!staffId) return;
@@ -55,8 +62,8 @@ export const StaffDialog = ({
       open={open}
       dialogTitle={staffId ? staff?.full_name || "Edit Staff" : "Create Staff"}
       onClose={() => {
-        setStaff(null);
         setOpen(false);
+        setStaff(null);
       }}
       disableEscapeKeyDown
       fullWidth
@@ -65,12 +72,20 @@ export const StaffDialog = ({
       cancelButtonText="Cancel"
       isActionsRequired
       onCancel={() => {
-        setStaff(null);
         setOpen(false);
+        setStaff(null);
       }}
       formId="staff-form"
+      saveButtonProps={{
+        disabled: !canEdit || disableSave,
+      }}
     >
-      <StaffForm staff={staff} saveStaff={saveStaff} />
+      <StaffForm
+        fetchStaff={fetchStaff}
+        saveStaff={saveStaff}
+        setDisableDialogSave={setDisableSave}
+        staff={staff}
+      />
     </TrackDialog>
   );
 };

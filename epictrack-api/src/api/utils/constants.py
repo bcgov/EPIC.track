@@ -1,13 +1,15 @@
 """File representing constants used in the application"""
 
+import os
+
 from pytz import timezone
 
+from api.models.ministry import Ministry
 from api.models.project import Project
 from api.models.proponent import Proponent
 from api.models.special_field import EntityEnum
+from api.models.staff import Staff
 from api.models.work import Work
-from api.models.ministry import Ministry
-import os
 
 
 SCHEMA_MAPS = {
@@ -23,11 +25,13 @@ NULL_CACHE_TYPE = 'NullCache'
 
 PIP_LINK_URL_BASE = "https://apps.nrs.gov.bc.ca/int/fnp/FirstNationDetail.xhtml?name="
 
+# This intentionally does not include the 'WORK_ISSUE' model
 SPECIAL_FIELD_ENTITY_MODEL_MAPS = {
     EntityEnum.PROJECT: Project,
     EntityEnum.WORK: Work,
     EntityEnum.PROPONENT: Proponent,
     EntityEnum.MINISTRY: Ministry,
+    EntityEnum.STAFF: Staff,
 }
 
 CANADA_TIMEZONE = timezone("US/Pacific")
