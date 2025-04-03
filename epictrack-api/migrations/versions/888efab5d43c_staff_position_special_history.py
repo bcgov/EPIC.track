@@ -16,6 +16,7 @@ depends_on = None
 def upgrade():
     # update entity enum
     op.execute("ALTER TYPE entityenum ADD VALUE IF NOT EXISTS 'STAFF'")
+    op.execute("COMMIT")
 
     # Add new DTU position
     op.execute("""
