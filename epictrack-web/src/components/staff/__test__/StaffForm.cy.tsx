@@ -48,7 +48,9 @@ const endpoints: Endpoint[] = [
 describe("StaffForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
-    cy.mount(<StaffForm fetchStaff={cy.stub()} staff={null} saveStaff={cy.stub()} />);
+    cy.mount(
+      <StaffForm fetchStaff={cy.stub()} staff={null} saveStaff={cy.stub()} />
+    );
   });
 
   it("renders the form", () => {
