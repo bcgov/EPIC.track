@@ -79,7 +79,7 @@ export const SpecialHistoryProvider = ({
       POSITION_ENUM.MINISTER.toString()
     );
 
-    if (ministerResults.status == 200) {
+    if (ministerResults.status === 200) {
       setMinisters(ministerResults.data as Staff[]);
     }
   };
@@ -100,7 +100,7 @@ export const SpecialHistoryProvider = ({
     if (!ministry) return;
     const selectedMinistry = ministries.find((m) => m.id === ministry.id);
     if (selectedMinistry) setMinistry(selectedMinistry);
-  }, [ministries]);
+  }, [ministries, ministry]);
 
   return (
     <SpecialHistoryContext.Provider
