@@ -1,13 +1,13 @@
+import { useContext, useMemo } from "react";
 import { Button, Grid } from "@mui/material";
-import { ETGridTitle, ETHeading4 } from "components/shared";
+import { MRT_ColumnDef } from "material-react-table";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { useContext, useMemo } from "react";
-import { SpecialHistoryContext } from "./SpecialHistorySettingsContext";
+import { ETGridTitle, ETHeading4 } from "components/shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { MRT_ColumnDef } from "material-react-table";
-import { Ministry } from "models/ministry";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { Ministry } from "models/ministry";
+import { SpecialHistoryContext } from "./SpecialHistorySettingsContext";
 
 const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
@@ -50,9 +50,10 @@ const SpecialHistorySettings = () => {
       },
       {
         accessorKey: "date_created",
+        enableColumnFilter: false,
         header: "Date Created",
         size: 300,
-        enableColumnFilter: false,
+        sortingFn: "sortFn",
         Cell: ({ row }) => {
           const date_created = row.original.date_created;
           if (!date_created) {
@@ -68,9 +69,10 @@ const SpecialHistorySettings = () => {
       },
       {
         accessorKey: "date_closed",
+        enableColumnFilter: false,
         header: "Date Closed",
         size: 300,
-        enableColumnFilter: false,
+        sortingFn: "sortFn",
         Cell: ({ row }) => {
           const date_closed = row.original.date_closed;
           if (!date_closed) {
@@ -84,7 +86,7 @@ const SpecialHistorySettings = () => {
         },
       },
     ],
-    [ministries]
+    [setCreateMinistryDialogOpen, setMinistry]
   );
 
   return (
@@ -104,7 +106,18 @@ const SpecialHistorySettings = () => {
         </Button>
       </Grid>
       <Grid item xs={12}>
-        <MasterTrackTable data={ministries} columns={columns} />
+        <MasterTrackTable
+          data={ministries}
+          columns={columns}
+          initialState={{
+            sorting: [
+              {
+                id: "date_created",
+                desc: true,
+              },
+            ],
+          }}
+        />
       </Grid>
     </Grid>
   );
