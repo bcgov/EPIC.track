@@ -1,6 +1,11 @@
 import Keycloak from "keycloak-js";
 import { Action, AnyAction, Dispatch } from "redux";
-import { userToken, userAuthentication, userDetails } from "./userSlice";
+import {
+  userToken,
+  userAuthentication,
+  userDetails,
+  userAuthorization,
+} from "./userSlice";
 import { AppConfig } from "../../config";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
@@ -104,6 +109,13 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       staffProfile?.position?.name ?? "",
       roles
     );
+    const isAuthorized = userDetail.groups.some(
+      (group) =>
+        group.startsWith("TRACK/") &&
+        group !== "TRACK" &&
+        group !== "TRACK/NO_ROLE"
+    );
+    dispatch(userAuthorization(isAuthorized));
     dispatch(userDetails(userDetail));
     dispatch(userToken(KeycloakData.token));
     dispatch(userAuthentication(Boolean(KeycloakData.authenticated)));
