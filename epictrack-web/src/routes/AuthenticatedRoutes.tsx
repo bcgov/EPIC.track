@@ -1,4 +1,5 @@
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
+import { useAppSelector } from "hooks";
 import NotFound from "./NotFound";
 import StaffList from "../components/staff/StaffList";
 import AnticipatedEAOSchedule from "../components/reports/eaReferral/AnticipatedEAOSchedule";
@@ -23,6 +24,15 @@ import MyTasksList from "components/myTasks/MyTasksList";
 import Settings from "components/settings";
 
 const AuthenticatedRoutes = () => {
+  const isAuthorized = useAppSelector((state) => state.user.isAuthorized);
+  const isAuthenticated = useAppSelector(
+    (state) => state.user.authentication.authenticated
+  );
+
+  if (isAuthenticated && !isAuthorized) {
+    return <Navigate to="/unauthorized" replace />;
+  }
+
   return (
     <Routes>
       <Route
