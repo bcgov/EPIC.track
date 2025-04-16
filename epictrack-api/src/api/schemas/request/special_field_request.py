@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Special field resource's input validations"""
-from marshmallow import EXCLUDE, fields, validate
+from marshmallow import EXCLUDE, fields, validate, validates_schema, ValidationError
 
 from api.models.special_field import EntityEnum, FieldTypeEnum
 
@@ -31,7 +31,7 @@ class SpecialFieldQueryParamSchema(RequestQueryParameterSchema):
     entity_id = fields.Int(
         metadata={"description": "The id of the entity"},
         validate=validate.Range(min=1),
-        required=True,
+        required=False,
     )
 
     field_name = fields.Str(
@@ -39,6 +39,18 @@ class SpecialFieldQueryParamSchema(RequestQueryParameterSchema):
         validate=validate.Length(max=150),
         required=True,
     )
+
+    field_value = fields.Str(
+        metadata={"description": "Value of the special field"},
+        validate=validate.Length(min=1),
+        required=False,
+    )
+
+    @validates_schema
+    def validate_field_or_entity(self, data):
+        """Validated that either field_value or entity_id is provided"""
+        if not data.get("field_value") and not data.get("entity_id"):
+            raise ValidationError("Either 'field_value' or 'entity_id' must be provided.")
 
 
 class SpecialFieldBodyParameterSchema(RequestBodyParameterSchema):

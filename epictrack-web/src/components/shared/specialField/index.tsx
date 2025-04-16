@@ -1,5 +1,6 @@
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import dayjs from "dayjs";
 import { Box, Button, IconButton, TextField } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
 import { When } from "react-if";
 import {
   MRT_ColumnDef,
@@ -20,16 +21,14 @@ import {
   DATE_FORMAT,
   MIN_WORK_START_DATE,
 } from "../../../constants/application-constant";
-import dayjs from "dayjs";
 import MasterTrackTable from "../MasterTrackTable";
-import { useDispatch } from "react-redux";
 import { showNotification } from "../notificationProvider";
 import { getErrorMessage } from "utils/axiosUtils";
 
-const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
-const EditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
-const CheckIcon: React.FC<IconProps> = Icons["CheckIcon"];
-const CancelIcon: React.FC<IconProps> = Icons["CloseXIcon"];
+const AddIcon: FC<IconProps> = Icons["AddIcon"];
+const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
+const CheckIcon: FC<IconProps> = Icons["CheckIcon"];
+const CancelIcon: FC<IconProps> = Icons["CloseXIcon"];
 
 const Styles = {
   flexStart: {
@@ -42,14 +41,6 @@ type SPECIAL_FIELD_KEY = "field_value" | "active_from";
 const SPECIAL_FIELD_KEYS: { [x: string]: SPECIAL_FIELD_KEY } = {
   FIELD_VALUE: "field_value",
   ACTIVE_FROM: "active_from",
-};
-
-type ErrorState = {
-  [key in SPECIAL_FIELD_KEY]: boolean;
-};
-
-type Errors = {
-  [key: string]: ErrorState | undefined;
 };
 
 export const SpecialFieldGrid = ({
@@ -73,14 +64,13 @@ export const SpecialFieldGrid = ({
   const [tableInstance, setTableInstance] =
     useState<MRT_TableInstance<SpecialField>>();
 
-  const dispatch = useDispatch();
   const tableState = useMemo<MRT_TableState<SpecialField> | undefined>(() => {
     if (tableInstance) {
       return tableInstance.getState();
     }
   }, [tableInstance]);
 
-  const getEntries = async () => {
+  const getEntries = useCallback(async () => {
     setLoading(true);
     const specialFieldEntries = await specialFieldService.getEntries(
       entity,
@@ -91,11 +81,11 @@ export const SpecialFieldGrid = ({
       setEntries(specialFieldEntries.data as SpecialField[]);
     }
     setLoading(false);
-  };
+  }, [entity, entity_id, fieldName]);
 
   useEffect(() => {
     getEntries();
-  }, [fieldName]);
+  }, [fieldName, getEntries]);
 
   const resetErrors = () => {
     setErrors({
@@ -157,13 +147,11 @@ export const SpecialFieldGrid = ({
                 <TrackSelect
                   options={options}
                   placeholder={fieldLabel}
-                  filterAppliedCallback={() => {
-                    return;
-                  }}
                   name={fieldName}
                   defaultValue={value || ""}
                   onChange={onBlur}
                   error={errors.field_value}
+                  fullWidth
                 />
               </When>
               <When condition={fieldType === "text"}>
@@ -234,7 +222,7 @@ export const SpecialFieldGrid = ({
         },
       },
     ],
-    [fieldLabel, fieldName, options, errors, tableState]
+    [fieldLabel, fieldName, fieldType, options, errors, tableState]
   );
 
   const validateRowInputs = (values: Record<SPECIAL_FIELD_KEY, any>) => {
