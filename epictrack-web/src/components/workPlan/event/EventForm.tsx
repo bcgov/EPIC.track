@@ -165,7 +165,7 @@ const EventForm = ({
   );
 
   const getDecisionMakers = useCallback(async () => {
-    const result = await staffService.getStaffByPosition(
+    const result = await staffService.getActiveStaffByPosition(
       [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
     );
     if (result.status === 200) {

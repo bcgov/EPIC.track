@@ -198,7 +198,7 @@ export default function WorkForm({
 
   const getStaffByPosition = useCallback(
     async (position: POSITION_ENUM) => {
-      const staffResult = await staffService.getStaffByPosition(
+      const staffResult = await staffService.getActiveStaffByPosition(
         position.toString()
       );
       if (staffResult.status === 200) {

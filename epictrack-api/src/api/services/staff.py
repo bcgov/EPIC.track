@@ -40,10 +40,12 @@ class StaffService:
         return staffs
 
     @classmethod
-    def find_by_position_ids(cls, position_ids):
+    def find_by_position_ids(cls, position_ids, include_inactive: bool):
         """Find staffs by position ids."""
-        current_app.logger.debug(f"Find staff by positions : {position_ids}")
-        staffs = Staff.find_active_staff_by_positions(position_ids)
+        if include_inactive is True:
+            staffs = Staff.find_all_staff_by_positions(position_ids)
+        else:
+            staffs = Staff.find_active_staff_by_positions(position_ids)
         return staffs
 
     @classmethod
