@@ -47,7 +47,7 @@ class SpecialFieldQueryParamSchema(RequestQueryParameterSchema):
     )
 
     @validates_schema
-    def validate_field_or_entity(self, data):
+    def validate_field_or_entity(self, data, **_kwargs):
         """Validated that either field_value or entity_id is provided"""
         if not data.get("field_value") and not data.get("entity_id"):
             raise ValidationError("Either 'field_value' or 'entity_id' must be provided.")
