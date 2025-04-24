@@ -19,7 +19,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import NextPageTemplate, Paragraph, Table, TableStyle
 from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
-from sqlalchemy import INTEGER, and_, func, or_
+from sqlalchemy import and_, case, func, INTEGER, or_
 from sqlalchemy.dialects.postgresql import DATERANGE
 from sqlalchemy.orm import aliased
 
@@ -184,9 +184,11 @@ class EAResourceForeCastReport(ReportFactory):
 
     def _fetch_data(self, report_date: datetime):
         """Find and return works that are started before end date and did not end before report date"""
+        report_date = report_date.astimezone(CANADA_TIMEZONE)
         current_app.logger.info(f"Report Date: {report_date}")
         env_region = aliased(Region)
         nrs_region = aliased(Region)
+        sh_project_name = aliased(SpecialField)
         less_than_end_date_query = self._get_less_than_end_date_query()
         current_app.logger.info(f"Less than end date query: {less_than_end_date_query}")
         greater_than_report_date_query = self._get_greater_than_report_date_query(
@@ -226,6 +228,13 @@ class EAResourceForeCastReport(ReportFactory):
             # TODO: Make sure to add the region_id_env and region_id_flnro to the Project model
             .join(env_region, env_region.id == Project.region_id_env)
             .join(nrs_region, nrs_region.id == Project.region_id_flnro)
+            # special history project name
+            .outerjoin(sh_project_name, and_(
+                sh_project_name.entity_id == Project.id,
+                sh_project_name.entity == EntityEnum.PROJECT.value,
+                sh_project_name.time_range.contains(report_date),
+                sh_project_name.field_name == "name"
+            ))
             .join(
                 less_than_end_date_query, Work.id == less_than_end_date_query.c.work_id
             )
@@ -234,7 +243,15 @@ class EAResourceForeCastReport(ReportFactory):
                 Work.id == greater_than_report_date_query.c.work_id,
             )
             .add_columns(
-                Work.title.label("work_title"),
+                case(
+                    (
+                        func.coalesce(Work.simple_title, "") != "",
+                        func.concat(func.coalesce(sh_project_name.field_value, Project.name), " - ", WorkType.name, " - ", Work.simple_title),
+                    ),
+                    else_=func.concat(func.coalesce(sh_project_name.field_value, Project.name), " - ", WorkType.name)
+                ).label(
+                    "work_title"
+                ),
                 Project.capital_investment.label("capital_investment"),
                 WorkType.name.label("ea_type"),
                 WorkType.report_title.label("ea_type_label"),
@@ -465,7 +482,7 @@ class EAResourceForeCastReport(ReportFactory):
             results[work_id] = work_data
         return results
 
-    def _filter_start_events(self, events: [Event]) -> [Event]:
+    def _filter_start_events(self, events: list[Event]) -> list[Event]:
         """Filter the start events of each phase per work"""
         start_events = [
             {
@@ -638,7 +655,7 @@ class EAResourceForeCastReport(ReportFactory):
             sorted_data = sorted(sorted_data, key=lambda k: k["work_title"])
         return sorted_data
 
-    def _get_events(self, work_ids: [int]) -> List[Event]:
+    def _get_events(self, work_ids: list[int]) -> List[Event]:
         """Returns the start event of each of the work phases for the works"""
         return (
             Event.query.filter(
