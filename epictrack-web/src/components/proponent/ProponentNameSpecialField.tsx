@@ -12,20 +12,22 @@ import { When } from "react-if";
 import { SpecialFieldLock } from "../shared/specialField/components/SpecialFieldLock";
 
 interface ProponentNameSpecialFieldProps {
+  children?: React.ReactNode;
   id?: number;
+  isPositionLeft?: boolean; // Is special field position leftmost in dialog
+  onLockClick: () => void;
   onSave: () => void;
   open: boolean;
-  onLockClick: () => void;
-  children?: React.ReactNode;
   title: string;
 }
 const LABEL = "Name";
 export const ProponentNameSpecialField = ({
+  children,
   id,
+  isPositionLeft = false,
+  onLockClick,
   onSave,
   open = false,
-  onLockClick,
-  children,
   title,
 }: ProponentNameSpecialFieldProps) => {
   if (!id) {
@@ -49,7 +51,7 @@ export const ProponentNameSpecialField = ({
         {children}
       </Grid>
       <When condition={open}>
-        <Grid item xs={12}>
+        <Grid item xs={12} sx={{ order: isPositionLeft ? 1 : 0 }}>
           <SpecialFieldGrid
             entity={SpecialFieldEntityEnum.PROPONENT}
             entity_id={id}
