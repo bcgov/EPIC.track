@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 from flask import jsonify, current_app
 from pytz import timezone
-from sqlalchemy import and_, case, func, or_, select
+from sqlalchemy import and_, case, cast, func, Integer, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
 from sqlalchemy.orm import aliased
 
@@ -114,6 +114,14 @@ class EAAnticipatedScheduleReport(ReportFactory):
         report_date = report_date.astimezone(timezone('US/Pacific'))
         staff_decision_by = aliased(Staff)
         staff_minister = aliased(Staff)
+        staff_sh_minister = aliased(Staff)
+        sh_project_name = aliased(SpecialField)
+        sh_project_proponent = aliased(SpecialField)
+        sh_proponent_name = aliased(SpecialField)
+        sh_work_decision_by = aliased(SpecialField)
+        sh_work_ministry = aliased(SpecialField)
+        sh_work_ministry_minister = aliased(SpecialField)
+        sh_work_ministry_name = aliased(SpecialField)
 
         next_pecp_query = self._get_next_pcp_query(start_date)
         next_event_query = self._get_next_event_query(report_date)
@@ -152,20 +160,70 @@ class EAAnticipatedScheduleReport(ReportFactory):
             .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .join(Project, Work.project_id == Project.id)
-            # TODO: Switch to `JOIN` once proponents are imported again with special field entries created
-            .outerjoin(SpecialField, and_(
-                SpecialField.entity_id == Project.proponent_id,
-                SpecialField.entity == EntityEnum.PROPONENT.value,
-                SpecialField.time_range.contains(report_date),
-                SpecialField.field_name == "name"
+            # special history project name
+            .outerjoin(sh_project_name, and_(
+                sh_project_name.entity_id == Work.project_id,
+                sh_project_name.entity == EntityEnum.PROJECT.value,
+                sh_project_name.time_range.contains(report_date),
+                sh_project_name.field_name == "name"
+            ))
+            # special history project proponent id
+            .outerjoin(sh_project_proponent, and_(
+                sh_project_proponent.entity_id == Work.project_id,
+                sh_project_proponent.entity == EntityEnum.PROJECT.value,
+                sh_project_proponent.time_range.contains(report_date),
+                sh_project_proponent.field_name == "proponent_id"
+            ))
+            # special history proponent name
+            .outerjoin(sh_proponent_name, and_(
+                sh_proponent_name.entity_id == cast(sh_project_proponent.field_value, Integer),
+                sh_proponent_name.entity == EntityEnum.PROPONENT.value,
+                sh_proponent_name.time_range.contains(report_date),
+                sh_proponent_name.field_name == "name"
             ))
             # TODO: Remove this JOIN once proponents are imported again with special field entries created
             .join(Proponent, Proponent.id == Project.proponent_id)
             .join(Region, Region.id == Project.region_id_env)
             .join(EAAct, EAAct.id == Work.ea_act_id)
-            .join(Ministry)
-            .outerjoin(staff_minister, Ministry.minister_id == staff_minister.id)
+            # special history work ministry
+            .outerjoin(sh_work_ministry, and_(
+                sh_work_ministry.entity_id == Work.id,
+                sh_work_ministry.entity == EntityEnum.WORK.value,
+                sh_work_ministry.time_range.contains(report_date),
+                sh_work_ministry.field_name == "ministry_id"
+            ))
+            # special history ministry name
+            .outerjoin(sh_work_ministry_name, and_(
+                sh_work_ministry_name.entity_id == cast(sh_work_ministry.field_value, Integer),
+                sh_work_ministry_name.entity == EntityEnum.MINISTRY.value,
+                sh_work_ministry_name.time_range.contains(report_date),
+                sh_work_ministry_name.field_name == "name"
+            ))
+            # special history ministry minister
+            .outerjoin(sh_work_ministry_minister, and_(
+                sh_work_ministry_minister.entity_id == cast(sh_work_ministry.field_value, Integer),
+                sh_work_ministry_minister.entity == EntityEnum.MINISTRY.value,
+                sh_work_ministry_minister.time_range.contains(report_date),
+                sh_work_ministry_minister.field_name == "minister_id"
+            ))
+            .outerjoin(
+                staff_sh_minister,
+                cast(sh_work_ministry_minister.field_value, Integer) == staff_sh_minister.id
+            )
+            # required for fallback if no sh record exists
+            .outerjoin(Ministry, Ministry.id == Work.ministry_id)
+            .outerjoin(
+                staff_minister,
+                Ministry.minister_id == staff_minister.id
+            )
             .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
+            # special history work decision by
+            .outerjoin(sh_work_decision_by, and_(
+                sh_work_decision_by.entity_id == Work.id,
+                sh_work_decision_by.entity == EntityEnum.WORK.value,
+                sh_work_decision_by.time_range.contains(report_date),
+                sh_work_decision_by.field_name == "decision_by_id"
+            ))
             .outerjoin(
                 staff_decision_by,  # Join staff alias
                 or_(
@@ -176,7 +234,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
                         staff_decision_by.id == Work.eac_decision_by_id,
                     ),
-                    staff_decision_by.id == Work.decision_by_id,  # Default case if event.decision_maker is not populated
+                    staff_decision_by.id == func.coalesce(cast(sh_work_decision_by.field_value, Integer), Work.decision_by_id),  # Default case if event.decision_maker is not populated
                 )
             )
             .outerjoin(SubstitutionAct)
@@ -269,16 +327,16 @@ class EAAnticipatedScheduleReport(ReportFactory):
                                 Work.simple_title != "",
                                 Work.simple_title.is_not(None),
                             ),
-                            func.concat(Project.name, " - ", Work.simple_title)
+                            func.concat(func.coalesce(sh_project_name.field_value, Project.name), " - ", Work.simple_title)
                         ),
-                        else_=Project.name
+                        else_=func.coalesce(sh_project_name.field_value, Project.name)
                 ).label("amendment_title"),
                 ea_type_column,
                 anticipated_date_column.label("anticipated_date_label"),
                 latest_status_updates.c.posted_date.label("date_updated"),
-                Project.name.label("project_name"),
+                func.coalesce(sh_project_name.field_value, Project.name).label("project_name"),
                 func.coalesce(
-                    SpecialField.field_value, Proponent.name
+                    sh_proponent_name.field_value, Proponent.name
                 ).label("proponent"),
                 Region.name.label("region"),
                 Project.address.label("location"),
@@ -301,7 +359,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         ),
                         else_="",
                 ).label("decision_by"),
-                func.concat(staff_minister.first_name, " ", staff_minister.last_name).label("minister"),
+                func.coalesce(
+                    func.concat(staff_sh_minister.first_name, " ", staff_sh_minister.last_name),
+                    func.concat(staff_minister.first_name, " ", staff_minister.last_name)
+                ).label("minister"),
                 EventConfiguration.event_type_id.label("milestone_type"),
                 EventConfiguration.event_category_id.label("category_type"),
                 EventConfiguration.name.label("event_name"),
