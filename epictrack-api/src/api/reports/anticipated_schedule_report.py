@@ -93,6 +93,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "EAC/Order Transfer Request Decisions",
             "Substantial Start Decisions",
             "EAC/Order Cancellation Decisions",
+            "Material Alteration Decisions"
         ]
         item_sort_key = "referral_date"
         template_name = "anticipated_schedule.docx"
