@@ -582,6 +582,9 @@ class EAResourceForeCastReport(ReportFactory):
         order_cancellations = self._sort_data_by_work_type(
             data, WorkTypeEnum.EAC_ORDER_CANCELLATION.value
         )
+        material_alterations = self._sort_data_by_work_type(
+            data, WorkTypeEnum.MATERIAL_ALTERATION.value
+        )
         others = self._sort_data_by_work_type(data, WorkTypeEnum.OTHER.value)
 
         sorted_data = (
@@ -597,7 +600,7 @@ class EAResourceForeCastReport(ReportFactory):
             + extensions
             + substantial_start_decisions
         )
-        sorted_data += order_suspensions + order_cancellations + others
+        sorted_data += order_suspensions + order_cancellations + material_alterations + others
         return sorted_data
 
     def _fetch_second_phases(self, events, work_ids) -> List[WorkPhase]:
