@@ -1,19 +1,20 @@
+import { FC, ReactNode, useContext, useEffect, useMemo } from "react";
+import { When } from "react-if";
 import { Box, Grid, SxProps, Tooltip } from "@mui/material";
-import { FC, ReactNode, useContext, useEffect, useMemo, useState } from "react";
 import Moment from "moment";
-import ETAccordion from "../../shared/accordion/Accordion";
-import { PhaseAccordionProps } from "./type";
-import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
 import { ETCaption1, ETParagraph } from "../../shared";
-import { Palette } from "../../../styles/theme";
+import ETAccordion from "../../shared/accordion/Accordion";
+import ETAccordionSummary from "../../shared/accordion/components/AccordionSummary";
 import ETAccordionDetails from "../../shared/accordion/components/AccordionDetails";
+import BorderLinearProgress from "../../shared/progress/Progress";
 import EventGrid from "../event";
 import { WorkplanContext } from "../WorkPlanContext";
-import BorderLinearProgress from "../../shared/progress/Progress";
 import Icons from "../../icons/index";
 import { IconProps } from "../../icons/type";
-import { When } from "react-if";
+import { Palette } from "../../../styles/theme";
 import { MONTH_DAY_YEAR } from "../../../constants/application-constant";
+import { PhaseAccordionProps } from "./type";
+
 const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
 const PauseIcon: FC<IconProps> = Icons["PauseIcon"];
 const IndicatorIcon: FC<IconProps> = Icons["IndicatorIcon"];
