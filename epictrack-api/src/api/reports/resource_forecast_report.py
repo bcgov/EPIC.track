@@ -601,7 +601,6 @@ class EAResourceForeCastReport(ReportFactory):
             + substantial_start_decisions
         )
         sorted_data += order_suspensions + order_cancellations + material_alterations + others
-        current_app.logger.info(f'mat alts {material_alterations}')
         return sorted_data
 
     def _fetch_second_phases(self, events, work_ids) -> List[WorkPhase]:
