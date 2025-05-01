@@ -53,11 +53,11 @@ const UserList = () => {
 
   React.useEffect(() => {
     getUsers();
-  }, [updatedOn]);
+  }, [getUsers, updatedOn]);
 
   React.useEffect(() => {
     getGroups();
-  }, []);
+  }, [getGroups]);
 
   const [groups, setGroups] = React.useState<Group[]>([]);
   const [users, setUsers] = React.useState<User[]>([]);
@@ -65,13 +65,10 @@ const UserList = () => {
   const [selectedGroup, setSelectedGroup] = React.useState<
     Group | undefined | null
   >();
+
   const currentUserGroup = React.useMemo<Group>(() => {
     return groups
-      .filter(
-        (p) =>
-          userDetails.groups.includes(p.path) ||
-          userDetails.groups.includes(p.path.split("/")[0])
-      )
+      .filter((p) => userDetails.groups.includes(p.path))
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
 
@@ -85,7 +82,8 @@ const UserList = () => {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "group.display_name",
+        id: "group.display_name",
+        accessorFn: (row: User) => row.group?.display_name || "",
         header: "Group",
         enableEditing: true,
         Edit: ({ cell }) => (
@@ -118,7 +116,7 @@ const UserList = () => {
         ),
       },
     ],
-    [groups, isValidGroup, selectedGroup]
+    [currentUserGroup, groups, isValidGroup, selectedGroup]
   );
 
   const handleCancelRowEdits = () => {
