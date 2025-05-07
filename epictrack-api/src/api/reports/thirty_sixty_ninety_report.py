@@ -28,11 +28,13 @@ from api.models import Event, Project, Work, WorkStatus, WorkType, db
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
+from api.models.phase_code import PhaseVisibilityEnum
 from api.models.special_field import EntityEnum, SpecialField
 from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
 from api.models.work import WorkStateEnum
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
+from api.models.work_phase import WorkPhase
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
@@ -448,7 +450,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .filter(
                 Event.work_id == Work.id,
                 Event.event_configuration.has(event_type_id=EventTypeEnum.REFERRAL.value),
-                # Event.anticipated_date.isnot(None),
                 Event.actual_date.is_(None)
             )
             .correlate(Work)
@@ -458,6 +459,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
             db.session.query(Event.id)
             .join(EventConfiguration, Event.event_configuration)
             .join(Work, Event.work)
+            .join(WorkPhase, and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+            ))
             .filter(
                 or_(
                     and_(

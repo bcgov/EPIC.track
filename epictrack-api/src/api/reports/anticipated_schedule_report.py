@@ -19,7 +19,7 @@ from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.ministry import Ministry
-from api.models.phase_code import PhaseCode
+from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.project import Project
 from api.models.proponent import Proponent
 from api.models.region import Region
@@ -158,7 +158,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EventConfiguration,
                 EventConfiguration.id == Event.event_configuration_id
             )
-            .join(WorkPhase, EventConfiguration.work_phase_id == WorkPhase.id)
+            .join(WorkPhase, and_(
+                EventConfiguration.work_phase_id == WorkPhase.id,
+                WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+            ))
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .join(Project, Work.project_id == Project.id)
             # special history project name
@@ -725,6 +728,13 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
                 )
             )
+            .join(
+                WorkPhase,
+                and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                )
+            )
             .filter(
                 func.coalesce(Event.actual_date, Event.anticipated_date) > start_date,
                 Event.is_active.is_(True),
@@ -755,9 +765,17 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     Event.event_configuration_id == EventConfiguration.id,
                     EventConfiguration.event_category_id.in_([EventCategoryEnum.DECISION.value, EventCategoryEnum.MILESTONE.value])
                 )
-                   )
+            )
+            .join(
+                WorkPhase,
+                and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                ))
             .filter(
                 func.coalesce(Event.actual_date, Event.anticipated_date) >= start_date,
+                Event.is_active.is_(True),
+                Event.is_deleted.is_(False),
             )
             .group_by(Event.work_id)
             .subquery()
