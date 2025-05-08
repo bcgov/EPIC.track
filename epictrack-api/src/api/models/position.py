@@ -13,10 +13,25 @@
 # limitations under the License.
 """Model to handle all operations related to Position."""
 
+import enum
+
 from sqlalchemy import Column, Integer, String
 
 from .code_table import CodeTableVersioned
 from .db import db
+
+
+class PositionEnum(enum.Enum):
+    """Enum for positions."""
+
+    ASSOCIATE_DEPUTY_MINISTER = 1
+    ADM = 2
+    EXECUTIVE_PROJECT_DIRECTOR = 3
+    PROJECT_ASSESSMENT_DIRECTOR = 4
+    PROJECT_ASSESSMENT_OFFICER = 5
+    PROJECT_ANALYST = 6
+    OTHER = 7
+    MINISTER = 8
 
 
 class Position(db.Model, CodeTableVersioned):
