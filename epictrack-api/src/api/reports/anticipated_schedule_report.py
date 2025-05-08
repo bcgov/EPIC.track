@@ -20,6 +20,7 @@ from api.models.work_issue_updates import WorkIssueUpdates
 from api.models.work_type import WorkType, WorkTypeEnum
 from api.models.ministry import Ministry
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
+from api.models.position import Position, PositionEnum
 from api.models.project import Project
 from api.models.proponent import Proponent
 from api.models.region import Region
@@ -232,7 +233,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 staff_decision_by,  # Join staff alias
                 or_(
                     and_(
-                        Event.decision_maker_id.isnot(None), staff_decision_by.id == Event.decision_maker_id
+                        Event.decision_maker_id.isnot(None),
+                        staff_decision_by.id == Event.decision_maker_id
                     ),
                     and_(
                         EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
@@ -240,6 +242,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
                     ),
                     staff_decision_by.id == func.coalesce(cast(sh_work_decision_by.field_value, Integer), Work.decision_by_id),  # Default case if event.decision_maker is not populated
                 )
+            )
+            .outerjoin(
+                Position,
+                Position.id == staff_decision_by.position_id
             )
             .outerjoin(SubstitutionAct)
             .outerjoin(FederalInvolvement, FederalInvolvement.id == Work.federal_involvement_id)
@@ -359,7 +365,13 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 case(
                         (
                             EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
-                            func.concat(staff_decision_by.first_name, " ", staff_decision_by.last_name)
+                            case(
+                                (
+                                    Position.id != PositionEnum.MINISTER.value,
+                                    func.concat(staff_decision_by.first_name, " ", staff_decision_by.last_name, " - ", Position.name)
+                                ),
+                                else_=func.concat(staff_decision_by.first_name, " ", staff_decision_by.last_name)
+                            )
                         ),
                         else_="",
                 ).label("decision_by"),
