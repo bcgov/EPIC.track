@@ -164,6 +164,7 @@ class Work(BaseModelVersioned):
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
                     EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
+                    Event.is_active.is_(True),
                 ),
             )
             .filter(

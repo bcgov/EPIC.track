@@ -39,6 +39,7 @@ class WorkTypeEnum(enum.Enum):
     EAC_ORDER_SUSPENSION = 12
     EAC_ORDER_CANCELLATION = 13
     OTHER = 14
+    MATERIAL_ALTERATION = 15
 
 
 class WorkType(db.Model, CodeTableVersioned):

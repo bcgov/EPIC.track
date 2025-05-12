@@ -8,9 +8,11 @@ import ministryService from "services/ministryService";
 import { Staff } from "models/staff";
 import staffService from "services/staffService/staffService";
 import { POSITION_ENUM } from "models/position";
-import { ROLES } from "constants/application-constant";
+import { ROLES, SpecialFieldEntityEnum } from "constants/application-constant";
 import { hasPermission } from "components/shared/restricted";
 import { useAppSelector } from "hooks";
+import specialFieldService from "services/specialFieldService";
+import { SpecialField } from "components/shared/specialField/type";
 
 interface SpecialHistoryContextProps {
   createMinistryDialogOpen: boolean;
@@ -18,7 +20,7 @@ interface SpecialHistoryContextProps {
   onSave(data: any, callback: () => any): any;
   ministry: Ministry | null;
   setMinistry: Dispatch<React.SetStateAction<Ministry | null>>;
-  ministers: Staff[];
+  allMinisters: Staff[];
   ministries: Ministry[];
   getMinistries: () => any;
 }
@@ -29,7 +31,7 @@ export const SpecialHistoryContext = createContext<SpecialHistoryContextProps>({
   onSave: (data: any, callback: () => any) => ({}),
   ministry: null,
   setMinistry: () => {},
-  ministers: [],
+  allMinisters: [],
   ministries: [],
   getMinistries: () => {},
 });
@@ -43,7 +45,7 @@ export const SpecialHistoryProvider = ({
     useState(false);
   const [ministry, setMinistry] = useState<Ministry | null>(null);
   const [ministries, setMinistries] = useState<Ministry[]>([]);
-  const [ministers, setMinisters] = useState<Staff[]>([]);
+  const [allMinisters, setAllMinisters] = useState<Staff[]>([]);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.MANAGE_USERS] });
   const [disableSave, setDisableSave] = useState(!canEdit);
@@ -74,13 +76,29 @@ export const SpecialHistoryProvider = ({
     getMinistries();
   };
 
-  const getMinisters = async () => {
-    const ministerResults = await staffService.getStaffByPosition(
-      POSITION_ENUM.MINISTER.toString()
-    );
+  const getPreviousMinisters = async () => {
+    const previousMinisters =
+      await specialFieldService.getEntriesBasedOnFieldValue(
+        SpecialFieldEntityEnum.STAFF,
+        "position_id",
+        POSITION_ENUM.MINISTER.toString()
+      );
 
-    if (ministerResults.status === 200) {
-      setMinisters(ministerResults.data as Staff[]);
+    if (previousMinisters.status === 200) {
+      const ministerEntries = previousMinisters.data as SpecialField[];
+      const ministerStaffIds = new Set(
+        ministerEntries.map((entry) => entry.entity_id)
+      );
+
+      // Fetch all staff who were ministers
+      const allStaffResponse = await staffService.getAll();
+      if (allStaffResponse.status === 200) {
+        const allStaff = allStaffResponse.data as Staff[];
+        const filteredStaff = allStaff.filter((staff) =>
+          ministerStaffIds.has(staff.id)
+        );
+        setAllMinisters(filteredStaff);
+      }
     }
   };
 
@@ -92,7 +110,7 @@ export const SpecialHistoryProvider = ({
   };
 
   useEffect(() => {
-    getMinisters(); // staff members with role of minister
+    getPreviousMinisters(); // all previous ministers
     getMinistries();
   }, []);
 
@@ -110,7 +128,7 @@ export const SpecialHistoryProvider = ({
         onSave,
         ministry,
         setMinistry,
-        ministers,
+        allMinisters,
         ministries,
         getMinistries,
       }}

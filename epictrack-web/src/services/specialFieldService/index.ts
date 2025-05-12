@@ -16,6 +16,18 @@ class SpecialFieldService {
     });
   };
 
+  getEntriesBasedOnFieldValue = async (
+    entity: SpecialFieldEntityEnum,
+    field_name: string,
+    field_value: string
+  ) => {
+    return await http.GetRequest(Endpoints.SpecialFields.SPECIAL_FIELDS, {
+      entity,
+      field_name,
+      field_value,
+    });
+  };
+
   createSpecialFieldEntry = async (payload: SpecialField) => {
     return await http.PostRequest(
       Endpoints.SpecialFields.SPECIAL_FIELDS,
@@ -34,4 +46,5 @@ class SpecialFieldService {
   };
 }
 
-export default new SpecialFieldService();
+const specialFieldService = new SpecialFieldService();
+export default specialFieldService;

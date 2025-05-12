@@ -22,16 +22,19 @@ from reportlab.platypus.doctemplate import BaseDocTemplate, PageTemplate
 from reportlab.platypus.frames import Frame
 from sqlalchemy import and_, func, or_, select
 from sqlalchemy.dialects.postgresql import INTERVAL
+from sqlalchemy.orm import aliased
 
 from api.models import Event, Project, Work, WorkStatus, WorkType, db
 from api.models.event_category import EventCategoryEnum
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
-from api.models.special_field import EntityEnum
+from api.models.phase_code import PhaseVisibilityEnum
+from api.models.special_field import EntityEnum, SpecialField
 from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
 from api.models.work import WorkStateEnum
 from api.models.work_issues import WorkIssues
 from api.models.work_issue_updates import WorkIssueUpdates
+from api.models.work_phase import WorkPhase
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
@@ -125,11 +128,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
 
     def _fetch_data(self, report_date):
         """Fetches the relevant data for EA 30-60-90 Report"""
+        report_date = report_date.astimezone(CANADA_TIMEZONE)
         max_date = report_date + timedelta(days=93)
         next_pecp_query = self._get_next_pcp_query(report_date, max_date)
         valid_event_ids = self._get_valid_event_ids(report_date)
         work_issue_work_ids = self._get_valid_work_issue_work_ids(report_date)
         latest_status_updates = self._get_latest_status_update_query()
+        sh_project_name = aliased(SpecialField)
 
         results_qry = (
             Work.query.filter(
@@ -140,6 +145,13 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 ),
             )
             .join(Project, Work.project)
+            # special history project name
+            .outerjoin(sh_project_name, and_(
+                sh_project_name.entity_id == Work.project_id,
+                sh_project_name.entity == EntityEnum.PROJECT.value,
+                sh_project_name.time_range.contains(report_date),
+                sh_project_name.field_name == "name"
+            ))
             .join(WorkType, Work.work_type)
             .outerjoin(
                 Event,
@@ -163,7 +175,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 )
             )
             .add_columns(
-                Project.name.label("project_name"),
+                func.coalesce(sh_project_name.field_value, Project.name).label("project_name"),
                 WorkType.report_title.label("work_report_title"),
                 (
                     Event.anticipated_date
@@ -438,7 +450,6 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .filter(
                 Event.work_id == Work.id,
                 Event.event_configuration.has(event_type_id=EventTypeEnum.REFERRAL.value),
-                # Event.anticipated_date.isnot(None),
                 Event.actual_date.is_(None)
             )
             .correlate(Work)
@@ -448,6 +459,10 @@ class ThirtySixtyNinetyReport(ReportFactory):
             db.session.query(Event.id)
             .join(EventConfiguration, Event.event_configuration)
             .join(Work, Event.work)
+            .join(WorkPhase, and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+            ))
             .filter(
                 or_(
                     and_(

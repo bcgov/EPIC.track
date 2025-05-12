@@ -28,7 +28,7 @@ type MinistryFormProps = {
 };
 
 const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
-  const { onSave, ministers, ministry, getMinistries } = useContext(
+  const { onSave, allMinisters, ministry, getMinistries } = useContext(
     SpecialHistoryContext
   );
 
@@ -135,7 +135,7 @@ const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
           fieldName="minister_id"
           fieldValueType={SPECIAL_FIELD_TYPES.INTEGER}
           fieldType="select"
-          options={ministers || []}
+          options={allMinisters || []}
           gridSize={4}
         >
           <ControlledSelectV2
@@ -143,7 +143,7 @@ const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
             disabled={ministry !== null}
             getOptionLabel={(o: Staff) => (o ? o.full_name : "")}
             getOptionValue={(o: Staff) => (o ? o.id.toString() : "")}
-            options={ministers || []}
+            options={allMinisters || []}
             {...register("minister_id")}
           />
         </WorkFormSpecialField>

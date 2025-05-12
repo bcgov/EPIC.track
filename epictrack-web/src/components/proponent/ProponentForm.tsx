@@ -34,12 +34,14 @@ const schema = yup.object().shape({
 });
 
 type ProponentFormProps = {
+  fetchProponent: () => void;
   proponent: Proponent | null;
   saveProponent: (data: any) => void;
   setDisableDialogSave: (disabled: boolean) => void;
 };
 
 export default function ProponentForm({
+  fetchProponent,
   proponent,
   saveProponent,
   setDisableDialogSave,
@@ -90,9 +92,10 @@ export default function ProponentForm({
       >
         <ProponentNameSpecialField
           id={proponent?.id}
+          isPositionLeft={true}
           onLockClick={() => setIsNameFieldLocked((prev) => !prev)}
           open={isNameFieldLocked}
-          onSave={() => {}}
+          onSave={() => fetchProponent()}
           title={proponent?.name || ""}
         >
           <TextField

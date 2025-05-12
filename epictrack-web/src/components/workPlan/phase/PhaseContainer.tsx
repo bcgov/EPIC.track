@@ -42,7 +42,7 @@ const PhaseContainer = () => {
       ctx.setSelectedWorkPhase(phase);
       setExpandedPhase(phase?.work_phase.id ?? null);
     }
-  }, [ctx.workPhases, ctx.work]);
+  }, [ctx]);
 
   useRouterLocationStateForHelpPage(() => {
     return ctx.work?.work_type?.name ?? undefined;
