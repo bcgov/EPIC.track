@@ -69,6 +69,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         cls._update_original_model(special_field)
         if commit:
             db.session.commit()
+        cls._adjust_special_field_end_dates(payload)
         return special_field
 
     @classmethod
@@ -76,6 +77,32 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         """Find special field entry by id."""
         special_field = SpecialField.find_by_id(_id)
         return special_field
+
+    @classmethod
+    def _adjust_special_field_end_dates(
+        cls, payload: dict
+    ):
+        """Adjusts end dates of special field entries"""
+        # find all special field entries with the same entity and field name and order them by start times
+        existing_query = db.session.query(SpecialField).filter(
+            SpecialField.entity == payload["entity"],
+            SpecialField.entity_id == payload["entity_id"],
+            SpecialField.field_name == payload["field_name"])
+        matching_special_fields = existing_query.order_by(
+            SpecialField.time_range.asc()
+        ).all()
+        # update the end date of all but the last entry to be a day before the start date of the next entry
+        for i, special_field in enumerate(matching_special_fields):
+            if i != len(matching_special_fields) - 1:
+                # get the start date of the next entry
+                next_start_date = matching_special_fields[i + 1].time_range.lower
+                # set the end date of the current entry to be a day before the start date of the next entry
+                special_field.time_range = DateTimeTZRange(
+                    special_field.time_range.lower,
+                    next_start_date - timedelta(days=1),
+                    bounds="[)",
+                )
+        db.session.commit()
 
     @classmethod
     def _get_upper_limit(
