@@ -192,18 +192,14 @@ class EAAnticipatedScheduleReport(ReportFactory):
         return (
             query
             .outerjoin(subqueries["next_pecp_query"], subqueries["next_pecp_query"].c.work_id == Work.id)
-            .outerjoin(subqueries["next_event_query"],
-                and_(
-                    subqueries["next_event_query"].c.work_id == Work.id,
-                    subqueries["next_event_query"].c.rn == 1
-                )
-            )
-            .outerjoin(subqueries["next_decision_event_query"],
-                and_(
-                    subqueries["next_decision_event_query"].c.work_id == Work.id,
-                    Event.anticipated_date == subqueries["next_decision_event_query"].c.min_anticipated_date,
-                )
-            )
+            .outerjoin(subqueries["next_event_query"], and_(
+                subqueries["next_event_query"].c.work_id == Work.id,
+                subqueries["next_event_query"].c.rn == 1
+            ))
+            .outerjoin(subqueries["next_decision_event_query"], and_(
+                subqueries["next_decision_event_query"].c.work_id == Work.id,
+                Event.anticipated_date == subqueries["next_decision_event_query"].c.min_anticipated_date,
+            ))
             .outerjoin(subqueries["next_referral_event_query"], Event.id == subqueries["next_referral_event_query"].c.next_referral_event_id)
 
             # SpecialField outerjoins using aliases
@@ -221,7 +217,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 aliases["sh_work_ministry_name"].time_range.contains(report_date),
                 aliases["sh_work_ministry_name"].field_name == "name"
             ))
-             # special history ministry minister
+            # Special history ministry minister
             .outerjoin(aliases["sh_work_ministry_minister"], and_(
                 aliases["sh_work_ministry_minister"].entity_id == cast(aliases["sh_work_ministry"].field_value, Integer),
                 aliases["sh_work_ministry_minister"].entity == EntityEnum.MINISTRY.value,
@@ -243,7 +239,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 aliases["sh_work_decision_by"].time_range.contains(report_date),
                 aliases["sh_work_decision_by"].field_name == "decision_by_id"
             ))
-           .outerjoin(
+            .outerjoin(
                 aliases["staff_decision_by"],  # Join staff alias
                 or_(
                     and_(
