@@ -109,30 +109,265 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         )
         self.report_title = "Anticipated EA Referral Schedule"
 
-    def _fetch_data(self, report_date):
+    def _fetch_data(self, report_date: datetime):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
         current_app.logger.info(f"Fetching data for {self.report_title} report")
-        start_date = report_date + timedelta(days=-7)
-        report_date = report_date.astimezone(timezone('US/Pacific'))
-        staff_decision_by = aliased(Staff)
-        staff_minister = aliased(Staff)
-        staff_sh_minister = aliased(Staff)
-        sh_project_name = aliased(SpecialField)
-        sh_project_proponent = aliased(SpecialField)
-        sh_proponent_name = aliased(SpecialField)
-        sh_work_decision_by = aliased(SpecialField)
-        sh_work_ministry = aliased(SpecialField)
-        sh_work_ministry_minister = aliased(SpecialField)
-        sh_work_ministry_name = aliased(SpecialField)
+        start_date, report_date = self._get_date_range(report_date)
 
-        next_pecp_query = self._get_next_pcp_query(start_date)
-        next_event_query = self._get_next_event_query(report_date)
-        next_referral_event_query = self._get_referral_event_query(start_date)
-        next_decision_event_query = self._get_decision_event_query(start_date)
-        latest_status_updates = self._get_latest_status_update_query()
+        aliases = self._get_aliased_tables()
+        subqueries = self._get_subqueries(start_date, report_date)
+
+        query = self._base_query()
+        query = self._build_joins(query, aliases, subqueries, report_date)
+
+        formatted_columns = self._get_formatted_columns()
+        columns = self._get_selected_columns(aliases, subqueries, formatted_columns)
+        query = query.with_entities(*columns)
+        query = query.filter(*self._build_filters(report_date, subqueries["next_referral_event_query"], subqueries["next_decision_event_query"]))
+        results = query.all()
+
+        return self._process_results(results)
+
+    def _get_date_range(self, report_date: datetime) -> tuple[datetime, datetime]:
+        """Calculates the start and end dates for the data period based on the report date."""
+        start_date = report_date + timedelta(days=-7)
+        report_date = report_date.astimezone(timezone("US/Pacific"))
+        return start_date, report_date
+
+    def _get_aliased_tables(self) -> dict:
+        """Defines and returns a dictionary of aliased Staff and SpecialField tables for use in joins."""
+        return {
+            "staff_decision_by": aliased(Staff),
+            "staff_minister": aliased(Staff),
+            "staff_sh_minister": aliased(Staff),
+            "sh_project_name": aliased(SpecialField),
+            "sh_project_proponent": aliased(SpecialField),
+            "sh_proponent_name": aliased(SpecialField),
+            "sh_work_decision_by": aliased(SpecialField),
+            "sh_work_ministry": aliased(SpecialField),
+            "sh_work_ministry_minister": aliased(SpecialField),
+            "sh_work_ministry_name": aliased(SpecialField)
+        }
+
+    def _get_subqueries(self, start_date, report_date) -> dict:
+        """Defines and returns a dictionary of subqueries used for filtering and selecting data."""
+        return {
+            "latest_status_updates": self._get_latest_status_update_query(),
+            "next_decision_event_query": self._get_decision_event_query(start_date),
+            "next_event_query": self._get_next_event_query(report_date),
+            "next_pecp_query": self._get_next_pcp_query(start_date),
+            "next_referral_event_query": self._get_referral_event_query(start_date),
+        }
+
+    def _base_query(self):
+        """Constructs and returns the base Work query with initial basic joins."""
+        return (
+            db.session.query(Work)
+            .join(Event, Event.work_id == Work.id)
+            .join(
+                EventConfiguration,
+                EventConfiguration.id == Event.event_configuration_id,
+            )
+            .join(
+                WorkPhase,
+                and_(
+                    EventConfiguration.work_phase_id == WorkPhase.id,
+                    WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                )
+            )
+            .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
+            .join(Project, Work.project_id == Project.id)
+            .join(Proponent, Proponent.id == Project.proponent_id)
+            .join(Region, Region.id == Project.region_id_env)
+            .join(EAAct, EAAct.id == Work.ea_act_id)
+            .join(WorkType, WorkType.id == Work.work_type_id)
+            .join(FederalInvolvement, FederalInvolvement.id == Work.federal_involvement_id)
+            .join(Ministry, Ministry.id == Work.ministry_id)
+            .join(SubstitutionAct, SubstitutionAct.id == Work.substitution_act_id)
+        )
+
+    def _build_joins(self, query, aliases, subqueries, report_date):
+        """Adds a series of outer join clauses to the base query using provided aliases and subqueries."""
+        return (
+            query
+            .outerjoin(subqueries["next_pecp_query"], subqueries["next_pecp_query"].c.work_id == Work.id)
+            .outerjoin(subqueries["next_event_query"], and_(
+                subqueries["next_event_query"].c.work_id == Work.id,
+                subqueries["next_event_query"].c.rn == 1
+            ))
+            .outerjoin(subqueries["next_decision_event_query"], and_(
+                subqueries["next_decision_event_query"].c.work_id == Work.id,
+                Event.anticipated_date == subqueries["next_decision_event_query"].c.min_anticipated_date,
+            ))
+            .outerjoin(subqueries["next_referral_event_query"], Event.id == subqueries["next_referral_event_query"].c.next_referral_event_id)
+
+            # SpecialField outerjoins using aliases
+            # Special history work ministry
+            .outerjoin(aliases["sh_work_ministry"], and_(
+                aliases["sh_work_ministry"].entity_id == Work.id,
+                aliases["sh_work_ministry"].entity == EntityEnum.WORK.value,
+                aliases["sh_work_ministry"].time_range.contains(report_date),
+                aliases["sh_work_ministry"].field_name == "ministry_id"
+            ))
+            # Special history ministry name
+            .outerjoin(aliases["sh_work_ministry_name"], and_(
+                aliases["sh_work_ministry_name"].entity_id == cast(aliases["sh_work_ministry"].field_value, Integer),
+                aliases["sh_work_ministry_name"].entity == EntityEnum.MINISTRY.value,
+                aliases["sh_work_ministry_name"].time_range.contains(report_date),
+                aliases["sh_work_ministry_name"].field_name == "name"
+            ))
+            # Special history ministry minister
+            .outerjoin(aliases["sh_work_ministry_minister"], and_(
+                aliases["sh_work_ministry_minister"].entity_id == cast(aliases["sh_work_ministry"].field_value, Integer),
+                aliases["sh_work_ministry_minister"].entity == EntityEnum.MINISTRY.value,
+                aliases["sh_work_ministry_minister"].time_range.contains(report_date),
+                aliases["sh_work_ministry_minister"].field_name == "minister_id"
+            ))
+            .outerjoin(
+                aliases["staff_sh_minister"],
+                cast(aliases["sh_work_ministry_minister"].field_value, Integer) == aliases["staff_sh_minister"].id
+            )
+            .outerjoin(
+                aliases["staff_minister"],
+                Ministry.minister_id == aliases["staff_minister"].id,
+            )
+            # Special history work decision by
+            .outerjoin(aliases["sh_work_decision_by"], and_(
+                aliases["sh_work_decision_by"].entity_id == Work.id,
+                aliases["sh_work_decision_by"].entity == EntityEnum.WORK.value,
+                aliases["sh_work_decision_by"].time_range.contains(report_date),
+                aliases["sh_work_decision_by"].field_name == "decision_by_id"
+            ))
+            .outerjoin(
+                aliases["staff_decision_by"],  # Join staff alias
+                or_(
+                    and_(
+                        Event.decision_maker_id.isnot(None), aliases["staff_decision_by"].id == Event.decision_maker_id
+                    ),
+                    and_(
+                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                        aliases["staff_decision_by"].id == Work.eac_decision_by_id,
+                    ),
+                    aliases["staff_decision_by"].id == func.coalesce(cast(aliases["sh_work_decision_by"].field_value, Integer), Work.decision_by_id),  # Default case if event.decision_maker is not populated
+                )
+            )
+            .outerjoin(
+                Position,
+                Position.id == aliases["staff_decision_by"].position_id
+            )
+
+            # special history project name
+            .outerjoin(aliases["sh_project_name"], and_(
+                aliases["sh_project_name"].entity_id == Work.project_id,
+                aliases["sh_project_name"].entity == EntityEnum.PROJECT.value,
+                aliases["sh_project_name"].time_range.contains(report_date),
+                aliases["sh_project_name"].field_name == "name"
+            ))
+            # special history project proponent id
+            .outerjoin(aliases["sh_project_proponent"], and_(
+                aliases["sh_project_proponent"].entity_id == Work.project_id,
+                aliases["sh_project_proponent"].entity == EntityEnum.PROJECT.value,
+                aliases["sh_project_proponent"].time_range.contains(report_date),
+                aliases["sh_project_proponent"].field_name == "proponent_id"
+            ))
+            # special history proponent name
+            .outerjoin(aliases["sh_proponent_name"], and_(
+                aliases["sh_proponent_name"].entity_id == cast(aliases["sh_project_proponent"].field_value, Integer),
+                aliases["sh_proponent_name"].entity == EntityEnum.PROPONENT.value,
+                aliases["sh_proponent_name"].time_range.contains(report_date),
+                aliases["sh_proponent_name"].field_name == "name"
+            ))
+        )
+
+    def _build_filters(self, report_date: datetime, next_referral_event_query, next_decision_event_query) -> list:
+        """Constructs and returns a list of filter conditions for the main query."""
+        start = report_date - timedelta(days=7)
+        end = report_date + timedelta(days=366)
+
+        # Get phase names to exclude
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
+
+        return [
+            Work.is_active.is_(True),
+            Event.anticipated_date.between(start, end),
+
+            # Must have at least one referral or decision event
+            or_(
+                next_referral_event_query.c.work_id.isnot(None),
+                next_decision_event_query.c.work_id.isnot(None),
+            ),
+
+            # Include relevant event configurations based on work type
+            or_(
+                and_(
+                    EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
+                    EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value
+                ),
+                and_(
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value
+                ),
+                and_(
+                    Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
+                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                ),
+                and_(
+                    Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.name.notin_([
+                        "IPD/EP Approval Decision (Day Zero)",
+                        "Revised EAC Application Acceptance Decision (Day Zero)"
+                    ]),
+                    EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
+                ),
+                and_(
+                    Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.name != "Delegation of Amendment Decision",
+                    EventConfiguration.event_type_id.in_([
+                        EventTypeEnum.CEAO_DECISION.value,
+                        EventTypeEnum.ADM.value
+                    ])
+                ),
+                and_(
+                    Work.work_type_id == WorkTypeEnum.EAC_EXTENSION.value,
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                ),
+                and_(
+                    Work.work_type_id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value,
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.name != "Delegation of SubStart Decision to Minister",
+                    EventConfiguration.event_type_id == EventTypeEnum.ADM.value
+                ),
+                and_(
+                    Work.work_type_id == WorkTypeEnum.EAC_ORDER_TRANSFER.value,
+                    EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
+                    EventConfiguration.name != "Delegation of Transfer Decision to Minister",
+                    EventConfiguration.event_type_id.in_([
+                        EventTypeEnum.CEAO_DECISION.value,
+                        EventTypeEnum.ADM.value
+                    ])
+                )
+            ),
+
+            Work.is_deleted.is_(False),
+            Event.is_active.is_(True),
+            Event.is_deleted.is_(False),
+            Work.work_state.in_([
+                WorkStateEnum.IN_PROGRESS.value,
+                WorkStateEnum.SUSPENDED.value
+            ]),
+
+            ~WorkPhase.name.in_(exclude_phase_names)
+        ]
+
+    def _get_formatted_columns(self) -> dict:
+        """Retrieves a dictionary of formatted column expressions."""
         formatted_phase_name = self._get_formatted_phase_name()
         formatted_work_type = self._get_formatted_work_type_name()
         formatted_anticipated_date = self._get_formatted_date_label(formatted_work_type, formatted_phase_name)
@@ -140,280 +375,118 @@ class EAAnticipatedScheduleReport(ReportFactory):
         anticipated_date_column = self._get_anticipated_date_column(formatted_anticipated_date)
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
 
-        current_app.logger.debug(f"Executing query for {self.report_title} report")
-        results_qry = (
-            db.session.query(Work)
-            .join(Event, Event.work_id == Work.id)
-            .outerjoin(
-                next_referral_event_query,
-                Event.id == next_referral_event_query.c.next_referral_event_id,
-            )
-            .outerjoin(
-                next_decision_event_query,
-                and_(
-                    Event.work_id == next_decision_event_query.c.work_id,
-                    Event.anticipated_date == next_decision_event_query.c.min_anticipated_date,
-                ),
-            )
-            .join(
-                EventConfiguration,
-                EventConfiguration.id == Event.event_configuration_id
-            )
-            .join(WorkPhase, and_(
-                EventConfiguration.work_phase_id == WorkPhase.id,
-                WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
-            ))
-            .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
-            .join(Project, Work.project_id == Project.id)
-            # special history project name
-            .outerjoin(sh_project_name, and_(
-                sh_project_name.entity_id == Work.project_id,
-                sh_project_name.entity == EntityEnum.PROJECT.value,
-                sh_project_name.time_range.contains(report_date),
-                sh_project_name.field_name == "name"
-            ))
-            # special history project proponent id
-            .outerjoin(sh_project_proponent, and_(
-                sh_project_proponent.entity_id == Work.project_id,
-                sh_project_proponent.entity == EntityEnum.PROJECT.value,
-                sh_project_proponent.time_range.contains(report_date),
-                sh_project_proponent.field_name == "proponent_id"
-            ))
-            # special history proponent name
-            .outerjoin(sh_proponent_name, and_(
-                sh_proponent_name.entity_id == cast(sh_project_proponent.field_value, Integer),
-                sh_proponent_name.entity == EntityEnum.PROPONENT.value,
-                sh_proponent_name.time_range.contains(report_date),
-                sh_proponent_name.field_name == "name"
-            ))
-            # TODO: Remove this JOIN once proponents are imported again with special field entries created
-            .join(Proponent, Proponent.id == Project.proponent_id)
-            .join(Region, Region.id == Project.region_id_env)
-            .join(EAAct, EAAct.id == Work.ea_act_id)
-            # special history work ministry
-            .outerjoin(sh_work_ministry, and_(
-                sh_work_ministry.entity_id == Work.id,
-                sh_work_ministry.entity == EntityEnum.WORK.value,
-                sh_work_ministry.time_range.contains(report_date),
-                sh_work_ministry.field_name == "ministry_id"
-            ))
-            # special history ministry name
-            .outerjoin(sh_work_ministry_name, and_(
-                sh_work_ministry_name.entity_id == cast(sh_work_ministry.field_value, Integer),
-                sh_work_ministry_name.entity == EntityEnum.MINISTRY.value,
-                sh_work_ministry_name.time_range.contains(report_date),
-                sh_work_ministry_name.field_name == "name"
-            ))
-            # special history ministry minister
-            .outerjoin(sh_work_ministry_minister, and_(
-                sh_work_ministry_minister.entity_id == cast(sh_work_ministry.field_value, Integer),
-                sh_work_ministry_minister.entity == EntityEnum.MINISTRY.value,
-                sh_work_ministry_minister.time_range.contains(report_date),
-                sh_work_ministry_minister.field_name == "minister_id"
-            ))
-            .outerjoin(
-                staff_sh_minister,
-                cast(sh_work_ministry_minister.field_value, Integer) == staff_sh_minister.id
-            )
-            # required for fallback if no sh record exists
-            .outerjoin(Ministry, Ministry.id == Work.ministry_id)
-            .outerjoin(
-                staff_minister,
-                Ministry.minister_id == staff_minister.id
-            )
-            .outerjoin(latest_status_updates, latest_status_updates.c.work_id == Work.id)
-            # special history work decision by
-            .outerjoin(sh_work_decision_by, and_(
-                sh_work_decision_by.entity_id == Work.id,
-                sh_work_decision_by.entity == EntityEnum.WORK.value,
-                sh_work_decision_by.time_range.contains(report_date),
-                sh_work_decision_by.field_name == "decision_by_id"
-            ))
-            .outerjoin(
-                staff_decision_by,  # Join staff alias
-                or_(
+        return {
+            "formatted_work_type": formatted_work_type,
+            "group_column": group_column,
+            "anticipated_date_column": anticipated_date_column,
+            "ea_type_column": ea_type_column,
+        }
+
+    def _get_selected_columns(self, aliases, subqueries, formatted_columns) -> list:
+        """Defines and returns a list of column expressions to be selected in the final query."""
+        return [
+            Event.id.label("event_id"),
+            Work.id.label("work_id"),
+            Work.work_type_id.label("work_type_id"),
+            formatted_columns["formatted_work_type"].label("work_type"),
+            formatted_columns["group_column"].label("group"),
+            case(
+                (
                     and_(
-                        Event.decision_maker_id.isnot(None),
-                        staff_decision_by.id == Event.decision_maker_id
+                        Work.simple_title != "",
+                        Work.simple_title.is_not(None),
                     ),
-                    and_(
-                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
-                        staff_decision_by.id == Work.eac_decision_by_id,
-                    ),
-                    staff_decision_by.id == func.coalesce(cast(sh_work_decision_by.field_value, Integer), Work.decision_by_id),  # Default case if event.decision_maker is not populated
-                )
-            )
-            .outerjoin(
-                Position,
-                Position.id == staff_decision_by.position_id
-            )
-            .outerjoin(SubstitutionAct)
-            .outerjoin(FederalInvolvement, FederalInvolvement.id == Work.federal_involvement_id)
-            .outerjoin(WorkType, WorkType.id == Work.work_type_id)
-            .outerjoin(
-                next_pecp_query,
-                and_(
-                    next_pecp_query.c.work_id == Work.id,
-                ),
-            )
-            .outerjoin(
-                next_event_query,
-                and_(
-                    next_event_query.c.work_id == Work.id,
-                    next_event_query.c.rn == 1
-                ),
-            )
-            # FILTER ENTRIES MATCHING MIN DATE FOR NEXT PECP OR NO WORK ENGAGEMENTS (FOR AMENDMENTS)
-            .filter(
-                Work.is_active.is_(True),
-                Event.anticipated_date.between(report_date - timedelta(days=7), report_date + timedelta(days=366)),
-                # At least one referral or decision event
-                or_(
-                    next_referral_event_query.c.work_id.isnot(None),
-                    next_decision_event_query.c.work_id.isnot(None),
-                ),
-                or_(
-                    and_(
-                        EventConfiguration.event_category_id == EventCategoryEnum.MILESTONE.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value
-                    ),
-                    and_(
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value
-                    ),
-                    and_(
-                        Work.work_type_id == WorkTypeEnum.EXEMPTION_ORDER.value,
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                    ),
-                    and_(
-                        Work.work_type_id == WorkTypeEnum.ASSESSMENT.value,
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.name != "IPD/EP Approval Decision (Day Zero)",
-                        EventConfiguration.name != "Revised EAC Application Acceptance Decision (Day Zero)",
-                        EventConfiguration.event_type_id == EventTypeEnum.CEAO_DECISION.value
-                    ),
-                    and_(
-                        Work.work_type_id == WorkTypeEnum.AMENDMENT.value,
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.name != "Delegation of Amendment Decision",
-                        EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
-                    ),
-                    and_(
-                        Work.work_type_id == WorkTypeEnum.EAC_EXTENSION.value,
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                    ),
-                    and_(
-                        Work.work_type_id == WorkTypeEnum.SUBSTANTIAL_START_DECISION.value,
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.name != "Delegation of SubStart Decision to Minister",
-                        EventConfiguration.event_type_id == EventTypeEnum.ADM.value
-                    ),
-                    and_(
-                        Work.work_type_id == WorkTypeEnum.EAC_ORDER_TRANSFER.value,
-                        EventConfiguration.event_category_id == EventCategoryEnum.DECISION.value,
-                        EventConfiguration.name != "Delegation of Transfer Decision to Minister",
-                        EventConfiguration.event_type_id.in_([EventTypeEnum.CEAO_DECISION.value, EventTypeEnum.ADM.value])
+                    func.concat(
+                        func.coalesce(aliases["sh_project_name"].field_value, Project.name),
+                        " - ",
+                        Work.simple_title
                     )
                 ),
-                Work.is_deleted.is_(False),
-                Event.is_active.is_(True),
-                Event.is_deleted.is_(False),
-                Work.work_state.in_([WorkStateEnum.IN_PROGRESS.value, WorkStateEnum.SUSPENDED.value]),
-                # Filter out specific WorkPhase names
-                ~WorkPhase.name.in_(exclude_phase_names)
-            )
-            .add_columns(
-                Event.id.label("event_id"),
-                Work.id.label("work_id"),
-                Work.work_type_id.label("work_type_id"),
-                formatted_work_type.label("work_type"),
-                group_column.label("group"),
-                case(
-                        (
-                            and_(
-                                Work.simple_title != "",
-                                Work.simple_title.is_not(None),
-                            ),
-                            func.concat(func.coalesce(sh_project_name.field_value, Project.name), " - ", Work.simple_title)
-                        ),
-                        else_=func.coalesce(sh_project_name.field_value, Project.name)
-                ).label("amendment_title"),
-                ea_type_column,
-                anticipated_date_column.label("anticipated_date_label"),
-                latest_status_updates.c.posted_date.label("date_updated"),
-                func.coalesce(sh_project_name.field_value, Project.name).label("project_name"),
-                func.coalesce(
-                    sh_proponent_name.field_value, Proponent.name
-                ).label("proponent"),
-                Region.name.label("region"),
-                Project.address.label("location"),
-                EAAct.name.label("ea_act"),
-                SubstitutionAct.name.label("substitution_act"),
-                Project.description.label("project_description"),
-                Work.report_description.label("report_description"),
+                else_=func.coalesce(aliases["sh_project_name"].field_value, Project.name)
+            ).label("amendment_title"),
+            formatted_columns["ea_type_column"],
+            formatted_columns["anticipated_date_column"].label("anticipated_date_label"),
+            subqueries["latest_status_updates"].c.posted_date.label("date_updated"),
+            func.coalesce(
+                aliases["sh_project_name"].field_value, Project.name
+            ).label("project_name"),
+            func.coalesce(
+                aliases["sh_proponent_name"].field_value, Proponent.name
+            ).label("proponent"),
+            Region.name.label("region"),
+            Project.address.label("location"),
+            EAAct.name.label("ea_act"),
+            SubstitutionAct.name.label("substitution_act"),
+            Project.description.label("project_description"),
+            Work.report_description.label("report_description"),
+            (
+                Event.anticipated_date + func.cast(
+                    func.concat(Event.number_of_days, " DAYS"), INTERVAL
+                )
+            ).label("anticipated_decision_date"),
+            subqueries["latest_status_updates"].c.description.label("additional_info"),
+            (
+                Event.anticipated_date + func.cast(
+                    func.concat(Event.number_of_days, " DAYS"), INTERVAL
+                )
+            ).label("referral_date"),
+            Event.actual_date.label("actual_date"),
+            case(
                 (
-                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
-                ).label("anticipated_decision_date"),
-                latest_status_updates.c.description.label("additional_info"),
-                (
-                    Event.anticipated_date + func.cast(func.concat(Event.number_of_days, " DAYS"), INTERVAL)
-                ).label("referral_date"),
-                Event.actual_date.label("actual_date"),
-                case(
+                    EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
+                    case(
                         (
-                            EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
-                            case(
-                                (
-                                    Position.id != PositionEnum.MINISTER.value,
-                                    func.concat(staff_decision_by.first_name, " ", staff_decision_by.last_name, " - ", Position.name)
-                                ),
-                                else_=func.concat(staff_decision_by.first_name, " ", staff_decision_by.last_name)
-                            )
+                            Position.id != PositionEnum.MINISTER.value,
+                            func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name, " - ", Position.name)
                         ),
-                        else_="",
-                ).label("decision_by"),
-                func.coalesce(
-                    func.concat(staff_sh_minister.first_name, " ", staff_sh_minister.last_name),
-                    func.concat(staff_minister.first_name, " ", staff_minister.last_name)
-                ).label("minister"),
-                EventConfiguration.event_type_id.label("milestone_type"),
-                EventConfiguration.event_category_id.label("category_type"),
-                EventConfiguration.name.label("event_name"),
-                func.coalesce(next_pecp_query.c.name, Event.name).label(
-                    "next_pecp_title"
+                        else_=func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name)
+                    )
                 ),
-                func.coalesce(
-                    next_pecp_query.c.actual_date,
-                    next_pecp_query.c.anticipated_date,
-                    Event.actual_date,
-                ).label("next_pecp_date"),
-                next_pecp_query.c.notes.label("next_pecp_short_description"),
-                next_pecp_query.c.phase_name.label("next_pecp_phase_name"),
-                func.coalesce(next_pecp_query.c.number_of_days, 0).label("next_pecp_number_of_days"),
-                func.coalesce(
-                    next_event_query.c.name,
-                    "None"
-                ).label("next_event_name")
-            )
-        )
-        results = results_qry.all()
-        current_app.logger.debug(f"Fetched data: {results}")
+                else_="",
+            ).label("decision_by"),
+            func.coalesce(
+                func.concat(
+                    aliases["staff_sh_minister"].first_name, " ", aliases["staff_sh_minister"].last_name),
+                func.concat(
+                    aliases["staff_minister"].first_name, " ", aliases["staff_minister"].last_name)
+            ).label("minister"),
+            EventConfiguration.event_type_id.label("milestone_type"),
+            EventConfiguration.event_category_id.label("category_type"),
+            EventConfiguration.name.label("event_name"),
+            func.coalesce(
+                subqueries["next_pecp_query"].c.name, Event.name
+            ).label("next_pecp_title"),
+            func.coalesce(
+                subqueries["next_pecp_query"].c.actual_date,
+                subqueries["next_pecp_query"].c.anticipated_date,
+                Event.actual_date,
+            ).label("next_pecp_date"),
+            subqueries["next_pecp_query"].c.notes.label("next_pecp_short_description"),
+            subqueries["next_pecp_query"].c.phase_name.label("next_pecp_phase_name"),
+            func.coalesce(
+                subqueries["next_pecp_query"].c.number_of_days, 0
+            ).label("next_pecp_number_of_days"),
+            func.coalesce(
+                subqueries["next_event_query"].c.name, "None"
+            ).label("next_event_name")
+        ]
+
+    def _process_results(self, results):
+        """Processes the next_pecp_short_description field in the results."""
         results_dict = [result._asdict() for result in results]
-        # Processes the 'next_pecp_short_description' field in the results:
-        #   - Logs the short description if it exists.
-        #   - Attempts to parse the short description as JSON.
-        #   - If successful, extracts and concatenates text from JSON blocks.
-        #   - Logs a warning if JSON parsing fails.
+        current_app.logger.debug(f"Fetched data: {results_dict}")
+
+        # Iterate over the results and process the 'next_pecp_short_description'
         for result in results_dict:
             result['next_pecp_phase_name'] = result.get('next_pecp_phase_name', None)
             if 'next_pecp_short_description' in result and result['next_pecp_short_description'] is not None:
                 current_app.logger.debug(f"Next PECP Short Description: {result['next_pecp_short_description']}")
                 try:
+                    # Attempt to parse the short description as JSON
                     short_description_json = json.loads(result['next_pecp_short_description'])
                     result['next_pecp_short_description'] = ''
+
+                    # If parsing is successful, process each block
                     if 'blocks' in short_description_json:
                         for block in short_description_json['blocks']:
                             current_app.logger.debug(f"Block: {block}")
@@ -421,8 +494,11 @@ class EAAnticipatedScheduleReport(ReportFactory):
                                 result['next_pecp_short_description'] += block['text'] + '\n'
                 except json.JSONDecodeError:
                     current_app.logger.warning("Failed to decode JSON from next_pecp_short_description")
+
+        # Convert the processed dictionary back to a namedtuple
         data_result = namedtuple('data_result', results_dict[0].keys()) if len(results_dict) > 0 else ()
         results = [data_result(**result) for result in results_dict]
+
         return results
 
     def generate_report(self, report_date, return_type):
