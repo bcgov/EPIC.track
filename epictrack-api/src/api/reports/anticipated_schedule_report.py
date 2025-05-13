@@ -119,7 +119,6 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
         query = self._base_query()
         query = self._build_joins(query, aliases, subqueries, report_date)
-        current_app.logger.info("Done building joins")
 
         formatted_columns = self._get_formatted_columns()
         columns = self._get_selected_columns(aliases, subqueries, formatted_columns)
