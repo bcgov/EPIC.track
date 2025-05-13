@@ -200,6 +200,9 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 Event.anticipated_date == subqueries["next_decision_event_query"].c.min_anticipated_date,
             ))
             .outerjoin(subqueries["next_referral_event_query"], Event.id == subqueries["next_referral_event_query"].c.next_referral_event_id)
+            .outerjoin(subqueries["latest_status_updates"], and_(
+                subqueries["latest_status_updates"].c.work_id == Work.id,
+            ))
 
             # SpecialField outerjoins using aliases
             # Special history work ministry

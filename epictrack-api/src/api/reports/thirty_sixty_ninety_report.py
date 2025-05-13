@@ -238,7 +238,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
                 if event_date <= self.report_date + timedelta(days=cutoff):
                     special_history = self._get_project_special_history_id(
                         first_event["project_id"],
-                        project_special_history[cutoff],
+                        project_special_history[int(label)],
                         event_date
                     )
                     if special_history:
