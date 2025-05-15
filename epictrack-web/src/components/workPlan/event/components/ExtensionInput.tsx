@@ -1,11 +1,10 @@
+import { useContext, useEffect, useRef } from "react";
 import { Grid, TextField } from "@mui/material";
-import React from "react";
 import Moment from "moment";
 import { useFormContext } from "react-hook-form";
 import { DATE_FORMAT } from "../../../../constants/application-constant";
 import { WorkplanContext } from "../../WorkPlanContext";
 import { dateUtils } from "../../../../utils";
-import { SyntheticEvent } from "react-draft-wysiwyg";
 import { ETFormLabel } from "../../../shared";
 import ExtensionSuspensionInput from "./ExtensionSuspensionInput";
 import ControlledDatePicker from "../../../shared/controlledInputComponents/ControlledDatePicker";
@@ -19,55 +18,47 @@ const ExtensionInput = (props: ExtensionInputProps) => {
     register,
     unregister,
     formState: { errors },
-    control,
     setValue,
-    getValues,
   } = useFormContext();
-  const ctx = React.useContext(WorkplanContext);
-  React.useEffect(() => {
-    return () => {
-      unregister("phase_end_date");
-    };
-  }, []);
 
-  React.useEffect(() => {
-    let numberOfDays = Number(getValues("number_of_days"));
-    if (numberOfDaysRef.current as any) {
-      numberOfDays = (numberOfDaysRef.current as any)["value"];
-    }
-    setValue(
-      "phase_end_date",
-      Moment(ctx.selectedWorkPhase?.work_phase.end_date)
-        .add(numberOfDays, "days")
-        .format()
-    );
-  }, []);
-  const numberOfDaysRef = React.useRef();
-  const endDateRef = React.useRef();
-  const onDayChange = (event: SyntheticEvent) => {
-    if (endDateRef.current as any) {
-      setValue(
-        "phase_end_date",
-        Moment(ctx.selectedWorkPhase?.work_phase.end_date)
-          .add(Number((event.target as any)["value"]), "days")
-          .format(DATE_FORMAT)
-      );
-      setValue("number_of_days", Number((event.target as any)["value"]));
-    }
-    return Promise.resolve();
+  const ctx = useContext(WorkplanContext);
+
+  const originalEndDate = ctx.selectedWorkPhase?.work_phase.end_date;
+
+  const numberOfDaysRef = useRef<HTMLInputElement>(null);
+  const endDateRef = useRef<HTMLInputElement>(null);
+
+  const onDayChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const days = Number(e.target.value);
+    if (!originalEndDate || isNaN(days)) return;
+
+    const newDate = Moment(originalEndDate)
+      .startOf("day")
+      .add(days, "days")
+      .format(DATE_FORMAT);
+
+    setValue("phase_end_date", newDate, { shouldValidate: true });
+    props.onChangeDay?.();
   };
-  const onEndDateChange = (endDate: any) => {
-    if (numberOfDaysRef.current as any) {
-      setValue(
-        "number_of_days",
-        Moment(endDate).diff(
-          Moment(ctx.selectedWorkPhase?.work_phase.end_date),
-          "days"
-        )
-      );
-      props.onChangeDay();
-    }
+
+  const onEndDateChange = (selectedDate: any) => {
+    if (!originalEndDate || !selectedDate) return;
+
+    const newDate = Moment(selectedDate).startOf("day");
+    const original = Moment(originalEndDate).startOf("day");
+
+    const days = newDate.diff(original, "days");
+
+    console.log("New Date:", newDate.format(DATE_FORMAT));
+    console.log("Original Date:", original.format(DATE_FORMAT));
+    console.log("Days Difference:", days);
+
+    setValue("number_of_days", days, { shouldValidate: true });
+    props.onChangeDay?.();
   };
+
+  useEffect(() => () => unregister("phase_end_date"), [unregister]);
+
   return (
     <>
       <Grid item xs={12}>
@@ -76,9 +67,7 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           fullWidth
           disabled
           placeholder="MM-DD-YYYY"
-          defaultValue={dateUtils.formatDate(
-            String(ctx.selectedWorkPhase?.work_phase.end_date)
-          )}
+          value={dateUtils.formatDate(String(originalEndDate))}
         />
       </Grid>
       <Grid item xs={6}>
@@ -88,18 +77,13 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           disabled={props.isFormFieldsLocked}
           helperText={errors?.number_of_days?.message?.toString()}
           error={!!errors?.number_of_days?.message}
+          type="number"
           inputRef={numberOfDaysRef}
           InputProps={{
-            inputProps: {
-              min: 0,
-            },
+            inputProps: { min: 0 },
           }}
-          type="number"
           {...register("number_of_days")}
-          onChange={async (e) => {
-            await onDayChange(e);
-            props.onChangeDay();
-          }}
+          onChange={onDayChange}
         />
       </Grid>
       <Grid item xs={6}>
@@ -109,9 +93,9 @@ const ExtensionInput = (props: ExtensionInputProps) => {
           disabled={props.isFormFieldsLocked}
           datePickerProps={{
             onDateChange: (event: any, defaultOnChange: any) => {
-              const d = event ? event["$d"] : null;
-              defaultOnChange(d);
-              onEndDateChange(d);
+              const dateValue = event?.$d ?? event; // depends on date picker format
+              defaultOnChange(dateValue); // sync with form
+              onEndDateChange(dateValue);
             },
           }}
           datePickerSlotProps={{

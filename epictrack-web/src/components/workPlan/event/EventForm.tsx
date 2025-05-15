@@ -92,7 +92,7 @@ const EventForm = ({
   const [showEventPushConfirmation, setShowEventPushConfirmation] =
     useState(false);
   const [pushEvents, setPushEvents] = useState<boolean>(false);
-  const initialNotes = useMemo(() => event?.notes, [event?.id]);
+  const initialNotes = useMemo(() => event?.notes, [event?.notes]);
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
@@ -155,7 +155,7 @@ const EventForm = ({
           selectedWorkPhase?.work_phase.legislated &&
           selectedConfiguration?.event_position === EventPosition.END
       ),
-    [selectedConfiguration, selectedWorkPhase]
+    [isFormFieldsLocked, selectedConfiguration, selectedWorkPhase]
   );
   const pushRequired = useMemo(
     () =>
@@ -187,21 +187,32 @@ const EventForm = ({
     ) {
       getDecisionMakers();
     }
-  }, [actualAdded, selectedConfiguration]);
+  }, [
+    actualAdded,
+    getDecisionMakers,
+    selectedConfiguration?.event_category_id,
+  ]);
+
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
       selectedWorkPhase?.work_phase.legislated &&
       selectedConfiguration?.event_category_id !== EventCategory.EXTENSION,
-    [dateCheckStatus, selectedWorkPhase]
+    [
+      dateCheckStatus,
+      selectedConfiguration?.event_category_id,
+      selectedWorkPhase,
+    ]
   );
+
   const isMilestoneTypeDisabled = useMemo(
     () =>
       !!event ||
       isFormFieldsLocked ||
       selectedWorkPhase?.work_phase.is_suspended,
-    [event, selectedWorkPhase?.work_phase.is_suspended]
+    [event, isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
   );
+
   const isTitleDisabled = useMemo(
     () => isFormFieldsLocked || selectedWorkPhase?.work_phase.is_suspended,
     [isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
@@ -290,17 +301,12 @@ const EventForm = ({
       setTitleCharacterCount(Number(event?.name.length));
       setNotes(event.notes);
     }
-  }, [
-    event,
-    numberOfDaysRef?.current,
-    endDateRef?.current,
-    anticipatedDateRef?.current,
-  ]);
+  }, [event, reset]);
 
   useEffect(() => {
     if (configurations && event) {
       const config = configurations.filter(
-        (p) => p.id == event.event_configuration_id
+        (p) => p.id === event.event_configuration_id
       )[0];
       setSelectedConfiguration(config);
     }
@@ -317,7 +323,7 @@ const EventForm = ({
       !event
     ) {
       const config = configurations.filter(
-        (p) => p.event_type_id == EventType.TIME_LIMIT_RESUMPTION
+        (p) => p.event_type_id === EventType.TIME_LIMIT_RESUMPTION
       );
       if (!config || config.length === 0) {
         showNotification(MISSING_RESUMPTION_ERROR, {
@@ -331,9 +337,14 @@ const EventForm = ({
         });
       }
     }
-  }, [configurations, event]);
+  }, [
+    configurations,
+    event,
+    reset,
+    selectedWorkPhase?.work_phase.is_suspended,
+  ]);
 
-  const getConfigurations = async () => {
+  const getConfigurations = useCallback(async () => {
     try {
       const result = await configurationService.getAll(
         Number(selectedWorkPhase?.work_phase.id),
@@ -347,12 +358,12 @@ const EventForm = ({
         type: "error",
       });
     }
-  };
+  }, [selectedWorkPhase]);
 
   useEffect(() => {
-    if (!Boolean(event)) {
+    if (!event) {
       getConfigurations();
-    } else if (event) {
+    } else {
       setConfigurations([(event as MilestoneEvent).event_configuration]);
     }
   }, [event, getConfigurations]);
@@ -419,7 +430,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [handleHighlightRows, pushEvents]
+    [handleHighlightRows, pushEvents, selectedWorkPhase?.work_phase.id]
   );
 
   const updateEvent = useCallback(
@@ -455,7 +466,7 @@ const EventForm = ({
 
       return createEvent(data, pushEventConfirmed);
     },
-    [event, createEvent, pushEvents, updateEvent]
+    [event, createEvent, updateEvent]
   );
   const handleSaveEvent = async (
     data?: MilestoneEvent,

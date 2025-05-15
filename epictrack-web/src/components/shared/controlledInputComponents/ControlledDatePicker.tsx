@@ -50,7 +50,7 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
             ...register(name),
           }}
           {...datePickerProps}
-          value={value ? dayjs(value) : value}
+          value={value ? dayjs(value) : null}
           onChange={(event: Dayjs | null) => {
             if (datePickerProps?.onDateChange) {
               datePickerProps.onDateChange(event, onChange);
