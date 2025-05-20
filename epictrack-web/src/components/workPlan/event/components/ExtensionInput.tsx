@@ -49,10 +49,6 @@ const ExtensionInput = (props: ExtensionInputProps) => {
 
     const days = newDate.diff(original, "days");
 
-    console.log("New Date:", newDate.format(DATE_FORMAT));
-    console.log("Original Date:", original.format(DATE_FORMAT));
-    console.log("Days Difference:", days);
-
     setValue("number_of_days", days, { shouldValidate: true });
     props.onChangeDay?.();
   };
