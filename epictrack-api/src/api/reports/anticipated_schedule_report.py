@@ -366,7 +366,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 WorkStateEnum.SUSPENDED.value
             ]),
 
-            ~WorkPhase.name.in_(exclude_phase_names)
+            ~WorkPhase.name.in_(exclude_phase_names + ["Pre-EA (EAC Assessment)"])
         ]
 
     def _get_formatted_columns(self) -> dict:
