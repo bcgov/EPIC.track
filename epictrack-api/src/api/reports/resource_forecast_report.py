@@ -215,7 +215,10 @@ class EAResourceForeCastReport(ReportFactory):
                     Work.is_deleted.is_(False),
                 ),
             )
-            .join(WorkPhase, WorkPhase.id == Work.current_work_phase_id)
+            .join(WorkPhase, and_(
+                WorkPhase.id == Work.current_work_phase_id,
+                WorkPhase.name != "Pre-EA (EAC Assessment)")
+            )
             .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
             .join(WorkType, Work.work_type_id == WorkType.id)
             .join(EAAct, Work.ea_act_id == EAAct.id)
