@@ -537,6 +537,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .join(WorkPhase, and_(
                 EventConfiguration.work_phase_id == WorkPhase.id,
                 WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+                WorkPhase.name != "Pre-EA (EAC Assessment)",
             ))
             .filter(or_(
                 minister_decision_late,
