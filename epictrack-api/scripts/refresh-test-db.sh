@@ -93,5 +93,5 @@ fi
 
 # Cleanup
 unset TEST_PW
-unset $PGPASSWORD
+unset PGPASSWORD
 kill $PF_PID
