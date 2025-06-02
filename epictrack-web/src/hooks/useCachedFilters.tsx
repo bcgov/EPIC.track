@@ -22,7 +22,7 @@ export function useCachedState<StateType>(
     } else {
       sessionStorage.removeItem(storageKey);
     }
-  }, [state]);
+  }, [state, storageKey]);
 
   return [state, setState];
 }

@@ -18,7 +18,7 @@ export const FiltersCache = <TData extends MRT_RowData>({
       prevFilters.current = currentFilters;
       onCacheFilters(currentFilters);
     }
-  }, [table.getState().columnFilters]);
+  }, [onCacheFilters, table]);
 
   return null;
 };

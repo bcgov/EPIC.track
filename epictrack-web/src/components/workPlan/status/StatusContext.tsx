@@ -1,10 +1,17 @@
-import { Dispatch, SetStateAction, createContext, useContext } from "react";
-import React from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import TrackDialog from "../../shared/TrackDialog";
 import StatusForm from "./StatusForm";
 import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
-import statusService from "../../../services/statusService/statusService";
+import { statusService } from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
@@ -46,15 +53,14 @@ export const StatusProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  const [showStatusForm, setShowStatusForm] = React.useState<boolean>(false);
+  const [showStatusForm, setShowStatusForm] = useState<boolean>(false);
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
-    React.useState<boolean>(false);
-  const [isCloning, setIsCloning] = React.useState<boolean>(false);
-  const [status, setStatus] = React.useState<Status>();
-  const [selectedHistoryIndex, setSelectedHistoryIndex] =
-    React.useState<number>(0);
+    useState<boolean>(false);
+  const [isCloning, setIsCloning] = useState<boolean>(false);
+  const [status, setStatus] = useState<Status>();
+  const [selectedHistoryIndex, setSelectedHistoryIndex] = useState<number>(0);
   const query = useSearchParams<StatusContainerRouteParams>();
-  const workId = React.useMemo(() => query.get("work_id"), [query]);
+  const workId = useMemo(() => query.get("work_id"), [query]);
   const { getWorkStatuses, setStatuses } = useContext(WorkplanContext);
 
   const onDialogClose = () => {
@@ -107,7 +113,7 @@ export const StatusProvider = ({
     }
   };
 
-  const closeApproveDialog = React.useCallback(() => {
+  const closeApproveDialog = useCallback(() => {
     setShowApproveStatusDialog(false);
   }, []);
 
@@ -128,7 +134,8 @@ export const StatusProvider = ({
     }
   };
 
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.STATUS.label, []);
+  const statusLabelCallback = useCallback(() => WORKPLAN_TAB.STATUS.label, []);
+  useRouterLocationStateForHelpPage(statusLabelCallback);
 
   return (
     <StatusContext.Provider

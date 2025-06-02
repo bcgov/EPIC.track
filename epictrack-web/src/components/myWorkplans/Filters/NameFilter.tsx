@@ -10,7 +10,7 @@ import {
   MyWorkplansContext,
   WorkPlanSearchOptions,
 } from "../MyWorkPlanContext";
-import projectService from "../../../services/projectService/projectService";
+import { projectService } from "../../../services/projectService/projectService";
 import { PROJECT_RETURN_TYPE } from "../../../services/projectService/constants";
 import { ListType } from "../../../models/code";
 import SearchIcon from "../../../assets/images/search.svg";

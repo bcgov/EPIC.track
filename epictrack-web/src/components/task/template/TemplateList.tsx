@@ -10,7 +10,7 @@ import TrackDialog from "../../shared/TrackDialog";
 import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
 import { ETChip } from "../../shared/chip/ETChip";
-import templateService from "../../../services/taskService/templateService";
+import { templateService } from "../../../services/taskService/templateService";
 import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
 import TableFilter from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "../../../hooks";
@@ -37,7 +37,7 @@ const TemplateList = () => {
 
   const titleSuffix = "Task Template Details";
   const onDialogClose = (event: any = undefined, reason: any = undefined) => {
-    if (reason && reason == "backdropClick") return;
+    if (reason && reason === "backdropClick") return;
     setShowCreateDialog(false);
     setShowDetailsDialog(false);
     setTemplateId(undefined);
@@ -63,7 +63,7 @@ const TemplateList = () => {
 
   React.useEffect(() => {
     getTemplates();
-  }, []);
+  }, [getTemplates]);
 
   React.useEffect(() => {
     const eaActs = templates
@@ -207,7 +207,7 @@ const TemplateList = () => {
         ),
       },
     ],
-    [eaActs]
+    [canEdit, eaActs, phases, statuses, workTypes]
   );
 
   return (

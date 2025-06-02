@@ -4,7 +4,7 @@ import { Box, Button, Grid } from "@mui/material";
 import { Project } from "../../models/project";
 import MasterTrackTable from "../shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "../shared";
-import projectService from "../../services/projectService/projectService";
+import { projectService } from "../../services/projectService/projectService";
 import { ETChip } from "../shared/chip/ETChip";
 import TableFilter from "../shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "../shared/MasterTrackTable/utils";
@@ -18,7 +18,6 @@ import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
-  const [envRegions, setEnvRegions] = React.useState<string[]>([]);
   const [subTypes, setSubTypes] = React.useState<string[]>([]);
   const [proponents, setProponents] = React.useState<string[]>([]);
   const [types, setTypes] = React.useState<string[]>([]);
@@ -35,7 +34,7 @@ const ProjectList = () => {
     setLoadingProjects(true);
     try {
       const response = await projectService.getAll();
-      setProjects(response.data);
+      setProjects(response.data || []);
       setLoadingProjects(false);
     } catch (error) {
       showNotification("Could not load Projects", { type: "error" });
@@ -53,16 +52,12 @@ const ProjectList = () => {
     const subTypes = projects
       .map((p) => p.sub_type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-    const envRegions = projects
-      .map((p) => p.region_env?.name)
-      .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     const projectProponents = projects
       .map((p) => p.proponent.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setProponents(projectProponents);
     setTypes(types);
     setSubTypes(subTypes);
-    setEnvRegions(envRegions);
   }, [projects]);
 
   const statusesOptions = useMemo(
@@ -257,7 +252,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    [types, subTypes, envRegions, proponents]
+    [envRegionsOptions, proponents, statusesOptions, subTypes, types]
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {

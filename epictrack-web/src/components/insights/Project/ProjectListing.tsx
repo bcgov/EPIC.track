@@ -230,7 +230,14 @@ const ProjectList = () => {
         },
       },
     ],
-    [types, subTypes, envRegionsOptions, proponents, nrsRegionOptions]
+    [
+      envRegionsOptions,
+      nrsRegionOptions,
+      proponents,
+      subTypes,
+      types,
+      types_filter,
+    ]
   );
 
   return (

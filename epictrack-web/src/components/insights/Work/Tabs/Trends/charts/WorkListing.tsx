@@ -25,7 +25,7 @@ const WorkList = () => {
   });
   const { data, error, isLoading } = useGetAllWorksQuery();
 
-  const works = data || [];
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -54,19 +54,6 @@ const WorkList = () => {
           works
             .map((work) => work?.project?.name || "")
             .filter((project) => project)
-            .sort()
-        )
-      ),
-    [works]
-  );
-
-  const phases = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.current_work_phase?.name || "")
-            .filter((phase) => phase)
             .sort()
         )
       ),
@@ -265,7 +252,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, phases, workStates, started_years, closed_years]
+    [projects, workStates, started_years, closed_years]
   );
   return (
     <MasterTrackTable

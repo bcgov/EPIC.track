@@ -7,6 +7,7 @@ type ConsultationLevel = {
   description: string;
   is_active: boolean;
 };
+
 class IndigenousNationsConsultationLevels {
   async getAll(is_active = true) {
     return await http.GetRequest<ConsultationLevel[]>(
@@ -15,4 +16,5 @@ class IndigenousNationsConsultationLevels {
     );
   }
 }
-export default new IndigenousNationsConsultationLevels();
+export const indigenousNationsConsultationLevels =
+  new IndigenousNationsConsultationLevels();

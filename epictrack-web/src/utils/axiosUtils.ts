@@ -14,6 +14,8 @@ export const getErrorMessage = (_error: any): string => {
   return COMMON_ERROR_MESSAGE;
 };
 
-export default {
+const axiosUtils = {
   getAxiosError,
 };
+
+export default axiosUtils;

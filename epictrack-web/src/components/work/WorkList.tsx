@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import { Work } from "../../models/work";
-import workService from "../../services/workService/workService";
+import { workService } from "../../services/workService/workService";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";

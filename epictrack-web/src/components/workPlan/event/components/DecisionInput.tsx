@@ -1,12 +1,12 @@
+import { useEffect, useState } from "react";
 import { Grid } from "@mui/material";
-import React, { useEffect } from "react";
 import { ETFormLabel } from "../../../shared";
 import ControlledSelectV2 from "../../../shared/controlledInputComponents/ControlledSelectV2";
 import { useFormContext } from "react-hook-form";
 import { ListType } from "../../../../models/code";
 import { showNotification } from "../../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../../constants/application-constant";
-import outcomeConfigurationService from "../../../../services/outcomeConfigurationService/outcomeConfigurationService";
+import { outcomeConfigurationService } from "../../../../services/outcomeConfigurationService/outcomeConfigurationService";
 import { Staff } from "../../../../models/staff";
 import { OUTCOME_ID } from "../constants";
 
@@ -20,37 +20,41 @@ const DecisionInput = ({
   configurationId,
   isFormFieldsLocked,
 }: DecisionInputProps) => {
-  const [outcomes, setOutcomes] = React.useState<ListType[]>([]);
+  const [outcomes, setOutcomes] = useState<ListType[]>([]);
+
   const {
     register,
     formState: { errors },
     setValue,
   } = useFormContext();
-  React.useEffect(() => {
+
+  useEffect(() => {
+    const getOutcomes = async () => {
+      try {
+        const result =
+          await outcomeConfigurationService.getOutcomeConfigurations(
+            Number(configurationId)
+          );
+        if (result.status === 200) {
+          setOutcomes(result.data as any[]);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
+      }
+    };
+
     if (configurationId) {
       getOutcomes();
     }
-  }, []);
-  const getOutcomes = async () => {
-    try {
-      const result = await outcomeConfigurationService.getOutcomeConfigurations(
-        Number(configurationId)
-      );
-      if (result.status === 200) {
-        setOutcomes(result.data as any[]);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+  }, [configurationId]);
 
   useEffect(() => {
     if (outcomes.length === 1) {
       setValue(OUTCOME_ID, outcomes[0].id);
     }
-  }, [outcomes]);
+  }, [outcomes, setValue]);
 
   return (
     <>

@@ -9,5 +9,5 @@ export const useWorkplanSelector = <T>(
   if (!context) {
     console.error("useWorkplanSelector must be used within a WorkplanProvider");
   }
-  return useMemo(() => selector(context), [context]);
+  return useMemo(() => selector(context), [context, selector]);
 };

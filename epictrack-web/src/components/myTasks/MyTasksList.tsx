@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Box, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "../shared/MasterTrackTable";
@@ -16,7 +16,7 @@ import { useAppSelector } from "../../hooks";
 import { Palette } from "styles/theme";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useCachedState } from "hooks/useCachedFilters";
-import taskEventService from "services/taskEventService/taskEventService";
+import { taskEventService } from "services/taskEventService/taskEventService";
 import { MyTask } from "models/task";
 import { EVENT_STATUS, statusOptions } from "models/taskEvent";
 import { Switch, Case } from "react-if";
@@ -49,17 +49,11 @@ export default function MyTasksList() {
   const ctx = useContext(MasterContext);
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-  const [loading, setLoading] = useState(true);
   const [myTasks, setMyTasks] = useState<MyTask[]>([]);
-  const [startDates, setStartDates] = useState<[]>([]);
-  const [endDates, setEndDates] = useState<[]>([]);
-  const [progress, setProgress] = useState<[]>([]);
-  const [assigned, setAssigned] = useState<[]>([]);
-  const [work, setWork] = useState<[]>([]);
   const [task, setTask] = useState<MyTask | null>(null);
   const [showModalForm, setShowModalForm] = useState<boolean>(false);
 
-  const getMyTasks = async (): Promise<MyTask[]> => {
+  const getMyTasks = useCallback(async (): Promise<MyTask[]> => {
     const result: [] = [];
     try {
       const taskResult = await taskEventService.getMyTasks(
@@ -79,14 +73,14 @@ export default function MyTasksList() {
         setMyTasks(tasksWithEndDates);
       }
     } catch (e) {
-      setLoading(false);
+      console.log("Error fetching my tasks", e);
     }
     return Promise.resolve(result);
-  };
+  }, [user.staffId, setMyTasks]);
 
   useEffect(() => {
     ctx.setForm(<></>);
-  }, []);
+  }, [ctx]);
 
   const handleEdit = (task: MyTask) => {
     setTask(task);
@@ -95,7 +89,7 @@ export default function MyTasksList() {
 
   useEffect(() => {
     getMyTasks();
-  }, []);
+  }, [getMyTasks]);
 
   const statusFilterOptions = getSelectFilterOptions(
     myTasks,
@@ -119,6 +113,12 @@ export default function MyTasksList() {
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
   );
 
+  const workFilterOptions = getSelectFilterOptions(
+    myTasks,
+    "work",
+    (value) => value || BLANK_OPTION
+  );
+
   const assigneeOptions = Array.from(
     new Set(
       myTasks
@@ -131,31 +131,6 @@ export default function MyTasksList() {
         )
     )
   );
-
-  const codeTypes: { [x: string]: any } = {
-    start_date: setStartDates,
-    end_date: setEndDates,
-    progress: setProgress,
-    assigned: setAssigned,
-    work: setWork,
-  };
-
-  React.useEffect(() => {
-    Object.keys(codeTypes).forEach((key: string) => {
-      let accessor = `${key}`;
-      if (key === "work") {
-        accessor = "title";
-      }
-      const codes = myTasks
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        .map((w) => (w[key] ? w[key][accessor] : null))
-        .filter(
-          (ele, index, arr) => arr.findIndex((t) => t === ele) === index && ele
-        );
-      codeTypes[key](codes);
-    });
-  }, [myTasks]);
 
   const columns = useMemo<MRT_ColumnDef<MyTask>[]>(
     () => [
@@ -375,7 +350,7 @@ export default function MyTasksList() {
         accessorKey: "work.title",
         header: "Work",
         filterVariant: "multi-select",
-        filterSelectOptions: work,
+        filterSelectOptions: workFilterOptions,
         Cell: ({ cell, row, renderedCellValue }) => (
           <ETParagraph
             enableEllipsis
@@ -399,7 +374,14 @@ export default function MyTasksList() {
         sortingFn: "sortFn",
       },
     ],
-    [myTasks, work, assigned, startDates, endDates, progress]
+    [
+      assigneeOptions,
+      canEdit,
+      endDateFilterOptions,
+      startDateFilterOptions,
+      statusFilterOptions,
+      workFilterOptions,
+    ]
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {

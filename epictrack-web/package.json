@@ -25,6 +25,7 @@
     "color": "^4.2.3",
     "dayjs": "^1.11.7",
     "draft-js": "^0.11.7",
+    "immutable": "^5.1.2",
     "json-2-csv": "^4.0.0",
     "keycloak-js": "^26.2.0",
     "material-react-table": "^2.0.5",

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
@@ -14,16 +14,16 @@ import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
-  const works = data || [];
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -79,7 +79,7 @@ const WorkList = () => {
     return uniqueNations;
   }, [works]);
 
-  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
+  const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
@@ -203,7 +203,7 @@ const WorkList = () => {
         },
       },
     ],
-    [ministries, works]
+    [federalInvolvements, indigenousNations, ministries]
   );
   return (
     <MasterTrackTable

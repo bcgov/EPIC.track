@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import * as Moment from "moment";
 import { extendMoment } from "moment-range";
 import * as _ from "lodash";
@@ -43,6 +43,7 @@ const Month = ({
     events,
     (e: any) => e.project && e.project !== "null"
   );
+
   const engagementsWithoutProject = prepareEventDates(
     _.filter(events, (e: any) => e.project === "null" || e.project === null)
   );
@@ -192,6 +193,7 @@ const Month = ({
       if (projectData) {
         const projectStart = _.minBy(projectData, "start_date");
         const projectEnd = _.maxBy(projectData, "end_date");
+        if (!projectStart || !projectEnd) return null;
         const projectEventDuration =
           1 + (projectEnd.end_date.date() - projectStart.start_date.date());
         const style = {
@@ -213,6 +215,7 @@ const Month = ({
           </>
         );
       }
+      return null;
     });
 
   const renderEngagements = () =>
@@ -293,4 +296,4 @@ const Month = ({
   );
 };
 
-export default React.memo(Month);
+export default memo(Month);

@@ -16,7 +16,7 @@ import {
   COMMON_ERROR_MESSAGE,
   ROLES,
 } from "../../../constants/application-constant";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import TeamForm from "./TeamForm";
 import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
@@ -49,7 +49,7 @@ const TeamList = () => {
 
   useEffect(() => {
     setLoading(ctx.loading);
-  }, []);
+  }, [ctx.loading]);
 
   useEffect(() => {
     if (teamMembers) {
@@ -148,7 +148,7 @@ const TeamList = () => {
         ),
       },
     ],
-    [teamMembers, roles, statuses]
+    [canEdit, roles, statuses]
   );
 
   const onCancelHandler = () => {

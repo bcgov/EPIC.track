@@ -194,7 +194,7 @@ const StaffList = () => {
             }}
             tableName={"staff-listing"}
             enableExport
-            renderTopToolbarCustomActions={({ table }) => (
+            renderTopToolbarCustomActions={() => (
               <Restricted
                 allowed={[ROLES.CREATE]}
                 errorProps={{ disabled: true }}

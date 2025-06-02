@@ -8,7 +8,7 @@ import { ListType } from "models/code";
 import { Staff } from "../../models/staff";
 import { PIPOrgType } from "../../models/pipOrgType";
 import staffService from "../../services/staffService/staffService";
-import pipOrgTypeService from "services/pipOrgTypeService";
+import { pipOrgTypeService } from "services/pipOrgTypeService";
 import indigenousNationService from "../../services/indigenousNationService/indigenousNationService";
 import { FirstNation, defaultFirstNation } from "../../models/firstNation";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";

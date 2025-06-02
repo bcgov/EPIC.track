@@ -25,6 +25,7 @@ const ControlledRadioGroup: React.ForwardRefRenderFunction<
     formState: { errors, defaultValues },
   } = useFormContext();
   const [selectedVal, setSelectedVal] = useState("");
+
   const generateRadioOptions = useCallback(() => {
     return options.map((singleOption) => (
       <FormControlLabel
@@ -46,7 +47,8 @@ const ControlledRadioGroup: React.ForwardRefRenderFunction<
         }
       />
     ));
-  }, [selectedVal]);
+  }, [options, selectedVal]);
+
   return (
     <Controller
       control={control}

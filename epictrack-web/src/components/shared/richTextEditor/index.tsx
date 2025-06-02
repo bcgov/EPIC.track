@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { EditorState, convertToRaw } from "draft-js";
 import { Editor } from "react-draft-wysiwyg";
 import { Box, FormControl, FormHelperText } from "@mui/material";
@@ -37,7 +37,7 @@ const RichTextEditor = ({
   error = false,
   helperText = "",
 }: RichTextEditorProps) => {
-  const getStateFromInitialValue = () => {
+  const getStateFromInitialValue = useCallback(() => {
     if (initialRawEditorState) {
       setEditorState(getEditorStateFromRaw(initialRawEditorState));
       return;
@@ -47,12 +47,12 @@ const RichTextEditor = ({
       const contentState = getEditorStateFromHtml(initialHTMLText);
       setEditorState(contentState);
     }
-  };
+  }, [initialHTMLText, initialRawEditorState]);
 
-  const [editorState, setEditorState] = React.useState(
+  const [editorState, setEditorState] = useState(
     getEditorStateFromRaw(initialRawEditorState)
   );
-  const [focused, setFocused] = React.useState<boolean>(false);
+  const [focused, setFocused] = useState<boolean>(false);
 
   const handleChange = (newEditorState: EditorState) => {
     const plainText = newEditorState.getCurrentContent().getPlainText();
@@ -66,7 +66,7 @@ const RichTextEditor = ({
 
   useEffect(() => {
     getStateFromInitialValue();
-  }, [initialRawEditorState, initialHTMLText]);
+  }, [getStateFromInitialValue, initialRawEditorState, initialHTMLText]);
 
   return (
     <FormControl fullWidth>

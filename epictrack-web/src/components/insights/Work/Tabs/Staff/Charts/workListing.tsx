@@ -97,33 +97,39 @@ const WorkList = () => {
     WorkStaffRole.OFFICER_ANALYST
   );
 
-  const roleFilterFunction = (row: any, id: any, filterValue: any) => {
-    const options =
-      id === WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST]
+  const roleFilterFunction = useCallback(
+    (row: any, id: any, filterValue: any) => {
+      const options =
+        id === WorkStaffRoleNames[WorkStaffRole.OFFICER_ANALYST]
+          ? officerAnalystOptions
+          : coLeadOptions;
+      if (
+        !filterValue.length ||
+        filterValue.length > options.length // select all is selected
+      ) {
+        return true;
+      }
+
+      const value: string = row.getValue(id) || "";
+      // Split the cell value into individual names
+      const names = value.split("; ");
+
+      // Check if any name includes the filter value
+      return names.some((name) => filterValue.includes(name));
+    },
+    [coLeadOptions, officerAnalystOptions]
+  );
+
+  const getRolefilterOptions = useCallback(
+    (role: WorkStaffRole) => {
+      return role === WorkStaffRole.OFFICER_ANALYST
         ? officerAnalystOptions
         : coLeadOptions;
-    if (
-      !filterValue.length ||
-      filterValue.length > options.length // select all is selected
-    ) {
-      return true;
-    }
+    },
+    [officerAnalystOptions, coLeadOptions]
+  );
 
-    const value: string = row.getValue(id) || "";
-    // Split the cell value into individual names
-    const names = value.split("; ");
-
-    // Check if any name includes the filter value
-    return names.some((name) => filterValue.includes(name));
-  };
-
-  const getRolefilterOptions = (role: WorkStaffRole) => {
-    return role === WorkStaffRole.OFFICER_ANALYST
-      ? officerAnalystOptions
-      : coLeadOptions;
-  };
-
-  const tableColumns = React.useMemo(() => {
+  useEffect(() => {
     const cols: Array<MRT_ColumnDef<WorkStaffWithWork>> = [];
     if (workStaffs && workStaffs.length > 0) {
       const roles = [WorkStaffRole.TEAM_CO_LEAD, WorkStaffRole.OFFICER_ANALYST];
@@ -165,7 +171,7 @@ const WorkList = () => {
       });
     }
     setWorkRoles(cols);
-  }, [workStaffs]);
+  }, [getRolefilterOptions, roleFilterFunction, workStaffs]);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {
     return [

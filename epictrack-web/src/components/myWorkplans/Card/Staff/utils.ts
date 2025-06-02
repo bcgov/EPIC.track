@@ -1,6 +1,6 @@
 export const sortTeam = (staff_info: any[], email: string) => {
   let userIndex = -1;
-  staff_info.map((staffObject: any, index: number) => {
+  staff_info.forEach((staffObject: any, index: number) => {
     const staff = staffObject.staff;
     if (staff.email === email) {
       userIndex = index;

@@ -19,4 +19,4 @@ class MinistryService {
   }
 }
 
-export default new MinistryService();
+export const ministryService = new MinistryService();

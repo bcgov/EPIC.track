@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import TrackDialog from "components/shared/TrackDialog";
 import { Project } from "models/project";
-import projectService from "services/projectService/projectService";
+import { projectService } from "services/projectService/projectService";
 import { showNotification } from "components/shared/notificationProvider";
 import ProjectForm from "../ProjectForm";
 import { useAppSelector } from "hooks";
@@ -26,7 +26,7 @@ export const ProjectDialog = ({
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = roles.includes(ROLES.EDIT);
 
-  const fetchProject = async () => {
+  const fetchProject = useCallback(async () => {
     if (!projectId) return;
     try {
       const response = await projectService.getById(String(projectId));
@@ -36,7 +36,7 @@ export const ProjectDialog = ({
         type: "error",
       });
     }
-  };
+  }, [projectId]);
 
   const createProject = async (data: any) => {
     try {
@@ -86,7 +86,7 @@ export const ProjectDialog = ({
     if (open) {
       fetchProject();
     }
-  }, [open]);
+  }, [fetchProject, open]);
 
   return (
     <TrackDialog

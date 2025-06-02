@@ -60,7 +60,7 @@ const FirstNationList = () => {
     setLoading(true);
     try {
       const response = await IndigenousNationService.getAll();
-      setFirstNations(response.data);
+      setFirstNations(response.data || []);
       setLoading(false);
     } catch (error) {
       showNotification("Could not load First Nations", { type: "error" });
@@ -72,6 +72,11 @@ const FirstNationList = () => {
   }, []);
 
   useEffect(() => {
+    if (!staffId) {
+      setElevatedRoles([]);
+      return;
+    }
+
     const fetchStaffElevatedRoles = async () => {
       try {
         const response =

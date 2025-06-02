@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
 import { ETCaption2, ETGridTitle, IButton } from "../../shared";
@@ -43,7 +43,7 @@ import { Palette } from "../../../styles/theme";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
-import projectService from "../../../services/projectService/projectService";
+import { projectService } from "../../../services/projectService/projectService";
 import { Restricted, hasPermission } from "../../shared/restricted";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { useAppSelector } from "../../../hooks";
@@ -98,14 +98,14 @@ const FirstNationList = () => {
     null
   );
 
-  const getStatusOptions = () => {
+  const getStatusOptions = useCallback(() => {
     const statuses = firstNations
       .map((p) => p.status)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setStatusOptions(statuses);
-  };
+  }, [firstNations]);
 
-  const getConsultationLevels = () => {
+  const getConsultationLevels = useCallback(() => {
     const levelMap = new Map();
     firstNations
       .map((firstNation) => firstNation.indigenous_consultation_level)
@@ -114,7 +114,7 @@ const FirstNationList = () => {
       });
 
     setConsultationLevels(Array.from(levelMap.values()));
-  };
+  }, [firstNations]);
 
   useEffect(() => {
     getStatusOptions();
@@ -132,7 +132,7 @@ const FirstNationList = () => {
 
   useEffect(() => {
     getFirstNationAvailability();
-  }, [ctx.work?.project_id]);
+  }, [ctx.work?.project_id, getFirstNationAvailability]);
 
   const handleOpenUserMenu = (
     event: MouseEvent<HTMLElement>,
@@ -289,7 +289,7 @@ const FirstNationList = () => {
         },
       },
     ],
-    [firstNations, userMenuAnchorEl, relationshipHolder, consultationLevels]
+    [canEdit, consultationLevels, handleCloseUserMenu, statusOptions]
   );
 
   const onCancelHandler = () => {
@@ -359,7 +359,7 @@ const FirstNationList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
+  }, [ctx.work?.id, ctx.work?.project.name, ctx.work?.title]);
 
   const onTemplateFormSaveHandler = async (firstNationIds: number[]) => {
     setShowImportNationForm(false);

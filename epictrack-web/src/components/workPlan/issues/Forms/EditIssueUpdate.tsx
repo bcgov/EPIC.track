@@ -43,7 +43,7 @@ const EditIssueUpdate = () => {
     );
     const minDate = dayjs(minDateUnix * 1000);
     return minDate;
-  }, [issues, updateToEdit?.id]);
+  }, [issues, updateToEdit?.id, updateToEdit?.work_issue_id]);
 
   const methods = useForm<CloneForm>({
     resolver: yupResolver(schema),

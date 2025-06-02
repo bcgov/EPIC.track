@@ -2,7 +2,7 @@ import React from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import MasterTrackTable from "../../shared/MasterTrackTable";
 import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
@@ -34,25 +34,27 @@ const WorkStaffList = () => {
 
   React.useEffect(() => {
     getWorkStaffAllocation();
-  }, []);
+  }, [getWorkStaffAllocation]);
 
-  let uniquestaff: any[] = [];
-  workStaffData.forEach((value, index) => {
-    if (value.staff.length > 0) {
-      const roles = value.staff
-        .filter(
-          (person) =>
-            ![WorkStaffRole.TEAM_LEAD, WorkStaffRole.RESPONSIBLE_EPD].includes(
-              person.role.id
-            )
-        )
-        .map((person) => person.role.name)
-        .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
-      uniquestaff = [...uniquestaff, ...roles].filter(
-        (ele, index, arr) => arr.findIndex((t) => t === ele) === index
-      );
-    }
-  });
+  const uniquestaff = React.useMemo(() => {
+    const uniqueRoles = new Set<string>();
+
+    workStaffData.forEach((value) => {
+      if (value.staff.length > 0) {
+        value.staff
+          .filter(
+            (person) =>
+              ![
+                WorkStaffRole.TEAM_LEAD,
+                WorkStaffRole.RESPONSIBLE_EPD,
+              ].includes(person.role.id)
+          )
+          .forEach((person) => uniqueRoles.add(person.role.name));
+      }
+    });
+
+    return Array.from(uniqueRoles);
+  }, [workStaffData]);
 
   const setRoleColumns = React.useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
@@ -214,10 +216,11 @@ const WorkStaffList = () => {
       ...setRoleColumns(),
     ],
     [
-      setRoleColumns,
-      titleFilter,
-      teamFilter,
+      projectFilter,
       responsibleEpdFilter,
+      setRoleColumns,
+      teamFilter,
+      titleFilter,
       workLeadFilter,
     ]
   );

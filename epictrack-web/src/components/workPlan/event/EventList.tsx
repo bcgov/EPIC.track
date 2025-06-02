@@ -28,10 +28,10 @@ import {
 } from "models/work";
 import { ListType } from "models/code";
 import { setLoadingState } from "services/loadingService";
-import eventService from "services/eventService/eventService";
-import responsibilityService from "services/responsibilityService/responsibilityService";
-import taskEventService from "services/taskEventService/taskEventService";
-import workService from "services/workService/workService";
+import { eventService } from "services/eventService/eventService";
+import { responsibilityService } from "services/responsibilityService/responsibilityService";
+import { taskEventService } from "services/taskEventService/taskEventService";
+import { workService } from "services/workService/workService";
 import { OptionType } from "../../shared/filterSelect/type";
 import { showNotification } from "../../shared/notificationProvider";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -10,8 +10,9 @@ import dayjs, { Dayjs } from "dayjs";
 import ControlledSelectV2 from "components/shared/controlledInputComponents/ControlledSelectV2";
 import { Palette } from "styles/theme";
 import { Staff } from "models/staff";
-import workService from "services/workService/workService";
-import taskEventService, {
+import { workService } from "services/workService/workService";
+import {
+  taskEventService,
   TaskEventMutationRequest,
 } from "services/taskEventService/taskEventService";
 import { showNotification } from "components/shared/notificationProvider";
@@ -23,7 +24,7 @@ import { getErrorMessage } from "utils/axiosUtils";
 import ControlledDatePicker from "components/shared/controlledInputComponents/ControlledDatePicker";
 import TrackDatePicker from "components/shared/DatePicker";
 import ControlledTextField from "components/shared/controlledInputComponents/ControlledTextField";
-import responsibilityService from "services/responsibilityService/responsibilityService";
+import { responsibilityService } from "services/responsibilityService/responsibilityService";
 import { MyTask } from "models/task";
 
 const schema = yup.object().shape({
@@ -59,7 +60,7 @@ const TaskForm = ({
   const [notes, setNotes] = useState(taskEvent?.notes || "");
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const endDateRef = useRef();
-  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.id]);
+  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent]);
   const assigneeIds = taskEvent?.assignees?.map((assignee) =>
     assignee.assignee_id.toString()
   );
@@ -94,10 +95,6 @@ const TaskForm = ({
     getResponsibilites();
   }, []);
 
-  useEffect(() => {
-    getWorkTeamMembers();
-  }, [taskEvent.work.id]);
-
   const getResponsibilites = async () => {
     const responsibilities = await responsibilityService.getResponsibilities();
     if (responsibilities.status === 200) {
@@ -105,17 +102,23 @@ const TaskForm = ({
       setResponsibilities(result);
     }
   };
-  const getWorkTeamMembers = async () => {
-    const assigneeResult = await workService.getWorkTeamMembers(
-      Number(taskEvent.work.id),
-      true
-    );
-    if (assigneeResult.status === 200) {
-      const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
-      setAssignees(staff);
-    }
-  };
+
+  useEffect(() => {
+    const getWorkTeamMembers = async () => {
+      const assigneeResult = await workService.getWorkTeamMembers(
+        Number(taskEvent.work.id),
+        true
+      );
+      if (assigneeResult.status === 200) {
+        const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
+        setAssignees(staff);
+      }
+    };
+    getWorkTeamMembers();
+  }, [taskEvent.work.id]);
+
   const statuses = useMemo(() => statusOptions, []);
+
   const updateTask = async (data: TaskEventMutationRequest) => {
     if (!taskEvent?.id) return;
 
@@ -160,10 +163,13 @@ const TaskForm = ({
   const number_of_days = watch("number_of_days");
   const startDate = watch("start_date");
 
-  const handleNDaysChange = (days: number) => {
-    const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
-    setEndDate(endDate);
-  };
+  const handleNDaysChange = useCallback(
+    (days: number) => {
+      const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
+      setEndDate(endDate);
+    },
+    [startDate]
+  );
 
   const handleEndDateChange = (newEndDate: Dayjs | null) => {
     if (!newEndDate) {
@@ -177,7 +183,7 @@ const TaskForm = ({
 
   useEffect(() => {
     handleNDaysChange(Number(number_of_days));
-  }, [startDate]);
+  }, [handleNDaysChange, number_of_days, startDate]);
 
   return (
     <>

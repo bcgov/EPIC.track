@@ -474,7 +474,17 @@ const EventListTable = ({
         },
       },
     ],
-    [events]
+    [
+      assigneeOptions,
+      canEdit,
+      endDateFilterOptions,
+      numberOfDaysFilterOptions,
+      onRowClick,
+      responsibilityFilterOptions,
+      startDateFilterOptions,
+      statusFilterOptions,
+      typeFilterOptions,
+    ]
   );
 
   return (
