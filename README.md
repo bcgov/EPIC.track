@@ -20,7 +20,7 @@ Use [formsﬂow.ai](https://github.com/AOT-Technologies/forms-flow-ai) which is 
 ### Solution Components
 Here is a snapshot of various solution components for this solution
 
-![Soluttion Components](./docs/assets/SolutionComponents.png)
+![Solution Components](./docs/assets/SolutionComponents.png)
 
 | Nbr  | Component | Description |
 | :---:| :---: |:--- |
@@ -33,7 +33,7 @@ Here is a snapshot of various solution components for this solution
 
 ### Solution Architecture 
 Here is the overall architecture for the solution
-![Soluttion Architecture](./docs/assets/EAOArchitecture.png)
+![Solution Architecture](./docs/assets/EAOArchitecture.png)
 
 ### formsflow.ai components
 This solution make use the full set of components provided by [formsﬂow.ai](https://github.com/AOT-Technologies/forms-flow-ai)
@@ -68,5 +68,5 @@ PostgreSQL is used as central database for the project due to the large adoption
 Python was selected as the technology to develop APIs required for integration between formsflow and additional solution components.
 
 ### Staff Identity
-BC Govt uses IDIR as the identity for their staff. BCdevexchange already setup a Keycloak to provide IDIR based authentication for SSO. The Keycloak instance installed as part of [formsﬂow.ai](https://github.com/AOT-Technologies/forms-flow-ai) is updated to add BCdevexchange Keycloak instane as a *Identity Provider*.
+BC Govt uses IDIR as the identity for their staff. BCdevexchange already setup a Keycloak to provide IDIR based authentication for SSO. The Keycloak instance installed as part of [formsﬂow.ai](https://github.com/AOT-Technologies/forms-flow-ai) is updated to add BCdevexchange Keycloak instance as a *Identity Provider*.
 
