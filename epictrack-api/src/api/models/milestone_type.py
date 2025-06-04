@@ -23,6 +23,6 @@ class MilestoneType(db.Model, CodeTableVersioned):
     """Model class for Milestone Type."""
 
     __tablename__ = 'milestone_types'
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = Column(String, nullable=False)
     sort_order = Column(Integer, nullable=False)

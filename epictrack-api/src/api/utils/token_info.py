@@ -53,7 +53,7 @@ class TokenInfo:
     @staticmethod
     def is_super_user() -> bool:
         """Return True if the user is staff user."""
-        # TODO Implement this method
+        # TODO Implement this method TRACK-533
         return True
 
     @staticmethod

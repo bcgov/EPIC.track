@@ -31,7 +31,7 @@ class WorkSchemaV2(
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods, duplicate-code
     """Work model schema class"""
 
-    # TODO: DEPRECATED. TO BE REMOVED
+    # TODO: DEPRECATED. TO BE REMOVED TRACK-529
 
     class Meta(AutoSchemaBase.Meta):
         """Meta information"""

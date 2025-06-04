@@ -24,7 +24,7 @@ class WorkCalendarEvent(BaseModelVersioned):
 
     __tablename__ = 'work_calendar_events'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     calendar_event_id = sa.Column(sa.ForeignKey('calendar_events.id'), nullable=False)
     source_event_id = sa.Column(sa.Integer, nullable=True)
     event_configuration_id = sa.Column(sa.ForeignKey('event_configurations.id'), nullable=False)

@@ -22,7 +22,7 @@ class CalendarEvent(BaseModelVersioned):
 
     __tablename__ = 'calendar_events'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     anticipated_date = sa.Column(sa.DateTime(timezone=True), nullable=False)
     actual_date = sa.Column(sa.DateTime(timezone=True))

@@ -46,7 +46,7 @@ class TaskEvent(BaseModelVersioned):
 
     id = sa.Column(
         sa.Integer, primary_key=True, autoincrement=True
-    )  # TODO check how it can be inherited from parent
+    )  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     work_phase_id = sa.Column(sa.ForeignKey('work_phases.id'), nullable=True)
 

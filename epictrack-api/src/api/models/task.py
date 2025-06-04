@@ -24,7 +24,7 @@ class Task(BaseModelVersioned):
 
     __tablename__ = 'tasks'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     start_at = sa.Column(sa.Integer, default=0, nullable=False)
     number_of_days = sa.Column(sa.Integer, default=1, nullable=False)

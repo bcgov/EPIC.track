@@ -228,7 +228,6 @@ class EAResourceForeCastReport(ReportFactory):
             )
             .join(SubType, Project.sub_type_id == SubType.id)
             .join(Type, Project.type_id == Type.id)
-            # TODO: Make sure to add the region_id_env and region_id_flnro to the Project model
             .join(env_region, env_region.id == Project.region_id_env)
             .join(nrs_region, nrs_region.id == Project.region_id_flnro)
             # special history project name

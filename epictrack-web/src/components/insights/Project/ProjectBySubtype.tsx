@@ -40,7 +40,7 @@ const ProjectBySubtypeChart = () => {
     return <PieChartSkeleton />;
   }
 
-  // TODO: handle error
+  // TODO: handle error TRACK-528
   if (queryResult.isError) {
     showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
     return <div>Error</div>;

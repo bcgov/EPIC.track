@@ -27,7 +27,7 @@ class Proponent(db.Model, CodeTableVersioned):
 
     id = Column(
         Integer, primary_key=True, autoincrement=True
-    )  # TODO check how it can be inherited from parent
+    )  # TODO check how it can be inherited from parent TRACK-532
     is_active = Column(BOOLEAN(), default=True, nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
 
