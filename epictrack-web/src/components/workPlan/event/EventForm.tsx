@@ -173,6 +173,9 @@ const EventForm = ({
       if (work?.responsible_epd) {
         decisionMakers.push(work?.responsible_epd);
       }
+      if (work?.work_lead) {
+        decisionMakers.push(work?.work_lead);
+      }
       if (work?.decision_by) {
         decisionMakers.unshift(work?.decision_by);
       }
