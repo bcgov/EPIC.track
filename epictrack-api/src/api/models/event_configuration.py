@@ -27,7 +27,7 @@ class EventConfiguration(BaseModelVersioned):
 
     __tablename__ = 'event_configurations'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     parent_id = sa.Column(sa.Integer, nullable=True)
     template_id = sa.Column(sa.ForeignKey('event_templates.id'), nullable=False)

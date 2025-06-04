@@ -49,5 +49,5 @@ class Readyz(Resource):
     @staticmethod
     def get():
         """Return a JSON object that identifies if the service is setupAnd ready to work."""
-        # TODO: add a poll to the DB when called
+        # TODO: add a poll to the DB when called TRACK-531
         return {'message': 'api is ready'}, 200

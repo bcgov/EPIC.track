@@ -42,7 +42,7 @@ class EventType(BaseModelVersioned):
 
     id = sa.Column(
         sa.Integer, primary_key=True, autoincrement=True
-    )  # TODO check how it can be inherited from parent
+    )  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     event_category_id = sa.Column(sa.ForeignKey("event_categories.id"), nullable=False)
     sort_order = sa.Column(sa.Integer, nullable=False)

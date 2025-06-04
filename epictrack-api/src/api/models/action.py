@@ -43,6 +43,6 @@ class Action(db.Model, CodeTableVersioned):
 
     __tablename__ = 'actions'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     description = sa.Column(sa.String)

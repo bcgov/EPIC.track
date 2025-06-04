@@ -30,5 +30,5 @@ class FederalInvolvement(db.Model, CodeTableVersioned):
 
     __tablename__ = 'federal_involvements'
 
-    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = Column(Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     sort_order = Column(Integer, nullable=False)

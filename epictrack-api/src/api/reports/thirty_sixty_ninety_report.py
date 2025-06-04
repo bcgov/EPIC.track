@@ -307,7 +307,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
         if return_type == "json" or not data:
             return process_data(data, return_type)
         pdf_stream = BytesIO()
-        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup
+        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup TRACK-527
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
         bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
