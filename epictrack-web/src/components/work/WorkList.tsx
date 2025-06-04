@@ -7,7 +7,6 @@ import { workService } from "../../services/workService/workService";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { ETGridTitle, ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";
-import TableFilter from "components/shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
@@ -21,6 +20,9 @@ import { useCachedState } from "hooks/useCachedFilters";
 import { sort } from "utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { useIsActiveTeamMember } from "components/workPlan/utils";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 
 const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 
@@ -44,6 +46,8 @@ const WorkList = () => {
       },
     ]
   );
+
+  const isActiveTeamMember = useIsActiveTeamMember();
 
   const loadWorks = async () => {
     setLoadingWorks(true);
@@ -326,27 +330,8 @@ const WorkList = () => {
         size: 75,
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statuses.length // select all is selected
-          ) {
-            return true;
-          }
-          const value: string = row.getValue(id);
-          return filterValue.includes(value);
-        },
+        filterFn: "multiSelectFilter",
+        Filter: getStatusFilter<Work>,
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -419,6 +404,7 @@ const WorkList = () => {
         open={showWorkDialogForm}
         setOpen={setShowWorkDialogForm}
         saveWorkCallback={loadWorks}
+        isActiveTeamMember={isActiveTeamMember}
       />
     </>
   );

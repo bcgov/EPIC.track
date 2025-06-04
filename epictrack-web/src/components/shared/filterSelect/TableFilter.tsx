@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useMemo } from "react";
-
 import FilterSelect from "./FilterSelect";
 import { TableFilterProps } from "./type";
 
@@ -8,65 +7,64 @@ const makeTableFilter =
     Component: React.ComponentType<SelectProps>
   ): React.FC<TableFilterProps> =>
   ({ header, column, ...props }: TableFilterProps) => {
-    const filterAppliedCallback = useCallback(
-      (selectedOptions: string[] | string) => {
-        header.column.setFilterValue(selectedOptions);
+    const setFilter = useCallback(
+      (
+        value:
+          | { value: any; label: string }[]
+          | { value: any; label: string }
+          | string[]
+          | string
+      ) => {
+        if (Array.isArray(value)) {
+          column.setFilterValue(
+            value.map((v) => (typeof v === "object" ? v.value : v))
+          );
+        } else if (typeof value === "object" && value !== null) {
+          column.setFilterValue([value.value]);
+        } else if (value) {
+          column.setFilterValue([value]);
+        } else {
+          column.setFilterValue([]);
+        }
       },
-      [header]
-    );
-
-    const filterClearedCallback = useCallback(
-      (value: [] | string) => {
-        header.column.setFilterValue(value);
-      },
-      [header]
+      [column]
     );
 
     const toOptionType = (option: any) => {
       if (typeof option === "object") {
-        return { label: option.text, value: option.value };
+        return { label: option.text ?? option.label, value: option.value };
       }
-      return { label: option, value: option };
+      return { label: String(option), value: option };
     };
+
     const options = useMemo(() => {
-      let filterOptions = column.columnDef.filterSelectOptions;
-      filterOptions = filterOptions.map(
-        (
-          option:
-            | string
-            | {
-                text: string;
-                value: any;
-              }
-        ) => toOptionType(option)
-      );
-      return filterOptions;
+      const rawOptions = column.columnDef?.filterSelectOptions ?? [];
+      return rawOptions.map(toOptionType);
     }, [column]);
 
-    const handleValues = (value: string | string[]) => {
-      if (!value) return value;
-      if (Array.isArray(value)) {
-        return value.map((val) => {
-          return toOptionType(val);
-        });
-      }
-      return toOptionType(value);
-    };
+    const defaultValue = useMemo(() => {
+      const raw = column.getFilterValue();
+      if (!raw) return [];
+      if (Array.isArray(raw)) return raw.map(toOptionType);
+      return [toOptionType(raw)];
+    }, [column]);
 
     useEffect(() => {
-      column.setFilterValue(column.getFilterValue());
+      // Ensure initial value is set in correct format
+      if (!Array.isArray(column.getFilterValue())) {
+        column.setFilterValue([]);
+      }
     }, [column]);
 
     return (
       <Component
         {...(props as SelectProps)}
         options={options}
-        filterAppliedCallback={filterAppliedCallback}
-        filterClearedCallback={filterClearedCallback}
-        defaultValue={handleValues(column.getFilterValue())}
+        filterAppliedCallback={setFilter}
+        filterClearedCallback={() => setFilter([])}
+        defaultValue={defaultValue}
       />
     );
   };
 
-const TableFilter = makeTableFilter(FilterSelect);
-export default TableFilter;
+export const TableFilter = makeTableFilter(FilterSelect);

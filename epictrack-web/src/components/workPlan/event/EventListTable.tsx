@@ -16,7 +16,7 @@ import {
   NotStartedIcon,
 } from "../../icons/status";
 import { getTextFromDraftJsContentState } from "../../shared/richTextEditor/utils";
-import TableFilter from "../../shared/filterSelect/TableFilter";
+import { TableFilter } from "../../shared/filterSelect/TableFilter";
 import { Switch, Case } from "react-if";
 import {
   BLANK_OPTION,

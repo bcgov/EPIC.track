@@ -4,7 +4,7 @@ import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";

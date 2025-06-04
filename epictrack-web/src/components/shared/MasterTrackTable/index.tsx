@@ -85,6 +85,8 @@ const MasterTrackTable = <TData extends MRT_RowData>({
 }: MaterialReactTableProps<TData>) => {
   const { initialState, state, icons } = rest;
 
+  console.log("MasterTrackTable render");
+
   const table = useMaterialReactTable({
     columns: columns,
     data: data,
@@ -272,7 +274,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         return filterValue.includes(row.getValue(id));
       },
     },
-    ...rest,
+    // ...otherProps,
   });
 
   const rowCount = useMemo(() => {

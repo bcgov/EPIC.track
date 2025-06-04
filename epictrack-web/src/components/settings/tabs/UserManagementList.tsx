@@ -13,7 +13,7 @@ import { Restricted } from "components/shared/restricted";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { showNotification } from "components/shared/notificationProvider";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import TrackSelect from "components/shared/TrackSelect";
 import elevatedRoleService from "services/elevatedRoleService";
 import staffElevatedRoleService from "services/staffElevatedRoleService/staffElevatedRoleService";
@@ -22,6 +22,7 @@ import { ROLES } from "constants/application-constant";
 import { ElevatedRole } from "models/elevated_role";
 import { Staff, StaffElevatedRole, StaffWithElevatedRoles } from "models/staff";
 import { Palette } from "styles/theme";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
 const CheckIcon: FC<IconProps> = Icons["CheckIcon"];
@@ -208,29 +209,8 @@ const UserManagementList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
         size: 110,
-        Filter: ({ header, column }) => {
-          return (
-            <Box>
-              <TableFilter
-                isMulti
-                header={header}
-                column={column}
-                variant="inline"
-                name="isActiveFilter"
-              />
-            </Box>
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statusesOptions.length // select all is selected
-          ) {
-            return true;
-          }
-          const value: string = row.getValue(id);
-          return filterValue.includes(value);
-        },
+        Filter: getStatusFilter<StaffWithElevatedRoles>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}

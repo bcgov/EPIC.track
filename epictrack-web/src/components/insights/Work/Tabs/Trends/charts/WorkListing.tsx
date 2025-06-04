@@ -4,7 +4,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";

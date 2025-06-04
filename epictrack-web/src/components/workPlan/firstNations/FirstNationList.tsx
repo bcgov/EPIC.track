@@ -31,7 +31,6 @@ import AddIcon from "@mui/icons-material/Add";
 import { ETChip } from "../../shared/chip/ETChip";
 import TrackDialog from "../../shared/TrackDialog";
 import NoDataEver from "../../shared/NoDataEver";
-import TableFilter from "../../shared/filterSelect/TableFilter";
 import {
   ConsultationLevel,
   WorkFirstNation,
@@ -49,6 +48,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import { useAppSelector } from "../../../hooks";
 import { debounce } from "lodash";
 import { basePIPUrl } from "../../../constants/application-constant";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: FC<IconProps> = Icons["ImportFileIcon"];
@@ -177,17 +177,7 @@ const FirstNationList = () => {
         header: "Consultation",
         size: 150,
         filterVariant: "multi-select",
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="consultationFilter"
-            />
-          );
-        },
+        Filter: getStatusFilter<WorkFirstNation>,
         filterSelectOptions: consultationLevels.map((level) => level.name),
         filterFn: "multiSelectFilter",
       },
@@ -266,6 +256,7 @@ const FirstNationList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusOptions,
         filterFn: "multiSelectFilter",
+        Filter: getStatusFilter<WorkFirstNation>,
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<string>() === ACTIVE_STATUS.ACTIVE && (
@@ -276,17 +267,6 @@ const FirstNationList = () => {
             )}
           </span>
         ),
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          );
-        },
       },
     ],
     [canEdit, consultationLevels, handleCloseUserMenu, statusOptions]

@@ -5,7 +5,7 @@ import {
   rowsPerPageOptions,
 } from "components/shared/MasterTrackTable/utils";
 import { Project } from "models/project";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useProjectsContext } from "./ProjectsContext";

@@ -8,7 +8,7 @@ import {
   BLANK_OPTION,
   getSelectFilterOptions,
 } from "../shared/MasterTrackTable/utils";
-import TableFilter from "../shared/filterSelect/TableFilter";
+import { TableFilter } from "../shared/filterSelect/TableFilter";
 import { hasPermission } from "../shared/restricted";
 import { MONTH_DAY_YEAR, ROLES } from "../../constants/application-constant";
 import { searchFilter } from "../shared/MasterTrackTable/filters";

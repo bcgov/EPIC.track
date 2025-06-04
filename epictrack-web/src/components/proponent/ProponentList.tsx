@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Avatar, Button, Grid, Stack, Typography } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { ETCaption2, ETGridTitle, ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";
-import TableFilter from "components/shared/filterSelect/TableFilter";
 import { Staff } from "../../models/staff";
 import { Proponent } from "../../models/proponent";
 import staffService from "../../services/staffService/staffService";
@@ -21,6 +20,7 @@ import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import UserMenu from "components/shared/userMenu/UserMenu";
 import { Palette } from "styles/theme";
 import { ProponentDialog } from "./Dialog";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 
@@ -154,31 +154,8 @@ const ProponentList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
         size: 60,
-        Filter: ({ header, column }) => {
-          return (
-            <Box sx={{ width: "100px" }}>
-              <TableFilter
-                isMulti
-                header={header}
-                column={column}
-                variant="inline"
-                name="statusFilter"
-              />
-            </Box>
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statusesOptions.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
+        Filter: getStatusFilter<Proponent>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}

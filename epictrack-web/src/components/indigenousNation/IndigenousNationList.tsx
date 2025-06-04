@@ -1,17 +1,17 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
-import { debounce } from "lodash";
+import { debounce, isEqual } from "lodash";
 import { AxiosError } from "axios";
-import { Avatar, Box, Button, Grid, Stack, Typography } from "@mui/material";
+import { Avatar, Button, Grid, Stack, Typography } from "@mui/material";
 import { ElevatedRoleEnum } from "models/elevated_role";
 import { FirstNation } from "models/firstNation";
 import { Staff } from "models/staff";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 import { hasPermission, Restricted } from "components/shared/restricted";
 import { ETChip } from "components/shared/chip/ETChip";
-import TableFilter from "components/shared/filterSelect/TableFilter";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { showNotification } from "components/shared/notificationProvider";
 import UserMenu from "components/shared/userMenu/UserMenu";
@@ -109,11 +109,15 @@ const FirstNationList = () => {
     [firstNations]
   );
 
-  const statusesOptions = getSelectFilterOptions(
-    firstNations,
-    "is_active",
-    (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+  const statusesOptions = useMemo(
+    () =>
+      getSelectFilterOptions(
+        firstNations,
+        "is_active",
+        (value) => (value ? "Active" : "Inactive"),
+        (value) => value
+      ),
+    [firstNations]
   );
 
   const handleCloseUserMenu = debounce(() => {
@@ -163,21 +167,10 @@ const FirstNationList = () => {
       },
       {
         accessorKey: "pip_org_type.name",
-        header: "Organization Type",
-        filterVariant: "multi-select",
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="positionsFilter"
-            />
-          );
-        },
-        filterSelectOptions: orgTypes,
         filterFn: "multiSelectFilter",
+        filterSelectOptions: orgTypes,
+        filterVariant: "multi-select",
+        header: "Organization Type",
       },
       {
         accessorKey: "relationship_holder.full_name",
@@ -231,26 +224,8 @@ const FirstNationList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusesOptions,
         size: 115,
-        Filter: ({ header, column }) => (
-          <Box sx={{ width: "100px" }}>
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          </Box>
-        ),
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statusesOptions.length
-          ) {
-            return true;
-          }
-          return filterValue.includes(row.getValue(id));
-        },
+        Filter: getStatusFilter<FirstNation>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -285,12 +260,39 @@ const FirstNationList = () => {
     getStaffs();
   }, []);
 
-  const handleCacheFilters = (filters?: ColumnFilter[]) => {
-    if (!filters) {
-      return;
-    }
-    setColumnFilters(filters);
-  };
+  const handleCacheFilters = useCallback(
+    (filters?: ColumnFilter[]) => {
+      if (!filters) {
+        return;
+      }
+      setColumnFilters((prevFilters) => {
+        return isEqual(prevFilters, filters) ? prevFilters : filters;
+      });
+    },
+    [setColumnFilters]
+  );
+
+  const renderTopToolbarCustomActions = useCallback(
+    () => (
+      <Restricted
+        allowed={[ROLES.CREATE]}
+        elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+        elevatedRoles={elevatedRoles}
+        errorProps={{ disabled: true }}
+      >
+        <Button
+          variant="contained"
+          onClick={() => {
+            setShowFormDialog(true);
+            setFirstNationId(undefined);
+          }}
+        >
+          Create First Nation
+        </Button>
+      </Restricted>
+    ),
+    [setShowFormDialog, setFirstNationId, elevatedRoles]
+  );
 
   return (
     <ETPageContainer container columnSpacing={2} rowSpacing={3}>
@@ -305,24 +307,7 @@ const FirstNationList = () => {
           state={{ isLoading: loading, showGlobalFilter: true }}
           tableName={"first-nation-listing"}
           enableExport
-          renderTopToolbarCustomActions={() => (
-            <Restricted
-              allowed={[ROLES.CREATE]}
-              elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
-              elevatedRoles={elevatedRoles}
-              errorProps={{ disabled: true }}
-            >
-              <Button
-                variant="contained"
-                onClick={() => {
-                  setShowFormDialog(true);
-                  setFirstNationId(undefined);
-                }}
-              >
-                Create First Nation
-              </Button>
-            </Restricted>
-          )}
+          renderTopToolbarCustomActions={renderTopToolbarCustomActions}
           onCacheFilters={handleCacheFilters}
         />
       </Grid>
