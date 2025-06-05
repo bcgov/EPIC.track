@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const useRouterLocationStateForHelpPage = (
-  callback: () => string[] | string | undefined,
-  dependencies: any[]
+  callback: () => string[] | string | undefined
 ) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +21,7 @@ const useRouterLocationStateForHelpPage = (
       state: { helpPageTags: newtags },
       replace: true, // modify current entry in history stack rather than adding duplicate
     });
-  }, dependencies);
+  }, [callback, location.pathname, location.search, navigate]);
 };
 
 export default useRouterLocationStateForHelpPage;

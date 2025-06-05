@@ -87,4 +87,4 @@ class ProjectService implements ServiceBase {
   }
 }
 
-export default new ProjectService();
+export const projectService = new ProjectService();

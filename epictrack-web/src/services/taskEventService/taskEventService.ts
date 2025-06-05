@@ -73,4 +73,4 @@ class TaskEventService {
   };
 }
 
-export default new TaskEventService();
+export const taskEventService = new TaskEventService();

@@ -1,26 +1,24 @@
-import React from "react";
+import { useCallback, useEffect, useState } from "react";
 import { TextField, Grid, Button, FormHelperText } from "@mui/material";
 import { UploadFile as UploadFileIcon } from "@mui/icons-material";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import phaseService from "../../../services/phaseService";
 import { Template } from "../../../models/template";
 import { ETFormLabel } from "../../shared";
 import { ListType } from "../../../models/code";
 import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
 import { showNotification } from "../../shared/notificationProvider";
-import templateService from "../../../services/taskService/templateService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import eaActService from "services/eaActService";
-import workService from "services/workService/workService";
+import { eaActService } from "services/eaActService";
+import phaseService from "services/phaseService";
+import { templateService } from "services/taskService/templateService";
+import { workService } from "services/workService/workService";
 
 export default function TemplateForm({ ...props }) {
-  const [eaActs, setEAActs] = React.useState<ListType[]>([]);
-  const [workTypes, setWorkTypes] = React.useState<ListType[]>([]);
-  const [phases, setPhases] = React.useState<ListType[]>([]);
-  const [loading, setLoading] = React.useState<boolean>(false);
-  const templateId = props.templateId;
+  const [eaActs, setEAActs] = useState<ListType[]>([]);
+  const [workTypes, setWorkTypes] = useState<ListType[]>([]);
+  const [phases, setPhases] = useState<ListType[]>([]);
   const schema = yup.object<Template>().shape({
     ea_act_id: yup.number().required("EA Act is required"),
     work_type_id: yup.number().required("Work type is required"),
@@ -49,7 +47,7 @@ export default function TemplateForm({ ...props }) {
   } = methods;
   const formValues = useWatch({ control });
 
-  const getPhaseByWorkTypeEAact = async () => {
+  const getPhaseByWorkTypeEAact = useCallback(async () => {
     const phaseResult = await phaseService.getPhaseByWorkTypeEAact(
       formValues.ea_act_id,
       formValues.work_type_id
@@ -57,7 +55,7 @@ export default function TemplateForm({ ...props }) {
     if (phaseResult.status === 200) {
       setPhases(phaseResult.data as ListType[]);
     }
-  };
+  }, [formValues.ea_act_id, formValues.work_type_id]);
 
   const getEAActs = async () => {
     const eaActResult = await eaActService.getAll();
@@ -75,20 +73,19 @@ export default function TemplateForm({ ...props }) {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (formValues.ea_act_id && formValues.work_type_id) {
       getPhaseByWorkTypeEAact();
     }
-  }, [formValues.ea_act_id, formValues.work_type_id]);
+  }, [getPhaseByWorkTypeEAact, formValues.ea_act_id, formValues.work_type_id]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getEAActs();
     getWorkTypes();
   }, []);
 
   const onSubmitHandler = async (data: any) => {
     try {
-      setLoading(true);
       data["template_file"] = data["template_file"][0];
       const result = await templateService.createTemplate(data);
       if (result.status === 201) {
@@ -96,7 +93,6 @@ export default function TemplateForm({ ...props }) {
           type: "success",
         });
         props.onSubmitSuccess();
-        setLoading(false);
       }
       reset();
     } catch (e) {

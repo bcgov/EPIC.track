@@ -7,4 +7,4 @@ class SubstitutionActService {
   }
 }
 
-export default new SubstitutionActService();
+export const substitutionActService = new SubstitutionActService();

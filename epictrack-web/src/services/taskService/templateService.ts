@@ -50,4 +50,4 @@ class TemplateService {
   };
 }
 
-export default new TemplateService();
+export const templateService = new TemplateService();

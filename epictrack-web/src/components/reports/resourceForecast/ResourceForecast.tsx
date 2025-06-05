@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Autocomplete,
   Box,
@@ -7,13 +7,14 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
+import ClearAllIcon from "@mui/icons-material/ClearAll";
 import {
   MRT_ColumnDef,
   MRT_ColumnFiltersState,
-  MRT_ToggleFullScreenButton,
-  MRT_ShowHideColumnsButton,
+  MRT_ShowHideColumnsButton as MRTShowHideColumnsButton,
   MRT_TableInstance,
-  MRT_ToggleFiltersButton,
+  MRT_ToggleFiltersButton as MRTToggleFiltersButton,
+  MRT_ToggleFullScreenButton as MRTToggleFullScreenButton,
   MRT_VisibilityState,
 } from "material-react-table";
 import { json2csv } from "json-2-csv";
@@ -25,7 +26,6 @@ import {
 import ReportService from "../../../services/reportService";
 import { dateUtils } from "../../../utils";
 import { ResourceForecastModel } from "./type";
-import ClearAllIcon from "@mui/icons-material/ClearAll";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETPageContainer, ETParagraph, IButton } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -33,6 +33,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 export default function ResourceForecast() {
@@ -63,7 +64,8 @@ export default function ResourceForecast() {
       pageSize: options[options.length - 1].value,
     }));
   }, [rfData]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     const hiddenColumns = Object.keys(columnVisibility).filter(
       (p) => !columnVisibility[p]
     );
@@ -73,7 +75,7 @@ export default function ResourceForecast() {
     setColumnFilters(filteredColumnFilters);
   }, [columnFilters, columnVisibility, setColumnFilters]);
 
-  const exportToCsv = React.useCallback(
+  const exportToCsv = useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
       const filteredResult = table.getFilteredRowModel().flatRows.map((p) => {
         return {
@@ -106,7 +108,7 @@ export default function ResourceForecast() {
     [reportDate]
   );
 
-  React.useEffect(() => {
+  useEffect(() => {
     const diff = dateUtils.diff(
       reportDate,
       new Date(2019, 11, 19).toISOString(),
@@ -114,7 +116,8 @@ export default function ResourceForecast() {
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
-  React.useEffect(() => {
+
+  useEffect(() => {
     setFilters((prev) => {
       const state = {
         ...prev,
@@ -137,7 +140,7 @@ export default function ResourceForecast() {
     });
   }, [columnFilters, columnVisibility, globalFilter]);
 
-  const setMonthColumns = React.useCallback(() => {
+  const setMonthColumns = useCallback(() => {
     let columns: Array<MRT_ColumnDef<ResourceForecastModel>> = [];
     if (rfData && rfData.length > 0) {
       columns = rfData[0].months.map((rfMonth: any, index: number) => {
@@ -170,7 +173,7 @@ export default function ResourceForecast() {
     return columns;
   }, [rfData]);
 
-  const filterFn = React.useCallback(
+  const filterFn = useCallback(
     (filterField: keyof ResourceForecastModel) =>
       rfData
         .filter((p) => p[filterField])
@@ -191,7 +194,7 @@ export default function ResourceForecast() {
   const epdFilter = filterFn("responsible_epd");
   const teamFilter = filterFn("eao_team");
 
-  const columns = React.useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
+  const columns = useMemo<MRT_ColumnDef<ResourceForecastModel>[]>(
     () => [
       {
         accessorKey: "work_title",
@@ -350,7 +353,9 @@ export default function ResourceForecast() {
       workLeadFilter,
     ]
   );
-  const fetchReportData = React.useCallback(async () => {
+
+  const fetchReportData = useCallback(async () => {
+    setIsLoading(true);
     try {
       const reportData = await ReportService.fetchReportData(
         REPORT_TYPE.RESOURCE_FORECAST,
@@ -375,10 +380,12 @@ export default function ResourceForecast() {
         type: "error",
       });
       setRFData([]);
+    } finally {
+      setIsLoading(false);
     }
   }, [reportDate]);
 
-  const downloadPDFReport = React.useCallback(async () => {
+  const downloadPDFReport = useCallback(async () => {
     try {
       const binaryReponse = await ReportService.downloadPDF(
         REPORT_TYPE.RESOURCE_FORECAST,
@@ -469,9 +476,8 @@ export default function ResourceForecast() {
           enableHiding={true}
           renderToolbarInternalActions={({ table }) => (
             <>
-              <MRT_ToggleFiltersButton table={table} />
-              <MRT_ShowHideColumnsButton table={table} />
-              {/* add your own custom print button or something */}
+              <MRTToggleFiltersButton table={table} />
+              <MRTShowHideColumnsButton table={table} />
               <Tooltip title="Clear all filters">
                 <IconButton
                   onClick={() => {
@@ -488,7 +494,7 @@ export default function ResourceForecast() {
                   <DownloadIcon className="icon" />
                 </IButton>
               </Tooltip>
-              <MRT_ToggleFullScreenButton table={table} />
+              <MRTToggleFullScreenButton table={table} />
             </>
           )}
           data={rfData}

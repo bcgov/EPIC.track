@@ -9,4 +9,4 @@ class ActSectionService {
   }
 }
 
-export default new ActSectionService();
+export const actSectionService = new ActSectionService();

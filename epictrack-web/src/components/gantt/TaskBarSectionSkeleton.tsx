@@ -1,7 +1,3 @@
-// TaskBarSection.js
-import React from "react";
-import TaskBar from "./TaskBar";
-import { GanttRow } from "./types";
 import { barHeight } from "./constants";
 import { Palette } from "styles/theme";
 import { Skeleton } from "@mui/material";

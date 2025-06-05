@@ -14,7 +14,6 @@ type IFormInputProps = {
   disabled?: boolean;
   fullWidth?: boolean;
   onHandleChange?: (val: any) => void;
-  // menuPortalTarget: HTMLElement | undefined;
 };
 
 const ControlledSelectV2: React.ForwardRefRenderFunction<
@@ -30,12 +29,11 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
   disabled,
   helperText,
   onHandleChange,
-  // menuPortalTarget,
   ...otherProps
 }) => {
   const {
     control,
-    formState: { errors, defaultValues },
+    formState: { defaultValues },
   } = useFormContext();
   return (
     <Controller

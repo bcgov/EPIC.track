@@ -45,8 +45,7 @@ describe("ProjectList", () => {
   });
 
   it("should display the project list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the project list based on the project name input", () => {

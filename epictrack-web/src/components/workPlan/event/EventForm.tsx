@@ -11,20 +11,35 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import Moment from "moment";
+import { Else, If, Then, When } from "react-if";
+import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
+import { Palette } from "../../../styles/theme";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import RichTextEditor from "../../shared/richTextEditor";
+import TrackDialog from "../../shared/TrackDialog";
+import WarningBox from "../../shared/warningBox";
+import { showNotification } from "../../shared/notificationProvider";
+import Icons from "../../icons";
+import { IconProps } from "../../icons/type";
+import { WorkplanContext } from "../WorkPlanContext";
+import { EventContext } from "./EventContext";
 import {
   COMMON_ERROR_MESSAGE,
   MIN_WORK_START_DATE,
 } from "../../../constants/application-constant";
-import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
-import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { Palette } from "../../../styles/theme";
-import { WorkplanContext } from "../WorkPlanContext";
-import { showNotification } from "../../shared/notificationProvider";
+import { EVENT_TYPE } from "../phase/type";
+import { OUTCOME_ID } from "./constants";
+import { POSITION_ENUM } from "models/position";
+import { eventService } from "services/eventService/eventService";
+import staffService from "services/staffService/staffService";
+import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import { ListType } from "../../../models/code";
-import RichTextEditor from "../../shared/richTextEditor";
-import eventService from "../../../services/eventService/eventService";
+import { dateUtils } from "../../../utils";
+import { ListType } from "models/code";
+import { Staff } from "models/staff";
 import {
   EventCategory,
   EventPosition,
@@ -33,30 +48,15 @@ import {
   EventsGridModel,
   MilestoneEvent,
   MilestoneEventDateCheck,
-} from "../../../models/event";
-import configurationService from "../../../services/configurationService/configurationService";
-import TrackDialog from "../../shared/TrackDialog";
-import EventConfiguration from "../../../models/eventConfiguration";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+} from "models/event";
+import EventConfiguration from "models/eventConfiguration";
 import MultiDaysInput from "./components/MultiDaysInput";
-import { dateUtils } from "../../../utils";
 import PCPInput from "./components/PCPInput";
-import Icons from "../../icons/index";
-import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import DecisionInput from "./components/DecisionInput";
-import { POSITION_ENUM } from "../../../models/position";
-import { Else, If, Then, When } from "react-if";
 import ExtensionInput from "./components/ExtensionInput";
-import { EventContext } from "./EventContext";
-import { EVENT_TYPE } from "../phase/type";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
-import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { Staff } from "models/staff";
-import staffService from "services/staffService/staffService";
-import { OUTCOME_ID } from "./constants";
 
 interface EventFormProps {
   onSave: () => void;

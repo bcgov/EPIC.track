@@ -1,23 +1,31 @@
-import React from "react";
+import {
+  FC,
+  SyntheticEvent,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import debounce from "lodash/debounce";
 import { Box, Grid, SxProps } from "@mui/material";
-import { ETHeading3, ETLink, ETParagraph } from "../../shared";
+import { Work } from "../../../models/work";
+import { FN_RESOURCES } from "../../../constants/application-constant";
 import { Palette } from "../../../styles/theme";
-import FirstNationList from "./FirstNationList";
+import { workService } from "../../../services/workService/workService";
+import { ETHeading3, ETLink, ETParagraph } from "../../shared";
+import { showNotification } from "../../shared/notificationProvider";
+import RichTextEditor from "../../shared/richTextEditor";
 import { ETTab, ETTabs } from "../../shared/tab/Tab";
 import TabPanel from "../../shared/tab/TabPanel";
-import { WorkplanContext } from "../WorkPlanContext";
-import RichTextEditor from "../../shared/richTextEditor";
-import { FN_RESOURCES } from "../../../constants/application-constant";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
-import debounce from "lodash/debounce";
-import workService from "../../../services/workService/workService";
-import { Work } from "../../../models/work";
-import { showNotification } from "../../shared/notificationProvider";
-import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import FirstNationList from "./FirstNationList";
+import { WorkplanContext } from "../WorkPlanContext";
 import { WORKPLAN_TAB } from "../constants";
+import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 
-const LinkIcon: React.FC<IconProps> = Icons["LinkIcon"];
+const LinkIcon: FC<IconProps> = Icons["LinkIcon"];
 
 const tab: SxProps = {
   paddingBottom: "0.5rem !important",
@@ -35,37 +43,38 @@ const tabPanel: SxProps = {
 };
 
 const FirstNationContainer = () => {
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
-  const [notes, setNotes] = React.useState("");
-  const ctx = React.useContext(WorkplanContext);
-  const initialNotes = React.useMemo(
-    () => ctx?.work?.first_nation_notes,
-    [ctx?.work?.id]
-  );
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
+  const [notes, setNotes] = useState("");
+  const ctx = useContext(WorkplanContext);
 
-  React.useEffect(() => {
+  const initialNotes = useMemo(() => ctx?.work?.first_nation_notes, [ctx]);
+
+  useEffect(() => {
     setNotes(ctx.work?.first_nation_notes || "");
   }, [ctx.work?.first_nation_notes]);
 
-  const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
+  const handleTabSelected = (event: SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
 
-  const saveNationNotes = React.useCallback(async (value: string) => {
-    const result = await workService.saveFirstNationNotes(
-      Number(ctx.work?.id),
-      value
-    );
-    if (result.status === 200) {
-      ctx.setWork(result.data as Work);
-      showNotification("Notes saved successfully", {
-        type: "success",
-        duration: 1000,
-      });
-    }
-  }, []);
+  const saveNationNotes = useCallback(
+    async (value: string) => {
+      const result = await workService.saveFirstNationNotes(
+        Number(ctx.work?.id),
+        value
+      );
+      if (result.status === 200) {
+        ctx.setWork(result.data as Work);
+        showNotification("Notes saved successfully", {
+          type: "success",
+          duration: 1000,
+        });
+      }
+    },
+    [ctx]
+  );
 
-  const debounceSave = React.useMemo(() => {
+  const debounceSave = useMemo(() => {
     return debounce(saveNationNotes, 1000);
   }, [saveNationNotes]);
 
@@ -76,7 +85,11 @@ const FirstNationContainer = () => {
     }
   };
 
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.FIRST_NATIONS.label, []);
+  const firstNationsLabelCallback = useCallback(
+    () => WORKPLAN_TAB.FIRST_NATIONS.label,
+    []
+  );
+  useRouterLocationStateForHelpPage(firstNationsLabelCallback);
 
   return (
     <Grid container columnSpacing={1.5}>

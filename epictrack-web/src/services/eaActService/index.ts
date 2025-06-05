@@ -7,4 +7,4 @@ class EAActService {
   }
 }
 
-export default new EAActService();
+export const eaActService = new EAActService();

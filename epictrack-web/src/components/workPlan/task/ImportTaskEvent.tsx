@@ -1,4 +1,11 @@
-import React from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Box,
   Chip,
@@ -9,7 +16,7 @@ import {
 } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import { ListType } from "../../../models/code";
-import templateService from "../../../services/taskService/templateService";
+import { templateService } from "../../../services/taskService/templateService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { showNotification } from "../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
@@ -21,20 +28,11 @@ interface ImportTaskEventsProps {
 }
 
 const ImportTaskEvent = (props: ImportTaskEventsProps) => {
-  const [templates, setTemplates] = React.useState<ListType[]>([]);
-  const [tasks, setTasks] = React.useState<ListType[]>([]);
-  const [templateIndex, setTemplateIndex] = React.useState<number>(0);
-  const ctx = React.useContext(WorkplanContext);
-  const taskContainerRef = React.useRef(null);
-  React.useEffect(() => {
-    getTemplates();
-  }, [ctx.work, ctx.selectedWorkPhase]);
-
-  React.useEffect(() => {
-    if (templates.length > 0) {
-      getTemplateTasks(templates[templateIndex].id);
-    }
-  }, [templateIndex, templates]);
+  const [templates, setTemplates] = useState<ListType[]>([]);
+  const [tasks, setTasks] = useState<ListType[]>([]);
+  const [templateIndex, setTemplateIndex] = useState<number>(0);
+  const ctx = useContext(WorkplanContext);
+  const taskContainerRef = useRef(null);
 
   const methods = useForm({
     mode: "onBlur",
@@ -42,7 +40,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
 
   const { handleSubmit } = methods;
 
-  const selectedTemplateId = React.useMemo<number>(
+  const selectedTemplateId = useMemo<number>(
     () => (templates.length > 0 ? templates[templateIndex].id : 0),
     [templates, templateIndex]
   );
@@ -54,7 +52,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
     }
   };
 
-  const getTemplates = async () => {
+  const getTemplates = useCallback(async () => {
     try {
       const result = await templateService.getTemplatesByParams(
         Number(ctx.work?.ea_act_id),
@@ -72,7 +70,7 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
         type: "error",
       });
     }
-  };
+  }, [ctx.work, ctx.selectedWorkPhase]);
 
   const getTemplateTasks = async (templateId: number) => {
     try {
@@ -87,9 +85,20 @@ const ImportTaskEvent = (props: ImportTaskEventsProps) => {
     }
   };
 
+  useEffect(() => {
+    getTemplates();
+  }, [ctx.work, ctx.selectedWorkPhase, getTemplates]);
+
+  useEffect(() => {
+    if (templates.length > 0) {
+      getTemplateTasks(templates[templateIndex].id);
+    }
+  }, [templateIndex, templates]);
+
   const onSubmitHandler = async () => {
     props.onSave(selectedTemplateId);
   };
+
   return (
     <>
       <FormProvider {...methods}>

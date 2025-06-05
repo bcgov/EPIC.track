@@ -4,7 +4,7 @@ import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
@@ -25,7 +25,7 @@ const WorkList = () => {
   });
   const { data, error, isLoading } = useGetAllWorksQuery();
 
-  const works = data || [];
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -54,19 +54,6 @@ const WorkList = () => {
           works
             .map((work) => work?.project?.name || "")
             .filter((project) => project)
-            .sort()
-        )
-      ),
-    [works]
-  );
-
-  const phases = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          works
-            .map((work) => work?.current_work_phase?.name || "")
-            .filter((phase) => phase)
             .sort()
         )
       ),
@@ -265,7 +252,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, phases, workStates, started_years, closed_years]
+    [projects, workStates, started_years, closed_years]
   );
   return (
     <MasterTrackTable

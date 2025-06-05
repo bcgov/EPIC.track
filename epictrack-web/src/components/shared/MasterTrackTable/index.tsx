@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useRef } from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -83,12 +83,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   tableName,
   ...rest
 }: MaterialReactTableProps<TData>) => {
-  const { initialState, state, icons, ...otherProps } = rest;
-  const [otherPropsData, setOtherPropsData] = useState(otherProps);
-
-  useEffect(() => {
-    setOtherPropsData(otherProps);
-  }, [columns, data]);
+  const { initialState, state, icons } = rest;
 
   const table = useMaterialReactTable({
     columns: columns,
@@ -277,19 +272,23 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         return filterValue.includes(row.getValue(id));
       },
     },
-    ...otherPropsData,
+    // ...otherProps,
   });
 
-  const rowCount = useMemo(
-    () => (!loading ? table.getRowModel().rows.length : 0),
-    [loading, table]
-  );
+  const rowCount = useMemo(() => {
+    return !loading ? table.getRowModel().rows.length : 0;
+  }, [loading, table]);
+
+  const prevTableRef = useRef<MRT_TableInstance<TData> | null>(null);
 
   useEffect(() => {
     if (table && setTableInstance) {
-      setTableInstance(table);
+      if (prevTableRef.current !== table) {
+        prevTableRef.current = table;
+        setTableInstance(table);
+      }
     }
-  }, [setTableInstance, table]);
+  }, [table, setTableInstance]);
 
   return (
     <>

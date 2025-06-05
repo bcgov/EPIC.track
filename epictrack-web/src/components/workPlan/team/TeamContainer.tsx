@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { Grid, SxProps } from "@mui/material";
 import { ETHeading3 } from "../../shared";
 import { Palette } from "../../../styles/theme";
@@ -12,7 +13,9 @@ const title: SxProps = {
 };
 
 const TeamContainer = () => {
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.TEAM.label, []);
+  const teamLabelCallback = useCallback(() => WORKPLAN_TAB.TEAM.label, []);
+  useRouterLocationStateForHelpPage(teamLabelCallback);
+
   return (
     <Grid container columnSpacing={1.5}>
       <Grid item xs={8}>

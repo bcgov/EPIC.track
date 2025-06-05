@@ -1,4 +1,11 @@
-import React, { useContext, useMemo, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -20,12 +27,12 @@ const schema = yup.object().shape({
 const CHARACTER_LIMIT = 1000;
 
 const StatusForm = () => {
-  const [description, setDescription] = React.useState<string>("");
+  const [description, setDescription] = useState<string>("");
   const startDateRef = useRef();
   const { status: statusToEdit, onSave, isCloning } = useContext(StatusContext);
   const { getWorkStatuses, statuses } = useContext(WorkplanContext);
 
-  const getPostedDateMin = () => {
+  const getPostedDateMin = useCallback(() => {
     if (statuses.length === 0) {
       return dayjs(EARLIEST_WORK_DATE);
     }
@@ -44,12 +51,9 @@ const StatusForm = () => {
     );
 
     return dayjs(previousStatus?.posted_date || EARLIEST_WORK_DATE);
-  };
+  }, [isCloning, statusToEdit, statuses]);
 
-  const postedDateMin = useMemo(
-    () => getPostedDateMin(),
-    [statuses, statusToEdit, isCloning]
-  );
+  const postedDateMin = useMemo(() => getPostedDateMin(), [getPostedDateMin]);
   const postedDateMax = dayjs(new Date()).add(7, "day");
 
   const methods = useForm({
@@ -60,14 +64,14 @@ const StatusForm = () => {
 
   const { handleSubmit, reset } = methods;
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (statusToEdit) {
       setDescription(statusToEdit?.description);
       if (isCloning) {
         reset({ posted_date: Moment().format() });
       }
     }
-  }, []);
+  }, [isCloning, reset, statusToEdit]);
 
   const handleDescriptionChange = (event: any) => {
     setDescription(event.target.value);

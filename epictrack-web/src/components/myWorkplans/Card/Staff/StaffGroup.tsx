@@ -18,7 +18,7 @@ const StaffGroup = ({ workplan }: CardProps) => {
   useEffect(() => {
     const sortedList = sortTeam(staff_info, email);
     setStaffList(sortedList);
-  }, [staff_info]);
+  }, [email, staff_info]);
 
   return (
     <AvatarGroup

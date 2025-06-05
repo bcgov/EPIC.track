@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import PhaseAccordion from "./PhaseAccordion";
 import { Box, FormControlLabel, Grid } from "@mui/material";
 import { WorkplanContext } from "../WorkPlanContext";
@@ -44,9 +44,11 @@ const PhaseContainer = () => {
     }
   }, [ctx]);
 
-  useRouterLocationStateForHelpPage(() => {
+  const callback = useCallback(() => {
     return ctx.work?.work_type?.name ?? undefined;
-  }, [ctx.work?.work_type_id]);
+  }, [ctx.work?.work_type?.name]);
+
+  useRouterLocationStateForHelpPage(callback);
 
   if (ctx.workPhases.length === 0) {
     return (

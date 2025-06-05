@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import WorkForm from "../WorkForm";
 import TrackDialog from "components/shared/TrackDialog";
 import { Work } from "models/work";
-import workService from "services/workService/workService";
+import { workService } from "services/workService/workService";
 import { showNotification } from "components/shared/notificationProvider";
 import { useAppSelector } from "hooks";
 import { hasPermission } from "components/shared/restricted";
@@ -34,7 +34,7 @@ export const WorkDialog = ({
     hasPermission({ roles, allowed: [ROLES.EDIT] }) || isActiveTeamMember;
   const [disableSave, setDisableSave] = useState(!canEdit);
 
-  const fetchWork = async () => {
+  const fetchWork = useCallback(async () => {
     if (!workId) return;
     try {
       const response = await workService.getById(String(workId));
@@ -44,7 +44,7 @@ export const WorkDialog = ({
         type: "error",
       });
     }
-  };
+  }, [workId]);
 
   const createWork = async (data: any) => {
     await workService.create(data);
@@ -74,7 +74,7 @@ export const WorkDialog = ({
     if (open) {
       fetchWork();
     }
-  }, [open]);
+  }, [fetchWork, open]);
 
   return (
     <TrackDialog

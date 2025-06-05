@@ -10,17 +10,17 @@ import { showNotification } from "../../shared/notificationProvider";
 import { ETChip } from "../../shared/chip/ETChip";
 import TrackDialog from "../../shared/TrackDialog";
 import NoDataEver from "../../shared/NoDataEver";
-import TableFilter from "../../shared/filterSelect/TableFilter";
 import {
   ACTIVE_STATUS,
   COMMON_ERROR_MESSAGE,
   ROLES,
 } from "../../../constants/application-constant";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import TeamForm from "./TeamForm";
 import { useAppSelector } from "hooks";
 import { Restricted, hasPermission } from "components/shared/restricted";
 import { unEditableTeamMembers } from "./constants";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const TeamList = () => {
   const [roles, setRoles] = useState<string[]>([]);
@@ -49,7 +49,7 @@ const TeamList = () => {
 
   useEffect(() => {
     setLoading(ctx.loading);
-  }, []);
+  }, [ctx.loading]);
 
   useEffect(() => {
     if (teamMembers) {
@@ -90,22 +90,11 @@ const TeamList = () => {
       },
       {
         accessorFn: (row: StaffWorkRole) => row.role?.name,
+        filterFn: "multiSelectFilter",
+        filterSelectOptions: roles,
+        filterVariant: "multi-select",
         header: "Role",
         size: 150,
-        filterVariant: "multi-select",
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="rolesFilter"
-            />
-          );
-        },
-        filterSelectOptions: roles,
-        filterFn: "multiSelectFilter",
       },
       {
         accessorKey: "staff.email",
@@ -123,17 +112,7 @@ const TeamList = () => {
         header: "Active",
         size: 100,
         filterVariant: "multi-select",
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          );
-        },
+        Filter: getStatusFilter<StaffWorkRole>,
         filterSelectOptions: statuses,
         filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
@@ -148,7 +127,7 @@ const TeamList = () => {
         ),
       },
     ],
-    [teamMembers, roles, statuses]
+    [canEdit, roles, statuses]
   );
 
   const onCancelHandler = () => {

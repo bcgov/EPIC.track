@@ -1,5 +1,5 @@
+import { createContext, useCallback } from "react";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
-import { createContext } from "react";
 import { WORKPLAN_TAB } from "../constants";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -12,6 +12,8 @@ export const AboutProvider = ({
 }: {
   children: JSX.Element | JSX.Element[];
 }) => {
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.ABOUT.label, []);
+  const aboutLabelCallback = useCallback(() => WORKPLAN_TAB.ABOUT.label, []);
+
+  useRouterLocationStateForHelpPage(aboutLabelCallback);
   return <AboutContext.Provider value={{}}>{children}</AboutContext.Provider>;
 };

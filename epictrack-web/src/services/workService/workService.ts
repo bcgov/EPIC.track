@@ -235,4 +235,4 @@ class WorkService implements ServiceBase {
     return await http.GetRequest<WorkType[]>(Endpoints.WorkTypes.GET_ALL);
   }
 }
-export default new WorkService();
+export const workService = new WorkService();

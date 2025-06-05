@@ -10,12 +10,12 @@ import { ListType } from "../../../models/code";
 import { showNotification } from "../../shared/notificationProvider";
 import staffService from "../../../services/staffService/staffService";
 import { sort } from "../../../utils";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
 import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
-import roleService from "services/roleService";
+import { roleService } from "services/roleService";
 import { unEditableTeamMembers } from "./constants";
 
 interface TeamFormProps {
@@ -55,6 +55,19 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
   const ctx = React.useContext(WorkplanContext);
   const staffWorkRole = ctx.selectedStaff;
 
+  const methods = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: staffWorkRole,
+    mode: "onBlur",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = methods;
+
   React.useEffect(() => {
     getAllStaff();
     getAllRoles();
@@ -66,33 +79,33 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       work_id: ctx.work?.id,
       is_active: true,
     });
-  }, [ctx.work?.id]);
+  }, [ctx.work?.id, staffWorkRole, reset]);
 
   React.useEffect(() => {
+    const getTeamMember = async () => {
+      try {
+        const result = await workService.getWorkTeamMember(Number(workStaffId));
+        if (result.status === 200) {
+          const staff = result.data as StaffWorkRole;
+          ctx.setSelectedStaff(staff);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
+      }
+    };
+
     if (workStaffId) {
       getTeamMember();
     }
-  }, [workStaffId]);
+  }, [ctx, workStaffId]);
 
   React.useEffect(() => {
     if (staffWorkRole) {
       reset(staffWorkRole);
     }
-  }, [staffWorkRole]);
-
-  const getTeamMember = async () => {
-    try {
-      const result = await workService.getWorkTeamMember(Number(workStaffId));
-      if (result.status === 200) {
-        const staff = result.data as StaffWorkRole;
-        ctx.setSelectedStaff(staff);
-      }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+  }, [reset, staffWorkRole]);
 
   const getAllStaff = async () => {
     try {
@@ -124,18 +137,6 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       });
     }
   };
-  const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: staffWorkRole,
-    mode: "onBlur",
-  });
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = methods;
 
   const saveTeamMember = (data: StaffWorkRole) => {
     if (workStaffId) {

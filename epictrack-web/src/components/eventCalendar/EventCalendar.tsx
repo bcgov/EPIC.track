@@ -1,16 +1,16 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
 import * as Moment from "moment";
 import { extendMoment } from "moment-range";
-import React from "react";
+import { Box, SxProps } from "@mui/material";
 import Month from "./components/Month";
 import { CalendarEvent } from "./type";
-import { Box, SxProps } from "@mui/material";
 import { ETPageContainer, ETParagraph } from "../shared";
 import TrackDialog from "../shared/TrackDialog";
 import EventDetails from "./components/EventDetails";
 import ReportService from "../../services/reportService";
 
 const extendedMoment = extendMoment(Moment);
-// extendedMoment./
+
 const titleStyle: SxProps = {
   gridColumn: "span 7",
   borderBottom: "1px solid #ccd6eb",
@@ -21,7 +21,6 @@ const titleStyle: SxProps = {
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  // position: "relative",
   "&:first-of-type": { gridColumn: "15/22" },
   "&::before, &:nth-child(7)::after": {
     content: '" "',
@@ -60,23 +59,22 @@ const titleStyle: SxProps = {
   },
   "&:last-of-type::after": { right: "0" },
 };
+
 const EventCalendar = () => {
-  //   const gridSize = React.useMemo(() => "1.5rem", []);
-  const [showPopup, setShowPopup] = React.useState(false);
-  const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent>();
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [hoveredEvent, setHoveredEvent] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent>();
+  const [showPopup, setShowPopup] = useState(false);
 
   const prevMonth = extendedMoment().subtract(1, "months");
   const lastMonth = extendedMoment().endOf("year");
   const monthRange = extendedMoment.range(prevMonth, lastMonth).snapTo("month");
   const months = Array.from(monthRange.by("month"));
-  const [events, setEvents] = React.useState<CalendarEvent[]>([]);
 
   const days = ["S", "M", "T", "W", "T", "F", "S"];
-  const [hoveredEvent, setHoveredEvent] = React.useState(null);
 
   const togglePopup = () => {
     setShowPopup(!showPopup);
-    // setSelectedEvent(undefined);
   };
 
   const handleEventClick = (event_id: number) => {
@@ -85,7 +83,7 @@ const EventCalendar = () => {
     setSelectedEvent(event);
   };
 
-  const monthEvents: any = React.useMemo(() => {
+  const monthEvents: any = useMemo(() => {
     const monthData: any = {};
     months.forEach((month: any) => {
       const data = events.filter(
@@ -98,18 +96,18 @@ const EventCalendar = () => {
       monthData[month.format("MMMM")] = data;
     });
     return monthData;
-  }, [months]);
+  }, [events, months]);
 
-  const getEvents = React.useCallback(async () => {
+  const getEvents = useCallback(async () => {
     const eventsResult = await ReportService.getEventCalendar();
     if (eventsResult.status === 200) {
       setEvents(eventsResult.data as CalendarEvent[]);
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getEvents();
-  }, []);
+  }, [getEvents]);
 
   return (
     <>
