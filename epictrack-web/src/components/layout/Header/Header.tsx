@@ -1,16 +1,19 @@
-import React from "react";
+import { MouseEvent, useState } from "react";
 import MuiAppBar, { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
 import {
-  useMediaQuery,
-  Theme,
-  IconButton,
   Avatar,
+  Box,
+  ClickAwayListener,
+  IconButton,
   styled,
+  Theme,
+  Toolbar,
+  useMediaQuery,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import CssBaseline from "@mui/material/CssBaseline";
+import { Unless } from "react-if";
+import { useDispatch } from "react-redux";
 import EnvironmentBanner from "./EnvironmentBanner";
 import SideNav from "../SideNav/SideNav";
 import { UIState } from "../../../styles/type";
@@ -21,9 +24,7 @@ import { ETCaption2, ETSubhead } from "../../shared";
 import { Palette } from "../../../styles/theme";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import { HEADER_HEIGHT } from "./constants";
-import { useDispatch } from "react-redux";
 import { toggleDrawer } from "styles/uiStateSlice";
-import { Unless } from "react-if";
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -36,14 +37,6 @@ const AppBar = styled(MuiAppBar, {
     easing: theme.transitions.easing.sharp,
     duration: theme.transitions.duration.leavingScreen,
   }),
-  // ...(open && {
-  //   marginLeft: 260,
-  //   width: `calc(100% - ${260}px)`,
-  //   transition: theme.transitions.create(["width", "margin"], {
-  //     easing: theme.transitions.easing.sharp,
-  //     duration: theme.transitions.duration.enteringScreen,
-  //   }),
-  // }),
 }));
 
 const Header = () => {
@@ -58,13 +51,15 @@ const Header = () => {
   );
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] =
-    React.useState<null | HTMLElement>(null);
+    useState<null | HTMLElement>(null);
 
-  const handleOpenProfileMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setProfileMenuAnchorEl(event.currentTarget);
+  const isMenuOpen = Boolean(profileMenuAnchorEl);
+
+  const handleToggleProfileMenu = (event: MouseEvent<HTMLElement>) => {
+    setProfileMenuAnchorEl((prev) => (prev ? null : event.currentTarget));
   };
 
-  const handleCloseProfileMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleCloseProfileMenu = () => {
     setProfileMenuAnchorEl(null);
   };
 
@@ -115,44 +110,46 @@ const Header = () => {
             />
           </Box>
           {/* User menu */}
-          <Box
-            sx={{
-              flexGrow: 0,
-              display: "flex",
-              alignItems: "baseline",
-              gap: "1rem",
-            }}
-            data-testid="user-menu-box"
-            onMouseEnter={handleOpenProfileMenu}
-            onMouseLeave={handleCloseProfileMenu}
-          >
-            <ETSubhead>Hello, {user.firstName}</ETSubhead>
-            <Avatar
+          <ClickAwayListener onClickAway={handleCloseProfileMenu}>
+            <Box
               sx={{
-                bgcolor: Palette.white,
-                color: Palette.primary.main,
-                fontSize: "1rem",
-                lineHeight: "1.3rem",
-                fontWeight: 700,
-                width: "2rem",
-                height: "2rem",
+                alignItems: "baseline",
+                cursor: isMenuOpen ? "default" : "pointer",
+                display: "flex",
+                flexGrow: 0,
+                gap: "1rem",
               }}
+              data-testid="user-menu-box"
+              onClick={handleToggleProfileMenu}
             >
-              <ETCaption2
-                bold
-              >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
-            </Avatar>
-            <UserMenu
-              data-testid="user-menu"
-              anchorEl={profileMenuAnchorEl}
-              email={user.email}
-              phone={user.phone}
-              position={user.position}
-              firstName={user.firstName}
-              lastName={user.lastName}
-              onClose={handleCloseProfileMenu}
-            />
-          </Box>
+              <ETSubhead>Hello, {user.firstName}</ETSubhead>
+              <Avatar
+                sx={{
+                  bgcolor: Palette.white,
+                  color: Palette.primary.main,
+                  fontSize: "1rem",
+                  lineHeight: "1.3rem",
+                  fontWeight: 700,
+                  width: "2rem",
+                  height: "2rem",
+                }}
+              >
+                <ETCaption2
+                  bold
+                >{`${user.firstName[0]}${user.lastName[0]}`}</ETCaption2>
+              </Avatar>
+              <UserMenu
+                data-testid="user-menu"
+                anchorEl={profileMenuAnchorEl}
+                email={user.email}
+                phone={user.phone}
+                position={user.position}
+                firstName={user.firstName}
+                lastName={user.lastName}
+                onClose={handleCloseProfileMenu}
+              />
+            </Box>
+          </ClickAwayListener>
         </Toolbar>
         <EnvironmentBanner />
       </AppBar>
