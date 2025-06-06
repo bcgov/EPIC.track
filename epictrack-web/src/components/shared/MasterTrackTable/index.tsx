@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useRef } from "react";
+import { FC, useEffect, useRef } from "react";
 import {
   MaterialReactTable,
   MRT_ColumnDef,
@@ -218,7 +218,7 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         >
           {renderResultCount && (
             <Box sx={{ flexGrow: 1 }}>
-              <Typography>Results: {rowCount}</Typography>
+              <Typography>Results: {filteredRowCount}</Typography>
             </Box>
           )}
           <Box
@@ -275,9 +275,9 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     ...otherProps,
   });
 
-  const rowCount = useMemo(() => {
-    return !loading ? table.getRowModel().rows.length : 0;
-  }, [loading, table]);
+  const filteredRowCount = !loading
+    ? table.getFilteredRowModel().rows.length
+    : 0;
 
   const prevTableRef = useRef<MRT_TableInstance<TData> | null>(null);
 
