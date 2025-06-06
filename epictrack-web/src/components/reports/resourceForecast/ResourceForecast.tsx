@@ -72,8 +72,16 @@ export default function ResourceForecast() {
     const filteredColumnFilters = columnFilters.filter(
       (p) => !hiddenColumns.includes(p.id)
     );
-    setColumnFilters(filteredColumnFilters);
-  }, [columnFilters, columnVisibility, setColumnFilters]);
+    if (
+      filteredColumnFilters.length !== columnFilters.length ||
+      filteredColumnFilters.some(
+        (f, i) =>
+          f.id !== columnFilters[i]?.id || f.value !== columnFilters[i]?.value
+      )
+    ) {
+      setColumnFilters(filteredColumnFilters);
+    }
+  }, [columnFilters, columnVisibility]);
 
   const exportToCsv = useCallback(
     async (table: MRT_TableInstance<ResourceForecastModel>) => {
@@ -125,12 +133,16 @@ export default function ResourceForecast() {
           (p) => !columnVisibility[p]
         ),
         filter_search: (() => {
-          let result = {};
+          let result: Record<string, any> = {};
           columnFilters.forEach((filter) => {
-            result = {
-              ...result,
-              [filter["id"]]: filter["value"],
-            };
+            if (
+              filter.value !== undefined &&
+              filter.value !== null &&
+              filter.value !== "" &&
+              !(Array.isArray(filter.value) && filter.value.length === 0)
+            ) {
+              result[filter.id] = filter.value;
+            }
           });
           return result;
         })(),
@@ -224,7 +236,7 @@ export default function ResourceForecast() {
         filterFn: (row, id, filterValue) => {
           return !filterValue.includes(row.getValue(id));
         },
-        Cell: ({ row }: any) => (
+        Cell: ({ row }: { row: any }) => (
           <ETParagraph
             enableEllipsis
             enableTooltip
@@ -240,22 +252,23 @@ export default function ResourceForecast() {
       },
       {
         accessorKey: "fte_positions_construction",
-        header: "Est. FTEs for construction",
+        header: "Est. FTEs for Construction",
       },
       {
         accessorKey: "fte_positions_operation",
-        header: "Est. FTEs for operation",
+        header: "Est. FTEs for Operation ",
       },
       {
         accessorKey: "ea_type",
         header: "EA Type",
         enableHiding: false,
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: eaTypeFilter,
       },
       {
+        accessorKey: "project_phase",
         header: "Project Phase",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: projectPhaseFilter,
         Cell: ({ row }: any) => (
           <ETParagraph
@@ -270,52 +283,53 @@ export default function ResourceForecast() {
       {
         accessorKey: "ea_act",
         header: "EA Act",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: eaActFilter,
       },
       {
         accessorKey: "iaac",
         header: "IAAC",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: iaacFilter,
       },
       {
         accessorKey: "sector(sub)",
         header: "Type (Subtype)",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: typeFilter,
       },
       {
         accessorKey: "env_region",
         header: "ENV Region",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: envRegionFilter,
       },
       {
         accessorKey: "nrs_region",
         header: "NRS Region",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: nrsRegionFilter,
       },
       {
         accessorKey: "responsible_epd",
         header: "Responsible EPD",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: epdFilter,
       },
       {
         accessorKey: "eao_team",
         header: "Lead's Team",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: teamFilter,
       },
       {
         accessorKey: "work_lead",
         header: "Work Lead",
-        filterVariant: "select",
+        filterVariant: "multi-select",
         filterSelectOptions: workLeadFilter,
       },
       {
+        accessorKey: "work_team_members",
         header: "Work Team Members",
         Cell: ({ row }: any) => (
           <ETParagraph
