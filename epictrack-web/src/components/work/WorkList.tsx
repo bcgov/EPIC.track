@@ -169,11 +169,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > projects.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (projects.length > 0 && filterValue.length >= projects.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -197,11 +197,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > eaActs.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (eaActs.length > 0 && filterValue.length >= eaActs.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -225,11 +225,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > workTypes.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (workTypes.length > 0 && filterValue.length >= workTypes.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -253,11 +253,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > teams.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (teams.length > 0 && filterValue.length >= teams.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -281,11 +281,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > phases.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (phases.length > 0 && filterValue.length >= phases.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -311,9 +311,12 @@ const WorkList = () => {
         filterFn: (row, id, filterValue) => {
           if (
             !filterValue.length ||
-            filterValue.length > states.length // select all is selected
+            !filterValue.length
           ) {
             return true;
+          }
+          if (states.length > 0 && filterValue.length >= states.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           const label = WORK_STATE[value as keyof typeof WORK_STATE]?.label;
@@ -370,7 +373,6 @@ const WorkList = () => {
                   desc: false,
                 },
               ],
-              columnFilters: cachedFilters,
             }}
             loading={loadingWorks}
             onCacheFilters={handleCacheFilters}
@@ -378,6 +380,7 @@ const WorkList = () => {
             state={{
               isLoading: loadingWorks,
               showGlobalFilter: true,
+              columnFilters: cachedFilters,
             }}
             renderTopToolbarCustomActions={() => (
               <Restricted

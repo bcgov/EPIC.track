@@ -115,15 +115,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > types.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (types.length > 0 && filterValue.length >= types.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -144,15 +142,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > subTypes.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (subTypes.length > 0 && filterValue.length >= subTypes.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -174,15 +170,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > proponents.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (proponents.length > 0 && filterValue.length >= proponents.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -203,15 +197,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > envRegionsOptions.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (envRegionsOptions.length > 0 && filterValue.length >= envRegionsOptions.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -259,11 +251,11 @@ const ProjectList = () => {
                   desc: false,
                 },
               ],
-              columnFilters: columnFilters,
             }}
             state={{
               isLoading: loadingProjects,
               showGlobalFilter: true,
+              columnFilters,
             }}
             tableName={"project-listing"}
             enableExport
