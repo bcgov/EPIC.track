@@ -9,6 +9,7 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
@@ -23,12 +24,13 @@ type WorkStaffWithWork = WorkStaff & { work: Work };
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
   const [workRoles, setWorkRoles] = React.useState<
     MRT_ColumnDef<WorkStaffWithWork>[]
   >([]);
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
   const { data: works } = useGetWorksQuery();
 
@@ -270,11 +272,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

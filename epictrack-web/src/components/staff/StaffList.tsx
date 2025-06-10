@@ -175,6 +175,7 @@ const StaffList = () => {
             columns={columns}
             data={staffs}
             enableExport
+            loading={loading}
             initialState={{
               sorting: [
                 {
@@ -191,6 +192,7 @@ const StaffList = () => {
             tableName={"staff-listing"}
             onCacheFilters={handleCacheFilters}
             renderTopToolbarCustomActions={renderTopToolbarCustomActions}
+            renderResultCount
           />
         </Grid>
       </ETPageContainer>

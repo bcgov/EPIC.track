@@ -209,6 +209,7 @@ const ProponentList = () => {
             showGlobalFilter: true,
             columnFilters,
           }}
+          loading={loadingProponents}
           tableName={"proponent-listing"}
           enableExport
           renderTopToolbarCustomActions={({ table }) => (
@@ -228,6 +229,7 @@ const ProponentList = () => {
             </Restricted>
           )}
           onCacheFilters={handleCacheFilters}
+          renderResultCount
         />
       </Grid>
       <UserMenu

@@ -13,14 +13,16 @@ import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
   const works = useMemo(() => data || [], [data]);
@@ -217,11 +219,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

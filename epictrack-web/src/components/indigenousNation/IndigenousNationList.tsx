@@ -308,6 +308,8 @@ const FirstNationList = () => {
               },
             ],
           }}
+          loading={loading}
+          renderResultCount
           state={{
             columnFilters: columnFilters,
             isLoading: loading,
