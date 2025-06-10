@@ -173,7 +173,10 @@ const ProjectList = () => {
           if (!filterValue || !filterValue.length) {
             return true;
           }
-          if (proponents.length > 0 && filterValue.length >= proponents.length) {
+          if (
+            proponents.length > 0 &&
+            filterValue.length >= proponents.length
+          ) {
             return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
@@ -200,7 +203,10 @@ const ProjectList = () => {
           if (!filterValue || !filterValue.length) {
             return true;
           }
-          if (envRegionsOptions.length > 0 && filterValue.length >= envRegionsOptions.length) {
+          if (
+            envRegionsOptions.length > 0 &&
+            filterValue.length >= envRegionsOptions.length
+          ) {
             return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";

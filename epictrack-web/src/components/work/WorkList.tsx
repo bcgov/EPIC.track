@@ -309,10 +309,7 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            !filterValue.length
-          ) {
+          if (!filterValue.length || !filterValue.length) {
             return true;
           }
           if (states.length > 0 && filterValue.length >= states.length) {

@@ -15,8 +15,8 @@ function testTableFiltering(tableHeaderName: string, propertyToTest: string) {
       // Within the table cell, find the div that includes 'the property to test' in its class name
       cy.wrap($tableCell)
         .find("input:first")
-        .click({force: true}) // Click the input field to focus it
-        .type(`${propertyToTest}{enter}`, {force:true}); // Type into the input field and press Enter
+        .click({ force: true }) // Click the input field to focus it
+        .type(`${propertyToTest}{enter}`, { force: true }); // Type into the input field and press Enter
 
       cy.contains("button", "Apply").click();
     });

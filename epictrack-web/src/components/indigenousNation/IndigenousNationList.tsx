@@ -142,25 +142,25 @@ const FirstNationList = () => {
         header: "Name",
         Cell: canEdit
           ? ({ cell, row, renderedCellValue }) => (
-            <Restricted
-              allowed={[ROLES.EDIT]}
-              elevatedRoles={elevatedRoles}
-              elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
-              RenderError={undefined}
-            >
-              <ETGridTitle
-                to={"#"}
-                onClick={() => {
-                  setFirstNationId(row.original.id);
-                  setShowFormDialog(true);
-                }}
-                enableTooltip={true}
-                tooltip={cell.getValue<string>()}
+              <Restricted
+                allowed={[ROLES.EDIT]}
+                elevatedRoles={elevatedRoles}
+                elevatedAllowed={[ElevatedRoleEnum.MANAGE_FIRST_NATIONS]}
+                RenderError={undefined}
               >
-                {renderedCellValue}
-              </ETGridTitle>
-            </Restricted>
-          )
+                <ETGridTitle
+                  to={"#"}
+                  onClick={() => {
+                    setFirstNationId(row.original.id);
+                    setShowFormDialog(true);
+                  }}
+                  enableTooltip={true}
+                  tooltip={cell.getValue<string>()}
+                >
+                  {renderedCellValue}
+                </ETGridTitle>
+              </Restricted>
+            )
           : undefined,
         sortingFn: "sortFn",
         filterFn: searchFilter,
@@ -302,16 +302,16 @@ const FirstNationList = () => {
           data={firstNations}
           initialState={{
             sorting: [
-              { 
+              {
                 id: "name",
-                desc: false
-               }
+                desc: false,
+              },
             ],
           }}
           state={{
             columnFilters: columnFilters,
-            isLoading: loading, 
-            showGlobalFilter: true
+            isLoading: loading,
+            showGlobalFilter: true,
           }}
           tableName={"first-nation-listing"}
           enableExport

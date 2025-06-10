@@ -381,7 +381,7 @@ const UserManagementList = () => {
           }}
           onEditingRowSave={handleEditRowSave}
           onCacheFilters={handleCacheFilters}
-          state={{ isLoading: loading, columnFilters, }}
+          state={{ isLoading: loading, columnFilters }}
           tableName="user-management-listing"
           renderRowActions={({ row, table }) => (
             <Box>

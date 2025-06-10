@@ -196,9 +196,10 @@ const MasterTrackTable = <TData extends MRT_RowData>({
     },
     onColumnFiltersChange: (updaterOrValue) => {
       // Apply and cache filters
-      const newFilters = typeof updaterOrValue === 'function' 
-        ? updaterOrValue(state?.columnFilters || [])
-        : updaterOrValue;
+      const newFilters =
+        typeof updaterOrValue === "function"
+          ? updaterOrValue(state?.columnFilters || [])
+          : updaterOrValue;
       if (rest.onColumnFiltersChange) {
         rest.onColumnFiltersChange(newFilters);
       }
