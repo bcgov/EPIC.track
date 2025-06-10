@@ -203,11 +203,11 @@ const ProponentList = () => {
                 desc: false,
               },
             ],
-            columnFilters,
           }}
           state={{
             isLoading: loadingProponents,
             showGlobalFilter: true,
+            columnFilters,
           }}
           tableName={"proponent-listing"}
           enableExport

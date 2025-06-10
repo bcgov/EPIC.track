@@ -245,11 +245,11 @@ const WorkStaffList = () => {
                 desc: false,
               },
             ],
-            columnFilters,
           }}
           state={{
             isLoading: loading,
             showGlobalFilter: true,
+            columnFilters,
           }}
           tableName={"work-staff-listing"}
           enableExport

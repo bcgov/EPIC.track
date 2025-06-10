@@ -405,11 +405,11 @@ export default function MyTasksList() {
             data={myTasks}
             initialState={{
               sorting: [{ id: "start_date", desc: false }],
-              columnFilters,
             }}
             state={{
               isLoading: ctx.loading,
               showGlobalFilter: true,
+              columnFilters,
             }}
             onCacheFilters={handleCacheFilters}
           />

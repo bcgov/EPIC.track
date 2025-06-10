@@ -301,10 +301,18 @@ const FirstNationList = () => {
           columns={columns}
           data={firstNations}
           initialState={{
-            sorting: [{ id: "name", desc: false }],
-            columnFilters,
+            sorting: [
+              {
+                id: "name",
+                desc: false,
+              },
+            ],
           }}
-          state={{ isLoading: loading, showGlobalFilter: true }}
+          state={{
+            columnFilters: columnFilters,
+            isLoading: loading,
+            showGlobalFilter: true,
+          }}
           tableName={"first-nation-listing"}
           enableExport
           renderTopToolbarCustomActions={renderTopToolbarCustomActions}

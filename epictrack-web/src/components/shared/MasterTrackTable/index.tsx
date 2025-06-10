@@ -12,7 +12,6 @@ import SearchIcon from "../../../assets/images/search.svg";
 import { Palette } from "../../../styles/theme";
 import { MET_Header_Font_Weight_Bold } from "../../../styles/constants";
 import { ETHeading2, IButton } from "..";
-import { FiltersCache } from "./FiltersCache";
 import { exportToCsv } from "./utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
@@ -195,6 +194,19 @@ const MasterTrackTable = <TData extends MRT_RowData>({
         },
       },
     },
+    onColumnFiltersChange: (updaterOrValue) => {
+      // Apply and cache filters
+      const newFilters =
+        typeof updaterOrValue === "function"
+          ? updaterOrValue(state?.columnFilters || [])
+          : updaterOrValue;
+      if (rest.onColumnFiltersChange) {
+        rest.onColumnFiltersChange(newFilters);
+      }
+      if (onCacheFilters) {
+        onCacheFilters(newFilters);
+      }
+    },
     sortingFns: {
       sortFn: (rowA: any, rowB: any, columnId: string) => {
         return rowA
@@ -293,9 +305,6 @@ const MasterTrackTable = <TData extends MRT_RowData>({
   return (
     <>
       <MaterialReactTable table={table} />
-      {onCacheFilters && (
-        <FiltersCache onCacheFilters={onCacheFilters} table={table} />
-      )}
     </>
   );
 };

@@ -182,11 +182,11 @@ const StaffList = () => {
                   desc: false,
                 },
               ],
-              columnFilters,
             }}
             state={{
               isLoading: loading,
               showGlobalFilter: true,
+              columnFilters,
             }}
             tableName={"staff-listing"}
             onCacheFilters={handleCacheFilters}
