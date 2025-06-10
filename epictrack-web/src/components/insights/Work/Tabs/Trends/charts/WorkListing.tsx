@@ -7,6 +7,7 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box, Grid } from "@mui/material";
 import { ETCaption1, ETGridTitle, IButton } from "components/shared";
@@ -21,8 +22,9 @@ const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
   const { data, error, isLoading } = useGetAllWorksQuery();
 
   const works = useMemo(() => data || [], [data]);
@@ -266,11 +268,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

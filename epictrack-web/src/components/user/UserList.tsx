@@ -1,4 +1,4 @@
-import React from "react";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import { type MRT_ColumnDef } from "material-react-table";
 import { Box, IconButton, FormHelperText, Grid, Tooltip } from "@mui/material";
 import { Edit } from "@mui/icons-material";
@@ -17,16 +17,22 @@ import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const UserList = () => {
-  const [isValidGroup, setIsValidGroup] = React.useState<boolean>(true);
-  const [updatedOn, setUpdatedOn] = React.useState<number>(
+  const [groups, setGroups] = useState<Group[]>([]);
+  const [isValidGroup, setIsValidGroup] = useState<boolean>(true);
+  const [resultStatus, setResultStatus] = useState<string>();
+  const [selectedGroup, setSelectedGroup] = useState<
+    Group | undefined | null
+  >();
+  const [updatedOn, setUpdatedOn] = useState<number>(
     new Date().getMilliseconds()
   );
+  const [users, setUsers] = useState<User[]>([]);
   const userDetails = useAppSelector((state) => state.user.userDetail);
 
-  const getUsers = React.useCallback(async () => {
+  const getUsers = useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
       const userResult = await UserService.getUsers();
@@ -40,7 +46,7 @@ const UserList = () => {
     }
   }, []);
 
-  const getGroups = React.useCallback(async () => {
+  const getGroups = useCallback(async () => {
     try {
       const groupResult = await UserService.getGroups();
       if (groupResult.status === 200) {
@@ -51,28 +57,21 @@ const UserList = () => {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getUsers();
   }, [getUsers, updatedOn]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getGroups();
   }, [getGroups]);
 
-  const [groups, setGroups] = React.useState<Group[]>([]);
-  const [users, setUsers] = React.useState<User[]>([]);
-  const [resultStatus, setResultStatus] = React.useState<string>();
-  const [selectedGroup, setSelectedGroup] = React.useState<
-    Group | undefined | null
-  >();
-
-  const currentUserGroup = React.useMemo<Group>(() => {
+  const currentUserGroup = useMemo<Group>(() => {
     return groups
       .filter((p) => userDetails.groups.includes(p.path))
       .sort((a, b) => b.level - a.level)[0];
   }, [userDetails, groups]);
 
-  const columns = React.useMemo<MRT_ColumnDef<User>[]>(
+  const columns = useMemo<MRT_ColumnDef<User>[]>(
     () => [
       {
         id: "name",
@@ -175,6 +174,8 @@ const UserList = () => {
             }}
             onEditingRowSave={handleSaveRowEdits}
             onEditingRowCancel={handleCancelRowEdits}
+            loading={resultStatus === RESULT_STATUS.LOADING}
+            renderResultCount
             renderRowActions={({ row, table }) => {
               const level = row.original.group?.level || 0;
               return (

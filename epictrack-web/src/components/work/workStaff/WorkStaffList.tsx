@@ -246,11 +246,13 @@ const WorkStaffList = () => {
               },
             ],
           }}
+          loading={loading}
           state={{
             isLoading: loading,
             showGlobalFilter: true,
             columnFilters,
           }}
+          renderResultCount
           tableName={"work-staff-listing"}
           enableExport
           onCacheFilters={handleCacheFilters}

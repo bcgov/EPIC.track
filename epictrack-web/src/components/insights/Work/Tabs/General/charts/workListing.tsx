@@ -3,8 +3,9 @@ import { MRT_ColumnDef } from "material-react-table";
 import { Tooltip, Box } from "@mui/material";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
-import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
@@ -18,8 +19,10 @@ const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 const WorkList = () => {
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+
   const { data, error, isLoading } = useGetWorksQuery();
 
   const works = useMemo(() => data || [], [data]);
@@ -200,11 +203,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

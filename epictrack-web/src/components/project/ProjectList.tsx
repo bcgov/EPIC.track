@@ -263,6 +263,7 @@ const ProjectList = () => {
               showGlobalFilter: true,
               columnFilters,
             }}
+            loading={loadingProjects}
             tableName={"project-listing"}
             enableExport
             renderTopToolbarCustomActions={({ table }) => (
@@ -282,6 +283,7 @@ const ProjectList = () => {
               </Restricted>
             )}
             onCacheFilters={handleCacheFilters}
+            renderResultCount
           />
         </Grid>
       </ETPageContainer>
