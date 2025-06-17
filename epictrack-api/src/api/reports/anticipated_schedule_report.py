@@ -854,7 +854,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EventConfiguration,
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.event_category_id.in_([EventCategoryEnum.DECISION.value, EventCategoryEnum.MILESTONE.value])
+                    EventConfiguration.event_category_id.in_([EventCategoryEnum.DECISION.value])
                 )
             )
             .join(
