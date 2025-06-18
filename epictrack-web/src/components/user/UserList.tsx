@@ -12,6 +12,7 @@ import MasterTrackTable, {
 } from "../shared/MasterTrackTable";
 import { UserGroupUpdate } from "../../services/userService/type";
 import { useAppSelector } from "../../hooks";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import Icons from "components/icons";
@@ -20,6 +21,7 @@ import { IconProps } from "components/icons/type";
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const UserList = () => {
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [isValidGroup, setIsValidGroup] = useState<boolean>(true);
   const [resultStatus, setResultStatus] = useState<string>();
@@ -171,7 +173,9 @@ const UserList = () => {
             state={{
               isLoading: resultStatus === RESULT_STATUS.LOADING,
               showGlobalFilter: true,
+              columnFilters,
             }}
+            onColumnFiltersChange={setColumnFilters}
             onEditingRowSave={handleSaveRowEdits}
             onEditingRowCancel={handleCancelRowEdits}
             loading={resultStatus === RESULT_STATUS.LOADING}
