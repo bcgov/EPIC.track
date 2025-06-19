@@ -4,6 +4,7 @@ import { Fab, Menu } from "@mui/material";
 import SupportCenterMenuItem from "./SupportCenterMenuItem";
 import { Palette } from "styles/theme";
 import { DateCalculatorMenuItem } from "./DateCalculator/DateCalculatorMenuItem";
+import { ReportIssueMenuItem } from "./ReportIssueMenuItem";
 
 export default function AppHelpButton() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -48,6 +49,7 @@ export default function AppHelpButton() {
       >
         <DateCalculatorMenuItem />
         <SupportCenterMenuItem />
+        <ReportIssueMenuItem />
       </Menu>
     </>
   );
