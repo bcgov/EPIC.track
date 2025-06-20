@@ -28,9 +28,6 @@ const UserList = () => {
   const [selectedGroup, setSelectedGroup] = useState<
     Group | undefined | null
   >();
-  const [updatedOn, setUpdatedOn] = useState<number>(
-    new Date().getMilliseconds()
-  );
   const [users, setUsers] = useState<User[]>([]);
   const userDetails = useAppSelector((state) => state.user.userDetail);
 
@@ -61,7 +58,7 @@ const UserList = () => {
 
   useEffect(() => {
     getUsers();
-  }, [getUsers, updatedOn]);
+  }, [getUsers]);
 
   useEffect(() => {
     getGroups();
@@ -97,7 +94,6 @@ const UserList = () => {
                 .filter((p) => currentUserGroup.level >= p.level)
                 .sort((a, b) => b.level - a.level)}
               required={true}
-              // menuPortalTarget={document.body}
               onChange={(newVal) => setSelectedGroup(newVal)}
               defaultValue={groups.find(
                 (p) => p.id === cell.row.original.group?.id
@@ -125,7 +121,7 @@ const UserList = () => {
   };
 
   const handleSaveRowEdits: MaterialReactTableProps<User>["onEditingRowSave"] =
-    async ({ exitEditingMode, row, values }) => {
+    async ({ row, table }) => {
       const group = selectedGroup ? selectedGroup : row.original.group;
       setSelectedGroup(group);
       setIsValidGroup(!!group);
@@ -137,13 +133,12 @@ const UserList = () => {
         setResultStatus(RESULT_STATUS.LOADING);
         try {
           await UserService.updateUserGroup(row.original.id, updateGroup);
-          setUpdatedOn(new Date().getMilliseconds());
-          setResultStatus(RESULT_STATUS.LOADED);
+          getUsers(); //re-fetch users after saving
         } catch (e) {
           setResultStatus(RESULT_STATUS.ERROR);
         }
         setSelectedGroup(null);
-        exitEditingMode(); //required to exit editing mode and close modal
+        table.setEditingRow(null);
       }
     };
 
