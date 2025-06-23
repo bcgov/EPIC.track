@@ -37,7 +37,7 @@ from api.models.role import RoleEnum
 from api.services.staff import StaffService
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
-from api.utils.constants import CANADA_TIMEZONE
+from api.utils.constants import CANADA_TIMEZONE, FIRST_WORK_PHASES
 
 from .report_factory import ReportFactory
 from flask import current_app
@@ -182,7 +182,7 @@ class EAResourceForeCastReport(ReportFactory):
         headers = [section_headings, cell_headings]
         return headers, cell_keys, styles, cell_widths
 
-    def _fetch_data(self, report_date: datetime):
+    def _fetch_data(self, report_date: datetime, include_first_phase: bool):
         """Find and return works that are started before end date and did not end before report date"""
         report_date = report_date.astimezone(CANADA_TIMEZONE)
         current_app.logger.info(f"Report Date: {report_date}")
@@ -195,6 +195,9 @@ class EAResourceForeCastReport(ReportFactory):
             report_date
         )
         current_app.logger.info(f"Greater than report date query: {greater_than_report_date_query}")
+        work_phase_filters = [WorkPhase.id == Work.current_work_phase_id]
+        if not include_first_phase:
+            work_phase_filters.append(WorkPhase.name.notin_(FIRST_WORK_PHASES))
         works = (
             Project.query.filter(
                 Project.is_project_closed.is_(False),
@@ -215,9 +218,7 @@ class EAResourceForeCastReport(ReportFactory):
                     Work.is_deleted.is_(False),
                 ),
             )
-            .join(WorkPhase, and_(
-                WorkPhase.id == Work.current_work_phase_id,
-                WorkPhase.name != "Pre-EA (EAC Assessment)")
+            .join(WorkPhase, and_(*work_phase_filters)
             )
             .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
             .join(WorkType, Work.work_type_id == WorkType.id)
@@ -398,10 +399,10 @@ class EAResourceForeCastReport(ReportFactory):
             response.append(work_data)
         return response
 
-    def generate_report(self, report_date, return_type):
+    def generate_report(self, report_date, return_type, include_first_phase):
         """Generates a report and returns it"""
         self._set_month_labels(report_date)
-        works = self._fetch_data(report_date)
+        works = self._fetch_data(report_date, include_first_phase)
         work_ids = set((work.work_id for work in works))
         current_app.logger.debug(f"Work IDs: {work_ids}")
         works = super()._format_data(works)

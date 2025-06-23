@@ -37,6 +37,7 @@ import { IconProps } from "components/icons/type";
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 export default function ResourceForecast() {
+  const [includeFirstPhase, setIncludeFirstPhase] = useState<boolean>(false);
   const [reportDate, setReportDate] = useState<string>("");
   const [showReportDateBanner, setShowReportDateBanner] =
     useState<boolean>(false);
@@ -376,6 +377,7 @@ export default function ResourceForecast() {
         {
           report_date: reportDate,
           color_intensity: "25",
+          first_phase: includeFirstPhase,
         }
       );
       if (reportData.status && reportData.status === 200) {
@@ -397,7 +399,7 @@ export default function ResourceForecast() {
     } finally {
       setIsLoading(false);
     }
-  }, [reportDate]);
+  }, [includeFirstPhase, reportDate]);
 
   const downloadPDFReport = useCallback(async () => {
     try {
@@ -407,6 +409,7 @@ export default function ResourceForecast() {
           report_date: reportDate,
           filters,
           color_intensity: "25",
+          first_phase: includeFirstPhase,
         }
       );
       const url = window.URL.createObjectURL(
@@ -427,7 +430,7 @@ export default function ResourceForecast() {
         type: "error",
       });
     }
-  }, [reportDate, filters]);
+  }, [includeFirstPhase, reportDate, filters]);
 
   return (
     <ETPageContainer
@@ -443,6 +446,8 @@ export default function ResourceForecast() {
           setReportDate={setReportDate}
           fetchReportData={fetchReportData}
           downloadPDFReport={downloadPDFReport}
+          setIncludeFirstPhase={setIncludeFirstPhase}
+          includeFirstPhase={includeFirstPhase}
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>

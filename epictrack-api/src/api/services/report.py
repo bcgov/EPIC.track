@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Service to manage Reports."""
-
 from api.reports import get_report_generator
 
 
@@ -20,10 +19,10 @@ class ReportService:  # pylint: disable=too-few-public-methods, too-many-argumen
     """Service to manage report related operations."""
 
     @classmethod
-    def generate_report(cls, report_type, report_date, return_type='json', filters=None, color_intensity=None):
+    def generate_report(cls, report_type, report_date, return_type='json', filters=None, color_intensity=None, include_first_phase=False):
         """Generate a report"""
         report_generator = get_report_generator(report_type, filters, color_intensity)
-        report, file_name = report_generator.generate_report(report_date, return_type)
+        report, file_name = report_generator.generate_report(report_date, return_type, include_first_phase)
         if return_type == 'json':
             return report
         return report, file_name
