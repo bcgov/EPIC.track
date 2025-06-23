@@ -218,8 +218,7 @@ class EAResourceForeCastReport(ReportFactory):
                     Work.is_deleted.is_(False),
                 ),
             )
-            .join(WorkPhase, and_(*work_phase_filters)
-            )
+            .join(WorkPhase, and_(*work_phase_filters))
             .join(PhaseCode, PhaseCode.id == WorkPhase.phase_id)
             .join(WorkType, Work.work_type_id == WorkType.id)
             .join(EAAct, Work.ea_act_id == EAAct.id)

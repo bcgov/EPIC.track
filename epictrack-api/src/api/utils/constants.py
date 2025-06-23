@@ -47,4 +47,4 @@ FIRST_WORK_PHASES = [
     "Pre-EA (EAC Assessment)",
     "SubStart Pre-Assessment",
     "Transfer Pre-Application",
-    ]
+]
