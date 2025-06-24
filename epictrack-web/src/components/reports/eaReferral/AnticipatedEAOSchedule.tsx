@@ -26,7 +26,6 @@ import {
   RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
-  MILESTONE_TYPES,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
