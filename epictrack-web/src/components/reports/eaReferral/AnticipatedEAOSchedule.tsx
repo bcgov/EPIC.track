@@ -26,7 +26,6 @@ import {
   RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
-  MILESTONE_TYPES,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
@@ -325,10 +324,7 @@ export default function AnticipatedEAOSchedule() {
                                   <TableBody>
                                     <TableRow>
                                       <TableCell>
-                                        {item["milestone_type"] ===
-                                        MILESTONE_TYPES.REFERRAL
-                                          ? "Referral Date"
-                                          : "Decision Date"}
+                                        {item["anticipated_date_label"]}
                                       </TableCell>
                                       <TableCell>
                                         {dateUtils.formatDate(
