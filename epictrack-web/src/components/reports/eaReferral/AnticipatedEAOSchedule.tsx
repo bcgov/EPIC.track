@@ -325,10 +325,7 @@ export default function AnticipatedEAOSchedule() {
                                   <TableBody>
                                     <TableRow>
                                       <TableCell>
-                                        {item["milestone_type"] ===
-                                        MILESTONE_TYPES.REFERRAL
-                                          ? "Referral Date"
-                                          : "Decision Date"}
+                                        {item["anticipated_date_label"]}
                                       </TableCell>
                                       <TableCell>
                                         {dateUtils.formatDate(
