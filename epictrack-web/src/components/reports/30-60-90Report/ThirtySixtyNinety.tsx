@@ -60,6 +60,7 @@ interface ReportData {
 const IndicatorIcon: FC<IconProps> = Icons["IndicatorIcon"];
 
 export default function ThirtySixtyNinety() {
+  const [includeFirstPhase, setIncludeFirstPhase] = useState<boolean>(false);
   const [reports, setReports] = useState<Period>();
   const [showReportDateBanner, setShowReportDateBanner] =
     useState<boolean>(false);
@@ -146,6 +147,7 @@ export default function ThirtySixtyNinety() {
         REPORT_TYPE.REPORT_30_60_90,
         {
           report_date: reportDate,
+          first_phase: includeFirstPhase,
         }
       );
       setResultStatus(RESULT_STATUS.LOADED);
@@ -169,7 +171,7 @@ export default function ThirtySixtyNinety() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, issueStalenessLevel]);
+  }, [includeFirstPhase, issueStalenessLevel, reportDate]);
 
   const downloadPDFReport = useCallback(async () => {
     try {
@@ -178,6 +180,7 @@ export default function ThirtySixtyNinety() {
         REPORT_TYPE.REPORT_30_60_90,
         {
           report_date: reportDate,
+          first_phase: includeFirstPhase,
         }
       );
       const url = window.URL.createObjectURL(
@@ -197,7 +200,7 @@ export default function ThirtySixtyNinety() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, fetchReportData]);
+  }, [fetchReportData, includeFirstPhase, reportDate]);
 
   const handleTabChange = (event: SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -273,6 +276,8 @@ export default function ThirtySixtyNinety() {
           setReportDate={setReportDate}
           fetchReportData={fetchReportData}
           downloadPDFReport={downloadPDFReport}
+          setIncludeFirstPhase={setIncludeFirstPhase}
+          includeFirstPhase={includeFirstPhase}
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>

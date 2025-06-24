@@ -29,7 +29,7 @@ from api.models.staff import Staff
 from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
-from api.utils.constants import CANADA_TIMEZONE
+from api.utils.constants import CANADA_TIMEZONE, FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from collections import namedtuple
 from .cdog_client import CDOGClient
@@ -109,7 +109,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         )
         self.report_title = "Anticipated EA Referral Schedule"
 
-    def _fetch_data(self, report_date: datetime):
+    def _fetch_data(self, report_date: datetime, include_first_phase: bool):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
         current_app.logger.info(f"Fetching data for {self.report_title} report")
         start_date, report_date = self._get_date_range(report_date)
@@ -123,7 +123,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         formatted_columns = self._get_formatted_columns()
         columns = self._get_selected_columns(aliases, subqueries, formatted_columns)
         query = query.with_entities(*columns)
-        query = query.filter(*self._build_filters(report_date, subqueries["next_referral_event_query"], subqueries["next_decision_event_query"]))
+        query = query.filter(*self._build_filters(report_date, include_first_phase, subqueries["next_referral_event_query"], subqueries["next_decision_event_query"]))
         results = query.all()
 
         return self._process_results(results)
@@ -282,7 +282,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             ))
         )
 
-    def _build_filters(self, report_date: datetime, next_referral_event_query, next_decision_event_query) -> list:
+    def _build_filters(self, report_date: datetime, include_first_phase: bool, next_referral_event_query, next_decision_event_query) -> list:
         """Constructs and returns a list of filter conditions for the main query."""
         start = report_date - timedelta(days=7)
         end = report_date + timedelta(days=366)
@@ -291,7 +291,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
-
+        if not include_first_phase:
+            exclude_phase_names += FIRST_WORK_PHASES
         return [
             Work.is_active.is_(True),
             Event.anticipated_date.between(start, end),
@@ -366,7 +367,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 WorkStateEnum.SUSPENDED.value
             ]),
 
-            ~WorkPhase.name.in_(exclude_phase_names + ["Pre-EA (EAC Assessment)"])
+            ~WorkPhase.name.in_(exclude_phase_names)
         ]
 
     def _get_formatted_columns(self) -> dict:
@@ -504,10 +505,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
         return results
 
-    def generate_report(self, report_date, return_type):
+    def generate_report(self, report_date, return_type, include_first_phase):
         """Generates a report and returns it"""
         current_app.logger.info(f"Generating {self.report_title} report for {report_date}")
-        data = self._fetch_data(report_date)
+        data = self._fetch_data(report_date, include_first_phase)
         works_map = self._resolve_duplicates(data)
 
         works_list = []
