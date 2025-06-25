@@ -288,7 +288,10 @@ export default function ThirtySixtyNinety() {
             return (
               <>
                 <Accordion sx={{ mt: "15px" }} expanded>
-                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                  <AccordionSummary
+                    aria-label={`${key}-day-section`}
+                    expandIcon={<ExpandMoreIcon />}
+                  >
                     <Typography>{key}</Typography>
                   </AccordionSummary>
                   <AccordionDetails>
