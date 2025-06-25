@@ -8,10 +8,16 @@ const PCPInput = () => {
     register,
     formState: { errors },
   } = useFormContext();
+
+  const topicRegister = register("topic");
+  const numberResponsesRegister = register("number_of_responses");
+
   const [topicCount, setTopicCount] = React.useState<number>(0);
+
   const topicChangeHandler = (event: any) => {
     setTopicCount(event.target.value.length);
   };
+
   return (
     <>
       <Grid item xs={6}>
@@ -26,7 +32,7 @@ const PCPInput = () => {
             },
           }}
           type="number"
-          {...register("number_of_responses")}
+          {...numberResponsesRegister}
         />
       </Grid>
       <Grid item xs={6}>
@@ -45,8 +51,11 @@ const PCPInput = () => {
               maxLength: 150,
             },
           }}
-          {...register("topic")}
-          onChange={topicChangeHandler}
+          {...topicRegister}
+          onChange={(e) => {
+            topicRegister.onChange(e);
+            topicChangeHandler(e);
+          }}
         />
       </Grid>
     </>

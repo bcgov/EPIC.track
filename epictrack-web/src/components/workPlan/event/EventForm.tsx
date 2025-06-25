@@ -292,7 +292,10 @@ const EventForm = ({
   }, [selectedConfiguration]);
 
   useEffect(() => {
-    if (event) {
+    if (!event) return;
+    const current = getValues();
+    const hasChanged = JSON.stringify(current) !== JSON.stringify(event);
+    if (hasChanged) {
       reset(event);
       daysOnChangeHandler({
         anticipatedDate: !event.actual_date
@@ -304,7 +307,7 @@ const EventForm = ({
       setTitleCharacterCount(Number(event?.name.length));
       setNotes(event.notes);
     }
-  }, [event, reset]);
+  }, [event, getValues, reset]);
 
   useEffect(() => {
     if (configurations && event) {
@@ -375,7 +378,7 @@ const EventForm = ({
    * Check if the selected event configuration cause date to exceed the phase
    * or push subsequent events
    */
-  const eventDateCheck = async () => {
+  const eventDateCheck = useCallback(async () => {
     try {
       const result = await eventService.check_event_for_date_push(
         getValues(),
@@ -385,7 +388,7 @@ const EventForm = ({
         setDateCheckStatus(result.data as MilestoneEventDateCheck);
       }
     } catch (e) {}
-  };
+  }, [event?.id, getValues]);
 
   /**
    * Check if it is required to show the Lock confirmation
@@ -568,10 +571,15 @@ const EventForm = ({
     }
     return Promise.resolve();
   };
-  const changeHandler = async (params?: NumberOfDaysChangeProps) => {
-    await daysOnChangeHandler(params);
-    eventDateCheck();
-  };
+
+  const changeHandler = useCallback(
+    async (params?: NumberOfDaysChangeProps) => {
+      await daysOnChangeHandler(params);
+      eventDateCheck();
+    },
+    [eventDateCheck]
+  );
+
   return (
     <>
       <FormProvider {...methods}>
