@@ -243,23 +243,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 aliases["sh_work_decision_by"].field_name == "decision_by_id"
             ))
             .outerjoin(
-                aliases["staff_decision_by"],  # Join staff alias
+                # Join staff alias for decision_by. Defaults to work primary decision maker if event decision maker not set
+                aliases["staff_decision_by"],
                 or_(
                     and_(
                         Event.decision_maker_id.isnot(None), aliases["staff_decision_by"].id == Event.decision_maker_id
                     ),
-                    and_(
-                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
-                        aliases["staff_decision_by"].id == Work.eac_decision_by_id,
-                    ),
-                    aliases["staff_decision_by"].id == func.coalesce(cast(aliases["sh_work_decision_by"].field_value, Integer), Work.decision_by_id),  # Default case if event.decision_maker is not populated
+                    aliases["staff_decision_by"].id == func.coalesce(cast(aliases["sh_work_decision_by"].field_value, Integer), Work.decision_by_id),
                 )
             )
             .outerjoin(
                 Position,
                 Position.id == aliases["staff_decision_by"].position_id
             )
-
             # special history project name
             .outerjoin(aliases["sh_project_name"], and_(
                 aliases["sh_project_name"].entity_id == Work.project_id,
@@ -442,22 +438,26 @@ class EAAnticipatedScheduleReport(ReportFactory):
             Event.actual_date.label("actual_date"),
             case(
                 (
-                    EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
-                    case(
-                        (
-                            Position.id != PositionEnum.MINISTER.value,
-                            func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name, " - ", Position.name)
-                        ),
-                        else_=func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name)
-                    )
+                    Position.id != PositionEnum.MINISTER.value,
+                    func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name, " - ", Position.name)
                 ),
-                else_="",
+                else_=func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name)
             ).label("decision_by"),
             func.coalesce(
-                func.concat(
-                    aliases["staff_sh_minister"].first_name, " ", aliases["staff_sh_minister"].last_name),
-                func.concat(
-                    aliases["staff_minister"].first_name, " ", aliases["staff_minister"].last_name)
+                func.coalesce(
+                    func.nullif(
+                        func.concat(
+                            aliases["staff_sh_minister"].first_name, " ", aliases["staff_sh_minister"].last_name
+                        ),
+                        " "
+                    ),
+                    func.nullif(
+                        func.concat(
+                            aliases["staff_minister"].first_name, " ", aliases["staff_minister"].last_name
+                        ),
+                        " "
+                    ),
+                )
             ).label("minister"),
             EventConfiguration.event_type_id.label("milestone_type"),
             EventConfiguration.event_category_id.label("category_type"),

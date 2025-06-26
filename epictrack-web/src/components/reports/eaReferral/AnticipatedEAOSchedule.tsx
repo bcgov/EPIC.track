@@ -302,7 +302,11 @@ export default function AnticipatedEAOSchedule() {
                                         Decision to be made by
                                       </TableCell>
                                       <TableCell>
-                                        {item["decision_by"]}
+                                        {item["minister"]
+                                          ? item["decision_by"] +
+                                            ", " +
+                                            item["minister"]
+                                          : item["decision_by"]}
                                       </TableCell>
                                     </TableRow>
                                   </TableBody>
