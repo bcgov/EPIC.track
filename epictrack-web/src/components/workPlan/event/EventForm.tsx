@@ -96,7 +96,9 @@ const EventForm = ({
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
-  const [actualAdded, setActualAdded] = useState<boolean>(false);
+  const [actualAdded, setActualAdded] = useState<boolean>(
+    event?.actual_date ? true : false
+  );
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
   const isCreateMode = useMemo(() => !event, [event]);
