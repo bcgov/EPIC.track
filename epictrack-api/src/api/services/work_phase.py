@@ -231,7 +231,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             decision_milestones[-1].name if decision_milestones else None
         )
         result["decision"] = (
-            decision_milestones[-1].outcome.name if decision_milestones else None
+            decision_milestones[-1].outcome.name if decision_milestones and decision_milestones[-1].outcome else None
         )
         result["decision_milestone_date"] = (
             decision_milestones[-1].actual_date if decision_milestones else None
