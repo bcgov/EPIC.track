@@ -72,6 +72,54 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         cls._adjust_special_field_end_dates(payload)
         return special_field
 
+
+    @classmethod
+    def delete_special_field_entry(cls, special_field_id: int):
+        """Delete a special field entry and shift adjacent history as needed."""
+        to_delete = SpecialField.find_by_id(special_field_id)
+        if not to_delete:
+            raise ResourceNotFoundError(f"Special field entry with id '{special_field_id}' not found")
+
+        entries = db.session.query(SpecialField).filter_by(
+            entity=to_delete.entity,
+            entity_id=to_delete.entity_id,
+            field_name=to_delete.field_name,
+        ).order_by(SpecialField.time_range).all()
+
+        if len(entries) <= 1:
+            raise BadRequestError("Cannot delete the only special history entry for this field.")
+
+        # Previous and next entries
+        previous_entry = None
+        next_entry = None
+        for i, entry in enumerate(entries):
+            if entry.id == to_delete.id:
+                if i > 0:
+                    previous_entry = entries[i - 1]
+                if i < len(entries) - 1:
+                    next_entry = entries[i + 1]
+                break
+
+        # Delete most recent/current entry and update model
+        if to_delete.time_range.upper is None and previous_entry:
+            previous_entry.time_range = DateTimeTZRange(previous_entry.time_range.lower, None, bounds='[)')
+            db.session.add(previous_entry)
+            cls._update_original_model(previous_entry)
+
+        # Delete middle entry
+        elif to_delete.time_range.upper and next_entry:
+            new_lower = previous_entry.time_range.upper + timedelta(days=1)
+            next_entry.time_range = DateTimeTZRange(
+                new_lower,
+                next_entry.time_range.upper,
+                bounds='[)' if next_entry.time_range.upper else '[)'
+            )
+            db.session.add(next_entry)
+
+        db.session.delete(to_delete)
+        db.session.commit()
+        return to_delete
+
     @classmethod
     def find_by_id(cls, _id):
         """Find special field entry by id."""

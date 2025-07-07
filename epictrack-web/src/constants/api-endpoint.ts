@@ -117,6 +117,7 @@ const Endpoints = {
   SpecialFields: {
     SPECIAL_FIELDS: "/special-fields",
     UPDATE: "/special-fields/:specialFieldId",
+    DELETE: "/special-fields/:specialFieldId",
   },
   Ministry: {
     MINISTRY: "/ministries",
