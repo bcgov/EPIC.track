@@ -72,7 +72,6 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         cls._adjust_special_field_end_dates(payload)
         return special_field
 
-
     @classmethod
     def delete_special_field_entry(cls, special_field_id: int):
         """Delete a special field entry and shift adjacent history as needed."""
