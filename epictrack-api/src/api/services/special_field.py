@@ -25,6 +25,8 @@ from api.models import SpecialField, db
 from api.models.role import RoleEnum
 from api.models.special_field import EntityEnum
 from api.utils.constants import SPECIAL_FIELD_ENTITY_MODEL_MAPS
+from api.utils.roles import Membership, Role as KeycloakRole
+from api.services import authorisation
 
 
 class SpecialFieldService:  # pylint:disable=too-many-arguments
@@ -44,6 +46,9 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
             payload.pop("active_from"), upper_limit, bounds="[)"
         )
         special_field = SpecialField(**payload)
+
+        cls._check_auth(special_field=special_field)
+
         special_field.flush()
         cls._update_original_model(special_field)
         if commit:
@@ -57,6 +62,8 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         """Create special field entry"""
         special_field = SpecialField.find_by_id(special_field_id)
         upper_limit = cls._get_upper_limit(payload, special_field_id)
+
+        cls._check_auth(special_field=special_field)
 
         if not special_field:
             raise ResourceNotFoundError(
@@ -76,6 +83,9 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
     def delete_special_field_entry(cls, special_field_id: int):
         """Delete a special field entry and shift adjacent history as needed."""
         to_delete = SpecialField.find_by_id(special_field_id)
+
+        cls._check_auth(special_field=to_delete)
+
         if not to_delete:
             raise ResourceNotFoundError(f"Special field entry with id '{special_field_id}' not found")
 
@@ -259,3 +269,16 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         if entity_ids:
             query = query.filter(SpecialField.entity_id.in_(entity_ids))
         return query.all()
+
+    @classmethod
+    def _check_auth(cls, special_field=None):
+        """Check if user has extended_edit role or is team member"""
+        work_id = None
+        if special_field and special_field.entity == EntityEnum.WORK:
+            work_id = special_field.entity_id
+
+        one_of_roles = (
+            Membership.TEAM_MEMBER.value,
+            KeycloakRole.EXTENDED_EDIT.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
