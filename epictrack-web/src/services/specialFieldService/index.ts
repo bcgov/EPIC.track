@@ -44,6 +44,15 @@ class SpecialFieldService {
       payload
     );
   };
+
+  deleteSpecialFieldEntry = async (objectId: number) => {
+    return await http.DeleteRequest(
+      Endpoints.SpecialFields.DELETE.replace(
+        ":specialFieldId",
+        objectId.toString()
+      )
+    );
+  };
 }
 
 const specialFieldService = new SpecialFieldService();

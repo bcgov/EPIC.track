@@ -56,8 +56,8 @@ class SpecialFields(Resource):
         return res.SpecialFieldResponseSchema().dump(entry), HTTPStatus.CREATED
 
 
-@cors_preflight('GET, PUT')
-@API.route('/<int:special_field_id>', methods=['GET', 'PUT', 'OPTIONS'])
+@cors_preflight('GET, PUT, DELETE')
+@API.route('/<int:special_field_id>', methods=['GET', 'PUT', 'DELETE', 'OPTIONS'])
 class SpecialField(Resource):
     """Endpoint resource to return special field details."""
 
@@ -83,3 +83,16 @@ class SpecialField(Resource):
         request_json = req.SpecialFieldBodyParameterSchema().load(API.payload)
         special_field_entry = SpecialFieldService.update_special_field_entry(special_field_id, request_json)
         return res.SpecialFieldResponseSchema().dump(special_field_entry), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin='*')
+    @auth.require
+    @profiletime
+    def delete(special_field_id):
+        """Delete a special field entry and optionally merge its range into a replacement."""
+        req.SpecialFieldIdPathParameterSchema().load(request.view_args)
+
+        SpecialFieldService.delete_special_field_entry(
+            special_field_id=special_field_id,
+        )
+        return {"message": "Special field deleted successfully."}, HTTPStatus.NO_CONTENT

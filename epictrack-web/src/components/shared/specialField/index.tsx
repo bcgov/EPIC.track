@@ -20,15 +20,20 @@ import TrackSelect from "../TrackSelect";
 import {
   DATE_FORMAT,
   MIN_WORK_START_DATE,
+  ROLES,
 } from "../../../constants/application-constant";
 import MasterTrackTable from "../MasterTrackTable";
 import { showNotification } from "../notificationProvider";
 import { getErrorMessage } from "utils/axiosUtils";
+import { Restricted } from "../restricted";
+import { useIsActiveTeamMember } from "components/workPlan/utils";
+import TrackDialog from "../TrackDialog";
 
 const AddIcon: FC<IconProps> = Icons["AddIcon"];
-const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
-const CheckIcon: FC<IconProps> = Icons["CheckIcon"];
 const CancelIcon: FC<IconProps> = Icons["CloseXIcon"];
+const CheckIcon: FC<IconProps> = Icons["CheckIcon"];
+const DeleteIcon: FC<IconProps> = Icons["DeleteIcon"];
+const EditIcon: FC<IconProps> = Icons["PencilEditIcon"];
 
 const Styles = {
   flexStart: {
@@ -63,6 +68,10 @@ export const SpecialFieldGrid = ({
   });
   const [tableInstance, setTableInstance] =
     useState<MRT_TableInstance<SpecialField>>();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null);
+
+  const isActiveTeamMember = useIsActiveTeamMember();
 
   const tableState = useMemo<MRT_TableState<SpecialField> | undefined>(() => {
     if (tableInstance) {
@@ -298,6 +307,24 @@ export const SpecialFieldGrid = ({
     }
   };
 
+  const handleDeleteEntry = async (objectId: number) => {
+    try {
+      await specialFieldService.deleteSpecialFieldEntry(objectId);
+      getEntries();
+      showNotification("Entry deleted successfully", {
+        type: "success",
+      });
+      if (onSave) {
+        onSave();
+      }
+    } catch (error) {
+      const message = getErrorMessage(error);
+      showNotification(message, {
+        type: "error",
+      });
+    }
+  };
+
   return (
     <Box
       data-cy="special-field-grid"
@@ -385,15 +412,42 @@ export const SpecialFieldGrid = ({
           onEditingRowSave={handleEditRowSave}
           onCreatingRowSave={handleCreateRowSave}
           renderRowActions={({ row, table }) => (
-            <IconButton
-              onClick={() => {
-                table.setEditingRow(row);
-                table.setCreatingRow(null);
-                resetErrors();
-              }}
-            >
-              <EditIcon fill={Palette.primary.accent.main} />
-            </IconButton>
+            <>
+              <Box>
+                <Restricted
+                  allowed={[ROLES.EXTENDED_EDIT]}
+                  errorProps={{ disabled: true }}
+                  exception={isActiveTeamMember}
+                >
+                  <IconButton
+                    onClick={() => {
+                      table.setEditingRow(row);
+                      table.setCreatingRow(null);
+                      resetErrors();
+                    }}
+                  >
+                    <EditIcon fill={Palette.primary.accent.main} />
+                  </IconButton>
+                </Restricted>
+              </Box>
+
+              <Box>
+                <Restricted
+                  allowed={[ROLES.EXTENDED_EDIT]}
+                  errorProps={{ disabled: true }}
+                  exception={isActiveTeamMember}
+                >
+                  <IconButton
+                    onClick={() => {
+                      setDeleteTargetId(Number(row.original.id));
+                      setShowDeleteDialog(true);
+                    }}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </Restricted>
+              </Box>
+            </>
           )}
           icons={{
             SaveIcon: (props: any) => (
@@ -405,6 +459,29 @@ export const SpecialFieldGrid = ({
           }}
         />
       </Box>
+      <TrackDialog
+        cancelButtonText={"Cancel"}
+        dialogContentText={
+          "Once deleted, this entry will no longer be displayed in History."
+        }
+        dialogTitle={"Delete Entry?"}
+        isActionsRequired
+        isCancelRequired
+        isOkRequired
+        okButtonText={"Delete"}
+        open={showDeleteDialog}
+        onCancel={() => {
+          setShowDeleteDialog(false);
+          setDeleteTargetId(null);
+        }}
+        onOk={async () => {
+          if (deleteTargetId !== null) {
+            await handleDeleteEntry(deleteTargetId);
+            setShowDeleteDialog(false);
+            setDeleteTargetId(null);
+          }
+        }}
+      />
     </Box>
   );
 };
