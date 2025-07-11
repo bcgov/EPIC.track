@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
@@ -21,7 +21,6 @@ import { sort } from "utils";
 import { getStatusFilter } from "components/shared/filterSelect/utils";
 import { useIsActiveTeamMember } from "components/workPlan/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
-
 
 const WorkList = () => {
   const [eaActs, setEAActs] = useState<string[]>([]);
