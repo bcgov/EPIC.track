@@ -17,7 +17,7 @@ export const calculateStatusStaleness = (
 
   const daysAgo = moment();
   const NDaysAgo = dateUtils.diff(
-    daysAgo.toLocaleString(),
+    daysAgo.toISOString(),
     lastApprovedStatus?.posted_date,
     "days"
   );

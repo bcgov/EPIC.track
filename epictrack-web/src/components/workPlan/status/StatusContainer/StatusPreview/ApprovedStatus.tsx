@@ -1,4 +1,3 @@
-import React from "react";
 import { Box } from "@mui/material";
 import moment from "moment";
 import { ETCaption1, ETPreviewBox, ETPreviewText } from "../../../../shared";

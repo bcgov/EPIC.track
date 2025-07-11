@@ -139,7 +139,6 @@ const WorkList = () => {
             }}
             enableTooltip
             tooltip={row.original.title}
-            titleText={row.original.title}
           >
             {row.original.title}
           </ETGridTitle>

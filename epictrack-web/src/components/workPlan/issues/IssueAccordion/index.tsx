@@ -88,7 +88,6 @@ const IssueAccordion = ({
         <IssueSummary issue={issue} />
       </ETAccordionSummary>
       <ETAccordionDetails
-        expanded={expanded}
         sx={{
           pt: "24px",
         }}

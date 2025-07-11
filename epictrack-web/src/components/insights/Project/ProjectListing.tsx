@@ -172,7 +172,7 @@ const ProjectList = () => {
         },
       },
       {
-        accessorKey: "region_env.name",
+        accessorFn: (row) => row.region_env?.name || "",
         header: "Region ENV",
         filterSelectOptions: envRegionsOptions,
         filterVariant: "multi-select",
@@ -201,7 +201,7 @@ const ProjectList = () => {
         },
       },
       {
-        accessorKey: "region_flnro.name",
+        accessorFn: (row) => row.region_flnro?.name || "",
         header: "Region NRS",
         filterSelectOptions: nrsRegionOptions,
         filterVariant: "multi-select",

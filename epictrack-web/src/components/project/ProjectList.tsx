@@ -191,7 +191,7 @@ const ProjectList = () => {
         },
       },
       {
-        accessorKey: "region_env.name",
+        accessorFn: (row) => row.region_env?.name || "",
         header: "ENV Region",
         filterSelectOptions: envRegionsOptions,
         filterVariant: "multi-select",

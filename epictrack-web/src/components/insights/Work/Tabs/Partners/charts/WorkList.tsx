@@ -19,7 +19,7 @@ const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const WorkList = () => {
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
@@ -91,7 +91,6 @@ const WorkList = () => {
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
-            titleText={row.original.title}
             tooltip={row.original.title}
           >
             {renderedCellValue}

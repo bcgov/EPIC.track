@@ -73,7 +73,7 @@ const EventListTable = ({
 
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10, //customize the default page size
+    pageSize: 15, //customize the default page size
   });
 
   useEffect(() => {
@@ -148,7 +148,6 @@ const EventListTable = ({
                 bold={[EventPosition.START, EventPosition.END].includes(
                   row.original.event_configuration?.event_position
                 )}
-                enableEllipsis
                 onClick={(event: any) => onRowClick(event, row.original)}
                 enableTooltip={true}
                 tooltip={cell.getValue<string>()}
@@ -227,7 +226,6 @@ const EventListTable = ({
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis={true}
           >
             {dateUtils.formatDate(cell.getValue<string>(), MONTH_DAY_YEAR)}
           </ETParagraph>
@@ -269,7 +267,6 @@ const EventListTable = ({
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis={true}
           >
             {cell.getValue<string>() &&
               dateUtils.formatDate(
@@ -351,7 +348,6 @@ const EventListTable = ({
           return (
             <ETParagraph
               bold={row.original.type === EVENT_TYPE.MILESTONE}
-              enableEllipsis
               enableTooltip
               tooltip={cell.getValue<string>()}
             >
@@ -393,7 +389,6 @@ const EventListTable = ({
         Cell: ({ cell, row }) => (
           <ETParagraph
             bold={row.original.type === EVENT_TYPE.MILESTONE}
-            enableEllipsis
             enableTooltip
             tooltip={cell.getValue<string>()}
           >

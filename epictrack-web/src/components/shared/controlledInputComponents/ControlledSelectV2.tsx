@@ -20,19 +20,22 @@ type IFormInputProps = {
 const ControlledSelectV2: React.ForwardRefRenderFunction<
   HTMLDivElement,
   IFormInputProps
-> = ({
-  placeholder,
-  name,
-  options,
-  getOptionLabel,
-  getOptionValue,
-  isMulti,
-  disabled,
-  helperText,
-  onHandleChange,
-  // menuPortalTarget,
-  ...otherProps
-}) => {
+> = (
+  {
+    placeholder,
+    name,
+    options,
+    getOptionLabel,
+    getOptionValue,
+    isMulti,
+    disabled,
+    helperText,
+    onHandleChange,
+    // menuPortalTarget,
+    ...otherProps
+  },
+  ref
+) => {
   const {
     control,
     formState: { errors, defaultValues },

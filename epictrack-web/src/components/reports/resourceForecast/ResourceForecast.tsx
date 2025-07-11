@@ -51,7 +51,7 @@ export default function ResourceForecast() {
   const [filters, setFilters] = useState({});
   const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10, //customize the default page size
+    pageSize: 15, //customize the default page size
   });
 
   const FILENAME_PREFIX = "EAO_Resource_Forecast";

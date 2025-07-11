@@ -2,7 +2,7 @@ import React from "react";
 import * as Moment from "moment";
 import { extendMoment } from "moment-range";
 import * as _ from "lodash";
-import { Box } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { ETParagraph } from "../../shared";
 
 const extendedMoment = extendMoment(Moment);
@@ -13,7 +13,6 @@ const Month = ({
   hoveredEvent,
   setHoveredEvent,
   handleEventClick,
-  key,
 }: any) => {
   const start = month;
   const end = extendedMoment(month).endOf("month");
@@ -74,10 +73,12 @@ const Month = ({
 
   const renderMonthDates = () => [
     <ETParagraph
+      key={month.format("MMMM")}
       style={{ gridColumn: "8 / 15", textAlign: "center" }}
     ></ETParagraph>,
-    monthDates.map((date: any, i: number) => (
+    ...monthDates.map((date: any, i: number) => (
       <Box
+        key={`month-date-box-${i}`}
         sx={{
           ...(!date && {
             gridRow: `span ${numTasks + 1}`,
@@ -85,7 +86,7 @@ const Month = ({
             backgroundColor: "#d2d8e5",
           }),
           ...(date && {
-            [`&:nth-child(${3 + i})`]: {
+            [`&:nth-of-type(${3 + i})`]: {
               "&::after": {
                 content: '" "',
                 height: "1px",
@@ -117,32 +118,33 @@ const Month = ({
 
   const renderProjectNames = () =>
     _.keys(eventsData).map((projectName: string, i: number) => (
-      <ETParagraph
-        sx={{
-          fontWeight: "bold",
-          fontSize: "1rem",
-          "&::after": {
-            content: '" "',
-            height: "1px",
-            backgroundColor: "#a7bce8",
-            left: "0",
-            right: "0",
-            display: "block",
-            position: "absolute",
-            width: "100%",
-            gridColumnStart: "8",
-          },
-        }}
-        key={`${projectName}-name`}
-        title={projectName}
-        style={{ gridColumn: "8 / 15", textAlign: "center", gridRow: i + 2 }}
-      >
-        {eventsData[projectName][0].project_short_code &&
-        eventsData[projectName][0].project_short_code !== "null" &&
-        eventsData[projectName][0].project_short_code !== "undefined"
-          ? eventsData[projectName][0].project_short_code
-          : getShortForm(projectName)}
-      </ETParagraph>
+      <Tooltip title={projectName} key={`tooltip-${projectName}-${i}`}>
+        <ETParagraph
+          sx={{
+            fontWeight: "bold",
+            fontSize: "1rem",
+            "&::after": {
+              content: '" "',
+              height: "1px",
+              backgroundColor: "#a7bce8",
+              left: "0",
+              right: "0",
+              display: "block",
+              position: "absolute",
+              width: "100%",
+              gridColumnStart: "8",
+            },
+          }}
+          key={`${projectName}-name`}
+          style={{ gridColumn: "8 / 15", textAlign: "center", gridRow: i + 2 }}
+        >
+          {eventsData[projectName][0].project_short_code &&
+          eventsData[projectName][0].project_short_code !== "null" &&
+          eventsData[projectName][0].project_short_code !== "undefined"
+            ? eventsData[projectName][0].project_short_code
+            : getShortForm(projectName)}
+        </ETParagraph>
+      </Tooltip>
     ));
 
   const renderEvents = (projectData: any, projectStart: any) =>
@@ -206,11 +208,9 @@ const Month = ({
         };
 
         return (
-          <>
-            <Box style={style} key={`${projectName}-grid`}>
-              {renderEvents(projectData, projectStart)}
-            </Box>
-          </>
+          <Box style={style} key={`${projectName}-grid`}>
+            {renderEvents(projectData, projectStart)}
+          </Box>
         );
       }
     });
@@ -258,7 +258,6 @@ const Month = ({
         "&:not(:last-child)": { borderBottom: "none" },
       }}
       style={style}
-      key={key}
     >
       <Box
         style={style}

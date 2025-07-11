@@ -80,7 +80,7 @@ const PhaseContainer = () => {
       </When>
       <When condition={showCompletedPhases}>
         {completedPhases.map((phase) => (
-          <Grid item xs={12}>
+          <Grid item xs={12} key={`completed-phase-${phase.work_phase.id}`}>
             <PhaseAccordion
               key={`phase-accordion-${phase.work_phase.id}`}
               expanded={expandedPhase === phase.work_phase.id}
@@ -102,7 +102,7 @@ const PhaseContainer = () => {
         </Grid>
       </When>
       {currentAndFuturePhases.map((phase) => (
-        <Grid item xs={12}>
+        <Grid item xs={12} key={`current-phase-${phase.work_phase.id}`}>
           <PhaseAccordion
             key={`phase-accordion-${phase.work_phase.id}`}
             expanded={expandedPhase === phase.work_phase.id}

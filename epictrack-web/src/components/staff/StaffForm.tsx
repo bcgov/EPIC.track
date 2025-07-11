@@ -105,6 +105,8 @@ export default function StaffForm({
     getPositions();
   }, []);
 
+  const { ref, ...restRegister } = register("position_id");
+
   return (
     <FormProvider {...methods}>
       <Grid
@@ -166,7 +168,7 @@ export default function StaffForm({
               helperText={errors?.position_id?.message?.toString()}
               options={positions || []}
               placeholder="Select"
-              {...register("position_id")}
+              name="position_id"
             />
           </StaffPositionSpecialField>
         </Grid>

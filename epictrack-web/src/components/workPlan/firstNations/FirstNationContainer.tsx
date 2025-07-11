@@ -154,45 +154,44 @@ const FirstNationContainer = () => {
           <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {FN_RESOURCES.map((resource) => {
               return (
-                <>
+                <Box
+                  sx={{
+                    display: "flex",
+                    padding: "1rem 1.5rem",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: ".5rem",
+                    alignSelf: "stretch",
+                    borderRadius: "4px",
+                    backgroundColor: Palette.neutral.bg.light,
+                  }}
+                  key={resource.url}
+                >
                   <Box
                     sx={{
                       display: "flex",
-                      padding: "1rem 1.5rem",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
                       gap: ".5rem",
-                      alignSelf: "stretch",
-                      borderRadius: "4px",
-                      backgroundColor: Palette.neutral.bg.light,
+                      alignItems: "center",
                     }}
                   >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: ".5rem",
-                        alignItems: "center",
+                    <LinkIcon fill={`${Palette.primary.accent.main}`} />
+                    <ETLink
+                      to={`${resource.url}`}
+                      target="_blank"
+                      rel="noopener"
+                      style={{
+                        fontSize: "1rem",
+                        fontWeight: 700,
+                        lineHeight: "1.5rem",
                       }}
                     >
-                      <LinkIcon fill={`${Palette.primary.accent.main}`} />
-                      <ETLink
-                        to={`${resource.url}`}
-                        target="_blank"
-                        rel="noopener"
-                        style={{
-                          fontSize: "1rem",
-                          fontWeight: 700,
-                          lineHeight: "1.5rem",
-                        }}
-                      >
-                        {resource.title}
-                      </ETLink>
-                    </Box>
-                    <ETParagraph enableEllipsis={false}>
-                      {resource.description}
-                    </ETParagraph>
+                      {resource.title}
+                    </ETLink>
                   </Box>
-                </>
+                  <ETParagraph enableEllipsis={false}>
+                    {resource.description}
+                  </ETParagraph>
+                </Box>
               );
             })}
           </Box>

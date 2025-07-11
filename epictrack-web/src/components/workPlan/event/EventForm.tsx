@@ -819,30 +819,30 @@ const EventForm = ({
           }}
           isActionsRequired
         />
-        <TrackDialog
-          open={showEventPushConfirmation}
-          dialogTitle={"Update this Milestone only?"}
-          disableEscapeKeyDown
-          fullWidth
-          maxWidth="sm"
-          okButtonText="Save"
-          cancelButtonText="Cancel"
-          isActionsRequired
-          onCancel={() => setShowEventPushConfirmation(false)}
-          formId="confirm-form"
-        >
-          <EventDatePushConfirmForm
-            onSave={(option: number) => {
-              setPushEvents((prevState) => {
-                prevState = option === 1;
-                handleSaveEvent(undefined, prevState);
-                setShowEventPushConfirmation(false);
-                return prevState;
-              });
-            }}
-          />
-        </TrackDialog>
       </FormProvider>
+      <TrackDialog
+        open={showEventPushConfirmation}
+        dialogTitle={"Update this Milestone only?"}
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="sm"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        onCancel={() => setShowEventPushConfirmation(false)}
+        formId="confirm-form"
+      >
+        <EventDatePushConfirmForm
+          onSave={(option: number) => {
+            setPushEvents((prevState) => {
+              prevState = option === 1;
+              handleSaveEvent(undefined, prevState);
+              setShowEventPushConfirmation(false);
+              return prevState;
+            });
+          }}
+        />
+      </TrackDialog>
     </>
   );
 };
