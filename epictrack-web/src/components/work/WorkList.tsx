@@ -1,11 +1,11 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import { Work } from "../../models/work";
 import { workService } from "../../services/workService/workService";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer } from "components/shared";
+import { ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";
 import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
@@ -18,13 +18,9 @@ import { WorkDialog } from "./Dialog";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { sort } from "utils";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
 import { getStatusFilter } from "components/shared/filterSelect/utils";
 import { useIsActiveTeamMember } from "components/workPlan/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
-
-const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 
 const WorkList = () => {
   const [eaActs, setEAActs] = useState<string[]>([]);
@@ -120,33 +116,15 @@ const WorkList = () => {
   const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
-        header: " ",
-        size: 25,
-        Cell: ({ row }) => (
-          <Box>
-            <Link to={`/work-plan?work_id=${row.original.id}`}>
-              <GoToIcon />
-            </Link>
-          </Box>
-        ),
-      },
-      {
         accessorKey: "title",
         header: "Name",
         size: 300,
         Cell: ({ row }) => (
-          <ETGridTitle
-            to="#"
-            onClick={() => {
-              setWorkId(row.original.id);
-              setShowWorkDialogForm(true);
-            }}
-            enableTooltip
-            tooltip={row.original.title}
-            titleText={row.original.title}
-          >
-            {row.original.title}
-          </ETGridTitle>
+          <Box>
+            <Link to={`/work-plan?work_id=${row.original.id}`}>
+              {row.original.title}
+            </Link>
+          </Box>
         ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
