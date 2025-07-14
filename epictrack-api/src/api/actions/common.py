@@ -4,22 +4,35 @@ from api.models import Event, EventConfiguration, WorkPhase, db
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.work_calendar_event import WorkCalendarEvent
 from api.models.calendar_event import CalendarEvent
+from sqlalchemy import and_
 
 
 def find_configuration(source_event: Event, params) -> int:
     """Find the configuration"""
+    # Check if the source event is already the one we are looking for
+    if params.get("this_event"):
+        event_configuration = (
+            db.session.query(EventConfiguration).filter(EventConfiguration.id == source_event.event_configuration_id)
+            .first()
+        )
+        return event_configuration
+    work_phase_is_completed = params.get("work_phase_state_is_completed")
+    work_phase_filters = [
+        WorkPhase.work_id == source_event.work_id,
+        WorkPhase.name == params.get("phase_name"),
+        PhaseCode.work_type_id == params.get("work_type_id"),
+        PhaseCode.ea_act_id == params.get("ea_act_id"),
+        WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
+        WorkPhase.is_active.is_(True),
+        WorkPhase.is_completed.is_(False),
+        PhaseCode.is_active.is_(True),
+    ]
+    if work_phase_is_completed is not None:
+        work_phase_filters.append(WorkPhase.is_completed.is_(work_phase_is_completed))
     work_phase = (
         db.session.query(WorkPhase)
         .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
-        .filter(
-            WorkPhase.work_id == source_event.work_id,
-            WorkPhase.name == params.get("phase_name"),
-            PhaseCode.work_type_id == params.get("work_type_id"),
-            PhaseCode.ea_act_id == params.get("ea_act_id"),
-            WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
-            WorkPhase.is_active.is_(True),
-            PhaseCode.is_active.is_(True),
-        )
+        .filter(and_(*work_phase_filters))
         .order_by(WorkPhase.sort_order.desc())
         .first()
     )

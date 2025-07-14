@@ -44,7 +44,7 @@ def create_app(run_mode=os.getenv('FLASK_ENV', 'production')):
     app = Flask(__name__)
     app.config.from_object(config.CONFIGURATION[run_mode])
     log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
-    app.logger.info(f'Current log level: {log_level}')
+    app.logger.info('Current log level: %s', log_level)
     app.logger.setLevel(getattr(logging, log_level, logging.INFO))  # pylint: disable=no-member
     app.json_provider_class = CustomJSONEncoder
 
