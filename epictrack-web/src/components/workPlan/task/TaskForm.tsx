@@ -1,4 +1,11 @@
-import { useState, useContext, useRef, useEffect, useMemo } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -11,8 +18,9 @@ import ControlledSelectV2 from "../../shared/controlledInputComponents/Controlle
 import { Palette } from "../../../styles/theme";
 import { Staff } from "../../../models/staff";
 import { WorkplanContext } from "../WorkPlanContext";
-import workService from "../../../services/workService/workService";
-import taskEventService, {
+import { workService } from "../../../services/workService/workService";
+import {
+  taskEventService,
   TaskEventMutationRequest,
 } from "../../../services/taskEventService/taskEventService";
 import { showNotification } from "../../shared/notificationProvider";
@@ -26,7 +34,7 @@ import { getErrorMessage } from "../../../utils/axiosUtils";
 import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
 import TrackDatePicker from "../../shared/DatePicker";
 import ControlledTextField from "../../shared/controlledInputComponents/ControlledTextField";
-import responsibilityService from "services/responsibilityService/responsibilityService";
+import { responsibilityService } from "services/responsibilityService/responsibilityService";
 
 const schema = yup.object().shape({
   name: yup
@@ -66,7 +74,7 @@ const TaskForm = ({
   const endDateRef = useRef();
   const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
-  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.id]);
+  const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.notes]);
 
   const defaultValues: TaskEventForm = {
     name: taskEvent?.name || "",
@@ -91,22 +99,15 @@ const TaskForm = ({
     watch,
   } = methods;
 
-  useEffect(() => {
-    getResponsibilites();
-  }, []);
-
-  useEffect(() => {
-    getWorkTeamMembers();
-  }, [ctx.work?.id]);
-
-  const getResponsibilites = async () => {
+  const getResponsibilites = useCallback(async () => {
     const responsibilities = await responsibilityService.getResponsibilities();
     if (responsibilities.status === 200) {
       const result = responsibilities.data as ListType[];
       setResponsibilities(result);
     }
-  };
-  const getWorkTeamMembers = async () => {
+  }, []);
+
+  const getWorkTeamMembers = useCallback(async () => {
     const assigneeResult = await workService.getWorkTeamMembers(
       Number(ctx.work?.id),
       true
@@ -115,7 +116,16 @@ const TaskForm = ({
       const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
       setAssignees(staff);
     }
-  };
+  }, [ctx.work?.id]);
+
+  useEffect(() => {
+    getResponsibilites();
+  }, [getResponsibilites]);
+
+  useEffect(() => {
+    getWorkTeamMembers();
+  }, [ctx.work?.id, getWorkTeamMembers]);
+
   const statuses = useMemo(() => statusOptions, []);
 
   const createTask = async (data: TaskEventMutationRequest) => {
@@ -182,10 +192,13 @@ const TaskForm = ({
   const number_of_days = watch("number_of_days");
   const startDate = watch("start_date");
 
-  const handleNDaysChange = (days: number) => {
-    const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
-    setEndDate(endDate);
-  };
+  const handleNDaysChange = useCallback(
+    (days: number) => {
+      const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
+      setEndDate(endDate);
+    },
+    [startDate]
+  );
 
   const handleEndDateChange = (newEndDate: Dayjs | null) => {
     if (!newEndDate) {
@@ -199,7 +212,7 @@ const TaskForm = ({
 
   useEffect(() => {
     handleNDaysChange(Number(number_of_days));
-  }, [startDate]);
+  }, [handleNDaysChange, number_of_days, startDate]);
 
   return (
     <>

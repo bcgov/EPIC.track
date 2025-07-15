@@ -17,7 +17,7 @@ import { showNotification } from "../../shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "../../../constants/application-constant";
 import { ETCaption2, ETParagraph } from "../../shared";
 import { Palette } from "../../../styles/theme";
-import projectService from "../../../services/projectService/projectService";
+import { projectService } from "../../../services/projectService/projectService";
 import { IconProps } from "../../icons/type";
 import Icons from "../../icons";
 
@@ -39,15 +39,6 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
 
   const ctx = React.useContext(WorkplanContext);
   const taskContainerRef = React.useRef(null);
-  React.useEffect(() => {
-    getWorkTypes();
-  }, [ctx.work, ctx.selectedWorkPhase]);
-
-  React.useEffect(() => {
-    if (workTypes.length > 0) {
-      getFirstNations(workTypes[workTypeIndex].id);
-    }
-  }, [workTypeIndex, workTypes]);
 
   const methods = useForm({
     mode: "onBlur",
@@ -62,45 +53,54 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
     }
   };
 
-  const getWorkTypes = async () => {
-    try {
-      const result = await projectService.getWorkTypes(
-        Number(ctx.work?.project_id),
-        Number(ctx.work?.id)
-      );
-      if (result.status === 200) {
-        const workTypes = (result.data as any[]).filter(
-          (p) => p["is_active"] === true
+  React.useEffect(() => {
+    const getWorkTypes = async () => {
+      try {
+        const result = await projectService.getWorkTypes(
+          Number(ctx.work?.project_id),
+          Number(ctx.work?.id)
         );
-        if (workTypes.length > 0)
-          setWorkTypes([
-            { name: `All Work Types` },
-            ...workTypes,
-          ] as ListType[]);
+        if (result.status === 200) {
+          const workTypes = (result.data as any[]).filter(
+            (p) => p["is_active"] === true
+          );
+          if (workTypes.length > 0)
+            setWorkTypes([
+              { name: `All Work Types` },
+              ...workTypes,
+            ] as ListType[]);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
       }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+    };
 
-  const getFirstNations = async (workTypeId: number | undefined) => {
-    try {
-      const result = await projectService.getFirstNations(
-        Number(ctx.work?.project_id),
-        Number(ctx.work?.id),
-        workTypeId
-      );
-      if (result.status === 200) {
-        setFirstNations(result.data as ListType[]);
+    getWorkTypes();
+  }, [ctx.work, ctx.selectedWorkPhase]);
+
+  React.useEffect(() => {
+    const getFirstNations = async (workTypeId: number | undefined) => {
+      try {
+        const result = await projectService.getFirstNations(
+          Number(ctx.work?.project_id),
+          Number(ctx.work?.id),
+          workTypeId
+        );
+        if (result.status === 200) {
+          setFirstNations(result.data as ListType[]);
+        }
+      } catch (e) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
       }
-    } catch (e) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
+    };
+    if (workTypes.length > 0) {
+      getFirstNations(workTypes[workTypeIndex].id);
     }
-  };
+  }, [ctx.work?.id, ctx.work?.project_id, workTypeIndex, workTypes]);
 
   const onSubmitHandler = async () => {
     props.onSave(selectedFirstNations);
@@ -123,6 +123,7 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
       setIsSelectAllSelected(false);
     }
   };
+
   const handleNationSelectAll = (
     event: React.ChangeEvent<HTMLInputElement>,
     checked: boolean

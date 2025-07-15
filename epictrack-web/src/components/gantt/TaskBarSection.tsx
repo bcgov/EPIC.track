@@ -1,5 +1,3 @@
-// TaskBarSection.js
-import React from "react";
 import TaskBar from "./TaskBar";
 import { barHeight } from "./constants";
 import { Palette } from "styles/theme";

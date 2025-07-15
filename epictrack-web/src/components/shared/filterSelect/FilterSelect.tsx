@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Select from "react-select";
 import Menu from "./components/Menu";
 import Option from "./components/Option";
@@ -15,41 +15,24 @@ const FilterSelect = (props: SelectProps) => {
   const theme = useTheme();
   const { name, isMulti, defaultValue } = props;
   const standardDefault = isMulti ? [] : "";
-  const [options, setOptions] = React.useState<OptionType[]>([]);
-  const [selectedOptions, setSelectedOptions] = React.useState<any>();
-  const [selectValue, setSelectValue] = React.useState<any>(
+  const [options, setOptions] = useState<OptionType[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<any>();
+  const [selectValue, setSelectValue] = useState<any>(
     defaultValue ?? standardDefault
   );
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const [menuIsOpen, setMenuIsOpen] = React.useState<boolean>(
-    !!props.menuIsOpen
-  );
-  const [menuStyle, setMenuStyle] = React.useState<any>({}); // eslint-disable-line
-  const [overflowRight, setOverflowRight] = React.useState<number>(0);
-  const selectRef = React.useRef<any | null>(null);
+  const [menuIsOpen, setMenuIsOpen] = useState<boolean>(!!props.menuIsOpen);
+  const [menuStyle, setMenuStyle] = useState<any>({}); // eslint-disable-line
+  const [overflowRight, setOverflowRight] = useState<number>(0);
+  const selectRef = useRef<any | null>(null);
 
-  const selectAllOption = React.useMemo(
+  const selectAllOption = useMemo(
     () => ({
       label: "Select All",
       value: "<SELECT_ALL>",
     }),
     []
   );
-
-  useEffect(() => {
-    if (menuIsOpen) {
-      requestAnimationFrame(() => {
-        const documentWidth = document.documentElement.clientWidth;
-        const scrollWidth = document.documentElement.scrollWidth;
-        const overflowRight = Math.max(scrollWidth - documentWidth, 1);
-        setOverflowRight(overflowRight);
-      });
-      updateSelectedOptions();
-      adjustDropdownPosition();
-    } else {
-      setOverflowRight(0);
-    }
-  }, [menuIsOpen, overflowRight]);
 
   const isSelectAllSelected = () =>
     selectedOptions.includes(selectAllOption.value);
@@ -137,7 +120,7 @@ const FilterSelect = (props: SelectProps) => {
   };
 
   // Adjust dropdown position based on overflow
-  const adjustDropdownPosition = () => {
+  const adjustDropdownPosition = useCallback(() => {
     if (menuRef?.current) {
       if (overflowRight > 0) {
         setMenuStyle({
@@ -147,21 +130,41 @@ const FilterSelect = (props: SelectProps) => {
         setMenuStyle({});
       }
     }
-  };
+  }, [overflowRight]);
 
   // Function to update selected options
-  const updateSelectedOptions = () => {
+  const updateSelectedOptions = useCallback(() => {
     const currentValues = isMulti
       ? selectValue.map((v: OptionType) => v.value)
       : selectValue.value;
     setSelectedOptions(currentValues);
-  };
+  }, [isMulti, selectValue]);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    if (menuIsOpen) {
+      requestAnimationFrame(() => {
+        const documentWidth = document.documentElement.clientWidth;
+        const scrollWidth = document.documentElement.scrollWidth;
+        const overflowRight = Math.max(scrollWidth - documentWidth, 1);
+        setOverflowRight(overflowRight);
+      });
+      updateSelectedOptions();
+      adjustDropdownPosition();
+    } else {
+      setOverflowRight(0);
+    }
+  }, [
+    adjustDropdownPosition,
+    menuIsOpen,
+    overflowRight,
+    updateSelectedOptions,
+  ]);
+
+  useEffect(() => {
     let filterOptions = props.options as OptionType[];
     if (isMulti) filterOptions = [selectAllOption, ...filterOptions];
     setOptions(filterOptions);
-  }, [props.options]);
+  }, [isMulti, props.options, selectValue, selectAllOption]);
 
   const isSearchable = () => {
     if (props.isSearchable !== undefined) return props.isSearchable;
@@ -173,7 +176,7 @@ const FilterSelect = (props: SelectProps) => {
     return !selectValue;
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (
       props.value !== undefined &&
       selectValue !== undefined &&
@@ -181,7 +184,7 @@ const FilterSelect = (props: SelectProps) => {
     ) {
       setSelectValue(props.value);
     }
-  }, [props.value]);
+  }, [props.value, selectValue]);
 
   return (
     <div ref={menuRef}>

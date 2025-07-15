@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { Stack } from "@mui/material";
 import { useAppSelector } from "../../../hooks";
 import { ETCaption2 } from "../../shared";
@@ -16,13 +16,16 @@ export const AssigneeToggle = () => {
     Boolean(searchOptions.staff_id)
   );
 
-  const handleToggleChange = (checked: boolean) => {
-    setIsUsersWorkPlans(checked);
-    setSearchOptions((prev) => ({
-      ...prev,
-      staff_id: checked ? user.staffId : null,
-    }));
-  };
+  const handleToggleChange = useCallback(
+    (checked: boolean) => {
+      setIsUsersWorkPlans(checked);
+      setSearchOptions((prev) => ({
+        ...prev,
+        staff_id: checked ? user.staffId : null,
+      }));
+    },
+    [setSearchOptions, user.staffId]
+  );
 
   useEffect(() => {
     if (!haveInitializedtoggle && !loadingWorkplans) {
@@ -31,7 +34,12 @@ export const AssigneeToggle = () => {
         handleToggleChange(false);
       }
     }
-  }, [loadingWorkplans]);
+  }, [
+    handleToggleChange,
+    haveInitializedtoggle,
+    loadingWorkplans,
+    totalWorkplans,
+  ]);
 
   return (
     <Stack direction="row" spacing={1} alignItems={"center"}>

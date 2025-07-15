@@ -25,7 +25,7 @@ const WorksClosedYearlyBreakdown = () => {
   useEffect(() => {
     if (!chartData) return;
     const years: OptionType[] = [];
-    chartData.map((entry) => {
+    chartData.forEach((entry) => {
       const year = { value: entry.year, label: entry.year };
       if (!years.find((item) => item?.value === year?.value)) years.push(year);
     });
@@ -40,13 +40,13 @@ const WorksClosedYearlyBreakdown = () => {
     if (!chartData) return;
     const filteredData = chartData.filter((item) => item.year === selectedYear);
     setDisplayData(filteredData);
-  }, [selectedYear]);
+  }, [chartData, selectedYear]);
 
   if (isChartLoading || !chartData) {
     return <PieChartSkeleton />;
   }
 
-  // TODO: handle error
+  // TODO: handle error TRACK-528
   if (error) {
     showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
     return <div>Error</div>;

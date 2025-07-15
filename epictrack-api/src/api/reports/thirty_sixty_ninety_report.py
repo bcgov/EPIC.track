@@ -39,7 +39,7 @@ from api.models.work_type import WorkTypeEnum
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
-from api.utils.constants import CANADA_TIMEZONE
+from api.utils.constants import CANADA_TIMEZONE, FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from api.utils.util import process_data
 from api.utils.draftjs_extractor import draftjs_extractor
@@ -127,12 +127,12 @@ class ThirtySixtyNinetyReport(ReportFactory):
             .all()
         )
 
-    def _fetch_data(self, report_date):
+    def _fetch_data(self, report_date, include_first_phase):
         """Fetches the relevant data for EA 30-60-90 Report"""
         report_date = report_date.astimezone(CANADA_TIMEZONE)
         max_date = report_date + timedelta(days=93)
         next_pecp_query = self._get_next_pcp_query(report_date, max_date)
-        valid_event_ids = self._get_valid_event_ids(report_date)
+        valid_event_ids = self._get_valid_event_ids(report_date, include_first_phase)
         work_issue_work_ids = self._get_valid_work_issue_work_ids(report_date)
         latest_status_updates = self._get_latest_status_update_query()
         sh_project_name = aliased(SpecialField)
@@ -297,17 +297,17 @@ class ThirtySixtyNinetyReport(ReportFactory):
         return data
 
     def generate_report(
-        self, report_date: datetime, return_type
+        self, report_date: datetime, return_type, include_first_phase
     ):  # pylint: disable=too-many-locals
         """Generates a report and returns it"""
         self.report_date = report_date.astimezone(utc)
-        data = self._fetch_data(report_date + timedelta(days=-3))
+        data = self._fetch_data(report_date + timedelta(days=-3), include_first_phase)
         data = self._format_data(data)
         data = self._update_staleness(data, report_date)
         if return_type == "json" or not data:
             return process_data(data, return_type)
         pdf_stream = BytesIO()
-        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup
+        current_directory = path.dirname(path.abspath(__file__))  # TODO CJK: refactor to pull out style setup TRACK-527
         font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Regular_2f.ttf")
         bold_font_path = path.join(current_directory, "report_templates", "2023_01_01_BCSans-Bold_2f.ttf")
         pdfmetrics.registerFont(TTFont('BCSans', font_path))
@@ -483,7 +483,7 @@ class ThirtySixtyNinetyReport(ReportFactory):
             Event.actual_date.is_(None)
         ).correlate(Work).exists()
 
-    def _get_valid_event_ids(self, report_date) -> List[int]:
+    def _get_valid_event_ids(self, report_date, include_first_phase) -> List[int]:
         """Find and return set of valid event ids"""
         start_date = report_date - timedelta(days=3)
         end_date = report_date + timedelta(days=93)
@@ -530,15 +530,15 @@ class ThirtySixtyNinetyReport(ReportFactory):
             )
         )
 
+        work_phase_filters = [EventConfiguration.work_phase_id == WorkPhase.id, WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value]
+        if not include_first_phase:
+            work_phase_filters.append(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+
         valid_events = (
             db.session.query(Event.id)
             .join(EventConfiguration, Event.event_configuration)
             .join(Work, Event.work)
-            .join(WorkPhase, and_(
-                EventConfiguration.work_phase_id == WorkPhase.id,
-                WorkPhase.visibility == PhaseVisibilityEnum.REGULAR.value,
-                WorkPhase.name != "Pre-EA (EAC Assessment)",
-            ))
+            .join(WorkPhase, and_(*work_phase_filters))
             .filter(or_(
                 minister_decision_late,
                 decision_pending_referral_made,

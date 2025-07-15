@@ -71,4 +71,4 @@ class IssueService {
   }
 }
 
-export default new IssueService();
+export const issueService = new IssueService();

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Box, Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
@@ -16,7 +16,7 @@ import { OptionType } from "components/shared/filterSelect/type";
 const ProjectBySubtypeChart = () => {
   const { projects, loadingProjects } = useProjectsContext();
   const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
-  const [selectedType, setSelectedType] = React.useState({
+  const [selectedType, setSelectedType] = useState({
     id: 0,
     name: "",
   });
@@ -34,13 +34,13 @@ const ProjectBySubtypeChart = () => {
     if (selectedType?.id) {
       loadChartTrigger(selectedType.id);
     }
-  }, [selectedType]);
+  }, [loadChartTrigger, selectedType]);
 
   if (loadingProjects || queryResult.isLoading || !selectedType) {
     return <PieChartSkeleton />;
   }
 
-  // TODO: handle error
+  // TODO: handle error TRACK-528
   if (queryResult.isError) {
     showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
     return <div>Error</div>;

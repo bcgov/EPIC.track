@@ -19,8 +19,10 @@ const add = (date: string, unit: number, unitOfTime: UnitOfTime) => {
   return moment(date).add(unit, unitOfTime);
 };
 
-export default {
+const dateUtils = {
   formatDate,
   diff,
   add,
 };
+
+export default dateUtils;

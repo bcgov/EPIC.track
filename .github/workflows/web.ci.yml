@@ -31,7 +31,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x]
+        node-version: [16.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -51,6 +51,10 @@ jobs:
     needs: setup-job
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [16.x]
+
     steps:
       - uses: actions/checkout@v2
 
@@ -68,25 +72,13 @@ jobs:
         run: |
           npx cypress run --component --headed --browser chrome
 
-      # # Set codecov branch name with prefix if pull request
-      # - name: Sets Codecov branch name
-      #   run: |
-      #     echo "CODECOV_BRANCH=PR_${{github.head_ref}}" >> $GITHUB_ENV
-      #   if: github.event_name == 'pull_request'
-
-      # - name: Upload coverage to Codecov
-      #   uses: codecov/codecov-action@v3
-      #   with:
-      #     flags: epictrackweb
-      #     name: codecov-epictrack-web
-      #     fail_ci_if_error: true
-      #     verbose: true
-      #     override_branch: ${{env.CODECOV_BRANCH}}
-      #     token: ${{ secrets.CODECOV_TOKEN }}
-
   web-build-check:
     needs: setup-job
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -100,4 +92,4 @@ jobs:
       - name: build to check strictness
         id: build
         run: |
-          npm run build --quiet || true
+          npm run build --quiet

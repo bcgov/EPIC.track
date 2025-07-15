@@ -7,4 +7,4 @@ class ResponsibilityService {
   };
 }
 
-export default new ResponsibilityService();
+export const responsibilityService = new ResponsibilityService();

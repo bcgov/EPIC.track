@@ -7,4 +7,4 @@ class TypeService {
   }
 }
 
-export default new TypeService();
+export const typeService = new TypeService();

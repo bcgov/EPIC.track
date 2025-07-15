@@ -11,20 +11,35 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import Moment from "moment";
+import { Else, If, Then, When } from "react-if";
+import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
+import { Palette } from "../../../styles/theme";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import RichTextEditor from "../../shared/richTextEditor";
+import TrackDialog from "../../shared/TrackDialog";
+import WarningBox from "../../shared/warningBox";
+import { showNotification } from "../../shared/notificationProvider";
+import Icons from "../../icons";
+import { IconProps } from "../../icons/type";
+import { WorkplanContext } from "../WorkPlanContext";
+import { EventContext } from "./EventContext";
 import {
   COMMON_ERROR_MESSAGE,
   MIN_WORK_START_DATE,
 } from "../../../constants/application-constant";
-import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
-import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { Palette } from "../../../styles/theme";
-import { WorkplanContext } from "../WorkPlanContext";
-import { showNotification } from "../../shared/notificationProvider";
+import { EVENT_TYPE } from "../phase/type";
+import { OUTCOME_ID } from "./constants";
+import { POSITION_ENUM } from "models/position";
+import { eventService } from "services/eventService/eventService";
+import staffService from "services/staffService/staffService";
+import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import { ListType } from "../../../models/code";
-import RichTextEditor from "../../shared/richTextEditor";
-import eventService from "../../../services/eventService/eventService";
+import { dateUtils } from "../../../utils";
+import { ListType } from "models/code";
+import { Staff } from "models/staff";
 import {
   EventCategory,
   EventPosition,
@@ -33,30 +48,15 @@ import {
   EventsGridModel,
   MilestoneEvent,
   MilestoneEventDateCheck,
-} from "../../../models/event";
-import configurationService from "../../../services/configurationService/configurationService";
-import TrackDialog from "../../shared/TrackDialog";
-import EventConfiguration from "../../../models/eventConfiguration";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+} from "models/event";
+import EventConfiguration from "models/eventConfiguration";
 import MultiDaysInput from "./components/MultiDaysInput";
-import { dateUtils } from "../../../utils";
 import PCPInput from "./components/PCPInput";
-import Icons from "../../icons/index";
-import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import DecisionInput from "./components/DecisionInput";
-import { POSITION_ENUM } from "../../../models/position";
-import { Else, If, Then, When } from "react-if";
 import ExtensionInput from "./components/ExtensionInput";
-import { EventContext } from "./EventContext";
-import { EVENT_TYPE } from "../phase/type";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
-import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { Staff } from "models/staff";
-import staffService from "services/staffService/staffService";
-import { OUTCOME_ID } from "./constants";
 
 interface EventFormProps {
   onSave: () => void;
@@ -96,7 +96,9 @@ const EventForm = ({
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
-  const [actualAdded, setActualAdded] = useState<boolean>(false);
+  const [actualAdded, setActualAdded] = useState<boolean>(
+    event?.actual_date ? true : false
+  );
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
   const isCreateMode = useMemo(() => !event, [event]);
@@ -172,6 +174,9 @@ const EventForm = ({
       const decisionMakers = result.data as Staff[];
       if (work?.responsible_epd) {
         decisionMakers.push(work?.responsible_epd);
+      }
+      if (work?.work_lead) {
+        decisionMakers.push(work?.work_lead);
       }
       if (work?.decision_by) {
         decisionMakers.unshift(work?.decision_by);
@@ -289,7 +294,10 @@ const EventForm = ({
   }, [selectedConfiguration]);
 
   useEffect(() => {
-    if (event) {
+    if (!event) return;
+    const current = getValues();
+    const hasChanged = JSON.stringify(current) !== JSON.stringify(event);
+    if (hasChanged) {
       reset(event);
       daysOnChangeHandler({
         anticipatedDate: !event.actual_date
@@ -301,7 +309,7 @@ const EventForm = ({
       setTitleCharacterCount(Number(event?.name.length));
       setNotes(event.notes);
     }
-  }, [event, reset]);
+  }, [event, getValues, reset]);
 
   useEffect(() => {
     if (configurations && event) {
@@ -372,7 +380,7 @@ const EventForm = ({
    * Check if the selected event configuration cause date to exceed the phase
    * or push subsequent events
    */
-  const eventDateCheck = async () => {
+  const eventDateCheck = useCallback(async () => {
     try {
       const result = await eventService.check_event_for_date_push(
         getValues(),
@@ -382,7 +390,7 @@ const EventForm = ({
         setDateCheckStatus(result.data as MilestoneEventDateCheck);
       }
     } catch (e) {}
-  };
+  }, [event?.id, getValues]);
 
   /**
    * Check if it is required to show the Lock confirmation
@@ -565,10 +573,15 @@ const EventForm = ({
     }
     return Promise.resolve();
   };
-  const changeHandler = async (params?: NumberOfDaysChangeProps) => {
-    await daysOnChangeHandler(params);
-    eventDateCheck();
-  };
+
+  const changeHandler = useCallback(
+    async (params?: NumberOfDaysChangeProps) => {
+      await daysOnChangeHandler(params);
+      eventDateCheck();
+    },
+    [eventDateCheck]
+  );
+
   return (
     <>
       <FormProvider {...methods}>

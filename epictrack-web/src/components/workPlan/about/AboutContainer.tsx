@@ -1,6 +1,6 @@
+import { FC, SyntheticEvent, useContext, useState } from "react";
 import { Box, Grid } from "@mui/material";
-import React, { useContext } from "react";
-import { ETHeading3, ETLink, ETParagraph } from "../../shared";
+import { ETHeading3, ETLink } from "../../shared";
 import { tabPanelStyle, tabStyle, titleStyle } from "../common/styles";
 import { Palette } from "../../../styles/theme";
 import { ETTabs, ETTab } from "../../shared/tab/Tab";
@@ -12,13 +12,13 @@ import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { WorkplanContext } from "../WorkPlanContext";
 
-const LinkIcon: React.FC<IconProps> = Icons["LinkIcon"];
+const LinkIcon: FC<IconProps> = Icons["LinkIcon"];
 
 const AboutContainer = () => {
   const { work } = useContext(WorkplanContext);
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
-  const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
+  const handleTabSelected = (event: SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
 

@@ -8,7 +8,7 @@ import {
   useState,
 } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import workService from "../../services/workService/workService";
+import { workService } from "../../services/workService/workService";
 import { Work, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
 import {
@@ -20,8 +20,8 @@ import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
 import { WorkIssue } from "../../models/Issue";
 import { StalenessSettings } from "models/settings";
-import statusService from "../../services/statusService/statusService";
-import issueService from "../../services/issueService";
+import { statusService } from "../../services/statusService/statusService";
+import { issueService } from "../../services/issueService";
 import { useAppSelector } from "hooks";
 import stalenessSettingsService from "services/stalenessSettingsService";
 

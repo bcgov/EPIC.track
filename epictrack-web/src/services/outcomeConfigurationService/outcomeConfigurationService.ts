@@ -8,4 +8,4 @@ class OutcomeConfigurationService {
     );
   }
 }
-export default new OutcomeConfigurationService();
+export const outcomeConfigurationService = new OutcomeConfigurationService();

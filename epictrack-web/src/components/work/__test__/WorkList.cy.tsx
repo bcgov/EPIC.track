@@ -283,6 +283,6 @@ describe("WorkList", () => {
   });
 
   it("should display the work list", () => {
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 });

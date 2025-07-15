@@ -44,7 +44,7 @@ class EventTemplate(BaseModelVersioned):
 
     id = sa.Column(
         sa.Integer, primary_key=True, autoincrement=True
-    )  # TODO check how it can be inherited from parent
+    )  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     parent_id = sa.Column(sa.Integer, nullable=True)
     phase_id = sa.Column(sa.ForeignKey("phase_codes.id"), nullable=False)

@@ -50,12 +50,6 @@ export const Routes: RouteType[] = [
         allowedRoles: [],
         isAuthenticated: false,
       },
-      {
-        name: "Event Calendar",
-        path: "/reports/event-calendar",
-        allowedRoles: [],
-        isAuthenticated: false,
-      },
     ],
   },
   {

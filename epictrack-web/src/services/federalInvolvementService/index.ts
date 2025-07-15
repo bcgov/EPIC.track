@@ -7,4 +7,4 @@ class FederalInvolvementService {
   }
 }
 
-export default new FederalInvolvementService();
+export const federalInvolvementService = new FederalInvolvementService();

@@ -12,4 +12,4 @@ class ConfigurationService {
   }
 }
 
-export default new ConfigurationService();
+export const configurationService = new ConfigurationService();

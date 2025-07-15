@@ -29,7 +29,7 @@ from api.models.staff import Staff
 from api.models.substitution_acts import SubstitutionAct
 from api.models.work import Work, WorkStateEnum
 from api.models.work_phase import WorkPhase
-from api.utils.constants import CANADA_TIMEZONE
+from api.utils.constants import CANADA_TIMEZONE, FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from collections import namedtuple
 from .cdog_client import CDOGClient
@@ -50,6 +50,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             "additional_info",
             "amendment_title",
             "anticipated_date_label",
+            "anticipated_date_title",
             "anticipated_decision_date",
             "category_type",
             "date_updated",
@@ -109,7 +110,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                         )
         self.report_title = "Anticipated EA Referral Schedule"
 
-    def _fetch_data(self, report_date: datetime):
+    def _fetch_data(self, report_date: datetime, include_first_phase: bool):
         """Fetches the relevant data for EA Anticipated Schedule Report"""
         current_app.logger.info(f"Fetching data for {self.report_title} report")
         start_date, report_date = self._get_date_range(report_date)
@@ -123,7 +124,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
         formatted_columns = self._get_formatted_columns()
         columns = self._get_selected_columns(aliases, subqueries, formatted_columns)
         query = query.with_entities(*columns)
-        query = query.filter(*self._build_filters(report_date, subqueries["next_referral_event_query"], subqueries["next_decision_event_query"]))
+        query = query.filter(*self._build_filters(report_date, include_first_phase, subqueries["next_referral_event_query"], subqueries["next_decision_event_query"]))
         results = query.all()
 
         return self._process_results(results)
@@ -242,23 +243,19 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 aliases["sh_work_decision_by"].field_name == "decision_by_id"
             ))
             .outerjoin(
-                aliases["staff_decision_by"],  # Join staff alias
+                # Join staff alias for decision_by. Defaults to work primary decision maker if event decision maker not set
+                aliases["staff_decision_by"],
                 or_(
                     and_(
                         Event.decision_maker_id.isnot(None), aliases["staff_decision_by"].id == Event.decision_maker_id
                     ),
-                    and_(
-                        EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
-                        aliases["staff_decision_by"].id == Work.eac_decision_by_id,
-                    ),
-                    aliases["staff_decision_by"].id == func.coalesce(cast(aliases["sh_work_decision_by"].field_value, Integer), Work.decision_by_id),  # Default case if event.decision_maker is not populated
+                    aliases["staff_decision_by"].id == func.coalesce(cast(aliases["sh_work_decision_by"].field_value, Integer), Work.decision_by_id),
                 )
             )
             .outerjoin(
                 Position,
                 Position.id == aliases["staff_decision_by"].position_id
             )
-
             # special history project name
             .outerjoin(aliases["sh_project_name"], and_(
                 aliases["sh_project_name"].entity_id == Work.project_id,
@@ -282,7 +279,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
             ))
         )
 
-    def _build_filters(self, report_date: datetime, next_referral_event_query, next_decision_event_query) -> list:
+    def _build_filters(self, report_date: datetime, include_first_phase: bool, next_referral_event_query, next_decision_event_query) -> list:
         """Constructs and returns a list of filter conditions for the main query."""
         start = report_date - timedelta(days=7)
         end = report_date + timedelta(days=366)
@@ -291,7 +288,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
         exclude_phase_names = []
         if self.filters and "exclude" in self.filters:
             exclude_phase_names = self.filters["exclude"]
-
+        if not include_first_phase:
+            exclude_phase_names += FIRST_WORK_PHASES
         return [
             Work.is_active.is_(True),
             Event.anticipated_date.between(start, end),
@@ -366,7 +364,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 WorkStateEnum.SUSPENDED.value
             ]),
 
-            ~WorkPhase.name.in_(exclude_phase_names + ["Pre-EA (EAC Assessment)"])
+            ~WorkPhase.name.in_(exclude_phase_names)
         ]
 
     def _get_formatted_columns(self) -> dict:
@@ -375,13 +373,16 @@ class EAAnticipatedScheduleReport(ReportFactory):
         formatted_work_type = self._get_formatted_work_type_name()
         formatted_anticipated_date = self._get_formatted_date_label(formatted_work_type, formatted_phase_name)
         group_column = self._get_grouped_column(formatted_work_type)
-        anticipated_date_column = self._get_anticipated_date_column(formatted_anticipated_date)
+        anticipated_date_title = self._get_anticipated_date_title(formatted_anticipated_date)
+        anticipated_date_label = self._get_anticipated_date_label()
+
         ea_type_column = self._get_ea_type_column(formatted_phase_name)
 
         return {
             "formatted_work_type": formatted_work_type,
             "group_column": group_column,
-            "anticipated_date_column": anticipated_date_column,
+            "anticipated_date_title": anticipated_date_title,
+            "anticipated_date_label": anticipated_date_label,
             "ea_type_column": ea_type_column,
         }
 
@@ -408,7 +409,8 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 else_=func.coalesce(aliases["sh_project_name"].field_value, Project.name)
             ).label("amendment_title"),
             formatted_columns["ea_type_column"],
-            formatted_columns["anticipated_date_column"].label("anticipated_date_label"),
+            formatted_columns["anticipated_date_title"],
+            formatted_columns["anticipated_date_label"],
             subqueries["latest_status_updates"].c.posted_date.label("date_updated"),
             func.coalesce(
                 aliases["sh_project_name"].field_value, Project.name
@@ -436,22 +438,26 @@ class EAAnticipatedScheduleReport(ReportFactory):
             Event.actual_date.label("actual_date"),
             case(
                 (
-                    EventConfiguration.event_type_id != EventTypeEnum.MINISTER_DECISION.value,
-                    case(
-                        (
-                            Position.id != PositionEnum.MINISTER.value,
-                            func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name, " - ", Position.name)
-                        ),
-                        else_=func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name)
-                    )
+                    Position.id != PositionEnum.MINISTER.value,
+                    func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name, " - ", Position.name)
                 ),
-                else_="",
+                else_=func.concat(aliases["staff_decision_by"].first_name, " ", aliases["staff_decision_by"].last_name)
             ).label("decision_by"),
             func.coalesce(
-                func.concat(
-                    aliases["staff_sh_minister"].first_name, " ", aliases["staff_sh_minister"].last_name),
-                func.concat(
-                    aliases["staff_minister"].first_name, " ", aliases["staff_minister"].last_name)
+                func.coalesce(
+                    func.nullif(
+                        func.concat(
+                            aliases["staff_sh_minister"].first_name, " ", aliases["staff_sh_minister"].last_name
+                        ),
+                        " "
+                    ),
+                    func.nullif(
+                        func.concat(
+                            aliases["staff_minister"].first_name, " ", aliases["staff_minister"].last_name
+                        ),
+                        " "
+                    ),
+                )
             ).label("minister"),
             EventConfiguration.event_type_id.label("milestone_type"),
             EventConfiguration.event_category_id.label("category_type"),
@@ -504,10 +510,10 @@ class EAAnticipatedScheduleReport(ReportFactory):
 
         return results
 
-    def generate_report(self, report_date, return_type):
+    def generate_report(self, report_date, return_type, include_first_phase):
         """Generates a report and returns it"""
         current_app.logger.info(f"Generating {self.report_title} report for {report_date}")
-        data = self._fetch_data(report_date)
+        data = self._fetch_data(report_date, include_first_phase)
         works_map = self._resolve_duplicates(data)
 
         works_list = []
@@ -648,25 +654,29 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 ),
                 else_=case(
                             (
-                                EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                                and_(
+                                    EventConfiguration.event_type_id == EventTypeEnum.MINISTER_DECISION.value,
+                                    WorkType.id == WorkTypeEnum.ASSESSMENT.value
+                                ),
                                 "EA Certificate"
                             ),
                             else_=formatted_work_type,
                     )
         )
 
-    def _get_anticipated_date_column(self, formatted_anticipated_date):
-        """Returns an expression for the anticipated date"""
-        referral_postfix = " Referral Date"
-        decision_postfix = " Decision Date"
-        date_prefix = "Anticipated "
+    def _get_anticipated_date_label(self):
+        """Returns an expression for the anticipated date label"""
         return case(
                 (
                     EventConfiguration.event_type_id == EventTypeEnum.REFERRAL.value,
-                    func.concat(date_prefix, formatted_anticipated_date, referral_postfix)
+                    "Referral Date"
                 ),
-                else_=func.concat(date_prefix, formatted_anticipated_date, decision_postfix),
+                else_="Decision Date",
         ).label("anticipated_date_label")
+
+    def _get_anticipated_date_title(self, formatted_anticipated_date):
+        """Returns an expression for the anticipated date title"""
+        return func.concat("Anticipated ", formatted_anticipated_date).label("anticipated_date_title")
 
     def _get_formatted_phase_name(self):
         """Returns an expression for the reformatted PhaseCode.name"""
@@ -854,7 +864,7 @@ class EAAnticipatedScheduleReport(ReportFactory):
                 EventConfiguration,
                 and_(
                     Event.event_configuration_id == EventConfiguration.id,
-                    EventConfiguration.event_category_id.in_([EventCategoryEnum.DECISION.value, EventCategoryEnum.MILESTONE.value])
+                    EventConfiguration.event_category_id.in_([EventCategoryEnum.DECISION.value])
                 )
             )
             .join(
