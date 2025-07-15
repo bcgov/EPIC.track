@@ -224,9 +224,7 @@ const EventListTable = ({
         filterSelectOptions: startDateFilterOptions,
         size: 140,
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {dateUtils.formatDate(cell.getValue<string>(), MONTH_DAY_YEAR)}
           </ETParagraph>
         ),
@@ -265,9 +263,7 @@ const EventListTable = ({
           );
         },
         Cell: ({ cell, row }) => (
-          <ETParagraph
-            bold={row.original.type === EVENT_TYPE.MILESTONE}
-          >
+          <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
             {cell.getValue<string>() &&
               dateUtils.formatDate(
                 String(cell.getValue<string>()),

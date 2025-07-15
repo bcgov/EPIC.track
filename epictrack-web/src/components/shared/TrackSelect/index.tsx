@@ -1,5 +1,5 @@
 import React from "react";
-import Select, { CSSObjectWithLabel, Props } from "react-select";
+import Select, { Props } from "react-select";
 import { FormHelperText } from "@mui/material";
 import { Palette } from "../../../styles/theme";
 
@@ -12,13 +12,7 @@ type TrackSelectProps = Props & {
 
 const TrackSelect = React.forwardRef<any, TrackSelectProps>(
   (
-    {
-      disabled,
-      error = false,
-      helperText = "",
-      fullWidth = false,
-      ...rest
-    },
+    { disabled, error = false, helperText = "", fullWidth = false, ...rest },
     ref
   ) => {
     return (

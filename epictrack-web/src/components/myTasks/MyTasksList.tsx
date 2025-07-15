@@ -320,10 +320,7 @@ export default function MyTasksList() {
         size: 140,
         Cell: ({ cell, row }) => {
           return (
-            <ETParagraph
-              enableTooltip
-              tooltip={cell.getValue<string>()}
-            >
+            <ETParagraph enableTooltip tooltip={cell.getValue<string>()}>
               {cell.getValue<string>()}
             </ETParagraph>
           );
@@ -350,10 +347,7 @@ export default function MyTasksList() {
         filterVariant: "multi-select",
         filterSelectOptions: workFilterOptions,
         Cell: ({ cell, row, renderedCellValue }) => (
-          <ETParagraph
-            enableTooltip
-            tooltip={row.original.work.title}
-          >
+          <ETParagraph enableTooltip tooltip={row.original.work.title}>
             {row.original.work.title}
           </ETParagraph>
         ),

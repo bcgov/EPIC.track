@@ -78,7 +78,6 @@ export default function StaffForm({
   });
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,
@@ -104,8 +103,6 @@ export default function StaffForm({
   useEffect(() => {
     getPositions();
   }, []);
-
-  const { ref, ...restRegister } = register("position_id");
 
   return (
     <FormProvider {...methods}>

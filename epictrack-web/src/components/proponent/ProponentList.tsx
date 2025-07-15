@@ -103,7 +103,7 @@ const ProponentList = () => {
         filterFn: searchFilter,
       },
       {
-        accessorFn: row => row.relationship_holder?.full_name ?? "",
+        accessorFn: (row) => row.relationship_holder?.full_name ?? "",
         header: "Relationship Holder",
         filterSelectOptions: staffs.map((s) => s.full_name),
         Cell: ({ row }) => {

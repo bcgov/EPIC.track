@@ -38,7 +38,9 @@ const StaffGroup = ({ workplan }: CardProps) => {
       }}
     >
       {staffList.map((staff, index) => {
-        return <StaffAvatar key={`${staff.staff.id}-${index}`} staff={staff.staff} />;
+        return (
+          <StaffAvatar key={`${staff.staff.id}-${index}`} staff={staff.staff} />
+        );
       })}
     </AvatarGroup>
   );

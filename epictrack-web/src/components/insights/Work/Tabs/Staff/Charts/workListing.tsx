@@ -27,9 +27,6 @@ const WorkList = () => {
     pageSize: 15,
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
-  const [workRoles, setWorkRoles] = React.useState<
-    MRT_ColumnDef<WorkStaffWithWork>[]
-  >([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
   const { data: works } = useGetWorksQuery();
@@ -172,7 +169,6 @@ const WorkList = () => {
         });
       });
     }
-    setWorkRoles(cols);
   }, [getRolefilterOptions, roleFilterFunction, workStaffs]);
 
   const columns = React.useMemo<MRT_ColumnDef<WorkStaffWithWork>[]>(() => {

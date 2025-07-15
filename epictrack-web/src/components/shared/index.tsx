@@ -183,7 +183,15 @@ export const ETSubhead = ({
 
 export const ETParagraph = React.forwardRef(
   (
-    { bold, color, children, sx, enableTooltip, enableEllipsis, ...rest }: HeaderProps,
+    {
+      bold,
+      color,
+      children,
+      sx,
+      enableTooltip,
+      enableEllipsis,
+      ...rest
+    }: HeaderProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
     return (

@@ -248,8 +248,8 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
-            "WebkitLineClamp": "2",
-            "WebkitBoxOrient": "vertical",
+            WebkitLineClamp: "2",
+            WebkitBoxOrient: "vertical",
           }}
         >
           {workplan.status_info.description}
