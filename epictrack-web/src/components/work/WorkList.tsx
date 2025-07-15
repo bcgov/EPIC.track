@@ -15,6 +15,7 @@ import { ROLES } from "../../constants/application-constant";
 import { WORK_STATE } from "components/shared/constants";
 import { showNotification } from "components/shared/notificationProvider";
 import { WorkDialog } from "./Dialog";
+import { Palette } from "styles/theme";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { sort } from "utils";
@@ -121,7 +122,13 @@ const WorkList = () => {
         size: 300,
         Cell: ({ row }) => (
           <Box>
-            <Link to={`/work-plan?work_id=${row.original.id}`}>
+            <Link
+              to={`/work-plan?work_id=${row.original.id}`}
+              style={{
+                textDecoration: "none",
+                color: Palette.primary.accent.main,
+              }}
+            >
               {row.original.title}
             </Link>
           </Box>
