@@ -161,9 +161,8 @@ const WorkStaffList = () => {
           return (
             <ETGridTitle
               to={`/work-plan?work_id=${row.original.id}`}
-              titleText={row.original.title}
               enableTooltip
-              enableEllipsis
+              enableEllipsis={true}
               tooltip={row.original.title}
             >
               {renderedCellValue}

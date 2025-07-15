@@ -352,7 +352,6 @@ export default function ProjectForm({
           <ControlledSelectV2
             placeholder="Select"
             key={`env_select_${formValues.region_id_env}`}
-            helperText={errors?.region_id_env?.message?.toString()}
             defaultValue={project?.region_id_env}
             options={envRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
@@ -366,7 +365,6 @@ export default function ProjectForm({
           <ControlledSelectV2
             placeholder="Select"
             key={`nrs_select_${formValues.region_id_flnro}`}
-            helperText={errors?.region_id_flnro?.message?.toString()}
             defaultValue={project?.region_id_flnro}
             options={nrsRegions || []}
             getOptionValue={(o: Region) => o?.id?.toString()}
@@ -427,7 +425,6 @@ export default function ProjectForm({
           <ETFormLabel>Certificate Number</ETFormLabel>
           <ControlledTextField
             name="ea_certificate"
-            helperText
             fullWidth
             disabled={shouldDisableFormField}
           />
@@ -441,7 +438,7 @@ export default function ProjectForm({
           >
             <ControlledTextField
               name={"abbreviation"}
-              helperText
+              helperText={errors?.abbreviation?.message?.toString()}
               fullWidth
               placeholder="EDRMS retrieval code"
               inputEffects={(e) => e.target.value.toUpperCase()}

@@ -63,7 +63,6 @@ const SummaryItem = (props: SummaryItemProps) => {
         >
           <ETParagraph
             bold={props.isTitleBold}
-            enableEllipsis={true}
             sx={{
               ...summaryContentStyle,
               color: `${Palette.neutral.dark}`,
@@ -232,7 +231,6 @@ const PhaseAccordion = ({
             </Grid>
           </ETAccordionSummary>
           <ETAccordionDetails
-            expanded={expanded}
             sx={{
               pt: "24px",
             }}

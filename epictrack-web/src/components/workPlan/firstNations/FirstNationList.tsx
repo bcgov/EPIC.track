@@ -391,33 +391,37 @@ const FirstNationList = () => {
             }}
           >
             <Tooltip title={"Import Nations from existing Works"}>
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                exception={userIsActiveTeamMember}
-                errorProps={{
-                  disabled: true,
-                }}
-              >
-                <IButton
-                  onClick={() => setShowImportNationForm(true)}
-                  disabled={!firstNationAvailable}
+              <span>
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  exception={userIsActiveTeamMember}
+                  errorProps={{
+                    disabled: true,
+                  }}
                 >
-                  <ImportFileIcon className="icon" />
-                </IButton>
-              </Restricted>
+                  <IButton
+                    onClick={() => setShowImportNationForm(true)}
+                    disabled={!firstNationAvailable}
+                  >
+                    <ImportFileIcon className="icon" />
+                  </IButton>
+                </Restricted>
+              </span>
             </Tooltip>
             <Tooltip title="Export first nations to excel">
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                exception={userIsActiveTeamMember}
-                errorProps={{
-                  disabled: true,
-                }}
-              >
-                <IButton onClick={downloadPDFReport}>
-                  <DownloadIcon className="icon" />
-                </IButton>
-              </Restricted>
+              <span>
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  exception={userIsActiveTeamMember}
+                  errorProps={{
+                    disabled: true,
+                  }}
+                >
+                  <IButton onClick={downloadPDFReport}>
+                    <DownloadIcon className="icon" />
+                  </IButton>
+                </Restricted>
+              </span>
             </Tooltip>
           </Grid>
           <Grid item xs={12}>

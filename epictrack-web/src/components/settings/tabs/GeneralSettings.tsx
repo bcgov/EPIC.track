@@ -201,7 +201,7 @@ const GeneralSettings = () => {
             {" "}
             Define the number of days before a status changes colours:{" "}
           </ETParagraph>
-          <ETParagraph color={Palette.neutral.dark}>
+          <ETParagraph color={Palette.neutral.dark} component="div">
             <List sx={{ pt: 0 }}>
               <ListItem sx={{ pt: 0, pb: 0, lineHeight: 1 }}>
                 <ListItemIcon sx={{ minWidth: "4px" }}>

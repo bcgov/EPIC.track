@@ -71,41 +71,39 @@ const RichTextEditor = ({
   return (
     <FormControl fullWidth>
       <Box style={{ borderColor: `${error ? Palette.error.main : ""}` }}>
-        <form>
-          <Editor
-            spellCheck
-            editorState={editorState}
-            onEditorStateChange={handleChange}
-            handlePastedText={() => false}
-            editorStyle={{
-              height: "485px",
-              padding: "8px 8px 8px",
-              border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
-              borderRadius: "4px",
-              background: "#f9f9fb",
-              marginBottom: "8px",
-              fontSize: "16px",
-            }}
-            toolbarStyle={styles.toolbar}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
-            toolbar={{
-              options: [
-                "inline",
-                "fontSize",
-                "list",
-                "colorPicker",
-                "link",
-                "emoji",
-                "history",
-              ],
-              inline: {
-                options: ["bold", "italic", "underline"],
-              },
-              list: { options: ["unordered", "ordered"] },
-            }}
-          />
-        </form>
+        <Editor
+          spellCheck
+          editorState={editorState}
+          onEditorStateChange={handleChange}
+          handlePastedText={() => false}
+          editorStyle={{
+            height: "485px",
+            padding: "8px 8px 8px",
+            border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
+            borderRadius: "4px",
+            background: "#f9f9fb",
+            marginBottom: "8px",
+            fontSize: "16px",
+          }}
+          toolbarStyle={styles.toolbar}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          toolbar={{
+            options: [
+              "inline",
+              "fontSize",
+              "list",
+              "colorPicker",
+              "link",
+              "emoji",
+              "history",
+            ],
+            inline: {
+              options: ["bold", "italic", "underline"],
+            },
+            list: { options: ["unordered", "ordered"] },
+          }}
+        />
       </Box>
       <FormHelperText error={error}>{error ? helperText : ""}</FormHelperText>
     </FormControl>

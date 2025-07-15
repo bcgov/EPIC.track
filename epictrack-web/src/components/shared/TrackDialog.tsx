@@ -6,7 +6,6 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogProps,
   IconButton,
 } from "@mui/material";
@@ -107,7 +106,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
         }}
       >
         {dialogContentText && (
-          <DialogContentText
+          <Box
             sx={{
               color: Palette.neutral.dark,
             }}
@@ -119,7 +118,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
             >
               {dialogContentText}
             </ETSubhead>
-          </DialogContentText>
+          </Box>
         )}
         {props.children}
       </DialogContent>

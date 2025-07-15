@@ -78,7 +78,6 @@ export default function StaffForm({
   });
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,
@@ -166,7 +165,7 @@ export default function StaffForm({
               helperText={errors?.position_id?.message?.toString()}
               options={positions || []}
               placeholder="Select"
-              {...register("position_id")}
+              name="position_id"
             />
           </StaffPositionSpecialField>
         </Grid>

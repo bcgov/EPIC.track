@@ -187,7 +187,7 @@ export default function MyTasksList() {
           );
         },
         Cell: ({ cell, row }) => (
-          <ETParagraph enableEllipsis={true}>
+          <ETParagraph>
             {dateUtils.formatDate(cell.getValue<string>(), MONTH_DAY_YEAR)}
           </ETParagraph>
         ),
@@ -226,7 +226,7 @@ export default function MyTasksList() {
           );
         },
         Cell: ({ cell, row }) => (
-          <ETParagraph enableEllipsis={true}>
+          <ETParagraph>
             {cell.getValue<string>() &&
               dateUtils.formatDate(
                 String(cell.getValue<string>()),
@@ -320,11 +320,7 @@ export default function MyTasksList() {
         size: 140,
         Cell: ({ cell, row }) => {
           return (
-            <ETParagraph
-              enableEllipsis
-              enableTooltip
-              tooltip={cell.getValue<string>()}
-            >
+            <ETParagraph enableTooltip tooltip={cell.getValue<string>()}>
               {cell.getValue<string>()}
             </ETParagraph>
           );
@@ -338,7 +334,6 @@ export default function MyTasksList() {
         sortingFn: "sortFn",
         Cell: ({ cell, row }) => (
           <ETParagraph
-            enableEllipsis
             enableTooltip
             tooltip={getTextFromDraftJsContentState(cell.getValue<string>())}
           >
@@ -352,11 +347,7 @@ export default function MyTasksList() {
         filterVariant: "multi-select",
         filterSelectOptions: workFilterOptions,
         Cell: ({ cell, row, renderedCellValue }) => (
-          <ETParagraph
-            enableEllipsis
-            enableTooltip
-            tooltip={row.original.work.title}
-          >
+          <ETParagraph enableTooltip tooltip={row.original.work.title}>
             {row.original.work.title}
           </ETParagraph>
         ),

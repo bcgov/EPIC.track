@@ -22,7 +22,7 @@ const titleStyle: SxProps = {
   alignItems: "center",
   justifyContent: "center",
   "&:first-of-type": { gridColumn: "15/22" },
-  "&::before, &:nth-child(7)::after": {
+  "&::before, &:nth-of-type(7)::after": {
     content: '" "',
     width: "2px",
     backgroundColor: "#a7bce8",
@@ -34,25 +34,25 @@ const titleStyle: SxProps = {
     gridRowStart: 1,
     zIndex: 1,
   },
-  "&:nth-child(2)::before": {
+  "&:nth-of-type(2)::before": {
     gridColumnStart: 15,
   },
-  "&:nth-child(3)::before": {
+  "&:nth-of-type(3)::before": {
     gridColumnStart: 22,
   },
-  "&:nth-child(4)::before": {
+  "&:nth-of-type(4)::before": {
     gridColumnStart: 29,
   },
-  "&:nth-child(5)::before": {
+  "&:nth-of-type(5)::before": {
     gridColumnStart: 36,
   },
-  "&:nth-child(6)::before": {
+  "&:nth-of-type(6)::before": {
     gridColumnStart: 43,
   },
-  "&:nth-child(7)::before": {
+  "&:nth-of-type(7)::before": {
     gridColumnStart: 50,
   },
-  "&:nth-child(7)::after": {
+  "&:nth-of-type(7)::after": {
     right: 0,
     left: "auto",
     gridColumnEnd: "-1",
@@ -229,7 +229,7 @@ const EventCalendar = () => {
                 <Box
                   sx={{
                     textAlign: "center",
-                    "&:nth-child(8)": { gridColumnStart: "15" },
+                    "&:nth-of-type(8)": { gridColumnStart: "15" },
                     "&::after": {
                       content: '" "',
                       width: "1px",
@@ -249,11 +249,11 @@ const EventCalendar = () => {
               ))
             )}
 
-            {months.map((month) => (
+            {months.map((month, index) => (
               <Month
                 month={month}
                 numTasks={Math.floor(Math.random() * (5 - 1)) + 2}
-                key={month.toString()}
+                key={`${month.toString()}-${index}`}
                 events={monthEvents ? monthEvents[month.format("MMMM")] : []}
                 setHoveredEvent={setHoveredEvent}
                 hoveredEvent={hoveredEvent}
