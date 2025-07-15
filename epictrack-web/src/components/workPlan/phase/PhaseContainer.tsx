@@ -44,6 +44,12 @@ const PhaseContainer = () => {
     }
   }, [ctx]);
 
+  useEffect(() => {
+    if (ctx.selectedWorkPhase) {
+      setExpandedPhase(ctx.selectedWorkPhase.work_phase.id);
+    }
+  }, [ctx.selectedWorkPhase]);
+
   const callback = useCallback(() => {
     return ctx.work?.work_type?.name ?? undefined;
   }, [ctx.work?.work_type?.name]);
