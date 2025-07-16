@@ -161,12 +161,25 @@ class WorkPhaseByIdResponseSchema(Schema):
     work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
 
 
+class WorkPhaseEndEventResponseSchema(
+    Schema
+):
+    """Workphase END event model schema class"""
+
+    name = fields.Str(required=True, metadata={"description": "Name of the end milestone event"})
+    actual_date = fields.DateTime(allow_none=True, metadata={"description": "Actual date of the event"})
+    anticipated_date = fields.DateTime(allow_none=True, metadata={"description": "Anticipated date of the event"})
+
+
 class WorkPhaseAdditionalInfoResponseSchema(Schema):
     """Schema for additional work phase details"""
 
     work_phase = fields.Nested(WorkPhaseResponseSchema, dump_only=True)
     total_number_of_days = fields.Number(
         metadata={"description": "Total number of days in the phase"}, required=True
+    )
+    end_milestone = fields.Nested(
+        WorkPhaseEndEventResponseSchema, dump_only=True, metadata={"description": "End milestone of the phase"}
     )
     current_milestone = fields.Str(metadata={"description": "Current milestone in the phase"})
     next_milestone = fields.Str(metadata={"description": "Next milestone in the phase"})

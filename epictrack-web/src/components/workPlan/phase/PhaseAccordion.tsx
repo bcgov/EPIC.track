@@ -80,6 +80,8 @@ const PhaseAccordion = ({
   phase,
   expanded,
   onExpandHandler,
+  showAnticipated,
+  showActual,
 }: PhaseAccordionProps) => {
   const { selectedWorkPhase, setSelectedWorkPhase } =
     useContext(WorkplanContext);
@@ -141,7 +143,7 @@ const PhaseAccordion = ({
                   }}
                 />
               </Grid>
-              <Grid item xs={2}>
+              <Grid item xs={1}>
                 <SummaryItem
                   title="Start date"
                   content={Moment(phase.work_phase.start_date).format(
@@ -150,6 +152,28 @@ const PhaseAccordion = ({
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
+              {showAnticipated && (
+                <Grid item xs={1.2}>
+                  <SummaryItem
+                    title="Anticipated End"
+                    content={Moment(
+                      phase.end_milestone.anticipated_date
+                    ).format(MONTH_DAY_YEAR)}
+                    isTitleBold={isSelectedPhase}
+                  />
+                </Grid>
+              )}
+              {showActual && (
+                <Grid item xs={1}>
+                  <SummaryItem
+                    title="Actual End"
+                    content={Moment(phase.end_milestone.actual_date).format(
+                      MONTH_DAY_YEAR
+                    )}
+                    isTitleBold={isSelectedPhase}
+                  />
+                </Grid>
+              )}
               <Grid item xs={2}>
                 <SummaryItem
                   title={
@@ -210,8 +234,9 @@ const PhaseAccordion = ({
                   isTitleBold={isSelectedPhase}
                 />
               </Grid>
-              <Grid item xs={1}></Grid>
-              <Grid item xs={2}>
+              {!showActual && <Grid item xs={1}></Grid>}
+              {!showAnticipated && <Grid item xs={1.2}></Grid>}
+              <Grid item xs={1.8}>
                 <SummaryItem
                   title="Next milestone"
                   enableTooltip={true}
