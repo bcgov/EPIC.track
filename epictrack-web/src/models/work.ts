@@ -83,14 +83,21 @@ export interface WorkPhase extends MasterBase {
   number_of_days: string;
 }
 
+export interface EndEvent {
+  actual_date: string;
+  anticipated_date: string;
+  name: string;
+}
+
 export interface WorkPhaseAdditionalInfo {
-  work_phase: WorkPhase;
-  total_number_of_days: number;
-  next_milestone: string;
   current_milestone: string;
-  milestone_progress: number;
   days_left: number;
+  end_milestone: EndEvent;
   is_last_phase: boolean;
+  milestone_progress: number;
+  next_milestone: string;
+  total_number_of_days: number;
+  work_phase: WorkPhase;
 }
 
 export interface TemplateStatus extends MasterBase {

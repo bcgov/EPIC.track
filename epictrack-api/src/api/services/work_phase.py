@@ -202,7 +202,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         end_milestone = next(
             (
                 event
-                for event in remaining_milestone_events
+                for event in work_phase_events
                 if event.event_position == EventPositionEnum.END.value
             ),
             None,
@@ -218,6 +218,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             if remaining_milestone_events
             else None
         )
+        result["end_milestone"] = end_milestone
 
         decision_milestones = [
             event

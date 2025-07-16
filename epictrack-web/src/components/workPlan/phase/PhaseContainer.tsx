@@ -1,6 +1,15 @@
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import PhaseAccordion from "./PhaseAccordion";
-import { Box, FormControlLabel, Grid } from "@mui/material";
+import { Box, FormControl, FormControlLabel, Grid } from "@mui/material";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
 import { WorkplanContext } from "../WorkPlanContext";
 import { ETCaption1, ETHeading4 } from "../../shared";
 import { CustomSwitch } from "../../shared/CustomSwitch";
@@ -8,6 +17,15 @@ import { Palette } from "../../../styles/theme";
 import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
+import TrackSelect from "components/shared/TrackSelect";
+import { OptionType } from "components/shared/filterSelect/type";
+
+const CalendarIcon: FC<IconProps> = Icons["CalendarIcon"];
+
+const dateStyleOptions = [
+  { value: "ACTUAL", label: "Actual" },
+  { value: "ACTUAL_AND_ANTICIPATED", label: "Actual + Anticipated" },
+];
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
@@ -15,6 +33,9 @@ const PhaseContainer = () => {
     ctx.selectedWorkPhase?.work_phase.id ?? null
   );
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
+  const [showCompletedActual, setShowCompletedActual] = useState<boolean>(true);
+  const [showCompletedAnticipated, setShowCompletedAnticipated] =
+    useState<boolean>(false);
 
   const currentAndFuturePhases: WorkPhaseAdditionalInfo[] = useMemo(
     () => ctx.workPhases.filter((p) => !p.work_phase.is_completed),
@@ -50,6 +71,25 @@ const PhaseContainer = () => {
 
   useRouterLocationStateForHelpPage(callback);
 
+  const formatDateStyleOptionLabel = (
+    option: any,
+    { context }: { context: "menu" | "value" }
+  ) => {
+    return (
+      <ETCaption1
+        sx={{ textTransform: "uppercase" }}
+        color={Palette.neutral.dark}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {context === "value" && <CalendarIcon />}
+          {context === "value"
+            ? `Phase Date View: ${option.label}`
+            : option.label}
+        </Box>
+      </ETCaption1>
+    );
+  };
+
   if (ctx.workPhases.length === 0) {
     return (
       <Box sx={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -76,8 +116,44 @@ const PhaseContainer = () => {
                 defaultChecked={showCompletedPhases}
               />
             }
-            label="Completed Phases"
+            label={
+              <ETCaption1
+                sx={{
+                  color: Palette.neutral.dark,
+                }}
+              >
+                COMPLETED PHASES
+              </ETCaption1>
+            }
           />
+          <></>
+          {showCompletedPhases && (
+            <FormControl sx={{ minWidth: 220 }}>
+              <TrackSelect
+                options={dateStyleOptions}
+                value={
+                  showCompletedAnticipated
+                    ? dateStyleOptions.find(
+                        (option) => option.value === "ACTUAL_AND_ANTICIPATED"
+                      )
+                    : dateStyleOptions[0]
+                }
+                onChange={(selectedOption) => {
+                  const option = selectedOption as OptionType;
+                  if (option.value === "ACTUAL") {
+                    setShowCompletedActual(true);
+                    setShowCompletedAnticipated(false);
+                  } else {
+                    setShowCompletedActual(true);
+                    setShowCompletedAnticipated(true);
+                  }
+                }}
+                isClearable={false}
+                isSearchable={false}
+                formatOptionLabel={formatDateStyleOptionLabel}
+              />
+            </FormControl>
+          )}
         </Grid>
       </When>
       <When condition={showCompletedPhases}>
@@ -88,6 +164,8 @@ const PhaseContainer = () => {
               expanded={expandedPhase === phase.work_phase.id}
               onExpandHandler={() => handleExpand(phase.work_phase.id)}
               phase={phase}
+              showAnticipated={showCompletedAnticipated}
+              showActual={showCompletedActual}
             />
           </Grid>
         ))}
@@ -99,7 +177,7 @@ const PhaseContainer = () => {
               color: Palette.neutral.dark,
             }}
           >
-            CURRENT AND FUTURE PHASES
+            CURRENT + FUTURE PHASES
           </ETCaption1>
         </Grid>
       </When>
@@ -110,6 +188,8 @@ const PhaseContainer = () => {
             expanded={expandedPhase === phase.work_phase.id}
             onExpandHandler={() => handleExpand(phase.work_phase.id)}
             phase={phase}
+            showAnticipated={true}
+            showActual={false}
           />
         </Grid>
       ))}
