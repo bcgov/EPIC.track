@@ -206,12 +206,12 @@ const PhaseAccordion = ({
                                     <>
                                       {" "}
                                       {daysAhead > 0
-                                        ? `(${Math.abs(daysAhead)} early)`
-                                        : `(${Math.abs(daysAhead)} over)`}
+                                        ? `(${Math.abs(daysAhead)} days early)`
+                                        : `(${Math.abs(daysAhead)} days over)`}
                                     </>
                                   )
                                 : daysAhead < 0 &&
-                                  ` (${Math.abs(daysAhead)} over)`}
+                                  ` (${Math.abs(daysAhead)} days over)`}
                             </>
                           )}
                         </>
