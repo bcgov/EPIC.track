@@ -85,6 +85,7 @@ const PhaseAccordion = ({
 }: PhaseAccordionProps) => {
   const { selectedWorkPhase, setSelectedWorkPhase } =
     useContext(WorkplanContext);
+  const daysAhead = phase.total_number_of_days - phase.days_taken;
 
   const isSelectedPhase = useMemo<boolean>(
     () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
@@ -97,13 +98,14 @@ const PhaseAccordion = ({
     }
   }, [expanded, phase, setSelectedWorkPhase]);
 
-  const getPhaseOverdueColour = (daysLeft: number, isLegislated: boolean) => {
-    if (daysLeft >= 0) return Palette.neutral.dark;
-    if (isLegislated) {
-      return Palette.error.dark;
-    } else {
-      return Palette.purple;
-    }
+  const getPhaseOverdueColour = (
+    isLegislated: boolean,
+    isCompleted: boolean
+  ) => {
+    if (!isLegislated) return Palette.neutral.dark;
+    if (daysAhead > 0 && isCompleted) return Palette.success.dark;
+    if (daysAhead < 0) return Palette.error.dark;
+    else return Palette.neutral.dark;
   };
 
   return (
@@ -176,11 +178,7 @@ const PhaseAccordion = ({
               )}
               <Grid item xs={2}>
                 <SummaryItem
-                  title={
-                    phase.work_phase.is_completed
-                      ? "Total"
-                      : "Days left / Total"
-                  }
+                  title={"Days"}
                   children={
                     <Box
                       sx={{
@@ -193,23 +191,30 @@ const PhaseAccordion = ({
                         sx={{
                           ...summaryContentStyle,
                           color: getPhaseOverdueColour(
-                            phase.days_left,
-                            phase.work_phase.legislated
+                            phase.work_phase.legislated,
+                            phase.work_phase.is_completed
                           ),
                         }}
                       >
-                        {phase.work_phase.is_completed && (
-                          <>{phase.days_left < 0 ? 0 : phase.days_left}</>
-                        )}
-                        {!phase.work_phase.is_completed && (
-                          <>
-                            {phase.days_left < 0 ? 0 : phase.days_left} /{" "}
-                            {phase.total_number_of_days.toString()}
-                            {phase.days_left < 0
-                              ? ` (${Math.abs(phase.days_left)} over)`
-                              : ""}
-                          </>
-                        )}
+                        <>
+                          {phase.days_taken} / {phase.total_number_of_days}
+                          {phase.work_phase.legislated && (
+                            <>
+                              {phase.work_phase.is_completed
+                                ? phase.days_taken !==
+                                    phase.total_number_of_days && (
+                                    <>
+                                      {" "}
+                                      {daysAhead > 0
+                                        ? `(${Math.abs(daysAhead)} days early)`
+                                        : `(${Math.abs(daysAhead)} days over)`}
+                                    </>
+                                  )
+                                : daysAhead < 0 &&
+                                  ` (${Math.abs(daysAhead)} days over)`}
+                            </>
+                          )}
+                        </>
                       </ETParagraph>
                       <When condition={phase.days_left < 0}>
                         <Box

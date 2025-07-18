@@ -92,6 +92,7 @@ export interface EndEvent {
 export interface WorkPhaseAdditionalInfo {
   current_milestone: string;
   days_left: number;
+  days_taken: number;
   end_milestone: EndEvent;
   is_last_phase: boolean;
   milestone_progress: number;

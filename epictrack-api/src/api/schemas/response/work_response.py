@@ -194,6 +194,9 @@ class WorkPhaseAdditionalInfoResponseSchema(Schema):
     days_left = fields.Number(
         metadata={"description": "Number of days left in the phase"}
     )
+    days_taken = fields.Number(
+        metadata={"description": "Number of days taken in the phase"}
+    )
 
 
 class WorkPhaseTemplateAvailableResponse(Schema):
