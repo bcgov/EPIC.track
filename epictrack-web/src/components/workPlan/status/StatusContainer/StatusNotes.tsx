@@ -4,32 +4,38 @@ import { WorkplanContext } from "../../WorkPlanContext";
 import { StatusContext } from "../StatusContext";
 import { showNotification } from "../../../shared/notificationProvider";
 import debounce from "lodash/debounce";
-import workService from "../../../../services/workService/workService";
+import { workService } from "../../../../services/workService/workService";
 
 const StatusNotes = () => {
   const { work, setWork } = React.useContext(WorkplanContext);
   const { workId } = React.useContext(StatusContext);
   const [notes, setNotes] = React.useState("");
-  const initialNotes = React.useMemo(() => work?.status_notes, [work?.id]);
+  const initialNotes = React.useMemo(
+    () => work?.status_notes,
+    [work?.status_notes]
+  );
 
   React.useEffect(() => {
     setNotes(work?.status_notes || "");
   }, [work]);
 
-  const saveStatusNotes = React.useCallback(async (value: string) => {
-    const result = await workService.saveNotes(
-      Number(workId),
-      value,
-      "status_notes"
-    );
-    if (result.status === 200) {
-      setWork(result.data);
-      showNotification("Notes saved successfully", {
-        type: "success",
-        duration: 1000,
-      });
-    }
-  }, []);
+  const saveStatusNotes = React.useCallback(
+    async (value: string) => {
+      const result = await workService.saveNotes(
+        Number(workId),
+        value,
+        "status_notes"
+      );
+      if (result.status === 200) {
+        setWork(result.data);
+        showNotification("Notes saved successfully", {
+          type: "success",
+          duration: 1000,
+        });
+      }
+    },
+    [setWork, workId]
+  );
 
   const debounceSave = React.useMemo(() => {
     return debounce(saveStatusNotes, 1000);

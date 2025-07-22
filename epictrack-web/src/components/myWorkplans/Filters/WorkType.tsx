@@ -1,7 +1,7 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
 import { OptionType } from "../../shared/filterSelect/type";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import { sort } from "utils";
 export const WorkTypeFilter = () => {

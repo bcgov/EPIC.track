@@ -34,7 +34,7 @@ class ReportFactory(ABC):
         self.color_intensity = color_intensity
 
     @abstractmethod
-    def _fetch_data(self, report_date):
+    def _fetch_data(self, report_date, include_first_phase):
         """Fetches the relevant data for the given report"""
 
     def _format_data(self, data, report_title=None):
@@ -108,7 +108,7 @@ class ReportFactory(ABC):
         return deserialized_issues
 
     @abstractmethod
-    def generate_report(self, report_date, return_type):
+    def generate_report(self, report_date, return_type, include_first_phase):
         """Generates a report and returns it"""
 
     def generate_template(self):

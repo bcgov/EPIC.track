@@ -64,12 +64,14 @@ class Report(Resource):
         report_date = datetime.strptime(API.payload["report_date"], "%Y-%m-%d")
         color_intensity = API.payload.get("color_intensity", None)
         filters = API.payload.get("filters", None)
+        include_first_phase = str(API.payload.get("first_phase", "false")).lower() == "true"
         report = ReportService.generate_report(
             report_type,
             report_date,
             "json",
             filters=filters,
             color_intensity=color_intensity,
+            include_first_phase=include_first_phase,
         )
         if report:
             return jsonify(report), HTTPStatus.OK
@@ -90,12 +92,14 @@ class FileReport(Resource):
         report_date = datetime.strptime(API.payload["report_date"], "%Y-%m-%d")
         color_intensity = API.payload.get("color_intensity", None)
         filters = API.payload.get("filters", None)
+        include_first_phase = str(API.payload.get("first_phase", "false")).lower() == "true"
         report, file_name = ReportService.generate_report(
             report_type,
             report_date,
             "file",
             filters=filters,
             color_intensity=color_intensity,
+            include_first_phase=include_first_phase,
         )
         if report:
             return send_file(

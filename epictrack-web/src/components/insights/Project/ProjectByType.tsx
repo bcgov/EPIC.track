@@ -27,7 +27,7 @@ const ProjectByTypeChart = () => {
     return <PieChartSkeleton />;
   }
 
-  // TODO: handle error
+  // TODO: handle error TRACK-528
   if (error) {
     showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
     return <div>Error</div>;

@@ -10,7 +10,7 @@ import { ControlledMaskTextField } from "../shared/maskTextField";
 import ControlledSelectV2 from "../shared/controlledInputComponents/ControlledSelectV2";
 import ControlledSwitch from "../shared/controlledInputComponents/ControlledSwitch";
 import ControlledTextField from "../shared/controlledInputComponents/ControlledTextField";
-import positionService from "services/positionService";
+import { positionService } from "services/positionService";
 import staffService from "services/staffService/staffService";
 import { ROLES } from "constants/application-constant";
 import { StaffPositionSpecialField } from "./StaffPositionSpecialField";
@@ -78,7 +78,6 @@ export default function StaffForm({
   });
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     reset,
@@ -166,7 +165,7 @@ export default function StaffForm({
               helperText={errors?.position_id?.message?.toString()}
               options={positions || []}
               placeholder="Select"
-              {...register("position_id")}
+              name="position_id"
             />
           </StaffPositionSpecialField>
         </Grid>

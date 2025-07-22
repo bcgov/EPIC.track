@@ -6,7 +6,7 @@ import MasterTrackTable from "../../shared/MasterTrackTable";
 import { Task } from "../../../models/task";
 import TrackDialog from "../../shared/TrackDialog";
 import { Template } from "../../../models/template";
-import templateService from "../../../services/taskService/templateService";
+import { templateService } from "../../../services/taskService/templateService";
 
 const TemplateTaskList = ({ ...props }) => {
   const [tasks, setTasks] = React.useState<Task[]>([]);
@@ -31,7 +31,7 @@ const TemplateTaskList = ({ ...props }) => {
         setResultStatus(RESULT_STATUS.LOADED);
       }
     },
-    [templateId]
+    []
   );
   const getTemplate = React.useCallback(
     async (templateId: number | undefined) => {
@@ -45,13 +45,13 @@ const TemplateTaskList = ({ ...props }) => {
         console.error("Get template: ", error);
       }
     },
-    [templateId]
+    []
   );
 
   React.useEffect(() => {
     getTemplateTasks(templateId);
     getTemplate(templateId);
-  }, [templateId]);
+  }, [getTemplateTasks, getTemplate, templateId]);
 
   const columns = React.useMemo<MRT_ColumnDef<Task>[]>(
     () => [

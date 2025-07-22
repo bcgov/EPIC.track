@@ -31,7 +31,7 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
   defaultValue,
   disabled,
 }) => {
-  const { control, register } = useFormContext();
+  const { control } = useFormContext();
   return (
     <Controller
       name={name}
@@ -47,10 +47,9 @@ const ControlledDatePicker: React.FC<ControlledDatePickerProps> = ({
               helperText: error?.message || "",
               ...datePickerSlotProps,
             },
-            ...register(name),
           }}
           {...datePickerProps}
-          value={value ? dayjs(value) : value}
+          value={value ? dayjs(value) : null}
           onChange={(event: Dayjs | null) => {
             if (datePickerProps?.onDateChange) {
               datePickerProps.onDateChange(event, onChange);

@@ -7,7 +7,7 @@ import {
 } from "react";
 import { WorkPlan } from "models/workplan";
 import { StalenessSettings } from "models/settings";
-import workplanService from "services/workplanService";
+import { workplanService } from "services/workplanService";
 import stalenessSettingsService from "services/stalenessSettingsService";
 import { WORK_STATE } from "../shared/constants";
 import { useAppSelector } from "../../hooks";
@@ -110,29 +110,30 @@ export const MyWorkplansProvider = ({
     MY_WORKPLAN_VIEW.CARDS
   );
 
-  const fetchWorkplans = async (page: number, shouldAppend = false) => {
-    try {
-      const result = await workplanService.getAll(
-        page,
-        PAGE_SIZE,
-        searchOptions
-      );
-      let newWorkplans;
-      if (shouldAppend) {
-        newWorkplans = [...workplans, ...result.data.items];
-      } else {
-        newWorkplans = [...result.data.items];
+  const fetchWorkplans = useCallback(
+    async (page: number, shouldAppend = false) => {
+      try {
+        const result = await workplanService.getAll(
+          page,
+          PAGE_SIZE,
+          searchOptions
+        );
+        setPage(page);
+        setWorkplans((prev) =>
+          shouldAppend
+            ? [...prev, ...result.data.items]
+            : [...result.data.items]
+        );
+        setTotalWorkplans(result.data.total);
+        setLoadingWorkplans(false);
+      } catch (error) {
+        showNotification(COMMON_ERROR_MESSAGE, {
+          type: "error",
+        });
       }
-      setPage(page);
-      setWorkplans(newWorkplans);
-      setTotalWorkplans(result.data.total);
-      setLoadingWorkplans(false);
-    } catch (error) {
-      showNotification(COMMON_ERROR_MESSAGE, {
-        type: "error",
-      });
-    }
-  };
+    },
+    [searchOptions]
+  );
 
   const getStalenessSettings = useCallback(async () => {
     try {
@@ -151,27 +152,20 @@ export const MyWorkplansProvider = ({
     getStalenessSettings();
   }, [getStalenessSettings]);
 
-  const loadWorkplans = async () => {
-    setLoadingWorkplans(true);
-    await fetchWorkplans(1);
-    setLoadingWorkplans(false);
-  };
-
-  const lazyLoadMoreWorkplans = async () => {
+  const lazyLoadMoreWorkplans = useCallback(async () => {
     setLoadingMoreWorkplans(true);
     await fetchWorkplans(page + 1, true);
     setLoadingMoreWorkplans(false);
-  };
+  }, [fetchWorkplans, page]);
 
   useEffect(() => {
+    const loadWorkplans = async () => {
+      setLoadingWorkplans(true);
+      await fetchWorkplans(1);
+      setLoadingWorkplans(false);
+    };
     loadWorkplans();
-  }, [searchOptions]);
-
-  useEffect(() => {
-    if (loadingMoreWorkplans) {
-      lazyLoadMoreWorkplans();
-    }
-  }, [loadingMoreWorkplans]);
+  }, [fetchWorkplans, searchOptions]);
 
   const contextValue = useMemo(
     () => ({

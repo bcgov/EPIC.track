@@ -154,10 +154,16 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             work_phases = [wp for wp in work_phases if wp.id == work_phase_id]
         for index, work_phase in enumerate(work_phases, start=1):
             result_item = {"work_phase": work_phase}
-            total_days = (
-                work_phase.end_date.date() - work_phase.start_date.date()
-            ).days
             work_phase_events = cls._filter_sort_events(events, work_phase)
+            extension_events = [
+                e for e in work_phase_events
+                if e.event_configuration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value
+            ]
+            extension_days = sum(e.number_of_days for e in extension_events)
+            if work_phase.number_of_days:
+                total_days = work_phase.number_of_days + extension_days
+            else:
+                total_days = (work_phase.end_date.date() - work_phase.start_date.date()).days
 
             suspended_days = functools.reduce(
                 lambda x, y: x + y,
@@ -177,8 +183,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             milestone_info = cls._get_milestone_information(work_phase_events)
             result_item = {**result_item, **milestone_info}
 
-            days_left = cls._get_days_left(suspended_days, total_days, work_phase)
+            days_left = cls._get_days_left(suspended_days, total_days, work_phase, work_phase_events)
             result_item["days_left"] = days_left
+            days_taken = cls._get_days_taken(work_phase, work_phase_events, suspended_days)
+            result_item["days_taken"] = days_taken if days_taken else 0
             result_item["is_last_phase"] = index == len(work_phases)
             result.append(result_item)
         return result
@@ -202,7 +210,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         end_milestone = next(
             (
                 event
-                for event in remaining_milestone_events
+                for event in work_phase_events
                 if event.event_position == EventPositionEnum.END.value
             ),
             None,
@@ -218,6 +226,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             if remaining_milestone_events
             else None
         )
+        result["end_milestone"] = end_milestone
 
         decision_milestones = [
             event
@@ -231,7 +240,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             decision_milestones[-1].name if decision_milestones else None
         )
         result["decision"] = (
-            decision_milestones[-1].outcome.name if decision_milestones else None
+            decision_milestones[-1].outcome.name if decision_milestones and decision_milestones[-1].outcome else None
         )
         result["decision_milestone_date"] = (
             decision_milestones[-1].actual_date if decision_milestones else None
@@ -261,22 +270,55 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase_events
 
     @classmethod
-    def _get_days_left(cls, suspended_days, total_days, work_phase):
+    def _get_days_left(cls, suspended_days, total_days, work_phase, events):
         if (
             work_phase.work.current_work_phase_id == work_phase.id
             and work_phase.is_completed is False
         ):
-            if work_phase.is_suspended:
-                days_passed = (
-                    work_phase.suspended_date.date() - work_phase.start_date.date()
-                ).days
-            else:
-                days_passed = (
-                    datetime.datetime.now(timezone.utc).date()
-                    - work_phase.start_date.date()
-                ).days
-                days_passed = 0 if days_passed < 0 else days_passed
+            days_passed = cls._get_days_taken(work_phase, events, suspended_days)
             days_left = (total_days - suspended_days) - days_passed
         else:
             days_left = total_days - suspended_days
         return days_left
+
+    @classmethod
+    def _get_days_taken(cls, work_phase, events, suspended_days=0):
+        days_taken = 0
+        # Current phase
+        if work_phase.work.current_work_phase_id == work_phase.id:
+            if work_phase.is_suspended:
+                days_taken = (
+                    work_phase.suspended_date.date() - work_phase.start_date.date()
+                ).days
+            else:
+                days_taken = (
+                    datetime.datetime.now(timezone.utc).date()
+                    - work_phase.start_date.date()
+                ).days
+                days_taken = max(0, days_taken)
+        # Completed phase
+        elif work_phase.is_completed:
+            start_event = next(
+                (
+                    e
+                    for e in events
+                    if e.event_configuration.event_position.name == "START"
+                    and e.actual_date is not None
+                ),
+                None,
+            )
+            end_event = next(
+                (
+                    e
+                    for e in events
+                    if e.event_configuration.event_position.name == "END"
+                    and e.actual_date is not None
+                ),
+                None,
+            )
+            if start_event and end_event:
+                days_taken = (end_event.actual_date.date() - start_event.actual_date.date()).days
+            else:
+                days_taken = 0
+        days_taken = max(0, days_taken - suspended_days)
+        return days_taken

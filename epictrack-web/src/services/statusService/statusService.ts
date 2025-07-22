@@ -33,4 +33,4 @@ class StatusService {
   }
 }
 
-export default new StatusService();
+export const statusService = new StatusService();

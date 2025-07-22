@@ -7,4 +7,4 @@ class PositionService {
   }
 }
 
-export default new PositionService();
+export const positionService = new PositionService();

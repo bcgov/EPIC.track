@@ -81,6 +81,10 @@ export const EPIC_SUPPORT_LINKS = {
     "https://intranet.gov.bc.ca/eao/digital-services/support-for-epic-system/support-for-epic-track/work-pages#specialhistory",
 };
 
+export const REPORT_ISSUE_LINKS = {
+  JSM_PORTAL: "https://eao-dst.atlassian.net/servicedesk/customer/portal/35",
+};
+
 export const ABOUT_RESOURCES = [
   {
     title: "Link to eGuide",

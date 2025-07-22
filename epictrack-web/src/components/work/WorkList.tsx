@@ -1,13 +1,12 @@
-import { FC, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Box, Button, Grid } from "@mui/material";
 import { MRT_ColumnDef } from "material-react-table";
 import { Work } from "../../models/work";
-import workService from "../../services/workService/workService";
+import { workService } from "../../services/workService/workService";
 import MasterTrackTable from "components/shared/MasterTrackTable";
-import { ETGridTitle, ETPageContainer } from "components/shared";
+import { ETPageContainer } from "components/shared";
 import { ETChip } from "components/shared/chip/ETChip";
-import TableFilter from "components/shared/filterSelect/TableFilter";
 import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
@@ -16,13 +15,13 @@ import { ROLES } from "../../constants/application-constant";
 import { WORK_STATE } from "components/shared/constants";
 import { showNotification } from "components/shared/notificationProvider";
 import { WorkDialog } from "./Dialog";
+import { Palette } from "styles/theme";
 import { All_WORKS_FILTERS_CACHE_KEY } from "./constants";
 import { useCachedState } from "hooks/useCachedFilters";
 import { sort } from "utils";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
-
-const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
+import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { useIsActiveTeamMember } from "components/workPlan/utils";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 
 const WorkList = () => {
   const [eaActs, setEAActs] = useState<string[]>([]);
@@ -44,6 +43,8 @@ const WorkList = () => {
       },
     ]
   );
+
+  const isActiveTeamMember = useIsActiveTeamMember();
 
   const loadWorks = async () => {
     setLoadingWorks(true);
@@ -116,33 +117,21 @@ const WorkList = () => {
   const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
-        header: " ",
-        size: 25,
-        Cell: ({ row }) => (
-          <Box>
-            <Link to={`/work-plan?work_id=${row.original.id}`}>
-              <GoToIcon />
-            </Link>
-          </Box>
-        ),
-      },
-      {
         accessorKey: "title",
         header: "Name",
         size: 300,
         Cell: ({ row }) => (
-          <ETGridTitle
-            to="#"
-            onClick={() => {
-              setWorkId(row.original.id);
-              setShowWorkDialogForm(true);
-            }}
-            enableTooltip
-            tooltip={row.original.title}
-            titleText={row.original.title}
-          >
-            {row.original.title}
-          </ETGridTitle>
+          <Box>
+            <Link
+              to={`/work-plan?work_id=${row.original.id}`}
+              style={{
+                textDecoration: "none",
+                color: Palette.primary.accent.main,
+              }}
+            >
+              {row.original.title}
+            </Link>
+          </Box>
         ),
         sortingFn: "sortFn",
         filterFn: searchFilter,
@@ -165,11 +154,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > projects.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (projects.length > 0 && filterValue.length >= projects.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -193,11 +182,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > eaActs.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (eaActs.length > 0 && filterValue.length >= eaActs.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -221,11 +210,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > workTypes.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (workTypes.length > 0 && filterValue.length >= workTypes.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -249,11 +238,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > teams.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (teams.length > 0 && filterValue.length >= teams.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -277,11 +266,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > phases.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
+          }
+          if (phases.length > 0 && filterValue.length >= phases.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           return filterValue.includes(value);
@@ -305,11 +294,11 @@ const WorkList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > states.length // select all is selected
-          ) {
+          if (!filterValue.length || !filterValue.length) {
             return true;
+          }
+          if (states.length > 0 && filterValue.length >= states.length) {
+            return true; // "select all" case
           }
           const value: string = row.getValue(id) || "";
           const label = WORK_STATE[value as keyof typeof WORK_STATE]?.label;
@@ -326,27 +315,8 @@ const WorkList = () => {
         size: 75,
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statuses.length // select all is selected
-          ) {
-            return true;
-          }
-          const value: string = row.getValue(id);
-          return filterValue.includes(value);
-        },
+        filterFn: "multiSelectFilter",
+        Filter: getStatusFilter<Work>,
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -385,7 +355,6 @@ const WorkList = () => {
                   desc: false,
                 },
               ],
-              columnFilters: cachedFilters,
             }}
             loading={loadingWorks}
             onCacheFilters={handleCacheFilters}
@@ -393,6 +362,7 @@ const WorkList = () => {
             state={{
               isLoading: loadingWorks,
               showGlobalFilter: true,
+              columnFilters: cachedFilters,
             }}
             renderTopToolbarCustomActions={() => (
               <Restricted
@@ -419,6 +389,7 @@ const WorkList = () => {
         open={showWorkDialogForm}
         setOpen={setShowWorkDialogForm}
         saveWorkCallback={loadWorks}
+        isActiveTeamMember={isActiveTeamMember}
       />
     </>
   );

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import MyTaskForm from "./MyTaskForm";
 import TrackDialog from "components/shared/TrackDialog";
 import { MyTask } from "models/task";
@@ -22,7 +21,6 @@ export const MyTaskDialog = ({ data }: MyTaskData) => {
   const { open, setOpen, task, setTask, saveMyTaskCallback } = data;
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
-  const [disableSave, setDisableSave] = useState(!canEdit);
 
   const saveTask = async (data: any) => {
     setOpen(false);
@@ -50,7 +48,7 @@ export const MyTaskDialog = ({ data }: MyTaskData) => {
       }}
       formId={"myTask-form"}
       saveButtonProps={{
-        disabled: disableSave,
+        disabled: !canEdit,
       }}
     >
       {task && <MyTaskForm taskEvent={task} onSave={saveTask} />}

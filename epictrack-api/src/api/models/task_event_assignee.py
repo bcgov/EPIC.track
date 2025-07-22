@@ -24,7 +24,7 @@ class TaskEventAssignee(BaseModelVersioned):
 
     __tablename__ = 'task_event_assignees'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     task_event_id = sa.Column(sa.ForeignKey('task_events.id'), nullable=False)
     assignee_id = sa.Column(sa.ForeignKey('staffs.id'), nullable=False)
 

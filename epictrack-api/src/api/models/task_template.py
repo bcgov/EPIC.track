@@ -23,7 +23,7 @@ class TaskTemplate(BaseModelVersioned):
 
     __tablename__ = 'task_templates'
 
-    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)  # TODO check how it can be inherited from parent TRACK-532
     name = sa.Column(sa.String)
     ea_act_id = sa.Column(sa.ForeignKey('ea_acts.id'), nullable=False)
     phase_id = sa.Column(sa.ForeignKey('phase_codes.id'), nullable=False)

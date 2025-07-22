@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { WorkplanContext } from "../WorkPlanContext";
-import issueService from "../../../services/issueService";
+import { issueService } from "../../../services/issueService";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { WorkIssue, WorkIssueUpdate } from "../../../models/Issue";
 import { CloneForm, CreateIssueForm, EditIssueForm } from "./types";
@@ -125,10 +131,10 @@ export const IssuesProvider = ({
   const query = useSearchParams<IssueContainerRouteParams>();
   const workId = query.get("work_id");
 
-  const handleLoadIssues = async () => {
+  const handleLoadIssues = useCallback(async () => {
     await loadIssues();
     setIsIssuesLoading(false);
-  };
+  }, [loadIssues]);
 
   useEffect(() => {
     if (!issues?.length) {
@@ -136,7 +142,7 @@ export const IssuesProvider = ({
     } else {
       setIsIssuesLoading(false);
     }
-  }, []);
+  }, [handleLoadIssues, issues?.length, setIsIssuesLoading]);
 
   const addIssue = async (issueForm: CreateIssueForm) => {
     if (!workId) return;
@@ -252,7 +258,8 @@ export const IssuesProvider = ({
     }
   };
 
-  useRouterLocationStateForHelpPage(() => WORKPLAN_TAB.ISSUES.label, []);
+  const issueLabelCallback = useCallback(() => WORKPLAN_TAB.ISSUES.label, []);
+  useRouterLocationStateForHelpPage(issueLabelCallback);
 
   return (
     <IssuesContext.Provider

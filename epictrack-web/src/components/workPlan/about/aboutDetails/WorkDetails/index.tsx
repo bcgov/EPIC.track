@@ -99,16 +99,26 @@ const WorkDetails = () => {
           <Grid item xs={12}>
             <Divider sx={{ paddingTop: "8px" }} />
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <ETCaption1 bold color={Palette.primary.main}>
               ANTICIPATED REFERRAL DATE
             </ETCaption1>
           </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
+            <ETCaption1 bold color={Palette.primary.main}>
+              PRIMARY DECISION MAKER
+            </ETCaption1>
+          </Grid>
+          <Grid item xs={6}>
             <ETParagraph color={Palette.neutral.dark}>
               {work.anticipated_referral_date
                 ? dayjs(work.anticipated_referral_date).format(MONTH_DAY_YEAR)
                 : "-"}
+            </ETParagraph>
+          </Grid>
+          <Grid item xs={6}>
+            <ETParagraph color={Palette.neutral.dark}>
+              {work.decision_by?.full_name}
             </ETParagraph>
           </Grid>
           <Grid item xs={6}>
@@ -188,16 +198,6 @@ const WorkDetails = () => {
           <Grid item xs={12}>
             <ETParagraph color={Palette.neutral.dark}>
               {work.ministry?.name}
-            </ETParagraph>
-          </Grid>
-          <Grid item xs={12}>
-            <ETCaption1 bold color={Palette.primary.main}>
-              DECISION MAKER
-            </ETCaption1>
-          </Grid>
-          <Grid item xs={12}>
-            <ETParagraph color={Palette.neutral.dark}>
-              {work.decision_by?.full_name}
             </ETParagraph>
           </Grid>
         </Grid>

@@ -19,4 +19,4 @@ class WorkPlanService {
     );
   }
 }
-export default new WorkPlanService();
+export const workplanService = new WorkPlanService();

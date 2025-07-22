@@ -105,8 +105,7 @@ describe("UserList", () => {
   });
 
   it("should display the user list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the user list based on the user name input", () => {

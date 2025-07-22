@@ -14,7 +14,7 @@ const EnvironmentBanner = () => {
 
   React.useEffect(() => {
     dispatch(envBanner(isTestEnvironment));
-  }, []);
+  }, [dispatch, isTestEnvironment]);
 
   if (!isTestEnvironment) {
     return (

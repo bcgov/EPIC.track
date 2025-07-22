@@ -54,9 +54,8 @@ export const ControlledMaskTextField = ({
     <ControlledTextField
       name={name}
       InputProps={{
-        inputComponent: (props: any) => (
-          <TextMaskCustom {...props} mask={mask} />
-        ),
+        inputComponent: TextMaskCustom as any,
+        inputProps: { mask },
       }}
       {...otherProps}
     />

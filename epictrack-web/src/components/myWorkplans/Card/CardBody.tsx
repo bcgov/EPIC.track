@@ -125,7 +125,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
           <ETHeading4
             bold
             color={Palette.neutral.dark}
-            xs
             enableTooltip
             enableEllipsis
             tooltip={workTitle}
@@ -158,7 +157,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
             >
               <ETCaption2
                 bold
-                enableEllipsis
                 color={phase_color}
                 sx={{
                   overflow: "hidden",
@@ -176,7 +174,6 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
               />
               <ETCaption2
                 bold
-                enableEllipsis
                 color={
                   currentWorkPhaseInfo?.days_left > 0
                     ? Palette.neutral.main
@@ -251,8 +248,8 @@ const CardBody = ({ workplan, statusStalenessSettings }: CardProps) => {
             overflow: "hidden",
             textOverflow: "ellipsis",
             display: "-webkit-box",
-            "-webkit-line-clamp": "2",
-            "-webkit-box-orient": "vertical",
+            WebkitLineClamp: "2",
+            WebkitBoxOrient: "vertical",
           }}
         >
           {workplan.status_info.description}

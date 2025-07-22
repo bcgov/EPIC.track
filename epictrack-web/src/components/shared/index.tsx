@@ -128,12 +128,14 @@ export const ETHeading4 = ({
   color,
   children,
   sx,
+  enableTooltip,
+  enableEllipsis,
   ...rest
 }: HeaderProps) => {
   return (
     <Tooltip
       title={rest.tooltip as string}
-      disableHoverListener={!rest.enableTooltip}
+      disableHoverListener={!enableTooltip}
     >
       <Typography
         color={color}
@@ -143,7 +145,7 @@ export const ETHeading4 = ({
             ? MET_Header_Font_Weight_Bold
             : MET_Header_Font_Weight_Regular,
           fontFamily: MET_Header_Font_Family,
-          ...(rest.enableEllipsis && useStyle.textEllipsis),
+          ...(enableEllipsis && useStyle.textEllipsis),
         }}
         variant="h4"
         {...rest}
@@ -181,32 +183,39 @@ export const ETSubhead = ({
 
 export const ETParagraph = React.forwardRef(
   (
-    { bold, color, children, sx, ...rest }: HeaderProps,
+    {
+      bold,
+      color,
+      children,
+      sx,
+      enableTooltip,
+      enableEllipsis,
+      ...rest
+    }: HeaderProps,
     ref: React.ForwardedRef<HTMLDivElement>
   ) => {
     return (
-      <div ref={ref}>
-        <Tooltip
-          title={rest.tooltip as string}
-          disableHoverListener={!rest.enableTooltip}
+      <Tooltip
+        title={rest.tooltip as string}
+        disableHoverListener={!enableTooltip}
+      >
+        <Typography
+          ref={ref}
+          color={color}
+          sx={{
+            fontWeight: bold
+              ? MET_Header_Font_Weight_Bold
+              : MET_Header_Font_Weight_Regular,
+            fontFamily: MET_Header_Font_Family,
+            ...sx,
+            ...(enableEllipsis && useStyle.textEllipsis),
+          }}
+          variant="body1"
+          {...rest}
         >
-          <Typography
-            color={color}
-            sx={{
-              fontWeight: bold
-                ? MET_Header_Font_Weight_Bold
-                : MET_Header_Font_Weight_Regular,
-              fontFamily: MET_Header_Font_Family,
-              ...sx,
-              ...(rest.enableEllipsis && useStyle.textEllipsis),
-            }}
-            variant="body1"
-            {...rest}
-          >
-            {children}
-          </Typography>
-        </Tooltip>
-      </div>
+          {children}
+        </Typography>
+      </Tooltip>
     );
   }
 );
@@ -271,6 +280,8 @@ export const ETGridTitle = ({
   children,
   sx,
   disabled = false,
+  enableTooltip,
+  enableEllipsis,
   ...rest
 }: LinkHeaderProps) => {
   if (disabled) {
@@ -281,13 +292,13 @@ export const ETGridTitle = ({
     <ETLink onClick={rest.onClick} {...rest}>
       <Tooltip
         title={rest.tooltip as string}
-        disableHoverListener={!rest.enableTooltip}
+        disableHoverListener={!enableTooltip}
       >
         <ETParagraph
           bold={bold}
           {...rest}
           sx={{
-            ...(rest.enableEllipsis && useStyle.textEllipsis),
+            ...(enableEllipsis && useStyle.textEllipsis),
           }}
           color={Palette.primary.accent.main}
         >

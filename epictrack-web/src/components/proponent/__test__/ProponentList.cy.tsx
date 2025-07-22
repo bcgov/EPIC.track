@@ -62,8 +62,7 @@ describe("ProponentList", () => {
   });
 
   it("should display the proponent list", () => {
-    // Select the table container
-    cy.get(".MuiInputBase-root");
+    cy.get("table").should("exist").and("be.visible");
   });
 
   it("should filter the proponent list based on the proponent name input", () => {

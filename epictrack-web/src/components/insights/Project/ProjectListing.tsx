@@ -5,7 +5,8 @@ import {
   rowsPerPageOptions,
 } from "components/shared/MasterTrackTable/utils";
 import { Project } from "models/project";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useProjectsContext } from "./ProjectsContext";
@@ -24,6 +25,7 @@ const ProjectList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
 
   const types = useMemo(
     () => projects.map((project) => project.type),
@@ -100,23 +102,24 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > types.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (
+            types_filter.length > 0 &&
+            filterValue.length >= types_filter.length
+          ) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
         accessorKey: "sub_type.name",
-        header: "Subtype",
-        filterVariant: "multi-select",
+        header: "Sub Type",
         filterSelectOptions: subTypes,
+        filterVariant: "multi-select",
         Filter: ({ header, column }) => {
           return (
             <TableFilter
@@ -129,15 +132,13 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > subTypes.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (subTypes.length > 0 && filterValue.length >= subTypes.length) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
@@ -159,20 +160,21 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > proponents.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (
+            proponents.length > 0 &&
+            filterValue.length >= proponents.length
+          ) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
-        accessorKey: "region_env.name",
+        accessorFn: (row) => row.region_env?.name || "",
         header: "Region ENV",
         filterSelectOptions: envRegionsOptions,
         filterVariant: "multi-select",
@@ -188,20 +190,21 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > envRegionsOptions.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (
+            envRegionsOptions.length > 0 &&
+            filterValue.length >= envRegionsOptions.length
+          ) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
       {
-        accessorKey: "region_flnro.name",
+        accessorFn: (row) => row.region_flnro?.name || "",
         header: "Region NRS",
         filterSelectOptions: nrsRegionOptions,
         filterVariant: "multi-select",
@@ -217,20 +220,21 @@ const ProjectList = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > nrsRegionOptions.length // select all is selected
-          ) {
+          if (!filterValue || !filterValue.length) {
             return true;
           }
-
+          if (
+            nrsRegionOptions.length > 0 &&
+            filterValue.length >= nrsRegionOptions.length
+          ) {
+            return true; // "select all" case
+          }
           const value: string = row.getValue(id) || "";
-
           return filterValue.includes(value);
         },
       },
     ],
-    [types, subTypes, envRegionsOptions, proponents, nrsRegionOptions]
+    [envRegionsOptions, nrsRegionOptions, proponents, subTypes, types_filter]
   );
 
   return (
@@ -245,11 +249,15 @@ const ProjectList = () => {
           },
         ],
       }}
+      loading={loadingProjects}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: loadingProjects,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

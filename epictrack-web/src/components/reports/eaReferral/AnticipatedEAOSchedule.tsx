@@ -26,7 +26,6 @@ import {
   RESULT_STATUS,
   REPORT_TYPE,
   DISPLAY_DATE_FORMAT,
-  MILESTONE_TYPES,
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
@@ -43,6 +42,8 @@ interface ReportData {
 }
 
 export default function AnticipatedEAOSchedule() {
+  const [includeFirstPhase, setIncludeFirstPhase] =
+    React.useState<boolean>(false);
   const [reports, setReports] = React.useState<Group[]>([]);
   const [showReportDateBanner, setShowReportDateBanner] =
     React.useState<boolean>(false);
@@ -68,6 +69,7 @@ export default function AnticipatedEAOSchedule() {
       setTypeFilter(filterTypes);
     }
   }, [reports]);
+
   const fetchReportData = React.useCallback(async () => {
     setResultStatus(RESULT_STATUS.LOADING);
     try {
@@ -75,6 +77,7 @@ export default function AnticipatedEAOSchedule() {
         REPORT_TYPE.EA_REFERRAL,
         {
           report_date: reportDate,
+          first_phase: includeFirstPhase,
         }
       );
       setResultStatus(RESULT_STATUS.LOADED);
@@ -89,7 +92,8 @@ export default function AnticipatedEAOSchedule() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate]);
+  }, [reportDate, includeFirstPhase]);
+
   const downloadPDFReport = React.useCallback(async () => {
     try {
       fetchReportData();
@@ -103,6 +107,7 @@ export default function AnticipatedEAOSchedule() {
         {
           report_date: reportDate,
           filters: filtersToSend,
+          first_phase: includeFirstPhase,
         }
       );
       const url = window.URL.createObjectURL(
@@ -121,7 +126,7 @@ export default function AnticipatedEAOSchedule() {
     } catch (error) {
       setResultStatus(RESULT_STATUS.ERROR);
     }
-  }, [reportDate, fetchReportData, selectedTypes]);
+  }, [fetchReportData, includeFirstPhase, reportDate, selectedTypes]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setSelectedTab(newValue);
@@ -166,6 +171,8 @@ export default function AnticipatedEAOSchedule() {
         {" "}
         <ReportHeader
           setReportDate={setReportDate}
+          setIncludeFirstPhase={setIncludeFirstPhase}
+          includeFirstPhase={includeFirstPhase}
           fetchReportData={fetchReportData}
           downloadPDFReport={downloadPDFReport}
           showReportDateBanner={showReportDateBanner}
@@ -295,7 +302,11 @@ export default function AnticipatedEAOSchedule() {
                                         Decision to be made by
                                       </TableCell>
                                       <TableCell>
-                                        {item["decision_by"]}
+                                        {item["minister"]
+                                          ? item["decision_by"] +
+                                            ", " +
+                                            item["minister"]
+                                          : item["decision_by"]}
                                       </TableCell>
                                     </TableRow>
                                   </TableBody>
@@ -317,10 +328,7 @@ export default function AnticipatedEAOSchedule() {
                                   <TableBody>
                                     <TableRow>
                                       <TableCell>
-                                        {item["milestone_type"] ===
-                                        MILESTONE_TYPES.REFERRAL
-                                          ? "Referral Date"
-                                          : "Decision Date"}
+                                        {item["anticipated_date_label"]}
                                       </TableCell>
                                       <TableCell>
                                         {dateUtils.formatDate(

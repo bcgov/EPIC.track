@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import TableFilter from "components/shared/filterSelect/TableFilter";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetWorksWithNationsQuery } from "services/rtkQuery/workInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
@@ -13,17 +13,19 @@ import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
-const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const WorkList = () => {
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: 15,
   });
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
-  const works = data || [];
+  const works = useMemo(() => data || [], [data]);
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -79,7 +81,7 @@ const WorkList = () => {
     return uniqueNations;
   }, [works]);
 
-  const columns = React.useMemo<MRT_ColumnDef<Work>[]>(
+  const columns = useMemo<MRT_ColumnDef<Work>[]>(
     () => [
       {
         accessorKey: "title",
@@ -91,7 +93,6 @@ const WorkList = () => {
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
-            titleText={row.original.title}
             tooltip={row.original.title}
           >
             {renderedCellValue}
@@ -203,7 +204,7 @@ const WorkList = () => {
         },
       },
     ],
-    [ministries, works]
+    [federalInvolvements, indigenousNations, ministries]
   );
   return (
     <MasterTrackTable
@@ -217,11 +218,15 @@ const WorkList = () => {
           },
         ],
       }}
+      loading={isLoading}
+      onColumnFiltersChange={setColumnFilters}
       state={{
         isLoading: isLoading,
         showGlobalFilter: true,
         pagination: pagination,
+        columnFilters,
       }}
+      renderResultCount
       renderTopToolbarCustomActions={({ table }) => (
         <Box
           sx={{

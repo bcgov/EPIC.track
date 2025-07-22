@@ -16,7 +16,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import workService from "../../../services/workService/workService";
+import { workService } from "../../../services/workService/workService";
 import { WorkplanContext } from "../WorkPlanContext";
 import { MRT_ColumnDef } from "material-react-table";
 import { ETCaption2, ETGridTitle, IButton } from "../../shared";
@@ -31,7 +31,6 @@ import AddIcon from "@mui/icons-material/Add";
 import { ETChip } from "../../shared/chip/ETChip";
 import TrackDialog from "../../shared/TrackDialog";
 import NoDataEver from "../../shared/NoDataEver";
-import TableFilter from "../../shared/filterSelect/TableFilter";
 import {
   ConsultationLevel,
   WorkFirstNation,
@@ -43,12 +42,13 @@ import { Palette } from "../../../styles/theme";
 import UserMenu from "../../shared/userMenu/UserMenu";
 import { Staff } from "../../../models/staff";
 import ImportFirstNation from "./ImportFirstNation";
-import projectService from "../../../services/projectService/projectService";
+import { projectService } from "../../../services/projectService/projectService";
 import { Restricted, hasPermission } from "../../shared/restricted";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import { useAppSelector } from "../../../hooks";
 import { debounce } from "lodash";
 import { basePIPUrl } from "../../../constants/application-constant";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 const ImportFileIcon: FC<IconProps> = Icons["ImportFileIcon"];
@@ -98,14 +98,14 @@ const FirstNationList = () => {
     null
   );
 
-  const getStatusOptions = () => {
+  const getStatusOptions = useCallback(() => {
     const statuses = firstNations
       .map((p) => p.status)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
     setStatusOptions(statuses);
-  };
+  }, [firstNations]);
 
-  const getConsultationLevels = () => {
+  const getConsultationLevels = useCallback(() => {
     const levelMap = new Map();
     firstNations
       .map((firstNation) => firstNation.indigenous_consultation_level)
@@ -114,7 +114,7 @@ const FirstNationList = () => {
       });
 
     setConsultationLevels(Array.from(levelMap.values()));
-  };
+  }, [firstNations]);
 
   useEffect(() => {
     getStatusOptions();
@@ -132,7 +132,7 @@ const FirstNationList = () => {
 
   useEffect(() => {
     getFirstNationAvailability();
-  }, [ctx.work?.project_id]);
+  }, [ctx.work?.project_id, getFirstNationAvailability]);
 
   const handleOpenUserMenu = (
     event: MouseEvent<HTMLElement>,
@@ -177,17 +177,7 @@ const FirstNationList = () => {
         header: "Consultation",
         size: 150,
         filterVariant: "multi-select",
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="consultationFilter"
-            />
-          );
-        },
+        Filter: getStatusFilter<WorkFirstNation>,
         filterSelectOptions: consultationLevels.map((level) => level.name),
         filterFn: "multiSelectFilter",
       },
@@ -266,6 +256,7 @@ const FirstNationList = () => {
         filterVariant: "multi-select",
         filterSelectOptions: statusOptions,
         filterFn: "multiSelectFilter",
+        Filter: getStatusFilter<WorkFirstNation>,
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<string>() === ACTIVE_STATUS.ACTIVE && (
@@ -276,20 +267,9 @@ const FirstNationList = () => {
             )}
           </span>
         ),
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          );
-        },
       },
     ],
-    [firstNations, userMenuAnchorEl, relationshipHolder, consultationLevels]
+    [canEdit, consultationLevels, handleCloseUserMenu, statusOptions]
   );
 
   const onCancelHandler = () => {
@@ -359,7 +339,7 @@ const FirstNationList = () => {
         type: "success",
       });
     } catch (error) {}
-  }, [ctx.work?.id, ctx.selectedWorkPhase?.work_phase.phase.id]);
+  }, [ctx.work?.id, ctx.work?.project.name, ctx.work?.title]);
 
   const onTemplateFormSaveHandler = async (firstNationIds: number[]) => {
     setShowImportNationForm(false);
@@ -411,33 +391,37 @@ const FirstNationList = () => {
             }}
           >
             <Tooltip title={"Import Nations from existing Works"}>
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                exception={userIsActiveTeamMember}
-                errorProps={{
-                  disabled: true,
-                }}
-              >
-                <IButton
-                  onClick={() => setShowImportNationForm(true)}
-                  disabled={!firstNationAvailable}
+              <span>
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  exception={userIsActiveTeamMember}
+                  errorProps={{
+                    disabled: true,
+                  }}
                 >
-                  <ImportFileIcon className="icon" />
-                </IButton>
-              </Restricted>
+                  <IButton
+                    onClick={() => setShowImportNationForm(true)}
+                    disabled={!firstNationAvailable}
+                  >
+                    <ImportFileIcon className="icon" />
+                  </IButton>
+                </Restricted>
+              </span>
             </Tooltip>
             <Tooltip title="Export first nations to excel">
-              <Restricted
-                allowed={[ROLES.CREATE]}
-                exception={userIsActiveTeamMember}
-                errorProps={{
-                  disabled: true,
-                }}
-              >
-                <IButton onClick={downloadPDFReport}>
-                  <DownloadIcon className="icon" />
-                </IButton>
-              </Restricted>
+              <span>
+                <Restricted
+                  allowed={[ROLES.CREATE]}
+                  exception={userIsActiveTeamMember}
+                  errorProps={{
+                    disabled: true,
+                  }}
+                >
+                  <IButton onClick={downloadPDFReport}>
+                    <DownloadIcon className="icon" />
+                  </IButton>
+                </Restricted>
+              </span>
             </Tooltip>
           </Grid>
           <Grid item xs={12}>

@@ -22,7 +22,7 @@ const Option = ({
     if (filterProps?.selectedOptions) {
       setIsSelected(filterProps?.selectedOptions.indexOf(data.value) > -1);
     }
-  }, [filterProps?.selectedOptions]);
+  }, [filterProps?.selectedOptions, data.value]);
 
   return (
     <Box title={data.label}>

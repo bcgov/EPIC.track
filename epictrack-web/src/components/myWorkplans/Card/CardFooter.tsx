@@ -29,7 +29,6 @@ const CardFooter = ({ workplan }: CardProps) => {
         height: "90px",
         overflow: "hidden",
       }}
-      xs={12}
     >
       <Grid item xs={8}>
         <Grid container direction={"row"} justifyContent={"space-between"}>

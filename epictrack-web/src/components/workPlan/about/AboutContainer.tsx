@@ -1,6 +1,6 @@
+import { FC, SyntheticEvent, useContext, useState } from "react";
 import { Box, Grid } from "@mui/material";
-import React, { useContext } from "react";
-import { ETHeading3, ETLink, ETParagraph } from "../../shared";
+import { ETHeading3, ETLink } from "../../shared";
 import { tabPanelStyle, tabStyle, titleStyle } from "../common/styles";
 import { Palette } from "../../../styles/theme";
 import { ETTabs, ETTab } from "../../shared/tab/Tab";
@@ -12,13 +12,13 @@ import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import { WorkplanContext } from "../WorkPlanContext";
 
-const LinkIcon: React.FC<IconProps> = Icons["LinkIcon"];
+const LinkIcon: FC<IconProps> = Icons["LinkIcon"];
 
 const AboutContainer = () => {
   const { work } = useContext(WorkplanContext);
-  const [selectedTabIndex, setSelectedTabIndex] = React.useState(0);
+  const [selectedTabIndex, setSelectedTabIndex] = useState(0);
 
-  const handleTabSelected = (event: React.SyntheticEvent, index: number) => {
+  const handleTabSelected = (event: SyntheticEvent, index: number) => {
     setSelectedTabIndex(index);
   };
 
@@ -138,42 +138,41 @@ const AboutContainer = () => {
           </Box>
           {ABOUT_RESOURCES.map((resource) => {
             return (
-              <>
+              <Box
+                sx={{
+                  display: "flex",
+                  padding: "1rem 1.5rem",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: ".5rem",
+                  alignSelf: "stretch",
+                  borderRadius: "4px",
+                  backgroundColor: Palette.neutral.bg.light,
+                }}
+                key={resource.url}
+              >
                 <Box
                   sx={{
                     display: "flex",
-                    padding: "1rem 1.5rem",
-                    flexDirection: "column",
-                    alignItems: "flex-start",
                     gap: ".5rem",
-                    alignSelf: "stretch",
-                    borderRadius: "4px",
-                    backgroundColor: Palette.neutral.bg.light,
+                    alignItems: "center",
                   }}
                 >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: ".5rem",
-                      alignItems: "center",
+                  <LinkIcon fill={`${Palette.primary.accent.main}`} />
+                  <ETLink
+                    to={`${resource.url}`}
+                    target="_blank"
+                    rel="noopener"
+                    style={{
+                      fontSize: "1rem",
+                      fontWeight: 700,
+                      lineHeight: "1.5rem",
                     }}
                   >
-                    <LinkIcon fill={`${Palette.primary.accent.main}`} />
-                    <ETLink
-                      to={`${resource.url}`}
-                      target="_blank"
-                      rel="noopener"
-                      style={{
-                        fontSize: "1rem",
-                        fontWeight: 700,
-                        lineHeight: "1.5rem",
-                      }}
-                    >
-                      {resource.title}
-                    </ETLink>
-                  </Box>
+                    {resource.title}
+                  </ETLink>
                 </Box>
-              </>
+              </Box>
             );
           })}
         </Box>

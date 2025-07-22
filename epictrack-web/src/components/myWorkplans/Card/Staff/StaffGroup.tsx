@@ -18,7 +18,7 @@ const StaffGroup = ({ workplan }: CardProps) => {
   useEffect(() => {
     const sortedList = sortTeam(staff_info, email);
     setStaffList(sortedList);
-  }, [staff_info]);
+  }, [email, staff_info]);
 
   return (
     <AvatarGroup
@@ -37,8 +37,10 @@ const StaffGroup = ({ workplan }: CardProps) => {
         justifyContent: "flex-end",
       }}
     >
-      {staffList.map((staff) => {
-        return <StaffAvatar key={staff.staff.id} staff={staff.staff} />;
+      {staffList.map((staff, index) => {
+        return (
+          <StaffAvatar key={`${staff.staff.id}-${index}`} staff={staff.staff} />
+        );
       })}
     </AvatarGroup>
   );

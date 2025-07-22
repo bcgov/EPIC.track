@@ -11,20 +11,35 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import dayjs from "dayjs";
 import Moment from "moment";
+import { Else, If, Then, When } from "react-if";
+import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
+import { Palette } from "../../../styles/theme";
+import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
+import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
+import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
+import RichTextEditor from "../../shared/richTextEditor";
+import TrackDialog from "../../shared/TrackDialog";
+import WarningBox from "../../shared/warningBox";
+import { showNotification } from "../../shared/notificationProvider";
+import Icons from "../../icons";
+import { IconProps } from "../../icons/type";
+import { WorkplanContext } from "../WorkPlanContext";
+import { EventContext } from "./EventContext";
 import {
   COMMON_ERROR_MESSAGE,
   MIN_WORK_START_DATE,
 } from "../../../constants/application-constant";
-import { Box, FormControlLabel, Grid, TextField, Tooltip } from "@mui/material";
-import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../shared";
-import ControlledSelectV2 from "../../shared/controlledInputComponents/ControlledSelectV2";
-import { Palette } from "../../../styles/theme";
-import { WorkplanContext } from "../WorkPlanContext";
-import { showNotification } from "../../shared/notificationProvider";
+import { EVENT_TYPE } from "../phase/type";
+import { OUTCOME_ID } from "./constants";
+import { POSITION_ENUM } from "models/position";
+import { eventService } from "services/eventService/eventService";
+import staffService from "services/staffService/staffService";
+import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
-import { ListType } from "../../../models/code";
-import RichTextEditor from "../../shared/richTextEditor";
-import eventService from "../../../services/eventService/eventService";
+import { dateUtils } from "../../../utils";
+import { ListType } from "models/code";
+import { Staff } from "models/staff";
 import {
   EventCategory,
   EventPosition,
@@ -33,30 +48,15 @@ import {
   EventsGridModel,
   MilestoneEvent,
   MilestoneEventDateCheck,
-} from "../../../models/event";
-import configurationService from "../../../services/configurationService/configurationService";
-import TrackDialog from "../../shared/TrackDialog";
-import EventConfiguration from "../../../models/eventConfiguration";
-import ControlledSwitch from "../../shared/controlledInputComponents/ControlledSwitch";
+} from "models/event";
+import EventConfiguration from "models/eventConfiguration";
 import MultiDaysInput from "./components/MultiDaysInput";
-import { dateUtils } from "../../../utils";
 import PCPInput from "./components/PCPInput";
-import Icons from "../../icons/index";
-import { IconProps } from "../../icons/type";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
 import DecisionInput from "./components/DecisionInput";
-import { POSITION_ENUM } from "../../../models/position";
-import { Else, If, Then, When } from "react-if";
 import ExtensionInput from "./components/ExtensionInput";
-import { EventContext } from "./EventContext";
-import { EVENT_TYPE } from "../phase/type";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
-import WarningBox from "../../shared/warningBox";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
-import ControlledDatePicker from "../../shared/controlledInputComponents/ControlledDatePicker";
-import { Staff } from "models/staff";
-import staffService from "services/staffService/staffService";
-import { OUTCOME_ID } from "./constants";
 
 interface EventFormProps {
   onSave: () => void;
@@ -92,11 +92,13 @@ const EventForm = ({
   const [showEventPushConfirmation, setShowEventPushConfirmation] =
     useState(false);
   const [pushEvents, setPushEvents] = useState<boolean>(false);
-  const initialNotes = useMemo(() => event?.notes, [event?.id]);
+  const initialNotes = useMemo(() => event?.notes, [event?.notes]);
   const { handleHighlightRows } = useContext(EventContext);
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
-  const [actualAdded, setActualAdded] = useState<boolean>(false);
+  const [actualAdded, setActualAdded] = useState<boolean>(
+    event?.actual_date ? true : false
+  );
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
   const isCreateMode = useMemo(() => !event, [event]);
@@ -155,7 +157,7 @@ const EventForm = ({
           selectedWorkPhase?.work_phase.legislated &&
           selectedConfiguration?.event_position === EventPosition.END
       ),
-    [selectedConfiguration, selectedWorkPhase]
+    [isFormFieldsLocked, selectedConfiguration, selectedWorkPhase]
   );
   const pushRequired = useMemo(
     () =>
@@ -173,6 +175,9 @@ const EventForm = ({
       if (work?.responsible_epd) {
         decisionMakers.push(work?.responsible_epd);
       }
+      if (work?.work_lead) {
+        decisionMakers.push(work?.work_lead);
+      }
       if (work?.decision_by) {
         decisionMakers.unshift(work?.decision_by);
       }
@@ -187,21 +192,32 @@ const EventForm = ({
     ) {
       getDecisionMakers();
     }
-  }, [actualAdded, selectedConfiguration]);
+  }, [
+    actualAdded,
+    getDecisionMakers,
+    selectedConfiguration?.event_category_id,
+  ]);
+
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
       selectedWorkPhase?.work_phase.legislated &&
       selectedConfiguration?.event_category_id !== EventCategory.EXTENSION,
-    [dateCheckStatus, selectedWorkPhase]
+    [
+      dateCheckStatus,
+      selectedConfiguration?.event_category_id,
+      selectedWorkPhase,
+    ]
   );
+
   const isMilestoneTypeDisabled = useMemo(
     () =>
       !!event ||
       isFormFieldsLocked ||
       selectedWorkPhase?.work_phase.is_suspended,
-    [event, selectedWorkPhase?.work_phase.is_suspended]
+    [event, isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
   );
+
   const isTitleDisabled = useMemo(
     () => isFormFieldsLocked || selectedWorkPhase?.work_phase.is_suspended,
     [isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
@@ -278,7 +294,10 @@ const EventForm = ({
   }, [selectedConfiguration]);
 
   useEffect(() => {
-    if (event) {
+    if (!event) return;
+    const current = getValues();
+    const hasChanged = JSON.stringify(current) !== JSON.stringify(event);
+    if (hasChanged) {
       reset(event);
       daysOnChangeHandler({
         anticipatedDate: !event.actual_date
@@ -290,17 +309,12 @@ const EventForm = ({
       setTitleCharacterCount(Number(event?.name.length));
       setNotes(event.notes);
     }
-  }, [
-    event,
-    numberOfDaysRef?.current,
-    endDateRef?.current,
-    anticipatedDateRef?.current,
-  ]);
+  }, [event, getValues, reset]);
 
   useEffect(() => {
     if (configurations && event) {
       const config = configurations.filter(
-        (p) => p.id == event.event_configuration_id
+        (p) => p.id === event.event_configuration_id
       )[0];
       setSelectedConfiguration(config);
     }
@@ -317,7 +331,7 @@ const EventForm = ({
       !event
     ) {
       const config = configurations.filter(
-        (p) => p.event_type_id == EventType.TIME_LIMIT_RESUMPTION
+        (p) => p.event_type_id === EventType.TIME_LIMIT_RESUMPTION
       );
       if (!config || config.length === 0) {
         showNotification(MISSING_RESUMPTION_ERROR, {
@@ -331,9 +345,14 @@ const EventForm = ({
         });
       }
     }
-  }, [configurations, event]);
+  }, [
+    configurations,
+    event,
+    reset,
+    selectedWorkPhase?.work_phase.is_suspended,
+  ]);
 
-  const getConfigurations = async () => {
+  const getConfigurations = useCallback(async () => {
     try {
       const result = await configurationService.getAll(
         Number(selectedWorkPhase?.work_phase.id),
@@ -347,12 +366,12 @@ const EventForm = ({
         type: "error",
       });
     }
-  };
+  }, [selectedWorkPhase]);
 
   useEffect(() => {
-    if (!Boolean(event)) {
+    if (!event) {
       getConfigurations();
-    } else if (event) {
+    } else {
       setConfigurations([(event as MilestoneEvent).event_configuration]);
     }
   }, [event, getConfigurations]);
@@ -361,7 +380,7 @@ const EventForm = ({
    * Check if the selected event configuration cause date to exceed the phase
    * or push subsequent events
    */
-  const eventDateCheck = async () => {
+  const eventDateCheck = useCallback(async () => {
     try {
       const result = await eventService.check_event_for_date_push(
         getValues(),
@@ -371,7 +390,7 @@ const EventForm = ({
         setDateCheckStatus(result.data as MilestoneEventDateCheck);
       }
     } catch (e) {}
-  };
+  }, [event?.id, getValues]);
 
   /**
    * Check if it is required to show the Lock confirmation
@@ -419,7 +438,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [handleHighlightRows, pushEvents]
+    [handleHighlightRows, pushEvents, selectedWorkPhase?.work_phase.id]
   );
 
   const updateEvent = useCallback(
@@ -455,7 +474,7 @@ const EventForm = ({
 
       return createEvent(data, pushEventConfirmed);
     },
-    [event, createEvent, pushEvents, updateEvent]
+    [event, createEvent, updateEvent]
   );
   const handleSaveEvent = async (
     data?: MilestoneEvent,
@@ -554,10 +573,15 @@ const EventForm = ({
     }
     return Promise.resolve();
   };
-  const changeHandler = async (params?: NumberOfDaysChangeProps) => {
-    await daysOnChangeHandler(params);
-    eventDateCheck();
-  };
+
+  const changeHandler = useCallback(
+    async (params?: NumberOfDaysChangeProps) => {
+      await daysOnChangeHandler(params);
+      eventDateCheck();
+    },
+    [eventDateCheck]
+  );
+
   return (
     <>
       <FormProvider {...methods}>
@@ -808,30 +832,30 @@ const EventForm = ({
           }}
           isActionsRequired
         />
-        <TrackDialog
-          open={showEventPushConfirmation}
-          dialogTitle={"Update this Milestone only?"}
-          disableEscapeKeyDown
-          fullWidth
-          maxWidth="sm"
-          okButtonText="Save"
-          cancelButtonText="Cancel"
-          isActionsRequired
-          onCancel={() => setShowEventPushConfirmation(false)}
-          formId="confirm-form"
-        >
-          <EventDatePushConfirmForm
-            onSave={(option: number) => {
-              setPushEvents((prevState) => {
-                prevState = option === 1;
-                handleSaveEvent(undefined, prevState);
-                setShowEventPushConfirmation(false);
-                return prevState;
-              });
-            }}
-          />
-        </TrackDialog>
       </FormProvider>
+      <TrackDialog
+        open={showEventPushConfirmation}
+        dialogTitle={"Update this Milestone only?"}
+        disableEscapeKeyDown
+        fullWidth
+        maxWidth="sm"
+        okButtonText="Save"
+        cancelButtonText="Cancel"
+        isActionsRequired
+        onCancel={() => setShowEventPushConfirmation(false)}
+        formId="confirm-form"
+      >
+        <EventDatePushConfirmForm
+          onSave={(option: number) => {
+            setPushEvents((prevState) => {
+              prevState = option === 1;
+              handleSaveEvent(undefined, prevState);
+              setShowEventPushConfirmation(false);
+              return prevState;
+            });
+          }}
+        />
+      </TrackDialog>
     </>
   );
 };

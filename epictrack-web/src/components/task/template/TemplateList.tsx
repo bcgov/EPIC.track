@@ -10,12 +10,13 @@ import TrackDialog from "../../shared/TrackDialog";
 import { ETGridTitle, ETPageContainer } from "../../shared";
 import TemplateTaskList from "./TemplateTasksList";
 import { ETChip } from "../../shared/chip/ETChip";
-import templateService from "../../../services/taskService/templateService";
+import { templateService } from "../../../services/taskService/templateService";
 import { getSelectFilterOptions } from "../../shared/MasterTrackTable/utils";
-import TableFilter from "../../shared/filterSelect/TableFilter";
+import { TableFilter } from "../../shared/filterSelect/TableFilter";
 import { useAppSelector } from "../../../hooks";
 import { Restricted, hasPermission } from "../../shared/restricted";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const TemplateList = () => {
   const [templates, setTemplates] = React.useState<Template[]>([]);
@@ -37,7 +38,7 @@ const TemplateList = () => {
 
   const titleSuffix = "Task Template Details";
   const onDialogClose = (event: any = undefined, reason: any = undefined) => {
-    if (reason && reason == "backdropClick") return;
+    if (reason && reason === "backdropClick") return;
     setShowCreateDialog(false);
     setShowDetailsDialog(false);
     setTemplateId(undefined);
@@ -63,7 +64,7 @@ const TemplateList = () => {
 
   React.useEffect(() => {
     getTemplates();
-  }, []);
+  }, [getTemplates]);
 
   React.useEffect(() => {
     const eaActs = templates
@@ -176,29 +177,8 @@ const TemplateList = () => {
         header: "Status",
         filterVariant: "multi-select",
         filterSelectOptions: statuses,
-        Filter: ({ header, column }) => {
-          return (
-            <TableFilter
-              isMulti
-              header={header}
-              column={column}
-              variant="inline"
-              name="statusFilter"
-            />
-          );
-        },
-        filterFn: (row, id, filterValue) => {
-          if (
-            !filterValue.length ||
-            filterValue.length > statuses.length // select all is selected
-          ) {
-            return true;
-          }
-
-          const value: string = row.getValue(id);
-
-          return filterValue.includes(value);
-        },
+        Filter: getStatusFilter<Template>,
+        filterFn: "multiSelectFilter",
         Cell: ({ cell }) => (
           <span>
             {cell.getValue<boolean>() && <ETChip active label="Active" />}
@@ -207,7 +187,7 @@ const TemplateList = () => {
         ),
       },
     ],
-    [eaActs]
+    [canEdit, eaActs, phases, statuses, workTypes]
   );
 
   return (

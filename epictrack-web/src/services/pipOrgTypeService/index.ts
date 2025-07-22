@@ -7,4 +7,4 @@ class PIPOrgTypeService {
   }
 }
 
-export default new PIPOrgTypeService();
+export const pipOrgTypeService = new PIPOrgTypeService();

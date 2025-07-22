@@ -4,7 +4,7 @@ import MinistryForm from "./MinistryForm";
 import { getErrorMessage } from "utils/axiosUtils";
 import { showNotification } from "components/shared/notificationProvider";
 import { Ministry } from "models/ministry";
-import ministryService from "services/ministryService";
+import { ministryService } from "services/ministryService";
 import { Staff } from "models/staff";
 import staffService from "services/staffService/staffService";
 import { POSITION_ENUM } from "models/position";

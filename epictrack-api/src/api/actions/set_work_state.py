@@ -31,7 +31,7 @@ class SetWorkState(ActionFactory):
         work_decision_date = None
         if work_state in [state.value for state in EndingWorkStateEnum]:
             is_active = False
-            work_decision_date = datetime.now()
+            work_decision_date = source_event.actual_date
         db.session.query(Work).filter(Work.id == source_event.work_id).update(
             {Work.work_state: work_state, Work.is_active: is_active, Work.work_decision_date: work_decision_date}
         )
