@@ -181,6 +181,7 @@ export const WorkplanProvider = ({
         setTeam(team);
       }
     } catch (e) {
+      // TODO: handle error TRACK-528
       showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
     }
   }, [workId]);
@@ -213,6 +214,7 @@ export const WorkplanProvider = ({
       await getIssues();
       setLoading(false);
     } catch (e) {
+      // TODO: handle error TRACK-528
       showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
     } finally {
       setLoading(false);
