@@ -49,6 +49,19 @@ const WorkList = () => {
     [works]
   );
 
+  const workTypes = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          works
+            .map((work) => work?.work_type?.name || "")
+            .filter((type) => type)
+            .sort()
+        )
+      ),
+    [works]
+  );
+
   const projects = useMemo(
     () =>
       Array.from(
@@ -132,6 +145,32 @@ const WorkList = () => {
             !filterValue.length ||
             filterValue.length > projects.length // select all is selected
           ) {
+            return true;
+          }
+
+          const value: string = row.getValue(id) || "";
+
+          return filterValue.includes(value);
+        },
+      },
+      {
+        accessorKey: "work_type.name",
+        header: "Work type",
+        filterVariant: "multi-select",
+        filterSelectOptions: workTypes,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="rolesFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (!filterValue.length || filterValue.length > workTypes.length) {
             return true;
           }
 
