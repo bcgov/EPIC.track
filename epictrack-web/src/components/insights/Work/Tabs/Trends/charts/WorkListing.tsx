@@ -292,7 +292,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, workStates, started_years, closed_years]
+    [projects, workStates, workTypes, started_years, closed_years]
   );
   return (
     <MasterTrackTable
