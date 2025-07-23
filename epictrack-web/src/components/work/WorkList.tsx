@@ -41,6 +41,10 @@ const WorkList = () => {
         id: "is_active",
         value: [true],
       },
+      {
+        id: "work_state",
+        value: ["IN_PROGRESS", "COMPLETED"],
+      },
     ]
   );
 
