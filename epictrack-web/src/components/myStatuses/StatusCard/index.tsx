@@ -18,7 +18,7 @@ const StatusCard = ({ status, statusStalenessSettings }: StatusCardProps) => {
   return (
     <Box
       sx={{
-        border: `2px solid var(--neutral-background-dark, ${Palette.neutral.bg.dark})`,
+        border: `2px solid var(--neutral-background-dark, #DBDCDC)`,
         borderRadius: "4px",
       }}
     >
