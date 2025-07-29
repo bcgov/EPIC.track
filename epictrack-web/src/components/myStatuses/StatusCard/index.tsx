@@ -1,7 +1,6 @@
 import { Box } from "@mui/material";
 import StatusCardBody from "./StatusCardBody";
 import StatusCardHeader from "./StatusCardHeader";
-import { Palette } from "../../../styles/theme";
 import { StalenessSettings } from "models/settings";
 import { StatusDashboardItem } from "models/status";
 import { StatusProvider } from "components/workPlan/status/StatusContext";
