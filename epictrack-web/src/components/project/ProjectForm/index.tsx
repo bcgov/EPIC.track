@@ -134,15 +134,8 @@ export default function ProjectForm({
     );
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
-      // The subtype select box wasn't resetting when type changes
-      if (formValues.sub_type_id !== project?.sub_type_id) {
-        reset({
-          ...formValues,
-          sub_type_id: undefined,
-        });
-      }
     }
-  }, [formValues, project?.sub_type_id, reset]);
+  }, [formValues]);
 
   useEffect(() => {
     if (formValues.type_id) {
