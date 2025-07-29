@@ -37,6 +37,7 @@ const Endpoints = {
   },
   Works: {
     WORKS: "works",
+    WORKS_BY_STAFF: "works/by-staff/:staff_id",
     WORK_RESOURCES: "works/resources",
     WORK_RESOURCES_ACTIVE: "works/resources?is_active=true",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
@@ -66,6 +67,7 @@ const Endpoints = {
   },
   WorkStatuses: {
     WORK_STATUSES: "work/:work_id/statuses",
+    GET_ALL: "work-statuses/dashboard",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

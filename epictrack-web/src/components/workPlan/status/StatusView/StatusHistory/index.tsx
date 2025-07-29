@@ -1,5 +1,4 @@
 import React, { useContext, useState } from "react";
-import { WorkplanContext } from "../../../WorkPlanContext";
 import { ETCaption1, ETCaption3, ETPreviewText } from "../../../../shared";
 import Timeline from "@mui/lab/Timeline";
 import { IconProps } from "../../../../icons/type";
@@ -26,29 +25,36 @@ import { StatusContext } from "../../StatusContext";
 import { Restricted } from "../../../../shared/restricted";
 import { EmptyStatusHistory } from "./EmptyStatusHistory";
 import { useUserHasRole } from "../../../utils";
+import { Status } from "models/status";
 
 const ExpandIcon: React.FC<IconProps> = Icons["ExpandIcon"];
 const PencilEditIcon: React.FC<IconProps> = Icons["PencilEditIcon"];
 
-const StatusHistory = () => {
-  const { statuses } = React.useContext(WorkplanContext);
+const StatusHistory = ({
+  statuses,
+  highlightFirstInTimelineApproved = true,
+  defaultExpanded = true,
+  showEdit = true,
+}: {
+  statuses: Status[];
+  highlightFirstInTimelineApproved?: boolean;
+  defaultExpanded?: boolean;
+  showEdit?: boolean;
+}) => {
   const { setShowStatusForm, setStatus } = useContext(StatusContext);
   const [expand, setExpand] = useState(false);
   const theme = useTheme();
+  const userHasRole = useUserHasRole();
 
   const approvedStatuses = statuses.filter(
     (status) => status.is_approved && status.id !== statuses?.[0]?.id
   );
-  const highlightFirstInTimeLineApproved = !statuses?.[0]?.is_approved;
 
   const SHOW_MORE_THRESHOLD = 3;
-
-  const userHasRole = useUserHasRole();
 
   if (approvedStatuses.length === 0) {
     return <EmptyStatusHistory />;
   }
-
   return (
     <Box sx={{ paddingTop: "8px" }}>
       <ETCaption1 bold color={Palette.neutral.dark}>
@@ -66,7 +72,7 @@ const StatusHistory = () => {
         }}
       >
         {approvedStatuses.slice(0, SHOW_MORE_THRESHOLD).map((status, index) => {
-          const isSuccess = highlightFirstInTimeLineApproved && index === 0;
+          const isSuccess = highlightFirstInTimelineApproved && index === 0;
           const finalItem = approvedStatuses.length === index + 1;
           const lastItemHidden = index + 1 !== SHOW_MORE_THRESHOLD;
           const showConnector = (!finalItem && lastItemHidden) || expand;
@@ -78,11 +84,11 @@ const StatusHistory = () => {
                     isSuccess ? Palette.neutral.dark : Palette.neutral.main
                   }
                 >
-                  <ReadMoreText defaultExpanded={isSuccess}>
+                  <ReadMoreText defaultExpanded={isSuccess && defaultExpanded}>
                     {status.description}
                   </ReadMoreText>
                 </ETPreviewText>
-                <When condition={isSuccess}>
+                <When condition={isSuccess && showEdit}>
                   <Restricted
                     allowed={[ROLES.EXTENDED_EDIT]}
                     errorProps={{ disabled: true }}

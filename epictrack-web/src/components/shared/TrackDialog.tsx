@@ -8,11 +8,12 @@ import {
   DialogContent,
   DialogProps,
   IconButton,
+  Tooltip,
 } from "@mui/material";
 import { Palette } from "../../styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
-import { ETHeading4, ETSubhead } from ".";
+import { ETCaption1, ETHeading4, ETSubhead } from ".";
 
 export type TrackDialogProps = {
   onCancel?: () => void;
@@ -28,6 +29,7 @@ export type TrackDialogProps = {
   formId?: string;
   externalSubmitButtonUsed?: boolean;
   saveButtonProps?: ButtonProps;
+  headingCaption?: string;
 } & DialogProps;
 
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
@@ -47,6 +49,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
   additionalActions,
   externalSubmitButtonUsed = false,
   saveButtonProps,
+  headingCaption = "",
   ...props
 }) => {
   const [openDialog, setOpenDialog] = useState(false);
@@ -83,13 +86,37 @@ const TrackDialog: FC<TrackDialogProps> = ({
           borderBottom: `2px solid ${Palette.primary.main}`,
         }}
       >
-        <IconButton
-          onClick={onCancel}
-          sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
-          disableRipple
+        <Box
+          justifyContent={"space-between"}
+          sx={{ width: "100%", display: "flex", alignItems: "center" }}
         >
-          <CloseIconComponent />
-        </IconButton>
+          <Tooltip title={headingCaption ?? ""}>
+            <span>
+              <ETCaption1
+                bold
+                sx={{
+                  color: Palette.neutral.light,
+                  display: "-webkit-box",
+                  overflow: "hidden",
+                  WebkitBoxOrient: "vertical",
+                  WebkitLineClamp: 2,
+                  textOverflow: "ellipsis",
+                  textTransform: "uppercase",
+                  padding: "0 0.5rem 0.5rem 0",
+                }}
+              >
+                {headingCaption}
+              </ETCaption1>
+            </span>
+          </Tooltip>
+          <IconButton
+            onClick={onCancel}
+            sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
+            disableRipple
+          >
+            <CloseIconComponent />
+          </IconButton>
+        </Box>
         <ETHeading4 bold sx={{ color: Palette.primary.main, width: "100%" }}>
           {dialogTitle}
         </ETHeading4>

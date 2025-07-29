@@ -178,6 +178,19 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return serialized_work
 
     @classmethod
+    def get_work_ids_by_staff(cls, staff_id: int) -> list[int]:
+        """Get all work ids by staff id."""
+        return (
+            db.session.query(StaffWorkRole.work_id)
+            .filter(
+                StaffWorkRole.staff_id == staff_id,
+                StaffWorkRole.is_active.is_(True)
+            )
+            .distinct()
+            .all()
+        )
+
+    @classmethod
     def find_allocated_resources(cls, is_active=None):
         """Find all allocated resources"""
         lead = aliased(Staff)

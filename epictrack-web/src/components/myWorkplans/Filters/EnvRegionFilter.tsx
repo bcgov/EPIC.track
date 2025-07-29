@@ -5,8 +5,18 @@ import { MyWorkplansContext } from "../MyWorkPlanContext";
 import RegionService from "../../../services/regionService";
 import { REGIONS } from "../../shared/constants";
 
-export const EnvRegionFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
+interface EnvRegionFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const EnvRegionFilter = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}: EnvRegionFilterProps) => {
+  const context = useContext(MyWorkplansContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);

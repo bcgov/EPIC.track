@@ -9,10 +9,25 @@ from attr import dataclass
 class WorkplanDashboardSearchOptions:  # pylint: disable=too-many-instance-attributes
     """Used to store work dashboard search options."""
 
-    text: str
-    teams: Optional[List[int]]
-    work_states: Optional[List[str]]
-    regions: Optional[List[int]]
     project_types: Optional[List[int]]
-    work_types: Optional[List[int]]
+    regions: Optional[List[int]]
     staff_id: Optional[int]
+    teams: Optional[List[int]]
+    text: str
+    work_states: Optional[List[str]]
+    work_types: Optional[List[int]]
+
+
+@dataclass
+class StatusDashboardSearchOptions:  # pylint: disable=too-many-instance-attributes
+    """Used to store status dashboard search options."""
+
+    is_approved: Optional[List[bool]]
+    project_status: Optional[List[bool]]
+    regions: Optional[List[int]]
+    staff_id: Optional[int]
+    staleness: Optional[List[str]]
+    teams: Optional[List[int]]
+    text: str
+    work_status: Optional[List[bool]]
+    work_types: Optional[List[int]]

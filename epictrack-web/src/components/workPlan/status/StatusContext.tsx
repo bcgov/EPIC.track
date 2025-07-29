@@ -3,7 +3,6 @@ import {
   SetStateAction,
   createContext,
   useCallback,
-  useContext,
   useMemo,
   useState,
 } from "react";
@@ -13,12 +12,13 @@ import { Status } from "../../../models/status";
 import { showNotification } from "../../shared/notificationProvider";
 import { statusService } from "../../../services/statusService/statusService";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import { WorkplanContext } from "../WorkPlanContext";
 import { getErrorMessage } from "../../../utils/axiosUtils";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 import { WORKPLAN_TAB } from "../constants";
 
 interface StatusContextProps {
+  openStatusForm: (status?: Status, clone?: boolean) => void;
+  openApproveStatusDialog: (status: Status) => void;
   setShowStatusForm: Dispatch<SetStateAction<boolean>>;
   status?: Status | null;
   setStatus: Dispatch<SetStateAction<Status | undefined>>;
@@ -29,6 +29,7 @@ interface StatusContextProps {
   setIsCloning: Dispatch<SetStateAction<boolean>>;
   workId: string | null;
   isCloning: boolean;
+  headingCaption?: string;
 }
 
 interface StatusContainerRouteParams extends URLSearchParams {
@@ -46,12 +47,24 @@ export const StatusContext = createContext<StatusContextProps>({
   setIsCloning: () => ({}),
   isCloning: false,
   workId: null,
+  openStatusForm: function (status?: Status, clone?: boolean): void {
+    throw new Error("Function not implemented.");
+  },
+  openApproveStatusDialog: function (status: Status): void {
+    throw new Error("Function not implemented.");
+  },
 });
 
 export const StatusProvider = ({
   children,
+  workId: propWorkId = null,
+  refetchStatuses,
+  headingCaption = "",
 }: {
   children: JSX.Element | JSX.Element[];
+  workId?: string | null;
+  refetchStatuses?: () => void;
+  headingCaption?: string;
 }) => {
   const [showStatusForm, setShowStatusForm] = useState<boolean>(false);
   const [showApproveStatusDialog, setShowApproveStatusDialog] =
@@ -59,9 +72,21 @@ export const StatusProvider = ({
   const [isCloning, setIsCloning] = useState<boolean>(false);
   const [status, setStatus] = useState<Status>();
   const [selectedHistoryIndex, setSelectedHistoryIndex] = useState<number>(0);
+
   const query = useSearchParams<StatusContainerRouteParams>();
-  const workId = useMemo(() => query.get("work_id"), [query]);
-  const { getWorkStatuses, setStatuses } = useContext(WorkplanContext);
+  const urlWorkId = useMemo(() => query.get("work_id"), [query]);
+  const workId = propWorkId ?? urlWorkId;
+
+  const openStatusForm = (s?: Status, clone: boolean = false) => {
+    setStatus(s);
+    setIsCloning(clone);
+    setShowStatusForm(true);
+  };
+
+  const openApproveStatusDialog = (s: Status) => {
+    setStatus(s);
+    setShowApproveStatusDialog(true);
+  };
 
   const onDialogClose = () => {
     setShowStatusForm(false);
@@ -103,8 +128,8 @@ export const StatusProvider = ({
         createStatus(data, callback);
       }
       setIsCloning(false);
-      getWorkStatuses();
       setShowStatusForm(false);
+      refetchStatuses?.();
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
@@ -125,7 +150,7 @@ export const StatusProvider = ({
         type: "success",
       });
       setStatus(undefined);
-      getWorkStatuses();
+      refetchStatuses?.();
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
@@ -140,6 +165,8 @@ export const StatusProvider = ({
   return (
     <StatusContext.Provider
       value={{
+        openStatusForm,
+        openApproveStatusDialog,
         setSelectedHistoryIndex,
         selectedHistoryIndex,
         isCloning,
@@ -155,7 +182,8 @@ export const StatusProvider = ({
       {children}
       <TrackDialog
         open={showStatusForm}
-        dialogTitle="Add Status"
+        dialogTitle={status?.id && !isCloning ? "Edit Status" : "Add Status"}
+        headingCaption={headingCaption}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
@@ -172,12 +200,12 @@ export const StatusProvider = ({
         dialogContentText="Once approved, this status will be automatically added to the Report."
         okButtonText="Approve"
         cancelButtonText="Cancel"
+        headingCaption={headingCaption}
         isActionsRequired
         onCancel={closeApproveDialog}
         onOk={() => {
-          setStatuses([]); // Status history was not being updated so manually doing this
           approveStatus();
-          getWorkStatuses(); // Status history was not being updated so manually doing this
+          refetchStatuses?.();
         }}
       />
     </StatusContext.Provider>

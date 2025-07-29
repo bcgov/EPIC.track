@@ -9,7 +9,8 @@ export type Icon =
   | "GearIcon"
   | "PenIcon"
   | "GridIcon"
-  | "UserIcon";
+  | "UserIcon"
+  | "CategoryIcon";
 
 export interface IconProps extends SvgIconProps {
   className?: string;

@@ -43,6 +43,14 @@ const DashboardIcon = (props: IconProps) => {
   );
 };
 
+const CategoryIcon = (props: IconProps) => {
+  return (
+    <svg {...commonProps} {...props}>
+      <path d="M11.5 2L6 11H17L11.5 2ZM11.5 5.84L13.43 9H9.56L11.5 5.84ZM17 13C14.51 13 12.5 15.01 12.5 17.5C12.5 19.99 14.51 22 17 22C19.49 22 21.5 19.99 21.5 17.5C21.5 15.01 19.49 13 17 13ZM17 20C15.62 20 14.5 18.88 14.5 17.5C14.5 16.12 15.62 15 17 15C18.38 15 19.5 16.12 19.5 17.5C19.5 18.88 18.38 20 17 20ZM2.5 21.5H10.5V13.5H2.5V21.5ZM4.5 15.5H8.5V19.5H4.5V15.5Z" />
+    </svg>
+  );
+};
+
 const ReportIcon = (props: IconProps) => {
   return (
     <svg {...commonProps} {...props}>
@@ -329,7 +337,7 @@ const IndicatorSmallIcon = (props: IconProps) => {
 
 const GoToIcon = (props: IconProps) => {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24">
+    <svg width="17" height="17" viewBox="0 0 24 24">
       <path
         d="M17 15C17.6641 15 18.25 15.5859 18.25 16.25V20C18.25 21.4062 17.1172 22.5 15.75 22.5H4.5C3.09375 22.5 2 21.4062 2 20V8.75C2 7.38281 3.09375 6.25 4.5 6.25H8.25C8.91406 6.25 9.5 6.83594 9.5 7.5C9.5 8.20312 8.91406 8.75 8.25 8.75H4.5V20H15.75V16.25C15.75 15.5859 16.2969 15 17 15ZM21.6094 2.89062C21.8438 3.125 22 3.4375 22 3.75V10C22 10.7031 21.3359 11.25 20.7109 11.25C20.0469 11.25 19.5 10.7031 19.5 10V6.79688L10.75 15.625C10.2422 16.1328 9.46094 16.1328 8.95312 15.625C8.48438 15.1562 8.48438 14.375 8.95312 13.8672L17.7422 4.96094H14.5C13.8359 4.96094 13.25 4.41406 13.25 3.75C13.25 3.08594 13.7969 2.5 14.5 2.5H20.75C21.0625 2.5 21.375 2.65625 21.6094 2.89062Z"
         fill={Palette.primary.accent.main}
@@ -534,10 +542,22 @@ const Apps = ({ fill, sx, ...rest }: IconProps) => {
   );
 };
 
+const ArrowDownward = ({ fill, sx, ...rest }: IconProps) => {
+  return (
+    <SvgIcon viewBox="0 0 24 24" sx={{ ...sx }} {...rest}>
+      <path
+        fill={fill}
+        d="m20 12-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8z"
+      />
+    </SvgIcon>
+  );
+};
+
 const icons: { [x: string]: React.FC<IconProps> } = {
   AllIcon,
   BulletIcon,
   DashboardIcon,
+  CategoryIcon,
   ReportIcon,
   InsightIcon,
   GearIcon,
@@ -583,6 +603,7 @@ const icons: { [x: string]: React.FC<IconProps> } = {
   CalendarIcon,
   Gantt,
   Apps,
+  ArrowDownward,
 };
 
 export default icons;

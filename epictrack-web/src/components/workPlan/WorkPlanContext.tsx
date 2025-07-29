@@ -162,7 +162,7 @@ export const WorkplanProvider = ({
 
   const getWorkStatuses = useCallback(async () => {
     if (workId) {
-      const statusResult = await statusService.getAll(Number(workId));
+      const statusResult = await statusService.getAllbyWorkId(Number(workId));
       if (statusResult.status === 200) {
         setStatuses(statusResult.data);
       }

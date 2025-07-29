@@ -14,12 +14,14 @@
 """Model to handle all operations related to WorkStatus."""
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Dict, List
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, desc
 from sqlalchemy.orm import relationship
 
 from .base_model import BaseModelVersioned
+from api.models import db
 
 
 class WorkStatus(BaseModelVersioned):
@@ -41,6 +43,24 @@ class WorkStatus(BaseModelVersioned):
     def list_statuses_for_work_id(cls, work_id) -> List[WorkStatus]:
         """Return all WorkStatus records for a specific work_id"""
         return WorkStatus.query.filter_by(work_id=work_id).order_by(desc(WorkStatus.posted_date)).all()
+
+    @classmethod
+    def list_statuses_for_work_ids(cls, work_ids: list[int]) -> dict[int, list[WorkStatus]]:
+        """Fetch all statuses for multiple works, grouped by work_id."""
+
+        statuses = (
+            WorkStatus
+            .query
+            .filter(cls.work_id.in_(work_ids))
+            .order_by(cls.work_id, cls.posted_date.desc())
+            .all()
+        )
+
+        grouped = defaultdict(list)
+        for result in statuses:
+            grouped[result.work_id].append(result)
+        return grouped
+
 
     @classmethod
     def list_latest_approved_statuses_for_work_ids(cls, work_ids: List[int]) -> Dict[int, WorkStatus]:
@@ -66,3 +86,19 @@ class WorkStatus(BaseModelVersioned):
                 work_statuses_dict[status.work_id] = status
 
         return work_statuses_dict
+
+    @classmethod
+    def list_latest_status_for_work_ids(cls, work_ids: List[int]) -> Dict[int, WorkStatus]:
+        """Return the latest WorkStatus per work_id"""
+        query = db.session.query(WorkStatus).filter(WorkStatus.work_id.in_(work_ids))
+
+        query = query.order_by(WorkStatus.posted_date.desc())
+        statuses = query.all()
+
+        # Select latest per work_id
+        latest_per_work = {}
+        for status in statuses:
+            if status.work_id not in latest_per_work:
+                latest_per_work[status.work_id] = status
+
+        return latest_per_work

@@ -1,8 +1,10 @@
 """Work model schema"""
+from datetime import datetime, timezone
 from flask_marshmallow import Schema
 from marshmallow import EXCLUDE, fields, pre_dump
 
-from api.models import Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
+from api.models import db, Staff, Work, WorkIssues, WorkIssueUpdates, WorkPhase, WorkStatus
+from api.models.staleness_settings import StalenessSettings, StalenessTypeEnum
 from api.schemas import PositionSchema, RoleSchema
 from api.schemas.base import AutoSchemaBase
 from api.schemas.ea_act import EAActSchema
@@ -15,6 +17,7 @@ from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
+from api.utils.enums import StalenessEnum
 
 
 class WorkPhaseResponseSchema(
@@ -221,6 +224,25 @@ class WorkStatusResponseSchema(
         model = WorkStatus
         include_fk = True
         unknown = EXCLUDE
+
+    staleness = fields.Method("get_staleness", dump_only=True)
+
+    def get_staleness(self, obj: WorkStatus) -> str:
+        """Return the staleness of the work status"""
+        if not obj:
+            return None
+        staleness_settings = db.session.query(StalenessSettings).filter_by(is_active=True, staleness_type=StalenessTypeEnum.STATUS).one_or_none()
+        warning_length = getattr(staleness_settings, "warning_length", 5) or 5
+        staleness_length = getattr(staleness_settings, "staleness_length", 10) or 10
+        if obj.posted_date:
+            days_since_update = (datetime.now(timezone.utc) - obj.posted_date).days
+            if days_since_update >= staleness_length:
+                return StalenessEnum.CRITICAL.value
+            if days_since_update >= warning_length:
+                return StalenessEnum.WARN.value
+            else:
+                return StalenessEnum.GOOD.value
+        return StalenessEnum.CRITICAL.value
 
 
 class WorkIssueUpdatesResponseSchema(

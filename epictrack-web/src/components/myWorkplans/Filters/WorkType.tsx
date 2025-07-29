@@ -4,8 +4,19 @@ import { OptionType } from "../../shared/filterSelect/type";
 import { workService } from "../../../services/workService/workService";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 import { sort } from "utils";
-export const WorkTypeFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
+
+interface WorkTypeFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const WorkTypeFilter = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}: WorkTypeFilterProps) => {
+  const context = useContext(MyWorkplansContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
