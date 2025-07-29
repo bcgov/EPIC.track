@@ -42,7 +42,7 @@ const NoDataEver = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "400px",
+        minHeight: "350px",
       }}
     >
       <Box

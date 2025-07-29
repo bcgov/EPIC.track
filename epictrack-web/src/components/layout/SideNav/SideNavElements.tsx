@@ -11,6 +11,14 @@ export const Routes: RouteType[] = [
     isAuthenticated: false,
   },
   {
+    name: "My Updates",
+    icon: "CategoryIcon",
+    path: "/statuses",
+    group: "Group1",
+    allowedRoles: [],
+    isAuthenticated: false,
+  },
+  {
     name: "My Tasks",
     icon: "CheckListIcon",
     path: "/my-tasks",

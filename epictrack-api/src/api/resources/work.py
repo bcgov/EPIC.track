@@ -118,6 +118,21 @@ class Works(Resource):
 
 
 @cors_preflight("GET")
+@API.route("/by-staff/<int:staff_id>", methods=["GET", "OPTIONS"])
+class WorksByStaff(Resource):
+    """Endpoint resource to manage works."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(staff_id):
+        """Return all work ids that a staff is assigned to."""
+        work_ids = WorkService.get_work_ids_by_staff(staff_id)
+        return work_ids, 200
+
+
+@cors_preflight("GET")
 @API.route("/resources", methods=["GET", "OPTIONS"])
 class WorkResources(Resource):
     """Endpoint resource to list all allocated staff resources"""

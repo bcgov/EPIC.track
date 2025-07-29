@@ -1,3 +1,5 @@
+import { StalenessEnum } from "constants/application-constant";
+
 export interface Status {
   id: number;
   description: string;
@@ -6,4 +8,16 @@ export interface Status {
   is_approved: boolean;
   approved_by?: string;
   approved_date: string;
+  staleness?: StalenessEnum;
+}
+
+export interface StatusDashboardItem {
+  project_is_active: boolean;
+  project_name: string;
+  work_id: number;
+  work_is_active: boolean;
+  work_name: string;
+  status: Status;
+  status_history: Status[];
+  work_type: string;
 }

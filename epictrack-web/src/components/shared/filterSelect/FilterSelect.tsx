@@ -11,6 +11,7 @@ import { MET_Header_Font_Weight_Regular } from "../../../styles/constants";
 import { useTheme } from "@mui/material";
 
 const INPUT_SIZE = "0.875rem";
+
 const FilterSelect = (props: SelectProps) => {
   const theme = useTheme();
   const { name, isMulti, defaultValue } = props;
@@ -283,6 +284,8 @@ const FilterSelect = (props: SelectProps) => {
             ...base,
             fontWeight: "400",
             fontSize: INPUT_SIZE,
+            padding: 0,
+            margin: 0,
           }),
         }}
         isClearable={false}

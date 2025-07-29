@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { IconButton, Stack } from "@mui/material";
 import { AssigneeToggle } from "../Filters/AssigneeToggle";
 import icons from "components/icons";
@@ -10,10 +10,24 @@ const AppsIcon = icons["Apps"];
 const GanttIcon = icons["Gantt"];
 
 export const Toolbar = () => {
-  const { myWorkPlanView, setMyWorkPlanView } = useContext(MyWorkplansContext);
+  const {
+    myWorkPlanView,
+    setMyWorkPlanView,
+    searchOptions,
+    setSearchOptions,
+    totalWorkplans,
+    loadingWorkplans,
+  } = useContext(MyWorkplansContext);
+
   return (
     <Stack direction={"row"} spacing={1}>
-      <AssigneeToggle />
+      <AssigneeToggle
+        label="Workplans"
+        loading={loadingWorkplans}
+        searchOptions={searchOptions}
+        setSearchOptions={setSearchOptions}
+        total={totalWorkplans}
+      />
       <IconButton
         onClick={() => setMyWorkPlanView(MY_WORKPLAN_VIEW.CARDS)}
         disableRipple

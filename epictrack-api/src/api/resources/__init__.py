@@ -67,7 +67,8 @@ from .types import API as TYPES_API
 from .user import API as USER_API
 from .work import API as WORK_API
 from .work_issues import API as WORK_ISSUES_API
-from .work_status import API as WORK_STATUS_API
+from .work_status import WORK_STATUS_API
+from .work_status import STATUS_DASHBOARD_API as WORK_STATUS_DASHBOARD_API
 from .work_type import API as WORK_TYPES_API
 from .project_state import API as PROJECT_STATE_API
 
@@ -130,6 +131,7 @@ API.add_namespace(RESPONSIBILITY_API, path="/responsibilities")
 API.add_namespace(OUTCOME_CONFIGURATION_API, path="/outcome-configurations")
 API.add_namespace(ACT_SECTION_API, path="/act-sections")
 API.add_namespace(WORK_STATUS_API, path='/work/<int:work_id>/statuses')
+API.add_namespace(WORK_STATUS_DASHBOARD_API, path='/work-statuses')
 API.add_namespace(WORK_TYPES_API, path='/work-types')
 API.add_namespace(WORK_ISSUES_API, path='/work/<int:work_id>/issues')
 API.add_namespace(SPECIAL_FIELD_API, path='/special-fields')

@@ -10,7 +10,10 @@ export const EmptyStatusHistory = () => {
     <Stack
       justifyContent={"center"}
       alignItems={"center"}
-      sx={{ height: "100%" }}
+      sx={{
+        height: "100%",
+        padding: "1rem",
+      }}
       spacing={1}
     >
       <span style={{ marginBottom: "0.5em" }}>
@@ -19,7 +22,7 @@ export const EmptyStatusHistory = () => {
 
       <ETCaption2 bold>Your Status History will appear here</ETCaption2>
       <ETCaption3 color={Palette.neutral.main}>
-        Adding New Update will create your Status History
+        Adding a New Update will create your Status History
       </ETCaption3>
     </Stack>
   );

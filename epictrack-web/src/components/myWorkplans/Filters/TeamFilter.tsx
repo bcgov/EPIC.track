@@ -4,8 +4,18 @@ import EAOTeamService from "../../../services/eao_team";
 import { OptionType } from "../../shared/filterSelect/type";
 import { MyWorkplansContext } from "../MyWorkPlanContext";
 
-export const TeamFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyWorkplansContext);
+interface TeamFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const TeamFilter = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}: TeamFilterProps) => {
+  const context = useContext(MyWorkplansContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
 
   const [options, setOptions] = useState<OptionType[]>([]);
   const [loading, setLoading] = useState(false);
