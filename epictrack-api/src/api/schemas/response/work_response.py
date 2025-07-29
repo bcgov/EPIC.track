@@ -240,8 +240,7 @@ class WorkStatusResponseSchema(
                 return StalenessEnum.CRITICAL.value
             if days_since_update >= warning_length:
                 return StalenessEnum.WARN.value
-            else:
-                return StalenessEnum.GOOD.value
+            return StalenessEnum.GOOD.value
         return StalenessEnum.CRITICAL.value
 
 

@@ -47,7 +47,6 @@ class WorkStatus(BaseModelVersioned):
     @classmethod
     def list_statuses_for_work_ids(cls, work_ids: list[int]) -> dict[int, list[WorkStatus]]:
         """Fetch all statuses for multiple works, grouped by work_id."""
-
         statuses = (
             WorkStatus
             .query
@@ -60,7 +59,6 @@ class WorkStatus(BaseModelVersioned):
         for result in statuses:
             grouped[result.work_id].append(result)
         return grouped
-
 
     @classmethod
     def list_latest_approved_statuses_for_work_ids(cls, work_ids: List[int]) -> Dict[int, WorkStatus]:

@@ -45,11 +45,10 @@ class WorkStatusService:  # pylint: disable=too-many-public-methods
 
     @classmethod
     def fetch_status_for_all_works(
-        cls,
-        pagination_options: PaginationOptions,
-        search_options: StatusDashboardSearchOptions):
+            cls,
+            pagination_options: PaginationOptions,
+            search_options: StatusDashboardSearchOptions):
         """Fetch all latest work statuses for all works."""
-
         works, _ = Work.fetch_all_works_by_work_status(None, search_options)
         work_ids = [work.id for work in works]
 
