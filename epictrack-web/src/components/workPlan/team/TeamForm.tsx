@@ -54,6 +54,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
   const phoneRef = React.useRef(null);
   const ctx = React.useContext(WorkplanContext);
   const staffWorkRole = ctx.selectedStaff;
+  const { setSelectedStaff } = ctx;
 
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -87,7 +88,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
         const result = await workService.getWorkTeamMember(Number(workStaffId));
         if (result.status === 200) {
           const staff = result.data as StaffWorkRole;
-          ctx.setSelectedStaff(staff);
+          setSelectedStaff(staff);
         }
       } catch (e) {
         showNotification(COMMON_ERROR_MESSAGE, {
@@ -99,7 +100,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
     if (workStaffId) {
       getTeamMember();
     }
-  }, [ctx, workStaffId]);
+  }, [setSelectedStaff, workStaffId]);
 
   React.useEffect(() => {
     if (staffWorkRole) {
