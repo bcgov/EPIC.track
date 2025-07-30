@@ -65,6 +65,8 @@ const schema = yup.object().shape({
     .min(-180, "Longitude must be greater than or equal to -180")
     .max(180, "Longitude must be less than or equal to 180"),
   abbreviation: yup.string(),
+  region_id_env: yup.string().required("ENV Region is required"),
+  region_id_flnro: yup.string().required("NRS Region is required"),
 });
 
 type ProjectFormProps = {
@@ -341,7 +343,7 @@ export default function ProjectForm({
           />
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel>ENV Region</ETFormLabel>
+          <ETFormLabel required>ENV Region</ETFormLabel>
           <ControlledSelectV2
             placeholder="Select"
             key={`env_select_${formValues.region_id_env}`}
@@ -354,7 +356,7 @@ export default function ProjectForm({
           ></ControlledSelectV2>
         </Grid>
         <Grid item xs={6}>
-          <ETFormLabel>NRS Region</ETFormLabel>
+          <ETFormLabel required>NRS Region</ETFormLabel>
           <ControlledSelectV2
             placeholder="Select"
             key={`nrs_select_${formValues.region_id_flnro}`}
