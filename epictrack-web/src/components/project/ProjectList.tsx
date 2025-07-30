@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Button, Grid } from "@mui/material";
 import { Project } from "../../models/project";
@@ -19,13 +19,13 @@ import { getStatusFilter } from "components/shared/filterSelect/utils";
 
 const projectsListingFiltersCacheKey = "projects-listing-filters";
 const ProjectList = () => {
-  const [subTypes, setSubTypes] = React.useState<string[]>([]);
-  const [proponents, setProponents] = React.useState<string[]>([]);
-  const [types, setTypes] = React.useState<string[]>([]);
-  const [projectId, setProjectId] = React.useState<number>();
-  const [showFormDialog, setShowFormDialog] = React.useState(false);
-  const [projects, setProjects] = React.useState<Project[]>([]);
-  const [loadingProjects, setLoadingProjects] = React.useState(true);
+  const [subTypes, setSubTypes] = useState<string[]>([]);
+  const [proponents, setProponents] = useState<string[]>([]);
+  const [types, setTypes] = useState<string[]>([]);
+  const [projectId, setProjectId] = useState<number>();
+  const [showFormDialog, setShowFormDialog] = useState(false);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loadingProjects, setLoadingProjects] = useState(true);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     projectsListingFiltersCacheKey,
     []
@@ -46,7 +46,7 @@ const ProjectList = () => {
     fetchProjects();
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const types = projects
       .map((p) => p.type.name)
       .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
@@ -77,7 +77,7 @@ const ProjectList = () => {
     "name"
   );
 
-  const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
+  const columns = useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
         accessorKey: "name",
