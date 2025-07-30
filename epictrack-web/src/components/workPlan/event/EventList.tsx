@@ -459,7 +459,7 @@ const EventList = () => {
     }
     dispatch(setLoadingState(false));
     setShowDeleteMilestoneButton(
-      row.type === EVENT_TYPE.MILESTONE &&
+      (row.type === EVENT_TYPE.MILESTONE || row.type === EVENT_TYPE.TASK) &&
         !(row.visibility === EventTemplateVisibility.MANDATORY)
     );
   };
@@ -706,11 +706,22 @@ const EventList = () => {
     [getCombinedEvents, handleHighlightRows, rowSelection, work?.id]
   );
 
+  const taskData = () => {
+    if (Object.keys(rowSelection).length === 0) {
+      return {
+        task_ids: taskEvent?.id,
+        work_id: work?.id,
+      };
+    } else {
+      return {
+        task_ids: Object.keys(rowSelection).join(","),
+        work_id: work?.id,
+      };
+    }
+  };
+
   const deleteTasks = async () => {
-    const data = {
-      task_ids: Object.keys(rowSelection).join(","),
-      work_id: work?.id,
-    };
+    const data = taskData();
     const response = await taskEventService.deleteTasks(data);
     try {
       if (response.status === 200) {
@@ -923,6 +934,7 @@ const EventList = () => {
         isActionsRequired
         onCancel={() => onCancelHandler()}
         formId="task-form"
+        additionalActions={deleteAction}
       >
         <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
       </TrackDialog>
