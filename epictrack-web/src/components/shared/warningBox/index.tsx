@@ -62,7 +62,7 @@ const WarningBox = (props?: WarningBoxProps) => {
           </Box>
         </When>
       </Grid>
-      <When condition={props?.subTitle}>
+      <When condition={Boolean(props?.subTitle)}>
         <Grid item>
           <ETParagraph data-cy="warning-box-subtitle">
             {props?.subTitle}
