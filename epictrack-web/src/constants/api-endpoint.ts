@@ -58,6 +58,7 @@ const Endpoints = {
     GET_ALL: "work-types",
   },
   WorkIssues: {
+    GET_ALL: "work-issues/dashboard",
     ISSUES: "work/:work_id/issues",
     EDIT_ISSUE: "work/:work_id/issues/:issue_id",
     EDIT_ISSUE_UPDATE: "work/:work_id/issues/:issue_id/update/:issue_update_id",

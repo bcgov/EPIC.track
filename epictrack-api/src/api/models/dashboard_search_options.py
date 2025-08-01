@@ -31,3 +31,17 @@ class StatusDashboardSearchOptions:  # pylint: disable=too-many-instance-attribu
     text: str
     work_status: Optional[List[bool]]
     work_types: Optional[List[int]]
+
+
+@dataclass
+class IssuesDashboardSearchOptions:  # pylint: disable=too-many-instance-attributes
+    """Used to store issue dashboard search options."""
+
+    is_approved: Optional[List[bool]]
+    issue_state: Optional[List[str]]
+    regions: Optional[List[int]]
+    staff_id: Optional[int]
+    staleness: Optional[List[str]]
+    teams: Optional[List[int]]
+    text: str
+    work_types: Optional[List[int]]

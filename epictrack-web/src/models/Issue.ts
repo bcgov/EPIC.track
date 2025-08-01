@@ -1,3 +1,5 @@
+import { StalenessEnum } from "constants/application-constant";
+
 export interface WorkIssueUpdate {
   id: number;
   posted_date: string;
@@ -7,6 +9,7 @@ export interface WorkIssueUpdate {
   is_deleted: boolean;
   approved_by: string;
   is_approved: boolean;
+  staleness?: StalenessEnum;
 }
 
 export interface WorkIssue {
@@ -24,6 +27,13 @@ export interface WorkIssue {
   updated_by: string;
   updated_at: string;
   updates: WorkIssueUpdate[];
+}
+
+export interface WorkIssueDashboardItem {
+  work_id: number;
+  work_name: string;
+  issue: WorkIssue;
+  work_type: string;
 }
 
 export const defaultWorkIssue = {

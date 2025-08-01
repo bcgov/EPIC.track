@@ -8,11 +8,11 @@ import { useContext } from "react";
 import { MyStatusesContext } from "../MyStatusContext";
 
 export interface StatusCardProps {
-  status: StatusDashboardItem;
+  item: StatusDashboardItem;
   statusStalenessSettings?: StalenessSettings;
 }
 
-const StatusCard = ({ status, statusStalenessSettings }: StatusCardProps) => {
+const StatusCard = ({ item, statusStalenessSettings }: StatusCardProps) => {
   const { refetchStatuses } = useContext(MyStatusesContext);
   return (
     <Box
@@ -21,15 +21,15 @@ const StatusCard = ({ status, statusStalenessSettings }: StatusCardProps) => {
         borderRadius: "4px",
       }}
     >
-      <StatusCardHeader status={status} />
+      <StatusCardHeader item={item} />
       <StatusProvider
-        key={status.status?.id}
-        headingCaption={String(status.work_name)}
-        workId={String(status.work_id)}
+        key={item.status?.id}
+        headingCaption={String(item.work_name)}
+        workId={String(item.work_id)}
         refetchStatuses={refetchStatuses}
       >
         <StatusCardBody
-          status={status}
+          item={item}
           statusStalenessSettings={statusStalenessSettings}
         />
       </StatusProvider>

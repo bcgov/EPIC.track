@@ -1,15 +1,34 @@
 import Endpoints from "../../constants/api-endpoint";
 import http from "../../apiManager/http-request-handler";
-import { WorkIssue } from "../../models/Issue";
+import { WorkIssue, WorkIssueDashboardItem } from "../../models/Issue";
 import { MasterBase } from "../../models/type";
+import { IssueSearchOptions } from "components/myUpdates/myIssues/MyIssuesContext";
 
 class IssueService {
-  async getAll(workId: string) {
+  async getAllByWorkId(workId: string) {
     const query = `${Endpoints.WorkIssues.ISSUES.replace(
       ":work_id",
       workId.toString()
     )}`;
     return await http.GetRequest<WorkIssue[]>(query);
+  }
+
+  async getAll(
+    page: number,
+    size: number,
+    sort_order: string,
+    searchOptions: IssueSearchOptions
+  ) {
+    return await http.GetRequest<{
+      items: WorkIssueDashboardItem[];
+      total: number;
+    }>(Endpoints.WorkIssues.GET_ALL, {
+      page: page,
+      size: size,
+      sort_key: "start_date",
+      sort_order: sort_order,
+      ...searchOptions,
+    });
   }
 
   async create(workId: string, data: MasterBase) {

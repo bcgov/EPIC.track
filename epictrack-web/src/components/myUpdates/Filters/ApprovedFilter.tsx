@@ -1,10 +1,20 @@
-import { useContext, useMemo } from "react";
+import { FC, useContext, useMemo } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
-import { MyStatusesContext } from "../MyStatusContext";
 import { OptionType } from "components/shared/filterSelect/type";
+import { MyStatusesContext } from "../myStatuses/MyStatusContext";
 
-export const ApprovedFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyStatusesContext);
+interface ApprovedFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const ApprovedFilter: FC<ApprovedFilterProps> = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}) => {
+  const context = useContext(MyStatusesContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
 
   const isApprovedOptions: OptionType[] = useMemo(
     () => [
@@ -33,10 +43,13 @@ export const ApprovedFilter = () => {
       placeholder={"Approval"}
       filterAppliedCallback={(value) => {
         if (!value) return;
-        setSearchOptions((prev) => ({ ...prev, is_approved: value }));
+        setSearchOptions((prev: any) => ({
+          ...prev,
+          is_approved: value as string[],
+        }));
       }}
       filterClearedCallback={() => {
-        setSearchOptions((prev) => ({
+        setSearchOptions((prev: any) => ({
           ...prev,
           is_approved: [],
         }));
