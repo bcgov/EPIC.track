@@ -17,7 +17,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
-from api.models.dashboard_seach_options import StatusDashboardSearchOptions
+from api.models.dashboard_search_options import StatusDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
 from api.schemas import response as res

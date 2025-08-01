@@ -1,4 +1,4 @@
-import { StatusSearchOptions } from "components/myStatuses/MyStatusContext";
+import { StatusSearchOptions } from "components/myUpdates/myStatuses/MyStatusContext";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 import { Status, StatusDashboardItem } from "../../models/status";

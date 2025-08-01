@@ -1,7 +1,7 @@
 import { useContext, useMemo } from "react";
-import FilterSelect from "../../shared/filterSelect/FilterSelect";
+import FilterSelect from "../../../shared/filterSelect/FilterSelect";
 import { MyStatusesContext } from "../MyStatusContext";
-import { isActiveOptions } from "../constants";
+import { isActiveOptions } from "../../constants";
 
 export const WorkStatusFilter = () => {
   const { setSearchOptions, searchOptions } = useContext(MyStatusesContext);

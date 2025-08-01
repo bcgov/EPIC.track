@@ -1,11 +1,11 @@
-import { Palette } from "../../../styles/theme";
-import { Box } from "@mui/system";
+import { Palette } from "../../styles/theme";
+import { Box, BoxProps } from "@mui/system";
 
 type StatusBadgeProps = {
   is_active: boolean;
-};
+} & BoxProps;
 
-const StatusBadge = ({ is_active }: StatusBadgeProps) => {
+const StatusBadge = ({ is_active, ...boxProps }: StatusBadgeProps) => {
   const status = is_active ? "Active" : "Inactive";
   const backgroundColour = is_active
     ? Palette.primary.bg.main
@@ -14,6 +14,7 @@ const StatusBadge = ({ is_active }: StatusBadgeProps) => {
 
   return (
     <Box
+      {...boxProps}
       sx={{
         borderRadius: "4px",
         padding: "4px 8px",
@@ -23,6 +24,7 @@ const StatusBadge = ({ is_active }: StatusBadgeProps) => {
         textTransform: "capitalize",
         display: "inline-block",
         fontWeight: "700",
+        ...boxProps.sx,
       }}
     >
       {status}

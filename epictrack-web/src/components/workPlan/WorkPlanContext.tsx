@@ -114,7 +114,7 @@ export const WorkplanProvider = ({
   const getIssues = useCallback(async () => {
     if (!workId) return;
     try {
-      const response = await issueService.getAll(workId);
+      const response = await issueService.getAllByWorkId(workId);
       setIssues(response.data);
     } catch (error) {
       console.error("Failed to load Workplan issues", error);

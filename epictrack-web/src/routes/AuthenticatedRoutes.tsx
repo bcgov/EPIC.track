@@ -22,7 +22,7 @@ import MyWorkPlans from "../components/myWorkplans";
 import Insights from "components/insights";
 import MyTasksList from "components/myTasks/MyTasksList";
 import Settings from "components/settings";
-import MyStatuses from "components/myStatuses";
+import MyUpdates from "components/myUpdates";
 
 const AuthenticatedRoutes = () => {
   const isAuthorized = useAppSelector((state) => state.user.isAuthorized);
@@ -92,7 +92,7 @@ const AuthenticatedRoutes = () => {
         <Route path="/admin/settings" element={<Settings />} />
       </Route>
       <Route path="/" element={<MyWorkPlans />} />
-      <Route path="/statuses" element={<MyStatuses />} />
+      <Route path="/updates" element={<MyUpdates />} />
       <Route path="/insights" element={<Insights />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />

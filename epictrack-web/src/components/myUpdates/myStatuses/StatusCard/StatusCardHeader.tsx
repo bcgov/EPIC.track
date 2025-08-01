@@ -1,10 +1,11 @@
 import { Grid, Tooltip } from "@mui/material";
-import { Palette } from "../../../styles/theme";
-import { ETCaption1 } from "../../shared";
+import { Palette } from "../../../../styles/theme";
+import { ETCaption1 } from "../../../shared";
 import { StatusCardProps } from ".";
-import StatusBadge from "./StatusBadge";
+import StatusBadge from "../../StatusBadge";
 
-const StatusCardHeader = ({ status }: StatusCardProps) => {
+const StatusCardHeader = ({ item }: StatusCardProps) => {
+  const status = item;
   return (
     <Grid
       container

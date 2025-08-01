@@ -13,16 +13,23 @@
 # limitations under the License.
 """Service to manage Work status."""
 from datetime import datetime, timezone
-from typing import Dict
+from typing import Dict, Optional
+
+from flask import current_app
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
-from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
+from api.models import Work
 from api.models import WorkIssues as WorkIssuesModel
-from api.utils import TokenInfo
-from api.utils.roles import Role as KeycloakRole, Membership
-from api.services import authorisation
+from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
+from api.models.dashboard_search_options import IssuesDashboardSearchOptions
+from api.models.pagination_options import PaginationOptions
 from api.models.queries import WorkIssueQuery
 from api.models.special_field import EntityEnum, FieldTypeEnum
+from api.schemas.response import WorkIssuesResponseSchema, WorkIssueUpdatesResponseSchema
+from api.services import authorisation
+from api.utils import TokenInfo
+from api.utils.enums import StalenessEnum
+from api.utils.roles import Role as KeycloakRole, Membership
 
 
 class WorkIssuesService:  # pylint: disable=too-many-public-methods
@@ -46,6 +53,88 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         """Find all work issues by work ids"""
         results = WorkIssueQuery.find_work_issues_by_work_ids(work_ids)
         return results
+
+    @classmethod
+    def fetch_issues_for_all_works(
+            cls,
+            pagination_options: PaginationOptions,
+            search_options: IssuesDashboardSearchOptions):
+        """Fetch all work issues for all works."""
+        works, _ = Work.fetch_all_works_by_work_issues(None, search_options)
+        work_ids = [work.id for work in works]
+        work_issues = WorkIssuesModel.list_all_issues_for_work_ids(work_ids)
+        schema = WorkIssueUpdatesResponseSchema()
+
+        filtered = []
+        work_map = {work.id: work for work in works}
+        for issue in work_issues:
+            work = work_map.get(issue.work_id)
+            if not work or not issue.updates:
+                continue
+            issue_update = issue.updates[0]
+            if not work:
+                continue
+            # Filter approved
+            if (
+                search_options.is_approved
+                and str(issue_update.is_approved).lower() not in search_options.is_approved
+            ):
+                continue
+            # Filter staleness
+            if search_options.staleness:
+                issue_staleness = schema.get_staleness(issue_update)
+                if not issue.is_active or issue.is_resolved:
+                    issue_staleness = StalenessEnum.GOOD.value
+                if issue_staleness not in search_options.staleness:
+                    continue
+            # Filter issue_state
+            if search_options.issue_state:
+                matches_state = False
+                for state in search_options.issue_state:
+                    try:
+                        field, value = state.split(":")
+                        expected = value.lower() == "true"
+                        actual = getattr(issue, field, None)
+                        if actual is not None and bool(actual) == expected:
+                            matches_state = True
+                    except ValueError:
+                        continue
+                if not matches_state:
+                    continue
+            filtered.append((work, issue))
+
+        # Apply pagination to filtered results
+        if pagination_options.sort_key:
+            sort_key = pagination_options.sort_key
+            reverse = pagination_options.sort_order == "desc"
+            filtered.sort(
+                key=lambda item: getattr(item[1], sort_key, None) if item[1] else datetime.min.replace(tzinfo=timezone.utc),
+                reverse=reverse
+            )
+        total = len(filtered)
+        page = pagination_options.page or 1
+        size = pagination_options.size or total
+        start = (page - 1) * size
+        end = start + size
+        paginated_filtered = filtered[start:end]
+
+        serialized = []
+        for work, issue in paginated_filtered:
+            current_app.logger.info("Serializing issue for work: %s", work.id)
+            serialized.append(cls._serialize_issue(work, issue))
+
+        return {"items": serialized, "total": total}
+
+    @staticmethod
+    def _serialize_issue(work: Work, issue: Optional[WorkIssuesModel]) -> Dict:
+        """Serialize the issue info for a single work."""
+        return {
+            "work_id": work.id,
+            "work_name": work.title,
+            "project_name": work.project.name if work.project else None,
+            "work_type": work.work_type.name if work.work_type else None,
+            "issue": WorkIssuesResponseSchema(many=False).dump(issue) if issue else None,
+        }
 
     @classmethod
     def create_work_issue_and_updates(cls, work_id, issue_data: Dict):

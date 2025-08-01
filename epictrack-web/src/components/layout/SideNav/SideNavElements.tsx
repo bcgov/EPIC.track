@@ -13,7 +13,7 @@ export const Routes: RouteType[] = [
   {
     name: "My Updates",
     icon: "CategoryIcon",
-    path: "/statuses",
+    path: "/updates",
     group: "Group1",
     allowedRoles: [],
     isAuthenticated: false,

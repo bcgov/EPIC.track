@@ -38,7 +38,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from api.models import db
-from api.models.dashboard_seach_options import StatusDashboardSearchOptions, WorkplanDashboardSearchOptions
+from api.models.dashboard_search_options import IssuesDashboardSearchOptions, StatusDashboardSearchOptions, WorkplanDashboardSearchOptions
 from api.models.event_configuration import EventConfiguration
 from api.models.event_type import EventTypeEnum
 from api.models.event import Event
@@ -257,6 +257,44 @@ class Work(BaseModelVersioned):
         page = query.paginate(page=pagination_options.page, per_page=pagination_options.size)
 
         return page.items, page.total
+
+    @classmethod
+    def fetch_all_works_by_work_issues(
+        cls,
+        pagination_options: PaginationOptions,
+        search_filters: IssuesDashboardSearchOptions = None
+    ) -> Tuple[List[Work], int]:
+        """Fetch all works."""
+        query = cls.query.filter_by(is_deleted=False)
+        query = cls.filter_by_issues_search_criteria(query, search_filters)
+        query = query.order_by(Work.start_date.desc())
+
+        no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
+        if no_pagination_options:
+            items = query.all()
+            return items, len(items)
+
+        page = query.paginate(page=pagination_options.page, per_page=pagination_options.size)
+
+        return page.items, page.total
+
+    @classmethod
+    def filter_by_issues_search_criteria(cls, query, search_filters: IssuesDashboardSearchOptions):
+        """Filter by issues search criteria."""
+        if not search_filters:
+            return query
+
+        query = cls._filter_by_staff_id(query, search_filters.staff_id)
+
+        query = cls._filter_by_search_text(query, search_filters.text)
+
+        query = cls._filter_by_eao_team(query, search_filters.teams)
+
+        query = cls._filter_by_work_type(query, search_filters.work_types)
+
+        query = cls._filter_by_env_regions(query, search_filters.regions)
+
+        return query
 
     @classmethod
     def filter_by_status_search_criteria(cls, query, search_filters: StatusDashboardSearchOptions):

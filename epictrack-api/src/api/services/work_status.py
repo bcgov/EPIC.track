@@ -16,7 +16,7 @@ from datetime import datetime, timezone
 from typing import Dict, Optional
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
-from api.models.dashboard_seach_options import StatusDashboardSearchOptions
+from api.models.dashboard_search_options import StatusDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.models import WorkStatus as WorkStatusModel
 from api.models import Work

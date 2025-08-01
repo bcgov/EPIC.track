@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Button, Grid } from "@mui/material";
 import { useAppSelector } from "hooks";
 import { ROLES } from "constants/application-constant";
-import { IconProps } from "../../icons/type";
-import Icons from "../../icons";
+import { IconProps } from "../../../icons/type";
+import Icons from "../../../icons";
 import { hasPermission } from "components/shared/restricted";
 import RecentStatus from "components/workPlan/status/StatusView/RecentStatus";
 import StatusHistory from "components/workPlan/status/StatusView/StatusHistory";
@@ -17,13 +17,14 @@ import { MyStatusesContext } from "../MyStatusContext";
 
 const GoToIcon: FC<IconProps> = Icons["GoToIcon"];
 
-const StatusCardBody = ({ status }: StatusCardProps) => {
+const StatusCardBody = ({ item }: StatusCardProps) => {
   const {
     setStatus,
     setShowStatusForm,
     setShowApproveStatusDialog,
     setIsCloning,
   } = useContext(StatusContext);
+  const status = item;
   const { userWorkIds } = useContext(MyStatusesContext);
   const navigate = useNavigate();
   const { roles: currentRoles } = useAppSelector(

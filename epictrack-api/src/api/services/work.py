@@ -46,7 +46,7 @@ from api.models import (
     WorkStateEnum,
     db,
 )
-from api.models.dashboard_seach_options import WorkplanDashboardSearchOptions
+from api.models.dashboard_search_options import WorkplanDashboardSearchOptions
 from api.models.event_category import EventCategoryEnum
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.models.indigenous_nation import IndigenousNation

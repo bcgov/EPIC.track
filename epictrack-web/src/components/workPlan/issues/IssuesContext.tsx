@@ -104,8 +104,12 @@ export const LASTEST_ISSUE_UPDATE_INDEX = 0;
 
 export const IssuesProvider = ({
   children,
+  workId: propWorkId = null,
+  refetchIssues,
 }: {
   children: JSX.Element | JSX.Element[];
+  workId?: string | null;
+  refetchIssues?: () => void;
 }) => {
   const [createIssueFormIsOpen, setCreateIssueFormIsOpen] = useState(false);
   const [editIsssueFormIsOpen, setEditIssueFormIsOpen] = useState(false);
@@ -129,10 +133,10 @@ export const IssuesProvider = ({
 
   const { issues, loadIssues } = useContext(WorkplanContext);
   const query = useSearchParams<IssueContainerRouteParams>();
-  const workId = query.get("work_id");
+  const workId = propWorkId ?? query.get("work_id");
 
   const handleLoadIssues = useCallback(async () => {
-    await loadIssues();
+    await loadIssues?.();
     setIsIssuesLoading(false);
   }, [loadIssues]);
 
@@ -185,6 +189,7 @@ export const IssuesProvider = ({
         is_resolved,
       };
       await issueService.editIssue(workId, String(issueToEdit.id), request);
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       console.error("editIssue error:", error);
@@ -211,6 +216,7 @@ export const IssuesProvider = ({
         String(updateToEdit.id),
         request
       );
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -230,6 +236,7 @@ export const IssuesProvider = ({
         String(issueId),
         String(issueUpdateId)
       );
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       const message = getErrorMessage(error);
@@ -248,6 +255,7 @@ export const IssuesProvider = ({
         description: cloneForm.description,
         posted_date: cloneForm.posted_date,
       });
+      refetchIssues?.();
       handleLoadIssues();
     } catch (error) {
       const message = getErrorMessage(error);

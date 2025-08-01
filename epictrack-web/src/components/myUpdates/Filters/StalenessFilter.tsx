@@ -1,6 +1,6 @@
-import { useContext, useMemo } from "react";
+import { FC, useContext, useMemo } from "react";
 import FilterSelect from "../../shared/filterSelect/FilterSelect";
-import { MyStatusesContext } from "../MyStatusContext";
+import { MyStatusesContext } from "../myStatuses/MyStatusContext";
 import { StalenessEnum } from "constants/application-constant";
 import { OptionType } from "components/shared/filterSelect/type";
 
@@ -19,8 +19,18 @@ const stalenessOptions: OptionType[] = [
   },
 ];
 
-export const StalenessFilter = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyStatusesContext);
+interface StalenessFilterProps {
+  searchOptions?: any;
+  setSearchOptions?: React.Dispatch<React.SetStateAction<any>>;
+}
+
+export const StalenessFilter: FC<StalenessFilterProps> = ({
+  searchOptions: propSearchOptions,
+  setSearchOptions: propSetSearchOptions,
+}) => {
+  const context = useContext(MyStatusesContext);
+  const searchOptions = propSearchOptions ?? context.searchOptions;
+  const setSearchOptions = propSetSearchOptions ?? context.setSearchOptions;
 
   const value = useMemo(() => {
     return stalenessOptions.filter((option) =>

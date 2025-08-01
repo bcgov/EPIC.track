@@ -1,5 +1,4 @@
-import { FC, useContext } from "react";
-import { MyStatusesContext } from "../MyStatusContext";
+import { FC } from "react";
 import { Button, Stack } from "@mui/material";
 import { ETCaption2 } from "components/shared";
 import { Palette } from "styles/theme";
@@ -8,12 +7,20 @@ import Icons from "../../icons";
 
 const ArrowDownward: FC<IconProps> = Icons["ArrowDownward"];
 
-export const SortBy = () => {
-  const { sortOrder, setSortOrder } = useContext(MyStatusesContext);
+interface SortByProps {
+  sortOrder: string;
+  setSortOrder: (order: "asc" | "desc") => void;
+  label?: string;
+}
 
+export const SortBy: FC<SortByProps> = ({
+  sortOrder,
+  setSortOrder,
+  label = "Date Posted",
+}) => {
   return (
     <Stack direction="row" spacing={0.5} alignItems={"center"}>
-      <ETCaption2 color={Palette.neutral.dark}>Sort by: Date Posted</ETCaption2>
+      <ETCaption2 color={Palette.neutral.dark}>Sort by: {label}</ETCaption2>
       <Button
         sx={{
           backgroundColor: "inherit",

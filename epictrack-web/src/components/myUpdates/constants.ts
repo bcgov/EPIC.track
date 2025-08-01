@@ -1,5 +1,17 @@
 import { OptionType } from "components/shared/filterSelect/type";
-import { StatusFilters } from "./MyStatusContext";
+import { StatusFilters } from "./myStatuses/MyStatusContext";
+import { IssueFilters } from "./myIssues/MyIssuesContext";
+
+export const MY_UPDATES_TABS = {
+  STATUS: {
+    label: "Statuses",
+    index: 0,
+  },
+  ISSUES: {
+    label: "Issues",
+    index: 1,
+  },
+};
 
 export const isActiveOptions: OptionType[] = [
   {
@@ -11,6 +23,18 @@ export const isActiveOptions: OptionType[] = [
     value: "false",
   },
 ];
+
+export const MY_ISSUES_FILTERS: { [key in keyof IssueFilters]: string } = {
+  issue_state: "my-issues-state",
+  teams: "my-issues-teams",
+  regions: "my-issues-regions",
+  work_types: "my-issues-work-types",
+  text: "my-issues-text",
+  is_approved: "my-issues-approval",
+  staleness: "my-issues-staleness",
+};
+
+export const MY_ISSUES_CACHED_SEARCH_OPTIONS = "my-issues-search-options";
 
 export const MY_STATUS_FILTERS: { [key in keyof StatusFilters]: string } = {
   teams: "my-status-teams",

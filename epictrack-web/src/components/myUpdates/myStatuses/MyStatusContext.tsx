@@ -9,11 +9,11 @@ import { StatusDashboardItem } from "models/status";
 import { StalenessSettings } from "models/settings";
 import { statusService } from "services/statusService/statusService";
 import stalenessSettingsService from "services/stalenessSettingsService";
-import { useAppSelector } from "../../hooks";
+import { useAppSelector } from "../../../hooks";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { useCachedState } from "hooks/useCachedFilters";
-import { MY_STATUS_CACHED_SEARCH_OPTIONS } from "./constants";
+import { MY_STATUS_CACHED_SEARCH_OPTIONS } from "../constants";
 import { workService } from "services/workService/workService";
 
 interface MyStatusContextProps {

@@ -9,6 +9,7 @@ import { IconProps } from "../../../icons/type";
 import { WorkIssue } from "../../../../models/Issue";
 import IssueSummary from "./Summary";
 import IssueDetails from "./Details";
+import IssueHistory from "./IssueHistory";
 import { StalenessEnum } from "constants/application-constant";
 
 const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
@@ -93,7 +94,12 @@ const IssueAccordion = ({
         }}
       >
         <Grid container spacing={2}>
-          <IssueDetails issue={issue} />
+          <Grid item lg={6} xs={12}>
+            <IssueDetails issue={issue} />
+          </Grid>
+          <Grid item lg={6} xs={12}>
+            <IssueHistory issue={issue} />
+          </Grid>
         </Grid>
       </ETAccordionDetails>
     </ETAccordion>

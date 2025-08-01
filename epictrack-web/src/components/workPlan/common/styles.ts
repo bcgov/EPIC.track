@@ -11,7 +11,7 @@ export const tabStyle: SxProps = {
   fontWeight: 400,
   lineHeight: "1.3rem",
   "&.Mui-selected": {
-    fontWeight: 400,
+    fontWeight: "400 !important",
   },
   minHeight: "0px",
 };

@@ -1,18 +1,19 @@
 import { Grid } from "@mui/material";
-import { NameFilter } from "../../myWorkplans/Filters/NameFilter";
-import { TeamFilter } from "../../myWorkplans/Filters/TeamFilter";
-import { WorkTypeFilter } from "../../myWorkplans/Filters/WorkType";
-import { EnvRegionFilter } from "../../myWorkplans/Filters/EnvRegionFilter";
+import { NameFilter } from "../../../myWorkplans/Filters/NameFilter";
+import { TeamFilter } from "../../../myWorkplans/Filters/TeamFilter";
+import { WorkTypeFilter } from "../../../myWorkplans/Filters/WorkType";
+import { EnvRegionFilter } from "../../../myWorkplans/Filters/EnvRegionFilter";
 import { ProjectStatusFilter } from "./ProjectStatusFilter";
 import { WorkStatusFilter } from "./WorkStatusFilter";
-import { ApprovedFilter } from "./ApprovedFilter";
-import { StalenessFilter } from "./StalenessFilter";
-import { SortBy } from "./SortBy";
+import { ApprovedFilter } from "../../Filters/ApprovedFilter";
+import { StalenessFilter } from "../../Filters/StalenessFilter";
+import { SortBy } from "../../Filters/SortBy";
 import { MyStatusesContext } from "../MyStatusContext";
 import { useContext } from "react";
 
 export const Filters = () => {
-  const { setSearchOptions, searchOptions } = useContext(MyStatusesContext);
+  const { setSearchOptions, searchOptions, sortOrder, setSortOrder } =
+    useContext(MyStatusesContext);
 
   return (
     <Grid
@@ -39,7 +40,10 @@ export const Filters = () => {
         <WorkStatusFilter />
       </Grid>
       <Grid item sx={{ flex: "0 0 8%" }}>
-        <ApprovedFilter />
+        <ApprovedFilter
+          searchOptions={searchOptions}
+          setSearchOptions={setSearchOptions}
+        />
       </Grid>
       <Grid item sx={{ flex: "0 0 9%" }}>
         <WorkTypeFilter
@@ -63,7 +67,11 @@ export const Filters = () => {
         <StalenessFilter />
       </Grid>
       <Grid item sx={{ flex: "0 0 11%" }}>
-        <SortBy />
+        <SortBy
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          label="Date Posted"
+        />
       </Grid>
     </Grid>
   );
