@@ -15,8 +15,6 @@
 from datetime import datetime, timezone
 from typing import Dict, Optional
 
-from flask import current_app
-
 from api.exceptions import BadRequestError, ResourceNotFoundError
 from api.models import Work
 from api.models import WorkIssues as WorkIssuesModel
@@ -120,7 +118,6 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
 
         serialized = []
         for work, issue in paginated_filtered:
-            current_app.logger.info("Serializing issue for work: %s", work.id)
             serialized.append(cls._serialize_issue(work, issue))
 
         return {"items": serialized, "total": total}

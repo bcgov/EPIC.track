@@ -14,7 +14,7 @@
 """Resource for work issues endpoints."""
 from http import HTTPStatus
 
-from flask import jsonify, request, current_app
+from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
 from api.models.dashboard_search_options import IssuesDashboardSearchOptions
@@ -63,7 +63,6 @@ class IssuesDashboard(Resource):
     @auth.require
     def get():
         """Return issues for works."""
-        current_app.logger.info("Fetching issues for dashboard")
         args = request.args
 
         pagination_options = PaginationOptions(
