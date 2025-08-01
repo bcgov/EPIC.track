@@ -19,6 +19,7 @@ import { When } from "react-if";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
 import TrackSelect from "components/shared/TrackSelect";
 import { OptionType } from "components/shared/filterSelect/type";
+import WarningBox from "components/shared/warningBox";
 
 const CalendarIcon: FC<IconProps> = Icons["CalendarIcon"];
 
@@ -43,6 +44,17 @@ const PhaseContainer = () => {
   );
   const completedPhases: WorkPhaseAdditionalInfo[] = useMemo(
     () => ctx.workPhases.filter((p) => p.work_phase.is_completed),
+    [ctx.workPhases]
+  );
+
+  const overduePhases: WorkPhaseAdditionalInfo[] = useMemo(
+    () =>
+      ctx.workPhases.filter(
+        (p) =>
+          p.work_phase.is_completed &&
+          p.work_phase.legislated &&
+          p.total_number_of_days - p.days_taken < 0
+      ),
     [ctx.workPhases]
   );
 
@@ -199,6 +211,29 @@ const PhaseContainer = () => {
           />
         </Grid>
       ))}
+      {!!overduePhases.length && (
+        <WarningBox
+          title={`You've exceeded the legislated timeline in phase${
+            overduePhases.length > 1 ? "s" : ""
+          }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
+          subTitle={
+            <>
+              You must add an <b>Extension Milestone</b> of{" "}
+              <b>
+                {Math.abs(
+                  overduePhases.reduce(
+                    (sum, p) => sum + (p.total_number_of_days - p.days_taken),
+                    0
+                  )
+                )}{" "}
+                days
+              </b>{" "}
+              to complete this Work.
+            </>
+          }
+          isTitleBold={true}
+        />
+      )}
     </Grid>
   );
 };
