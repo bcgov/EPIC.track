@@ -92,9 +92,10 @@ const StatusCardBody = ({ item }: StatusCardProps) => {
           </Grid>
           <Grid item xs={12}>
             <StatusHistory
-              statuses={status.status_history.slice(0, 2)}
+              statuses={status.status_history}
               defaultExpanded={false}
               showEdit={false}
+              showOne={true}
             />
           </Grid>
 
