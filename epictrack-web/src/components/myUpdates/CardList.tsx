@@ -11,6 +11,7 @@ interface CardListProps<T> {
   loading: boolean;
   loadingMore: boolean;
   setLoadingMore: (value: boolean) => void;
+  lazyLoadMore: () => any;
   CardComponent: FC<{ item: T } & any>;
   cardProps?: any;
 }
@@ -20,6 +21,7 @@ const CardList = <T,>({
   totalItems,
   loading,
   loadingMore,
+  lazyLoadMore,
   setLoadingMore,
   CardComponent,
   cardProps,
@@ -45,7 +47,12 @@ const CardList = <T,>({
       ))}
 
       <Unless condition={loading || loadingMore || items.length === totalItems}>
-        <TriggerOnViewed callbackFn={() => setLoadingMore(true)} />
+        <TriggerOnViewed
+          callbackFn={() => {
+            setLoadingMore(true);
+            lazyLoadMore();
+          }}
+        />
       </Unless>
 
       <Unless condition={items.length === totalItems}>
