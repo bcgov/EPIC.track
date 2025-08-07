@@ -1,4 +1,4 @@
-import { Grid, Tooltip } from "@mui/material";
+import { Box, Stack, Tooltip } from "@mui/material";
 import { Palette } from "../../../../styles/theme";
 import { ETCaption1 } from "../../../shared";
 import { StatusCardProps } from ".";
@@ -7,20 +7,21 @@ import StatusBadge from "../../StatusBadge";
 const StatusCardHeader = ({ item }: StatusCardProps) => {
   const status = item;
   return (
-    <Grid
-      container
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      justifyContent="space-between"
+      alignItems={{ xs: "flex-start", sm: "center" }}
+      spacing={2}
       sx={{
         backgroundColor: Palette.neutral.bg.light,
         borderBottom: `2px solid var(--neutral-background-dark, #DBDCDC)`,
         padding: "0.875rem",
-        height: "88px",
         textTransform: "uppercase",
         fontSize: "13px",
+        minHeight: "88px",
       }}
-      justifyContent="space-between"
-      alignItems="start"
     >
-      <Grid item xs={6}>
+      <Box sx={{ flex: 1, alignSelf: "flex-start" }}>
         <Tooltip title={status?.work_name ?? ""}>
           <span>
             <ETCaption1
@@ -38,18 +39,13 @@ const StatusCardHeader = ({ item }: StatusCardProps) => {
             </ETCaption1>
           </span>
         </Tooltip>
-      </Grid>
-      <Grid
-        item
-        xs={6}
-        container
-        justifyContent={"flex-end"}
+      </Box>
+      <Stack
+        direction={{ xs: "column", sm: "row" }}
         spacing={2}
-        sx={{
-          padding: "0rem 0rem 0rem 0.875rem",
-        }}
+        alignItems={{ xs: "flex-start", sm: "center" }}
       >
-        <Grid item xs={6}>
+        <Stack spacing={0.5}>
           <ETCaption1
             color={Palette.neutral.dark}
             sx={{ lineHeight: "1.2rem" }}
@@ -59,8 +55,8 @@ const StatusCardHeader = ({ item }: StatusCardProps) => {
           <ETCaption1 color={Palette.neutral.dark}>
             <StatusBadge is_active={status?.project_is_active} />
           </ETCaption1>
-        </Grid>
-        <Grid item xs={6}>
+        </Stack>
+        <Stack spacing={0.5}>
           <ETCaption1
             color={Palette.neutral.dark}
             sx={{ lineHeight: "1.2rem" }}
@@ -70,9 +66,9 @@ const StatusCardHeader = ({ item }: StatusCardProps) => {
           <ETCaption1 color={Palette.neutral.dark}>
             <StatusBadge is_active={status?.work_is_active} />
           </ETCaption1>
-        </Grid>
-      </Grid>
-    </Grid>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 };
 
