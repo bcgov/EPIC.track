@@ -38,6 +38,10 @@ const WorkList = () => {
     All_WORKS_FILTERS_CACHE_KEY,
     [
       {
+        id: "is_active",
+        value: [true, false],
+      },
+      {
         id: "work_state",
         value: ["In Progress", "Completed"],
       },
