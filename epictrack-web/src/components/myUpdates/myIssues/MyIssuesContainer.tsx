@@ -8,6 +8,7 @@ import IssueCard from "./IssueCard";
 const IssuesContainer = () => {
   const {
     issues,
+    lazyLoadMoreIssues,
     loadingIssues,
     totalIssues,
     loadingMoreIssues,
@@ -19,6 +20,7 @@ const IssuesContainer = () => {
       <CardList
         items={issues}
         totalItems={totalIssues}
+        lazyLoadMore={lazyLoadMoreIssues}
         loading={loadingIssues}
         loadingMore={loadingMoreIssues}
         setLoadingMore={setLoadingMoreIssues}

@@ -13,6 +13,7 @@ const CardList = () => {
     loadingWorkplans,
     totalWorkplans,
     loadingMoreWorkplans,
+    lazyLoadMoreWorkplans,
     setLoadingMoreWorkplans,
     statusStalenessSettings,
   } = useContext(MyWorkplansContext);
@@ -51,6 +52,7 @@ const CardList = () => {
         <TriggerOnViewed
           callbackFn={() => {
             setLoadingMoreWorkplans(true);
+            lazyLoadMoreWorkplans();
           }}
         />
       </Unless>

@@ -9,6 +9,7 @@ const StatusContainer = () => {
     statuses,
     loadingStatuses,
     totalStatuses,
+    lazyLoadMoreStatuses,
     loadingMoreStatuses,
     setLoadingMoreStatuses,
     statusStalenessSettings,
@@ -19,6 +20,7 @@ const StatusContainer = () => {
       <CardList
         items={statuses}
         totalItems={totalStatuses}
+        lazyLoadMore={lazyLoadMoreStatuses}
         loading={loadingStatuses}
         loadingMore={loadingMoreStatuses}
         setLoadingMore={setLoadingMoreStatuses}
