@@ -105,16 +105,15 @@ export const EventCalendarProvider = ({
     const currentMonthLabel = dayjs().format("MMM 'YY");
 
     for (let i = 0; i < 12; i++) {
-      const monthLabel = dayjs()
-        .year(selectedYear)
-        .month(i)
-        .format("MMM 'YY");
+      const monthLabel = dayjs().year(selectedYear).month(i).format("MMM 'YY");
       collapsed[monthLabel] = monthLabel !== currentMonthLabel;
     }
     return collapsed;
   }, [selectedYear]);
 
-  const [collapsedMonths, setCollapsedMonths] = useState<Record<string, boolean>>(initialCollapsedMonths);
+  const [collapsedMonths, setCollapsedMonths] = useState<
+    Record<string, boolean>
+  >(initialCollapsedMonths);
 
   useEffect(() => {
     setCollapsedMonths(initialCollapsedMonths);
