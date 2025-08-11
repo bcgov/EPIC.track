@@ -1,40 +1,23 @@
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import {
   Box,
-  Button,
-  ButtonProps,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogProps,
   IconButton,
+  DialogContent,
+  DialogActions,
+  Button,
   Tooltip,
 } from "@mui/material";
-import { Palette } from "../../styles/theme";
-import { IconProps } from "../icons/type";
-import Icons from "../icons";
-import { ETCaption1, ETHeading4, ETSubhead } from ".";
-
-export type TrackDialogProps = {
-  onCancel?: () => void;
-  onOk?: (args: any) => void;
-  cancelButtonText?: string;
-  okButtonText?: string;
-  dialogTitle: string;
-  dialogContentText?: string;
-  isActionsRequired?: boolean;
-  isOkRequired?: boolean;
-  isCancelRequired?: boolean;
-  additionalActions?: React.ReactNode;
-  formId?: string;
-  externalSubmitButtonUsed?: boolean;
-  saveButtonProps?: ButtonProps;
-  headingCaption?: string;
-} & DialogProps;
+import { Palette } from "styles/theme";
+import { TrackDialogProps } from ".";
+import { ETCaption1, ETHeading4, ETSubhead } from "..";
+import { IconProps } from "components/icons/type";
+import Icons from "components/icons";
 
 const CloseIconComponent: React.FC<IconProps> = Icons["NotificationClose"];
 
-const TrackDialog: FC<TrackDialogProps> = ({
+type TrackDialogContentProps = Omit<TrackDialogProps, "open">;
+
+const TrackDialogContent: FC<TrackDialogContentProps> = ({
   onCancel,
   onOk,
   cancelButtonText,
@@ -42,7 +25,6 @@ const TrackDialog: FC<TrackDialogProps> = ({
   isActionsRequired,
   isOkRequired = true,
   isCancelRequired = true,
-  open,
   dialogTitle,
   dialogContentText,
   formId,
@@ -50,35 +32,32 @@ const TrackDialog: FC<TrackDialogProps> = ({
   externalSubmitButtonUsed = false,
   saveButtonProps,
   headingCaption = "",
-  ...props
+  children,
+  variant = "default",
 }) => {
-  const [openDialog, setOpenDialog] = useState(false);
-  useEffect(() => {
-    setOpenDialog(open);
-  }, [open]);
-
-  if (!onOk) {
-    onOk = () => setOpenDialog(false);
-  }
-  if (!onCancel) {
-    onCancel = () => setOpenDialog(false);
-  }
+  const isCompact = variant === "compact";
 
   return (
-    <Dialog
-      open={openDialog}
-      {...props}
-      PaperProps={{
-        sx: {
-          maxHeight: "80vh",
-        },
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        width: "100%",
+        maxHeight: "100vh",
+        backgroundColor: Palette.neutral.bg.light,
+        border: `1px solid ${Palette.neutral.bg.dark}`,
+        borderRadius: "4px",
+        ...(isCompact && {
+          maxHeight: "100%",
+          borderRadius: "2px",
+        }),
       }}
     >
       <Box
         className="modal-header"
         sx={{
           display: "flex",
-          padding: "24px 24px 16px 40px",
+          padding: isCompact ? "12px 16px 8px 20px" : "24px 24px 16px 40px",
           flexDirection: "column",
           alignItems: "flex-end",
           alignSelf: "stretch",
@@ -111,7 +90,11 @@ const TrackDialog: FC<TrackDialogProps> = ({
           </Tooltip>
           <IconButton
             onClick={onCancel}
-            sx={{ width: "1.5rem", height: "1.5rem", padding: "0" }}
+            sx={{
+              width: isCompact ? "1.2rem" : "1.5rem",
+              height: isCompact ? "1.2rem" : "1.5rem",
+              padding: "0",
+            }}
             disableRipple
           >
             <CloseIconComponent />
@@ -123,13 +106,16 @@ const TrackDialog: FC<TrackDialogProps> = ({
       </Box>
       <DialogContent
         sx={{
-          padding: "24px 40px",
+          padding: isCompact ? "12px 16px" : "24px 40px",
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
           alignItems: "flex-start",
           alignSelf: "stretch",
           backgroundColor: Palette.neutral.bg.light,
+          flexGrow: isCompact ? 1 : 0,
+          overflowY: isCompact ? "auto" : "visible",
+          minHeight: 0,
         }}
       >
         {dialogContentText && (
@@ -147,12 +133,12 @@ const TrackDialog: FC<TrackDialogProps> = ({
             </ETSubhead>
           </Box>
         )}
-        {props.children}
+        {children}
       </DialogContent>
       {isActionsRequired && (
         <DialogActions
           sx={{
-            padding: "16px 40px 24px 40px",
+            padding: isCompact ? "8px 16px 12px 16px" : "16px 40px 24px 40px",
             borderRadius: "0 0 4px 4px",
             borderTop: `1px solid ${Palette.neutral.bg.dark}`,
           }}
@@ -160,12 +146,17 @@ const TrackDialog: FC<TrackDialogProps> = ({
           {additionalActions}
           {isCancelRequired && (
             <Button
-              size="large"
+              size={isCompact ? "small" : "large"}
               onClick={onCancel}
               variant="outlined"
               sx={{
-                minWidth: "124px",
-                marginRight: externalSubmitButtonUsed ? "140px" : "",
+                minWidth: isCompact ? "80px" : "124px",
+                maxHeight: isCompact ? "45px" : "unset",
+                marginRight: externalSubmitButtonUsed
+                  ? isCompact
+                    ? "80px"
+                    : "140px"
+                  : "",
                 "&:focus": {
                   backgroundColor: Palette.primary.main,
                   color: Palette.neutral.bg.light,
@@ -178,7 +169,8 @@ const TrackDialog: FC<TrackDialogProps> = ({
           {isOkRequired && (
             <Button
               sx={{
-                minWidth: "124px",
+                minWidth: isCompact ? "80px" : "124px",
+                maxHeight: isCompact ? "45px" : "unset",
                 "&:focus": {
                   backgroundColor: Palette.primary.light,
                 },
@@ -193,7 +185,7 @@ const TrackDialog: FC<TrackDialogProps> = ({
                 }
                 return formId ? undefined : onOk?.(null);
               }}
-              size="large"
+              size={isCompact ? "small" : "large"}
               type={formId ? "submit" : "button"}
               form={formId}
               variant="contained"
@@ -204,8 +196,8 @@ const TrackDialog: FC<TrackDialogProps> = ({
           )}
         </DialogActions>
       )}
-    </Dialog>
+    </Box>
   );
 };
 
-export default TrackDialog;
+export default TrackDialogContent;

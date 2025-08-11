@@ -77,7 +77,8 @@ const RichTextEditor = ({
           onEditorStateChange={handleChange}
           handlePastedText={() => false}
           editorStyle={{
-            height: "485px",
+            maxHeight: "485px",
+            minHeight: "200px",
             padding: "8px 8px 8px",
             border: `1px solid ${focused ? "#0070E0" : "rgb(224,224,224)"}`,
             borderRadius: "4px",

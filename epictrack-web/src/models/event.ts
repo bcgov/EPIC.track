@@ -23,6 +23,15 @@ export interface EventsGridModel {
   notes: string;
   status: EVENT_STATUS;
   visibility: EventTemplateVisibility;
+  phase_name?: string;
+}
+
+export interface CalendarEvent {
+  event: EventsGridModel;
+  phase_name: string;
+  phase_id: number;
+  work_name: string;
+  work_id: number;
 }
 
 export interface MilestoneEvent {

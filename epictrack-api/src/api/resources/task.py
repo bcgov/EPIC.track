@@ -17,6 +17,7 @@ from http import HTTPStatus
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
+from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.schemas import request as req
 from api.schemas import response as res
 from api.services import TaskService
@@ -98,6 +99,33 @@ class CopyEvents(Resource):
             jsonify(res.TaskEventResponseSchema(many=True).dump(result)),
             HTTPStatus.CREATED,
         )
+
+
+@cors_preflight("GET")
+@API.route("/calendar", methods=["GET", "OPTIONS"])
+class CalendarTasks(Resource):
+    """Endpoint resource for calendar events"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get():
+        """Get calendar events."""
+        args = request.args
+        search_options = EventCalendarSearchOptions(
+            event_types=list(map(int, args.getlist('event_types[]'))),
+            project_types=list(map(int, args.getlist('project_types[]'))),
+            regions=list(map(int, args.getlist('regions[]'))),
+            staff_id=args.get('staff_id', None, int),
+            teams=list(map(int, args.getlist('teams[]'))),
+            text=args.get('text', None, str),
+            work_ids=list(map(int, args.getlist('work_ids[]'))),
+            work_types=list(map(int, args.getlist('work_types[]'))),
+            year=args.get('year', None, int),
+        )
+        events = TaskService.find_all_calendar_tasks(search_options)
+        return jsonify(events), HTTPStatus.OK
 
 
 @cors_preflight("GET,PUT")

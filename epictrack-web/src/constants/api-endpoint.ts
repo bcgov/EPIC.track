@@ -86,12 +86,14 @@ const Endpoints = {
   },
   Events: {
     MILESTONE_EVENTS: "milestones",
+    CALENDAR_EVENTS: "milestones/calendar",
   },
   TaskEvents: {
     EVENTS: "tasks/events",
     TASKS: "tasks",
     MY_TASKS: "tasks/events/staff-work/:staff_id",
     IMPORT_TASKS: "tasks/work_phase/:work_phase_id/sheet",
+    CALENDAR_TASKS: "tasks/calendar",
   },
   Configurations: {
     CONFIGURATIONS: "/event-configurations",
