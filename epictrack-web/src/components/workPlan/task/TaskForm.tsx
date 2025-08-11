@@ -60,21 +60,28 @@ type TaskEventForm = {
 interface TaskFormProps {
   onSave: () => void;
   taskEvent?: TaskEvent;
+  work_id?: number;
+  phase_id?: number;
 }
 const TaskForm = ({
   onSave = () => {
     return;
   },
   taskEvent,
+  work_id,
+  phase_id,
 }: TaskFormProps) => {
   const [assignees, setAssignees] = useState<Staff[]>([]);
   const [responsibilities, setResponsibilities] = useState<ListType[]>([]);
   const [notes, setNotes] = useState(taskEvent?.notes || "");
   const [endDate, setEndDate] = useState<Dayjs | null>(null);
   const endDateRef = useRef();
-  const ctx = useContext(WorkplanContext);
   const { handleHighlightRows } = useContext(EventContext);
   const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent?.notes]);
+
+  const ctx = useContext(WorkplanContext);
+  const effectiveWorkId = work_id ?? ctx.work?.id;
+  const effectivePhaseId = phase_id ?? ctx.selectedWorkPhase?.work_phase.id;
 
   const defaultValues: TaskEventForm = {
     name: taskEvent?.name || "",
@@ -90,6 +97,19 @@ const TaskForm = ({
     defaultValues: defaultValues,
     mode: "onBlur",
   });
+
+  const { reset } = methods;
+
+  useEffect(() => {
+    reset({
+      name: taskEvent?.name || "",
+      start_date: taskEvent?.start_date || dayjs().format(),
+      status: taskEvent?.status || "",
+      number_of_days: taskEvent?.number_of_days || 0,
+      responsibility_ids: taskEvent?.responsibility_ids || [],
+      assignee_ids: taskEvent?.assignee_ids || [],
+    });
+  }, [taskEvent, reset]);
 
   const {
     register,
@@ -109,14 +129,14 @@ const TaskForm = ({
 
   const getWorkTeamMembers = useCallback(async () => {
     const assigneeResult = await workService.getWorkTeamMembers(
-      Number(ctx.work?.id),
+      Number(effectiveWorkId),
       true
     );
     if (assigneeResult.status === 200) {
       const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
       setAssignees(staff);
     }
-  }, [ctx.work?.id]);
+  }, [effectiveWorkId]);
 
   useEffect(() => {
     getResponsibilites();
@@ -124,7 +144,7 @@ const TaskForm = ({
 
   useEffect(() => {
     getWorkTeamMembers();
-  }, [ctx.work?.id, getWorkTeamMembers]);
+  }, [effectiveWorkId, getWorkTeamMembers]);
 
   const statuses = useMemo(() => statusOptions, []);
 
@@ -172,7 +192,7 @@ const TaskForm = ({
     try {
       const dataToSave = {
         ...data,
-        work_phase_id: Number(ctx.selectedWorkPhase?.work_phase.id),
+        work_phase_id: Number(effectivePhaseId),
         start_date: Moment(data.start_date).format(),
         number_of_days:
           data.number_of_days.toString() === "" ? 0 : data.number_of_days,

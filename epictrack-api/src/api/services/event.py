@@ -15,7 +15,7 @@
 import copy
 import functools
 from datetime import datetime, timedelta
-from typing import List
+from typing import Dict, List
 from flask import current_app
 
 import pytz
@@ -23,6 +23,7 @@ import pytz
 from sqlalchemy import and_, extract, func, or_
 
 from api.actions.action_handler import ActionHandler
+from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models import (
     PRIMARY_CATEGORIES,
@@ -43,6 +44,7 @@ from api.models.event_template import EventPositionEnum
 from api.models.phase_code import PhaseCode, PhaseVisibilityEnum
 from api.models.project import Project
 from api.models.work_type import WorkType
+from api.schemas.response import EventResponseSchema
 from api.services.outcome_configuration import OutcomeConfigurationService
 from api.utils import util
 from api.application_constants import MIN_WORK_START_DATE
@@ -253,6 +255,32 @@ class EventService:
                         result["event"] = each_event
                         return result
         return result
+
+    @classmethod
+    def find_all_calendar_events(
+            cls,
+            search_options: EventCalendarSearchOptions):
+        """Fetch all events for all works."""
+        works, _ = Work.fetch_all_works_by_calendar_search_criteria(search_options)
+        work_ids = [work.id for work in works]
+        work_events = Event.find_by_work_ids_and_year(work_ids, search_options.year)
+
+        serialized = []
+        for event in work_events:
+            if search_options.event_types and event.type_id not in search_options.event_types:
+                continue
+            serialized.append(cls._serialize_event(event))
+
+        return {"items": serialized, "total": len(serialized)}
+
+    @staticmethod
+    def _serialize_event(event: Event) -> Dict:
+        """Serialize the event info."""
+        return {
+            "work_name": event.work.title if event.work else None,
+            "phase_name": event.event_configuration.work_phase.name if event.event_configuration and event.event_configuration.work_phase else None,
+            "event": EventResponseSchema(many=False).dump(event),
+        }
 
     @classmethod
     def find_milestone_event(cls, event_id: int) -> Event:

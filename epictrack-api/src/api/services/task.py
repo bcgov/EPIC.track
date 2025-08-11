@@ -14,7 +14,7 @@
 """Service to manage Tasks"""
 from datetime import timedelta
 from itertools import product
-from typing import List, IO
+from typing import Dict, List, IO
 
 import numpy as np
 import pandas as pd
@@ -23,13 +23,16 @@ from flask import current_app
 from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
 
+from api.schemas.response import TaskResponseSchema
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
+from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.models import (
     StaffWorkRole,
     StatusEnum,
     TaskEvent,
     TaskEventAssignee,
     WorkPhase,
+    Work,
     db,
 )
 from api.models.task_event_responsibility import TaskEventResponsibility
@@ -102,6 +105,42 @@ class TaskService:
             }
             tasks.append(task_data)
         return tasks
+
+    @classmethod
+    def find_all_calendar_tasks(
+            cls,
+            search_options: EventCalendarSearchOptions):
+        """Fetch all events for all works."""
+        works, _ = Work.fetch_all_works_by_calendar_search_criteria(search_options)
+        work_ids = [work.id for work in works]
+        work_tasks = TaskEvent.find_by_work_ids_and_year(work_ids, search_options.year)
+
+        serialized = []
+        for task in work_tasks:
+            serialized.append(cls._serialize_task(task))
+        return {"items": serialized, "total": len(serialized)}
+
+    @staticmethod
+    def _serialize_task(task: TaskEvent) -> Dict:
+        """Serialize the event info."""
+        work_title = None
+        work_id = None
+        phase_name = None
+        phase_id = None
+        if task.work_phase:
+            phase_name = task.work_phase.name
+            phase_id = task.work_phase.id
+            if hasattr(task.work_phase, "work") and task.work_phase.work:
+                work_title = task.work_phase.work.title
+                work_id = task.work_phase.work.id
+
+        return {
+            "work_name": work_title,
+            "work_id": work_id,
+            "phase_name": phase_name,
+            "phase_id": phase_id,
+            "event": TaskResponseSchema(many=False).dump(task),
+        }
 
     @classmethod
     def create_task_events_from_sheet(cls, work_phase_id: int, sheet: IO):

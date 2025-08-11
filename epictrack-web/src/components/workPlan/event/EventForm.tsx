@@ -61,7 +61,7 @@ import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 interface EventFormProps {
   onSave: () => void;
   event?: MilestoneEvent;
-  milestoneEvents: EventsGridModel[];
+  milestoneEvents?: EventsGridModel[];
   isFormFieldsLocked: boolean;
 }
 interface NumberOfDaysChangeProps {

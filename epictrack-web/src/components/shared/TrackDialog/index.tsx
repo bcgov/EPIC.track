@@ -1,0 +1,41 @@
+import { FC, useEffect, useState } from "react";
+import { ButtonProps, Dialog, DialogProps } from "@mui/material";
+import TrackDialogContent from "./TrackDialogContent";
+
+export type TrackDialogProps = {
+  onCancel?: () => void;
+  onOk?: (args: any) => void;
+  cancelButtonText?: string;
+  okButtonText?: string;
+  dialogTitle: string;
+  dialogContentText?: string;
+  isActionsRequired?: boolean;
+  isOkRequired?: boolean;
+  isCancelRequired?: boolean;
+  additionalActions?: React.ReactNode;
+  formId?: string;
+  externalSubmitButtonUsed?: boolean;
+  saveButtonProps?: ButtonProps;
+  headingCaption?: string;
+  variant?: "default" | "compact";
+} & DialogProps;
+
+const TrackDialog: FC<TrackDialogProps> = ({ open, ...props }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+
+  useEffect(() => {
+    setOpenDialog(open);
+  }, [open]);
+
+  return (
+    <Dialog
+      open={openDialog}
+      PaperProps={{ sx: { maxHeight: "80vh" } }}
+      {...props}
+    >
+      <TrackDialogContent {...props} />
+    </Dialog>
+  );
+};
+
+export default TrackDialog;

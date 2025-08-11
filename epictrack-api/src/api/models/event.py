@@ -13,7 +13,8 @@
 # limitations under the License.
 """Model to handle all operations related to Event."""
 
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, and_
+from datetime import date
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column
 from sqlalchemy.orm import relationship
 
 from api.models.event_category import EventCategory, PRIMARY_CATEGORIES
@@ -62,6 +63,31 @@ class Event(BaseModelVersioned):
     def find_by_work_id(cls, work_id: int):
         """Return by work id."""
         return cls.query.filter_by(work_id=work_id)
+
+    @classmethod
+    def find_by_work_ids_and_year(cls, work_ids: list[int], year: int):
+        """Return all entries matching any of the given work IDs that overlap with the given year."""
+        start_of_year = date(year, 1, 1)
+        end_of_year = date(year, 12, 31)
+
+        start_date = func.coalesce(Event.actual_date, Event.anticipated_date)
+        interval_expr = literal_column("INTERVAL '1 day'") * Event.number_of_days
+        end_date = start_date + interval_expr
+
+        return (
+            Event.query
+            .join(Event.event_configuration)
+            .join(Event.work)
+            .join(EventConfiguration.work_phase)
+            .filter(
+                Event.work_id.in_(work_ids),
+                Event.is_deleted.is_(False),
+                Event.is_active.is_(True),
+                start_date <= cast(end_of_year, Date),
+                end_date >= cast(start_of_year, Date),
+            )
+            .all()
+        )
 
     @classmethod
     def find_milestone_events_by_work_phase(cls, work_phase_id: int):

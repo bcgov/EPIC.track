@@ -1,6 +1,7 @@
 import { TaskEvent } from "../../models/taskEvent";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
+import { CalendarSearchOptions } from "components/calendar/EventCalendarContext";
 
 export type TaskEventMutationRequest = {
   name: string;
@@ -31,6 +32,12 @@ class TaskEventService {
     return await http.GetRequest(
       `${Endpoints.TaskEvents.EVENTS}?work_phase_id=${workPhaseId}`
     );
+  }
+
+  async getCalendarTasks(searchOptions: CalendarSearchOptions) {
+    return await http.GetRequest<any>(Endpoints.TaskEvents.CALENDAR_TASKS, {
+      ...searchOptions,
+    });
   }
 
   async getById(eventId: number) {

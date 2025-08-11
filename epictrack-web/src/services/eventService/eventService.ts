@@ -1,3 +1,4 @@
+import { CalendarSearchOptions } from "components/calendar/EventCalendarContext";
 import http from "../../apiManager/http-request-handler";
 import Endpoints from "../../constants/api-endpoint";
 import { MilestoneEvent, MilestoneEventDateCheck } from "../../models/event";
@@ -23,6 +24,12 @@ class EventService {
         workPhaseId.toString()
       )
     );
+  }
+
+  async getCalendarEvents(searchOptions: CalendarSearchOptions) {
+    return await http.GetRequest<any>(Endpoints.Events.CALENDAR_EVENTS, {
+      ...searchOptions,
+    });
   }
 
   async getById(eventId: number) {
