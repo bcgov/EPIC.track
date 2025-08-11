@@ -14,7 +14,7 @@
 """Resource for Task endpoints."""
 from http import HTTPStatus
 
-from flask import jsonify, request, current_app
+from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
 
 from api.models.dashboard_search_options import EventCalendarSearchOptions
@@ -112,7 +112,6 @@ class CalendarTasks(Resource):
     @profiletime
     def get():
         """Get calendar events."""
-        current_app.logger.info("Get calendar tasks")
         args = request.args
         search_options = EventCalendarSearchOptions(
             event_types=list(map(int, args.getlist('event_types[]'))),
@@ -125,7 +124,6 @@ class CalendarTasks(Resource):
             work_types=list(map(int, args.getlist('work_types[]'))),
             year=args.get('year', None, int),
         )
-        current_app.logger.info("search options: %s", search_options)
         events = TaskService.find_all_calendar_tasks(search_options)
         return jsonify(events), HTTPStatus.OK
 
