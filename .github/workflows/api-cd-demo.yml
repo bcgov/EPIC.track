@@ -1,0 +1,69 @@
+name: EPICTRACK API CD
+
+
+on:
+  push:
+    branches:
+      - big-hat-refactor
+    paths:
+      - "epictrack-api/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment (dev/test/prod)"
+        required: true
+        default: "demo"
+
+defaults:
+  run:
+    shell: bash
+    working-directory: ./epictrack-api
+
+env:
+  APP_NAME: "epictrack-api"
+  TAG_NAME: "demo" # If the environment type is manually selected, use the input value; otherwise, use 'dev' as default
+
+jobs:
+  api-cd:
+    runs-on: ubuntu-24.04
+
+    if: github.repository == 'bcgov/EPIC.track'
+    environment:
+      name: "demo"
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install OpenShift CLI
+        run: |
+          curl -LO "https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz"
+          tar -xvzf openshift-client-linux.tar.gz
+          sudo mv oc /usr/local/bin/
+          rm -f openshift-client-linux.tar.gz
+
+      - name: Login Openshift
+        shell: bash
+        run: |
+          oc login --server=${{secrets.OPENSHIFT_LOGIN_REGISTRY}} --token=${{secrets.OPENSHIFT_SA_TOKEN}}
+
+      - name: Login Docker
+        run: |
+          echo "${{ secrets.OPENSHIFT_SA_TOKEN }}" | 
+          docker login ${{ secrets.OPENSHIFT_IMAGE_REGISTRY }} -u ${{ secrets.OPENSHIFT_SA_NAME}} --password-stdin
+
+      - name: Build image
+        run: |
+          docker build . --file Dockerfile --tag image
+
+      - name: Push image
+        run: |
+          IMAGE_ID=${{ secrets.OPENSHIFT_IMAGE_REGISTRY }}/"${{ secrets.OPENSHIFT_REPOSITORY}}-tools"/$APP_NAME
+          docker tag image $IMAGE_ID:latest
+          docker push $IMAGE_ID:latest
+          docker image tag $IMAGE_ID:latest $IMAGE_ID:$TAG_NAME
+          docker push $IMAGE_ID:$TAG_NAME
+
+      - name: Rollout
+        shell: bash
+        run: |
+          oc rollout status dc/${{ env.APP_NAME }} -n ${{ secrets.OPENSHIFT_REPOSITORY }}-${{ env.TAG_NAME }} -w
