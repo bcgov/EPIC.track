@@ -1,12 +1,15 @@
 import { Box, Tooltip } from "@mui/material";
 import { Palette } from "styles/theme";
 import dayjs from "dayjs";
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import { ETCaption1 } from "components/shared";
 import { FC } from "react";
 import { CalendarEvent } from "models/event";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 import { isWeekendByIndex } from "./utils";
 import { useEventCalendarContext } from "./EventCalendarContext";
+
+dayjs.extend(isSameOrAfter);
 
 type EventWithRow = CalendarEvent & { row: number };
 
@@ -85,65 +88,89 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
                 />
               );
             }
-            const eventItem = rowEvents.find(
-              (ev) => day && dayjs(ev.event.start_date).isSame(day, "day")
-            );
+            const eventItem = rowEvents.find((ev) => {
+              const start = dayjs(ev.event.start_date);
+              const end = dayjs(ev.event.end_date);
+              return (
+                day &&
+                dayjs(day).isSameOrAfter(start, "day") &&
+                dayjs(day).isSameOrBefore(end, "day")
+              );
+            });
 
             // If an event starts on this day, render it with span
             if (eventItem) {
               const event = eventItem.event;
-              const startIdx = dayIdx;
-              const endIdx = days.findIndex(
+
+              const firstVisible = days.findIndex((d) => d !== null);
+              const lastVisible = days.length - 1;
+
+              const actualStartIdx = days.findIndex(
+                (d) => d && dayjs(d).isSame(dayjs(event.start_date), "day")
+              );
+
+              const actualEndIdx = days.findIndex(
                 (d) => d && dayjs(d).isSame(dayjs(event.end_date), "day")
               );
-              const span = endIdx - startIdx + 1;
 
-              const title =
-                event.type === EVENT_TYPE.MILESTONE
-                  ? `${eventItem.phase_name}: ${event.name}`
-                  : event.name;
+              // If the event starts before this month, start from first day in month
+              const startIdx =
+                actualStartIdx === -1 ? firstVisible : actualStartIdx;
+              // If the event ends after this month, end span at last day in month
+              const endIdx =
+                actualEndIdx === -1 ? lastVisible - 1 : actualEndIdx;
 
-              return (
-                <Box
-                  key={event.id}
-                  gridColumn={`span ${span}`}
-                  onClick={() => handleEventClick?.(eventItem)}
-                  sx={{
-                    height: cellSizePx,
-                    backgroundColor:
-                      eventItem.event.type === EVENT_TYPE.MILESTONE
-                        ? "#BACDDF"
-                        : "#C6DFDB",
-                    color: Palette.primary.main,
-                    borderRadius: "4px",
-                    borderColor:
-                      eventItem.event.type === EVENT_TYPE.MILESTONE
-                        ? "#BACDDF"
-                        : "#C6DFDB",
-                    paddingLeft: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    overflow: "hidden",
-                    width: "100%",
-                    cursor: "pointer",
-                  }}
-                >
-                  <Tooltip title={title} sx={{ width: "100%" }}>
-                    <Box sx={{ width: "100%", overflow: "hidden" }}>
-                      <ETCaption1
-                        sx={{
-                          display: "block",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {title}
-                      </ETCaption1>
-                    </Box>
-                  </Tooltip>
-                </Box>
-              );
+              if (dayIdx === startIdx) {
+                const span = endIdx - startIdx + 1;
+
+                const title =
+                  event.type === EVENT_TYPE.MILESTONE
+                    ? `${eventItem.phase_name}: ${event.name}`
+                    : event.name;
+
+                return (
+                  <Box
+                    key={event.id}
+                    gridColumn={`span ${span}`}
+                    onClick={() => handleEventClick?.(eventItem)}
+                    sx={{
+                      height: cellSizePx,
+                      backgroundColor:
+                        eventItem.event.type === EVENT_TYPE.MILESTONE
+                          ? "#BACDDF"
+                          : "#C6DFDB",
+                      color: Palette.primary.main,
+                      borderRadius: "4px",
+                      borderColor:
+                        eventItem.event.type === EVENT_TYPE.MILESTONE
+                          ? "#BACDDF"
+                          : "#C6DFDB",
+                      paddingLeft: "4px",
+                      display: "flex",
+                      alignItems: "center",
+                      overflow: "hidden",
+                      width: "100%",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Tooltip title={title} sx={{ width: "100%" }}>
+                      <Box sx={{ width: "100%", overflow: "hidden" }}>
+                        <ETCaption1
+                          sx={{
+                            display: "block",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {title}
+                        </ETCaption1>
+                      </Box>
+                    </Tooltip>
+                  </Box>
+                );
+              }
+              return null;
             }
 
             // If this cell falls inside a span already rendered, skip rendering it
@@ -154,7 +181,9 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
               const evEndIdx = days.findIndex(
                 (d) => d && dayjs(d).isSame(dayjs(ev.event.end_date), "day")
               );
-              return dayIdx > evStartIdx && dayIdx <= evEndIdx;
+              const start = evStartIdx === -1 ? 0 : evStartIdx;
+              const end = evEndIdx === -1 ? days.length - 1 : evEndIdx;
+              return dayIdx > start && dayIdx <= end;
             });
 
             if (inSpan) return null;
