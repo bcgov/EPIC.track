@@ -10,14 +10,15 @@ export const Routes: RouteType[] = [
     allowedRoles: [],
     isAuthenticated: false,
   },
-  {
-    name: "My Updates",
-    icon: "CategoryIcon",
-    path: "/updates",
-    group: "Group1",
-    allowedRoles: [],
-    isAuthenticated: false,
-  },
+  // Track-606
+  // {
+  //   name: "My Updates",
+  //   icon: "CategoryIcon",
+  //   path: "/updates",
+  //   group: "Group1",
+  //   allowedRoles: [],
+  //   isAuthenticated: false,
+  // },
   {
     name: "My Tasks",
     icon: "CheckListIcon",

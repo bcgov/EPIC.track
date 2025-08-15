@@ -21,7 +21,6 @@ import { IconProps } from "../icons/type";
 import { WORKPLAN_TAB } from "./constants";
 import { StalenessEnum } from "constants/application-constant";
 import { issueListMaxStaleness } from "./utils";
-import Calendar from "../calendar";
 
 const IndicatorIcon: React.FC<IconProps> = Icons["IndicatorIcon"];
 const ExclamationSmallIcon: React.FC<IconProps> = Icons["ExclamationSmallIcon"];
@@ -113,12 +112,13 @@ const WorkPlanContainer = () => {
                 }}
                 label={WORKPLAN_TAB.WORKPLAN.label}
               />
+              {/* Track-606
               <ETTab
                 sx={{
                   paddingLeft: 0,
                 }}
                 label={WORKPLAN_TAB.CALENDAR.label}
-              />
+              /> */}
               <ETTab
                 label={WORKPLAN_TAB.STATUS.label}
                 icon={
@@ -157,6 +157,7 @@ const WorkPlanContainer = () => {
           >
             <PhaseContainer />
           </TabPanel>
+          {/* Track-606
           <TabPanel
             index={WORKPLAN_TAB.CALENDAR.index}
             value={selectedTabIndex}
@@ -165,7 +166,7 @@ const WorkPlanContainer = () => {
             }}
           >
             <Calendar workId={ctx.work?.id} />
-          </TabPanel>
+          </TabPanel> */}
           <TabPanel
             index={WORKPLAN_TAB.STATUS.index}
             value={selectedTabIndex}
