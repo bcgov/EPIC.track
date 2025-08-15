@@ -103,7 +103,10 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
               const event = eventItem.event;
 
               const firstVisible = days.findIndex((d) => d !== null);
-              const lastVisible = days.length - 1;
+              const lastVisible =
+                days.length -
+                1 -
+                [...days].reverse().findIndex((d) => d !== null);
 
               const actualStartIdx = days.findIndex(
                 (d) => d && dayjs(d).isSame(dayjs(event.start_date), "day")
@@ -117,8 +120,7 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
               const startIdx =
                 actualStartIdx === -1 ? firstVisible : actualStartIdx;
               // If the event ends after this month, end span at last day in month
-              const endIdx =
-                actualEndIdx === -1 ? lastVisible - 1 : actualEndIdx;
+              const endIdx = actualEndIdx === -1 ? lastVisible : actualEndIdx;
 
               if (dayIdx === startIdx) {
                 const span = endIdx - startIdx + 1;
