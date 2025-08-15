@@ -3,28 +3,29 @@ export const WORKPLAN_TAB = {
     label: "Workplan",
     index: 0,
   },
-  CALENDAR: {
-    label: "Calendar",
-    index: 1,
-  },
+  // Track-606 - increase indexes when put back
+  // CALENDAR: {
+  //   label: "Calendar",
+  //   index: 1,
+  // },
   STATUS: {
     label: "Status",
-    index: 2,
+    index: 1,
   },
   ISSUES: {
     label: "Issues",
-    index: 3,
+    index: 2,
   },
   ABOUT: {
     label: "About",
-    index: 4,
+    index: 3,
   },
   TEAM: {
     label: "Team",
-    index: 5,
+    index: 4,
   },
   FIRST_NATIONS: {
     label: "First Nations",
-    index: 6,
+    index: 5,
   },
 };
