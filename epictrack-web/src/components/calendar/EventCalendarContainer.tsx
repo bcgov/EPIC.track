@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Box, Grid, IconButton } from "@mui/material";
+import { Box, CircularProgress, Grid, IconButton } from "@mui/material";
 import dayjs from "dayjs";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -13,7 +13,7 @@ import TrackSidePanel, {
 } from "components/shared/TrackDialog/TrackSidePanel";
 import { CalendarEvent } from "models/event";
 import { useEventCalendarContext } from "./EventCalendarContext";
-import TaskMilestoneLegend from "./TaskMilestoneLegend";
+import TaskMilestoneLegend from "./Legends/TaskMilestoneLegend";
 import { getNDaysArray } from "./utils";
 import DaysHeader from "./DaysHeader";
 import Month from "./Month";
@@ -22,14 +22,20 @@ import {
   DEFAULT_MIN_CELL_SIZE_PX,
   DEFAULT_LABEL_WIDTH,
 } from "./constants";
+import MyCalendarLegend from "./Legends/FullCalendarLegend";
+import { getWorkColour } from "./Legends/utils";
 
 type EventCalendarProps = {
   cellSizePx?: number;
   daysInRow?: number;
+  showFullLegend?: boolean;
+  showWorkLegend?: boolean;
 };
 
 export const EventCalendarContainer = ({
   daysInRow = DEFAULT_DAYS_IN_ROW,
+  showFullLegend = false,
+  showWorkLegend = false,
 }: EventCalendarProps) => {
   const {
     events,
@@ -43,10 +49,16 @@ export const EventCalendarContainer = ({
     onCancelHandler,
     collapsedMonths,
     toggleMonth,
+    work,
+    workPhase,
   } = useEventCalendarContext();
 
   const [cellSizePx, setCellSizePx] = useState(DEFAULT_MIN_CELL_SIZE_PX);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const labelWidth = showWorkLegend
+    ? DEFAULT_LABEL_WIDTH * 1.7
+    : DEFAULT_LABEL_WIDTH;
 
   const months = useMemo(() => {
     const start = dayjs(`${selectedYear}-01-01`);
@@ -71,7 +83,6 @@ export const EventCalendarContainer = ({
     const resize = () => {
       if (!containerRef.current) return;
 
-      const labelWidth = DEFAULT_LABEL_WIDTH;
       const containerWidth = containerRef.current.offsetWidth;
       const cellGap = 4;
       const totalGap = daysInRow * cellGap;
@@ -89,7 +100,83 @@ export const EventCalendarContainer = ({
     }
 
     return () => observer.disconnect();
-  }, [daysInRow, modalOpen]);
+  }, [daysInRow, modalOpen, labelWidth]);
+
+  const renderSidePanel = () => {
+    if (!modalOpen || !selectedEvent) return null;
+
+    if (
+      selectedEvent?.event?.type === EVENT_TYPE.MILESTONE &&
+      (!work || !workPhase)
+    ) {
+      return (
+        <Box
+          sx={{
+            width: `${DEFAULT_PANEL_SIZE}px`,
+            flexShrink: 0,
+            height: "calc(100vh - 250px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress size={32} />
+        </Box>
+      );
+    }
+    if (selectedEvent?.event?.type === EVENT_TYPE.TASK) {
+      return (
+        <TrackSidePanel
+          open={modalOpen}
+          dialogTitle={taskEvent ? taskEvent?.name : "Task Details"}
+          disableEscapeKeyDown
+          disablePortal
+          fullWidth
+          maxWidth="md"
+          okButtonText="Save"
+          cancelButtonText="Cancel"
+          isActionsRequired
+          onCancel={onCancelHandler}
+          formId="task-form"
+          variant="compact"
+          headingBackgroundColor={work ? getWorkColour(work.title) : "inherit"}
+        >
+          <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
+        </TrackSidePanel>
+      );
+    }
+
+    if (selectedEvent?.event?.type === EVENT_TYPE.MILESTONE) {
+      return (
+        <TrackSidePanel
+          open={modalOpen}
+          dialogTitle={milestoneEvent ? milestoneEvent?.name : "Event Details"}
+          disableEscapeKeyDown
+          disablePortal
+          fullWidth
+          maxWidth="md"
+          okButtonText="Save"
+          cancelButtonText="Cancel"
+          isActionsRequired
+          onCancel={onCancelHandler}
+          formId="event-form"
+          variant="compact"
+          headingCaption={selectedEvent?.phase_name}
+          headingBackgroundColor={work ? getWorkColour(work.title) : "inherit"}
+        >
+          <EventForm
+            onSave={onSaveHandler}
+            event={milestoneEvent}
+            isFormFieldsLocked={!!milestoneEvent?.actual_date}
+            work={work}
+            workPhase={workPhase}
+          />
+        </TrackSidePanel>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <Box
@@ -156,16 +243,18 @@ export const EventCalendarContainer = ({
                   />
                 </IconButton>
               </Box>
-              <Grid item>
-                <TaskMilestoneLegend />
-              </Grid>
+              {!showFullLegend && (
+                <Grid item>
+                  <TaskMilestoneLegend />
+                </Grid>
+              )}
             </Grid>
 
             <Box gap={0.5} display="flex" flexDirection="column" width="100%">
               <DaysHeader
                 cellSizePx={cellSizePx}
                 daysInRow={daysInRow}
-                offset={DEFAULT_LABEL_WIDTH}
+                offset={labelWidth}
               />
 
               {months.map(({ label, start }) => {
@@ -174,7 +263,7 @@ export const EventCalendarContainer = ({
                   <Month
                     key={label}
                     monthLabel={label}
-                    labelWidth={DEFAULT_LABEL_WIDTH}
+                    labelWidth={labelWidth}
                     days={days}
                     isCollapsed={collapsedMonths[label] || false}
                     toggleCollapsed={() => toggleMonth(label)}
@@ -194,66 +283,27 @@ export const EventCalendarContainer = ({
                         );
                       }
                     )}
+                    showWorkLegend={showWorkLegend}
                   />
                 );
               })}
             </Box>
           </Grid>
         </Box>
-        {modalOpen && selectedEvent && (
-          <Box
-            sx={{
-              width: `${DEFAULT_PANEL_SIZE}px`,
-              flexShrink: 0,
-              transition: "all 0.3s ease",
-              height: "calc(100vh - 250px)",
-            }}
-          >
-            {selectedEvent?.event?.type === EVENT_TYPE.TASK && (
-              <TrackSidePanel
-                open={modalOpen}
-                dialogTitle={taskEvent ? taskEvent?.name : "Task Details"}
-                disableEscapeKeyDown
-                disablePortal
-                fullWidth
-                maxWidth="md"
-                okButtonText="Save"
-                cancelButtonText="Cancel"
-                isActionsRequired
-                onCancel={onCancelHandler}
-                formId="task-form"
-                variant="compact"
-              >
-                <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
-              </TrackSidePanel>
-            )}
-            {selectedEvent?.event?.type === EVENT_TYPE.MILESTONE && (
-              <TrackSidePanel
-                open={modalOpen}
-                dialogTitle={
-                  milestoneEvent ? milestoneEvent?.name : "Event Details"
-                }
-                disableEscapeKeyDown
-                disablePortal
-                fullWidth
-                maxWidth="md"
-                okButtonText="Save"
-                cancelButtonText="Cancel"
-                isActionsRequired
-                onCancel={onCancelHandler}
-                formId="event-form"
-                variant="compact"
-                headingCaption={selectedEvent?.phase_name}
-              >
-                <EventForm
-                  onSave={onSaveHandler}
-                  event={milestoneEvent}
-                  isFormFieldsLocked={!!milestoneEvent?.actual_date}
-                />
-              </TrackSidePanel>
-            )}
-          </Box>
-        )}
+        <Box
+          sx={{
+            width: `${DEFAULT_PANEL_SIZE}px`,
+            flexShrink: 0,
+            transition: "all 0.3s ease",
+            height: "100%",
+          }}
+        >
+          {!modalOpen && showFullLegend && (
+            <MyCalendarLegend calendar="my-calendar" />
+          )}
+
+          {modalOpen && renderSidePanel()}
+        </Box>
       </Box>
     </Box>
   );

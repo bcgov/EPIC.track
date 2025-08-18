@@ -14,9 +14,10 @@
 """Model to handle all operations related to Event."""
 
 from datetime import date
-from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column
-from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column, or_
+from sqlalchemy.orm import relationship, aliased
 
+from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.models.event_category import EventCategory, PRIMARY_CATEGORIES
 from api.models.event_configuration import EventConfiguration
 
@@ -65,20 +66,56 @@ class Event(BaseModelVersioned):
         return cls.query.filter_by(work_id=work_id)
 
     @classmethod
-    def find_by_work_ids_and_year(cls, work_ids: list[int], year: int):
-        """Return all entries matching any of the given work IDs that overlap with the given year."""
-        start_of_year = date(year, 1, 1)
-        end_of_year = date(year, 12, 31)
+    def fetch_all_events_by_calendar_search_criteria(
+        cls,
+        work_ids: list[int],
+        search_filters: EventCalendarSearchOptions = None
+    ):
+        """Fetch all active events with optional event type / category filters."""
+        if not work_ids:
+            return [], 0
+
+        # create alias inside method
+        event_config_alias = aliased(EventConfiguration)
+
+        query = cls.find_by_work_ids_and_year(work_ids, search_filters, event_config_alias)
+
+        # parse event_types[] filters
+        filter_conditions = []
+        if search_filters and search_filters.event_types:
+            for f in search_filters.event_types:
+                try:
+                    key, value = f.split(":")
+                    val = int(value)
+                    if key == "event_category":
+                        filter_conditions.append(event_config_alias.event_category_id == val)
+                    elif key == "event_type":
+                        filter_conditions.append(event_config_alias.event_type_id == val)
+                except ValueError:
+                    continue
+
+        if filter_conditions:
+            # combine all conditions with OR
+            query = query.filter(or_(*filter_conditions))
+
+        items = query.all()
+        return items, len(items)
+
+    @classmethod
+    def find_by_work_ids_and_year(cls, work_ids, search_filters, event_config_alias):
+        """Find events by work ids and year."""
+        start_of_year = date(search_filters.year, 1, 1)
+        end_of_year = date(search_filters.year, 12, 31)
 
         start_date = func.coalesce(Event.actual_date, Event.anticipated_date)
         interval_expr = literal_column("INTERVAL '1 day'") * Event.number_of_days
         end_date = start_date + interval_expr
 
-        return (
+        query = (
             Event.query
-            .join(Event.event_configuration)
+            .join(event_config_alias, Event.event_configuration)
             .join(Event.work)
-            .join(EventConfiguration.work_phase)
+            .join(event_config_alias.work_phase)  # join via the alias
             .filter(
                 Event.work_id.in_(work_ids),
                 Event.is_deleted.is_(False),
@@ -86,8 +123,8 @@ class Event(BaseModelVersioned):
                 start_date <= cast(end_of_year, Date),
                 end_date >= cast(start_of_year, Date),
             )
-            .all()
         )
+        return query
 
     @classmethod
     def find_milestone_events_by_work_phase(cls, work_phase_id: int):

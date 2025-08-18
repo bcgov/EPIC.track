@@ -263,13 +263,9 @@ class EventService:
         """Fetch all events for all works."""
         works, _ = Work.fetch_all_works_by_calendar_search_criteria(search_options)
         work_ids = [work.id for work in works]
-        work_events = Event.find_by_work_ids_and_year(work_ids, search_options.year)
+        work_events, _ = Event.fetch_all_events_by_calendar_search_criteria(work_ids, search_options)
 
-        serialized = []
-        for event in work_events:
-            if search_options.event_types and event.type_id not in search_options.event_types:
-                continue
-            serialized.append(cls._serialize_event(event))
+        serialized = [cls._serialize_event(event) for event in work_events]
 
         return {"items": serialized, "total": len(serialized)}
 
@@ -278,7 +274,9 @@ class EventService:
         """Serialize the event info."""
         return {
             "work_name": event.work.title if event.work else None,
+            "work_id": event.work_id if event.work else None,
             "phase_name": event.event_configuration.work_phase.name if event.event_configuration and event.event_configuration.work_phase else None,
+            "phase_id": event.event_configuration.work_phase_id if event.event_configuration else None,
             "event": EventResponseSchema(many=False).dump(event),
         }
 

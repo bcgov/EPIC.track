@@ -51,12 +51,10 @@ class IssuesDashboardSearchOptions:  # pylint: disable=too-many-instance-attribu
 class EventCalendarSearchOptions:  # pylint: disable=too-many-instance-attributes
     """Used to store event calendar search options."""
 
-    event_types: Optional[List[int]]
+    event_types: Optional[List[str]]
     project_types: Optional[List[int]]
     regions: Optional[List[int]]
     staff_id: Optional[int]
-    teams: Optional[List[int]]
-    text: str
     work_ids: Optional[List[int]]
     work_types: Optional[List[int]]
     year: int

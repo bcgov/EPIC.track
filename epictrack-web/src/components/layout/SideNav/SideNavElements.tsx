@@ -20,6 +20,14 @@ export const Routes: RouteType[] = [
   //   isAuthenticated: false,
   // },
   {
+    name: "My Calendar",
+    icon: "PendingActions",
+    path: "/my-calendar",
+    group: "Group1",
+    allowedRoles: [],
+    isAuthenticated: false,
+  },
+  {
     name: "My Tasks",
     icon: "CheckListIcon",
     path: "/my-tasks",

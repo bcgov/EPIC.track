@@ -15,16 +15,16 @@ import dateUtils from "utils/dateUtils";
 import { showNotification } from "components/shared/notificationProvider";
 import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { TaskEvent } from "models/taskEvent";
+import { Work, WorkPhase } from "models/work";
+import { workService } from "services/workService/workService";
 
 export interface CalendarSearchOptions {
-  regions: string[];
-  teams: string[];
-  text: string;
-  work_types: string[];
-  project_types: string[];
   event_types: string[];
-  work_ids: number[];
+  project_types: string[];
+  regions: string[];
   staff_id: number | null;
+  work_ids: number[];
+  work_types: string[];
   year: number;
 }
 
@@ -43,8 +43,9 @@ interface EventCalendarContextType {
 
   milestoneEvent?: MilestoneEvent;
   taskEvent?: TaskEvent;
-  fetchMilestoneEvent: (id: number) => Promise<void>;
-  fetchTaskEvent: (id: number) => Promise<void>;
+  loadEventDetails: (event: CalendarEvent) => Promise<void>;
+  work?: Work;
+  workPhase?: WorkPhase;
 
   onSaveHandler: () => void;
   onCancelHandler: () => void;
@@ -77,8 +78,6 @@ export const EventCalendarProvider = ({
 }) => {
   const defaultSearchOptions: CalendarSearchOptions = {
     regions: [],
-    teams: [],
-    text: "",
     work_types: [],
     project_types: [],
     event_types: [],
@@ -97,6 +96,8 @@ export const EventCalendarProvider = ({
   );
   const [milestoneEvent, setMilestoneEvent] = useState<MilestoneEvent>();
   const [taskEvent, setTaskEvent] = useState<TaskEvent>();
+  const [work, setWork] = useState<Work>();
+  const [workPhase, setWorkPhase] = useState<WorkPhase>();
 
   const modalOpen = selectedEvent !== null;
 
@@ -125,9 +126,25 @@ export const EventCalendarProvider = ({
   const getEvents = useCallback(async () => {
     setLoading(true);
     try {
+      const eventPromise = eventService.getCalendarEvents({
+        ...searchOptions,
+        event_types: searchOptions.event_types.filter(
+          (t) => t !== "include_tasks:true"
+        ),
+      });
+
+      let taskPromise: Promise<any> | null = null;
+
+      if (searchOptions.event_types.includes("include_tasks:true")) {
+        taskPromise = taskEventService.getCalendarTasks({
+          ...searchOptions,
+          event_types: [],
+        });
+      }
+
       const [eventResult, taskResult] = await Promise.all([
-        eventService.getCalendarEvents(searchOptions),
-        taskEventService.getCalendarTasks(searchOptions),
+        eventPromise,
+        taskPromise ?? Promise.resolve({ data: { items: [] } }),
       ]);
 
       const eventItems = (eventResult?.data?.items || []) as any[];
@@ -150,7 +167,7 @@ export const EventCalendarProvider = ({
         phase_name: element.phase_name,
         phase_id: element.phase_id,
         work_name: element.work_name,
-        work_id: element.work_id,
+        work_id: element.event.work_id,
       }));
 
       const mappedTasks = taskItems.map((element) => ({
@@ -178,26 +195,44 @@ export const EventCalendarProvider = ({
 
   const refetchEvents = getEvents;
 
-  const fetchMilestoneEvent = useCallback(async (eventId: number) => {
+  const loadEventDetails = useCallback(async (calendarEvent: CalendarEvent) => {
     try {
-      const result = await eventService.getById(eventId);
-      if (result.status === 200) {
-        setMilestoneEvent(result.data as MilestoneEvent);
-      }
-    } catch {
-      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    }
-  }, []);
+      setSelectedEvent(calendarEvent);
 
-  const fetchTaskEvent = useCallback(async (eventId: number) => {
-    try {
-      const result = await taskEventService.getById(Number(eventId));
-      if (result.status === 200) {
-        const taskEvent = result.data as TaskEvent;
-        taskEvent.assignee_ids = (result.data as any)["assignees"].map(
+      const { work_id, phase_id, event } = calendarEvent;
+
+      // always fetch work
+      const workPromise = workService.getById(String(work_id));
+
+      // conditionally fetch workPhase
+      const phasePromise =
+        event.type === EVENT_TYPE.MILESTONE
+          ? workService.getWorkPhaseById(phase_id)
+          : Promise.resolve(null);
+
+      // fetch event details (milestone or task)
+      const eventPromise =
+        event.type === EVENT_TYPE.MILESTONE
+          ? eventService.getById(event.id)
+          : taskEventService.getById(event.id);
+
+      const [workRes, phaseRes, eventRes] = await Promise.all([
+        workPromise,
+        phasePromise,
+        eventPromise,
+      ]);
+
+      if (workRes.status === 200) setWork(workRes.data as Work);
+      if (phaseRes) setWorkPhase(phaseRes as WorkPhase);
+
+      if (event.type === EVENT_TYPE.MILESTONE && eventRes.status === 200) {
+        setMilestoneEvent(eventRes.data as MilestoneEvent);
+      } else if (event.type === EVENT_TYPE.TASK && eventRes.status === 200) {
+        const taskEvent = eventRes.data as TaskEvent;
+        taskEvent.assignee_ids = (eventRes.data as any)["assignees"].map(
           (p: any) => p["assignee_id"]
         );
-        taskEvent.responsibility_ids = (result.data as any)[
+        taskEvent.responsibility_ids = (eventRes.data as any)[
           "responsibilities"
         ].map((p: any) => p["responsibility_id"]);
         setTaskEvent(taskEvent);
@@ -209,15 +244,18 @@ export const EventCalendarProvider = ({
 
   const handleEventClick = useCallback(
     async (event: CalendarEvent) => {
-      setSelectedEvent(event);
-      if (event.event.type === EVENT_TYPE.MILESTONE) {
-        await fetchMilestoneEvent(event.event.id);
-      } else if (event.event.type === EVENT_TYPE.TASK) {
-        await fetchTaskEvent(event.event.id);
-      }
+      await loadEventDetails(event);
     },
-    [fetchMilestoneEvent, fetchTaskEvent]
+    [loadEventDetails]
   );
+
+  const resetEventDetails = useCallback(() => {
+    setSelectedEvent(null);
+    setMilestoneEvent(undefined);
+    setTaskEvent(undefined);
+    setWork(undefined);
+    setWorkPhase(undefined);
+  }, []);
 
   useEffect(() => {
     setSearchOptions((prev) => ({ ...prev, year: selectedYear }));
@@ -227,27 +265,14 @@ export const EventCalendarProvider = ({
     getEvents();
   }, [getEvents]);
 
-  useEffect(() => {
-    if (selectedEvent?.event) {
-      if (selectedEvent.event.type === EVENT_TYPE.MILESTONE) {
-        fetchMilestoneEvent(selectedEvent.event.id);
-      } else if (selectedEvent.event.type === EVENT_TYPE.TASK) {
-        fetchTaskEvent(selectedEvent.event.id);
-      }
-    } else {
-      setMilestoneEvent(undefined);
-      setTaskEvent(undefined);
-    }
-  }, [selectedEvent, fetchMilestoneEvent, fetchTaskEvent]);
-
   const onSaveHandler = useCallback(() => {
-    setSelectedEvent(null);
+    resetEventDetails();
     refetchEvents();
-  }, [refetchEvents]);
+  }, [refetchEvents, resetEventDetails]);
 
   const onCancelHandler = useCallback(() => {
-    setSelectedEvent(null);
-  }, []);
+    resetEventDetails();
+  }, [resetEventDetails]);
 
   const value: EventCalendarContextType = {
     events,
@@ -262,13 +287,14 @@ export const EventCalendarProvider = ({
     modalOpen,
     milestoneEvent,
     taskEvent,
-    fetchMilestoneEvent,
-    fetchTaskEvent,
+    loadEventDetails,
     onSaveHandler,
     onCancelHandler,
     handleEventClick,
     collapsedMonths,
     toggleMonth,
+    work,
+    workPhase,
   };
 
   return (

@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { LEGEND_COLOURS } from "./constants";
+import { LEGEND_COLOURS } from "../constants";
 import { ETCaption1 } from "components/shared";
 
 const TaskMilestoneLegend = () => {

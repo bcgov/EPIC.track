@@ -1,4 +1,7 @@
 import dayjs, { Dayjs } from "dayjs";
+import { LEGEND_ITEMS } from "./constants";
+import { EventCategory, EventsGridModel, EventType } from "models/event";
+import { EVENT_TYPE } from "components/workPlan/phase/type";
 
 export const getNDaysArray = (
   startDate: Dayjs,
@@ -32,3 +35,24 @@ export const isWeekendByIndex = (index: number): boolean => {
 export const addDays = (date: Date, n: number): Date => {
   return dayjs(date).add(n, "day").toDate();
 };
+
+export function getLegendIconMap() {
+  return LEGEND_ITEMS.reduce<Record<string, string>>((map, item) => {
+    map[item.text] = item.icon;
+    return map;
+  }, {});
+}
+
+export function resolveEventIconName(
+  event: EventsGridModel,
+  icons: Record<string, string>
+): string {
+  if (event.type === EVENT_TYPE.TASK) return icons["Task"];
+  if (event.event_configuration.event_type_id === EventType.SUBMISSION)
+    return icons["Submission"];
+  if (event.event_configuration.event_category_id === EventCategory.DECISION)
+    return icons["Decision"];
+  if (event.event_configuration.event_category_id === EventCategory.PCP)
+    return icons["PCP"];
+  return icons["Milestone"];
+}

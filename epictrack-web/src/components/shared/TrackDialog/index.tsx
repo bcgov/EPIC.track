@@ -18,6 +18,7 @@ export type TrackDialogProps = {
   saveButtonProps?: ButtonProps;
   headingCaption?: string;
   variant?: "default" | "compact";
+  headingBackgroundColor?: string;
 } & DialogProps;
 
 const TrackDialog: FC<TrackDialogProps> = ({ open, ...props }) => {

@@ -34,6 +34,7 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
   headingCaption = "",
   children,
   variant = "default",
+  headingBackgroundColor = "",
 }) => {
   const isCompact = variant === "compact";
 
@@ -57,7 +58,7 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         className="modal-header"
         sx={{
           display: "flex",
-          padding: isCompact ? "12px 16px 8px 20px" : "24px 24px 16px 40px",
+          padding: isCompact ? "12px 16px" : "24px 40px",
           flexDirection: "column",
           alignItems: "flex-end",
           alignSelf: "stretch",
@@ -66,43 +67,71 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         }}
       >
         <Box
-          justifyContent={"space-between"}
-          sx={{ width: "100%", display: "flex", alignItems: "center" }}
+          display="grid"
+          gridTemplateColumns="1fr auto"
+          gridTemplateRows="auto auto"
+          gap={1}
+          sx={{
+            backgroundColor: headingBackgroundColor ?? "inherit",
+            border: headingBackgroundColor
+              ? `2px solid ${Palette.neutral.accent.light};`
+              : "none",
+            borderRadius: "4px",
+            width: "100%",
+            padding: isCompact ? "0.5rem 0.875rem" : "1rem",
+          }}
         >
-          <Tooltip title={headingCaption ?? ""}>
-            <span>
-              <ETCaption1
-                bold
-                sx={{
-                  color: Palette.neutral.light,
-                  display: "-webkit-box",
-                  overflow: "hidden",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 2,
-                  textOverflow: "ellipsis",
-                  textTransform: "uppercase",
-                  padding: "0 0.5rem 0.5rem 0",
-                }}
-              >
-                {headingCaption}
-              </ETCaption1>
-            </span>
-          </Tooltip>
+          {headingCaption && (
+            <Tooltip sx={{ gridColumn: 1 }} title={headingCaption ?? ""}>
+              <span>
+                <ETCaption1
+                  bold
+                  sx={{
+                    color: headingBackgroundColor
+                      ? Palette.neutral.dark
+                      : Palette.neutral.light,
+                    display: "-webkit-box",
+                    overflow: "hidden",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 2,
+                    textOverflow: "ellipsis",
+                    textTransform: "uppercase",
+                    padding: "0 0.5rem 0.5rem 0",
+                  }}
+                >
+                  {headingCaption}
+                </ETCaption1>
+              </span>
+            </Tooltip>
+          )}
+
           <IconButton
             onClick={onCancel}
             sx={{
               width: isCompact ? "1.2rem" : "1.5rem",
               height: isCompact ? "1.2rem" : "1.5rem",
               padding: "0",
+              gridColumn: 2,
+              gridRow: 1,
+              alignSelf: "start",
             }}
             disableRipple
           >
             <CloseIconComponent />
           </IconButton>
+          <ETHeading4
+            bold
+            sx={{
+              color: Palette.primary.main,
+              width: "100%",
+              gridColumn: headingCaption ? 1 : "1 / span 2",
+              gridRow: headingCaption ? 2 : 1,
+              alignSelf: headingCaption ? "start" : "center",
+            }}
+          >
+            {dialogTitle}
+          </ETHeading4>
         </Box>
-        <ETHeading4 bold sx={{ color: Palette.primary.main, width: "100%" }}>
-          {dialogTitle}
-        </ETHeading4>
       </Box>
       <DialogContent
         sx={{

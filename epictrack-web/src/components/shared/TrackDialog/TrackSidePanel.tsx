@@ -4,7 +4,7 @@ import { Palette } from "styles/theme";
 import { TrackDialogProps } from ".";
 import TrackDialogContent from "./TrackDialogContent";
 
-export const DEFAULT_PANEL_SIZE = 450;
+export const DEFAULT_PANEL_SIZE = 415;
 
 export const TrackSidePanel: FC<TrackDialogProps> = (props) => {
   return (

@@ -10,7 +10,12 @@ export type Icon =
   | "PenIcon"
   | "GridIcon"
   | "UserIcon"
-  | "CategoryIcon";
+  | "CategoryIcon"
+  | "PendingActions"
+  | "ApproveCircle"
+  | "ApplyHere"
+  | "AddBubble"
+  | "Submission";
 
 export interface IconProps extends SvgIconProps {
   className?: string;
