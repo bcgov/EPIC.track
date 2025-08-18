@@ -83,6 +83,7 @@ export enum EventType {
   VIRTUAL_OPEN_HOUSE = 24,
   TIME_LIMIT_SUSPENSION = 12,
   TIME_LIMIT_RESUMPTION = 38,
+  SUBMISSION = 9,
 }
 
 export enum EventPosition {

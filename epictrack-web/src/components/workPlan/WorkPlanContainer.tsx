@@ -165,8 +165,19 @@ const WorkPlanContainer = () => {
               ...tabPanel,
             }}
           >
-            <Calendar workId={ctx.work?.id} />
-          </TabPanel> */}
+            <Calendar
+              initialSearchOptions={{
+                regions: [],
+                work_types: [],
+                project_types: [],
+                event_types: ["include_tasks:true"],
+                work_ids: ctx.work?.id ? [ctx.work?.id] : [],
+                staff_id: null,
+                year: new Date().getFullYear(),
+              }}
+            />
+          </TabPanel>
+          */}
           <TabPanel
             index={WORKPLAN_TAB.STATUS.index}
             value={selectedTabIndex}

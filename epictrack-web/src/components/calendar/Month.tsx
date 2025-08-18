@@ -1,14 +1,20 @@
-import { Box, Button } from "@mui/material";
-import { FC } from "react";
+import { Box, Button, Grid } from "@mui/material";
+import { FC, useEffect, useState } from "react";
 import { Palette } from "styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
 import EventRow from "./EventRow";
 import MonthDatesRow from "./MonthDatesRow";
 import { CalendarEvent } from "models/event";
+import MonthWorkLegendItem from "./Legends/MonthWorkLegendItem";
 
 const ExpandIcon: FC<IconProps> = Icons["ExpandIcon"];
 const CollapseIcon: FC<IconProps> = Icons["CollapseIcon"];
+
+type CalendarWork = {
+  id: number;
+  title: string;
+};
 
 type MonthProps = {
   monthLabel: string;
@@ -19,6 +25,7 @@ type MonthProps = {
   cellSizePx: number;
   daysInRow: number;
   milestoneEvents?: CalendarEvent[];
+  showWorkLegend?: boolean;
 };
 
 const Month: FC<MonthProps> = ({
@@ -30,7 +37,23 @@ const Month: FC<MonthProps> = ({
   cellSizePx,
   daysInRow,
   milestoneEvents: events,
+  showWorkLegend = false,
 }) => {
+  const [works, setWorks] = useState<CalendarWork[]>([]);
+
+  useEffect(() => {
+    const uniqueWorks = Array.from(
+      new Set(events?.map((event) => event.work_id))
+    ).map((workId) => {
+      const event = events?.find((event) => event.work_id === workId);
+      return {
+        id: workId,
+        title: event ? event.work_name : "Unknown Work",
+      };
+    });
+    setWorks(uniqueWorks);
+  }, [events]);
+
   return (
     <Box display="flex" alignItems="stretch" gap={0.5}>
       <Box
@@ -40,6 +63,7 @@ const Month: FC<MonthProps> = ({
           flexShrink: 0,
           display: "flex",
           alignItems: "flex-start",
+          flexDirection: "column",
         }}
       >
         <Button
@@ -66,6 +90,22 @@ const Month: FC<MonthProps> = ({
         >
           {monthLabel}
         </Button>
+        {!isCollapsed && showWorkLegend && (
+          <Grid
+            container
+            direction="column"
+            spacing={0}
+            sx={{ padding: "0.275rem" }}
+          >
+            {works.map((work) => (
+              <MonthWorkLegendItem
+                name={work.title}
+                key={work.id}
+                work_id={work.id}
+              />
+            ))}
+          </Grid>
+        )}
       </Box>
       <Box
         display="grid"
@@ -73,6 +113,7 @@ const Month: FC<MonthProps> = ({
         gridAutoRows="auto"
         gap={0.5}
         flexGrow={1}
+        alignContent={"start"}
       >
         <MonthDatesRow
           days={days}
@@ -80,7 +121,12 @@ const Month: FC<MonthProps> = ({
           events={events || []}
         />
         {!isCollapsed && (
-          <EventRow events={events ?? []} days={days} cellSizePx={cellSizePx} />
+          <EventRow
+            events={events ?? []}
+            days={days}
+            cellSizePx={cellSizePx}
+            showWorkLegend={showWorkLegend}
+          />
         )}
       </Box>
     </Box>

@@ -1,21 +1,16 @@
-import { EventCalendarProvider } from "./EventCalendarContext";
+import {
+  CalendarSearchOptions,
+  EventCalendarProvider,
+} from "./EventCalendarContext";
 import EventCalendarContainer from "./EventCalendarContainer";
 
-const Calendar = ({ workId }: { workId?: number }) => {
+interface CalendarProps {
+  initialSearchOptions: CalendarSearchOptions;
+}
+
+const Calendar = ({ initialSearchOptions }: CalendarProps) => {
   return (
-    <EventCalendarProvider
-      initialSearchOptions={{
-        regions: [],
-        teams: [],
-        text: "",
-        work_types: [],
-        project_types: [],
-        event_types: [],
-        work_ids: workId ? [workId] : [],
-        staff_id: null,
-        year: new Date().getFullYear(),
-      }}
-    >
+    <EventCalendarProvider initialSearchOptions={initialSearchOptions}>
       <EventCalendarContainer />
     </EventCalendarProvider>
   );

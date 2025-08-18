@@ -57,12 +57,15 @@ import DecisionInput from "./components/DecisionInput";
 import ExtensionInput from "./components/ExtensionInput";
 import ExtensionSuspensionInput from "./components/ExtensionSuspensionInput";
 import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
+import { Work, WorkPhase } from "models/work";
 
 interface EventFormProps {
   onSave: () => void;
   event?: MilestoneEvent;
   milestoneEvents?: EventsGridModel[];
   isFormFieldsLocked: boolean;
+  workPhase?: WorkPhase;
+  work?: Work;
 }
 interface NumberOfDaysChangeProps {
   numberOfDays?: number | undefined;
@@ -76,6 +79,8 @@ const EventForm = ({
   },
   event,
   isFormFieldsLocked,
+  workPhase: propWorkPhase,
+  work: propWork,
 }: EventFormProps) => {
   const [configurations, setConfigurations] = useState<EventConfiguration[]>(
     []
@@ -104,7 +109,16 @@ const EventForm = ({
   const isCreateMode = useMemo(() => !event, [event]);
   const [decisionMakers, setDecisionMakers] = useState<Staff[]>([]);
   const titleRef = useRef();
-  const { selectedWorkPhase, work, workPhases } = useContext(WorkplanContext);
+  const {
+    work: contextWork,
+    workPhases,
+    selectedWorkPhase: contextSelectedWorkPhase,
+  } = useContext(WorkplanContext);
+
+  const work = propWork ?? contextWork;
+  const selectedWorkPhase =
+    propWorkPhase ?? contextSelectedWorkPhase?.work_phase;
+
   const MISSING_RESUMPTION_ERROR =
     "No resumption milestone configuration found to resume the phase";
   const schema = useMemo(
@@ -154,7 +168,7 @@ const EventForm = ({
       isFormFieldsLocked ||
       Boolean(
         selectedConfiguration?.id &&
-          selectedWorkPhase?.work_phase.legislated &&
+          selectedWorkPhase?.legislated &&
           selectedConfiguration?.event_position === EventPosition.END
       ),
     [isFormFieldsLocked, selectedConfiguration, selectedWorkPhase]
@@ -201,7 +215,7 @@ const EventForm = ({
   const showDatePushWarning = useMemo(
     () =>
       dateCheckStatus?.phase_end_push_required &&
-      selectedWorkPhase?.work_phase.legislated &&
+      selectedWorkPhase?.legislated &&
       selectedConfiguration?.event_category_id !== EventCategory.EXTENSION,
     [
       dateCheckStatus,
@@ -211,23 +225,19 @@ const EventForm = ({
   );
 
   const isMilestoneTypeDisabled = useMemo(
-    () =>
-      !!event ||
-      isFormFieldsLocked ||
-      selectedWorkPhase?.work_phase.is_suspended,
-    [event, isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
+    () => !!event || isFormFieldsLocked || selectedWorkPhase?.is_suspended,
+    [event, isFormFieldsLocked, selectedWorkPhase?.is_suspended]
   );
 
   const isTitleDisabled = useMemo(
-    () => isFormFieldsLocked || selectedWorkPhase?.work_phase.is_suspended,
-    [isFormFieldsLocked, selectedWorkPhase?.work_phase.is_suspended]
+    () => isFormFieldsLocked || selectedWorkPhase?.is_suspended,
+    [isFormFieldsLocked, selectedWorkPhase?.is_suspended]
   );
 
   const isStartPhase = useMemo(
     () =>
-      workPhases.findIndex(
-        (p) => p.work_phase.id === selectedWorkPhase?.work_phase.id
-      ) === 0,
+      workPhases.findIndex((p) => p.work_phase.id === selectedWorkPhase?.id) ===
+      0,
     [workPhases, selectedWorkPhase]
   );
 
@@ -240,9 +250,7 @@ const EventForm = ({
   );
 
   const anticipatedDefaultValue = useMemo(() => {
-    return event
-      ? event.anticipated_date
-      : selectedWorkPhase?.work_phase.start_date;
+    return event ? event.anticipated_date : selectedWorkPhase?.start_date;
   }, [event, selectedWorkPhase]);
 
   const actualReferenceDate = useMemo(() => {
@@ -259,7 +267,7 @@ const EventForm = ({
     () =>
       isStartEvent && isStartPhase
         ? dayjs(MIN_WORK_START_DATE)
-        : dayjs(selectedWorkPhase?.work_phase.start_date),
+        : dayjs(selectedWorkPhase?.start_date),
     [selectedWorkPhase, isStartEvent, isStartPhase]
   );
   const methods = useForm({
@@ -326,7 +334,7 @@ const EventForm = ({
    */
   useEffect(() => {
     if (
-      selectedWorkPhase?.work_phase.is_suspended &&
+      selectedWorkPhase?.is_suspended &&
       configurations.length > 0 &&
       !event
     ) {
@@ -345,17 +353,12 @@ const EventForm = ({
         });
       }
     }
-  }, [
-    configurations,
-    event,
-    reset,
-    selectedWorkPhase?.work_phase.is_suspended,
-  ]);
+  }, [configurations, event, reset, selectedWorkPhase?.is_suspended]);
 
   const getConfigurations = useCallback(async () => {
     try {
       const result = await configurationService.getAll(
-        Number(selectedWorkPhase?.work_phase.id),
+        Number(selectedWorkPhase?.id),
         [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED]
       );
       if (result.status === 200) {
@@ -423,7 +426,7 @@ const EventForm = ({
     async (data: MilestoneEvent, pushEventConfirmed: boolean) => {
       const createdResult = await eventService.create(
         data,
-        Number(selectedWorkPhase?.work_phase.id),
+        Number(selectedWorkPhase?.id),
         pushEvents || pushEventConfirmed
       );
       showNotification("Milestone details inserted", {
@@ -438,7 +441,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [handleHighlightRows, pushEvents, selectedWorkPhase?.work_phase.id]
+    [handleHighlightRows, pushEvents, selectedWorkPhase?.id]
   );
 
   const updateEvent = useCallback(
@@ -683,9 +686,7 @@ const EventForm = ({
                 disabled={disableAnticipatedDate}
                 defaultValue={dayjs(anticipatedDefaultValue).format()}
                 datePickerProps={{
-                  referenceDate: dayjs(
-                    selectedWorkPhase?.work_phase.start_date
-                  ),
+                  referenceDate: dayjs(selectedWorkPhase?.start_date),
                   minDate: anticipatedMinDate,
                   onDateChange: (event: any, defaultOnChange: any) => {
                     const d = event ? event["$d"] : null;

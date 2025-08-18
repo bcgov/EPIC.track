@@ -1,13 +1,21 @@
+import { FC, useCallback, useMemo } from "react";
 import { Box, Tooltip } from "@mui/material";
-import { Palette } from "styles/theme";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import { Palette } from "styles/theme";
+import { CalendarEvent, EventsGridModel } from "models/event";
 import { ETCaption1 } from "components/shared";
-import { FC } from "react";
-import { CalendarEvent } from "models/event";
+import { IconProps } from "components/icons/type";
+import Icons from "components/icons";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
-import { isWeekendByIndex } from "./utils";
+import {
+  getLegendIconMap,
+  isWeekendByIndex,
+  resolveEventIconName,
+} from "./utils";
 import { useEventCalendarContext } from "./EventCalendarContext";
+import { darkenHex, getWorkColour } from "./Legends/utils";
+import { LEGEND_COLOURS } from "./constants";
 
 dayjs.extend(isSameOrAfter);
 
@@ -46,12 +54,51 @@ type EventRowProps = {
   events: CalendarEvent[];
   days: (Date | null)[];
   cellSizePx: number;
+  showWorkLegend: boolean;
 };
 
-const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
+const EventRow: FC<EventRowProps> = ({
+  events,
+  days,
+  cellSizePx,
+  showWorkLegend,
+}) => {
   const eventRows = assignEventRows(events);
 
   const { handleEventClick } = useEventCalendarContext();
+
+  const legendIcons = useMemo(() => getLegendIconMap(), []);
+
+  const getEventIcon = useCallback(
+    (event: EventsGridModel) => {
+      if (!showWorkLegend) return null;
+
+      const iconName = resolveEventIconName(event, legendIcons);
+      const Icon: FC<IconProps> = Icons[iconName];
+
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "1rem",
+            height: "1rem",
+            flexShrink: 0,
+            margin: "1px",
+          }}
+        >
+          <Icon
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+            fill={Palette.primary.main}
+          />
+        </Box>
+      );
+    },
+    [legendIcons, showWorkLegend]
+  );
 
   if (eventRows.length === 0) {
     return <></>;
@@ -130,6 +177,16 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
                     ? `${eventItem.phase_name}: ${event.name}`
                     : event.name;
 
+                const colour = showWorkLegend
+                  ? getWorkColour(eventItem.work_name)
+                  : eventItem.event.type === EVENT_TYPE.MILESTONE
+                  ? LEGEND_COLOURS.backgroundColour.MILESTONE
+                  : LEGEND_COLOURS.backgroundColour.TASK;
+
+                const borderColour = showWorkLegend
+                  ? darkenHex(colour, 0.3)
+                  : colour;
+
                 return (
                   <Box
                     key={event.id}
@@ -137,16 +194,10 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
                     onClick={() => handleEventClick?.(eventItem)}
                     sx={{
                       height: cellSizePx,
-                      backgroundColor:
-                        eventItem.event.type === EVENT_TYPE.MILESTONE
-                          ? "#BACDDF"
-                          : "#C6DFDB",
+                      backgroundColor: colour,
                       color: Palette.primary.main,
                       borderRadius: "4px",
-                      borderColor:
-                        eventItem.event.type === EVENT_TYPE.MILESTONE
-                          ? "#BACDDF"
-                          : "#C6DFDB",
+                      borderColor: borderColour,
                       paddingLeft: "4px",
                       display: "flex",
                       alignItems: "center",
@@ -156,13 +207,23 @@ const EventRow: FC<EventRowProps> = ({ events, days, cellSizePx }) => {
                     }}
                   >
                     <Tooltip title={title} sx={{ width: "100%" }}>
-                      <Box sx={{ width: "100%", overflow: "hidden" }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          width: "100%",
+                          overflow: "hidden",
+                          gap: 0.5,
+                        }}
+                      >
+                        {getEventIcon(event)}
                         <ETCaption1
                           sx={{
                             display: "block",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
                             whiteSpace: "nowrap",
+                            fontSize: "0.75rem",
                           }}
                         >
                           {title}

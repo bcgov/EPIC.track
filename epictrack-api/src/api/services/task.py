@@ -114,7 +114,6 @@ class TaskService:
         works, _ = Work.fetch_all_works_by_calendar_search_criteria(search_options)
         work_ids = [work.id for work in works]
         work_tasks = TaskEvent.find_by_work_ids_and_year(work_ids, search_options.year)
-
         serialized = []
         for task in work_tasks:
             serialized.append(cls._serialize_task(task))
@@ -205,7 +204,7 @@ class TaskService:
         return task_event
 
     @classmethod
-    def find_task_events(cls, work_phase_id: int) -> [TaskEvent]:
+    def find_task_events(cls, work_phase_id: int) -> List[TaskEvent]:
         """Get all task events per work_phase_id"""
         return (
             db.session.query(TaskEvent)
@@ -221,7 +220,7 @@ class TaskService:
         )
 
     @classmethod
-    def find_by_staff_work_role_staff_id(cls, staff_id: int, is_active: bool = None) -> [TaskEvent]:
+    def find_by_staff_work_role_staff_id(cls, staff_id: int, is_active: bool = None) -> List[TaskEvent]:
         """Get all task events per assignee_id"""
         tasks = find_by_staff_work_role_staff_id(staff_id, is_active)
         return tasks

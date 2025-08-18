@@ -23,6 +23,7 @@ import Insights from "components/insights";
 import MyTasksList from "components/myTasks/MyTasksList";
 import Settings from "components/settings";
 import MyUpdates from "components/myUpdates";
+import MyCalendar from "components/myCalendar";
 
 const AuthenticatedRoutes = () => {
   const isAuthorized = useAppSelector((state) => state.user.isAuthorized);
@@ -93,6 +94,7 @@ const AuthenticatedRoutes = () => {
       </Route>
       <Route path="/" element={<MyWorkPlans />} />
       <Route path="/updates" element={<MyUpdates />} />
+      <Route path="/my-calendar" element={<MyCalendar />} />
       <Route path="/insights" element={<Insights />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="*" element={<NotFound />} />

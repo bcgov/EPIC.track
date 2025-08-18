@@ -74,12 +74,10 @@ class CalendarEvents(Resource):
         """Get calendar events."""
         args = request.args
         search_options = EventCalendarSearchOptions(
-            event_types=list(map(int, args.getlist('event_types[]'))),
+            event_types=args.getlist('event_types[]'),
             project_types=list(map(int, args.getlist('project_types[]'))),
             regions=list(map(int, args.getlist('regions[]'))),
             staff_id=args.get('staff_id', None, int),
-            teams=list(map(int, args.getlist('teams[]'))),
-            text=args.get('text', None, str),
             work_ids=list(map(int, args.getlist('work_ids[]'))),
             work_types=list(map(int, args.getlist('work_types[]'))),
             year=args.get('year', None, int),

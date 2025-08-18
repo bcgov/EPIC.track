@@ -298,8 +298,6 @@ class Work(BaseModelVersioned):
             return query
 
         query = cls._filter_by_staff_id(query, search_filters.staff_id)
-        query = cls._filter_by_search_text(query, search_filters.text)
-        query = cls._filter_by_eao_team(query, search_filters.teams)
         query = cls._filter_by_work_type(query, search_filters.work_types)
         query = cls._filter_by_project_type(query, search_filters.project_types)
         query = cls._filter_by_env_regions(query, search_filters.regions)

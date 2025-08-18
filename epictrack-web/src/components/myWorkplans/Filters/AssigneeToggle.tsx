@@ -11,6 +11,7 @@ interface AssigneeToggleProps<T extends { staff_id: number | null }> {
   loading: boolean;
   total: number;
   label?: string;
+  disabled?: boolean;
 }
 
 export const AssigneeToggle = <T extends { staff_id: number | null }>({
@@ -19,11 +20,12 @@ export const AssigneeToggle = <T extends { staff_id: number | null }>({
   loading,
   total,
   label,
+  disabled,
 }: AssigneeToggleProps<T>) => {
   const user = useAppSelector((state) => state.user.userDetail);
   const [haveInitializedtoggle, setHaveInitializedToggle] = useState(false);
   const [isUsersItems, setIsUsersItems] = useState(
-    Boolean(searchOptions.staff_id)
+    searchOptions.staff_id != null
   );
 
   const handleToggleChange = useCallback(
@@ -60,6 +62,7 @@ export const AssigneeToggle = <T extends { staff_id: number | null }>({
         color="primary"
         checked={isUsersItems}
         onChange={() => handleToggleChange(!isUsersItems)}
+        disabled={disabled}
       />
     </Stack>
   );
