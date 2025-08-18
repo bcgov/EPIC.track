@@ -69,33 +69,36 @@ const EventRow: FC<EventRowProps> = ({
 
   const legendIcons = useMemo(() => getLegendIconMap(), []);
 
-  const getEventIcon = useCallback((event: EventsGridModel) => {
-    if (!showWorkLegend) return null;
+  const getEventIcon = useCallback(
+    (event: EventsGridModel) => {
+      if (!showWorkLegend) return null;
 
-    const iconName = resolveEventIconName(event, legendIcons);
-    const Icon: FC<IconProps> = Icons[iconName];
+      const iconName = resolveEventIconName(event, legendIcons);
+      const Icon: FC<IconProps> = Icons[iconName];
 
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "1rem",
-          height: "1rem",
-          flexShrink: 0,
-          margin: "1px",
-        }}
-      >
-        <Icon
-          width="100%"
-          height="100%"
-          preserveAspectRatio="xMidYMid meet"
-          fill={Palette.primary.main}
-        />
-      </Box>
-    );
-  }, []);
+      return (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "1rem",
+            height: "1rem",
+            flexShrink: 0,
+            margin: "1px",
+          }}
+        >
+          <Icon
+            width="100%"
+            height="100%"
+            preserveAspectRatio="xMidYMid meet"
+            fill={Palette.primary.main}
+          />
+        </Box>
+      );
+    },
+    [legendIcons, showWorkLegend]
+  );
 
   if (eventRows.length === 0) {
     return <></>;
