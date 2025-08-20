@@ -37,7 +37,9 @@ from api.models.role import RoleEnum
 from api.services.staff import StaffService
 from api.services.work_phase import WorkPhaseService
 from api.utils.color_utils import color_with_opacity
-from api.utils.constants import CANADA_TIMEZONE, FIRST_WORK_PHASES
+from api.utils.constants import CANADA_TIMEZONE
+from api.utils.work_phases import FIRST_WORK_PHASES
+
 
 from .report_factory import ReportFactory
 from flask import current_app

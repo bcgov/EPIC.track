@@ -39,7 +39,8 @@ from api.models.work_type import WorkTypeEnum
 from api.services.special_field import SpecialFieldService
 from api.services.work_issues import WorkIssuesService
 from api.schemas import response as res
-from api.utils.constants import CANADA_TIMEZONE, FIRST_WORK_PHASES
+from api.utils.constants import CANADA_TIMEZONE
+from api.utils.work_phases import FIRST_WORK_PHASES
 from api.utils.enums import StalenessEnum
 from api.utils.util import process_data
 from api.utils.draftjs_extractor import draftjs_extractor

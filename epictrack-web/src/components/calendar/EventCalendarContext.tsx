@@ -26,6 +26,7 @@ export interface CalendarSearchOptions {
   work_ids: number[];
   work_types: string[];
   year: number;
+  teams: string[];
 }
 
 interface EventCalendarContextType {
@@ -84,6 +85,7 @@ export const EventCalendarProvider = ({
     work_ids: [],
     staff_id: null,
     year: dayjs().year(),
+    teams: [],
     ...initialSearchOptions,
   };
   const [events, setEvents] = useState<CalendarEvent[]>([]);

@@ -23,10 +23,18 @@ interface LegendItemProps {
 }
 
 export const LEGEND_ITEMS: LegendItemProps[] = [
-  { icon: "ApproveCircle", text: "Milestone", calendars: ["my-calendar"] },
-  { icon: "AllIcon", text: "Task", calendars: ["my-calendar"] },
   {
-    icon: "CheckListIcon",
+    icon: "ApproveCircle",
+    text: "Milestone",
+    calendars: ["my-calendar"],
+  },
+  {
+    icon: "AllIcon",
+    text: "Task",
+    calendars: ["my-calendar"],
+  },
+  {
+    icon: "ApproveCircle",
     text: "Milestone (specific)",
     calendars: ["eao-calendar"],
   },
@@ -86,7 +94,7 @@ export const WORK_LEGEND_COLOURS = [
   "#896660",
   "#847673",
   "#b5a857",
-  "#865679",
+  "#936887",
   "#846c7d",
   "#71acc5",
   "#D6EBFF",

@@ -118,6 +118,7 @@ class CalendarTasks(Resource):
             project_types=list(map(int, args.getlist('project_types[]'))),
             regions=list(map(int, args.getlist('regions[]'))),
             staff_id=args.get('staff_id', None, int),
+            teams=list(map(int, args.getlist('teams[]'))),
             work_ids=list(map(int, args.getlist('work_ids[]'))),
             work_types=list(map(int, args.getlist('work_types[]'))),
             year=args.get('year', None, int),

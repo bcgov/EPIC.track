@@ -3,10 +3,11 @@ import { WorkTypeFilter } from "components/myWorkplans/Filters/WorkType";
 import { EnvRegionFilter } from "components/myWorkplans/Filters/EnvRegionFilter";
 import { ProjectTypeFilter } from "components/myWorkplans/Filters/ProjectTypeFilter";
 import { useEventCalendarContext } from "components/calendar/EventCalendarContext";
-import { EventTypeFilter } from "./EventTypeFilter";
 import { WorkNameFilter } from "./WorkNameFilter";
+import { EaoEventTypeFilter } from "./EaoEventTypeFilter";
+import { TeamFilter } from "components/myWorkplans/Filters/TeamFilter";
 
-export const MyCalendarFilters = () => {
+export const EaoCalendarFilters = () => {
   const { setSearchOptions, searchOptions } = useEventCalendarContext();
 
   return (
@@ -40,10 +41,16 @@ export const MyCalendarFilters = () => {
         />
       </Grid>
       <Grid item sx={{ flex: "0 0 12%" }}>
-        <EventTypeFilter />
+        <EaoEventTypeFilter />
       </Grid>
       <Grid item sx={{ flex: "0 0 12%" }}>
         <EnvRegionFilter
+          searchOptions={searchOptions}
+          setSearchOptions={setSearchOptions}
+        />
+      </Grid>
+      <Grid item sx={{ flex: "0 0 12%" }}>
+        <TeamFilter
           searchOptions={searchOptions}
           setSearchOptions={setSearchOptions}
         />
@@ -52,4 +59,4 @@ export const MyCalendarFilters = () => {
   );
 };
 
-export default MyCalendarFilters;
+export default EaoCalendarFilters;

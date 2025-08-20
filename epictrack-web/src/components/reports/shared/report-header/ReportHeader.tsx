@@ -56,7 +56,6 @@ const ReportHeader = ({ ...props }) => {
             onChange={(e) => {
               const checked = e.target.checked;
               props.setIncludeFirstPhase(checked);
-              console.log("Include first phase, change triggered:", checked);
             }}
             sx={{ paddingLeft: "0px", marginRight: "10px" }}
           />

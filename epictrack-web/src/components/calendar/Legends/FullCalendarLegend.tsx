@@ -5,19 +5,17 @@ import { Palette } from "styles/theme";
 import LegendItem from "./LegendItem";
 import { LEGEND_ITEMS } from "../constants";
 
-interface FullCalendarLegendProps {
+export interface CalendarType {
   calendar: "my-calendar" | "eao-calendar";
 }
 
-const FullCalendarLegend: React.FC<FullCalendarLegendProps> = ({
-  calendar,
-}) => {
+const FullCalendarLegend: React.FC<CalendarType> = ({ calendar }) => {
   const filteredItems = LEGEND_ITEMS.filter((item) =>
     item.calendars.includes(calendar)
   );
 
   return (
-    <Grid container sx={{ padding: "0.5rem 2rem" }}>
+    <Grid container sx={{ padding: "0.5rem 1rem" }}>
       <Grid item xs={12}>
         <ETSubhead
           sx={{
