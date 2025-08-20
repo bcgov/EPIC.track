@@ -93,7 +93,7 @@ const Month: FC<MonthProps> = ({
         {!isCollapsed && showWorkLegend && (
           <Grid
             container
-            direction="column"
+            direction="row"
             spacing={0}
             sx={{ padding: "0.275rem" }}
           >

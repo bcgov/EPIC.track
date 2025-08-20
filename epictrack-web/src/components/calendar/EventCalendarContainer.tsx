@@ -30,12 +30,14 @@ type EventCalendarProps = {
   daysInRow?: number;
   showFullLegend?: boolean;
   showWorkLegend?: boolean;
+  calendarType?: "my-calendar" | "eao-calendar";
 };
 
 export const EventCalendarContainer = ({
   daysInRow = DEFAULT_DAYS_IN_ROW,
   showFullLegend = false,
   showWorkLegend = false,
+  calendarType = "my-calendar",
 }: EventCalendarProps) => {
   const {
     events,
@@ -290,20 +292,30 @@ export const EventCalendarContainer = ({
             </Box>
           </Grid>
         </Box>
-        <Box
-          sx={{
-            width: `${DEFAULT_PANEL_SIZE}px`,
-            flexShrink: 0,
-            transition: "all 0.3s ease",
-            height: "100%",
-          }}
-        >
-          {!modalOpen && showFullLegend && (
-            <MyCalendarLegend calendar="my-calendar" />
-          )}
-
-          {modalOpen && renderSidePanel()}
-        </Box>
+        {!modalOpen && showFullLegend && (
+          <Box
+            sx={{
+              width: `calc(${DEFAULT_PANEL_SIZE}px - 3rem)`,
+              flexShrink: 1,
+              transition: "all 0.3s ease",
+              height: "100%",
+            }}
+          >
+            <MyCalendarLegend calendar={calendarType} />
+          </Box>
+        )}
+        {modalOpen && (
+          <Box
+            sx={{
+              width: `${DEFAULT_PANEL_SIZE}px`,
+              flexShrink: 1,
+              transition: "all 0.3s ease",
+              height: "100%",
+            }}
+          >
+            {renderSidePanel()}
+          </Box>
+        )}
       </Box>
     </Box>
   );

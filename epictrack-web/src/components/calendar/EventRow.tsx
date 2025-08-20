@@ -85,7 +85,6 @@ const EventRow: FC<EventRowProps> = ({
             width: "1rem",
             height: "1rem",
             flexShrink: 0,
-            margin: "1px",
           }}
         >
           <Icon
@@ -187,6 +186,9 @@ const EventRow: FC<EventRowProps> = ({
                   ? darkenHex(colour, 0.3)
                   : colour;
 
+                const eventIcon = getEventIcon(event);
+                const showOnlyIcon = eventIcon && span === 1;
+
                 return (
                   <Box
                     key={event.id}
@@ -198,7 +200,6 @@ const EventRow: FC<EventRowProps> = ({
                       color: Palette.primary.main,
                       borderRadius: "4px",
                       borderColor: borderColour,
-                      paddingLeft: "4px",
                       display: "flex",
                       alignItems: "center",
                       overflow: "hidden",
@@ -211,23 +212,29 @@ const EventRow: FC<EventRowProps> = ({
                         sx={{
                           display: "flex",
                           alignItems: "center",
+                          justifyContent: showOnlyIcon
+                            ? "center"
+                            : "flex-start",
                           width: "100%",
                           overflow: "hidden",
-                          gap: 0.5,
+                          paddingLeft: showOnlyIcon ? 0 : 0.5,
+                          gap: showOnlyIcon ? 0 : 0.5,
                         }}
                       >
-                        {getEventIcon(event)}
-                        <ETCaption1
-                          sx={{
-                            display: "block",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                            fontSize: "0.75rem",
-                          }}
-                        >
-                          {title}
-                        </ETCaption1>
+                        {eventIcon}
+                        {!showOnlyIcon && (
+                          <ETCaption1
+                            sx={{
+                              display: "block",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                              fontSize: "0.75rem",
+                            }}
+                          >
+                            {title}
+                          </ETCaption1>
+                        )}
                       </Box>
                     </Tooltip>
                   </Box>

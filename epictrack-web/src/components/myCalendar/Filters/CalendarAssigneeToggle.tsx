@@ -1,19 +1,39 @@
-import { AssigneeToggle } from "components/myWorkplans/Filters/AssigneeToggle";
-import { useEventCalendarContext } from "components/calendar/EventCalendarContext";
+import { Stack } from "@mui/material";
+import { ETCaption2 } from "components/shared";
+import { CustomSwitch } from "components/shared/CustomSwitch";
+import { Palette } from "styles/theme";
+import { useAppSelector } from "hooks";
 
-const CalendarAssigneeToggle = () => {
-  const { searchOptions, setSearchOptions, loading } =
-    useEventCalendarContext();
+type CalendarAssigneeToggleProps = {
+  handleToggle: (checked: boolean) => void;
+  isUsersItems: boolean;
+  disabled?: boolean;
+  label?: string;
+};
+
+const CalendarAssigneeToggle = ({
+  isUsersItems,
+  handleToggle,
+  disabled,
+  label,
+}: CalendarAssigneeToggleProps) => {
+  const user = useAppSelector((state) => state.user.userDetail);
 
   return (
-    <AssigneeToggle
-      searchOptions={searchOptions}
-      setSearchOptions={setSearchOptions}
-      loading={loading}
-      label="Calendar"
-      total={1}
-      disabled={true}
-    />
+    <Stack direction="row" spacing={1} alignItems="center">
+      <>
+        <ETCaption2 bold color={Palette.neutral.dark}>
+          {user?.firstName ?? "User"}'s
+        </ETCaption2>
+        <ETCaption2 color={Palette.neutral.dark}>{label ?? "Items"}</ETCaption2>
+      </>
+      <CustomSwitch
+        color="primary"
+        checked={isUsersItems}
+        onChange={() => handleToggle(!isUsersItems)}
+        disabled={disabled}
+      />
+    </Stack>
   );
 };
 

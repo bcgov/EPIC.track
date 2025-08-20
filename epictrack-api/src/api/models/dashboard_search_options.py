@@ -55,6 +55,7 @@ class EventCalendarSearchOptions:  # pylint: disable=too-many-instance-attribute
     project_types: Optional[List[int]]
     regions: Optional[List[int]]
     staff_id: Optional[int]
+    teams: Optional[List[int]]
     work_ids: Optional[List[int]]
     work_types: Optional[List[int]]
     year: int

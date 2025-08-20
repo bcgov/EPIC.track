@@ -17,9 +17,14 @@ from datetime import date
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column, or_
 from sqlalchemy.orm import relationship, aliased
 
+from flask import current_app
+
+from api.models.event_template import EventPositionEnum
 from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.models.event_category import EventCategory, PRIMARY_CATEGORIES
 from api.models.event_configuration import EventConfiguration
+from api.models.work_phase import WorkPhase
+from api.utils.work_phases import FIRST_WORK_PHASES
 
 from .base_model import BaseModelVersioned
 
@@ -86,12 +91,31 @@ class Event(BaseModelVersioned):
             for f in search_filters.event_types:
                 try:
                     key, value = f.split(":")
-                    val = int(value)
                     if key == "event_category":
+                        val = int(value)
                         filter_conditions.append(event_config_alias.event_category_id == val)
                     elif key == "event_type":
+                        val = int(value)
                         filter_conditions.append(event_config_alias.event_type_id == val)
+                    elif key == "event_position":
+                        positions = [v.strip().upper() for v in value.split(",")]
+                        valid_positions = []
+                        for position in positions:
+                            try:
+                                valid_positions.append(EventPositionEnum[position])
+                            except KeyError:
+                                current_app.logger.warning(f"Invalid event_position value: {position}")
+                        if valid_positions:
+                            condition = event_config_alias.event_position.in_(valid_positions)
+
+                            # For START/END events we only want legislated ones
+                            if any(p in (EventPositionEnum.START, EventPositionEnum.END) for p in valid_positions):
+                                condition = and_(condition, WorkPhase.legislated.is_(True))
+
+                            filter_conditions.append(condition)
+
                 except ValueError:
+                    current_app.logger.warning(f"Invalid filter format: {f}. Expected format 'key:value'.")
                     continue
 
         if filter_conditions:
@@ -122,6 +146,7 @@ class Event(BaseModelVersioned):
                 Event.is_active.is_(True),
                 start_date <= cast(end_of_year, Date),
                 end_date >= cast(start_of_year, Date),
+                WorkPhase.name.notin_(FIRST_WORK_PHASES),
             )
         )
         return query
