@@ -57,6 +57,7 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
       }}
     >
       <DialogTitle
+        className="modal-header"
         sx={{
           display: "flex",
           flexDirection: "column",
