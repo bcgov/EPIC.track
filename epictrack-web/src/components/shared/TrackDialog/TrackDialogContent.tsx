@@ -1,10 +1,11 @@
 import { FC } from "react";
 import {
   Box,
-  IconButton,
-  DialogContent,
-  DialogActions,
   Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   Tooltip,
 } from "@mui/material";
 import { Palette } from "styles/theme";
@@ -44,6 +45,7 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         display: "flex",
         flexDirection: "column",
         width: "100%",
+        height: "100%",
         maxHeight: "100vh",
         backgroundColor: Palette.neutral.bg.light,
         border: `1px solid ${Palette.neutral.bg.dark}`,
@@ -54,16 +56,14 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         }),
       }}
     >
-      <Box
-        className="modal-header"
+      <DialogTitle
         sx={{
           display: "flex",
-          padding: isCompact ? "12px 16px" : "24px 40px",
           flexDirection: "column",
           alignItems: "flex-end",
-          alignSelf: "stretch",
-          borderRadius: "4px 4px 0 0",
+          padding: isCompact ? "12px 16px" : "24px 40px",
           borderBottom: `2px solid ${Palette.primary.main}`,
+          borderRadius: "4px 4px 0 0",
         }}
       >
         <Box
@@ -132,7 +132,7 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
             {dialogTitle}
           </ETHeading4>
         </Box>
-      </Box>
+      </DialogTitle>
       <DialogContent
         sx={{
           padding: isCompact ? "12px 16px" : "24px 40px",
@@ -140,24 +140,15 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
           flexDirection: "column",
           gap: "1rem",
           alignItems: "flex-start",
-          alignSelf: "stretch",
           backgroundColor: Palette.neutral.bg.light,
-          flexGrow: isCompact ? 1 : 0,
-          overflowY: isCompact ? "auto" : "visible",
+          flex: 1,
+          overflowY: "auto",
           minHeight: 0,
         }}
       >
         {dialogContentText && (
-          <Box
-            sx={{
-              color: Palette.neutral.dark,
-            }}
-          >
-            <ETSubhead
-              sx={{
-                lineHeight: "1.6rem",
-              }}
-            >
+          <Box sx={{ color: Palette.neutral.dark }}>
+            <ETSubhead sx={{ lineHeight: "1.6rem" }}>
               {dialogContentText}
             </ETSubhead>
           </Box>
