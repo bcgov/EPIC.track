@@ -58,6 +58,18 @@ const PhaseContainer = () => {
     [ctx.workPhases]
   );
 
+  const daysOverdue = useMemo(() => {
+    const overdue = overduePhases.reduce(
+      (sum, p) => sum + (p.total_number_of_days - p.days_taken),
+      0
+    );
+    const finalPhase = ctx.workPhases.find((phase) => phase.is_last_phase);
+    const finalRemaining = finalPhase
+      ? finalPhase.total_number_of_days - finalPhase.days_taken
+      : 0;
+    return Math.abs(overdue) - finalRemaining;
+  }, [ctx.workPhases, overduePhases]);
+
   const handleExpand = (phaseId: number) => {
     setExpandedPhase(expandedPhase === phaseId ? null : phaseId);
   };
@@ -211,28 +223,28 @@ const PhaseContainer = () => {
           />
         </Grid>
       ))}
-      {!!overduePhases.length && (
-        <WarningBox
-          title={`You've exceeded the legislated timeline in phase${
-            overduePhases.length > 1 ? "s" : ""
-          }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
-          subTitle={
-            <>
-              You must add an <b>Extension Milestone</b> of{" "}
-              <b>
-                {Math.abs(
-                  overduePhases.reduce(
-                    (sum, p) => sum + (p.total_number_of_days - p.days_taken),
-                    0
-                  )
-                )}{" "}
-                days
-              </b>{" "}
-              to complete this Work.
-            </>
-          }
-          isTitleBold={true}
-        />
+      {!!overduePhases.length && daysOverdue > 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            width: "100%",
+            padding: "1rem",
+          }}
+        >
+          <WarningBox
+            title={`You've exceeded the legislated timeline in phase${
+              overduePhases.length > 1 ? "s" : ""
+            }: ${overduePhases.map((p) => p.work_phase.name).join(", ")}.`}
+            subTitle={
+              <>
+                You must add an <b>Extension Milestone</b> of{" "}
+                <b>{daysOverdue} days</b> to complete this Work.
+              </>
+            }
+            isTitleBold={true}
+          />
+        </Box>
       )}
     </Grid>
   );
