@@ -195,7 +195,17 @@ const EventForm = ({
       if (work?.decision_by) {
         decisionMakers.unshift(work?.decision_by);
       }
-      setDecisionMakers(decisionMakers);
+      const uniqueDecisionMakers = [
+        ...Array.from(
+          new Map(
+            decisionMakers.map((decisionMaker) => [
+              decisionMaker.id,
+              decisionMaker,
+            ])
+          ).values()
+        ),
+      ];
+      setDecisionMakers(uniqueDecisionMakers);
     }
   }, [work]);
 
