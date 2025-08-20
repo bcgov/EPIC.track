@@ -284,20 +284,8 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
     @classmethod
     def _get_days_taken(cls, work_phase, events, suspended_days=0):
         days_taken = 0
-        # Current phase
-        if work_phase.work.current_work_phase_id == work_phase.id:
-            if work_phase.is_suspended:
-                days_taken = (
-                    work_phase.suspended_date.date() - work_phase.start_date.date()
-                ).days
-            else:
-                days_taken = (
-                    datetime.datetime.now(timezone.utc).date()
-                    - work_phase.start_date.date()
-                ).days
-                days_taken = max(0, days_taken)
         # Completed phase
-        elif work_phase.is_completed:
+        if work_phase.is_completed:
             start_event = next(
                 (
                     e
@@ -320,5 +308,18 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 days_taken = (end_event.actual_date.date() - start_event.actual_date.date()).days
             else:
                 days_taken = 0
+        # Current phase uncompleted phase
+        elif work_phase.work.current_work_phase_id == work_phase.id:
+            if work_phase.is_suspended:
+                days_taken = (
+                    work_phase.suspended_date.date() - work_phase.start_date.date()
+                ).days
+            else:
+                days_taken = (
+                    datetime.datetime.now(timezone.utc).date()
+                    - work_phase.start_date.date()
+                ).days
+                days_taken = max(0, days_taken)
+
         days_taken = max(0, days_taken - suspended_days)
         return days_taken
