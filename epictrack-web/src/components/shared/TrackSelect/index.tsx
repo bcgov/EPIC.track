@@ -48,11 +48,11 @@ const TrackSelect = React.forwardRef<any, TrackSelectProps>(
             },
             indicatorsContainer: (base) => ({
               ...base,
-              zIndex: 99999,
+              zIndex: "auto",
             }),
             menuPortal: (base) => ({
               ...base,
-              zIndex: 99998,
+              zIndex: 1500,
               fontSize: "1rem",
             }),
           }}
