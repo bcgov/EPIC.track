@@ -43,7 +43,7 @@ const WorkList = () => {
       },
       {
         id: "work_state",
-        value: ["In Progress", "Completed"],
+        value: ["In Progress"],
       },
     ]
   );
