@@ -169,6 +169,7 @@ const EventForm = ({
       Boolean(
         selectedConfiguration?.id &&
           selectedWorkPhase?.legislated &&
+          contextSelectedWorkPhase?.milestone_progress === 0 &&
           selectedConfiguration?.event_position === EventPosition.END
       ),
     [isFormFieldsLocked, selectedConfiguration, selectedWorkPhase]
@@ -339,7 +340,7 @@ const EventForm = ({
   }, [configurations, event, setSelectedConfiguration]);
 
   /**
-   * If the phase is suspended, the, when you try to add a new event
+   * If the phase is suspended, when you try to add a new event
    * the form should be pre set with RESUMPTION milestone type
    */
   useEffect(() => {
