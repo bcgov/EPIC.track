@@ -6,20 +6,21 @@ import {
   useMemo,
   useState,
 } from "react";
-import PhaseAccordion from "./PhaseAccordion";
 import { Box, FormControl, FormControlLabel, Grid } from "@mui/material";
-import Icons from "components/icons";
-import { IconProps } from "components/icons/type";
-import { WorkplanContext } from "../WorkPlanContext";
-import { ETCaption1, ETHeading4 } from "../../shared";
-import { CustomSwitch } from "../../shared/CustomSwitch";
-import { Palette } from "../../../styles/theme";
-import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import { When } from "react-if";
 import useRouterLocationStateForHelpPage from "hooks/useRouterLocationStateForHelpPage";
-import TrackSelect from "components/shared/TrackSelect";
+import { useCachedState } from "hooks/useCachedFilters";
+import { CustomSwitch } from "components/shared/CustomSwitch";
+import { ETCaption1, ETHeading4 } from "components/shared";
+import { IconProps } from "components/icons/type";
 import { OptionType } from "components/shared/filterSelect/type";
+import Icons from "components/icons";
+import TrackSelect from "components/shared/TrackSelect";
 import WarningBox from "components/shared/warningBox";
+import { Palette } from "../../../styles/theme";
+import { WorkPhaseAdditionalInfo } from "../../../models/work";
+import { WorkplanContext } from "../WorkPlanContext";
+import PhaseAccordion from "./PhaseAccordion";
 
 const CalendarIcon: FC<IconProps> = Icons["CalendarIcon"];
 
@@ -30,7 +31,11 @@ const dateStyleOptions = [
 
 const PhaseContainer = () => {
   const ctx = useContext(WorkplanContext);
-  const [expandedPhase, setExpandedPhase] = useState<number | null>(
+  const WORKPLAN_EXPANDED_PHASE_CACHE_KEY = `workplan-work-id-${ctx.work?.id}-expanded-phase`;
+  const [cachedExpandedPhase, setCachedExpandedPhase] = useCachedState<
+    number | null
+  >(
+    WORKPLAN_EXPANDED_PHASE_CACHE_KEY,
     ctx.selectedWorkPhase?.work_phase.id ?? null
   );
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
@@ -71,11 +76,12 @@ const PhaseContainer = () => {
   }, [ctx.workPhases, overduePhases]);
 
   const handleExpand = (phaseId: number) => {
-    setExpandedPhase(expandedPhase === phaseId ? null : phaseId);
+    setCachedExpandedPhase(cachedExpandedPhase === phaseId ? null : phaseId);
   };
 
   useEffect(() => {
     if (
+      !cachedExpandedPhase &&
       ctx.work?.current_work_phase_id &&
       ctx.workPhases.length > 0 &&
       !ctx.selectedWorkPhase
@@ -85,15 +91,15 @@ const PhaseContainer = () => {
           workPhase.work_phase.id === ctx.work?.current_work_phase_id
       );
       ctx.setSelectedWorkPhase(phase);
-      setExpandedPhase(phase?.work_phase.id ?? null);
+      setCachedExpandedPhase(phase?.work_phase.id ?? null);
     }
-  }, [ctx]);
+  }, [cachedExpandedPhase, ctx, setCachedExpandedPhase]);
 
   useEffect(() => {
     if (ctx.selectedWorkPhase) {
-      setExpandedPhase(ctx.selectedWorkPhase.work_phase.id);
+      setCachedExpandedPhase(ctx.selectedWorkPhase.work_phase.id);
     }
-  }, [ctx.selectedWorkPhase]);
+  }, [ctx.selectedWorkPhase, setCachedExpandedPhase]);
 
   const callback = useCallback(() => {
     return ctx.work?.work_type?.name ?? undefined;
@@ -191,7 +197,7 @@ const PhaseContainer = () => {
           <Grid item xs={12} key={`completed-phase-${phase.work_phase.id}`}>
             <PhaseAccordion
               key={`phase-accordion-${phase.work_phase.id}`}
-              expanded={expandedPhase === phase.work_phase.id}
+              expanded={cachedExpandedPhase === phase.work_phase.id}
               onExpandHandler={() => handleExpand(phase.work_phase.id)}
               phase={phase}
               showAnticipated={showCompletedAnticipated}
@@ -215,7 +221,7 @@ const PhaseContainer = () => {
         <Grid item xs={12} key={`current-phase-${phase.work_phase.id}`}>
           <PhaseAccordion
             key={`phase-accordion-${phase.work_phase.id}`}
-            expanded={expandedPhase === phase.work_phase.id}
+            expanded={cachedExpandedPhase === phase.work_phase.id}
             onExpandHandler={() => handleExpand(phase.work_phase.id)}
             phase={phase}
             showAnticipated={true}
