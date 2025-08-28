@@ -48,6 +48,10 @@ from .outcome_configuration_request import (
 )
 from .outcome_template_request import OutcomeTemplateBodyParameterSchema
 from .phase_request import PhaseBodyParameterSchema
+from .phase_overage_responsibility_request import (
+    PhaseOverageResponsibilityBodyRequestSchema,
+    PhaseOverageResponsibilityBodyUpdateRequestSchema,
+)
 from .project_request import (
     ProjectAbbreviationParameterSchema,
     ProjectBodyParameterSchema,
@@ -115,6 +119,7 @@ from .work_request import (
     WorkIssuesParameterSchema,
     WorkIssuesUpdateCloneSchema,
     WorkIssuesUpdateEditSchema,
+    WorkPhaseNotesBodySchema,
     WorkNotesBodySchema,
     WorkPlanDownloadQueryParamSchema,
     WorkStatusParameterSchema,

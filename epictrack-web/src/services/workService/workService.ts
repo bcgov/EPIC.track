@@ -151,6 +151,14 @@ class WorkService implements ServiceBase {
     return await http.GetRequest(url);
   }
 
+  async savePhaseResponsibilityNotes(workPhaseId: number, notes: string) {
+    const url = Endpoints.Works.WORK_PHASE_RESPONSIBILITY_NOTES.replace(
+      ":work_phase_id",
+      workPhaseId.toString()
+    );
+    return await http.PatchRequest(url, { notes });
+  }
+
   async saveFirstNationNotes(workId: number, notes: string) {
     const url = Endpoints.Works.WORK_FIRST_NATION_NOTES.replace(
       ":work_id",

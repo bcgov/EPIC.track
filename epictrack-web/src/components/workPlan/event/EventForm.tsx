@@ -526,6 +526,7 @@ const EventForm = ({
     } catch (e) {
       const message = getErrorMessage(e);
       showNotification(message, {
+        duration: 3000,
         type: "error",
       });
     }

@@ -6,6 +6,7 @@ export interface PhaseAccordionProps {
   onExpandHandler: (expand: boolean) => void;
   showAnticipated: boolean;
   showActual: boolean;
+  isCurrentPhase?: boolean;
 }
 
 export enum EVENT_TYPE {

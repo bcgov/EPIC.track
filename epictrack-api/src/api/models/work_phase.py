@@ -44,6 +44,7 @@ class WorkPhase(BaseModelVersioned):
     suspended_date = Column(DateTime(timezone=True))
     sort_order = Column(Integer, nullable=False)
     visibility = Column(Enum(PhaseVisibilityEnum), default=PhaseVisibilityEnum.REGULAR)
+    responsibility_notes = Column(String(2000))
 
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")

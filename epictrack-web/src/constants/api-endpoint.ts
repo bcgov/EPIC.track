@@ -53,6 +53,10 @@ const Endpoints = {
     WORK_IMPORT_FIRST_NATIONS: "works/:work_id/first-nations/import",
     GET_ALL_WORK_TYPES: "works/types",
     GET_WORK_PHASE_BY_ID: "works/work-phases/:work_phase_id",
+    WORK_PHASE_RESPONSIBILITY_NOTES:
+      "works/work-phases/:work_phase_id/overage-responsibility-notes",
+    GET_OVERAGE_RESPONSIBILITY_BY_PHASE_ID:
+      "works/work-phases/:work_phase_id/overage-responsibilities",
   },
   WorkTypes: {
     GET_ALL: "work-types",
@@ -69,6 +73,9 @@ const Endpoints = {
   WorkStatuses: {
     WORK_STATUSES: "work/:work_id/statuses",
     GET_ALL: "work-statuses/dashboard",
+  },
+  PhaseOverageResponsibilities: {
+    OVERAGE_RESPONSIBILITIES: "overage-responsibilities",
   },
   SubTypes: {
     SUB_TYPES: "sub-types",

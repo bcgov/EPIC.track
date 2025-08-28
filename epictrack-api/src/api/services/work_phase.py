@@ -146,6 +146,14 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return result_dict, total_work_phases
 
     @classmethod
+    def save_notes(cls, work_phase_id: int, notes: str) -> WorkPhase:
+        """Save overage responsibility notes in the work phase."""
+        work_phase = WorkPhase.find_by_id(work_phase_id)
+        work_phase.responsibility_notes = notes
+        work_phase.save()
+        return work_phase
+
+    @classmethod
     def _find_work_phase_status(cls, work_id, work_phase_id, work_phases):
         """Find work phase status for the work Id.If work_phase_id is passed , only that phase is considered."""
         result = []

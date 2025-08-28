@@ -22,8 +22,10 @@ from api.models.dashboard_search_options import WorkplanDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
 from api.schemas import response as res
+from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
 from api.services import WorkService
 from api.services.work_phase import WorkPhaseService
+from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
@@ -337,6 +339,50 @@ class WorkPhaseId(Resource):
             res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,
         )
+
+
+@cors_preflight("GET,POST")
+@API.route("/work-phases/<int:work_phase_id>/overage-responsibilities", methods=["GET", "OPTIONS"])
+class WorkPhaseOverageResponsibilities(Resource):
+    """Endpoints to get work phase overage responsibilitiy"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_phase_id):
+        """Get the overage responsibility if it is available"""
+        req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
+        overage_responsibility = PhaseOverageResponsibilityService.find_by_work_phase_id(int(work_phase_id), is_deleted=False)
+        return jsonify(PhaseOverageResponsibilityResponseSchema(many=True).dump(overage_responsibility)), HTTPStatus.OK
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Create the new phase overage responsibility"""
+        request_json = request.get_json()
+        data = req.PhaseOverageResponsibilityBodyRequestSchema().load(request_json)
+        responsibility = PhaseOverageResponsibilityService.create(data)
+        return PhaseOverageResponsibilityResponseSchema().dump(responsibility), HTTPStatus.CREATED
+
+
+@cors_preflight("PATCH, OPTIONS")
+@API.route("/work-phases/<int:work_phase_id>/overage-responsibility-notes", methods=["PATCH", "OPTIONS"])
+class WorkPhaseResponsibilityNotes(Resource):
+    """Endpoints to handle work phase overage notes"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def patch(work_phase_id):
+        """Save the notes to corresponding work phase"""
+        req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
+        notes = req.WorkPhaseNotesBodySchema().load(API.payload)["notes"]
+        work_phase = WorkPhaseService.save_notes(work_phase_id, notes)
+        return res.WorkPhaseResponseSchema().dump(work_phase), HTTPStatus.OK
 
 
 @cors_preflight("GET,POST")
