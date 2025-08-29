@@ -154,6 +154,16 @@ class WorkIdPhaseIdPathParameterSchema(RequestPathParameterSchema):
     )
 
 
+class WorkPhaseNotesBodySchema(RequestBodyParameterSchema):
+    """Work phase notes body parameter schema"""
+
+    notes = fields.Str(
+        metadata={"notes": "Work phase overage responsibility notes"},
+        validate=validate.Length(min=0),
+        required=True,
+    )
+
+
 class WorkFirstNationNotesBodySchema(RequestBodyParameterSchema):
     """Work first nation notes body parameter schema"""
 

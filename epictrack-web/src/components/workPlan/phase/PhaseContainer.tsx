@@ -226,6 +226,9 @@ const PhaseContainer = () => {
             phase={phase}
             showAnticipated={true}
             showActual={false}
+            isCurrentPhase={
+              ctx.work?.current_work_phase_id === phase.work_phase.id
+            }
           />
         </Grid>
       ))}

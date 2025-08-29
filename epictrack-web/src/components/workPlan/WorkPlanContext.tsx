@@ -29,6 +29,7 @@ export interface WorkplanContextProps {
   firstNations: WorkFirstNation[];
   getWorkById: () => Promise<void>;
   getWorkStatuses: () => Promise<void>;
+  getWorkPhases: () => Promise<void>;
   issues: WorkIssue[];
   loadData: () => Promise<void>;
   loading: boolean;
@@ -61,6 +62,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
   firstNations: [],
   getWorkById: () => new Promise((resolve) => resolve),
   getWorkStatuses: () => new Promise((resolve) => resolve),
+  getWorkPhases: () => new Promise((resolve) => resolve),
   issues: [],
   loadData: () => new Promise((resolve) => resolve),
   loading: true,
@@ -240,6 +242,7 @@ export const WorkplanProvider = ({
         firstNations,
         getWorkById,
         getWorkStatuses,
+        getWorkPhases,
         issues,
         loadData,
         loading,

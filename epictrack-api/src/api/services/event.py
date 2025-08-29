@@ -46,6 +46,7 @@ from api.models.project import Project
 from api.models.work_type import WorkType
 from api.schemas.response import EventResponseSchema
 from api.services.outcome_configuration import OutcomeConfigurationService
+from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.utils import util
 from api.application_constants import MIN_WORK_START_DATE
 
@@ -130,6 +131,28 @@ class EventService:
                 )
             cls._process_actions(event, data.get("outcome_id", None))
             cls._post_process_actions(event)
+
+        # First check overage responsibility is set for end event in legislated phase if overage
+        if event.event_position == EventPositionEnum.END.value and event.actual_date:
+            start_event = next(
+                            (
+                                e
+                                for e in all_work_events
+                                if e.event_configuration.event_position == EventPositionEnum.START.value
+                                and e.actual_date is not None
+                            ),
+                            None,
+                        )
+            days_taken = (event.actual_date.date() - start_event.actual_date.date()).days
+            if current_work_phase.legislated and (current_work_phase.total_number_of_days - days_taken < 0):
+                responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
+                    current_work_phase.id, is_deleted=False
+                )
+                if not responsibilities:
+                    raise UnprocessableEntityError(
+                        "Cannot complete a legislated phase without an Overage Responsibility. Select a responsibility first."
+                    )
+
         if commit:
             db.session.commit()
         return event

@@ -27,6 +27,7 @@ from .inspection import InspectionService
 from .lookups import LookupService
 from .outcome_template import OutcomeTemplateService
 from .phaseservice import PhaseService
+from .phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from .position import PositionService
 from .project import ProjectService
 from .project_state import ProjectStateService

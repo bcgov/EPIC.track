@@ -81,6 +81,7 @@ export interface WorkPhase extends MasterBase {
   suspended_date: string;
   id: number;
   number_of_days: string;
+  responsibility_notes?: string;
 }
 
 export interface EndEvent {

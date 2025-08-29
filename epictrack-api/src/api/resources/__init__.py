@@ -44,6 +44,7 @@ from .ops import API as OPS_API
 from .outcome import API as OUTCOME_API
 from .outcome_configuration import API as OUTCOME_CONFIGURATION_API
 from .phase import API as PHASE_API
+from .phase_overage_responsibility import API as PHASE_OVERAGE_RESPONSIBILITY_API
 from .pip_org_type import API as PIP_ORG_TYPES_API
 from .position import API as POSITION_API
 from .project import API as PROJECTS_API
@@ -109,6 +110,7 @@ API.add_namespace(PROJECTS_API, path="/projects")
 API.add_namespace(PROJECT_TYPES_API, path="/project-types")
 API.add_namespace(SYNC_FORM_DATA_API, path="/sync-form-data")
 API.add_namespace(PHASE_API, path="/phases")
+API.add_namespace(PHASE_OVERAGE_RESPONSIBILITY_API, path="/overage-responsibilities")
 API.add_namespace(STAFF_API, path="/staffs")
 API.add_namespace(STALENESS_SETTINGS_API, path="/staleness-settings")
 API.add_namespace(ELEVATED_ROLE_API, path='/elevated-roles')
