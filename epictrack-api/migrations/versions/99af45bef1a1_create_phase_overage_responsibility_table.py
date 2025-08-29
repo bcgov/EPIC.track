@@ -16,26 +16,20 @@ down_revision = '999ef9ca9bdc'
 branch_labels = None
 depends_on = None
 
-
-responsibility_enum = sa.Enum(
-    "PROPONENT",
+overage_responsibility_enum = postgresql.ENUM("PROPONENT",
     "EAO",
     "SECONDARY_MINISTRY",
     "FEDERAL_AGENCY",
     "NATION",
     "PARTNER_AGENCY",
-    name="responsibility_enum",
-)
-
+    name='overage_responsibility_enum', create_type=True)
 
 def upgrade():
-    responsibility_enum.create(op.get_bind(), checkfirst=True)
-
     op.create_table(
         'phase_overage_responsibility',
         sa.Column('id', sa.Integer(), primary_key=True, nullable=False),
         sa.Column('work_phase_id', sa.Integer(), sa.ForeignKey('work_phases.id', ondelete="CASCADE"), nullable=False),
-        sa.Column('responsibility', responsibility_enum, nullable=False),
+        sa.Column('responsibility', overage_responsibility_enum, nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column('created_at', sa.DateTime(), server_default=sa.func.now(), nullable=False),
@@ -48,7 +42,7 @@ def upgrade():
         'phase_overage_responsibility_history',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('work_phase_id', sa.Integer(), sa.ForeignKey('work_phases.id', ondelete="CASCADE"), nullable=False),
-        sa.Column('responsibility', responsibility_enum, nullable=False),
+        sa.Column('responsibility', overage_responsibility_enum, nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False, server_default=sa.false()),
         sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.true()),
         sa.Column('created_at', sa.DateTime(), server_default=sa.func.now(), nullable=False),
@@ -75,4 +69,4 @@ def downgrade():
     op.drop_table('phase_overage_responsibility')
     op.drop_column("work_phases", "responsibility_notes")
     op.drop_column("work_phases_history", "responsibility_notes")
-    responsibility_enum.drop(op.get_bind(), checkfirst=True)
+    op.execute('DROP TYPE overage_responsibility_enum')

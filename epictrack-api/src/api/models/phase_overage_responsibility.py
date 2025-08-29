@@ -5,7 +5,7 @@ from sqlalchemy import Boolean, Column, Integer, ForeignKey, Enum
 from api.models.base_model import BaseModelVersioned
 
 
-class ResponsibilityEnum(enum.Enum):
+class OverageResponsibilityEnum(enum.Enum):
     """Enum for Responsibility."""
 
     PROPONENT = "Proponent"
@@ -23,7 +23,7 @@ class PhaseOverageResponsibility(BaseModelVersioned):
 
     id = Column(Integer, primary_key=True)
     work_phase_id = Column(Integer, ForeignKey("work_phases.id", ondelete="CASCADE"), nullable=False)
-    responsibility = Column(Enum(ResponsibilityEnum, name="responsibility_enum"), nullable=False)
+    responsibility = Column(Enum(OverageResponsibilityEnum), nullable=False)
     is_deleted = Column(Boolean(), default=False, nullable=False)
 
     def as_dict(self):  # pylint:disable=arguments-differ

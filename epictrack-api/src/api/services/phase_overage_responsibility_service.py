@@ -1,7 +1,7 @@
 """Service to manage Phase Overages Responsibility operations"""
 from api.exceptions import ResourceNotFoundError
 from api.models import db
-from api.models.phase_overage_responsibility import PhaseOverageResponsibility as PhaseOverageResponsibilityModel, ResponsibilityEnum
+from api.models.phase_overage_responsibility import PhaseOverageResponsibility as PhaseOverageResponsibilityModel, OverageResponsibilityEnum
 from api.utils.roles import Role as KeycloakRole, Membership
 from api.services import authorisation
 
@@ -33,7 +33,7 @@ class PhaseOverageResponsibilityService:
         """Create a new phase overage responsibility"""
         cls._check_auth()
         if "responsibility" in data and isinstance(data["responsibility"], str):
-            data["responsibility"] = ResponsibilityEnum[data["responsibility"]]
+            data["responsibility"] = OverageResponsibilityEnum[data["responsibility"]]
 
         new_item = PhaseOverageResponsibilityModel(**data)
         db.session.add(new_item)
