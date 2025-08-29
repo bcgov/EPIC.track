@@ -15,7 +15,7 @@
 from http import HTTPStatus
 from io import BytesIO
 
-from flask import jsonify, request, send_file, current_app
+from flask import jsonify, request, send_file
 from flask_restx import Namespace, Resource, cors
 
 from api.models.dashboard_search_options import WorkplanDashboardSearchOptions
@@ -202,6 +202,7 @@ class WorkPhases(Resource):
         return (
             res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phases), HTTPStatus.OK)
 
+
 @cors_preflight("GET")
 @API.route("/<int:work_id>/phase/<int:phase_id>/additionalinfo", methods=["GET", "OPTIONS"])
 class WorkPhase(Resource):
@@ -213,14 +214,11 @@ class WorkPhase(Resource):
     @profiletime
     def get(work_id, phase_id):
         """Return additional work_phase details based on id + work_id."""
-        try:
-            work_phase = WorkPhaseService.find_by_work_and_phase(work_id, phase_id)
-            return (
-                res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phase), HTTPStatus.OK
-            )
-        except Exception as e:
-            current_app.logger.error(f"Error in fetching additional info for work id: {work_id} and phase id: {phase_id} - {e}")
-            return {"message": "Error in fetching additional info"}, HTTPStatus.INTERNAL_SERVER_ERROR
+        work_phase = WorkPhaseService.find_by_work_and_phase(work_id, phase_id)
+        return (
+            res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phase), HTTPStatus.OK
+        )
+
 
 @cors_preflight("GET, POST")
 @API.route("/<int:work_id>/staff-roles", methods=["GET", "POST", "OPTIONS"])
@@ -351,7 +349,7 @@ class WorkPhaseId(Resource):
     def get(work_phase_id):
         """Get the status if template upload is available"""
         req.WorkIdPhaseIdPathParameterSchema().load(request.view_args)
-        work_phase = WorkPhase.find_by_id(work_phase_id)
+        work_phase = WorkPhaseModel.find_by_id(work_phase_id)
         return (
             res.WorkPhaseByIdResponseSchema().dump({'work_phase': work_phase}),
             HTTPStatus.OK,

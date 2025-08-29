@@ -188,11 +188,6 @@ const EventForm = ({
     fetchAdditionalInfo();
   }, [work?.id, selectedWorkPhase?.id]);
 
-  const WorkPhaseAdditionalInfo = useMemo(
-    () => workPhaseAdditionalInfo,
-    [workPhaseAdditionalInfo]
-  );
-
   const disableAnticipatedDate = useMemo(
     () =>
       isFormFieldsLocked ||
