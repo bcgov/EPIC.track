@@ -15,7 +15,7 @@
 from http import HTTPStatus
 from io import BytesIO
 
-from flask import jsonify, request, send_file
+from flask import jsonify, request, send_file, current_app
 from flask_restx import Namespace, Resource, cors
 
 from api.models.dashboard_search_options import WorkplanDashboardSearchOptions
@@ -28,7 +28,7 @@ from api.utils import auth, constants, profiletime
 from api.utils.caching import AppCache
 from api.utils.datetime_helper import get_start_of_day
 from api.utils.util import cors_preflight
-from api.models.work_phase import WorkPhase
+from api.models.work_phase import WorkPhase as WorkPhaseModel
 
 API = Namespace("works", description="Works")
 
@@ -202,6 +202,25 @@ class WorkPhases(Resource):
         return (
             res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phases), HTTPStatus.OK)
 
+@cors_preflight("GET")
+@API.route("/<int:work_id>/phase/<int:phase_id>/additionalinfo", methods=["GET", "OPTIONS"])
+class WorkPhase(Resource):
+    """Endpoint resource to return phase details for given work id."""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def get(work_id, phase_id):
+        """Return additional work_phase details based on id + work_id."""
+        try:
+            work_phase = WorkPhaseService.find_by_work_and_phase(work_id, phase_id)
+            return (
+                res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(work_phase), HTTPStatus.OK
+            )
+        except Exception as e:
+            current_app.logger.error(f"Error in fetching additional info for work id: {work_id} and phase id: {phase_id} - {e}")
+            return {"message": "Error in fetching additional info"}, HTTPStatus.INTERNAL_SERVER_ERROR
 
 @cors_preflight("GET, POST")
 @API.route("/<int:work_id>/staff-roles", methods=["GET", "POST", "OPTIONS"])

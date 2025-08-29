@@ -34,6 +34,7 @@ import { EVENT_TYPE } from "../phase/type";
 import { OUTCOME_ID } from "./constants";
 import { POSITION_ENUM } from "models/position";
 import { eventService } from "services/eventService/eventService";
+import { workService } from "services/workService/workService";
 import staffService from "services/staffService/staffService";
 import { configurationService } from "services/configurationService/configurationService";
 import { getErrorMessage } from "../../../utils/axiosUtils";
@@ -50,6 +51,7 @@ import {
   MilestoneEventDateCheck,
 } from "models/event";
 import EventConfiguration from "models/eventConfiguration";
+import { WorkPhaseAdditionalInfo } from "../../../models/work";
 import MultiDaysInput from "./components/MultiDaysInput";
 import PCPInput from "./components/PCPInput";
 import SingleDayPCPInput from "./components/SingleDayPCPInput";
@@ -163,17 +165,52 @@ const EventForm = ({
       }),
     [selectedConfiguration, actualAdded]
   );
+
+  const [workPhaseAdditionalInfo, setWorkPhaseAdditionalInfo] =
+    useState<WorkPhaseAdditionalInfo | null>(null);
+  useEffect(() => {
+    const fetchAdditionalInfo = async () => {
+      try {
+        if (work?.id && selectedWorkPhase?.id) {
+          const result = await workService.getWorkPhaseAdditionalInfo(
+            work.id,
+            selectedWorkPhase.id
+          );
+          if (result.status === 200) {
+            const [first] = result.data;
+            setWorkPhaseAdditionalInfo(first as WorkPhaseAdditionalInfo);
+          }
+        }
+      } catch {
+        console.error(`Failed to fetch work phase additional info`);
+      }
+    };
+    fetchAdditionalInfo();
+  }, [work?.id, selectedWorkPhase?.id]);
+
+  const WorkPhaseAdditionalInfo = useMemo(
+    () => workPhaseAdditionalInfo,
+    [workPhaseAdditionalInfo]
+  );
+
   const disableAnticipatedDate = useMemo(
     () =>
       isFormFieldsLocked ||
       Boolean(
         selectedConfiguration?.id &&
           selectedWorkPhase?.legislated &&
-          contextSelectedWorkPhase?.milestone_progress === 0 &&
+          workPhaseAdditionalInfo &&
+          workPhaseAdditionalInfo?.milestone_progress === 0 &&
           selectedConfiguration?.event_position === EventPosition.END
       ),
-    [isFormFieldsLocked, selectedConfiguration, selectedWorkPhase]
+    [
+      isFormFieldsLocked,
+      selectedConfiguration,
+      workPhaseAdditionalInfo,
+      selectedWorkPhase,
+    ]
   );
+
   const pushRequired = useMemo(
     () =>
       dateCheckStatus?.subsequent_event_push_required &&

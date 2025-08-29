@@ -40,6 +40,7 @@ const Endpoints = {
     WORKS_BY_STAFF: "works/by-staff/:staff_id",
     WORK_RESOURCES: "works/resources",
     WORK_RESOURCES_ACTIVE: "works/resources?is_active=true",
+    WORK_PHASE_ADDITIONAL_INFO: "works/:work_id/phase/:phase_id/additionalinfo",
     DOWNLOAD_WORK_PLAN: "works/workplan/download",
     WORK_TEAM_MEMBERS: "works/:work_id/staff-roles",
     WORK_TEAM_MEMBER: "works/staff-roles/:work_staff_id",

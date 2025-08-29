@@ -132,6 +132,17 @@ class WorkService implements ServiceBase {
     }
   }
 
+  async getWorkPhaseAdditionalInfo(
+    workId: number,
+    phaseId: number
+  ): Promise<any> {
+    const query = `${Endpoints.Works.WORK_PHASE_ADDITIONAL_INFO.replace(
+      ":work_id",
+      workId.toString()
+    ).replace(":phase_id", phaseId.toString())}`;
+    return await http.GetRequest(query);
+  }
+
   async downloadWorkplan(workPhaseId: number) {
     return await http.PostRequest(
       Endpoints.Works.DOWNLOAD_WORK_PLAN + `?work_phase_id=${workPhaseId}`,
