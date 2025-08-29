@@ -55,17 +55,10 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phases
 
     @classmethod
-    def find_by_work_nd_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
-        """Find the workphase by work and phase"""
-        work_phase = (
-            db.session.query(WorkPhase)
-            .filter(
-                WorkPhase.work_id == work_id,
-                WorkPhase.phase_id == phase_id,
-                WorkPhase.is_active.is_(True),
-            )
-            .scalar()
-        )
+    def find_by_work_and_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
+        """Find the workphase status by work_id and work_phase id"""
+        work_phases_dict = cls.find_work_phases_by_work_ids([work_id])[0]
+        work_phase = cls._find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []))
         return work_phase
 
     @classmethod

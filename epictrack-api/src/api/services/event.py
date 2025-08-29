@@ -342,7 +342,6 @@ class EventService:
     ) -> None:
         # pylint: disable=too-many-arguments
         """Process the event date logic"""
-        cls._end_event_anticipated_change_rule(event, event_old, current_work_phase)
         all_work_phases = WorkPhase.find_by_params(
             {
                 "work_id": current_work_phase.work_id,
@@ -354,7 +353,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         cls._validate_dates(event, current_work_phase, all_work_phases)
-        cls._previous_event_acutal_date_rule(
+        cls._previous_event_actual_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old
         )
         cls._handle_work_start_date_for_start_event_start_phase(
@@ -429,6 +428,8 @@ class EventService:
             if (
                 event.event_configuration.event_position.value
                 == EventPositionEnum.START.value
+                or event.event_configuration.event_position.value
+                == EventPositionEnum.END.value
                 or event.event_configuration.event_category_id
                 in [
                     EventCategoryEnum.EXTENSION.value,
@@ -910,22 +911,7 @@ class EventService:
         return phase_events
 
     @classmethod
-    def _end_event_anticipated_change_rule(
-        cls, event: Event, event_old: Event, current_work_phase: WorkPhase
-    ) -> None:
-        """Anticipated date of end event of legislated phase cannot be changed"""
-        if (
-            current_work_phase.legislated
-            and event.event_position == EventPositionEnum.END.value
-            and (event_old.anticipated_date.date() - event.anticipated_date.date()).days
-            != 0
-        ):
-            raise UnprocessableEntityError(
-                "Anticipated date of the phase end event should not be changed"
-            )
-
-    @classmethod
-    def _previous_event_acutal_date_rule(  # pylint: disable=too-many-arguments
+    def _previous_event_actual_date_rule(  # pylint: disable=too-many-arguments
         cls,
         all_work_events: List[Event],
         all_work_phases: List[WorkPhase],
