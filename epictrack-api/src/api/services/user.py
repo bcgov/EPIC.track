@@ -37,9 +37,11 @@ class UserService:
         for group in groups:
             members = KeycloakService.get_group_members(group["id"])
             member_ids = [member["id"] for member in members]
-            filtered_users = [user for user in users if user["id"] in member_ids]
-            for user in filtered_users:
-                user["group"] = group
+            for user in users:
+                if user["id"] in member_ids:
+                    # assign group only if user has no group yet or this group has higher level
+                    if (user["group"] is None) or (cls._get_level(group) > cls._get_level(user["group"])):
+                        user["group"] = group
         return users
 
     @classmethod

@@ -16,7 +16,9 @@ from http import HTTPStatus
 
 from flask import jsonify, request
 from flask_restx import Namespace, Resource, cors
+from sqlalchemy.exc import SQLAlchemyError
 
+from api.models import db
 from api.models.dashboard_search_options import IssuesDashboardSearchOptions
 from api.models.pagination_options import PaginationOptions
 from api.schemas import request as req
@@ -31,7 +33,7 @@ ISSUES_DASHBOARD_API = Namespace("work-issues-dashboard", description="Work Issu
 
 @cors_preflight("GET, POST")
 @WORK_ISSUES_API.route("", methods=["GET", "POST", "OPTIONS"])
-class WorkStatus(Resource):
+class WorkIssues(Resource):
     """Endpoint resource to manage work issues."""
 
     @staticmethod
@@ -47,10 +49,17 @@ class WorkStatus(Resource):
     @auth.require
     @profiletime
     def post(work_id):
-        """Create new work status"""
+        """Create new work issue with updates."""
         request_dict = req.WorkIssuesCreateParameterSchema().load(WORK_ISSUES_API.payload)
-        work_issues = WorkIssuesService.create_work_issue_and_updates(work_id, request_dict)
-        return res.WorkIssuesResponseSchema().dump(work_issues), HTTPStatus.CREATED
+
+        try:
+            work_issue = WorkIssuesService.create_work_issue_and_updates(work_id, request_dict)
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            raise e
+
+        return res.WorkIssuesResponseSchema().dump(work_issue), HTTPStatus.CREATED
 
 
 @cors_preflight("GET")

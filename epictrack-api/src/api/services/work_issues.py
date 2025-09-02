@@ -16,6 +16,7 @@ from datetime import datetime, timezone
 from typing import Dict, Optional
 
 from api.exceptions import BadRequestError, ResourceNotFoundError
+from api.models import db
 from api.models import Work
 from api.models import WorkIssues as WorkIssuesModel
 from api.models import WorkIssueUpdates as WorkIssueUpdatesModel
@@ -134,31 +135,34 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         }
 
     @classmethod
-    def create_work_issue_and_updates(cls, work_id, issue_data: Dict):
-        """Create a new work issue and its updates."""
-        updates = issue_data.pop('updates', [])
+    def create_work_issue_and_updates(cls, work_id, issue_data: dict):
+        """Create a new work issue and its updates (no commit)."""
+        updates = issue_data.pop("updates", [])
 
         cls._check_create_auth(work_id)
 
-        new_work_issue = WorkIssuesModel(**issue_data,
-                                         work_id=work_id
-                                         )
-        new_work_issue.save()
+        # create work issue
+        new_work_issue = WorkIssuesModel(**issue_data, work_id=work_id)
+        db.session.add(new_work_issue)
+        db.session.flush()  # generate ID for relationship
 
+        # create special fields (commit=False)
         cls.create_special_fields(
             new_work_issue.id,
             new_work_issue.is_active,
             new_work_issue.start_date
         )
 
+        # create updates
         for update_description in updates:
             new_update = WorkIssueUpdatesModel(
                 description=update_description,
-                posted_date=issue_data.get('start_date')
+                posted_date=issue_data.get("start_date"),
+                work_issue=new_work_issue
             )
-            new_update.work_issue_id = new_work_issue.id
-            new_update.save()
+            db.session.add(new_update)
 
+        # return object (still uncommitted)
         return new_work_issue
 
     @classmethod
