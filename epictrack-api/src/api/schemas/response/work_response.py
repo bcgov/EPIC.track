@@ -156,6 +156,11 @@ class WorkResourceResponseSchema(
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
     title = fields.Str()
+    work_state = fields.Method("get_work_state")
+
+    def get_work_state(self, obj: Work) -> str:
+        """Return the work state"""
+        return obj.work_state.value if obj.work_state else None
 
 
 class WorkPhaseByIdResponseSchema(Schema):
