@@ -49,7 +49,8 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
 
         cls._check_auth(special_field=special_field)
 
-        special_field.flush()
+        db.session.add(special_field)
+        db.session.flush()
         cls._update_original_model(special_field)
         if commit:
             db.session.commit()
