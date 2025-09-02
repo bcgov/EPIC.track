@@ -218,18 +218,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
                 StaffWorkRole.is_active.is_(True),
             )
         work_result = query.all()
-        works = [
-            {
-                "id": work.id,
-                "title": work.title,
-                "project": work.project,
-                "eao_team": work.eao_team,
-                "responsible_epd": work.responsible_epd,
-                "work_lead": work.work_lead,
-            }
-            for work in work_result
-        ]
-        work_ids = [work["id"] for work in works]
+        work_ids = [work.id for work in work_result]
         staff_result = (
             Staff.query.join(StaffWorkRole, StaffWorkRole.staff_id == Staff.id)
             .filter(
@@ -242,10 +231,13 @@ class WorkService:  # pylint: disable=too-many-public-methods
             .add_columns(StaffWorkRole.work_id)
             .all()
         )
-        for work in works:
-            staffs = [staff for staff in staff_result if staff.work_id == work["id"]]
-            work["staff"] = staffs
-        return works
+        for work in work_result:
+            staffs = [
+                s
+                for s in staff_result if s.work_id == work.id
+            ]
+            setattr(work, "staff", staffs)
+        return work_result
 
     @classmethod
     def create_work(cls, payload, commit: bool = True):

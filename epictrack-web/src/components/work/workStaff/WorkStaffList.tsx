@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Grid } from "@mui/material";
 import { WorkStaff } from "../../../models/workStaff";
@@ -8,17 +8,23 @@ import { useCachedState } from "hooks/useCachedFilters";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { ETGridTitle, ETPageContainer, ETParagraph } from "components/shared";
 import { WorkStaffRole } from "models/role";
+import { getSelectFilterOptions } from "components/shared/MasterTrackTable/utils";
+import { getStatusFilter } from "components/shared/filterSelect/utils";
+import { ETChip } from "components/shared/chip/ETChip";
+import { TableFilter } from "components/shared/filterSelect/TableFilter";
+import { WORK_STATE } from "components/shared/constants";
 
 const workStaffListColumnFiltersCacheKey = "work-staff-listing-column-filters";
 const WorkStaffList = () => {
-  const [workStaffData, setWorkStaffData] = React.useState<WorkStaff[]>([]);
-  const [loading, setLoading] = React.useState<boolean>(false);
+  const [workStaffData, setWorkStaffData] = useState<WorkStaff[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [workStates, setWorkStates] = useState<string[]>([]);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     workStaffListColumnFiltersCacheKey,
     []
   );
 
-  const getWorkStaffAllocation = React.useCallback(async () => {
+  const getWorkStaffAllocation = useCallback(async () => {
     setLoading(true);
     try {
       const workStaffingResult = await workService.getWorkStaffDetails();
@@ -32,11 +38,11 @@ const WorkStaffList = () => {
     }
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     getWorkStaffAllocation();
   }, [getWorkStaffAllocation]);
 
-  const uniquestaff = React.useMemo(() => {
+  const uniquestaff = useMemo(() => {
     const uniqueRoles = new Set<string>();
 
     workStaffData.forEach((value) => {
@@ -56,7 +62,7 @@ const WorkStaffList = () => {
     return Array.from(uniqueRoles);
   }, [workStaffData]);
 
-  const setRoleColumns = React.useCallback(() => {
+  const setRoleColumns = useCallback(() => {
     let columns: Array<MRT_ColumnDef<WorkStaff>> = [];
     if (workStaffData && workStaffData.length > 0) {
       columns = uniquestaff.map((rolename: any, index: number) => {
@@ -99,7 +105,28 @@ const WorkStaffList = () => {
     return columns;
   }, [workStaffData, uniquestaff]);
 
-  const projectFilter = React.useMemo(
+  const statuses = getSelectFilterOptions(
+    workStaffData,
+    "is_active",
+    (value) => (value ? "Active" : "Inactive"),
+    (value) => value
+  );
+
+  useEffect(() => {
+    if (!workStaffData.length) return;
+    const options = workStaffData
+      .map(
+        (w) =>
+          WORK_STATE[w.work_state as keyof typeof WORK_STATE]?.label ||
+          w.work_state
+      )
+      .filter(
+        (element, index, array) => element && array.indexOf(element) === index
+      );
+    setWorkStates(options);
+  }, [workStaffData]);
+
+  const projectFilter = useMemo(
     () =>
       workStaffData
         .filter((person) => person.project && person.project.name)
@@ -108,7 +135,7 @@ const WorkStaffList = () => {
     [workStaffData]
   );
 
-  const titleFilter = React.useMemo(
+  const titleFilter = useMemo(
     () =>
       workStaffData
         .filter((p) => p.title)
@@ -117,7 +144,7 @@ const WorkStaffList = () => {
     [workStaffData]
   );
 
-  const teamFilter = React.useMemo(
+  const teamFilter = useMemo(
     () =>
       workStaffData
         .filter((person) => person.eao_team)
@@ -126,7 +153,7 @@ const WorkStaffList = () => {
     [workStaffData]
   );
 
-  const responsibleEpdFilter = React.useMemo(
+  const responsibleEpdFilter = useMemo(
     () =>
       workStaffData
         .filter((person) => person.responsible_epd)
@@ -138,7 +165,7 @@ const WorkStaffList = () => {
     [workStaffData]
   );
 
-  const workLeadFilter = React.useMemo(
+  const workLeadFilter = useMemo(
     () =>
       workStaffData
         .filter((person) => person.responsible_epd)
@@ -150,7 +177,7 @@ const WorkStaffList = () => {
     [workStaffData]
   );
 
-  const columns = React.useMemo<MRT_ColumnDef<WorkStaff>[]>(
+  const columns = useMemo<MRT_ColumnDef<WorkStaff>[]>(
     () => [
       {
         accessorKey: "title",
@@ -169,6 +196,57 @@ const WorkStaffList = () => {
             </ETGridTitle>
           );
         },
+      },
+      {
+        accessorKey: "work_state",
+        header: "Work State",
+        size: 80,
+        filterVariant: "multi-select",
+        filterSelectOptions: workStates,
+        Filter: ({ header, column }) => {
+          return (
+            <TableFilter
+              isMulti
+              header={header}
+              column={column}
+              variant="inline"
+              name="stateFilter"
+            />
+          );
+        },
+        filterFn: (row, id, filterValue) => {
+          if (!filterValue.length || !filterValue.length) {
+            return true;
+          }
+          if (
+            workStates.length > 0 &&
+            filterValue.length >= workStates.length
+          ) {
+            return true; // "select all" case
+          }
+          const value: string = row.getValue(id) || "";
+          const label = WORK_STATE[value as keyof typeof WORK_STATE]?.label;
+          return filterValue.includes(label);
+        },
+        Cell: ({ cell }) => {
+          const stateValue = cell.getValue<keyof typeof WORK_STATE>();
+          return <span>{WORK_STATE[stateValue]?.label ?? stateValue}</span>;
+        },
+      },
+      {
+        accessorKey: "is_active",
+        header: "Work Status",
+        size: 75,
+        filterVariant: "multi-select",
+        filterSelectOptions: statuses,
+        filterFn: "multiSelectFilter",
+        Filter: getStatusFilter<WorkStaff>,
+        Cell: ({ cell }) => (
+          <span>
+            {cell.getValue<boolean>() && <ETChip active label="Active" />}
+            {!cell.getValue<boolean>() && <ETChip inactive label="Inactive" />}
+          </span>
+        ),
       },
       {
         accessorKey: "project.name",
@@ -218,9 +296,11 @@ const WorkStaffList = () => {
       projectFilter,
       responsibleEpdFilter,
       setRoleColumns,
+      statuses,
       teamFilter,
       titleFilter,
       workLeadFilter,
+      workStates,
     ]
   );
 
