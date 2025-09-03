@@ -71,7 +71,7 @@ const schema = yup.object<Work>().shape({
         return true;
       },
     }),
-  simple_title: yup.string(),
+  simple_title: yup.string().default(""),
   substitution_act_id: yup.number().required("Federal Act is required"),
   eao_team_id: yup.number().required("EAO team is required"),
   responsible_epd_id: yup.number().required("Responsible EPD is required"),
