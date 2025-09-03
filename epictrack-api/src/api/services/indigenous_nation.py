@@ -85,7 +85,7 @@ class IndigenousNationService:
     @classmethod
     def delete_indigenous_nation(cls, indigenous_nation_id: int):
         """Delete indigenous_nation by id."""
-        cls._check_can_create()
+        cls._check_can_delete()
 
         indigenous_nation = IndigenousNation.find_by_id(indigenous_nation_id)
         indigenous_nation.is_deleted = True
@@ -202,5 +202,14 @@ class IndigenousNationService:
         one_of_roles = (
             ElevatedRole.MANAGE_FIRST_NATIONS.value,
             KeycloakRole.CREATE.value,
+        )
+        authorisation.check_auth(one_of_roles=one_of_roles)
+
+    @classmethod
+    def _check_can_delete(cls):
+        """Check if user has create role or has elevated role"""
+        one_of_roles = (
+            ElevatedRole.MANAGE_FIRST_NATIONS.value,
+            KeycloakRole.DELETE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles)

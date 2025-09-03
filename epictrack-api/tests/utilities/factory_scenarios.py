@@ -203,6 +203,7 @@ class TestJwtClaims(dict, Enum):
                 'staff',
                 'create',
                 'edit',
+                'delete',
                 'extended_edit'
 
             ]

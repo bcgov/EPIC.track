@@ -401,7 +401,7 @@ class TaskService:
         """Mark tasks as deleted"""
         one_of_roles = (
             Membership.TEAM_MEMBER.value,
-            KeycloakRole.CREATE.value,
+            KeycloakRole.DELETE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
 

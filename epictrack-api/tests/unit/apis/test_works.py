@@ -29,8 +29,9 @@ from api.models.project import Project as ProjectModel
 from api.models.work_type import WorkType as WorkTypeModel
 from api.models.event_template import EventTemplateVisibilityEnum
 from api.services.role import RoleService
-from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum
+from tests.utilities.factory_scenarios import TestRoleEnum, TestWorkFirstNationEnum, TestWorkInfo, TestWorkNotesEnum, TestJwtClaims
 from tests.utilities.factory_utils import (
+    factory_auth_header,
     factory_first_nation_model,
     factory_staff_model,
     factory_staff_work_role_model,
@@ -225,15 +226,17 @@ def test_update_work(client, auth_header):
     assert response_json["simple_title"] == updated_data["simple_title"]
 
 
-def test_delete_work(client, auth_header):
+def test_delete_work(client, jwt):
     """Test delete work"""
     work = factory_work_model()
     url = urljoin(API_BASE_URL, f"works/{work.id}")
-    response = client.delete(url, headers=auth_header)
+    super_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=super_user)
+    response = client.delete(url, headers=headers)
     assert response.status_code == HTTPStatus.OK
     assert response.text == "Work successfully deleted"
 
-    response = client.get(url, headers=auth_header)
+    response = client.get(url, headers=headers)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 

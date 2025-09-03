@@ -20,8 +20,8 @@ from urllib.parse import urljoin
 
 from werkzeug.datastructures import FileStorage
 
-from tests.utilities.factory_scenarios import TestFirstNation
-from tests.utilities.factory_utils import factory_first_nation_model, factory_pip_org_type_model, factory_staff_model
+from tests.utilities.factory_scenarios import TestFirstNation, TestJwtClaims
+from tests.utilities.factory_utils import factory_auth_header, factory_first_nation_model, factory_pip_org_type_model, factory_staff_model
 
 
 API_BASE_URL = "/api/v1/"
@@ -128,15 +128,17 @@ def test_update_first_nation(client, auth_header):
     assert updated_data["notes"] == response_json["notes"]
 
 
-def test_delete_first_nation(client, auth_header):
+def test_delete_first_nation(client, jwt):
     """Test delete first nation"""
     first_nation = factory_first_nation_model()
     url = urljoin(API_BASE_URL, f"indigenous-nations/{first_nation.id}")
-    response = client.delete(url, headers=auth_header)
+    super_user = TestJwtClaims.staff_admin_role
+    headers = factory_auth_header(jwt=jwt, claims=super_user)
+    response = client.delete(url, headers=headers)
     assert response.status_code == HTTPStatus.OK
     assert response.text == "Indigenous nation successfully deleted"
 
-    response = client.get(url, headers=auth_header)
+    response = client.get(url, headers=headers)
     assert response.status_code == HTTPStatus.NOT_FOUND
 
 
