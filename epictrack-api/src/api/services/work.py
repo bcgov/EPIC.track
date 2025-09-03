@@ -641,6 +641,7 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def delete_work(cls, work_id: int):
         """Delete work by id."""
+        cls._check_delete_auth()
         work = Work.find_by_id(work_id)
         work.is_deleted = True
         Work.commit()
@@ -1071,3 +1072,9 @@ class WorkService:  # pylint: disable=too-many-public-methods
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)
+
+    @classmethod
+    def _check_delete_auth(cls):
+        """Check if user has delete role"""
+        one_of_roles = [KeycloakRole.DELETE.value]
+        authorisation.check_auth(one_of_roles=one_of_roles)

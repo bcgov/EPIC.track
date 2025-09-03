@@ -1144,7 +1144,7 @@ class EventService:
 
         one_of_roles = (
             Membership.TEAM_MEMBER.value,
-            KeycloakRole.CREATE.value,
+            KeycloakRole.DELETE.value,
         )
         authorisation.check_auth(one_of_roles=one_of_roles, work_id=event.work_id)
 
