@@ -98,7 +98,7 @@ class EventService:
     ) -> Event:
         """Update the event"""
         event = Event.find_by_id(event_id)
-        event_old = copy.copy(event)
+        event_old = Event.find_by_id(event_id) # snapshot before update
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
@@ -118,6 +118,31 @@ class EventService:
             raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
+
+        # First check overage responsibility is set for end event in legislated phase if overage
+        if event_old.event_position == EventPositionEnum.END.value and event_old.actual_date:
+            start_event = next(
+                            (
+                                e
+                                for e in all_work_events
+                                if e.event_configuration.event_position == EventPositionEnum.START.value
+                                and e.actual_date is not None
+                            ),
+                            None,
+                        )
+            if start_event:
+                days_taken = (event.actual_date.date() - start_event.actual_date.date()).days
+                if current_work_phase.legislated and (current_work_phase.total_number_of_days - days_taken < 0):
+                    responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
+                        current_work_phase.id, is_deleted=False
+                    )
+                    if not responsibilities:
+                        raise UnprocessableEntityError(
+                            "Cannot complete a legislated phase without an Overage Responsibility. Select a responsibility first."
+                        )
+            else:
+                current_app.logger.info("No start event found in the phase.")
+
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
         if not event_old.actual_date:
@@ -131,27 +156,6 @@ class EventService:
                 )
             cls._process_actions(event, data.get("outcome_id", None))
             cls._post_process_actions(event)
-
-        # First check overage responsibility is set for end event in legislated phase if overage
-        if event.event_position == EventPositionEnum.END.value and event.actual_date:
-            start_event = next(
-                            (
-                                e
-                                for e in all_work_events
-                                if e.event_configuration.event_position == EventPositionEnum.START.value
-                                and e.actual_date is not None
-                            ),
-                            None,
-                        )
-            days_taken = (event.actual_date.date() - start_event.actual_date.date()).days
-            if current_work_phase.legislated and (current_work_phase.total_number_of_days - days_taken < 0):
-                responsibilities = PhaseOverageResponsibilityService.find_by_work_phase_id(
-                    current_work_phase.id, is_deleted=False
-                )
-                if not responsibilities:
-                    raise UnprocessableEntityError(
-                        "Cannot complete a legislated phase without an Overage Responsibility. Select a responsibility first."
-                    )
 
         if commit:
             db.session.commit()
