@@ -13,12 +13,10 @@
 # limitations under the License.
 """Test suite for Events."""
 import enum
-import copy
 from datetime import timedelta
 from http import HTTPStatus
 from urllib.parse import urljoin
 
-from collections import defaultdict
 from faker import Faker
 from flask import g
 
@@ -31,6 +29,8 @@ from tests.utilities.factory_utils import (
 from tests.utilities.factory_scenarios import TestWorkInfo
 from api.services.event import EventService
 from api.services.work_phase import WorkPhase
+from api.models import db as _db
+from api.models.event_category import PRIMARY_CATEGORIES
 from api.models.event_configuration import EventPositionEnum
 from api.schemas.response import EventResponseSchema
 
@@ -72,7 +72,7 @@ def test_change_date_start_event_legislated_phase_push(client, jwt):
 
 def test_change_date_start_event_legislated_phase_not_push(client, jwt):
     """Change the date of start event in a legislated phase by 7 days and choose not to push subsequent events"""
-    # Change the aniticipated date of the start event in a legislated phaes, then choose to push the subsequent
+    # Change the aniticipated date of the start event in a legislated phaes, then choose not to push the subsequent
     # events
     # Only the current event and the end event will be changed
     _change_event_anticipated_date(
@@ -81,7 +81,7 @@ def test_change_date_start_event_legislated_phase_not_push(client, jwt):
 
 
 def test_change_intermediate_event_non_legislated_phase_push(client, jwt):
-    """Change the date of the intermediate event in a legislated phase by 7 days and chosee to push subsequent events"""
+    """Change the date of the intermediate event in a non-legislated phase by 7 days and chosee to push subsequent events"""
     # All the subsequent events plus the current event date should be pushed by the number of days to be pushed
     # since it is a non-legislated phase, the date push will continue all the way over to the end phase end event
     _change_event_anticipated_date(
@@ -94,26 +94,15 @@ def test_change_intermediate_event_non_legislated_phase_push(client, jwt):
 
 
 def test_change_intermediate_event_non_legislated_phase_not_push(client, jwt):
-    """Change the anticipated date of the intermediate event in a nonlegislated phase by 7 days ,not to push events"""
+    """Change the anticipated date of the intermediate event in a non-legislated phase by 7 days ,not to push events"""
     # Only the current event will change no other events will change
     _change_event_anticipated_date(
         jwt,
         client,
-        push_events=True,
+        push_events=False,
         legislated=False,
         test_type=TestTypeEnum.INTERMEDIATE_EVENT,
     )
-
-# def test_change_intermediate_event_legislated_phase_push(client, jwt):
-#     """Change the anticipated date of the intermediate event in a legislated phase by 7 days and push events"""
-#     # All the subsequent events except the end event will be pushed
-#     _change_event_anticipated_date(
-#         jwt,
-#         client,
-#         push_events=True,
-#         legislated=True,
-#         test_type=TestTypeEnum.INTERMEDIATE_EVENT,
-#     )
 
 
 def _change_event_anticipated_date(
@@ -123,146 +112,130 @@ def _change_event_anticipated_date(
     legislated: bool = False,
     test_type: TestTypeEnum = TestTypeEnum.START_EVENT,
 ):
-    """Change the anticipated date of the start event in a phase"""
+    """Change the anticipated date of an event and verify cascading changes in phases."""
     # Arrange
-    # Set the admin user token
     headers = _set_admin_user(jwt=jwt)
-    # Create an assessment work. This will create all the events
-    # event_configuration, outcome_configuration and action_configurations
     work_data = _set_up_work_object()
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=work_data, headers=headers)
     work_response_json = work_response.json
     work_id = work_response_json["id"]
-    work_phases = WorkPhase.find_by_params({"work_id": work_id})
-    # first work phase in the assessment would be non-legislated and second is legislated
-    # according to the ea act 2018
-    work_phase_id_to_test = work_phases[0].id if not legislated else work_phases[1].id
-    # Get workphase for checking
-    work_phase = WorkPhase.find_by_id(work_phase_id_to_test)
-    work_phase_start_date = work_phase.start_date
-    work_phase_end_date = work_phase.end_date
-
     assert work_id is not None
-    # Act
-    phase_events = EventService.find_events(
-        work_id=work_id, work_phase_id=work_phase_id_to_test
+
+    # Get all phases
+    all_phases = WorkPhase.find_by_params({"work_id": work_id})
+    work_phase_to_test = all_phases[0] if not legislated else all_phases[1]
+    # Save original phase dates
+    work_phase_start_date = work_phase_to_test.start_date
+    work_phase_end_date = work_phase_to_test.end_date
+    # Load events fresh from DB (scoped=False ensures we get real tracked objects)
+    work_events = EventService.find_events(
+        work_id=work_id, work_phase_id=None, event_categories=PRIMARY_CATEGORIES, scoped=False
     )
-    # Storing the anticipated dates of all events for the purpose of validating it after
-    # the date change
-    event_date_dict = defaultdict()
-    for event in phase_events:
-        event_date_dict[event.id] = event.anticipated_date
-    event_position = (
+    work_phase_to_test_events = EventService.find_events(
+        work_id=work_id, work_phase_id=work_phase_to_test.id, event_categories=PRIMARY_CATEGORIES, scoped=False
+    )
+    # Store original anticipated dates
+    original_dates = {e.id: e.anticipated_date for e in work_events}
+
+    # Find target event
+    target_position = (
         EventPositionEnum.START.value
         if test_type == TestTypeEnum.START_EVENT
         else EventPositionEnum.INTERMEDIATE.value
     )
-    event_to_test = copy.copy(
-        next(
-            (
-                event
-                for event in phase_events
-                if event.event_configuration.event_position.value == event_position
-            ),
-            None,
-        )
+    category_ids = list(map(lambda x: x.value, PRIMARY_CATEGORIES))
+    event_to_update = next(
+        e for e in work_phase_to_test_events
+        if e.event_configuration.event_position.value == target_position
+        and e.event_configuration.event_category_id in category_ids
     )
+
+    # Find end event for legislated phase checks
     end_event = next(
-        (
-            event
-            for event in phase_events
-            if event.event_configuration.event_position.value
-            == EventPositionEnum.END.value
-        ),
+        (e for e in work_phase_to_test_events if e.event_configuration.event_position.value == EventPositionEnum.END.value),
         None,
     )
-    event_to_test.anticipated_date = event_to_test.anticipated_date + timedelta(
-        days=NUMBER_OF_DAYS_TO_BE_PUSHED
-    )
-    event_data = EventResponseSchema().dump(event_to_test)
+
+    # Update anticipated date
+    new_anticipated_date = event_to_update.anticipated_date + timedelta(days=NUMBER_OF_DAYS_TO_BE_PUSHED)
+    # Dump the object to dict, then overwrite the field
+    event_data = EventResponseSchema().dump(event_to_update)
+    event_data["anticipated_date"] = new_anticipated_date.isoformat()
     url_event_update = urljoin(
-        API_BASE_URL,
-        f"milestones/events/{event_to_test.id}?push_events={push_events}",
+        API_BASE_URL, f"milestones/events/{event_to_update.id}?push_events={push_events}"
     )
+    # Use a subtransaction to ensure the changes are visible
     result_update_event = client.put(url_event_update, headers=headers, json=event_data)
-    # Assert
-    assert result_update_event.status_code == HTTPStatus.OK
-    # WorkPhase start date will change when start_event anticipated date changed
-    if test_type == TestTypeEnum.START_EVENT:
-        assert (
-            work_phase.start_date.date() - work_phase_start_date.date()
-        ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
+    assert result_update_event.status_code == HTTPStatus.OK, result_update_event.json
 
-    # Assert if push_events is set to true
-    event_to_test_index = _find_event_index(phase_events, event_to_test)
-    if push_events:
-        for event_index, event in enumerate(phase_events):
-            # if the test is based on START EVENT then all phase events should be asserted
-            # if the test is based on INTERMEDIATE event then only the events after the changed event
-            # plus the changed event should be asserted
-            if (
-                test_type == TestTypeEnum.START_EVENT
-                or event_index >= event_to_test_index
-            ):
-                assert (
-                    event.anticipated_date.date() - event_date_dict[event.id].date()
-                ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
-        # if the test is based on START event, and choose to push then the work phase end date should be asserted
-        # if the test is based on INTERMEDIATE event, and choose to push and is not legislated phase then
-        # the work phase end date should be asserted
-        if test_type == TestTypeEnum.START_EVENT or not legislated:
-            assert (
-                work_phase.end_date.date() - work_phase_end_date.date()
-            ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
-    # Assert if push_events is set to false
-    if not push_events:
-        # events that doesn't have change of dates includes
-        exclude_event_ids = (
-            [event_to_test.id] if not legislated else [event_to_test.id, end_event.id]
+    # Refresh and load all events
+    _db.session.expire_all()
+    all_phases = WorkPhase.find_by_params({"work_id": work_id})
+    all_events = []
+
+    for phase in all_phases:
+        all_events.extend(
+            EventService.find_events(work_id=work_id, work_phase_id=phase.id, event_categories=PRIMARY_CATEGORIES, scoped=False)
         )
-        assert (
-            event_to_test.anticipated_date.date()
-            - event_date_dict[event_to_test.id].date()
-        ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
-        for event_index, event in enumerate(
-            [event for event in phase_events if event.id not in exclude_event_ids]
-        ):
-            if (
-                test_type == TestTypeEnum.START_EVENT
-                or event_index >= event_to_test_index
-            ):
-                assert (
-                    event.anticipated_date.date() - event_date_dict[event.id].date()
-                ).days == 0
-        # special case where in legislated phases, if the start event date changed and choose not to push
-        # subsequent events, the end event date should adjusted to keep the total number of legislated days
-        if legislated and test_type == TestTypeEnum.START_EVENT:
-            assert (
-                end_event.anticipated_date.date() - event_date_dict[end_event.id].date()
-            ).days == NUMBER_OF_DAYS_TO_BE_PUSHED
-        # return work_phase, phase_events, event_to_test,
 
+    new_dates = {e.id: e.anticipated_date for e in all_events}
 
-# def _assert_start_event_non_legislated_phase_push(jwt, client):
-#     """Asserts for the start event change, non_legislated and push events"""
-#     _change_event_anticipated_date(
-#         jwt,
-#         client,
-#         push_events=True,
-#         legislated=False,
-#         test_type=TestTypeEnum.START_EVENT,
-#     )
+    # Determine which events should have been pushed
+    pushed_event_ids = set()
 
-
-def _find_event_index(events, event):
-    """Find the event index"""
-    index = -1
-    for item_index, item in enumerate(events):
-        if item.id == event.id:
-            index = item_index
-            break
-    return index
+    if push_events:
+        # Determine starting phase index
+        start_phase_index = next(
+            i for i, phase in enumerate(all_phases)
+            if any(e.id == event_to_update.id for e in EventService.find_events(
+                work_id=work_id, work_phase_id=phase.id, scoped=False
+            ))
+        )
+        # Iterate only from the triggering phase onward
+        for phase in all_phases[start_phase_index:]:
+            phase_events = EventService.find_events(
+                work_id=work_id,
+                work_phase_id=phase.id,
+                event_categories=PRIMARY_CATEGORIES,
+                scoped=False
+            )
+            # Ensure triggering event is included in the starting phase
+            if phase.id == work_phase_to_test.id and event_to_update.id not in [e.id for e in phase_events]:
+                phase_events.insert(0, event_to_update)
+            # Determine start index
+            start_index = 0
+            if phase.id == work_phase_to_test.id:
+                start_index = next(i for i, e in enumerate(phase_events) if e.id == event_to_update.id)
+            # Determine if this phase push is allowed (legislated rules)
+            trigger_pos = event_to_update.event_configuration.event_position.value
+            # For legislated phase: push everything from start_index onward
+            if legislated and trigger_pos in [EventPositionEnum.START.value, EventPositionEnum.END.value]:
+                for e in phase_events[start_index:]:
+                    pushed_event_ids.add(e.id)
+            elif not legislated:
+                # Non-legislated
+                for e in phase_events[start_index:]:
+                    pushed_event_ids.add(e.id)
+    else:
+        # Only the target event is pushed, plus END if legislated
+        pushed_event_ids.add(event_to_update.id)
+        if legislated and event_to_update.event_configuration.event_position.value == EventPositionEnum.START.value:
+            pushed_event_ids.add(end_event.id)
+    # Assert event anticipated dates
+    for e in all_events:
+        old_date = original_dates.get(e.id, e.anticipated_date).date()
+        new_date = new_dates[e.id].date()
+        if e.id in pushed_event_ids:
+            assert (new_date - old_date).days == NUMBER_OF_DAYS_TO_BE_PUSHED
+        else:
+            assert (new_date - old_date).days == 0
+    # Assert work phase dates
+    refreshed_phase = WorkPhase.find_by_id(work_phase_to_test.id)
+    if test_type == TestTypeEnum.START_EVENT:
+        assert (refreshed_phase.start_date.date() - work_phase_start_date.date()).days == NUMBER_OF_DAYS_TO_BE_PUSHED
+        if legislated or push_events:
+            assert (refreshed_phase.end_date.date() - work_phase_end_date.date()).days == NUMBER_OF_DAYS_TO_BE_PUSHED
 
 
 def _set_up_work_object():

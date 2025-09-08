@@ -98,11 +98,12 @@ class EventService:
     ) -> Event:
         """Update the event"""
         event = Event.find_by_id(event_id)
-        event_old = Event.find_by_id(event_id) # snapshot before update
+        if not event:
+            raise ResourceNotFoundError("Event not found")
+        event_old_data = event.as_dict_snapshot(recursive=False)
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
-
         one_of_roles = (
             Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
@@ -110,17 +111,14 @@ class EventService:
         authorisation.check_auth(
             one_of_roles=one_of_roles, work_id=current_work_phase.work_id
         )
-
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, scoped=True
+            current_work_phase.work_id, None, PRIMARY_CATEGORIES, scoped=False
         )
-        if not event:
-            raise ResourceNotFoundError("Event not found")
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
 
         # First check overage responsibility is set for end event in legislated phase if overage
-        if event_old.event_position == EventPositionEnum.END.value and event_old.actual_date:
+        if event_old_data.get("event_position") == EventPositionEnum.END.value and event_old_data.get("actual_date"):
             start_event = next(
                             (
                                 e
@@ -145,14 +143,14 @@ class EventService:
 
         event = event.update(data, commit=False)
         # Do not process the date logic if the event is already locked(has actual date entered)
-        if not event_old.actual_date:
+        if not event_old_data.get("actual_date"):
             if not current_app.config["SKIP_EVENT_LOGIC"]:
                 cls._process_events(
                     current_work_phase,
                     event,
                     all_work_events,
                     push_events,
-                    event_old,
+                    event_old_data,
                 )
             cls._process_actions(event, data.get("outcome_id", None))
             cls._post_process_actions(event)
@@ -171,10 +169,10 @@ class EventService:
         }
         if current_app.config["SKIP_EVENT_LOGIC"]:
             return result
-        event_old = None
+        event_old_data = None
         if event_id:
             event = Event.find_by_id(event_id)
-            event_old = copy.copy(event)
+            event_old_data = event.as_dict(recursive=False)
         event_to_check = Event(**data)
         if event_id:
             event_to_check.event_configuration = event.event_configuration
@@ -187,7 +185,7 @@ class EventService:
             event_to_check.event_configuration.work_phase_id
         )
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
-            event_to_check, event_old, current_work_phase
+            event_to_check, event_old_data, current_work_phase
         )
         if number_of_days_to_be_pushed != 0:
             all_work_events = cls.find_events(
@@ -197,7 +195,6 @@ class EventService:
                 current_work_phase,
                 event_to_check,
                 all_work_events,
-                event_old,
                 number_of_days_to_be_pushed,
             )
             result["subsequent_event_push_required"] = True
@@ -210,7 +207,6 @@ class EventService:
         current_work_phase: WorkPhase,
         event: Event,
         all_work_events: List[Event],
-        event_old: Event,
         number_of_days_to_be_pushed: int,
     ):
         # pylint: disable=too-many-arguments,too-many-locals
@@ -234,7 +230,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         current_event_index = cls.find_event_index(
-            all_work_events, event_old if event_old else event, current_work_phase
+            all_work_events, event, current_work_phase
         )
         work_phases_to_be_checked = [all_work_phases[current_work_phase_index]]
         if current_work_phase.legislated:
@@ -342,7 +338,7 @@ class EventService:
         event: Event,
         all_work_events: List[Event],
         push_events: bool,
-        event_old: Event = None,
+        event_old_data: Event = None,
     ) -> None:
         # pylint: disable=too-many-arguments
         """Process the event date logic"""
@@ -358,13 +354,13 @@ class EventService:
         )
         cls._validate_dates(event, current_work_phase, all_work_phases)
         cls._previous_event_actual_date_rule(
-            all_work_events, all_work_phases, current_work_phase_index, event, event_old
+            all_work_events, all_work_phases, current_work_phase_index, event, event_old_data
         )
         cls._handle_work_start_date_for_start_event_start_phase(
             event, current_work_phase_index
         )
         number_of_days_to_be_pushed = cls._get_number_of_days_to_be_pushed(
-            event, event_old, current_work_phase
+            event, event_old_data, current_work_phase
         )
         cls._handle_work_phase_for_end_phase_end_event(
             all_work_phases, current_work_phase_index, event, current_work_phase
@@ -394,7 +390,7 @@ class EventService:
                 current_work_phase_index,
                 current_work_phase,
                 number_of_days_to_be_pushed,
-                event_old,
+                event_old_data,
             )
         else:
             all_work_event_configurations = (
@@ -411,15 +407,16 @@ class EventService:
         current_work_phase_index: int,
         current_work_phase: WorkPhase,
         number_of_days_to_be_pushed: int,
-        event_old: Event = None,
+        event_old_data: dict = None,
     ):
         # pylint: disable=too-many-arguments
         """Push the subsequent events or phases if push_events flag is set"""
+        event_old_copy = Event(**event_old_data)
         all_work_event_configurations = (
             EventConfigurationService.find_all_configurations_by_work(event.work_id)
         )
         current_event_index = cls.find_event_index(
-            all_work_events, event_old if event_old else event, current_work_phase
+            all_work_events, event_old_copy if event_old_copy else event, current_work_phase
         )
         cls._handle_child_events(all_work_event_configurations, event)
         current_future_work_phases = all_work_phases[current_work_phase_index:]
@@ -587,7 +584,7 @@ class EventService:
         number_of_days_to_be_pushed: int,
         push_events: bool,
     ) -> None:
-        """Update the work phase's start date if the start event's date changed"""
+        """Update the work phase's start and end date if the start event's date changed"""
         if event.event_position == EventPositionEnum.START.value:
             current_work_phase.start_date = find_event_date(event)
             # Adjust the phase end date when START event's date changed in a legislated phase
@@ -596,9 +593,6 @@ class EventService:
                 current_work_phase.end_date = current_work_phase.end_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
 
     @classmethod
     def _handle_work_start_date_for_start_event_start_phase(
@@ -612,7 +606,6 @@ class EventService:
         ):
             work = event.work
             work.start_date = event.actual_date
-            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _handle_end_event_date_when_start_event_changed(
@@ -625,10 +618,8 @@ class EventService:
     ):
         # pylint: disable=too-many-arguments
         """END event date change according to start event when the no-push subsequent events requested"""
-        # The date of the END event of a phase should be adjusted according to the number of days
-        # changed in the START event of the phase in the leslated phase. The total number of days
-        # in legislated phase should always remains the same unless and extension/suspension happened.
-        # This section of the code will work only if the push_events turned false.
+        # In legislated phases, when the START event date changes and push_events=False,
+        # shift the END event by the same delta to preserve the total phase duration.
 
         if (
             current_work_phase.legislated
@@ -646,14 +637,7 @@ class EventService:
                 ),
                 None,
             )
-            end_event_from_db = Event.find_by_id(end_event.id)
-            end_event_from_db.anticipated_date = (
-                end_event_from_db.anticipated_date
-                + timedelta(days=number_of_days_to_be_pushed)
-            )
-            end_event_from_db.update(
-                end_event_from_db.as_dict(recursive=False), commit=False
-            )
+            end_event.anticipated_date += timedelta(days=number_of_days_to_be_pushed)
 
     @classmethod
     def _handle_work_phase_for_suspension(
@@ -667,9 +651,6 @@ class EventService:
         ):
             current_work_phase.suspended_date = event.actual_date
             current_work_phase.is_suspended = True
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
 
     @classmethod
     def _handle_work_phase_for_resumption(
@@ -685,11 +666,7 @@ class EventService:
             and event.actual_date
         ):
             event.number_of_days = number_of_days_to_be_pushed
-            event.update(event.as_dict(recursive=False), commit=False)
             current_work_phase.is_suspended = False
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
 
     @classmethod
     def _handle_work_phase_for_end_phase_end_event(
@@ -707,9 +684,6 @@ class EventService:
         ):
             current_work_phase.is_completed = True
             current_work_phase.end_date = event.actual_date
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
-            )
 
             work: Work = Work.find_by_id(current_work_phase.work_id)
             if current_work_phase_index == len(all_work_phases) - 1:
@@ -718,7 +692,6 @@ class EventService:
                 work.current_work_phase_id = all_work_phases[
                     current_work_phase_index + 1
                 ].id
-            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def _handle_work_phase_for_extension_without_push_events(
@@ -737,9 +710,6 @@ class EventService:
         ):
             current_work_phase.end_date = current_work_phase.end_date + timedelta(
                 days=number_of_days_to_be_pushed
-            )
-            current_work_phase.update(
-                current_work_phase.as_dict(recursive=False), commit=False
             )
 
     @classmethod
@@ -781,16 +751,17 @@ class EventService:
 
     @classmethod
     def _get_number_of_days_to_be_pushed(
-        cls, event: Event, event_old: Event, current_work_phase: WorkPhase
+        cls, event: Event, event_old_data: dict, current_work_phase: WorkPhase
     ) -> int:
         # pylint: disable=too-many-return-statements
         """Returns the number of days to be pushed"""
+        event_old_copy = Event(**event_old_data)
         delta = (
             (
                 find_event_date(event).date()
-                - find_event_date(event_old).date()
+                - find_event_date(event_old_copy).date()
             ).days
-            if event_old
+            if event_old_copy
             else 0
         )  # used to have the difference
         number_of_days = event.number_of_days
@@ -817,10 +788,10 @@ class EventService:
             if event.actual_date:
                 return (event.actual_date - current_work_phase.suspended_date).days
             return 0
-        if event.event_configuration.multiple_days and event_old:
+        if event.event_configuration.multiple_days and event_old_copy:
             number_of_days = (
-                (event.number_of_days - event_old.number_of_days)
-                if event_old
+                (event.number_of_days - event_old_copy.number_of_days)
+                if event_old_copy
                 else event.number_of_days
             )
             return number_of_days + delta
@@ -837,18 +808,13 @@ class EventService:
         """Push events the given number of days"""
         for event_to_update in phase_events:
             if event_to_update.id != event.id:
-                event_from_db = Event.find_by_id(event_to_update.id)
-                if (
-                    not event_from_db.actual_date
-                ):  # do not modify already locked milestones
-                    event_from_db.anticipated_date = (
-                        event_from_db.anticipated_date
-                        + timedelta(days=number_of_days_to_be_pushed)
-                    )
-                event_from_db.update(
-                    event_from_db.as_dict(recursive=False), commit=False
-                )
-                cls._handle_child_events(all_work_event_configurations, event_from_db)
+                # Skip locked milestones
+                if event_to_update.actual_date:
+                    continue
+                # Push anticipated date
+                event_to_update.anticipated_date += timedelta(days=number_of_days_to_be_pushed)
+                # Handle child events
+                cls._handle_child_events(all_work_event_configurations, event_to_update)
 
     @classmethod
     def _push_work_phases(
@@ -894,9 +860,6 @@ class EventService:
                 each_work_phase.end_date = each_work_phase.end_date + timedelta(
                     days=number_of_days_to_be_pushed
                 )
-                each_work_phase.update(
-                    each_work_phase.as_dict(recursive=False), commit=False
-                )
 
     @classmethod
     def _find_work_phase_events(
@@ -921,13 +884,14 @@ class EventService:
         all_work_phases: List[WorkPhase],
         current_work_phase_index: int,
         event: Event,
-        event_old,
+        event_old_data,
     ) -> None:
         """Check to see if the previous event has actual date present
 
         # When you put actual date of an event, it is mandatory to
         have actual dates in all the previous events.
         """
+        event_old_copy = Event(**event_old_data)
         if event.actual_date:
             if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
@@ -941,7 +905,7 @@ class EventService:
             ):
                 event_index = cls.find_event_index(
                     all_work_events,
-                    event_old if event_old else event,
+                    event_old_copy if event_old_copy else event,
                     all_work_phases[current_work_phase_index],
                 )
                 phase_events = cls._find_work_phase_events(
@@ -988,7 +952,6 @@ class EventService:
                         work_calendar_event.calendar_event_id
                     )
                     cal_event.anticipated = c_event_start_date
-                    cal_event.update(cal_event.as_dict(), commit=False)
                 else:
                     cal_event = CalendarEvent.flush(
                         CalendarEvent(
@@ -1018,9 +981,6 @@ class EventService:
                 )
                 if existing_event:
                     existing_event.anticipated_date = c_event_start_date
-                    existing_event.update(
-                        existing_event.as_dict(recursive=False), commit=False
-                    )
                 else:
                     Event.flush(
                         Event(
@@ -1204,7 +1164,6 @@ class EventService:
             and work.current_work_phase_id != all_work_phases[0].id
         ):
             work.current_work_phase_id = all_work_phases[0].id
-            work.update(work.as_dict(recursive=False), commit=False)
 
     @classmethod
     def find_events_by_date(cls, from_date: datetime) -> List[Event]:

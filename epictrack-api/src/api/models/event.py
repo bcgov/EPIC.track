@@ -13,6 +13,7 @@
 # limitations under the License.
 """Model to handle all operations related to Event."""
 
+import copy
 from datetime import date
 from sqlalchemy import Boolean, Column, Date, DateTime, ForeignKey, Integer, String, and_, cast, func, literal_column, or_
 from sqlalchemy.orm import relationship, aliased
@@ -64,6 +65,17 @@ class Event(BaseModelVersioned):
         "EventConfiguration", foreign_keys=[event_configuration_id], lazy="select"
     )
     notes = Column(String)
+
+    def as_dict_snapshot(self, recursive=True):
+        """Return JSON Representation (detached copy)."""
+        mapper = self.__mapper__
+        result = {c.key: getattr(self, c.key) for c in mapper.columns}
+        if recursive:
+            for rel in mapper.relationships:
+                relationship_name = rel.key
+                relational_data = getattr(self, relationship_name, None)
+                result[relationship] = relational_data.as_dict() if relational_data else None
+        return copy.deepcopy(result)
 
     @classmethod
     def find_by_work_id(cls, work_id: int):
