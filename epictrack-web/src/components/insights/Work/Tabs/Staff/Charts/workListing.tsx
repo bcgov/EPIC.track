@@ -222,6 +222,25 @@ const WorkList = () => {
         },
       },
       {
+        accessorFn: (row) =>
+          row.staff?.map((s) => `${s.first_name} ${s.last_name}`).join(", ") ||
+          "",
+        id: "staff",
+        header: "Staff",
+        size: 200,
+        Cell: ({ row }) => {
+          const staffList = row.original.staff
+            ?.map((s) => `${s.first_name} ${s.last_name}`)
+            .join(", ");
+          return <span>{staffList}</span>;
+        },
+        filterFn: (row, id, filterValue) => {
+          if (!filterValue) return true;
+          const value: string = row.getValue(id) || "";
+          return value.toLowerCase().includes(filterValue.toLowerCase());
+        },
+      },
+      {
         accessorKey: "work_lead.full_name",
         header: "Lead",
         size: 100,
