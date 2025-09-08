@@ -21,7 +21,7 @@ from typing import List, Dict, Any, Union
 from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
-from api.schemas.work_v2 import WorkPhaseSchema
+from api.schemas.work import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
 from api.services.event import EventService
