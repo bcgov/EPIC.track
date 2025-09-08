@@ -189,7 +189,10 @@ export const EventCalendarProvider = ({
 
       setEvents([...mappedEvents, ...mappedTasks]);
     } catch (error) {
-      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+      showNotification("Failed to load My Calendar", {
+        type: "error",
+        duration: 3000,
+      });
     } finally {
       setLoading(false);
     }
