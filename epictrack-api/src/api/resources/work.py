@@ -72,7 +72,7 @@ class WorkDashboard(Resource):
             page=args.get('page', None, int),
             size=args.get('size', None, int),
             sort_key=args.get('sort_key', 'name', str),
-            sort_order=args.get('sort_order', 'asc', str),
+            sort_order=args.get('sort_order', 'desc', str),
         )
         search_options = WorkplanDashboardSearchOptions(
             teams=list(map(int, args.getlist('teams[]'))),
@@ -82,7 +82,6 @@ class WorkDashboard(Resource):
             work_types=list(map(int, args.getlist('work_types[]'))),
             text=args.get('text', None, str),
             staff_id=args.get('staff_id', None, int),
-            sort_order=args.get('sort_order', 'desc', str),
         )
         works = WorkService.fetch_all_work_plans(pagination_options, search_options)
         return jsonify(works), HTTPStatus.OK
