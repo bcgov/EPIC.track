@@ -54,6 +54,11 @@ interface EventCalendarContextType {
 
   collapsedMonths: Record<string, boolean>;
   toggleMonth: (month: string) => void;
+
+  milestoneSelected: boolean;
+  setMilestoneSelected: React.Dispatch<React.SetStateAction<boolean>>;
+  taskSelected: boolean;
+  setTaskSelected: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const EventCalendarContext = createContext<
@@ -100,6 +105,12 @@ export const EventCalendarProvider = ({
   const [taskEvent, setTaskEvent] = useState<TaskEvent>();
   const [work, setWork] = useState<Work>();
   const [workPhase, setWorkPhase] = useState<WorkPhase>();
+
+  const [milestoneSelected, setMilestoneSelected] = useState(false);
+  const [taskSelected, setTaskSelected] = useState(false);
+
+  const [mappedEvents, setMappedEvents] = useState<CalendarEvent[]>([]);
+  const [mappedTasks, setMappedTasks] = useState<CalendarEvent[]>([]);
 
   const modalOpen = selectedEvent !== null;
 
@@ -171,7 +182,6 @@ export const EventCalendarProvider = ({
         work_name: element.work_name,
         work_id: element.event.work_id,
       }));
-
       const mappedTasks = taskItems.map((element) => ({
         event: {
           ...element.event,
@@ -186,7 +196,8 @@ export const EventCalendarProvider = ({
         work_name: element.work_name,
         work_id: element.work_id,
       }));
-
+      setMappedEvents(mappedEvents);
+      setMappedTasks(mappedTasks);
       setEvents([...mappedEvents, ...mappedTasks]);
     } catch (error) {
       showNotification("Failed to load My Calendar", {
@@ -197,6 +208,20 @@ export const EventCalendarProvider = ({
       setLoading(false);
     }
   }, [searchOptions]);
+
+  useEffect(() => {
+    // Handle filtering of milestones and tasks based on the toggle. Default behavior (none selected) shows both
+    if (
+      (milestoneSelected && taskSelected) ||
+      (!milestoneSelected && !taskSelected)
+    ) {
+      setEvents([...mappedEvents, ...mappedTasks]);
+    } else if (milestoneSelected) {
+      setEvents([...mappedEvents]);
+    } else if (taskSelected) {
+      setEvents([...mappedTasks]);
+    }
+  }, [milestoneSelected, taskSelected, mappedEvents, mappedTasks]);
 
   const refetchEvents = getEvents;
 
@@ -300,6 +325,10 @@ export const EventCalendarProvider = ({
     toggleMonth,
     work,
     workPhase,
+    milestoneSelected,
+    setMilestoneSelected,
+    taskSelected,
+    setTaskSelected,
   };
 
   return (
