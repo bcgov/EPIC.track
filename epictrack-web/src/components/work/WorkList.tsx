@@ -54,6 +54,11 @@ const WorkList = () => {
     setLoadingWorks(true);
     try {
       const response = await workService.getAll();
+      if (response.status !== 200) {
+        setWorks([]);
+        setLoadingWorks(false);
+        throw new Error("Could not fetch works");
+      }
       setWorks(sort(response.data, "title"));
       setLoadingWorks(false);
     } catch (error) {

@@ -118,6 +118,16 @@ export const MyWorkplansProvider = ({
           PAGE_SIZE,
           searchOptions
         );
+        if (!result || !result.data) {
+          setWorkplans([]);
+          setTotalWorkplans(0);
+          setLoadingWorkplans(false);
+          showNotification("Failed to load Workplans", {
+            type: "error",
+            duration: 3000,
+          });
+          return;
+        }
         setPage(page);
         setWorkplans((prev) =>
           shouldAppend
