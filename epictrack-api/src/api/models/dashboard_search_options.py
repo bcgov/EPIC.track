@@ -16,6 +16,7 @@ class WorkplanDashboardSearchOptions:  # pylint: disable=too-many-instance-attri
     text: str
     work_states: Optional[List[str]]
     work_types: Optional[List[int]]
+    sort_order: str
 
 
 @dataclass

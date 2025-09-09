@@ -82,6 +82,7 @@ class WorkDashboard(Resource):
             work_types=list(map(int, args.getlist('work_types[]'))),
             text=args.get('text', None, str),
             staff_id=args.get('staff_id', None, int),
+            sort_order=args.get('sort_order', 'desc', str),
         )
         works = WorkService.fetch_all_work_plans(pagination_options, search_options)
         return jsonify(works), HTTPStatus.OK

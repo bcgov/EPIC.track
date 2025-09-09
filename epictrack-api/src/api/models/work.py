@@ -205,7 +205,10 @@ class Work(BaseModelVersioned):
         """Fetch all active works."""
         query = cls.query.filter_by(is_deleted=False)
         query = cls.filter_by_search_criteria(query, search_filters)
-        query = query.order_by(Work.start_date.desc())
+        if search_filters and search_filters.sort_order == "asc":
+            query = query.order_by(Work.start_date.asc())
+        else:
+            query = query.order_by(Work.start_date.desc())
 
         no_pagination_options = not pagination_options or not pagination_options.page or not pagination_options.size
         if no_pagination_options:
