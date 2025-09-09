@@ -218,7 +218,7 @@ export const EventCalendarProvider = ({
     } else if (taskSelected) {
       setEvents([...mappedTasks]);
     }
-  }, [milestoneSelected, taskSelected]);
+  }, [milestoneSelected, taskSelected, mappedEvents, mappedTasks]);
 
   const refetchEvents = getEvents;
 

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Box, ToggleButton } from "@mui/material";
 import { LEGEND_COLOURS } from "../constants";
 import { ETCaption1 } from "components/shared";
