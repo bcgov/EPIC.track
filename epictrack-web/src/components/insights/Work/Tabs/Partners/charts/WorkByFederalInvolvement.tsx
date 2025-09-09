@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -13,7 +12,6 @@ import { getChartColor } from "components/insights/utils";
 import { WorkByFederalInvolvement } from "models/insights";
 import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
 const WorkByFederalInvolvementChart = () => {
@@ -34,14 +32,15 @@ const WorkByFederalInvolvementChart = () => {
     });
   };
 
-  if (isChartLoading) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works by Federal Involvement data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || error) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const chartData = formatData(data);

@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
@@ -6,7 +5,6 @@ import { getChartColor } from "components/insights/utils";
 import { useGetWorksByTypeQuery } from "services/rtkQuery/workInsights";
 import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
 const WorkByTypeChart = () => {
@@ -16,14 +14,15 @@ const WorkByTypeChart = () => {
     isLoading: isChartLoading,
   } = useGetWorksByTypeQuery();
 
-  if (isChartLoading || !chartData) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works by Type data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || !chartData) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const formatData = (data: WorkByType[]) => {

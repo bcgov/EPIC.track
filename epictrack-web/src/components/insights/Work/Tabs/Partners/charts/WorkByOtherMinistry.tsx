@@ -13,7 +13,6 @@ import { getChartColor } from "components/insights/utils";
 import { WorkByMinistry } from "models/insights";
 import { useGetWorkByMinistryQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
 const WorkByOtherMinistryChart = () => {
@@ -34,14 +33,15 @@ const WorkByOtherMinistryChart = () => {
     });
   };
 
-  if (isChartLoading) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works by Ministry data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || error) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const chartData = formatData(data);

@@ -5,7 +5,6 @@ import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import TrackSelect from "components/shared/TrackSelect";
 import { OptionType } from "components/shared/filterSelect/type";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { WorkStateByYear } from "models/insights";
 import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
@@ -42,15 +41,17 @@ const WorksClosedYearlyBreakdown = () => {
     setDisplayData(filteredData);
   }, [chartData, selectedYear]);
 
-  if (isChartLoading || !chartData) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load yearly closed Works data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || !chartData) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
+
   return (
     <GrayBox sx={{ height: "100%" }}>
       <Grid container spacing={1}>

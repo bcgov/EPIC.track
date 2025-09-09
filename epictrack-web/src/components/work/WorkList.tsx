@@ -57,7 +57,7 @@ const WorkList = () => {
       setWorks(sort(response.data, "title"));
       setLoadingWorks(false);
     } catch (error) {
-      showNotification("Could not load works", { type: "error" });
+      showNotification("Could not load Works", { type: "error" });
     }
   };
 

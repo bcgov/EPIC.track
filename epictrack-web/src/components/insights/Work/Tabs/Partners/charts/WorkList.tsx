@@ -36,7 +36,10 @@ const WorkList = () => {
 
   useEffect(() => {
     if (error) {
-      showNotification("Error fetching works", { type: "error" });
+      showNotification("Error fetching Works", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [error]);
 

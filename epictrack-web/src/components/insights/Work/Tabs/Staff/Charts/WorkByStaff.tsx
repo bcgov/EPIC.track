@@ -2,7 +2,6 @@ import { Box, Grid } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByStaffQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import {
   Bar,
   BarChart,
@@ -22,14 +21,15 @@ const WorkByStaffChart = () => {
     isLoading: isChartLoading,
   } = useGetWorksByStaffQuery();
 
-  if (isChartLoading || !chartData) {
-    return <BarChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works by Staff data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || !chartData) {
+    return <BarChartSkeleton loading={isChartLoading} />;
   }
 
   const formatData = (data: WorkByStaff[]) => {

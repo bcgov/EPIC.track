@@ -13,7 +13,6 @@ import { getChartColor } from "components/insights/utils";
 import { useGetProjectByTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 
 const ProjectByTypeChart = () => {
@@ -24,12 +23,14 @@ const ProjectByTypeChart = () => {
   } = useGetProjectByTypeQuery();
 
   if (isChartLoading || !chartData) {
-    return <PieChartSkeleton />;
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
-  // TODO: handle error TRACK-528
   if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+    showNotification("Could not load Project By Type data", {
+      duration: 3000,
+      type: "error",
+    });
     return <div>Error</div>;
   }
 
