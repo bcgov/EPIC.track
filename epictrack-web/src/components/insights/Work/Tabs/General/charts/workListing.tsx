@@ -75,7 +75,10 @@ const WorkList = () => {
 
   useEffect(() => {
     if (error) {
-      showNotification("Error fetching works", { type: "error" });
+      showNotification("Error fetching Works", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [error]);
 
@@ -86,7 +89,6 @@ const WorkList = () => {
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
-          // <Link to={`/work-plan?work_id=${row.original.id}`}>
           <ETGridTitle
             to={`/work-plan?work_id=${row.original.id}`}
             enableTooltip
@@ -94,7 +96,6 @@ const WorkList = () => {
           >
             {renderedCellValue}
           </ETGridTitle>
-          // </Link>
         ),
         sortingFn: "sortFn",
         filterFn: searchFilter,

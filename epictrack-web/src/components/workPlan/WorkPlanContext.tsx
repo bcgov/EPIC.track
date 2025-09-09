@@ -11,10 +11,7 @@ import { useSearchParams } from "../../hooks/useSearchParams";
 import { workService } from "../../services/workService/workService";
 import { Work, WorkPhaseAdditionalInfo } from "../../models/work";
 import { StaffWorkRole } from "../../models/staff";
-import {
-  ACTIVE_STATUS,
-  COMMON_ERROR_MESSAGE,
-} from "../../constants/application-constant";
+import { ACTIVE_STATUS } from "../../constants/application-constant";
 import { showNotification } from "../shared/notificationProvider";
 import { WorkFirstNation } from "../../models/firstNation";
 import { Status } from "../../models/status";
@@ -183,8 +180,10 @@ export const WorkplanProvider = ({
         setTeam(team);
       }
     } catch (e) {
-      // TODO: handle error TRACK-528
-      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+      showNotification("Could not load Team Members", {
+        duration: 3000,
+        type: "error",
+      });
     }
   }, [workId]);
 
@@ -216,8 +215,11 @@ export const WorkplanProvider = ({
       await getIssues();
       setLoading(false);
     } catch (e) {
-      // TODO: handle error TRACK-528
-      showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
+      console.error(e);
+      showNotification("Failed to load some Workplan information", {
+        type: "error",
+        duration: 3000,
+      });
     } finally {
       setLoading(false);
     }

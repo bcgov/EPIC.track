@@ -2,7 +2,6 @@ import { Grid } from "@mui/material";
 import { ETCaption1, GrayBox } from "components/shared";
 import { useGetWorksByTeamQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import {
   Cell,
   Legend,
@@ -22,14 +21,15 @@ const WorkByTeamChart = () => {
     isLoading: isChartLoading,
   } = useGetWorksByTeamQuery();
 
-  if (isChartLoading || !chartData) {
-    return <PieChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works by Team data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || !chartData) {
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const formatData = (data: WorkByTeam[]) => {

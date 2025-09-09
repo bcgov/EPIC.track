@@ -5,7 +5,6 @@ import { BAR_COLOR } from "components/insights/utils";
 import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 
 const WorkByNationChart = () => {
@@ -21,14 +20,15 @@ const WorkByNationChart = () => {
     });
   };
 
-  if (isChartLoading) {
-    return <BarChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Work by Nation data", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || error) {
+    return <BarChartSkeleton loading={isChartLoading} />;
   }
 
   const chartData = formatData(data);

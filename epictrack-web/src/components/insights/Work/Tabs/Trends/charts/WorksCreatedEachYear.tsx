@@ -3,7 +3,6 @@ import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { getChartColor } from "components/insights/utils";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
-import { COMMON_ERROR_MESSAGE } from "constants/application-constant";
 import { WorkByYear } from "models/insights";
 import { Tooltip, BarChart, Bar, XAxis, YAxis, Cell } from "recharts";
 import { useGetWorksByYearOpenedQuery } from "services/rtkQuery/workInsights";
@@ -15,14 +14,15 @@ const WorksCreatedEachYear = () => {
     isLoading: isChartLoading,
   } = useGetWorksByYearOpenedQuery();
 
-  if (isChartLoading || !chartData) {
-    return <BarChartSkeleton />;
+  if (error) {
+    showNotification("Could not load Works created each year", {
+      duration: 3000,
+      type: "error",
+    });
   }
 
-  // TODO: handle error TRACK-528
-  if (error) {
-    showNotification(COMMON_ERROR_MESSAGE, { type: "error" });
-    return <div>Error</div>;
+  if (isChartLoading || !chartData) {
+    return <BarChartSkeleton loading={isChartLoading} />;
   }
 
   const formatData = (data: WorkByYear[]) => {
