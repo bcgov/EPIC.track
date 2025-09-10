@@ -411,7 +411,7 @@ class EventService:
     ):
         # pylint: disable=too-many-arguments
         """Push the subsequent events or phases if push_events flag is set"""
-        event_old_copy = Event(**event_old_data)
+        event_old_copy = Event(**event_old_data) if event_old_data else None
         all_work_event_configurations = (
             EventConfigurationService.find_all_configurations_by_work(event.work_id)
         )
@@ -755,7 +755,7 @@ class EventService:
     ) -> int:
         # pylint: disable=too-many-return-statements
         """Returns the number of days to be pushed"""
-        event_old_copy = Event(**event_old_data)
+        event_old_copy = Event(**event_old_data) if event_old_data else None
         delta = (
             (
                 find_event_date(event).date()
@@ -891,7 +891,7 @@ class EventService:
         # When you put actual date of an event, it is mandatory to
         have actual dates in all the previous events.
         """
-        event_old_copy = Event(**event_old_data)
+        event_old_copy = Event(**event_old_data) if event_old_data else None
         if event.actual_date:
             if current_work_phase_index > 0:
                 previous_work_phase = all_work_phases[current_work_phase_index - 1]
