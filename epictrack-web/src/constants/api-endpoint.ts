@@ -173,5 +173,10 @@ const Endpoints = {
     STALENESS: "/staleness-settings",
     UPDATE_STALENESS_BY_TYPE: "/staleness-settings/:staleness_type",
   },
+  WorkResources: {
+    WORK_RESOURCES: "/work-resources",
+    GET_WORK_RESOURCES_BY_WORK: "/work-resources?work_id=:work_id",
+    WORK_RESOURCE_BY_ID: "/work-resources/:work_resource_id",
+  },
 };
 export default Endpoints;

@@ -398,3 +398,17 @@ class TestStaffElevatedRole(Enum):
         "elevated_role_id": TestElevatedRoleEnum.MANAGE_FIRST_NATIONS.value,
         "is_active": False
     }
+
+
+class TestWorkResourceInfo(Enum):
+    """Test scenarios of Work Resource creation."""
+
+    work_resource1 = {
+        "title": fake.word(),
+        "link": fake.word()
+    }
+
+    work_resource2 = {
+        "title": fake.word(),
+        "link": fake.word()
+    }

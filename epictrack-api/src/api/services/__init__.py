@@ -48,3 +48,4 @@ from .work import WorkService
 from .work_issues import WorkIssuesService
 from .work_phase import WorkPhaseService
 from .work_status import WorkStatusService
+from .work_resource import WorkResourceService

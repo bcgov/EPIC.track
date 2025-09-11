@@ -21,19 +21,19 @@ describe("ReportHeader", () => {
 
   it("renders report header with date picker", () => {
     cy.contains("Report Date").should("exist");
-    cy.contains("Submit").should("exist");
+    cy.contains("Generate").should("exist");
     cy.contains("Download").should("exist");
   });
 
-  it("shows an error message if no date is selected on submit", () => {
-    cy.contains("Submit").click();
+  it("shows an error message if no date is selected on Generate", () => {
+    cy.contains("Generate").click();
     cy.get('[role="alert"]').should(
       "contain.text",
       "Please select a date before generating the report."
     );
   });
 
-  it("allows selecting a date via date picker and submits the report", () => {
+  it("allows selecting a date via date picker and Generates the report", () => {
     cy.get('[aria-label="Choose date"]').click();
 
     // Click today's date and close the calendar
@@ -41,7 +41,7 @@ describe("ReportHeader", () => {
     cy.get("body").click(0, 0);
     cy.get('[role="dialog"]').should("not.exist");
 
-    cy.contains("Submit").click();
+    cy.contains("Generate").click();
     cy.get("@fetchReportData").should("have.been.called");
   });
 

@@ -130,3 +130,9 @@ from .ministry_request import (
     MinistryBodyParameterSchema,
     MinistryUpdateParameterSchema,
 )
+from .work_resource_request import (
+    WorkResourceRequestSchema,
+    WorkResourceBodySchema,
+    WorkResourceIdPathSchema,
+    WorkResourceUpdateBodySchema
+)

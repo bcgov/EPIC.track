@@ -72,7 +72,7 @@ class WorkDashboard(Resource):
             page=args.get('page', None, int),
             size=args.get('size', None, int),
             sort_key=args.get('sort_key', 'name', str),
-            sort_order=args.get('sort_order', 'asc', str),
+            sort_order=args.get('sort_order', 'desc', str),
         )
         search_options = WorkplanDashboardSearchOptions(
             teams=list(map(int, args.getlist('teams[]'))),
