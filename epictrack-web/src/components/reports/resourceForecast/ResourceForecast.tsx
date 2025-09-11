@@ -27,7 +27,7 @@ import ReportService from "../../../services/reportService";
 import { dateUtils } from "../../../utils";
 import { ResourceForecastModel } from "./type";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer, ETParagraph, IButton } from "../../shared";
+import { ETReportContainer, ETParagraph, IButton } from "../../shared";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { showNotification } from "components/shared/notificationProvider";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
@@ -433,7 +433,7 @@ export default function ResourceForecast() {
   }, [includeFirstPhase, reportDate, filters]);
 
   return (
-    <ETPageContainer
+    <ETReportContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -451,7 +451,7 @@ export default function ResourceForecast() {
           showReportDateBanner={showReportDateBanner}
         />
       </Grid>
-      <Grid item sm={12}>
+      <Grid item sm={11.75} sx={{ marginLeftight: "1rem" }}>
         <MasterTrackTable
           columns={columns}
           enablePagination
@@ -519,6 +519,6 @@ export default function ResourceForecast() {
           data={rfData}
         />
       </Grid>
-    </ETPageContainer>
+    </ETReportContainer>
   );
 }

@@ -69,8 +69,8 @@ describe("ResourceForecast", () => {
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
-    // Submit the report
-    cy.contains("Submit").click();
+    // Generate the report
+    cy.contains("Generate").click();
     cy.wait("@getRFReport");
     cy.contains("Test Work").should("be.visible");
   });
