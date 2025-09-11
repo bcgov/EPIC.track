@@ -38,7 +38,7 @@ import { dateUtils } from "../../../utils";
 import Icons from "../../icons";
 import { IconProps } from "../../icons/type";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer } from "../../shared";
+import { ETReportContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
 import { WorkIssue } from "models/Issue";
 import stalenessSettingsService from "services/stalenessSettingsService";
@@ -263,7 +263,7 @@ export default function ThirtySixtyNinety() {
   };
 
   return (
-    <ETPageContainer
+    <ETReportContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -523,6 +523,6 @@ export default function ThirtySixtyNinety() {
           </>
         )}
       </Grid>
-    </ETPageContainer>
+    </ETReportContainer>
   );
 }

@@ -1,10 +1,16 @@
-import { useState } from "react";
+import { useState, FC } from "react";
 import { Alert, Box, Button, FormLabel, Grid, Tooltip } from "@mui/material";
 import InfoIcon from "@mui/icons-material/Info";
 import { dateUtils } from "../../../../utils";
 import { ETFormLabel } from "components/shared";
 import { CustomSwitch } from "components/shared/CustomSwitch";
 import TrackDatePicker from "components/shared/DatePicker";
+import Icons from "components/icons";
+import { IconProps } from "components/icons/type";
+import { Palette } from "styles/theme";
+
+const GenerateIcon: FC<IconProps> = Icons["GenerateIcon"];
+const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
 const ReportHeader = ({ ...props }) => {
   const [dateSelected, setDateSelected] = useState<boolean>(false);
@@ -29,9 +35,15 @@ const ReportHeader = ({ ...props }) => {
         onSubmit={(e) => e.preventDefault()}
         container
         spacing={2}
-        sx={{ marginTop: "5px" }}
+        sx={{
+          marginTop: "5px",
+          bgcolor: Palette.neutral.bg.light,
+          padding: "2.5rem",
+          borderBottom: `2px solid ${Palette.neutral.bg.dark}`,
+          alignItems: "center",
+        }}
       >
-        <Grid item sm={2}>
+        <Grid item sm={1}>
           <FormLabel>Report Date</FormLabel>
         </Grid>
         <Grid item sm={2}>
@@ -47,9 +59,10 @@ const ReportHeader = ({ ...props }) => {
                 id: "ReportDate",
               },
             }}
+            sx={{ width: "90%" }}
           />
         </Grid>
-        <Grid item xs={2}>
+        <Grid item xs={3} sx={{ alignContent: "center", paddingLeft: "4rem" }}>
           <CustomSwitch
             checked={props.includeFirstPhase}
             name="include_first_phase"
@@ -78,21 +91,22 @@ const ReportHeader = ({ ...props }) => {
             </Box>
           </Tooltip>
         </Grid>
-        <Grid item sm={2}></Grid>
         <Grid item sm={2}>
           <Button
             variant="contained"
             type="submit"
             onClick={() => validateDate(props.fetchReportData)}
             sx={{ float: "right" }}
+            endIcon={<GenerateIcon />}
           >
-            Submit
+            Generate
           </Button>
         </Grid>
         <Grid item sm={2}>
           <Button
             variant="contained"
             onClick={() => validateDate(props.downloadPDFReport)}
+            endIcon={<DownloadIcon />}
           >
             Download
           </Button>

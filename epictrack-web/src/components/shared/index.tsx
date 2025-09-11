@@ -72,6 +72,22 @@ export const ETPageContainer = (props: PageContainerProps) => {
     </Grid>
   );
 };
+export const ETReportContainer = (props: PageContainerProps) => {
+  const state = useAppSelector((state) => state.uiState);
+  return (
+    <Grid
+      {...props}
+      sx={{
+        ...props.sx,
+        padding: `${state.showEnvBanner ? "6" : "4"}rem 0rem 1rem 0rem`,
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+      }}
+    >
+      {props.children}
+    </Grid>
+  );
+};
 export const ETHeading1 = ({ bold, children, sx, ...rest }: HeaderProps) => {
   return (
     <Typography

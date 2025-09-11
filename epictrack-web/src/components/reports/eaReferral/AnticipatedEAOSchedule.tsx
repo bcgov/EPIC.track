@@ -29,7 +29,7 @@ import {
 } from "../../../constants/application-constant";
 import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
-import { ETPageContainer } from "../../shared";
+import { ETReportContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
 
 interface Group {
@@ -159,7 +159,7 @@ export default function AnticipatedEAOSchedule() {
     );
   }
   return (
-    <ETPageContainer
+    <ETReportContainer
       direction="row"
       justifyContent="flex-start"
       alignItems="flex-start"
@@ -434,6 +434,6 @@ export default function AnticipatedEAOSchedule() {
           </>
         )}
       </Grid>
-    </ETPageContainer>
+    </ETReportContainer>
   );
 }
