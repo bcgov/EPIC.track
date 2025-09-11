@@ -32,7 +32,7 @@ describe("Anticipated/Referral Schedule", () => {
     cy.get('[aria-label="Choose date"]').click();
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
-    cy.get("button").contains("Submit").click();
+    cy.get("button").contains("Generate").click();
 
     // Confirm groups rendered
     AS_GROUP_HEADERS.forEach((header) => {
@@ -45,7 +45,7 @@ describe("Anticipated/Referral Schedule", () => {
     cy.get('[aria-label="Choose date"]').click();
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
-    cy.get("button").contains("Submit").click();
+    cy.get("button").contains("Generate").click();
 
     // Expand first work
     cy.contains(AS_GROUP_HEADERS[0])

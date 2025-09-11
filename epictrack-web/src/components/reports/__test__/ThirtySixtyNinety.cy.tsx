@@ -33,7 +33,7 @@ describe("30-60-90 Report", () => {
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
-    cy.contains("Submit").click();
+    cy.contains("Generate").click();
 
     // Check that the report sections are displayed
     cy.get('[role="region"]').should("have.length.at.least", 1);
@@ -48,7 +48,7 @@ describe("30-60-90 Report", () => {
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
-    cy.contains("Submit").click();
+    cy.contains("Generate").click();
 
     // Expand first work
     cy.contains("30")
@@ -66,12 +66,12 @@ describe("30-60-90 Report", () => {
   });
 
   it("shows Work Short Description when tab clicked", () => {
-    // Click today's date and submit
+    // Click today's date and Generate
     cy.get('[aria-label="Choose date"]').click();
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
-    cy.contains("Submit").click();
+    cy.contains("Generate").click();
 
     // Expand first work
     cy.contains("30")
@@ -88,12 +88,12 @@ describe("30-60-90 Report", () => {
   });
 
   it("shows Status with correct staleness chip", () => {
-    // Click today's date and submit
+    // Click today's date and Generate
     cy.get('[aria-label="Choose date"]').click();
     cy.get('[aria-current="date"]').click();
     cy.get("body").type("{esc}");
     cy.get('[role="dialog"]').should("not.exist");
-    cy.contains("Submit").click();
+    cy.contains("Generate").click();
 
     // Expand first work
     cy.contains("30")
