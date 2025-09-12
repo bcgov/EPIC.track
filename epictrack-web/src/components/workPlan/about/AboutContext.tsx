@@ -77,7 +77,7 @@ export const AboutProvider = ({
         type: "error",
       });
     }
-  }, [selectedWorkResource]);
+  }, [selectedWorkResource, workId]);
 
   const getWorkResources = useCallback(async () => {
     if (!workId) return;
