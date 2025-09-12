@@ -272,7 +272,6 @@ def test_work_resources(client, auth_header):
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
     work_resource_json = response.json[0]
-    print(response.json)
     assert work_resource_json["eao_team"]["id"] == work_response_json["eao_team_id"]
     assert work_resource_json["project"]["id"] == work_response_json["project_id"]
     assert (

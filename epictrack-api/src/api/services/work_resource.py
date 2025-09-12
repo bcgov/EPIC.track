@@ -45,7 +45,6 @@ class WorkResourceService:
         """Delete (soft delete) resource"""
         cls._check_delete_auth()
         resource = WorkResource.find_by_id(resource_id)
-        print(resource)
         if not resource:
             raise ResourceNotFoundError('Resource not found')
         resource.is_deleted = True
