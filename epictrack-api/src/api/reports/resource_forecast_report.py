@@ -112,14 +112,14 @@ class EAResourceForeCastReport(ReportFactory):
                     "width": 0.057,
                 },
                 {"data_key": "ea_act", "label": "EA ACT", "width": 0.03},
-                {"data_key": "iaac", "label": "IAAC", "width": 0.0395},
+                {"data_key": "iaac", "label": "IAAC", "width": 0.0405},
                 {"data_key": "sector(sub)", "label": "TYPE (SUB)", "width": 0.038},
                 {"data_key": "env_region", "label": "MOE REGION", "width": 0.041},
                 {"data_key": "nrs_region", "label": "NRS REGION", "width": 0.041},
             ],
             "EAO RESOURCING": [
                 {"data_key": "responsible_epd", "label": "EPD LEAD", "width": 0.040},
-                {"data_key": "eao_team", "label": "TEAM", "width": 0.028},
+                {"data_key": "eao_team", "label": "TEAM", "width": 0.031},
                 {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.045},
                 {
                     "data_key": "work_team_members",
@@ -374,6 +374,14 @@ class EAResourceForeCastReport(ReportFactory):
             )
         return work_data
 
+    def _format_long_region(self, work_data):
+        """Format the region. If region name is long and has a hyphen, split it into two lines"""
+        if work_data.get("env_region", None) and len(work_data["env_region"]) > 12:
+            work_data["env_region"] = work_data["env_region"].replace("-", "-\n")
+        if work_data.get("nrs_region", None) and len(work_data["nrs_region"]) > 12:
+            work_data["nrs_region"] = work_data["nrs_region"].replace("-", "-\n")
+        return work_data
+
     def _format_ea_type(self, work_data):
         """Format the capital investment"""
         if work_data.get("project_phase", None) == 'Pre-EA (EAC Assessment)':
@@ -394,6 +402,7 @@ class EAResourceForeCastReport(ReportFactory):
             work_data["work_team_members"] = ", ".join(staffs)
             work_data = self._format_capital_investment(work_data)
             work_data = self._handle_months(work_data)
+            work_data = self._format_long_region(work_data)
             work_data = self._format_ea_type(work_data)
             if report_title:
                 work_data["report_title"] = report_title
