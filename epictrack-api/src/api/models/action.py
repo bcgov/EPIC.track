@@ -36,6 +36,7 @@ class ActionEnum(enum.Enum):
     CHANGE_PHASE_END_EVENT = 11
     SET_FEDERAL_INVOLVEMENT = 12
     SET_PROJECT_STATE = 13
+    SET_EVENT_NAME = 14
 
 
 class Action(db.Model, CodeTableVersioned):

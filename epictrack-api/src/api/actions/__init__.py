@@ -17,6 +17,7 @@ from .add_phase import AddPhase
 from .create_work import CreateWork
 from .lock_work_start_date import LockWorkStartDate
 from .set_event_date import SetEventDate
+from .set_event_name import SetEventName
 from .set_events_status import SetEventsStatus
 from .set_phases_status import SetPhasesStatus
 from .set_project_status import SetProjectStatus
