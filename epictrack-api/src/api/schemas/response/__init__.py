@@ -64,3 +64,4 @@ from .work_response import (
 )
 from .project_state_response import ProjectStateResponseSchema
 from .ministry_response import MinistryResponseSchema
+from .work_resource_response import CustomWorkResourceResponseSchema

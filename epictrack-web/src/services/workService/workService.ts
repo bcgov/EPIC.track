@@ -7,6 +7,7 @@ import { WorkFirstNation } from "../../models/firstNation";
 import { Work, WorkPhase } from "../../models/work";
 import { WorkType } from "../../models/workType";
 import { AxiosResponse } from "axios";
+import { WorkResource } from "models/workResource";
 interface WorkPhaseResponse {
   work_phase: WorkPhase;
 }
@@ -258,6 +259,38 @@ class WorkService implements ServiceBase {
 
   async getWorkTypes() {
     return await http.GetRequest<WorkType[]>(Endpoints.WorkTypes.GET_ALL);
+  }
+
+  async getWorkResources(workId: number) {
+    const query = `${Endpoints.WorkResources.GET_WORK_RESOURCES_BY_WORK.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+    return await http.GetRequest<WorkResource[]>(query);
+  }
+
+  async deleteWorkResource(workResourceId: number) {
+    const query = `${Endpoints.WorkResources.WORK_RESOURCE_BY_ID.replace(
+      ":work_resource_id",
+      workResourceId.toString()
+    )}`;
+    return await http.DeleteRequest(query);
+  }
+
+  async updateWorkResource(workResourceId: number, data: any) {
+    const query = `${Endpoints.WorkResources.WORK_RESOURCE_BY_ID.replace(
+      ":work_resource_id",
+      workResourceId.toString()
+    )}`;
+    return await http.PutRequest(query, JSON.stringify(data));
+  }
+
+  async createWorkResource(workId: number, data: any) {
+    const query = `${Endpoints.WorkResources.GET_WORK_RESOURCES_BY_WORK.replace(
+      ":work_id",
+      workId.toString()
+    )}`;
+    return await http.PostRequest(query, JSON.stringify(data));
   }
 }
 export const workService = new WorkService();

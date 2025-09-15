@@ -206,13 +206,15 @@ export const WorkplanProvider = ({
   const loadData = useCallback(async () => {
     if (!workId) return;
     try {
-      await getWorkById();
-      await getWorkTeamMembers();
-      await getWorkPhases();
-      await getWorkFirstNations();
-      await getWorkStatuses();
-      await getStalenessSettings();
-      await getIssues();
+      await Promise.all([
+        getWorkById(),
+        getWorkTeamMembers(),
+        getWorkPhases(),
+        getWorkFirstNations(),
+        getWorkStatuses(),
+        getStalenessSettings(),
+        getIssues(),
+      ]);
       setLoading(false);
     } catch (e) {
       console.error(e);
