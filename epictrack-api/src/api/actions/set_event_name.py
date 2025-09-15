@@ -1,21 +1,20 @@
-"""Disable work start date action handler"""
-from datetime import timedelta
+"""Set event name action handler"""
 from api.actions.base import ActionFactory
 from api.models import db
 from api.models.event import Event
 
-from .common import find_configuration, find_event_date
+from .common import find_configuration
 
 
-class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
-    """Sets the event date"""
+class SetEventName(ActionFactory):  # pylint: disable=too-few-public-methods
+    """Sets the event name"""
 
     def run(self, source_event: Event, params: dict, event: Event = None) -> None:
         """Performs the required operations"""
         from api.services.event import EventService  # pylint: disable=import-outside-toplevel
 
         event_configuration = find_configuration(source_event, params)
-        number_of_days_to_be_added = int(params.get("start_at", event_configuration.start_at))
+        new_name = str(params.get("new_name", event_configuration.name))
         if event is None:
             # fallback if no event passed
             event = (
@@ -28,9 +27,7 @@ class SetEventDate(ActionFactory):  # pylint: disable=too-few-public-methods
                 .first()
             )
             if event is None:
-                raise ValueError("Event not found for updating anticipated date")
+                raise ValueError("Event not found for updating event name")
         event_dict = event.as_dict(recursive=False)
-        event_dict["anticipated_date"] = find_event_date(source_event) + timedelta(
-            days=number_of_days_to_be_added
-        )
-        EventService.update_event(event_dict, event.id, True, commit=False)
+        event_dict["name"] = new_name
+        EventService.update_event(event_dict, event.id, False, commit=False)

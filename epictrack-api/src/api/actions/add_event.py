@@ -11,7 +11,6 @@ from api.schemas.response.event_configuration_response import (
 from .set_event_date import SetEventDate
 from .common import find_event_date
 
-
 # pylint: disable=import-outside-toplevel
 
 
@@ -22,7 +21,14 @@ class AddEvent(ActionFactory):
         """Adds a new event based on params"""
         from api.services.event import EventService
 
+        # Normalize params: always a list of dicts
+        if isinstance(params, dict):
+            params = [params]
+        if not isinstance(params, list):
+            raise ValueError(f"Expected dict or list of dicts, got {type(params)}")
         for param in params:
+            if not isinstance(param, dict):
+                raise ValueError(f"Expected dict for param, got {type(param)}: {param}")
             event_data, work_phase_id = self.get_additional_params(source_event, param)
             # setting anticipated date one day later so that the new event falls below the source event
             event_data.update(
@@ -35,21 +41,20 @@ class AddEvent(ActionFactory):
             new_event = EventService.create_event(
                 event_data, work_phase_id=work_phase_id, push_events=True, commit=False
             )
-            set_event_date: SetEventDate = SetEventDate()
-            # Setting the event date from here cz, otherwise the event won't get pushed
-            set_event_date.run(source_event, param)
+            set_event_date = SetEventDate()
+            set_event_date.run(source_event, param, event=new_event)
             source_event = new_event
 
     def get_additional_params(self, source_event: Event, params):
         """Returns additional parameter"""
         from api.services.work import WorkService
-
+        # Find phase
         work_phase = (
             db.session.query(WorkPhase)
             .join(PhaseCode, WorkPhase.phase_id == PhaseCode.id)
             .filter(
                 WorkPhase.work_id == source_event.work_id,
-                PhaseCode.name == params.get("phase_name"),
+                WorkPhase.name == params.get("phase_name"),
                 PhaseCode.work_type_id == params.get("work_type_id"),
                 PhaseCode.ea_act_id == params.get("ea_act_id"),
                 WorkPhase.is_active.is_(True),
@@ -58,6 +63,7 @@ class AddEvent(ActionFactory):
             .order_by(WorkPhase.sort_order.desc())
             .first()
         )
+        # Find existing event config to copy
         old_event_config = (
             db.session.query(EventConfiguration)
             .filter(
@@ -68,14 +74,42 @@ class AddEvent(ActionFactory):
             .order_by(EventConfiguration.repeat_count.desc())
             .first()
         )
+        # If not found, get the latest inactive one
+        if not old_event_config:
+            old_event_config = (
+                db.session.query(EventConfiguration)
+                .filter(
+                    EventConfiguration.work_phase_id == work_phase.id,
+                    EventConfiguration.name == params.get("event_name"),
+                )
+                .order_by(EventConfiguration.repeat_count.desc())
+                .first()
+            )
 
-        event_configuration = EventConfigurationResponseSchema().dump(old_event_config)
-        event_configuration["start_at"] = params["start_at"]
-        event_configuration["visibility"] = EventTemplateVisibilityEnum.MANDATORY.value
-        event_configuration["repeat_count"] = old_event_config.repeat_count + 1
-        del event_configuration["id"]
-        event_configuration = EventConfiguration(**event_configuration)
+        if not old_event_config:
+            raise ValueError(
+                f"No event configuration found for phase '{params.get('phase_name')}' "
+                f"and event '{params.get('event_name')}'."
+            )
+
+        # Copy existing old config
+        event_configuration_dict = EventConfigurationResponseSchema().dump(old_event_config)
+
+        # Modify fields from params
+        event_configuration_dict["start_at"] = params.get("start_at", old_event_config.start_at)
+        event_configuration_dict["visibility"] = params.get(
+            "visibility", EventTemplateVisibilityEnum.MANDATORY.value
+        )
+        event_configuration_dict["repeat_count"] = old_event_config.repeat_count + 1
+        event_configuration_dict["name"] = params.get("new_name", old_event_config.name)
+
+        # Remove ID before creating a new config
+        del event_configuration_dict["id"]
+
+        # Create new config
+        event_configuration = EventConfiguration(**event_configuration_dict)
         event_configuration.flush()
+        # Copy outcomes and actions
         WorkService.copy_outcome_and_actions(
             old_event_config.as_dict(recursive=False),
             event_configuration,

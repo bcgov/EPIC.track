@@ -81,7 +81,7 @@ class EventService:
         )
         data["work_id"] = current_work_phase.work_id
         event = Event(**data)
-        event = event.flush()
+        event.flush()
         if not current_app.config["SKIP_EVENT_LOGIC"]:
             cls._process_events(
                 current_work_phase, event, all_work_events, push_events, None
@@ -104,15 +104,16 @@ class EventService:
         current_work_phase = WorkPhase.find_by_id(
             event.event_configuration.work_phase_id
         )
+        work_id = current_work_phase.work_id
         one_of_roles = (
             Membership.TEAM_MEMBER.value,
             KeycloakRole.EDIT.value,
         )
         authorisation.check_auth(
-            one_of_roles=one_of_roles, work_id=current_work_phase.work_id
+            one_of_roles=one_of_roles, work_id=work_id
         )
         all_work_events = cls.find_events(
-            current_work_phase.work_id, None, PRIMARY_CATEGORIES, scoped=False
+            work_id, None, PRIMARY_CATEGORIES, scoped=False
         )
         if not event.is_active:
             raise UnprocessableEntityError("Event is inactive and cannot be updated")
@@ -153,7 +154,7 @@ class EventService:
                     event_old_data,
                 )
             cls._process_actions(event, data.get("outcome_id", None))
-            cls._post_process_actions(event)
+            cls._post_process_actions(event, work_id)
 
         if commit:
             db.session.commit()
@@ -1128,7 +1129,7 @@ class EventService:
             outcomes = OutcomeConfigurationService.find_by_configuration_id(
                 event.event_configuration_id
             )
-            if not outcomes:
+            if not outcomes or outcomes[0] is None:
                 return
             outcome_id = outcomes[0].id
         action_configurations = (
@@ -1147,16 +1148,16 @@ class EventService:
             action_handler.apply(event, action_configuration.additional_params)
 
     @classmethod
-    def _post_process_actions(cls, source_event: Event):
+    def _post_process_actions(cls, source_event: Event, work_id: int = None):
         """Things to happen after the actions are being processed"""
         all_work_phases = WorkPhase.find_by_params(
             {
-                "work_id": source_event.event_configuration.work_phase.work_id,
+                "work_id": work_id if work_id else source_event.event_configuration.work_phase.work_id,
                 "visibility": PhaseVisibilityEnum.REGULAR.value,
                 "is_completed": False,
             }
         )
-        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order)
+        all_work_phases = sorted(all_work_phases, key=lambda x: x.sort_order or 0)
         work = source_event.work
         # if it is same, no need to do unwanted update
         if (
@@ -1164,6 +1165,7 @@ class EventService:
             and work.current_work_phase_id != all_work_phases[0].id
         ):
             work.current_work_phase_id = all_work_phases[0].id
+            work.work_state = WorkStateEnum.IN_PROGRESS
 
     @classmethod
     def find_events_by_date(cls, from_date: datetime) -> List[Event]:
