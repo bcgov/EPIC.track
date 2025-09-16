@@ -180,15 +180,18 @@ class WorkService:  # pylint: disable=too-many-public-methods
     @classmethod
     def get_work_ids_by_staff(cls, staff_id: int) -> list[int]:
         """Get all work ids by staff id."""
-        return (
-            db.session.query(StaffWorkRole.work_id)
-            .filter(
-                StaffWorkRole.staff_id == staff_id,
-                StaffWorkRole.is_active.is_(True)
+        work_ids = [
+            row[0] for row in (
+                db.session.query(StaffWorkRole.work_id)
+                .filter(
+                    StaffWorkRole.staff_id == staff_id,
+                    StaffWorkRole.is_active.is_(True)
+                )
+                .distinct()
+                .all()
             )
-            .distinct()
-            .all()
-        )
+        ]
+        return work_ids
 
     @classmethod
     def find_allocated_resources(cls, is_active=None):

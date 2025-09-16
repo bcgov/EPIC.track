@@ -1,8 +1,7 @@
 import { Box, Tooltip } from "@mui/material";
 import { ETCaption1 } from "components/shared";
-// Track-607
-// import { WORKPLAN_TAB } from "components/workPlan/constants";
-// import { useNavigate } from "react-router-dom";
+import { WORKPLAN_TAB } from "components/workPlan/constants";
+import { useNavigate } from "react-router-dom";
 import { darkenHex, getWorkColour } from "./utils";
 import { Palette } from "styles/theme";
 
@@ -12,14 +11,12 @@ export interface MonthWorkLegendItemProps {
 }
 
 const MonthWorkLegendItem = (item: MonthWorkLegendItemProps) => {
-  // Track-607
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleWorkClick = () => {
-    // Track-607
-    // navigate(`/work-plan?work_id=${item.work_id}`, {
-    //   state: { tabIndex: WORKPLAN_TAB.CALENDAR.index },
-    // });
+    navigate(`/work-plan?work_id=${item.work_id}`, {
+      state: { tabIndex: WORKPLAN_TAB.CALENDAR.index },
+    });
   };
 
   const colour = getWorkColour(item.name);
