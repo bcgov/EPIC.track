@@ -34,7 +34,7 @@ def test_get_works_by_team(client, auth_header):
     """Test get works grouped by team."""
     work = factory_work_model()
     url = urljoin(API_BASE_URL, "insights/works")
-    payload = { "group_by": "team" }
+    payload = {"group_by": "team"}
     result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
@@ -150,7 +150,7 @@ def test_get_projects_by_type(client, auth_header):
     """Test get projects grouped by type."""
     project = factory_project_model()
     url = urljoin(API_BASE_URL, "insights/projects")
-    payload = {  "group_by": "type" }
+    payload = {"group_by": "type"}
     result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
@@ -162,10 +162,8 @@ def test_get_projects_by_type(client, auth_header):
 def test_get_projects_by_subtype(client, auth_header):
     """Test get projects grouped by subtype."""
     project = factory_project_model()
-    url = urljoin(
-        API_BASE_URL, f"insights/projects"
-    )
-    payload = {  "group_by": "subtype", "type_id": project.type_id }
+    url = urljoin(API_BASE_URL, "insights/projects")
+    payload = {"group_by": "subtype", "type_id": project.type_id}
     result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
