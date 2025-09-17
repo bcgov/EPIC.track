@@ -26,8 +26,8 @@ from api.utils.util import cors_preflight
 API = Namespace("insights", description="Insights")
 
 
-@cors_preflight("GET")
-@API.route("/works", methods=["GET", "OPTIONS"])
+@cors_preflight("GET, POST")
+@API.route("/works", methods=["GET", "POST", "OPTIONS"])
 class Works(Resource):
     """Endpoint resource to return work insights"""
 
@@ -35,31 +35,15 @@ class Works(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get():
+    def post():
         """Return work insights based on group by param."""
-        args = req.WorkInsightRequestQueryParameterSchema().load(request.args)
-        work_insights = InsightService.fetch_work_insights(args["group_by"])
+        args = req.WorkInsightRequestQueryParameterSchema().load(request.json)
+        work_insights = InsightService.fetch_work_insights(args["group_by"], args["filters"])
         return jsonify(work_insights), HTTPStatus.OK
 
 
-@cors_preflight("GET")
-@API.route("/works/assessment", methods=["GET", "OPTIONS"])
-class AssessmentWorks(Resource):
-    """Endpoint resource to return assessment works insights"""
-
-    @staticmethod
-    @cors.crossdomain(origin="*")
-    @auth.require
-    @profiletime
-    def get():
-        """Return work insights based on group by param."""
-        args = req.WorkInsightRequestQueryParameterSchema().load(request.args)
-        work_insights = InsightService.fetch_assessment_work_insights(args["group_by"])
-        return jsonify(work_insights), HTTPStatus.OK
-
-
-@cors_preflight("GET")
-@API.route("/projects", methods=["GET", "OPTIONS"])
+@cors_preflight("POST")
+@API.route("/projects", methods=["POST", "OPTIONS"])
 class Projects(Resource):
     """Endpoint resource to return project insights"""
 
@@ -67,8 +51,8 @@ class Projects(Resource):
     @cors.crossdomain(origin="*")
     @auth.require
     @profiletime
-    def get():
+    def post():
         """Return project insights based on group by param."""
-        args = req.ProjectInsightRequestQueryParameterSchema().load(request.args)
-        project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"])
+        args = req.ProjectInsightRequestQueryParameterSchema().load(request.json)
+        project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"], args["filters"])
         return jsonify(project_insights), HTTPStatus.OK

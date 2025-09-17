@@ -1,6 +1,7 @@
 import { Grid } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { getChartColor } from "components/insights/utils";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { WorkByYear } from "models/insights";
@@ -8,11 +9,12 @@ import { Cell, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
 import { useGetWorksByYearCompletedQuery } from "services/rtkQuery/workInsights";
 
 const WorksCompletedEachYear = () => {
+  const { columnFilters } = useWorkInsightsContext();
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByYearCompletedQuery();
+  } = useGetWorksByYearCompletedQuery({ columnFilters });
 
   if (error) {
     showNotification("Could not load Works completed each year", {

@@ -9,13 +9,13 @@ import MasterTrackTable from "components/shared/MasterTrackTable";
 import { WorkStaff } from "models/workStaff";
 import { useGetWorkStaffsQuery } from "services/rtkQuery/workStaffInsights";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { Tooltip, Box } from "@mui/material";
 import { sort } from "utils";
 import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -27,7 +27,7 @@ const WorkList = () => {
     pageSize: 15,
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
+  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
   const { data: works } = useGetWorksQuery();
 

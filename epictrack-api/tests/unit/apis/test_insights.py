@@ -33,8 +33,9 @@ API_BASE_URL = "/api/v1/"
 def test_get_works_by_team(client, auth_header):
     """Test get works grouped by team."""
     work = factory_work_model()
-    url = urljoin(API_BASE_URL, "insights/works?group_by=team")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/works")
+    payload = { "group_by": "team" }
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     team_insight = result.json[0]
@@ -48,8 +49,9 @@ def test_get_works_by_lead(client, auth_header):
     url = urljoin(API_BASE_URL, "works")
     work_response = client.post(url, json=work_data, headers=auth_header)
     work_response_json = work_response.json
-    url = urljoin(API_BASE_URL, "insights/works?group_by=lead")
-    result = client.get(url, headers=auth_header)
+    payload = {"group_by": "lead"}
+    url = urljoin(API_BASE_URL, "insights/works")
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     lead_insight = result.json[0]
@@ -75,8 +77,9 @@ def test_get_works_by_staff(client, auth_header):
         "is_active": True,
     }
     client.post(url, json=staff_role_data, headers=auth_header)
-    url = urljoin(API_BASE_URL, "insights/works?group_by=staff")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/works")
+    payload = {"group_by": "staff"}
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     initial_staff = [work_response_json["work_lead_id"]]
@@ -88,8 +91,9 @@ def test_get_works_by_staff(client, auth_header):
 def test_get_works_by_ministry(client, auth_header):
     """Test get works grouped by ministry."""
     work = factory_work_model()
-    url = urljoin(API_BASE_URL, "insights/works?group_by=ministry")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/works")
+    payload = {"group_by": "ministry"}
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     ministry_insight = result.json[0]
@@ -100,8 +104,9 @@ def test_get_works_by_ministry(client, auth_header):
 def test_get_works_by_federal_involvement(client, auth_header):
     """Test get works grouped by federal involvement."""
     work = factory_work_model()
-    url = urljoin(API_BASE_URL, "insights/works?group_by=federal_involvement")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/works")
+    payload = {"group_by": "federal_involvement"}
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     federal_involvement_insight = result.json[0]
@@ -115,8 +120,9 @@ def test_get_works_by_federal_involvement(client, auth_header):
 def test_get_works_by_first_nation(client, auth_header):
     """Test get works grouped by federal involvement."""
     work_first_nation = factory_work_first_nation_model()
-    url = urljoin(API_BASE_URL, "insights/works?group_by=first_nation")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/works")
+    payload = {"group_by": "first_nation"}
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     first_nation_insight = result.json[0]
@@ -130,8 +136,9 @@ def test_get_works_by_first_nation(client, auth_header):
 def test_get_works_by_type(client, auth_header):
     """Test get works grouped by work type."""
     work = factory_work_model()
-    url = urljoin(API_BASE_URL, "insights/works?group_by=type")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/works")
+    payload = {"group_by": "type"}
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     type_insight = result.json[0]
@@ -139,44 +146,12 @@ def test_get_works_by_type(client, auth_header):
     assert type_insight["count"] == 1
 
 
-def test_get_assessment_works_by_phase(client, auth_header):
-    """Test get assessment works grouped by phase."""
-    # Create work
-    payload = prepare_work_payload(TestWorkInfo.assessment_work.value)
-
-    # Create the work
-    url = urljoin(API_BASE_URL, "works")
-    work_response = client.post(url, json=payload, headers=auth_header)
-    work_response_json = work_response.json
-    url = urljoin(API_BASE_URL, "insights/works/assessment?group_by=phase")
-    result = client.get(url, headers=auth_header)
-    assert result.status_code == HTTPStatus.OK
-    assert len(result.json) == 1
-    assessment_insight = result.json[0]
-    assert assessment_insight["count"] == 1
-    assert (
-        work_response_json["current_work_phase"]["phase_id"]
-        == assessment_insight["phase_id"]
-    )
-
-
-def test_get_projects_by_region(client, auth_header):
-    """Test get projects grouped by ENV regions."""
-    project = factory_project_model()
-    url = urljoin(API_BASE_URL, "insights/projects?group_by=region")
-    result = client.get(url, headers=auth_header)
-    assert result.status_code == HTTPStatus.OK
-    assert len(result.json) == 1
-    project_insight = result.json[0]
-    assert project_insight["region_id"] == project.region_id_env
-    assert project_insight["count"] == 1
-
-
 def test_get_projects_by_type(client, auth_header):
     """Test get projects grouped by type."""
     project = factory_project_model()
-    url = urljoin(API_BASE_URL, "insights/projects?group_by=type")
-    result = client.get(url, headers=auth_header)
+    url = urljoin(API_BASE_URL, "insights/projects")
+    payload = {  "group_by": "type" }
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     project_insight = result.json[0]
@@ -188,9 +163,10 @@ def test_get_projects_by_subtype(client, auth_header):
     """Test get projects grouped by subtype."""
     project = factory_project_model()
     url = urljoin(
-        API_BASE_URL, f"insights/projects?type_id={project.type_id}&group_by=subtype"
+        API_BASE_URL, f"insights/projects"
     )
-    result = client.get(url, headers=auth_header)
+    payload = {  "group_by": "subtype", "type_id": project.type_id }
+    result = client.post(url, json=payload, headers=auth_header)
     assert result.status_code == HTTPStatus.OK
     assert len(result.json) == 1
     project_insight = result.json[0]

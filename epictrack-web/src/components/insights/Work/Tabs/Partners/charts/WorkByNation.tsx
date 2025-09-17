@@ -6,9 +6,15 @@ import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const WorkByNationChart = () => {
-  const { data, error, isLoading: isChartLoading } = useGetWorksByNationQuery();
+  const { columnFilters } = useWorkInsightsContext();
+  const {
+    data,
+    error,
+    isLoading: isChartLoading,
+  } = useGetWorksByNationQuery({ columnFilters });
 
   const formatData = (data?: WorkByNation[]) => {
     if (!data) return [];

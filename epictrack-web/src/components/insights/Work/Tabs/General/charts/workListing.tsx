@@ -4,7 +4,6 @@ import { Tooltip, Box } from "@mui/material";
 import { showNotification } from "components/shared/notificationProvider";
 import { Work } from "models/work";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
@@ -13,6 +12,7 @@ import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
@@ -21,7 +21,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
-  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
 
   const { data, error, isLoading } = useGetWorksQuery();
 

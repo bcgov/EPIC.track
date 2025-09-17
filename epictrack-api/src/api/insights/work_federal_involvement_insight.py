@@ -8,34 +8,44 @@ from sqlalchemy import func
 from api.models import db
 from api.models.federal_involvement import FederalInvolvement
 from api.models.work import Work
+from api.models.project import Project
+from api.models.work_type import WorkType
+from api.models.indigenous_work import IndigenousWork
+from api.models.indigenous_nation import IndigenousNation
+from api.models.ministry import Ministry
+from api.insights.insights_table_filters import build_insights_filters
 
 
 # pylint: disable=not-callable
 class WorkFederalInvolvementInsightGenerator:
     """Insight generator for work resource grouped by Federal Involvement"""
 
-    def generate_partition_query(self):
+    def generate_partition_query(self, filters: List = None):
         """Generates the group by subquery."""
-        partition_query = (
-            db.session.query(
-                Work.federal_involvement_id,
-                func.count()
-                .over(order_by=Work.federal_involvement_id, partition_by=Work.federal_involvement_id)
-                .label("count"),
-            )
-            .filter(
-                Work.is_active.is_(True),
-                Work.is_deleted.is_(False),
-                Work.is_completed.is_(False),
-            )
-            .distinct(Work.federal_involvement_id)
-            .subquery()
+        filter_exprs = build_insights_filters(filters) if filters else []
+        query = db.session.query(
+            Work.federal_involvement_id,
+            func.count(func.distinct(Work.id)).label("count"),
         )
-        return partition_query
+        # Join necessary tables for filters
+        if filters:
+            query = query.join(Ministry, Work.ministry_id == Ministry.id)
+            query = query.join(Project, Work.project_id == Project.id)
+            query = query.join(WorkType, Work.work_type_id == WorkType.id)
+            query = query.join(IndigenousWork, IndigenousWork.work_id == Work.id)
+            query = query.join(IndigenousNation, IndigenousWork.indigenous_nation_id == IndigenousNation.id)
+        query = query.filter(
+            Work.is_active.is_(True),
+            Work.is_deleted.is_(False),
+            Work.is_completed.is_(False),
+            *filter_exprs if filter_exprs else [],
+        )
+        query = query.group_by(Work.federal_involvement_id)
+        return query.subquery()
 
-    def fetch_data(self) -> List[dict]:
+    def fetch_data(self, filters: List = None) -> List[dict]:
         """Fetch data from db"""
-        partition_query = self.generate_partition_query()
+        partition_query = self.generate_partition_query(filters)
 
         federal_involvement_insights = (
             db.session.query(FederalInvolvement)

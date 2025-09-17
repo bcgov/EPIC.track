@@ -22,13 +22,13 @@ class InsightService:  # pylint:disable=too-few-public-methods
     """Service to insights related operations"""
 
     @classmethod
-    def fetch_work_insights(cls, group_by: str):
+    def fetch_work_insights(cls, group_by: str, filters: list = None):
         """Fetch work insights"""
-        current_app.logger.debug(f"Fetch work insights {group_by = }")
+        current_app.logger.debug(f"Fetch work insights {group_by = } {filters = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=group_by
         )
-        insights = insight_generator().fetch_data()
+        insights = insight_generator().fetch_data(filters=filters)
         return insights
 
     @classmethod
@@ -42,14 +42,14 @@ class InsightService:  # pylint:disable=too-few-public-methods
         return insights
 
     @classmethod
-    def fetch_project_insights(cls, group_by: str, type_id: int = None):
+    def fetch_project_insights(cls, group_by: str, type_id: int = None, filters: list = None):
         """Fetch project insights"""
         current_app.logger.debug(f"Fetch project insights {group_by = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="projects", group_by=group_by
         )
         if type_id:
-            insights = insight_generator().fetch_data(type_id=type_id)
+            insights = insight_generator().fetch_data(filters=filters, type_id=type_id)
         else:
-            insights = insight_generator().fetch_data()
+            insights = insight_generator().fetch_data(filters=filters)
         return insights

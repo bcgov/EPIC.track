@@ -15,6 +15,7 @@ import {
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 export const workInsightsApi = createApi({
   tagTypes: [
@@ -38,8 +39,18 @@ export const workInsightsApi = createApi({
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getAssessmentsByPhase: builder.query<AssessmentByPhase[], void>({
-      query: () => `insights/works?group_by=assessment_by_phase`,
+    getAssessmentsByPhase: builder.query<
+      AssessmentByPhase[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "assessment_by_phase",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -77,8 +88,18 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
-    getWorksByType: builder.query<WorkByType[], void>({
-      query: () => `insights/works?group_by=type`,
+    getWorksByType: builder.query<
+      WorkByType[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "type",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -103,8 +124,18 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksWithNations", id: "LIST" }],
     }),
-    getWorkByMinistry: builder.query<WorkByMinistry[], void>({
-      query: () => `insights/works?group_by=ministry`,
+    getWorkByMinistry: builder.query<
+      WorkByMinistry[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "ministry",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -118,9 +149,16 @@ export const workInsightsApi = createApi({
     }),
     getWorksByFederalInvolvement: builder.query<
       WorkByFederalInvolvement[],
-      void
+      { columnFilters?: ColumnFilter[] }
     >({
-      query: () => `insights/works?group_by=federal_involvement`,
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "federal_involvement",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -132,8 +170,18 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByFederalInvolvement", id: "LIST" }],
     }),
-    getWorksByNation: builder.query<WorkByNation[], void>({
-      query: () => `insights/works?group_by=first_nation`,
+    getWorksByNation: builder.query<
+      WorkByNation[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "first_nation",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -145,8 +193,18 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByNation", id: "LIST" }],
     }),
-    getWorksByTeam: builder.query<WorkByTeam[], void>({
-      query: () => `insights/works?group_by=team`,
+    getWorksByTeam: builder.query<
+      WorkByTeam[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "team",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -158,8 +216,18 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByTeam", id: "LIST" }],
     }),
-    getWorksByLead: builder.query<WorkByLead[], void>({
-      query: () => `insights/works?group_by=lead`,
+    getWorksByLead: builder.query<
+      WorkByLead[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "lead",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -171,8 +239,18 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByLead", id: "LIST" }],
     }),
-    getWorksByStaff: builder.query<WorkByStaff[], void>({
-      query: () => `insights/works?group_by=staff`,
+    getWorksByStaff: builder.query<
+      WorkByStaff[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "staff",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -184,18 +262,71 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByStaff", id: "LIST" }],
     }),
-    getWorksByYearOpened: builder.query<WorkByYear[], void>({
-      query: () => `insights/works?group_by=year_opened`,
+    getWorksByYearOpened: builder.query<
+      WorkByYear[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "year_opened",
+          filters: columnFilters ?? [],
+        },
+      }),
     }),
-    getWorksByYearCompleted: builder.query<WorkByYear[], void>({
-      query: () => `insights/works?group_by=year_completed`,
+    getWorksByYearCompleted: builder.query<
+      WorkByYear[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "year_completed",
+          filters: columnFilters ?? [],
+        },
+      }),
     }),
-    getWorkClosureBreakdown: builder.query<WorkStateByYear[], void>({
-      query: () => `insights/works?group_by=work_closure_breakdown`,
+    getWorkClosureBreakdown: builder.query<
+      WorkStateByYear[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/works`,
+        method: "POST",
+        body: {
+          group_by: "work_closure_breakdown",
+          filters: columnFilters ?? [],
+        },
+      }),
     }),
   }),
   refetchOnMountOrArgChange: 300,
 });
+
+export function queryStringFromFilters(
+  columnFilters: { id: string; value: string | string[] }[] = []
+): string {
+  return columnFilters
+    .filter(({ value }) =>
+      Array.isArray(value)
+        ? value.length > 0 && value.some((v) => v !== "")
+        : value !== "" && value !== undefined && value !== null
+    )
+    .map(({ id, value }) => {
+      const encodedId = encodeURIComponent(id);
+      if (Array.isArray(value)) {
+        return value
+          .filter((v) => v !== "")
+          .map((v) => `${encodedId}=${encodeURIComponent(v)}`)
+          .join("&");
+      } else {
+        return `${encodedId}=${encodeURIComponent(value)}`;
+      }
+    })
+    .join("&");
+}
 
 export const {
   useGetWorksByTypeQuery,

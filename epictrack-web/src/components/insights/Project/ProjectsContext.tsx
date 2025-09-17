@@ -1,15 +1,23 @@
 import { Project } from "models/project";
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { useGetProjectsQuery } from "services/rtkQuery/projectInsights";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 interface ProjectsContextState {
   projects: Project[];
   loadingProjects: boolean;
+  columnFilters: ColumnFilter[];
+  setColumnFilters: any;
 }
 
-export const ProjectsContext = createContext<ProjectsContextState | undefined>(
-  undefined
-);
+export const ProjectsContext = createContext<ProjectsContextState | undefined>({
+  projects: [],
+  loadingProjects: false,
+  columnFilters: [],
+  setColumnFilters: () => {
+    return;
+  },
+});
 
 type ProjectsContextProviderProps = {
   children: React.ReactNode;
@@ -17,6 +25,8 @@ type ProjectsContextProviderProps = {
 export const ProjectsContextProvider: React.FC<
   ProjectsContextProviderProps
 > = ({ children }) => {
+  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+
   const { data: projectsData, isLoading: loadingProjects } =
     useGetProjectsQuery();
 
@@ -24,8 +34,10 @@ export const ProjectsContextProvider: React.FC<
     () => ({
       projects: projectsData ?? [],
       loadingProjects,
+      columnFilters,
+      setColumnFilters,
     }),
-    [projectsData, loadingProjects]
+    [projectsData, loadingProjects, columnFilters, setColumnFilters]
   );
   return (
     <ProjectsContext.Provider value={contextValue}>
