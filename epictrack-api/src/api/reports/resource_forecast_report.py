@@ -126,6 +126,11 @@ class EAResourceForeCastReport(ReportFactory):
                     "label": "WORK TEAM MEMBERS",
                     "width": 0.072,
                 },
+                {
+                    "data_key": "coleads",
+                    "label": "CO-LEADS",
+                    "width": 0.072,
+                },
             ],
             "QUARTERS": [],
             "Expected Referral Date": [
@@ -396,10 +401,11 @@ class EAResourceForeCastReport(ReportFactory):
         data = self._filter_data(data)
         for values in data:
             work_data = values[0]
-            staffs, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
+            staffs, coleads, responsible_epd, work_lead = self._get_work_team_members(work_data["work_id"])
             work_data["responsible_epd"] = responsible_epd
             work_data["work_lead"] = work_lead
             work_data["work_team_members"] = ", ".join(staffs)
+            work_data["coleads"] = ", ".join(coleads)
             work_data = self._format_capital_investment(work_data)
             work_data = self._handle_months(work_data)
             work_data = self._format_long_region(work_data)
@@ -765,6 +771,7 @@ class EAResourceForeCastReport(ReportFactory):
     def _get_work_team_members(self, work_id) -> Tuple[List[str], str]:
         """Fetch and return team members by work id"""
         staffs = []
+        coleads = []
         responsible_epd = ""
         work_lead = ""
         work_team_members = (
@@ -798,9 +805,11 @@ class EAResourceForeCastReport(ReportFactory):
             last_name = work_team_member.last_name
             if work_team_member.role_id in [RoleEnum.OFFICER_ANALYST.value, RoleEnum.OTHER.value]:
                 staffs.append({"first_name": first_name, "last_name": last_name})
+            elif work_team_member.role_id == RoleEnum.TEAM_CO_LEAD.value:
+                coleads.append(f"{first_name} {last_name}")
         staffs = sorted(staffs, key=lambda x: x["last_name"])
         staffs = [f"{x['first_name']} {x['last_name']}" for x in staffs]
-        return staffs, responsible_epd, work_lead
+        return staffs, coleads, responsible_epd, work_lead
 
     def _get_styles(self) -> Tuple[dict, dict]:
         """Returns basic styles needed for the PDF report."""

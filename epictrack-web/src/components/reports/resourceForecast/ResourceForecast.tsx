@@ -330,6 +330,19 @@ export default function ResourceForecast() {
         filterSelectOptions: workLeadFilter,
       },
       {
+        accessorKey: "coleads",
+        header: "Co-Leads",
+        Cell: ({ row }: any) => (
+          <ETParagraph
+            enableEllipsis
+            enableTooltip
+            tooltip={row.original.coleads}
+          >
+            {row.original.coleads}
+          </ETParagraph>
+        ),
+      },
+      {
         accessorKey: "work_team_members",
         header: "Work Team Members",
         Cell: ({ row }: any) => (
