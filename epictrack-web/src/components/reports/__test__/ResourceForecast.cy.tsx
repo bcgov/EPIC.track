@@ -21,6 +21,7 @@ const mockRFData: ResourceForecastModel[] = [
     eao_team: "Team 1",
     work_lead: "John Smith",
     work_team_members: "Alice, Bob",
+    coleads: "Charlie, David",
     referral_timing: faker.date.future().toISOString(),
     months: [
       { label: "June", phase: "Prep", color: "#ccc" },

@@ -14,6 +14,7 @@ export type ResourceForecastModel = {
   eao_team: string;
   work_lead: string;
   work_team_members: string;
+  coleads: string;
   referral_timing: string;
 
   sl_no: number;
