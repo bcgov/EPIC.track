@@ -1,8 +1,11 @@
 import { Staff } from "models/staff";
-import Sinon from "cypress/types/sinon";
 import { faker } from "@faker-js/faker";
 import { Project } from "models/project";
 import { Type } from "models/type";
+import { CalendarEvent, EventPosition, EventsGridModel, EventTemplateVisibility } from "models/event";
+import { EVENT_TYPE } from "components/workPlan/phase/type";
+import dayjs from "dayjs";
+import { EVENT_STATUS } from "models/taskEvent";
 
 export const mockStaffs: Staff[] = [
   {
@@ -43,6 +46,99 @@ export const mockStaffs: Staff[] = [
   },
   // Add more mock Staff objects as needed
 ];
+
+export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsGridModel => {
+  const startOfMonth = dayjs().startOf("month").toDate();
+  const endOfMonth = dayjs().endOf("month").toDate();
+
+  const start = faker.date.between(startOfMonth, endOfMonth);
+  // Ensure end date is same or after start, max 5 days later
+  const end = faker.date.between(start, dayjs(start).add(5, "day").toDate());
+
+  return {
+    id: faker.datatype.number(),
+    name: faker.lorem.words(3),
+    start_date: start.toISOString(),
+    end_date: end.toISOString(),
+    event_configuration_id: faker.datatype.number(),
+    event_configuration: { 
+      id: faker.datatype.number(),
+      name: faker.lorem.words(3),
+      event_category_id: faker.datatype.number(),
+      event_type_id: faker.datatype.number(),
+      multiple_days: false,
+      event_position: EventPosition.INTERMEDIATE,
+      visibilty_mode: EventTemplateVisibility.MANDATORY,
+      work_phase_id: faker.datatype.number(),
+    },
+    is_active: true,
+    type: faker.helpers.arrayElement([EVENT_TYPE.TASK, EVENT_TYPE.MILESTONE]),
+    is_complete: faker.datatype.boolean(),
+    long_description: faker.lorem.paragraph(),
+    number_of_days: faker.datatype.number({ min: 1, max: 5 }),
+    outcome_id: faker.datatype.uuid(),
+    short_description: faker.lorem.words(2),
+    assignees: [],
+    responsibility: faker.name.jobTitle(),
+    notes: faker.lorem.sentence(),
+    status: EVENT_STATUS.INPROGRESS,
+    visibility: EventTemplateVisibility.MANDATORY,
+    phase_name: faker.lorem.words(3),
+    ...overrides,
+  };
+};
+
+export const mockEventsGrid: CalendarEvent[] = [
+  {
+    event: generateMockEvent({
+      type: EVENT_TYPE.TASK,
+      phase_name: "Phase A",
+    }),
+    phase_name: "Phase A",
+    phase_id: faker.datatype.number(),
+    work_name: faker.commerce.productName(),
+    work_id: faker.datatype.number(),
+  },
+  {
+    event: generateMockEvent({
+      type: EVENT_TYPE.MILESTONE,
+      phase_name: "Phase B",
+    }),
+    phase_name: "Phase B",
+    phase_id: faker.datatype.number(),
+    work_name: faker.commerce.productName(),
+    work_id: faker.datatype.number(),
+  },
+];
+
+export const mockCalendarEvents =
+[
+  {
+    "event": {
+      "id": 1,
+      "name": "Kickoff Meeting",
+      "anticipated_date": "2025-09-15T09:00:00Z",
+      "actual_date": "2025-09-15T10:00:00Z",
+    },
+    "phase_name": "Initiation",
+    "phase_id": 11,
+    "work_name": "Project Alpha",
+    "work_id": 101
+  },
+  {
+    "event": {
+      "id": 2,
+      "name": "Draft Report Due",
+      "anticipated_date": "2025-09-20T00:00:00Z",
+      "actual_date": "2025-09-20T23:59:59Z",
+    },
+    "phase_name": "Reporting",
+    "phase_id": 12,
+    "work_name": "Project Beta",
+    "work_id": 102
+  }
+]
+
 
 export function createMockMasterContext(defaultItem: any, _data?: any) {
   return {
@@ -134,6 +230,6 @@ export const generateMockProject = (() => {
 })();
 
 export type CypressStubFunction =
-  | Cypress.Agent<Sinon.SinonStub>
+  | Cypress.Agent<sinon.SinonStub>
   | (() => void)
   | undefined;

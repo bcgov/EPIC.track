@@ -23,17 +23,8 @@ export const getNDaysArray = (
   return days;
 };
 
-export const isWeekendByDate = (date: Date): boolean => {
-  const day = dayjs(date).day();
-  return day === 0 || day === 6; // Sun, Sat
-};
-
 export const isWeekendByIndex = (index: number): boolean => {
   return index % 7 === 0 || index % 7 === 6; // Sun, Sat
-};
-
-export const addDays = (date: Date, n: number): Date => {
-  return dayjs(date).add(n, "day").toDate();
 };
 
 export function getLegendIconMap() {
