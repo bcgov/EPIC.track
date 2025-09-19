@@ -13,7 +13,7 @@ import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
@@ -22,7 +22,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
-  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
+  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
   const { data, error, isLoading } = useGetWorksWithNationsQuery();
 
   const works = useMemo(() => data || [], [data]);

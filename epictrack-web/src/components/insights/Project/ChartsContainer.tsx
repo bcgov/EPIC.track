@@ -14,11 +14,11 @@ const ChartsContainer = () => {
       <Grid item xs={6}>
         <ProjectBySubtype />
       </Grid>
-      <InsightsAccordionCollapsableDetails>
-        <Grid item xs={12}>
+      <Grid item xs={12}>
+        <InsightsAccordionCollapsableDetails>
           <ProjectList />
-        </Grid>
-      </InsightsAccordionCollapsableDetails>
+        </InsightsAccordionCollapsableDetails>
+      </Grid>
     </Grid>
   );
 };

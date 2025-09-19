@@ -6,7 +6,6 @@ import {
 } from "components/shared/MasterTrackTable/utils";
 import { Project } from "models/project";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useProjectsContext } from "./ProjectsContext";
@@ -20,12 +19,12 @@ import { IButton } from "components/shared";
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const ProjectList = () => {
-  const { projects, loadingProjects } = useProjectsContext();
+  const { projects, loadingProjects, columnFilters, setColumnFilters } =
+    useProjectsContext();
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 15,
   });
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
 
   const types = useMemo(
     () => projects.map((project) => project.type),

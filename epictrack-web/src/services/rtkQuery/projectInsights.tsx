@@ -3,6 +3,7 @@ import { AppConfig } from "config";
 import { prepareHeaders } from "./util";
 import { ProjectBySubtype, ProjectByType } from "models/insights";
 import { Project } from "models/project";
+import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 export const projectInsightsApi = createApi({
   tagTypes: [
@@ -30,8 +31,18 @@ export const projectInsightsApi = createApi({
             ]
           : [{ type: "Projects", id: "LIST" }],
     }),
-    getProjectByType: builder.query<ProjectByType[], void>({
-      query: () => `insights/projects?group_by=type`,
+    getProjectByType: builder.query<
+      ProjectByType[],
+      { columnFilters?: ColumnFilter[] }
+    >({
+      query: ({ columnFilters }) => ({
+        url: `insights/projects`,
+        method: "POST",
+        body: {
+          group_by: "type",
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [
@@ -43,11 +54,25 @@ export const projectInsightsApi = createApi({
             ]
           : [{ type: "ProjectsByType", id: "LIST" }],
     }),
-    getProjectBySubType: builder.query<ProjectBySubtype[], number>({
-      query: (type_id: number) =>
-        `insights/projects?group_by=subtype${
-          type_id ? `&type_id=${type_id}` : ""
-        }`,
+    getProjectBySubType: builder.query<
+      ProjectBySubtype[],
+      { type_id: number; columnFilters?: ColumnFilter[] }
+    >({
+      query: ({
+        type_id,
+        columnFilters,
+      }: {
+        type_id: number;
+        columnFilters?: ColumnFilter[];
+      }) => ({
+        url: `insights/projects`,
+        method: "POST",
+        body: {
+          group_by: "subtype",
+          type_id: type_id,
+          filters: columnFilters ?? [],
+        },
+      }),
       providesTags: (result) =>
         result
           ? [

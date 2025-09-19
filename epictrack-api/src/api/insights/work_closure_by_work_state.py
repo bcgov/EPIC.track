@@ -6,6 +6,7 @@ from sqlalchemy import func, extract
 
 from api.models import db
 from api.models.work import Work
+from api.insights.insights_table_filters import build_insights_filters
 
 
 # pylint: disable=not-callable
@@ -13,17 +14,21 @@ from api.models.work import Work
 class WorkClosureByWorkState:
     """Insight generator for work resource grouped by Work year closed"""
 
-    def fetch_data(self) -> List[dict]:
+    def fetch_data(self, filters: List = None) -> List[dict]:
         """Fetch data from db"""
+        filter_exprs = build_insights_filters(filters, "works") if filters else []
         closed_details_query = (
             db.session.query(
                 extract('year', Work.work_decision_date).label('year'),
                 Work.work_state.label('work_state'),
-                func.count().label('count')
+                func.count(func.distinct(Work.id)).label('count')
             )
             .filter(
                 Work.work_decision_date.isnot(None),
+                *filter_exprs if filter_exprs else []
             )
+            .join(Work.work_type)
+            .join(Work.project)
             .group_by(extract('year', Work.work_decision_date), Work.work_state)
             .order_by(extract('year', Work.work_decision_date), Work.work_state)
             .all()

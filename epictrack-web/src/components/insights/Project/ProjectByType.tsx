@@ -14,13 +14,15 @@ import { useGetProjectByTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useProjectsContext } from "./ProjectsContext";
 
 const ProjectByTypeChart = () => {
+  const { columnFilters } = useProjectsContext();
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetProjectByTypeQuery();
+  } = useGetProjectByTypeQuery({ columnFilters });
 
   if (isChartLoading || !chartData) {
     return <PieChartSkeleton loading={isChartLoading} />;

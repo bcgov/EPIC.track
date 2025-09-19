@@ -14,13 +14,15 @@ import { WorkByMinistry } from "models/insights";
 import { useGetWorkByMinistryQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const WorkByOtherMinistryChart = () => {
+  const { columnFilters } = useWorkInsightsContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkByMinistryQuery();
+  } = useGetWorkByMinistryQuery({ columnFilters });
 
   const formatData = (data?: WorkByMinistry[]) => {
     if (!data) return [];

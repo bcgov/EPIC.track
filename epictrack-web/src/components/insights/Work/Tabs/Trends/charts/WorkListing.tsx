@@ -7,7 +7,6 @@ import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
 import MasterTrackTable from "components/shared/MasterTrackTable";
 import { useGetAllWorksQuery } from "services/rtkQuery/workInsights";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { Tooltip, Box, Grid } from "@mui/material";
 import { ETCaption1, ETGridTitle, IButton } from "components/shared";
@@ -16,6 +15,7 @@ import { IconProps } from "components/icons/type";
 import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
 import WorkState from "components/workPlan/WorkState";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -24,7 +24,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFilter[]>([]);
+  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
   const { data, error, isLoading } = useGetAllWorksQuery();
 
   const works = useMemo(() => data || [], [data]);

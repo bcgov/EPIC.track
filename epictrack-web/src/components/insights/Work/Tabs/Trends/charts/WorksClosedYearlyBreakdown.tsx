@@ -1,5 +1,6 @@
 import { Box, Grid } from "@mui/material";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { getChartColor } from "components/insights/utils";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import TrackSelect from "components/shared/TrackSelect";
@@ -14,12 +15,13 @@ const WorksClosedYearlyBreakdown = () => {
   const [yearOptions, setYearOptions] = useState<OptionType[]>();
   const [selectedYear, setSetSelectedYear] = useState<string>();
   const [displayData, setDisplayData] = useState<WorkStateByYear[]>([]);
+  const { columnFilters } = useWorkInsightsContext();
 
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkClosureBreakdownQuery();
+  } = useGetWorkClosureBreakdownQuery({ columnFilters });
 
   useEffect(() => {
     if (!chartData) return;

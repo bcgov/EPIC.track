@@ -13,13 +13,15 @@ import {
 } from "recharts";
 import type { WorkByStaff } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const WorkByStaffChart = () => {
+  const { columnFilters } = useWorkInsightsContext();
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByStaffQuery();
+  } = useGetWorksByStaffQuery({ columnFilters });
 
   if (error) {
     showNotification("Could not load Works by Staff data", {

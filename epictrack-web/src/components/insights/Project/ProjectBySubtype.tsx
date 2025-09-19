@@ -13,6 +13,7 @@ import { getProjectsTypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
 
 const ProjectBySubtypeChart = () => {
+  const { columnFilters } = useProjectsContext();
   const { projects, loadingProjects } = useProjectsContext();
   const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
   const [selectedType, setSelectedType] = useState({
@@ -31,9 +32,9 @@ const ProjectBySubtypeChart = () => {
 
   useEffect(() => {
     if (selectedType?.id) {
-      loadChartTrigger(selectedType.id);
+      loadChartTrigger({ type_id: selectedType.id, columnFilters });
     }
-  }, [loadChartTrigger, selectedType]);
+  }, [loadChartTrigger, selectedType, columnFilters]);
 
   if (queryResult.isError) {
     showNotification("Could not load Project Subtype data", {

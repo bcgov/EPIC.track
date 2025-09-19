@@ -13,13 +13,15 @@ import {
 } from "recharts";
 import type { WorkByLead } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 
 const WorkByLeadChart = () => {
+  const { columnFilters } = useWorkInsightsContext();
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByLeadQuery();
+  } = useGetWorksByLeadQuery({ columnFilters });
 
   if (error) {
     showNotification("Could not load Works by Lead data", {

@@ -25,6 +25,12 @@ class WorkInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
         required=True,
     )
 
+    filters = fields.Field(
+        metadata={"description": "Additional filters to apply"},
+        required=False,
+        missing=None
+    )
+
 
 class ProjectInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
     """Project insight query parameter schema"""
@@ -36,6 +42,12 @@ class ProjectInsightRequestQueryParameterSchema(RequestQueryParameterSchema):
 
     type_id = fields.Int(
         metadata={"description": "Type id to filter by (optional)"},
+        required=False,
+        missing=None
+    )
+
+    filters = fields.Field(
+        metadata={"description": "Additional filters to apply"},
         required=False,
         missing=None
     )
