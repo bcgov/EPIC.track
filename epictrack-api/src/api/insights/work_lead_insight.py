@@ -21,7 +21,7 @@ class WorkLeadInsightGenerator:
 
     def generate_partition_query(self, filters: List = None):
         """Generates the group by subquery."""
-        filter_exprs = build_insights_filters(filters) if filters else []
+        filter_exprs = build_insights_filters(filters, "works") if filters else []
         query = db.session.query(
             StaffWorkRole.staff_id,
             func.count(func.distinct(Work.id)).label("count"),

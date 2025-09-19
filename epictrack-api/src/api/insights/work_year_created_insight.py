@@ -16,7 +16,7 @@ class WorkByYearOpenedInsightGenerator:
 
     def fetch_data(self, filters: List = None) -> List[dict]:
         """Fetch data from db"""
-        filter_exprs = build_insights_filters(filters) if filters else []
+        filter_exprs = build_insights_filters(filters, "works") if filters else []
         year_query = (
             db.session.query(
                 extract('year', Work.start_date).label('year'),

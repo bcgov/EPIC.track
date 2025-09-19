@@ -16,7 +16,7 @@ class ProjectBySubTypeInsightGenerator:
 
     def generate_partition_query(self, type_id: int, filters: List = None):
         """Generates the group by subquery."""
-        filter_exprs = build_insights_filters(filters) if filters else []
+        filter_exprs = build_insights_filters(filters, "projects") if filters else []
         partition_query = (
             db.session.query(
                 Project.sub_type_id,
