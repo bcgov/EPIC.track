@@ -2,6 +2,7 @@ import { FC, useCallback, useMemo } from "react";
 import { Box, Tooltip } from "@mui/material";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Palette } from "styles/theme";
 import { CalendarEvent, EventsGridModel } from "models/event";
 import { ETCaption1 } from "components/shared";
@@ -18,6 +19,7 @@ import { darkenHex, getWorkColour } from "./Legends/utils";
 import { LEGEND_COLOURS } from "./constants";
 
 dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 type EventWithRow = CalendarEvent & { row: number };
 
