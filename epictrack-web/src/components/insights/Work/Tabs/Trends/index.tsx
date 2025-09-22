@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { InsightsAccordionCollapsableDetails } from "components/insights/InsightsAccordion";
+import InsightAccordion from "components/insights/InsightsAccordion";
 import WorksCreatedEachYear from "./charts/WorksCreatedEachYear";
 import WorksCompletedEachYear from "./charts/WorksCompletedEachYear";
 import WorksClosedYearlyBreakdown from "./charts/WorksClosedYearlyBreakdown";
@@ -7,7 +7,13 @@ import WorkList from "./charts/WorkListing";
 
 const Trends = () => {
   return (
-    <Grid container spacing={2}>
+    <InsightAccordion
+      title="Trends Insights"
+      showMoreLabel={true}
+      showMoreContent={<WorkList />}
+      defaultExpanded={false}
+      data-cy="trend-work-accordion"
+    >
       <Grid item xs={4}>
         <WorksCreatedEachYear />
       </Grid>
@@ -17,12 +23,7 @@ const Trends = () => {
       <Grid item xs={4}>
         <WorksClosedYearlyBreakdown />
       </Grid>
-      <Grid item xs={12}>
-        <InsightsAccordionCollapsableDetails>
-          <WorkList />
-        </InsightsAccordionCollapsableDetails>
-      </Grid>
-    </Grid>
+    </InsightAccordion>
   );
 };
 

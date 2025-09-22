@@ -1,16 +1,16 @@
 import { ETHeading3 } from "components/shared";
 import { Grid, Stack } from "@mui/material";
-import ProjectInsights from "./ChartsContainer";
+import WorkInsightsTabs from "./Tabs";
 import { Palette } from "styles/theme";
 
-const ProjectInsightsContainer = () => {
+const WorkInsightsContainer = () => {
   return (
     <Grid container>
       <Grid item xs={12}>
-        <ProjectInsights data-cy="project-insights-accordion" />
+        <WorkInsightsTabs />
       </Grid>
     </Grid>
   );
 };
 
-export default ProjectInsightsContainer;
+export default WorkInsightsContainer;

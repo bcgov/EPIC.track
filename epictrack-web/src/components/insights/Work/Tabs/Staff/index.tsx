@@ -1,14 +1,19 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import WorkByTeam from "./Charts/WorkByTeam";
-import { InsightsAccordionCollapsableDetails } from "components/insights/InsightsAccordion";
+import InsightAccordion from "components/insights/InsightsAccordion";
 import WorkList from "./Charts/workListing";
 import WorkByLead from "./Charts/WorkByLead";
 import WorkByStaff from "./Charts/WorkByStaff";
 
 const Staff = () => {
   return (
-    <Grid container spacing={2}>
+    <InsightAccordion
+      title="Staff Insights"
+      showMoreLabel={true}
+      showMoreContent={<WorkList />}
+      defaultExpanded={false}
+      data-cy="staff-work-accordion"
+    >
       <Grid item xs={4}>
         <WorkByTeam />
       </Grid>
@@ -18,12 +23,7 @@ const Staff = () => {
       <Grid item xs={4}>
         <WorkByStaff />
       </Grid>
-      <Grid item xs={12}>
-        <InsightsAccordionCollapsableDetails>
-          <WorkList />
-        </InsightsAccordionCollapsableDetails>
-      </Grid>
-    </Grid>
+    </InsightAccordion>
   );
 };
 

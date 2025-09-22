@@ -4,10 +4,11 @@ import { AccordionProps as MuiAccordionProps } from "@mui/material/Accordion";
 import { Palette } from "../../../styles/theme";
 
 const ETAccordion = (props: MuiAccordionProps) => {
+  const { sx, ...otherProps } = props;
+
   return (
     <Accordion
-      expanded={props.expanded}
-      onChange={props.onChange}
+      {...otherProps}
       sx={{
         border: `1px solid ${Palette.primary.main}`,
         borderLeft: `${props.expanded ? "4px" : "1px"} solid ${
@@ -22,6 +23,7 @@ const ETAccordion = (props: MuiAccordionProps) => {
           mt: "0px !important",
           mb: "0px !important",
         },
+        ...sx, // Merge any external sx styles
       }}
     >
       {props.children}

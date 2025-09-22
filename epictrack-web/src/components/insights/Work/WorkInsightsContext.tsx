@@ -1,18 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { WORK_INSIGHTS_TAB, WorkInsightsTab } from "./constants";
+import React, { createContext, useContext, useState } from "react";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 
 type WorkInsightsContextState = {
-  activeTab: WorkInsightsTab;
-  setActiveTab: (tab: WorkInsightsTab) => void;
   columnFilters: ColumnFilter[];
   setColumnFilters: any;
 };
 const WorkInsightsContext = createContext<WorkInsightsContextState>({
-  activeTab: WORK_INSIGHTS_TAB.Staff,
-  setActiveTab: () => {
-    return;
-  },
   columnFilters: [],
   setColumnFilters: () => {
     return;
@@ -25,20 +18,11 @@ type WorkInsightsContextProviderProps = {
 const WorkInsightsContextProvider: React.FC<
   WorkInsightsContextProviderProps
 > = ({ children }) => {
-  const [activeTab, setActiveTab] = useState<WorkInsightsTab>(
-    WORK_INSIGHTS_TAB.General
-  );
   const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
-
-  useEffect(() => {
-    setColumnFilters([]);
-  }, [activeTab]);
 
   return (
     <WorkInsightsContext.Provider
       value={{
-        activeTab,
-        setActiveTab,
         columnFilters,
         setColumnFilters,
       }}

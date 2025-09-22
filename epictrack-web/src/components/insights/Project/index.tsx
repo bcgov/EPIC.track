@@ -1,11 +1,11 @@
 import React from "react";
 import { ProjectsContextProvider } from "./ProjectsContext";
-import ProjectAccordion from "./Accordion";
+import ProjectInsightsContainer from "./Accordion";
 
 const ProjectInsights = () => {
   return (
     <ProjectsContextProvider>
-      <ProjectAccordion />
+      <ProjectInsightsContainer />
     </ProjectsContextProvider>
   );
 };
