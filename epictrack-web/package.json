@@ -81,6 +81,7 @@
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@faker-js/faker": "^8.3.1",
+    "@testing-library/cypress": "^10.1.0",
     "@types/canvas-confetti": "^1.6.4",
     "@types/color": "^3.0.6",
     "@types/node": "^20.17.19",
