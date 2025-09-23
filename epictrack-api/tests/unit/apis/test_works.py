@@ -598,3 +598,35 @@ def test_get_work_types(client, auth_header):
     url = urljoin(API_BASE_URL, 'works/types')
     response = client.get(url, headers=auth_header)
     assert response.status_code == HTTPStatus.OK
+
+
+def test_get_work_phase_overage_responsibilities(client, jwt):
+    """Test GET /work-phases/<id>/overage-responsibilities"""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    work_phase_id = 1
+    url = urljoin(API_BASE_URL + "works/work-phases/", f"{work_phase_id}/overage-responsibilities")
+    response = client.get(url, headers=headers)
+
+    assert response.status_code == HTTPStatus.OK
+    response_json = response.json
+    assert isinstance(response_json, list)
+
+
+def test_patch_work_phase_overage_notes(client, jwt):
+    """Test PATCH /work-phases/<id>/overage-responsibility-notes"""
+    headers = factory_auth_header(jwt=jwt, claims=TestJwtClaims.staff_admin_role)
+    payload = prepare_work_payload()
+    # Create a work with phases
+    url = urljoin(API_BASE_URL, "works")
+    work_response = client.post(url, json=payload, headers=headers)
+    work_response_json = work_response.json
+    work_phase_id = work_response_json["current_work_phase_id"]
+    url = urljoin(API_BASE_URL + "works/work-phases/", f"{work_phase_id}/overage-responsibility-notes")
+
+    payload = {"notes": "Updated test notes"}
+
+    response = client.patch(url, headers=headers, json=payload)
+    assert response.status_code == HTTPStatus.OK
+    response_json = response.json
+    assert "responsibility_notes" in response_json
+    assert response_json["responsibility_notes"] == payload["notes"]
