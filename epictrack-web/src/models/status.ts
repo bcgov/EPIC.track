@@ -17,7 +17,7 @@ export interface StatusDashboardItem {
   work_id: number;
   work_is_active: boolean;
   work_name: string;
-  status: Status;
+  status: Status | null;
   status_history: Status[];
   work_type: string;
 }
