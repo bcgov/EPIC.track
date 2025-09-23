@@ -89,6 +89,7 @@ const RecentStatus: React.FC<RecentStatusProps> = ({
                   }}
                 >
                   <ExclamationIcon
+                    aria-label="staleness level"
                     style={{
                       fill:
                         currentStatus.staleness === StalenessEnum.CRITICAL

@@ -7,6 +7,7 @@ import { EVENT_TYPE } from "components/workPlan/phase/type";
 import dayjs from "dayjs";
 import { EVENT_STATUS } from "models/taskEvent";
 import { WorkplanContextProps } from "components/workPlan/WorkPlanContext";
+import { defaultSearchOptions } from "components/myUpdates/myIssues/MyIssuesContext";
 
 export const mockStaffs: Staff[] = [
   {
@@ -234,7 +235,6 @@ export type CypressStubFunction =
   | Cypress.Agent<sinon.SinonStub>
   | (() => void)
   | undefined;
-
  
 export const makeWorkplanContextStub = (
     overrides: Partial<WorkplanContextProps> = {}
@@ -266,3 +266,24 @@ export const makeWorkplanContextStub = (
     workPhases: [],
     ...overrides,
   });
+
+export const issuesContextValue={
+    ...defaultSearchOptions,
+    issues: [],
+    loadingIssues: false,
+    lazyLoadMoreIssues: () => {},
+    totalIssues: 0,
+    searchOptions: defaultSearchOptions,
+    setSearchOptions: () => {},
+    loadingMoreIssues: false,
+    setLoadingMoreIssues: () => {},
+    issueStalenessSettings: undefined,
+    sortOrder: "desc",
+    setSortOrder: () => {},
+    refetchIssues: () => {},
+    userWorkIds: [],
+    isIssueDialogOpen: false,
+    showIssueDialog: () => {},
+    hideIssueDialog: () => {},
+    selectedIssue: null,
+    }

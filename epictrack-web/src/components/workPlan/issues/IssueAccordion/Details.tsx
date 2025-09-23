@@ -89,6 +89,7 @@ const IssueDetails = ({
                       }}
                     >
                       <ExclamationIcon
+                        aria-label="staleness level"
                         style={{
                           fill:
                             latestUpdate.staleness === StalenessEnum.CRITICAL
