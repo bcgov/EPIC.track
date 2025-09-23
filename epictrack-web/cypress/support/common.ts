@@ -6,6 +6,7 @@ import { CalendarEvent, EventPosition, EventsGridModel, EventTemplateVisibility 
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 import dayjs from "dayjs";
 import { EVENT_STATUS } from "models/taskEvent";
+import { WorkplanContextProps } from "components/workPlan/WorkPlanContext";
 
 export const mockStaffs: Staff[] = [
   {
@@ -233,3 +234,35 @@ export type CypressStubFunction =
   | Cypress.Agent<sinon.SinonStub>
   | (() => void)
   | undefined;
+
+ 
+export const makeWorkplanContextStub = (
+    overrides: Partial<WorkplanContextProps> = {}
+  ): WorkplanContextProps => ({
+    firstNations: [],
+    getWorkById: cy.stub().resolves(),
+    getWorkStatuses: cy.stub().resolves(),
+    getWorkPhases: cy.stub().resolves(),
+    issues: [],
+    loadData: cy.stub().resolves(),
+    loading: false,
+    loadIssues: cy.stub().resolves(),
+    isActiveTeamMember: true,
+    issueStalenessSetting: undefined,
+    selectedStaff: undefined,
+    selectedWorkPhase: undefined,
+    setFirstNations: cy.stub(),
+    setIssues: cy.stub(),
+    setSelectedStaff: cy.stub(),
+    setSelectedWorkPhase: cy.stub(),
+    setStatuses: cy.stub(),
+    setTeam: cy.stub(),
+    setWork: cy.stub(),
+    setWorkPhases: cy.stub(),
+    statuses: [],
+    statusStalenessSetting: undefined,
+    team: [],
+    work: undefined,
+    workPhases: [],
+    ...overrides,
+  });
