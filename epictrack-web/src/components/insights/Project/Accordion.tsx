@@ -1,7 +1,5 @@
-import { ETHeading3 } from "components/shared";
-import { Grid, Stack } from "@mui/material";
+import { Grid } from "@mui/material";
 import ProjectInsights from "./ChartsContainer";
-import { Palette } from "styles/theme";
 
 const ProjectInsightsContainer = () => {
   return (

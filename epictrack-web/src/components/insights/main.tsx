@@ -1,5 +1,4 @@
-import React from "react";
-import { Box, Grid, Stack } from "@mui/material";
+import { Grid } from "@mui/material";
 import { ETHeading3, ETPageContainer } from "components/shared";
 import WorkInsights from "./Work";
 import ProjectInsights from "./Project";
