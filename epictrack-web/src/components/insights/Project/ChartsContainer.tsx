@@ -1,26 +1,26 @@
 import { Grid } from "@mui/material";
-import React from "react";
 import ProjectBySubtype from "./ProjectBySubtype";
 import ProjectByType from "./ProjectByType";
 import ProjectList from "./ProjectListing";
-import { InsightsAccordionCollapsableDetails } from "../InsightsAccordion";
+import InsightAccordion from "../InsightsAccordion";
 
-const ChartsContainer = () => {
+const ProjectInsights = () => {
   return (
-    <Grid container spacing={2}>
+    <InsightAccordion
+      title="General Insights"
+      showMoreLabel={true}
+      showMoreContent={<ProjectList />}
+      defaultExpanded={true}
+      data-cy="project-accordion"
+    >
       <Grid item xs={6}>
         <ProjectByType />
       </Grid>
       <Grid item xs={6}>
         <ProjectBySubtype />
       </Grid>
-      <Grid item xs={12}>
-        <InsightsAccordionCollapsableDetails>
-          <ProjectList />
-        </InsightsAccordionCollapsableDetails>
-      </Grid>
-    </Grid>
+    </InsightAccordion>
   );
 };
 
-export default ChartsContainer;
+export default ProjectInsights;

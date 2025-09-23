@@ -1,12 +1,17 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
+import { INSIGHTS_TAB, InsightsTab } from "./constants";
 
 interface InsightsContextState {
-  state?: any;
+  activeTab: InsightsTab;
+  setActiveTab: (tab: InsightsTab) => void;
 }
 
-export const InsightsContext = createContext<InsightsContextState | undefined>(
-  undefined
-);
+export const InsightsContext = createContext<InsightsContextState | undefined>({
+  activeTab: INSIGHTS_TAB.Work,
+  setActiveTab: () => {
+    return;
+  },
+});
 
 type InsightsContextProviderProps = {
   children: React.ReactNode;
@@ -14,8 +19,11 @@ type InsightsContextProviderProps = {
 export const InsightsContextProvider: React.FC<
   InsightsContextProviderProps
 > = ({ children }) => {
+  const [activeTab, setActiveTab] = useState<InsightsTab>(INSIGHTS_TAB.Work);
   return (
-    <InsightsContext.Provider value={{}}>{children}</InsightsContext.Provider>
+    <InsightsContext.Provider value={{ activeTab, setActiveTab }}>
+      {children}
+    </InsightsContext.Provider>
   );
 };
 

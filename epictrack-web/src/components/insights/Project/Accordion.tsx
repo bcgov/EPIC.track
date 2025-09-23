@@ -1,37 +1,14 @@
-import React from "react";
-import {
-  InsightsAccordion,
-  InsightsAccordionDetails,
-  InsightsAccordionSummary,
-} from "../InsightsAccordion";
-import { ETCaption3, ETParagraph } from "components/shared";
-import { Grid, Stack } from "@mui/material";
-import ChartsContainer from "./ChartsContainer";
+import { Grid } from "@mui/material";
+import ProjectInsights from "./ChartsContainer";
 
-const ProjectAccordion = () => {
-  const [expanded, setExpanded] = React.useState(false);
+const ProjectInsightsContainer = () => {
   return (
-    <InsightsAccordion
-      expanded={expanded}
-      onClick={() => setExpanded(!expanded)}
-    >
-      <InsightsAccordionSummary>
-        <Stack direction="row" spacing={1} alignItems={"center"}>
-          <ETParagraph bold>Project Dashboard</ETParagraph>
-          <ETCaption3>
-            (visualization of every in progress EAO Project)
-          </ETCaption3>
-        </Stack>
-      </InsightsAccordionSummary>
-      <InsightsAccordionDetails>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <ChartsContainer />
-          </Grid>
-        </Grid>
-      </InsightsAccordionDetails>
-    </InsightsAccordion>
+    <Grid container>
+      <Grid item xs={12}>
+        <ProjectInsights data-cy="project-insights-accordion" />
+      </Grid>
+    </Grid>
   );
 };
 
-export default ProjectAccordion;
+export default ProjectInsightsContainer;
