@@ -185,9 +185,8 @@ export const EventCalendarProvider = ({
       const mappedTasks = taskItems.map((element) => ({
         event: {
           ...element.event,
-          start_date: element.start_date,
           end_date: dateUtils
-            .add(element.start_date, element.event.number_of_days - 1, "days")
+            .add(element.event.start_date, element.event.number_of_days, "days")
             .toISOString(),
           type: EVENT_TYPE.TASK,
         },
