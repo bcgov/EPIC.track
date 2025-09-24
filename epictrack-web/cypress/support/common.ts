@@ -54,8 +54,8 @@ export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsG
   const endOfMonth = dayjs().endOf("month").toDate();
 
   const start = faker.date.between(startOfMonth, endOfMonth);
-  // Ensure end date is same or after start, max 5 days later
-  const end = faker.date.between(start, dayjs(start).add(5, "day").toDate());
+  const end = faker.date.between(dayjs(start).add(1, "day").toDate(), dayjs(start).add(5, "day").toDate());
+  const number_of_days = dayjs(end).diff(dayjs(start), "day") + 1;
 
   return {
     id: faker.datatype.number(),
@@ -68,7 +68,7 @@ export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsG
       name: faker.lorem.words(3),
       event_category_id: faker.datatype.number(),
       event_type_id: faker.datatype.number(),
-      multiple_days: false,
+      multiple_days: true,
       event_position: EventPosition.INTERMEDIATE,
       visibilty_mode: EventTemplateVisibility.MANDATORY,
       work_phase_id: faker.datatype.number(),
@@ -77,7 +77,7 @@ export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsG
     type: faker.helpers.arrayElement([EVENT_TYPE.TASK, EVENT_TYPE.MILESTONE]),
     is_complete: faker.datatype.boolean(),
     long_description: faker.lorem.paragraph(),
-    number_of_days: faker.datatype.number({ min: 1, max: 5 }),
+    number_of_days,
     outcome_id: faker.datatype.uuid(),
     short_description: faker.lorem.words(2),
     assignees: [],

@@ -42,6 +42,7 @@ describe("EventRow Component", () => {
         />
       </EventCalendarProvider>
     );
+    cy.viewport(1920, 1080);
 
     cy.wrap(mockEventsGrid).each((calendarItem: any) => {
       const title =
@@ -167,9 +168,8 @@ describe("EventRow Component", () => {
         />
       </EventCalendarProvider>
     );
-
-    // Icon box exists
-    cy.get("div").contains(taskEvent.name).should("exist");
+    cy.viewport(1920, 1080);
+    cy.get("div").contains(taskEvent.name).scrollIntoView().should("exist");
   });
 
   it("renders event without work legend icon when showWorkLegend is false", () => {
