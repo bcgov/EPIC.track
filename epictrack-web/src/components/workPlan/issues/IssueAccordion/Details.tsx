@@ -224,7 +224,7 @@ const IssueDetails = ({
         onClose={() => setIssueToApproveId(null)}
         onOk={handleApproveIssue}
         isActionsRequired
-        headingCaption={headingCaption}
+        subHeading={headingCaption}
       >
         <ETHeading4>
           Once approved, this issue will be automatically added to the report.

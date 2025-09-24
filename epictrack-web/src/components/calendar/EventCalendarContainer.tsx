@@ -14,7 +14,7 @@ import TrackSidePanel, {
 import { CalendarEvent } from "models/event";
 import { useEventCalendarContext } from "./EventCalendarContext";
 import TaskMilestoneLegend from "./Legends/TaskMilestoneLegend";
-import { getNDaysArray } from "./utils";
+import { getNDaysArray } from "./utils/utils";
 import DaysHeader from "./DaysHeader";
 import Month from "./Month";
 import {
@@ -24,6 +24,7 @@ import {
 } from "./constants";
 import MyCalendarLegend from "./Legends/FullCalendarLegend";
 import { getWorkColour } from "./Legends/utils";
+import { getEventIcon } from "./utils/eventIcons";
 
 type EventCalendarProps = {
   cellSizePx?: number;
@@ -141,7 +142,15 @@ export const EventCalendarContainer = ({
           onCancel={onCancelHandler}
           formId="task-form"
           variant="compact"
-          headingBackgroundColor={work ? getWorkColour(work.title) : "inherit"}
+          heading={showWorkLegend && work ? work.title : undefined}
+          dialogTitleIcon={
+            selectedEvent
+              ? getEventIcon(selectedEvent, showWorkLegend)
+              : undefined
+          }
+          headingBackgroundColor={
+            showWorkLegend && work ? getWorkColour(work.title) : undefined
+          }
         >
           <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
         </TrackSidePanel>
@@ -163,8 +172,16 @@ export const EventCalendarContainer = ({
           onCancel={onCancelHandler}
           formId="event-form"
           variant="compact"
-          headingCaption={selectedEvent?.phase_name}
-          headingBackgroundColor={work ? getWorkColour(work.title) : "inherit"}
+          subHeading={selectedEvent?.phase_name}
+          heading={showWorkLegend && work ? work.title : undefined}
+          dialogTitleIcon={
+            selectedEvent
+              ? getEventIcon(selectedEvent, showWorkLegend)
+              : undefined
+          }
+          headingBackgroundColor={
+            showWorkLegend && work ? getWorkColour(work.title) : undefined
+          }
         >
           <EventForm
             onSave={onSaveHandler}

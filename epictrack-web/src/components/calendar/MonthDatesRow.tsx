@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { Palette } from "styles/theme";
 import { FC } from "react";
-import { isWeekendByIndex } from "./utils";
+import { isWeekendByIndex } from "./utils/utils";
 import dayjs from "dayjs";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { CalendarEvent } from "models/event";

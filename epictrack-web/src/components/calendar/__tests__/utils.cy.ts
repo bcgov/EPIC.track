@@ -4,7 +4,7 @@ import {
   isWeekendByIndex,
   getLegendIconMap,
   resolveEventIconName,
-} from "components/calendar/utils";
+} from "components/calendar/utils/utils";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 import { EventCategory, EventType } from "models/event";
 

@@ -13,7 +13,6 @@ export const TrackSidePanel: FC<TrackDialogProps> = (props) => {
         width: `${DEFAULT_PANEL_SIZE}px`,
         backgroundColor: Palette.neutral.bg.light,
         overflowY: "auto",
-        height: "100%",
       }}
     >
       <TrackDialogContent {...props} />

@@ -1,5 +1,5 @@
 import { Box, Button, Grid } from "@mui/material";
-import { FC, useEffect, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import { Palette } from "styles/theme";
 import { IconProps } from "../icons/type";
 import Icons from "../icons";
@@ -40,6 +40,22 @@ const Month: FC<MonthProps> = ({
   showWorkLegend = false,
 }) => {
   const [works, setWorks] = useState<CalendarWork[]>([]);
+
+  const legendRef = useRef<HTMLDivElement | null>(null);
+  const [legendHeight, setLegendHeight] = useState(0);
+
+  useEffect(() => {
+    if (!legendRef.current) return;
+
+    setLegendHeight(legendRef.current.offsetHeight);
+
+    const observer = new ResizeObserver(([entry]) => {
+      setLegendHeight(entry.contentRect.height);
+    });
+    observer.observe(legendRef.current);
+
+    return () => observer.disconnect();
+  }, [works, isCollapsed, showWorkLegend]);
 
   useEffect(() => {
     const uniqueWorks = Array.from(
@@ -94,6 +110,7 @@ const Month: FC<MonthProps> = ({
           <Grid
             container
             direction="row"
+            ref={legendRef}
             spacing={0}
             sx={{ padding: "0.275rem" }}
           >
@@ -122,9 +139,10 @@ const Month: FC<MonthProps> = ({
         />
         {!isCollapsed && (
           <EventRow
-            events={events ?? []}
-            days={days}
             cellSizePx={cellSizePx}
+            days={days}
+            events={events ?? []}
+            legendHeight={legendHeight}
             showWorkLegend={showWorkLegend}
           />
         )}

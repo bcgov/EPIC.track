@@ -27,7 +27,7 @@ const NewIssueUpdateDialog = ({
         setNewIssueUpdateFormIsOpen(false);
       }}
       isActionsRequired
-      headingCaption={headingCaption}
+      subHeading={headingCaption}
     >
       <NewIssueUpdate />
     </TrackDialog>
