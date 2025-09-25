@@ -16,8 +16,10 @@ export type TrackDialogProps = {
   formId?: string;
   externalSubmitButtonUsed?: boolean;
   saveButtonProps?: ButtonProps;
-  headingCaption?: string;
+  subHeading?: string;
+  heading?: string;
   variant?: "default" | "compact";
+  dialogTitleIcon?: React.ReactNode;
   headingBackgroundColor?: string;
 } & DialogProps;
 

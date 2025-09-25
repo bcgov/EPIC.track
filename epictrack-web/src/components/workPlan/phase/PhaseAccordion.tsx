@@ -522,7 +522,7 @@ const PhaseAccordion = ({
         disableEscapeKeyDown
         formId="overage-responsibility-form"
         fullWidth
-        headingCaption={phase.work_phase.name}
+        subHeading={phase.work_phase.name}
         isActionsRequired
         maxWidth="sm"
         okButtonText="Save"

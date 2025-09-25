@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { Palette } from "styles/theme";
-import { isWeekendByIndex } from "./utils";
+import { isWeekendByIndex } from "./utils/utils";
 
 type DaysHeaderProps = {
   cellSizePx: number;

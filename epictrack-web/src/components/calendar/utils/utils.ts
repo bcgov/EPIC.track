@@ -1,5 +1,5 @@
 import dayjs, { Dayjs } from "dayjs";
-import { LEGEND_ITEMS } from "./constants";
+import { LEGEND_ITEMS } from "../constants";
 import { EventCategory, EventsGridModel, EventType } from "models/event";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
 
