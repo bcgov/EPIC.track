@@ -315,3 +315,9 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
     include_indigenous_nations = fields.Bool(
         metadata={"description": "Indicate if the result should have indigenous nations"}
     )
+
+    staff_id = fields.Int(
+        metadata={"description": "Staff ID to filter by (optional)"},
+        required=False,
+        missing=None
+    )

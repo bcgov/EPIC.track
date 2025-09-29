@@ -14,14 +14,19 @@ import {
 import type { WorkByLead } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const WorkByLeadChart = () => {
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByLeadQuery({ columnFilters });
+  } = useGetWorksByLeadQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works by Lead data", {

@@ -14,14 +14,19 @@ import {
 import type { WorkByStaff } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const WorkByStaffChart = () => {
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByStaffQuery({ columnFilters });
+  } = useGetWorksByStaffQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works by Staff data", {

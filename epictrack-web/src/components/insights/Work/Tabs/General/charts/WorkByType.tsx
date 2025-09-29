@@ -7,15 +7,20 @@ import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const WorkByTypeChart = () => {
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByTypeQuery({ columnFilters });
+  } = useGetWorksByTypeQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works by Type data", {

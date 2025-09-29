@@ -14,6 +14,7 @@ import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
@@ -23,7 +24,18 @@ const WorkList = () => {
     pageSize: 15,
   });
   const { columnFilters, setColumnFilters } = useWorkInsightsContext();
-  const { data, error, isLoading } = useGetWorksWithNationsQuery();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data, error, isLoading } = useGetWorksWithNationsQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const works = useMemo(() => data || [], [data]);
 

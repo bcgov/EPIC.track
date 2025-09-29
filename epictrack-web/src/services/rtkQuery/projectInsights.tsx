@@ -18,8 +18,20 @@ export const projectInsightsApi = createApi({
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getProjects: builder.query<Project[], boolean | void>({
-      query: (is_active = true) => `projects?is_active=${is_active}`,
+    getProjects: builder.query<
+      Project[],
+      { is_active?: boolean; staffId?: number } | void
+    >({
+      query: (
+        args: { is_active?: boolean; staffId?: number } = { is_active: true }
+      ) => {
+        const { is_active = true, staffId } = args;
+        let url = `projects?is_active=${is_active}`;
+        if (staffId !== undefined) {
+          url += `&staff_id=${staffId}`;
+        }
+        return url;
+      },
       providesTags: (result) =>
         result
           ? [
@@ -33,14 +45,15 @@ export const projectInsightsApi = createApi({
     }),
     getProjectByType: builder.query<
       ProjectByType[],
-      { columnFilters?: ColumnFilter[] }
+      { columnFilters?: ColumnFilter[]; staffId?: number }
     >({
-      query: ({ columnFilters }) => ({
+      query: ({ columnFilters, staffId }) => ({
         url: `insights/projects`,
         method: "POST",
         body: {
           group_by: "type",
           filters: columnFilters ?? [],
+          ...(staffId !== undefined && { staff_id: staffId }),
         },
       }),
       providesTags: (result) =>
@@ -56,14 +69,16 @@ export const projectInsightsApi = createApi({
     }),
     getProjectBySubType: builder.query<
       ProjectBySubtype[],
-      { type_id: number; columnFilters?: ColumnFilter[] }
+      { type_id: number; columnFilters?: ColumnFilter[]; staffId?: number }
     >({
       query: ({
         type_id,
         columnFilters,
+        staffId,
       }: {
         type_id: number;
         columnFilters?: ColumnFilter[];
+        staffId?: number;
       }) => ({
         url: `insights/projects`,
         method: "POST",
@@ -71,6 +86,7 @@ export const projectInsightsApi = createApi({
           group_by: "subtype",
           type_id: type_id,
           filters: columnFilters ?? [],
+          ...(staffId !== undefined && { staff_id: staffId }),
         },
       }),
       providesTags: (result) =>

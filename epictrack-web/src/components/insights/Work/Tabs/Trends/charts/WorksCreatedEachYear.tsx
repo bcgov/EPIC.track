@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { getChartColor } from "components/insights/utils";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
@@ -10,11 +11,16 @@ import { useGetWorksByYearOpenedQuery } from "services/rtkQuery/workInsights";
 
 const WorksCreatedEachYear = () => {
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByYearOpenedQuery({ columnFilters });
+  } = useGetWorksByYearOpenedQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works created each year", {

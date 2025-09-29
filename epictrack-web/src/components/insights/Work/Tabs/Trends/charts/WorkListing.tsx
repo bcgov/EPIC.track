@@ -16,6 +16,7 @@ import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
 import WorkState from "components/workPlan/WorkState";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -25,7 +26,18 @@ const WorkList = () => {
     pageSize: 15,
   });
   const { columnFilters, setColumnFilters } = useWorkInsightsContext();
-  const { data, error, isLoading } = useGetAllWorksQuery();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data, error, isLoading } = useGetAllWorksQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const works = useMemo(() => data || [], [data]);
 

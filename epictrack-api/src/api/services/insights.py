@@ -22,34 +22,34 @@ class InsightService:  # pylint:disable=too-few-public-methods
     """Service to insights related operations"""
 
     @classmethod
-    def fetch_work_insights(cls, group_by: str, filters: list = None):
+    def fetch_work_insights(cls, group_by: str, filters: list = None, staff_id: int = None):
         """Fetch work insights"""
-        current_app.logger.debug(f"Fetch work insights {group_by = } {filters = }")
+        current_app.logger.info(f"Fetch work insights {group_by = } {filters = } {staff_id = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=group_by
         )
-        insights = insight_generator().fetch_data(filters=filters)
+        insights = insight_generator().fetch_data(filters=filters, staff_id=staff_id)
         return insights
 
     @classmethod
-    def fetch_assessment_work_insights(cls, group_by: str):
+    def fetch_assessment_work_insights(cls, group_by: str, staff_id: int = None):
         """Fetch assessment work insights"""
         current_app.logger.debug(f"Fetch assessment work insights {group_by = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=f"assessment_by_{group_by}"
         )
-        insights = insight_generator().fetch_data()
+        insights = insight_generator().fetch_data(staff_id=staff_id)
         return insights
 
     @classmethod
-    def fetch_project_insights(cls, group_by: str, type_id: int = None, filters: list = None):
+    def fetch_project_insights(cls, group_by: str, type_id: int = None, filters: list = None, staff_id: int = None):
         """Fetch project insights"""
-        current_app.logger.debug(f"Fetch project insights {group_by = }")
+        current_app.logger.debug(f"Fetch project insights {group_by = } {type_id = } {filters = } {staff_id = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="projects", group_by=group_by
         )
         if type_id:
-            insights = insight_generator().fetch_data(filters=filters, type_id=type_id)
+            insights = insight_generator().fetch_data(filters=filters, type_id=type_id, staff_id=staff_id)
         else:
-            insights = insight_generator().fetch_data(filters=filters)
+            insights = insight_generator().fetch_data(filters=filters, staff_id=staff_id)
         return insights
