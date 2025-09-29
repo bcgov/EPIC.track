@@ -14,14 +14,20 @@ import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/workInsi
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const WorkByFederalInvolvementChart = () => {
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByFederalInvolvementQuery({ columnFilters });
+  } = useGetWorksByFederalInvolvementQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   const formatData = (data?: WorkByFederalInvolvement[]) => {
     if (!data) return [];

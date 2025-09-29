@@ -101,6 +101,27 @@ class WorkService:  # pylint: disable=too-many-public-methods
         return works
 
     @classmethod
+    def get_works_by_staff(cls, staff_id: Optional[int] = None) -> List[Work]:
+        """Fetch all active, non-deleted works and filter by staff_id if provided."""
+        query = Work.query.filter(
+            Work.is_active.is_(True),
+            Work.is_deleted.is_(False)
+        )
+
+        if staff_id:
+            query = query.join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == Work.id,
+                    StaffWorkRole.staff_id == staff_id,
+                    StaffWorkRole.is_active.is_(True),
+                    StaffWorkRole.is_deleted.is_(False)
+                )
+            )
+        works = query.all()
+        return works
+
+    @classmethod
     def fetch_all_work_plans(
         cls,
         pagination_options: PaginationOptions,

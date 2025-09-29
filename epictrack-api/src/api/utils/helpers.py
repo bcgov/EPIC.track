@@ -14,6 +14,9 @@
 """Helper Util."""
 
 from api.models import db
+from api.models.staff import Staff
+from api.models.staff_work_role import StaffWorkRole
+from api.models.work import Work
 
 
 def find_model_from_table_name(table_name: str):
@@ -22,3 +25,12 @@ def find_model_from_table_name(table_name: str):
         if getattr(model_class, '__tablename__', None) == table_name:
             return model_class
     return None
+
+
+def filter_query_by_staff(query, staff_id):
+    """Join and filter a query by staff_id if provided."""
+    if staff_id:
+        query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
+        query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+        query = query.filter(Staff.id == staff_id)
+    return query

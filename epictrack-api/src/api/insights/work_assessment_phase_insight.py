@@ -11,6 +11,8 @@ from api.models.work_phase import WorkPhase
 from api.models.work_type import WorkType
 from api.models.project import Project
 from api.models.work_type import WorkTypeEnum
+from api.models.staff import Staff
+from api.models.staff_work_role import StaffWorkRole
 from api.insights.insights_table_filters import build_insights_filters
 
 
@@ -18,7 +20,7 @@ from api.insights.insights_table_filters import build_insights_filters
 class AssessmentWorksByPhaseInsightGenerator:
     """Insight generator for assessment works grouped by phase"""
 
-    def generate_partition_query(self, filters: List = None):
+    def generate_partition_query(self, filters: List = None, staff_id: int = None):
         """Generates the group by subquery."""
         filter_exprs = build_insights_filters(filters, "works") if filters else []
         query = db.session.query(
@@ -30,6 +32,10 @@ class AssessmentWorksByPhaseInsightGenerator:
             query = query.join(Work, Work.id == WorkPhase.work_id)
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
+        if staff_id:
+            query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
+            query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+            query = query.filter(Staff.id == staff_id)
         query = query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False),
@@ -41,9 +47,9 @@ class AssessmentWorksByPhaseInsightGenerator:
         query = query.group_by(WorkPhase.phase_id)
         return query.subquery()
 
-    def fetch_data(self, filters: List = None) -> List[dict]:
+    def fetch_data(self, filters: List = None, staff_id: int = None) -> List[dict]:
         """Fetch data from db"""
-        partition_query = self.generate_partition_query(filters)
+        partition_query = self.generate_partition_query(filters, staff_id)
 
         assessment_insights = (
             db.session.query(PhaseCode)

@@ -11,10 +11,13 @@ import TrackSelect from "components/shared/TrackSelect";
 import { useProjectsContext } from "./ProjectsContext";
 import { getProjectsTypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
+import { useInsightsContext } from "../InsightsContext";
 
 const ProjectBySubtypeChart = () => {
   const { columnFilters } = useProjectsContext();
   const { projects, loadingProjects } = useProjectsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
   const [selectedType, setSelectedType] = useState({
     id: 0,
@@ -32,9 +35,13 @@ const ProjectBySubtypeChart = () => {
 
   useEffect(() => {
     if (selectedType?.id) {
-      loadChartTrigger({ type_id: selectedType.id, columnFilters });
+      loadChartTrigger({
+        type_id: selectedType.id,
+        columnFilters,
+        staffId: isUserInsights ? staffId : undefined,
+      });
     }
-  }, [loadChartTrigger, selectedType, columnFilters]);
+  }, [loadChartTrigger, selectedType, columnFilters, staffId, isUserInsights]);
 
   if (queryResult.isError) {
     showNotification("Could not load Project Subtype data", {

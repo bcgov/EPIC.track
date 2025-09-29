@@ -16,6 +16,7 @@ import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -28,12 +29,31 @@ const WorkList = () => {
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
   const { columnFilters, setColumnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data: works } = useGetWorksQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
+
   const { data: workStaffs, isLoading } = useGetWorkStaffsQuery();
-  const { data: works } = useGetWorksQuery();
 
   useEffect(() => {
     if (workStaffs && works) {
       const mergedData = workStaffs
+        .filter((workStaff) =>
+          isUserInsights
+            ? workStaff.staff
+                .map((staff) => staff.id)
+                ?.includes(staffId ? staffId : -1)
+            : true
+        )
         .map((workStaff) => {
           const work = works.find(
             (w) => w.eao_team_id === workStaff.eao_team.id
@@ -50,7 +70,7 @@ const WorkList = () => {
         pageSize: workStaffs.length,
       }));
     }
-  }, [workStaffs, works]);
+  }, [isUserInsights, staffId, works, workStaffs]);
 
   const workLeads = useMemo(() => {
     return Array.from(

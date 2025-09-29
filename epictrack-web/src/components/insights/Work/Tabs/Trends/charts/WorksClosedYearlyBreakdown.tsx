@@ -1,4 +1,5 @@
 import { Box, Grid } from "@mui/material";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { getChartColor } from "components/insights/utils";
@@ -16,12 +17,16 @@ const WorksClosedYearlyBreakdown = () => {
   const [selectedYear, setSetSelectedYear] = useState<string>();
   const [displayData, setDisplayData] = useState<WorkStateByYear[]>([]);
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkClosureBreakdownQuery({ columnFilters });
+  } = useGetWorkClosureBreakdownQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   useEffect(() => {
     if (!chartData) return;

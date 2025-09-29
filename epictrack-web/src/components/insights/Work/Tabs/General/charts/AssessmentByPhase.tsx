@@ -8,14 +8,19 @@ import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const AssessmentByPhaseChart = () => {
   const { columnFilters } = useWorkInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetAssessmentsByPhaseQuery({ columnFilters });
+  } = useGetAssessmentsByPhaseQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   const formatData = (data?: AssessmentByPhase[]) => {
     if (!data) return [];

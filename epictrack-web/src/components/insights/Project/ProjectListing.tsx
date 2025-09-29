@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import {
   getSelectFilterOptions,
@@ -21,7 +21,7 @@ const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 const ProjectList = () => {
   const { projects, loadingProjects, columnFilters, setColumnFilters } =
     useProjectsContext();
-  const [pagination, setPagination] = React.useState({
+  const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 15,
   });
@@ -76,7 +76,7 @@ const ProjectList = () => {
       ),
     [projects]
   );
-  const columns = React.useMemo<MRT_ColumnDef<Project>[]>(
+  const columns = useMemo<MRT_ColumnDef<Project>[]>(
     () => [
       {
         accessorKey: "name",

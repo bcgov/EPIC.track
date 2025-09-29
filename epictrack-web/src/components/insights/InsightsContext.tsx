@@ -1,9 +1,13 @@
 import React, { createContext, useContext, useState } from "react";
 import { INSIGHTS_TAB, InsightsTab } from "./constants";
+import { useAppSelector } from "hooks";
 
 interface InsightsContextState {
   activeTab: InsightsTab;
   setActiveTab: (tab: InsightsTab) => void;
+  isUserInsights: boolean;
+  setIsUserInsights: (isUser: boolean) => void;
+  staffId?: number;
 }
 
 export const InsightsContext = createContext<InsightsContextState | undefined>({
@@ -11,6 +15,11 @@ export const InsightsContext = createContext<InsightsContextState | undefined>({
   setActiveTab: () => {
     return;
   },
+  isUserInsights: false,
+  setIsUserInsights: () => {
+    return;
+  },
+  staffId: undefined,
 });
 
 type InsightsContextProviderProps = {
@@ -20,8 +29,20 @@ export const InsightsContextProvider: React.FC<
   InsightsContextProviderProps
 > = ({ children }) => {
   const [activeTab, setActiveTab] = useState<InsightsTab>(INSIGHTS_TAB.Work);
+  const [isUserInsights, setIsUserInsights] = useState<boolean>(false);
+  const user = useAppSelector((state) => state.user.userDetail);
+  const staffId = user?.staffId || undefined;
+
   return (
-    <InsightsContext.Provider value={{ activeTab, setActiveTab }}>
+    <InsightsContext.Provider
+      value={{
+        activeTab,
+        setActiveTab,
+        isUserInsights,
+        setIsUserInsights,
+        staffId,
+      }}
+    >
       {children}
     </InsightsContext.Provider>
   );
