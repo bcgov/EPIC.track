@@ -1,7 +1,7 @@
 import Staff from "./Staff";
 import General from "./General";
 import Partners from "./Partners";
-import { Grid, Table } from "@mui/material";
+import { Grid } from "@mui/material";
 import Trends from "./Trends";
 import { TableFilterProvider } from "components/insights/TableFilterContext";
 

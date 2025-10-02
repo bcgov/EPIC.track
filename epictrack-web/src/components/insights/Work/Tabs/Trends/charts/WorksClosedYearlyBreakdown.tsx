@@ -1,4 +1,5 @@
 import { Box, Grid } from "@mui/material";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getChartColor } from "components/insights/utils";
@@ -15,13 +16,17 @@ const WorksClosedYearlyBreakdown = () => {
   const [yearOptions, setYearOptions] = useState<OptionType[]>();
   const [selectedYear, setSetSelectedYear] = useState<string>();
   const [displayData, setDisplayData] = useState<WorkStateByYear[]>([]);
+  const { isUserInsights, staffId } = useInsightsContext();
   const { columnFilters } = useTableFilterContext();
 
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkClosureBreakdownQuery({ columnFilters });
+  } = useGetWorkClosureBreakdownQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   useEffect(() => {
     if (!chartData) return;
@@ -62,7 +67,7 @@ const WorksClosedYearlyBreakdown = () => {
         </Grid>
         <Grid item xs={12}>
           <ETCaption3>
-            The proportion of work closures categorized by their work state
+            The proportion of Work closures categorized by their work state
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent="flex-end">

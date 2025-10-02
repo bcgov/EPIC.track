@@ -316,9 +316,10 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
         metadata={"description": "Indicate if the result should have indigenous nations"}
     )
 
-    include_phase_status = fields.Bool(
-        metadata={"description": "Indicate if the result should have current phase status"},
-        default=False
+    staff_id = fields.Int(
+        metadata={"description": "Staff ID to filter by (optional)"},
+        required=False,
+        missing=None
     )
 
 

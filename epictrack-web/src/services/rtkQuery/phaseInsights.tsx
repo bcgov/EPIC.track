@@ -27,7 +27,7 @@ export const phaseInsightsApi = createApi({
       PhasesByAverageOverage[],
       { columnFilters?: ColumnFilter[]; selectedWorkType?: string }
     >({
-      query: ({ columnFilters, selectedWorkType: selectedWorkType }) => ({
+      query: ({ columnFilters, selectedWorkType }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
@@ -41,7 +41,7 @@ export const phaseInsightsApi = createApi({
       PhasesByAverageOverage[],
       { columnFilters?: ColumnFilter[]; selectedWorkType?: string }
     >({
-      query: ({ columnFilters, selectedWorkType: selectedWorkType }) => ({
+      query: ({ columnFilters, selectedWorkType }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
@@ -59,11 +59,7 @@ export const phaseInsightsApi = createApi({
         selectedPhase?: string;
       }
     >({
-      query: ({
-        columnFilters,
-        selectedWorkType: selectedWorkType,
-        selectedPhase: selectedPhase,
-      }) => ({
+      query: ({ columnFilters, selectedWorkType, selectedPhase }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
@@ -81,7 +77,7 @@ export const phaseInsightsApi = createApi({
         selectedWorkType?: string;
       }
     >({
-      query: ({ columnFilters, selectedWorkType: selectedWorkType }) => ({
+      query: ({ columnFilters, selectedWorkType }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
@@ -99,11 +95,7 @@ export const phaseInsightsApi = createApi({
         selectedYear?: string;
       }
     >({
-      query: ({
-        columnFilters,
-        selectedWorkType: selectedWorkType,
-        selectedYear: selectedYear,
-      }) => ({
+      query: ({ columnFilters, selectedWorkType, selectedYear }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {

@@ -100,8 +100,12 @@ class Works(Resource):
         """Return all active works."""
         request_args = req.WorkQueryParameterSchema().load(request.args)
         is_active = request_args.get("is_active", None)
+        staff_id = request_args.get("staff_id", None)
         include_indigenous_nations = request_args.get('include_indigenous_nations')
-        works = WorkService.find_all_works(is_active)
+        if staff_id is not None:
+            works = WorkService.get_works_by_staff(staff_id)
+        else:
+            works = WorkService.find_all_works(is_active)
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
 

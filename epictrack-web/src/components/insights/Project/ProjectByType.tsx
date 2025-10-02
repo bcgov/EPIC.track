@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -14,14 +15,24 @@ import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "../TableFilterContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const ProjectByTypeChart = () => {
   const { columnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArgs = useMemo(
+    () => ({
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    }),
+    [columnFilters, isUserInsights, staffId]
+  );
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetProjectByTypeQuery({ columnFilters });
+  } = useGetProjectByTypeQuery(queryArgs);
 
   if (isChartLoading || !chartData) {
     return <PieChartSkeleton loading={isChartLoading} />;
@@ -81,7 +92,7 @@ const ProjectByTypeChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "200px", // Add this line to limit the width of the legend
+                  maxWidth: "220px",
                   overflow: "hidden",
                 }}
               />

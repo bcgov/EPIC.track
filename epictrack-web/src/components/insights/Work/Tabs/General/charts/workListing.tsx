@@ -12,6 +12,7 @@ import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
@@ -22,8 +23,18 @@ const WorkList = () => {
     pageSize: 15,
   });
   const { columnFilters, setColumnFilters } = useTableFilterContext();
+  const { isUserInsights, staffId } = useInsightsContext();
 
-  const { data, error, isLoading } = useGetWorksQuery();
+  const queryArg = useMemo(() => {
+    return {
+      is_active: true,
+      ...(isUserInsights && staffId ? { staffId } : {}),
+    };
+  }, [isUserInsights, staffId]);
+
+  const { data, error, isLoading } = useGetWorksQuery(queryArg, {
+    refetchOnMountOrArgChange: true,
+  });
 
   const works = useMemo(() => data || [], [data]);
 

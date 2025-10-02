@@ -30,6 +30,7 @@ from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.project_state import ProjectState
 from api.models.special_field import EntityEnum, SpecialField, FieldTypeEnum
+from api.models.staff_work_role import StaffWorkRole
 from api.models.sub_types import SubType
 from api.models.types import Type
 from api.models.work import Work
@@ -57,9 +58,22 @@ class ProjectService:
         raise ResourceNotFoundError(f"Project with id '{project_id}' not found.")
 
     @classmethod
-    def find_all(cls, with_works=False, is_active=None):
-        """Find all projects"""
-        return Project.find_all_projects(with_works, is_active)
+    def find_all(cls, with_works=False, is_active=None, staff_id=None):
+        """Find all projects, optionally filtered by staff_id."""
+        projects_query = db.session.query(Project)
+
+        if with_works:
+            projects_query = projects_query.filter(Project.works.any())
+        if is_active is not None:
+            projects_query = projects_query.filter(Project.is_active.is_(is_active))
+        projects_query = projects_query.filter(Project.is_deleted.is_(False))
+
+        if staff_id:
+            projects_query = projects_query.join(Work, Work.project_id == Project.id) \
+                                           .join(StaffWorkRole, StaffWorkRole.work_id == Work.id) \
+                                           .filter(StaffWorkRole.staff_id == staff_id)
+
+        return projects_query.all()
 
     @classmethod
     def create_project(cls, payload: dict):

@@ -32,7 +32,9 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
   additionalActions,
   externalSubmitButtonUsed = false,
   saveButtonProps,
-  headingCaption = "",
+  subHeading = "",
+  heading = "",
+  dialogTitleIcon = undefined,
   children,
   variant = "default",
   headingBackgroundColor = "",
@@ -70,7 +72,9 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         <Box
           display="grid"
           gridTemplateColumns="1fr auto"
-          gridTemplateRows="auto auto"
+          gridTemplateRows={
+            heading && subHeading ? "auto auto auto" : "auto auto"
+          }
           gap={1}
           sx={{
             backgroundColor: headingBackgroundColor ?? "inherit",
@@ -82,8 +86,31 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
             padding: isCompact ? "0.5rem 0.875rem" : "1rem",
           }}
         >
-          {headingCaption && (
-            <Tooltip sx={{ gridColumn: 1 }} title={headingCaption ?? ""}>
+          {heading && (
+            <Tooltip sx={{ gridColumn: 1 }} title={heading ?? ""}>
+              <span>
+                <ETCaption1
+                  sx={{
+                    color: headingBackgroundColor
+                      ? Palette.neutral.dark
+                      : Palette.neutral.light,
+                    display: "-webkit-box",
+                    overflow: "hidden",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 2,
+                    textOverflow: "ellipsis",
+                    padding: heading ? "0" : "0 0.5rem 0.5rem 0",
+                    fontSize: "1rem",
+                    mb: subHeading ? "0.25rem" : 0,
+                  }}
+                >
+                  {heading}
+                </ETCaption1>
+              </span>
+            </Tooltip>
+          )}
+          {subHeading && (
+            <Tooltip sx={{ gridColumn: 1 }} title={subHeading ?? ""}>
               <span>
                 <ETCaption1
                   bold
@@ -97,10 +124,12 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
                     WebkitLineClamp: 2,
                     textOverflow: "ellipsis",
                     textTransform: "uppercase",
-                    padding: "0 0.5rem 0.5rem 0",
+                    padding: heading ? "0" : "0 0.5rem 0.5rem 0",
+                    fontSize: "0.75rem",
+                    lineHeight: "1rem",
                   }}
                 >
-                  {headingCaption}
+                  {subHeading}
                 </ETCaption1>
               </span>
             </Tooltip>
@@ -125,12 +154,28 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
             sx={{
               color: Palette.primary.main,
               width: "100%",
-              gridColumn: headingCaption ? 1 : "1 / span 2",
-              gridRow: headingCaption ? 2 : 1,
-              alignSelf: headingCaption ? "start" : "center",
+              gridColumn: subHeading ? 1 : "1 / span 2",
+              gridRow:
+                heading && subHeading ? 3 : heading || subHeading ? 2 : 1,
+              alignSelf: heading && subHeading ? "start" : "center",
+              fontSize: heading ? "0.875rem" : "1.25rem",
+              mt: heading && subHeading ? "-0.5rem" : 0,
             }}
           >
-            {dialogTitle}
+            <Box display="flex" alignItems="center" gap={0.5} fontWeight={700}>
+              {dialogTitleIcon && (
+                <Box
+                  sx={{
+                    width: "1rem",
+                    height: "1rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  {dialogTitleIcon}
+                </Box>
+              )}
+              {dialogTitle}
+            </Box>
           </ETHeading4>
         </Box>
       </DialogTitle>

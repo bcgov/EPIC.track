@@ -27,7 +27,7 @@ const EditIssueDialog = ({
         setEditIssueFormIsOpen(false);
       }}
       isActionsRequired
-      headingCaption={headingCaption}
+      subHeading={headingCaption}
     >
       <EditIssue />
     </TrackDialog>

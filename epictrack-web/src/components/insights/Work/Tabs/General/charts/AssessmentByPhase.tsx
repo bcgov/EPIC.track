@@ -7,14 +7,20 @@ import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 
 const AssessmentByPhaseChart = () => {
+  const { isUserInsights, staffId } = useInsightsContext();
   const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetAssessmentsByPhaseQuery({ columnFilters });
+  } = useGetAssessmentsByPhaseQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   const formatData = (data?: AssessmentByPhase[]) => {
     if (!data) return [];
@@ -75,8 +81,10 @@ const AssessmentByPhaseChart = () => {
               iconSize={16}
               wrapperStyle={{
                 fontSize: "16px",
-                maxWidth: "200px", // Add this line to limit the width of the legend
+                maxWidth: "300px",
                 overflow: "hidden",
+                maxHeight: "350px",
+                overflowY: "auto",
               }}
             />
             <Tooltip />

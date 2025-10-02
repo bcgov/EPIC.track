@@ -183,7 +183,7 @@ export const StatusProvider = ({
       <TrackDialog
         open={showStatusForm}
         dialogTitle={status?.id && !isCloning ? "Edit Status" : "Add Status"}
-        headingCaption={headingCaption}
+        subHeading={headingCaption}
         disableEscapeKeyDown
         fullWidth
         maxWidth="sm"
@@ -200,7 +200,7 @@ export const StatusProvider = ({
         dialogContentText="Once approved, this status will be automatically added to the Report."
         okButtonText="Approve"
         cancelButtonText="Cancel"
-        headingCaption={headingCaption}
+        subHeading={headingCaption}
         isActionsRequired
         onCancel={closeApproveDialog}
         onOk={() => {

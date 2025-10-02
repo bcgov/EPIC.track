@@ -6,16 +6,21 @@ import { useGetWorksByTypeQuery } from "services/rtkQuery/workInsights";
 import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByTypeChart = () => {
+  const { isUserInsights, staffId } = useInsightsContext();
   const { columnFilters } = useTableFilterContext();
 
   const {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByTypeQuery({ columnFilters });
+  } = useGetWorksByTypeQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   if (error) {
     showNotification("Could not load Works by Type data", {

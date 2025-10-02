@@ -12,10 +12,13 @@ import { useProjectsContext } from "./ProjectsContext";
 import { getProjectsTypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
 import { useTableFilterContext } from "../TableFilterContext";
+import { useInsightsContext } from "../InsightsContext";
 
 const ProjectBySubtypeChart = () => {
   const { columnFilters } = useTableFilterContext();
   const { projects, loadingProjects } = useProjectsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
   const [selectedType, setSelectedType] = useState({
     id: 0,
@@ -33,9 +36,13 @@ const ProjectBySubtypeChart = () => {
 
   useEffect(() => {
     if (selectedType?.id) {
-      loadChartTrigger({ type_id: selectedType.id, columnFilters });
+      loadChartTrigger({
+        type_id: selectedType.id,
+        columnFilters,
+        staffId: isUserInsights ? staffId : undefined,
+      });
     }
-  }, [loadChartTrigger, selectedType, columnFilters]);
+  }, [loadChartTrigger, selectedType, columnFilters, staffId, isUserInsights]);
 
   if (queryResult.isError) {
     showNotification("Could not load Project Subtype data", {
@@ -109,7 +116,7 @@ const ProjectBySubtypeChart = () => {
           </Box>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <PieChart width={600} height={300}>
+          <PieChart width={600} height={260}>
             <Pie
               data={chartData}
               cx="50%"

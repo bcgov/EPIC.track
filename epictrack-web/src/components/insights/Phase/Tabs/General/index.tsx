@@ -13,14 +13,16 @@ const General = () => (
     defaultExpanded={true}
     data-cy="general-phase-accordion"
   >
-    <Grid item xs={4}>
-      <AveragePhaseOverageChart />
-    </Grid>
-    <Grid item xs={4}>
-      <PercentOfPhasesWithOveragesChart />
-    </Grid>
-    <Grid item xs={4}>
-      <OverageResponsibilityChart />
+    <Grid container spacing={2}>
+      <Grid className="chart-item" item xs={4}>
+        <AveragePhaseOverageChart />
+      </Grid>
+      <Grid className="chart-item" item xs={4}>
+        <PercentOfPhasesWithOveragesChart />
+      </Grid>
+      <Grid className="chart-item" item xs={4}>
+        <OverageResponsibilityChart />
+      </Grid>
     </Grid>
   </InsightAccordion>
 );

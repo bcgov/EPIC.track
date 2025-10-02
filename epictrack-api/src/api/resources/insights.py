@@ -38,7 +38,8 @@ class Works(Resource):
     def post():
         """Return work insights based on group by param."""
         args = req.WorkInsightRequestQueryParameterSchema().load(request.json)
-        work_insights = InsightService.fetch_work_insights(args["group_by"], args["filters"])
+        staff_id = args.get("staff_id", None)
+        work_insights = InsightService.fetch_work_insights(args["group_by"], args["filters"], staff_id)
         return jsonify(work_insights), HTTPStatus.OK
 
 
@@ -54,7 +55,8 @@ class Projects(Resource):
     def post():
         """Return project insights based on group by param."""
         args = req.ProjectInsightRequestQueryParameterSchema().load(request.json)
-        project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"], args["filters"])
+        staff_id = args.get("staff_id", None)
+        project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"], args["filters"], staff_id)
         return jsonify(project_insights), HTTPStatus.OK
 
 

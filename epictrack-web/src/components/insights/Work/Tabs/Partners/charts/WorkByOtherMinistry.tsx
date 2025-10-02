@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -14,15 +13,21 @@ import { WorkByMinistry } from "models/insights";
 import { useGetWorkByMinistryQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByOtherMinistryChart = () => {
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkByMinistryQuery({ columnFilters });
+  } = useGetWorkByMinistryQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   const formatData = (data?: WorkByMinistry[]) => {
     if (!data) return [];
@@ -83,9 +88,9 @@ const WorkByOtherMinistryChart = () => {
                 align="right"
                 iconSize={16}
                 wrapperStyle={{
-                  fontSize: "12px",
-                  maxWidth: "200px", // Add this line to limit the width of the legend
-                  overflow: "hidden",
+                  fontSize: "14px",
+                  maxWidth: "250px",
+                  overflow: "scroll",
                 }}
               />
               <Tooltip />

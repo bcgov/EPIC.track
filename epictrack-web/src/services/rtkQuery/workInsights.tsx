@@ -1,4 +1,3 @@
-// worksApi.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { AppConfig } from "config";
 import {
@@ -16,6 +15,38 @@ import {
 import { prepareHeaders } from "./util";
 import { Work } from "models/work";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+
+type InsightQueryArgs = {
+  columnFilters?: ColumnFilter[];
+  staffId?: number;
+};
+
+function buildInsightBody(
+  groupBy: string,
+  { columnFilters, staffId }: InsightQueryArgs
+) {
+  return {
+    group_by: groupBy,
+    filters: columnFilters ?? [],
+    ...(staffId !== undefined && { staff_id: staffId }),
+  };
+}
+
+function buildQueryString(
+  base: string,
+  { is_active, staffId }: { is_active?: boolean; staffId?: number } = {}
+): string {
+  const params: string[] = [];
+
+  if (is_active !== undefined) {
+    params.push(`is_active=${is_active}`);
+  }
+  if (staffId !== undefined) {
+    params.push(`staff_id=${staffId}`);
+  }
+
+  return params.length ? `${base}?${params.join("&")}` : base;
+}
 
 export const workInsightsApi = createApi({
   tagTypes: [
@@ -39,31 +70,33 @@ export const workInsightsApi = createApi({
     prepareHeaders,
   }),
   endpoints: (builder) => ({
-    getAssessmentsByPhase: builder.query<
-      AssessmentByPhase[],
-      { columnFilters?: ColumnFilter[] }
+    getAssessmentsByPhase: builder.query<AssessmentByPhase[], InsightQueryArgs>(
+      {
+        query: (args) => ({
+          url: `insights/works`,
+          method: "POST",
+          body: buildInsightBody("assessment_by_phase", args),
+        }),
+        providesTags: (result) =>
+          result
+            ? [
+                ...result.map(({ phase_id }) => ({
+                  type: "AssessmentsByPhase" as const,
+                  id: phase_id,
+                })),
+                { type: "AssessmentsByPhase", id: "LIST" },
+              ]
+            : [{ type: "AssessmentsByPhase", id: "LIST" }],
+      }
+    ),
+
+    getAllWorks: builder.query<
+      Work[],
+      { is_active?: boolean; staffId?: number } | void
     >({
-      query: ({ columnFilters }) => ({
-        url: `insights/works`,
-        method: "POST",
-        body: {
-          group_by: "assessment_by_phase",
-          filters: columnFilters ?? [],
-        },
-      }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.map(({ phase_id }) => ({
-                type: "AssessmentsByPhase" as const,
-                id: phase_id,
-              })),
-              { type: "AssessmentsByPhase", id: "LIST" },
-            ]
-          : [{ type: "AssessmentsByPhase", id: "LIST" }],
-    }),
-    getAllWorks: builder.query<Work[], boolean | void>({
-      query: (is_active = true) => `works`,
+      query: (
+        args: { is_active?: boolean; staffId?: number } = { is_active: true }
+      ) => buildQueryString("works", args),
       providesTags: (result) =>
         result
           ? [
@@ -75,12 +108,14 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
+
     getWorks: builder.query<
       Work[],
-      { is_active?: boolean; include_phase_status?: boolean } | void
+      { is_active?: boolean; staffId?: number } | void
     >({
-      query: ({ is_active = true, include_phase_status = false } = {}) =>
-        `works?is_active=${is_active}&include_phase_status=${include_phase_status}`,
+      query: (
+        args: { is_active?: boolean; staffId?: number } = { is_active: true }
+      ) => buildQueryString("works", args),
       providesTags: (result) =>
         result
           ? [
@@ -92,17 +127,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
-    getWorksByType: builder.query<
-      WorkByType[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByType: builder.query<WorkByType[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "type",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("type", args),
       }),
       providesTags: (result) =>
         result
@@ -115,8 +145,11 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByType", id: "LIST" }],
     }),
-    getWorksWithNations: builder.query<Work[], void>({
-      query: () => `works?is_active=true&include_indigenous_nations=true`,
+
+    getWorksWithNations: builder.query<Work[], { staffId?: number } | void>({
+      query: (args) =>
+        buildQueryString("works", { ...args, is_active: true }) +
+        "&include_indigenous_nations=true",
       providesTags: (result) =>
         result
           ? [
@@ -128,17 +161,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksWithNations", id: "LIST" }],
     }),
-    getWorkByMinistry: builder.query<
-      WorkByMinistry[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorkByMinistry: builder.query<WorkByMinistry[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "ministry",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("ministry", args),
       }),
       providesTags: (result) =>
         result
@@ -151,17 +179,15 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByMinistry", id: "LIST" }],
     }),
+
     getWorksByFederalInvolvement: builder.query<
       WorkByFederalInvolvement[],
-      { columnFilters?: ColumnFilter[] }
+      InsightQueryArgs
     >({
-      query: ({ columnFilters }) => ({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "federal_involvement",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("federal_involvement", args),
       }),
       providesTags: (result) =>
         result
@@ -174,17 +200,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByFederalInvolvement", id: "LIST" }],
     }),
-    getWorksByNation: builder.query<
-      WorkByNation[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByNation: builder.query<WorkByNation[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "first_nation",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("first_nation", args),
       }),
       providesTags: (result) =>
         result
@@ -197,17 +218,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByNation", id: "LIST" }],
     }),
-    getWorksByTeam: builder.query<
-      WorkByTeam[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByTeam: builder.query<WorkByTeam[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "team",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("team", args),
       }),
       providesTags: (result) =>
         result
@@ -220,17 +236,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByTeam", id: "LIST" }],
     }),
-    getWorksByLead: builder.query<
-      WorkByLead[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByLead: builder.query<WorkByLead[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "lead",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("lead", args),
       }),
       providesTags: (result) =>
         result
@@ -243,17 +254,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByLead", id: "LIST" }],
     }),
-    getWorksByStaff: builder.query<
-      WorkByStaff[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByStaff: builder.query<WorkByStaff[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "staff",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("staff", args),
       }),
       providesTags: (result) =>
         result
@@ -266,45 +272,32 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "WorksByStaff", id: "LIST" }],
     }),
-    getWorksByYearOpened: builder.query<
-      WorkByYear[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByYearOpened: builder.query<WorkByYear[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "year_opened",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("year_opened", args),
       }),
     }),
-    getWorksByYearCompleted: builder.query<
-      WorkByYear[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
+
+    getWorksByYearCompleted: builder.query<WorkByYear[], InsightQueryArgs>({
+      query: (args) => ({
         url: `insights/works`,
         method: "POST",
-        body: {
-          group_by: "year_completed",
-          filters: columnFilters ?? [],
-        },
+        body: buildInsightBody("year_completed", args),
       }),
     }),
-    getWorkClosureBreakdown: builder.query<
-      WorkStateByYear[],
-      { columnFilters?: ColumnFilter[] }
-    >({
-      query: ({ columnFilters }) => ({
-        url: `insights/works`,
-        method: "POST",
-        body: {
-          group_by: "work_closure_breakdown",
-          filters: columnFilters ?? [],
-        },
-      }),
-    }),
+
+    getWorkClosureBreakdown: builder.query<WorkStateByYear[], InsightQueryArgs>(
+      {
+        query: (args) => ({
+          url: `insights/works`,
+          method: "POST",
+          body: buildInsightBody("work_closure_breakdown", args),
+        }),
+      }
+    ),
   }),
   refetchOnMountOrArgChange: 300,
 });

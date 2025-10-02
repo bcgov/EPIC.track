@@ -8,20 +8,23 @@ import WorkByStaff from "./Charts/WorkByStaff";
 const Staff = () => {
   return (
     <InsightAccordion
+      tab="Work"
       title="Staff Insights"
       showMoreLabel={true}
       showMoreContent={<WorkList />}
       defaultExpanded={false}
       data-cy="staff-work-accordion"
     >
-      <Grid item xs={4}>
-        <WorkByTeam />
-      </Grid>
-      <Grid item xs={4}>
-        <WorkByLead />
-      </Grid>
-      <Grid item xs={4}>
-        <WorkByStaff />
+      <Grid container spacing={2}>
+        <Grid className="chart-item" item xs={12}>
+          <WorkByTeam />
+        </Grid>
+        <Grid className="chart-item" item xs={6}>
+          <WorkByLead />
+        </Grid>
+        <Grid className="chart-item" item xs={6}>
+          <WorkByStaff />
+        </Grid>
       </Grid>
     </InsightAccordion>
   );

@@ -18,7 +18,7 @@ from api.insights.insights_table_filters import build_insights_filters
 class WorkTeamInsightGenerator:
     """Insight generator for work resource grouped by EAO team"""
 
-    def generate_partition_query(self, filters: List = None):
+    def generate_partition_query(self, filters: List = None, staff_id: int = None):
         """Generates the group by subquery."""
         filter_exprs = build_insights_filters(filters, "works") if filters else []
         query = db.session.query(
@@ -31,8 +31,10 @@ class WorkTeamInsightGenerator:
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)
+        if staff_id:
             query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
             query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+            query = query.filter(Staff.id == staff_id)
         query = query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False),
@@ -42,9 +44,9 @@ class WorkTeamInsightGenerator:
         query = query.group_by(Work.eao_team_id)
         return query.subquery()
 
-    def fetch_data(self, filters: List = None) -> List[dict]:
+    def fetch_data(self, filters: List = None, staff_id: int = None) -> List[dict]:
         """Fetch data from db"""
-        partition_query = self.generate_partition_query(filters)
+        partition_query = self.generate_partition_query(filters, staff_id)
 
         team_insights = (
             db.session.query(EAOTeam)

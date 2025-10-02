@@ -6,15 +6,22 @@ import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByNationChart = () => {
+  const { isUserInsights, staffId } = useInsightsContext();
+
   const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByNationQuery({ columnFilters });
+  } = useGetWorksByNationQuery({
+    columnFilters,
+    staffId: isUserInsights ? staffId : undefined,
+  });
 
   const formatData = (data?: WorkByNation[]) => {
     if (!data) return [];
@@ -56,18 +63,19 @@ const WorkByNationChart = () => {
               layout="vertical"
               data={chartData}
               margin={{
-                left: 30, // Increase left margin if names are getting cut off
+                left: 40, // Increase left margin if names are getting cut off
               }}
               height={chartData.length * 30 + 100}
-              width={350} // Adjust this value as needed
+              width={600} // Adjust this value as needed
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" allowDecimals={false} />
               <YAxis
                 dataKey="nation"
-                type="category"
-                width={40}
+                interval={0}
                 tick={{ fontSize: 12 }}
+                type="category"
+                width={100}
               />
               <Tooltip />
               <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />

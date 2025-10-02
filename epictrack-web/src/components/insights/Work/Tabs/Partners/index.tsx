@@ -8,20 +8,23 @@ import WorkList from "./charts/WorkList";
 const Partners = () => {
   return (
     <InsightAccordion
+      tab="Work"
       title="Partners Insights"
       showMoreLabel={true}
       showMoreContent={<WorkList />}
       defaultExpanded={false}
       data-cy="partner-work-accordion"
     >
-      <Grid item xs={4}>
-        <WorkByOtherMinistryChart />
-      </Grid>
-      <Grid item xs={4}>
-        <WorkByFederalInvolvementChart />
-      </Grid>
-      <Grid item xs={4}>
-        <WorkByNationChart />
+      <Grid container spacing={2}>
+        <Grid className="chart-item" item xs={6}>
+          <WorkByOtherMinistryChart />
+        </Grid>
+        <Grid className="chart-item" item xs={6}>
+          <WorkByFederalInvolvementChart />
+        </Grid>
+        <Grid className="chart-item" item xs={6}>
+          <WorkByNationChart />
+        </Grid>
       </Grid>
     </InsightAccordion>
   );

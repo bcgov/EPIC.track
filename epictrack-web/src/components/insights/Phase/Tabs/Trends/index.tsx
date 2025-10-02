@@ -12,11 +12,13 @@ const Trends = () => (
     defaultExpanded={false}
     data-cy="trend-phase-accordion"
   >
-    <Grid item xs={6}>
-      <PercentOfPhaseOveragesByAct />
-    </Grid>
-    <Grid item xs={6}>
-      <PercentOfPhaseOveragesByYear />
+    <Grid container spacing={2}>
+      <Grid className="chart-item" item xs={6}>
+        <PercentOfPhaseOveragesByAct />
+      </Grid>
+      <Grid className="chart-item" item xs={6}>
+        <PercentOfPhaseOveragesByYear />
+      </Grid>
     </Grid>
   </InsightAccordion>
 );

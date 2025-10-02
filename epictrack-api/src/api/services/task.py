@@ -23,7 +23,7 @@ from flask import current_app
 from sqlalchemy import and_, tuple_
 from sqlalchemy.orm import contains_eager, lazyload
 
-from api.schemas.response import TaskResponseSchema
+from api.schemas.response import TaskEventResponseSchema
 from api.exceptions import ResourceNotFoundError, UnprocessableEntityError
 from api.models.dashboard_search_options import EventCalendarSearchOptions
 from api.models import (
@@ -138,7 +138,7 @@ class TaskService:
             "work_id": work_id,
             "phase_name": phase_name,
             "phase_id": phase_id,
-            "event": TaskResponseSchema(many=False).dump(task),
+            "event": TaskEventResponseSchema(many=False).dump(task),
         }
 
     @classmethod

@@ -12,7 +12,6 @@ import Endpoints from "../../constants/api-endpoint";
 import { UserDetail, UserGroupUpdate } from "./type";
 import staffService from "../staffService/staffService";
 import { Staff } from "../../models/staff";
-import { showNotification } from "components/shared/notificationProvider";
 
 // Interface for UserInfo object.
 interface UserInfo {
@@ -90,11 +89,9 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
         staffProfile = staffResult.data as Staff;
       }
     } catch (e) {
-      console.log(e);
-      showNotification("Failed to fetch user profile", {
-        type: "error",
-        duration: 3000,
-      });
+      if ((e as any).response?.status === 404) {
+        console.log("Staff profile not found for current user.");
+      } else console.log(e);
     }
     const realmAccessRoles =
       KeycloakData.tokenParsed?.realm_access?.roles ?? [];

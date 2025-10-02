@@ -1,19 +1,14 @@
-import { FC, useCallback, useMemo } from "react";
+import { FC, useMemo } from "react";
 import { Box, Tooltip } from "@mui/material";
 import dayjs from "dayjs";
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
 import { Palette } from "styles/theme";
-import { CalendarEvent, EventsGridModel } from "models/event";
+import { CalendarEvent } from "models/event";
 import { ETCaption1 } from "components/shared";
-import { IconProps } from "components/icons/type";
-import Icons from "components/icons";
 import { EVENT_TYPE } from "components/workPlan/phase/type";
-import {
-  getLegendIconMap,
-  isWeekendByIndex,
-  resolveEventIconName,
-} from "./utils";
+import { isWeekendByIndex } from "./utils/utils";
+import { getEventIcon } from "./utils/eventIcons";
 import { useEventCalendarContext } from "./EventCalendarContext";
 import { darkenHex, getWorkColour } from "./Legends/utils";
 import { LEGEND_COLOURS } from "./constants";
@@ -53,53 +48,35 @@ function assignEventRows(events: CalendarEvent[]): EventWithRow[][] {
 }
 
 type EventRowProps = {
-  events: CalendarEvent[];
-  days: (Date | null)[];
   cellSizePx: number;
+  days: (Date | null)[];
+  events: CalendarEvent[];
+  legendHeight?: number;
   showWorkLegend: boolean;
 };
 
 const EventRow: FC<EventRowProps> = ({
-  events,
-  days,
   cellSizePx,
+  days,
+  events,
+  legendHeight,
   showWorkLegend,
 }) => {
   const eventRows = assignEventRows(events);
 
+  const extraRowsNeeded = useMemo(() => {
+    if (!legendHeight) return 0;
+    const rowGapPx = 4;
+    const eventRowsHeight =
+      eventRows.length * cellSizePx +
+      Math.max(0, eventRows.length - 1) * rowGapPx;
+    return Math.max(
+      Math.ceil((legendHeight - eventRowsHeight) / (cellSizePx + rowGapPx)),
+      0
+    );
+  }, [legendHeight, cellSizePx, eventRows.length]);
+
   const { handleEventClick } = useEventCalendarContext();
-
-  const legendIcons = useMemo(() => getLegendIconMap(), []);
-
-  const getEventIcon = useCallback(
-    (event: EventsGridModel) => {
-      if (!showWorkLegend) return null;
-
-      const iconName = resolveEventIconName(event, legendIcons);
-      const Icon: FC<IconProps> = Icons[iconName];
-
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            width: "1rem",
-            height: "1rem",
-            flexShrink: 0,
-          }}
-        >
-          <Icon
-            width="100%"
-            height="100%"
-            preserveAspectRatio="xMidYMid meet"
-            fill={Palette.primary.main}
-          />
-        </Box>
-      );
-    },
-    [legendIcons, showWorkLegend]
-  );
 
   if (eventRows.length === 0) {
     return <></>;
@@ -188,7 +165,7 @@ const EventRow: FC<EventRowProps> = ({
                   ? darkenHex(colour, 0.3)
                   : colour;
 
-                const eventIcon = getEventIcon(event);
+                const eventIcon = getEventIcon(eventItem, showWorkLegend);
                 const showOnlyIcon = eventIcon && span === 1;
 
                 return (
@@ -270,6 +247,47 @@ const EventRow: FC<EventRowProps> = ({
                     : "inherit",
                   color: isWeekendByIndex(dayIdx)
                     ? Palette.neutral.light
+                    : "inherit",
+                  border: day ? `1px solid ${Palette.neutral.bg.dark}` : "none",
+                  borderRadius: "2px",
+                }}
+              />
+            );
+          })}
+        </Box>
+      ))}
+      {[...Array(extraRowsNeeded)].map((_, idx) => (
+        /* Filler rows to match legend height */
+        <Box
+          key={`filler-${idx}`}
+          display="grid"
+          gridTemplateColumns={`repeat(${days.length}, ${cellSizePx}px)`}
+          gap={0.5}
+        >
+          {days.map((day, dayIdx) => {
+            if (!day) {
+              return (
+                <Box
+                  key={`filler-empty-${idx}-${dayIdx}`}
+                  sx={{
+                    height: cellSizePx,
+                    backgroundColor: isWeekendByIndex(dayIdx)
+                      ? "#F6F6F6"
+                      : Palette.neutral.bg.light,
+                    color: "transparent",
+                    border: "none",
+                    borderRadius: "2px",
+                  }}
+                />
+              );
+            }
+            return (
+              <Box
+                key={`filler-cell-${idx}-${dayIdx}`}
+                sx={{
+                  height: cellSizePx,
+                  backgroundColor: isWeekendByIndex(dayIdx)
+                    ? "#F6F6F6"
                     : "inherit",
                   border: day ? `1px solid ${Palette.neutral.bg.dark}` : "none",
                   borderRadius: "2px",
