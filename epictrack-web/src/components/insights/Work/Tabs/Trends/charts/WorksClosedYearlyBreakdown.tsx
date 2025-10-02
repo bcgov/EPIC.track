@@ -67,7 +67,7 @@ const WorksClosedYearlyBreakdown = () => {
         </Grid>
         <Grid item xs={12}>
           <ETCaption3>
-            The proportion of work closures categorized by their work state
+            The proportion of Work closures categorized by their work state
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent="flex-end">

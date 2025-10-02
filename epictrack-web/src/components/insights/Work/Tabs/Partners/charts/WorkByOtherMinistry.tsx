@@ -89,9 +89,9 @@ const WorkByOtherMinistryChart = () => {
                 align="right"
                 iconSize={16}
                 wrapperStyle={{
-                  fontSize: "12px",
-                  maxWidth: "200px", // Add this line to limit the width of the legend
-                  overflow: "hidden",
+                  fontSize: "14px",
+                  maxWidth: "250px",
+                  overflow: "scroll",
                 }}
               />
               <Tooltip />

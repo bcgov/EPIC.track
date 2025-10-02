@@ -24,7 +24,7 @@ class InsightService:  # pylint:disable=too-few-public-methods
     @classmethod
     def fetch_work_insights(cls, group_by: str, filters: list = None, staff_id: int = None):
         """Fetch work insights"""
-        current_app.logger.info(f"Fetch work insights {group_by = } {filters = } {staff_id = }")
+        current_app.logger.debug(f"Fetch work insights {group_by = } {filters = } {staff_id = }")
         insight_generator: InsightGenerator = get_insight_generator(
             resource="works", group_by=group_by
         )

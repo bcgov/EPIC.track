@@ -115,7 +115,7 @@ const ProjectBySubtypeChart = () => {
           </Box>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <PieChart width={600} height={300}>
+          <PieChart width={600} height={260}>
             <Pie
               data={chartData}
               cx="50%"

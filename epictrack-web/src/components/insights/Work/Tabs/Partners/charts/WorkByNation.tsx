@@ -62,18 +62,19 @@ const WorkByNationChart = () => {
               layout="vertical"
               data={chartData}
               margin={{
-                left: 30, // Increase left margin if names are getting cut off
+                left: 40, // Increase left margin if names are getting cut off
               }}
               height={chartData.length * 30 + 100}
-              width={350} // Adjust this value as needed
+              width={600} // Adjust this value as needed
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" allowDecimals={false} />
               <YAxis
                 dataKey="nation"
-                type="category"
-                width={40}
+                interval={0}
                 tick={{ fontSize: 12 }}
+                type="category"
+                width={100}
               />
               <Tooltip />
               <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
