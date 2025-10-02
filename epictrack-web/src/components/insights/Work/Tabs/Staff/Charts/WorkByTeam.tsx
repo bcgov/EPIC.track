@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import { ETCaption1, GrayBox } from "components/shared";
+import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { useGetWorksByTeamQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import {
@@ -56,6 +56,9 @@ const WorkByTeamChart = () => {
       <Grid container spacing={1}>
         <Grid item xs={12}>
           <ETCaption1 bold>WORK BY TEAM</ETCaption1>
+        </Grid>
+        <Grid item xs={12}>
+          <ETCaption3>The proportion of active Works by each team</ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <ResponsiveContainer width="100%" height={300}>

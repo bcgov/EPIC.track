@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Box, Grid } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { getChartColor } from "components/insights/utils";
@@ -51,29 +51,31 @@ const WorksCreatedEachYear = () => {
           <ETCaption1 bold>WORKS CREATED BY YEAR</ETCaption1>
         </Grid>
         <Grid item xs={12}>
-          <ETCaption3>The number of works created each year</ETCaption3>
+          <ETCaption3>The number of Works created each year</ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <BarChart
-            layout="vertical"
-            width={350}
-            height={chartData.length * 30 + 100}
-            data={formatData(chartData)}
-          >
-            <XAxis allowDecimals={false} type={"number"} />
-            <YAxis
-              dataKey={"name"}
-              type={"category"}
-              width={40}
-              tick={{ fontSize: 12 }}
-            />
-            <Bar dataKey="value">
-              {formatData(chartData).map((entry, index: number) => (
-                <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
-              ))}
-            </Bar>
-            <Tooltip />
-          </BarChart>
+          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
+            <BarChart
+              layout="vertical"
+              width={350}
+              height={chartData.length * 30 + 100}
+              data={formatData(chartData)}
+            >
+              <XAxis allowDecimals={false} type={"number"} />
+              <YAxis
+                dataKey={"name"}
+                type={"category"}
+                width={40}
+                tick={{ fontSize: 12 }}
+              />
+              <Bar dataKey="value">
+                {formatData(chartData).map((entry, index: number) => (
+                  <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
+                ))}
+              </Bar>
+              <Tooltip />
+            </BarChart>
+          </Box>
         </Grid>
       </Grid>
     </GrayBox>

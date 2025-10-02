@@ -24,15 +24,19 @@ class WorkStaffInsightGenerator:
         query = db.session.query(
             StaffWorkRole.staff_id,
             func.count(func.distinct(Work.id)).label("count"),
-        )
+        ).join(Work, StaffWorkRole.work_id == Work.id)
+
         # Join necessary tables for filters
-        if filters or staff_id:
-            query = query.join(Work, StaffWorkRole.work_id == Work.id)
+        if filters:
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)
-            query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+
+        query = query.join(Staff, Staff.id == StaffWorkRole.staff_id)
+
+        if staff_id:
             query = query.filter(Staff.id == staff_id)
+
         query = query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False),

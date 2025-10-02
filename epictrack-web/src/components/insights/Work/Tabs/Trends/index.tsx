@@ -8,20 +8,23 @@ import WorkList from "./charts/WorkListing";
 const Trends = () => {
   return (
     <InsightAccordion
+      tab="Work"
       title="Trends Insights"
       showMoreLabel={true}
       showMoreContent={<WorkList />}
       defaultExpanded={false}
       data-cy="trend-work-accordion"
     >
-      <Grid item xs={4}>
-        <WorksCreatedEachYear />
-      </Grid>
-      <Grid item xs={4}>
-        <WorksCompletedEachYear />
-      </Grid>
-      <Grid item xs={4}>
-        <WorksClosedYearlyBreakdown />
+      <Grid container spacing={2}>
+        <Grid className="chart-item" item xs={4}>
+          <WorksCreatedEachYear />
+        </Grid>
+        <Grid className="chart-item" item xs={4}>
+          <WorksCompletedEachYear />
+        </Grid>
+        <Grid className="chart-item" item xs={4}>
+          <WorksClosedYearlyBreakdown />
+        </Grid>
       </Grid>
     </InsightAccordion>
   );

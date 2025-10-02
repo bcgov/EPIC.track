@@ -25,14 +25,16 @@ class WorkLeadInsightGenerator:
         query = db.session.query(
             StaffWorkRole.staff_id,
             func.count(func.distinct(Work.id)).label("count"),
-        )
+        ).join(Work, StaffWorkRole.work_id == Work.id)
+
         # Join necessary tables for filters
         if filters or staff_id:
-            query = query.join(Work, StaffWorkRole.work_id == Work.id)
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)
-            query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+
+        query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+
         query = query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False),
@@ -41,9 +43,12 @@ class WorkLeadInsightGenerator:
             StaffWorkRole.role_id.in_(
                 [RoleEnum.TEAM_CO_LEAD.value, RoleEnum.TEAM_LEAD.value]
             ),
-            Staff.id == staff_id if staff_id else True,
             *filter_exprs if filter_exprs else [],
         )
+
+        if staff_id is not None:
+            query = query.filter(Staff.id == staff_id)
+
         query = query.group_by(StaffWorkRole.staff_id)
         return query.subquery()
 

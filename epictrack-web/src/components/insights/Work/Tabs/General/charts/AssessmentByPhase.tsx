@@ -81,8 +81,10 @@ const AssessmentByPhaseChart = () => {
               iconSize={16}
               wrapperStyle={{
                 fontSize: "16px",
-                maxWidth: "200px", // Add this line to limit the width of the legend
+                maxWidth: "300px",
                 overflow: "hidden",
+                maxHeight: "350px",
+                overflowY: "auto",
               }}
             />
             <Tooltip />
