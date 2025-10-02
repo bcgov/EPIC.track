@@ -105,6 +105,15 @@ class Works(Resource):
         exclude = [] if include_indigenous_nations else ['indigenous_works']
         works_schema = res.WorkResponseSchema(many=True, exclude=exclude)
 
+        include_phase_status = request_args.get('include_phase_status', False)
+        if include_phase_status:
+            augmented_works = []
+            for work in works:
+                work_data = works_schema.dump([work])[0]
+                work_phase_statuses = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(WorkPhaseService.find_work_phases_status(work.id))
+                work_data['work_phase_status'] = work_phase_statuses
+                augmented_works.append(work_data)
+            return jsonify(augmented_works), HTTPStatus.OK
         return jsonify(works_schema.dump(works)), HTTPStatus.OK
 
     @staticmethod

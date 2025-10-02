@@ -1,23 +1,32 @@
 import Staff from "./Staff";
 import General from "./General";
 import Partners from "./Partners";
-import { Grid } from "@mui/material";
+import { Grid, Table } from "@mui/material";
 import Trends from "./Trends";
+import { TableFilterProvider } from "components/insights/TableFilterContext";
 
 const WorkInsightsTabs = () => {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <General />
+        <TableFilterProvider>
+          <General />
+        </TableFilterProvider>
       </Grid>
       <Grid item xs={12}>
-        <Staff />
+        <TableFilterProvider>
+          <Staff />
+        </TableFilterProvider>
       </Grid>
       <Grid item xs={12}>
-        <Partners />
+        <TableFilterProvider>
+          <Partners />
+        </TableFilterProvider>
       </Grid>
       <Grid item xs={12}>
-        <Trends />
+        <TableFilterProvider>
+          <Trends />
+        </TableFilterProvider>
       </Grid>
     </Grid>
   );

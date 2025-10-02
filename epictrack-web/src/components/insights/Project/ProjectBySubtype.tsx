@@ -11,9 +11,10 @@ import TrackSelect from "components/shared/TrackSelect";
 import { useProjectsContext } from "./ProjectsContext";
 import { getProjectsTypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
+import { useTableFilterContext } from "../TableFilterContext";
 
 const ProjectBySubtypeChart = () => {
-  const { columnFilters } = useProjectsContext();
+  const { columnFilters } = useTableFilterContext();
   const { projects, loadingProjects } = useProjectsContext();
   const projectTypes = useMemo(() => getProjectsTypes(projects), [projects]);
   const [selectedType, setSelectedType] = useState({

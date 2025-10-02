@@ -26,12 +26,12 @@ class WorkFirstNationInsightGenerator:
             IndigenousWork.indigenous_nation_id,
             func.count(func.distinct(Work.id)).label("count"),
         )
+        query = query.join(IndigenousWork, IndigenousWork.work_id == Work.id)
         # Join necessary tables for filters
         if filters:
             query = query.join(Ministry, Work.ministry_id == Ministry.id)
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
-            query = query.join(IndigenousWork, IndigenousWork.work_id == Work.id)
             query = query.join(IndigenousNation, IndigenousWork.indigenous_nation_id == IndigenousNation.id)
         query = query.filter(
             Work.is_active.is_(True),

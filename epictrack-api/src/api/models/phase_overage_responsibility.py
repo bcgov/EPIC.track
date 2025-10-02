@@ -15,6 +15,14 @@ class OverageResponsibilityEnum(enum.Enum):
     NATION = "Nation"
     PARTNER_AGENCY = "Partner Agency"
 
+    @classmethod
+    def from_string(cls, display_str):
+        """Get enum value from display string."""
+        for member in cls:
+            if member.value == display_str:
+                return member
+        raise ValueError(f"No enum value found for display string '{display_str}'")
+
 
 class PhaseOverageResponsibility(BaseModelVersioned):
     """Model class for Phase Overage Responsibility."""

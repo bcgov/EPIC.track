@@ -74,6 +74,7 @@ from .work_status import STATUS_DASHBOARD_API as WORK_STATUS_DASHBOARD_API
 from .work_type import API as WORK_TYPES_API
 from .project_state import API as PROJECT_STATE_API
 from .work_resource import API as WORK_RESOURCE_API
+from .work_phases import API as WORK_PHASES_API
 
 __all__ = ("API_BLUEPRINT", "OPS_BLUEPRINT")
 
@@ -153,3 +154,4 @@ API.add_namespace(PIP_ORG_TYPES_API, path='/pip-org-types')
 API.add_namespace(INSIGHTS_API, path='/insights')
 API.add_namespace(PROJECT_STATE_API, path='/project-states')
 API.add_namespace(WORK_RESOURCE_API, path='/work-resources')
+API.add_namespace(WORK_PHASES_API, path='/work-phases')

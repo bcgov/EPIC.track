@@ -57,7 +57,7 @@ from .work_response import (
     WorkPhaseTemplateAvailableResponse,
     WorkResourceResponseSchema,
     WorkResponseSchema,
-    WorkStaffRoleReponseSchema,
+    WorkStaffRoleResponseSchema,
     WorkStatusResponseSchema,
     WorkPhaseByIdResponseSchema,
     WorkIssuesLatestUpdateResponseSchema,

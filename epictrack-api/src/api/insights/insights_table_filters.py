@@ -12,10 +12,12 @@ from api.models.staff import Staff
 from api.models.ministry import Ministry
 from api.models.indigenous_nation import IndigenousNation
 from api.models.federal_involvement import FederalInvolvement
+from api.models.phase_overage_responsibility import OverageResponsibilityEnum, PhaseOverageResponsibility
 from api.models.types import Type
 from api.models.sub_types import SubType
 from api.models.proponent import Proponent
 from api.models.region import Region
+from api.models.ea_act import EAAct
 from sqlalchemy import extract
 
 # The keys in the filter map correspond to the id values from the front end table filters
@@ -44,22 +46,39 @@ project_table_filter_map = {
     "name": lambda v: Project.name.ilike(f"%{v}%"),
 }
 
+phase_table_filter_map = {
+    "work.title": lambda v: Work.title.ilike(f"%{v}%"),
+    "work.work_type.name": lambda v: Work.work_type.has(WorkType.name.in_(v)),
+    "work_phase.name": WorkPhase.name.in_,
+    "overage_responsibility": PhaseOverageResponsibility.responsibility.in_,
+    "work.ea_act.name": lambda v: Work.ea_act.has(EAAct.name.in_(v)),
+    "work.decision_date": lambda v: extract('year', Work.decision_date).in_(v),
+}
+
 WORKS = "works"
 PROJECTS = "projects"
+PHASES = "phases"
 
 filter_maps = {
     WORKS: work_table_filter_map,
     PROJECTS: project_table_filter_map,
+    PHASES: phase_table_filter_map,
 }
 
 
 def build_insights_filters(filters: List[Dict[str, Any]], insight_type: str) -> List[Any]:
-    """Adds filter expressions for insights queries based on front end filters from table. Selects the appropriate filter map using insight_type ("works" or "projects")."""
+    """Adds filter expressions for insights queries based on front end filters from table. Selects the appropriate filter map using insight_type ("works", "projects", or "phases")."""
     filter_map = filter_maps.get(insight_type)
-    if not filter_map:
+    if filter_map is None:
         raise ValueError(f"Unknown insight_type: {insight_type}")
-    return [
-        filter_map[filter_id](value)
-        for f in filters
-        if (filter_id := f.get('id')) in filter_map and (value := f.get('value'))
-    ]
+    result = []
+    for f in filters:
+        filter_id = f.get('id')
+        value = f.get('value')
+
+        if filter_id in filter_map and value:
+            # Handle enum conversion automatically for overage_responsibility
+            if filter_id == "overage_responsibility":
+                value = [OverageResponsibilityEnum.from_string(v) for v in value]
+            result.append(filter_map[filter_id](value))
+    return result

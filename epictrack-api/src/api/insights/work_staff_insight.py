@@ -25,9 +25,9 @@ class WorkStaffInsightGenerator:
             StaffWorkRole.staff_id,
             func.count(func.distinct(Work.id)).label("count"),
         )
+        query = query.join(Work, StaffWorkRole.work_id == Work.id)
         # Join necessary tables for filters
         if filters:
-            query = query.join(Work, StaffWorkRole.work_id == Work.id)
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)

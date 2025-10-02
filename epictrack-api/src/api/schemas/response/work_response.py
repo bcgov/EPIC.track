@@ -17,6 +17,7 @@ from api.schemas.response.staff_response import StaffResponseSchema
 from api.schemas.staff import StaffSchema
 from api.schemas.substitution_act import SubstitutionActSchema
 from api.schemas.work_type import WorkTypeSchema
+from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
 from api.utils.enums import StalenessEnum
 
 
@@ -104,7 +105,7 @@ class WorkResponseSchema(
         return obj.anticipated_referral_date if obj.anticipated_referral_date else None
 
 
-class WorkStaffRoleReponseSchema(
+class WorkStaffRoleResponseSchema(
     AutoSchemaBase
 ):  # pylint: disable=too-many-ancestors,too-few-public-methods
     """Schema for allocated staff for work"""
@@ -154,7 +155,7 @@ class WorkResourceResponseSchema(
     eao_team = fields.Nested(EAOTeamSchema, dump_only=True)
     responsible_epd = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
     work_lead = fields.Nested(StaffSchema, exclude=("position",), dump_only=True)
-    staff = fields.Nested(WorkStaffRoleReponseSchema(many=True), dump_default=[])
+    staff = fields.Nested(WorkStaffRoleResponseSchema(many=True), dump_default=[])
     title = fields.Str()
     work_state = fields.Method("get_work_state")
 
@@ -204,6 +205,10 @@ class WorkPhaseAdditionalInfoResponseSchema(Schema):
     )
     days_taken = fields.Number(
         metadata={"description": "Number of days taken in the phase"}
+    )
+    overage_responsibility = fields.Nested(
+        PhaseOverageResponsibilityResponseSchema(many=True),
+        metadata={"description": "Responsibility for any overage in the phase"}
     )
 
 

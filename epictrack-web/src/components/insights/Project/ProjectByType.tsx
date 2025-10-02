@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -14,10 +13,10 @@ import { useGetProjectByTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import { useProjectsContext } from "./ProjectsContext";
+import { useTableFilterContext } from "../TableFilterContext";
 
 const ProjectByTypeChart = () => {
-  const { columnFilters } = useProjectsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data: chartData,
     error,

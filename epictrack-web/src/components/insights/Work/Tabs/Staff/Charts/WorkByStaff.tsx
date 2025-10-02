@@ -13,10 +13,10 @@ import {
 } from "recharts";
 import type { WorkByStaff } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByStaffChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data: chartData,
     error,

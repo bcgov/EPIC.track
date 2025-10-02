@@ -26,7 +26,10 @@ from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
 from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
+from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
+from api.models.work import Work
 from .common_service import event_compare_func
+from api.schemas import response as res
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -58,7 +61,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
     def find_by_work_and_phase(cls, work_id: int, phase_id: int) -> WorkPhase:
         """Find the workphase status by work_id and work_phase id"""
         work_phases_dict = cls.find_work_phases_by_work_ids([work_id])[0]
-        work_phase = cls._find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []))
+        work_phase = cls.find_work_phase_status(work_id, phase_id, work_phases_dict.get(work_id, []))
         return work_phase
 
     @classmethod
@@ -108,7 +111,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         work_phases_dict = cls.find_work_phases_by_work_ids(work_ids)[0]
 
         for work_id, _work_phase_id in work_params_dict.items():
-            result_dict[work_id] = cls._find_work_phase_status(
+            result_dict[work_id] = cls.find_work_phase_status(
                 work_id, None, work_phases_dict.get(work_id, [])
             )
 
@@ -147,7 +150,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return work_phase
 
     @classmethod
-    def _find_work_phase_status(cls, work_id, work_phase_id, work_phases):
+    def find_work_phase_status(cls, work_id, work_phase_id, work_phases):
         """Find work phase status for the work Id.If work_phase_id is passed , only that phase is considered."""
         result = []
         events = EventService.find_events(work_id, event_categories=PRIMARY_CATEGORIES)
@@ -189,6 +192,7 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             days_taken = cls._get_days_taken(work_phase, work_phase_events, suspended_days)
             result_item["days_taken"] = days_taken if days_taken else 0
             result_item["is_last_phase"] = index == len(work_phases)
+            result_item["overage_responsibility"] = PhaseOverageResponsibilityService.find_by_work_phase_id(int(work_phase.id), is_deleted=False)
             result.append(result_item)
         return result
 
@@ -324,3 +328,25 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
         days_taken = max(0, days_taken - suspended_days)
         return days_taken
+
+    @classmethod
+    def find_all_work_phases_with_additional_info(cls, legislated: bool = None) -> List[WorkPhase]:
+        """Return all work phases."""
+        work_phases = WorkPhase.find_by_params({'legislated': legislated})
+        phase_by_work = defaultdict(list)
+
+        data = []
+        for phase in work_phases:
+            phase_by_work[phase.work_id].append(phase)
+
+        # Grouped by work_id to process together is faster
+        for work_id, group in phase_by_work.items():
+            phase_with_info = cls.find_work_phase_status(work_id, None, group)
+            data.extend(phase_with_info)
+
+        data = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(data)
+
+        for item in data:
+            item["work"] = res.WorkResponseSchema().dump(Work.find_by_id(item["work_phase"]["work_id"]))
+
+        return data

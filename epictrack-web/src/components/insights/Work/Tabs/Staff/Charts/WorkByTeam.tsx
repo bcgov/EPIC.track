@@ -13,10 +13,10 @@ import {
 import { getChartColor } from "components/insights/utils";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import type { WorkByTeam } from "models/insights";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByTeamChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data: chartData,
     error,

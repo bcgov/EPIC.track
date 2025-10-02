@@ -75,8 +75,12 @@ export const workInsightsApi = createApi({
             ]
           : [{ type: "Works", id: "LIST" }],
     }),
-    getWorks: builder.query<Work[], boolean | void>({
-      query: (is_active = true) => `works?is_active=${is_active}`,
+    getWorks: builder.query<
+      Work[],
+      { is_active?: boolean; include_phase_status?: boolean } | void
+    >({
+      query: ({ is_active = true, include_phase_status = false } = {}) =>
+        `works?is_active=${is_active}&include_phase_status=${include_phase_status}`,
       providesTags: (result) =>
         result
           ? [
@@ -304,29 +308,6 @@ export const workInsightsApi = createApi({
   }),
   refetchOnMountOrArgChange: 300,
 });
-
-export function queryStringFromFilters(
-  columnFilters: { id: string; value: string | string[] }[] = []
-): string {
-  return columnFilters
-    .filter(({ value }) =>
-      Array.isArray(value)
-        ? value.length > 0 && value.some((v) => v !== "")
-        : value !== "" && value !== undefined && value !== null
-    )
-    .map(({ id, value }) => {
-      const encodedId = encodeURIComponent(id);
-      if (Array.isArray(value)) {
-        return value
-          .filter((v) => v !== "")
-          .map((v) => `${encodedId}=${encodeURIComponent(v)}`)
-          .join("&");
-      } else {
-        return `${encodedId}=${encodeURIComponent(value)}`;
-      }
-    })
-    .join("&");
-}
 
 export const {
   useGetWorksByTypeQuery,

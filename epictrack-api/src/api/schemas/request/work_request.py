@@ -315,3 +315,18 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
     include_indigenous_nations = fields.Bool(
         metadata={"description": "Indicate if the result should have indigenous nations"}
     )
+
+    include_phase_status = fields.Bool(
+        metadata={"description": "Indicate if the result should have current phase status"},
+        default=False
+    )
+
+
+class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
+    """Work Phase Query parameters"""
+
+    legislated = fields.Bool(
+        metadata={"description": "query legislated or non-legislated ones"},
+        default=None,
+        allow_none=True
+    )

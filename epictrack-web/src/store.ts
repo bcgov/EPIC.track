@@ -6,6 +6,7 @@ import loadingSlice from "./services/loadingService";
 import { projectInsightsApi } from "services/rtkQuery/projectInsights";
 import { workInsightsApi } from "services/rtkQuery/workInsights";
 import { workStaffInsightsApi } from "services/rtkQuery/workStaffInsights";
+import { phaseInsightsApi } from "services/rtkQuery/phaseInsights";
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     loadingState: loadingSlice,
     [projectInsightsApi.reducerPath]: projectInsightsApi.reducer,
     [workInsightsApi.reducerPath]: workInsightsApi.reducer,
+    [phaseInsightsApi.reducerPath]: phaseInsightsApi.reducer,
     [workStaffInsightsApi.reducerPath]: workStaffInsightsApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
@@ -22,7 +24,8 @@ export const store = configureStore({
     })
       .concat(projectInsightsApi.middleware)
       .concat(workInsightsApi.middleware)
-      .concat(workStaffInsightsApi.middleware),
+      .concat(workStaffInsightsApi.middleware)
+      .concat(phaseInsightsApi.middleware),
 });
 
 // optional, but required for refetchOnFocus/refetchOnReconnect behaviors

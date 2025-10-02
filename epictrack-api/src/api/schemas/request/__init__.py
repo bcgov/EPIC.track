@@ -41,6 +41,7 @@ from .indigenous_nation_request import (
 from .insight_request import (
     ProjectInsightRequestQueryParameterSchema,
     WorkInsightRequestQueryParameterSchema,
+    PhaseInsightRequestQueryParameterSchema,
 )
 from .outcome_configuration_request import (
     OutcomeConfigurationBodyParameterSchema,
@@ -125,6 +126,7 @@ from .work_request import (
     WorkStatusParameterSchema,
     WorkTypeIdQueryParamSchema,
     WorkQueryParameterSchema,
+    WorkPhaseQueryParameterSchema
 )
 from .ministry_request import (
     MinistryBodyParameterSchema,

@@ -12,7 +12,7 @@ import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
@@ -21,7 +21,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
-  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
 
   const { data, error, isLoading } = useGetWorksQuery();
 

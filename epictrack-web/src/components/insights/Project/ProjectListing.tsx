@@ -15,12 +15,13 @@ import { sort } from "utils";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { IButton } from "components/shared";
+import { useTableFilterContext } from "../TableFilterContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
 const ProjectList = () => {
-  const { projects, loadingProjects, columnFilters, setColumnFilters } =
-    useProjectsContext();
+  const { projects, loadingProjects } = useProjectsContext();
+  const {  columnFilters, setColumnFilters } = useTableFilterContext();
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 15,

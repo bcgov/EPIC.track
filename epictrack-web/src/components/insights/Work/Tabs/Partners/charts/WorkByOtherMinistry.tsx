@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import {
@@ -14,10 +14,10 @@ import { WorkByMinistry } from "models/insights";
 import { useGetWorkByMinistryQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByOtherMinistryChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,

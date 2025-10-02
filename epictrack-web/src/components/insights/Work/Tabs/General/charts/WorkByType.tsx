@@ -6,10 +6,10 @@ import { useGetWorksByTypeQuery } from "services/rtkQuery/workInsights";
 import { WorkByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByTypeChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
+  const { columnFilters } = useTableFilterContext();
 
   const {
     data: chartData,
