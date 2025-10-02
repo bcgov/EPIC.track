@@ -60,7 +60,7 @@ const InsightAccordion: React.FC<InsightAccordionProps> = ({
           />
         }
       >
-        <ETParagraph>{title}</ETParagraph>
+        <ETParagraph sx={{ paddingLeft: "4px" }}>{title}</ETParagraph>
       </ETAccordionSummary>
       <ETAccordionDetails sx={{ pt: "24px" }}>
         <Grid container spacing={2}>
