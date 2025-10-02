@@ -1,5 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import React, { createContext, useContext } from "react";
 
 type WorkInsightsContextState = {};
 

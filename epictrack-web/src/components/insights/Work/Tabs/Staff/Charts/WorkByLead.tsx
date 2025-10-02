@@ -14,7 +14,6 @@ import {
 import type { WorkByLead } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
 
 const WorkByLeadChart = () => {

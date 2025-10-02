@@ -263,7 +263,7 @@ const TrendWorkPhaseListing = () => {
         },
       },
     ],
-    [workPhases]
+    [phaseOptions, eaActOptions, yearOptions, workTypeOptions]
   );
   return (
     <MasterTrackTable
