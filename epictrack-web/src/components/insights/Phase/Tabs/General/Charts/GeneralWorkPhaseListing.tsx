@@ -1,7 +1,6 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Tooltip, Box } from "@mui/material";
-import { showNotification } from "components/shared/notificationProvider";
 import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
@@ -11,8 +10,8 @@ import { exportToCsv } from "components/shared/MasterTrackTable/utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { useGetWorkPhasesQuery } from "services/rtkQuery/phaseInsights";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
+import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
@@ -22,12 +21,7 @@ const GeneralWorkPhaseListing = () => {
     pageSize: 15,
   });
   const { columnFilters, setColumnFilters } = useTableFilterContext();
-
-  const { data, error, isLoading } = useGetWorkPhasesQuery({
-    legislated: true,
-  });
-
-  const workPhases = useMemo(() => data || [], [data]);
+  const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
 
   useEffect(() => {
     setPagination((prev) => ({
@@ -75,15 +69,6 @@ const GeneralWorkPhaseListing = () => {
       ).sort(),
     [workPhases]
   );
-
-  useEffect(() => {
-    if (error) {
-      showNotification("Error fetching Works", {
-        duration: 3000,
-        type: "error",
-      });
-    }
-  }, [error]);
 
   const columns = useMemo<
     MRT_ColumnDef<{ work: Work } & WorkPhase & WorkPhaseAdditionalInfo>[]
@@ -238,10 +223,10 @@ const GeneralWorkPhaseListing = () => {
           },
         ],
       }}
-      loading={isLoading}
+      loading={loadingWorkPhases}
       onColumnFiltersChange={setColumnFilters}
       state={{
-        isLoading: isLoading,
+        isLoading: loadingWorkPhases,
         showGlobalFilter: true,
         pagination: pagination,
         columnFilters,

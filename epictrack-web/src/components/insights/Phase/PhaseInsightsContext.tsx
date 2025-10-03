@@ -1,6 +1,7 @@
 import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
 import React, { createContext, useContext, useMemo } from "react";
 import { useGetWorkPhasesQuery } from "services/rtkQuery/phaseInsights";
+import { useInsightsContext } from "../InsightsContext";
 
 interface PhaseInsightsContextState {
   workPhases: ({ work: Work } & WorkPhase & WorkPhaseAdditionalInfo)[];
@@ -20,17 +21,26 @@ type PhaseInsightsContextProviderProps = {
 export const PhaseInsightsContextProvider: React.FC<
   PhaseInsightsContextProviderProps
 > = ({ children }) => {
-  const { data: workPhases, isLoading: loadingWorkPhases } =
-    useGetWorkPhasesQuery({
-      legislated: true,
+  const { isUserInsights, staffId } = useInsightsContext();
+
+  const queryArg = useMemo(
+    () => ({ legislated: true, staffId: isUserInsights ? staffId : undefined }),
+    [isUserInsights, staffId]
+  );
+
+  const { data: workPhasesData, isLoading: loadingWorkPhases } =
+    useGetWorkPhasesQuery(queryArg, {
+      refetchOnMountOrArgChange: true,
     });
+
+  console.log(workPhasesData?.length);
 
   const contextValue = useMemo(
     () => ({
-      workPhases: workPhases ?? [],
+      workPhases: workPhasesData ?? [],
       loadingWorkPhases,
     }),
-    [workPhases, loadingWorkPhases]
+    [workPhasesData, loadingWorkPhases]
   );
   return (
     <PhaseInsightsContext.Provider value={contextValue}>

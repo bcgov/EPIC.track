@@ -9,6 +9,22 @@ import { prepareHeaders } from "./util";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
 
+function buildQueryString(
+  base: string,
+  { legislated, staffId }: { legislated?: boolean; staffId?: number } = {}
+): string {
+  const params: string[] = [];
+
+  if (legislated !== undefined) {
+    params.push(`legislated=${legislated}`);
+  }
+  if (staffId !== undefined) {
+    params.push(`staff_id=${staffId}`);
+  }
+
+  return params.length ? `${base}?${params.join("&")}` : base;
+}
+
 export const phaseInsightsApi = createApi({
   reducerPath: "phaseInsightsApi",
   baseQuery: fetchBaseQuery({
@@ -18,10 +34,10 @@ export const phaseInsightsApi = createApi({
   endpoints: (builder) => ({
     getWorkPhases: builder.query<
       ({ work: Work } & WorkPhase & WorkPhaseAdditionalInfo)[],
-      { legislated?: boolean } | void
+      { legislated?: boolean; staffId?: number } | void
     >({
-      query: ({ legislated = true } = {}) =>
-        `work-phases?legislated=${legislated}`,
+      query: ({ legislated = true, staffId } = {}) =>
+        buildQueryString("work-phases", { legislated, staffId }),
     }),
     getPhasesByAverageOverage: builder.query<
       PhasesByAverageOverage[],
