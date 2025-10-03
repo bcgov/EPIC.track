@@ -72,5 +72,5 @@ class Phases(Resource):
     def post():
         """Return phase insights based on group by param."""
         args = req.PhaseInsightRequestQueryParameterSchema().load(request.json)
-        phase_insights = InsightService.fetch_phase_insights(args["group_by"], args["selected_year"], args["filters"], args["selected_work_type_id"], args["selected_phase_id"])
+        phase_insights = InsightService.fetch_phase_insights(**args)
         return jsonify(phase_insights), HTTPStatus.OK

@@ -1,5 +1,6 @@
 import { Grid, Box } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getChartColor } from "components/insights/utils";
@@ -15,6 +16,7 @@ import { useGetOverageResponsibilityQuery } from "services/rtkQuery/phaseInsight
 const OverageResponsibilityChart = () => {
   const { columnFilters } = useTableFilterContext();
   const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
   const [selectedWorkType, setSelectedWorkType] = useState<OptionType | null>({
     value: "all",
     label: "All",
@@ -33,6 +35,7 @@ const OverageResponsibilityChart = () => {
     columnFilters,
     selectedWorkType: String(selectedWorkType?.value) || "all",
     selectedPhase: String(selectedPhase?.value) || "all",
+    staffId: isUserInsights ? staffId : undefined,
   });
 
   const workTypeOptions = useMemo(() => {

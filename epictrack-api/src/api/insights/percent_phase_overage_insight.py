@@ -11,9 +11,9 @@ from api.insights.utils import compute_phase_overage_insights, get_filtered_work
 class PercentPhaseOverageInsightGenerator:
     """Insight generator for phase resource grouped by phases"""
 
-    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all") -> List[dict]:
-        """Fetch data from db"""
-        work_phases = get_filtered_work_phases(filters, selected_work_type_id)
+    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", staff_id: int = None) -> List[dict]:
+        """Fetch data for the insight"""
+        work_phases = get_filtered_work_phases(filters=filters, selected_work_type_id=selected_work_type_id, selected_year=None, staff_id=staff_id)
 
         overage_by_phase = compute_phase_overage_insights(work_phases)
 

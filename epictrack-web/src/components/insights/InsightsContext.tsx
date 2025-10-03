@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { INSIGHTS_TAB, InsightsTab } from "./constants";
 import { useAppSelector } from "hooks";
 
@@ -33,16 +33,19 @@ export const InsightsContextProvider: React.FC<
   const user = useAppSelector((state) => state.user.userDetail);
   const staffId = user?.staffId || undefined;
 
+  const contextValue = useMemo(
+    () => ({
+      activeTab,
+      setActiveTab,
+      isUserInsights,
+      setIsUserInsights,
+      staffId,
+    }),
+    [activeTab, isUserInsights, staffId]
+  );
+
   return (
-    <InsightsContext.Provider
-      value={{
-        activeTab,
-        setActiveTab,
-        isUserInsights,
-        setIsUserInsights,
-        staffId,
-      }}
-    >
+    <InsightsContext.Provider value={contextValue}>
       {children}
     </InsightsContext.Provider>
   );

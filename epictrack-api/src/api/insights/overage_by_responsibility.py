@@ -11,6 +11,8 @@ from api.models.phase_overage_responsibility import OverageResponsibilityEnum
 from api.models.work_type import WorkType
 from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models.project import Project
+from api.models.staff import Staff
+from api.models.staff_work_role import StaffWorkRole
 from api.services.work_phase import WorkPhaseService
 from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
 from api.insights.insights_table_filters import build_insights_filters
@@ -21,7 +23,7 @@ from api.insights.insights_table_filters import build_insights_filters
 class OverageByResponsibilityInsightGenerator:
     """Insight generator for phase resource grouped by phases"""
 
-    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", selected_phase_id: str = "all") -> List[dict]:
+    def fetch_data(self, filters: List = None, selected_work_type_id: str = "all", selected_phase_id: str = "all", staff_id: int = None) -> List[dict]:
         """Fetch data from db"""
         filter_exprs = build_insights_filters(filters, "phases") if filters else []
         selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
@@ -33,6 +35,11 @@ class OverageByResponsibilityInsightGenerator:
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(PhaseOverageResponsibility, WorkPhase.id == PhaseOverageResponsibility.work_phase_id)
+
+        if staff_id:
+            query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
+            query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
+            query = query.filter(Staff.id == staff_id)
 
         query = query.filter(
             WorkPhase.is_active.is_(True),
