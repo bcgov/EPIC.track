@@ -40,6 +40,7 @@ export const exportAccordionChartsToPdf = async (
   wrapper.style.top = "-9999px";
   wrapper.style.left = "-9999px";
   wrapper.style.width = container.offsetWidth + "px";
+  wrapper.style.display = "block";
   wrapper.classList.add("exporting");
 
   const style = document.createElement("style");
@@ -54,6 +55,16 @@ export const exportAccordionChartsToPdf = async (
   wrapper.appendChild(clone);
   document.body.appendChild(wrapper);
 
+  const origCharts = container.querySelectorAll(".chart-item");
+  const clonedCharts = clone.querySelectorAll(".chart-item");
+  origCharts.forEach((orig, idx) => {
+    const rect = (orig as HTMLElement).getBoundingClientRect();
+    (clonedCharts[idx] as HTMLElement).style.maxWidth = rect.width + "px";
+    (clonedCharts[idx] as HTMLElement).style.height = "auto";
+    (clonedCharts[idx] as HTMLElement).style.flex = "0 0 auto";
+    (clonedCharts[idx] as HTMLElement).style.alignSelf = "flex-start";
+  });
+
   try {
     const pdf = new jsPDF("p", "mm", "letter");
     const pageMargin = 10;
@@ -67,12 +78,16 @@ export const exportAccordionChartsToPdf = async (
     for (let i = 0; i < chartNodes.length; i++) {
       const chartNode = chartNodes[i] as HTMLDivElement;
 
+      // Original size in mm (px * 0.2646)
+      const pxToMm = 0.2646;
+      const pixelRatio = 2;
+
       // Chart as PNG
       const dataUrl = await htmlToImage.toPng(chartNode, {
         quality: 1,
         backgroundColor: "white",
-        pixelRatio: 2,
         skipFonts: true,
+        pixelRatio: pixelRatio,
       });
 
       const img = new Image();
@@ -81,16 +96,23 @@ export const exportAccordionChartsToPdf = async (
         img.onload = () => resolve();
       });
 
-      // Scale width to page, keep aspect ratio
-      let scale = pageWidth / img.width;
-      let scaledWidth = img.width * scale;
-      let scaledHeight = img.height * scale;
+      let originalWidth = (img.width / pixelRatio) * pxToMm;
+      let originalHeight = (img.height / pixelRatio) * pxToMm;
 
-      // Shrink chart if height exceeds page
+      let scaledWidth = originalWidth;
+      let scaledHeight = originalHeight;
+
+      // Only scale down if wider than page
+      if (scaledWidth > pageWidth) {
+        const widthScale = pageWidth / scaledWidth;
+        scaledWidth *= widthScale;
+        scaledHeight *= widthScale;
+      }
+      // Only scale down if taller than page
       if (scaledHeight > pageHeight) {
         const heightScale = pageHeight / scaledHeight;
         scaledWidth *= heightScale;
-        scaledHeight = pageHeight;
+        scaledHeight *= heightScale;
       }
 
       // Start new page if chart doesn't fit remaining space
