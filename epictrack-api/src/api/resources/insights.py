@@ -58,3 +58,19 @@ class Projects(Resource):
         staff_id = args.get("staff_id", None)
         project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"], args["filters"], staff_id)
         return jsonify(project_insights), HTTPStatus.OK
+
+
+@cors_preflight("POST")
+@API.route("/phases", methods=["POST", "OPTIONS"])
+class Phases(Resource):
+    """Endpoint resource to return phase insights"""
+
+    @staticmethod
+    @cors.crossdomain(origin="*")
+    @auth.require
+    @profiletime
+    def post():
+        """Return phase insights based on group by param."""
+        args = req.PhaseInsightRequestQueryParameterSchema().load(request.json)
+        phase_insights = InsightService.fetch_phase_insights(args["group_by"], args["selected_year"], args["filters"], args["selected_work_type_id"], args["selected_phase_id"])
+        return jsonify(phase_insights), HTTPStatus.OK

@@ -53,3 +53,19 @@ class InsightService:  # pylint:disable=too-few-public-methods
         else:
             insights = insight_generator().fetch_data(filters=filters, staff_id=staff_id)
         return insights
+
+    @classmethod
+    # pylint: disable=too-many-arguments
+    def fetch_phase_insights(cls, group_by: str, selected_year: int, filters: list = None, selected_work_type_id: str = "all", selected_phase_id: str = "all"):
+        """Fetch phase insights"""
+        current_app.logger.debug(f"Fetch phase insights {group_by = }")
+        insight_generator: InsightGenerator = get_insight_generator(
+            resource="phases", group_by=group_by
+        )
+        if group_by == "overage_responsibility":
+            insights = insight_generator().fetch_data(filters=filters, selected_work_type_id=selected_work_type_id, selected_phase_id=selected_phase_id)
+        elif group_by == "overages_by_year":
+            insights = insight_generator().fetch_data(filters=filters, selected_year=selected_year, selected_work_type_id=selected_work_type_id)
+        else:
+            insights = insight_generator().fetch_data(filters=filters, selected_work_type_id=selected_work_type_id)
+        return insights

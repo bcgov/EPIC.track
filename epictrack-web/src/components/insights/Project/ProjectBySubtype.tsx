@@ -11,10 +11,11 @@ import TrackSelect from "components/shared/TrackSelect";
 import { useProjectsContext } from "./ProjectsContext";
 import { getProjectsTypes } from "./utils";
 import { OptionType } from "components/shared/filterSelect/type";
+import { useTableFilterContext } from "../TableFilterContext";
 import { useInsightsContext } from "../InsightsContext";
 
 const ProjectBySubtypeChart = () => {
-  const { columnFilters } = useProjectsContext();
+  const { columnFilters } = useTableFilterContext();
   const { projects, loadingProjects } = useProjectsContext();
   const { isUserInsights, staffId } = useInsightsContext();
 

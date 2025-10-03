@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid } from "@mui/material";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { PieChart, Pie, Cell, Legend, Tooltip } from "recharts";
@@ -7,12 +6,12 @@ import { AssessmentByPhase } from "models/insights";
 import { useGetAssessmentsByPhaseQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
 
 const AssessmentByPhaseChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,

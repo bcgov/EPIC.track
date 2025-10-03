@@ -321,3 +321,13 @@ class WorkQueryParameterSchema(RequestQueryParameterSchema):
         required=False,
         missing=None
     )
+
+
+class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
+    """Work Phase Query parameters"""
+
+    legislated = fields.Bool(
+        metadata={"description": "query legislated or non-legislated ones"},
+        default=None,
+        allow_none=True
+    )

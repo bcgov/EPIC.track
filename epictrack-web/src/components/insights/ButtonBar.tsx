@@ -34,12 +34,12 @@ const ButtonBar = () => {
         >
           Project
         </TabButton>
-        {/* <TabButton
-        active={activeTab === INSIGHTS_TAB.Phase}
-        onClick={() => setActiveTab(INSIGHTS_TAB.Phase)}
-      >
-        Phase
-      </TabButton> */}
+        <TabButton
+          active={activeTab === INSIGHTS_TAB.Phase}
+          onClick={() => setActiveTab(INSIGHTS_TAB.Phase)}
+        >
+          Phase
+        </TabButton>
       </Stack>
     </Stack>
   );

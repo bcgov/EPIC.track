@@ -13,12 +13,12 @@ import {
 } from "recharts";
 import type { WorkByLead } from "models/insights";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
 
 const WorkByLeadChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
+  const { columnFilters } = useTableFilterContext();
   const {
     data: chartData,
     error,

@@ -1,6 +1,7 @@
 import { ListType } from "./code";
 import { FederalInvolvement } from "./federalInvolvement";
 import { Ministry } from "./ministry";
+import { PhaseOverageResponsibility } from "./phaseOverageResponsibilities";
 import { Staff } from "./staff";
 import { MasterBase } from "./type";
 
@@ -57,7 +58,7 @@ export interface Work extends MasterBase {
   responsible_epd: Staff;
   work_lead: Staff;
   work_type: ListType;
-  current_work_phase: ListType;
+  current_work_phase: WorkPhase;
   substitution_act: ListType;
   eac_decision_by: Staff;
   decision_by: Staff;
@@ -66,6 +67,7 @@ export interface Work extends MasterBase {
     id: number;
     name: string;
   }[];
+  work_phase_status?: WorkPhaseAdditionalInfo[];
 }
 
 export interface WorkPhase extends MasterBase {
@@ -100,6 +102,7 @@ export interface WorkPhaseAdditionalInfo {
   next_milestone: string;
   total_number_of_days: number;
   work_phase: WorkPhase;
+  overage_responsibility?: PhaseOverageResponsibility[];
 }
 
 export interface TemplateStatus extends MasterBase {

@@ -28,7 +28,7 @@ class WorkFirstNationInsightGenerator:
             IndigenousWork.indigenous_nation_id,
             func.count(func.distinct(Work.id)).label("count"),
         )
-        query = query.join(Work, IndigenousWork.work_id == Work.id)
+        query = query.join(IndigenousWork, IndigenousWork.work_id == Work.id)
         # Join necessary tables for filters
         if filters:
             query = query.join(Ministry, Work.ministry_id == Ministry.id)

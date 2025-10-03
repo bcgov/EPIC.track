@@ -15,8 +15,8 @@ import { useGetWorksQuery } from "services/rtkQuery/workInsights";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
 import { Role, WorkStaffRole, WorkStaffRoleNames } from "models/role";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -28,7 +28,7 @@ const WorkList = () => {
     pageSize: 15,
   });
   const [workData, setWorkData] = React.useState<WorkStaffWithWork[]>([]);
-  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
   const queryArg = useMemo(() => {

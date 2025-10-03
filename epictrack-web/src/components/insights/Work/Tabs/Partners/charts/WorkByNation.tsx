@@ -6,13 +6,13 @@ import { WorkByNation } from "models/insights";
 import { useGetWorksByNationQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByNationChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
+  const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,

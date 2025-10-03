@@ -13,13 +13,13 @@ import { WorkByFederalInvolvement } from "models/insights";
 import { useGetWorksByFederalInvolvementQuery } from "services/rtkQuery/workInsights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const WorkByFederalInvolvementChart = () => {
-  const { columnFilters } = useWorkInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
+  const { columnFilters } = useTableFilterContext();
   const {
     data,
     error,

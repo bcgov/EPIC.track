@@ -7,6 +7,7 @@ import { INSIGHTS_TAB } from "./constants";
 import { useInsightsContext } from "./InsightsContext";
 import { Case, Switch } from "react-if";
 import { Palette } from "styles/theme";
+import PhaseInsights from "./Phase";
 
 const InsightBoxWrapperStyle = {
   padding: "16px",
@@ -45,7 +46,7 @@ const Main = () => {
           <Case condition={activeTab === INSIGHTS_TAB.Work}>
             <Grid container item xs={12} sx={InsightHeaderStyle}>
               <ETHeading3 bold sx={{ color: Palette.primary.main }}>
-                Work Insights
+                Work Dashboard
               </ETHeading3>
             </Grid>
             <Grid item xs={12} sx={InsightBoxWrapperStyle}>
@@ -55,11 +56,21 @@ const Main = () => {
           <Case condition={activeTab === INSIGHTS_TAB.Project}>
             <Grid container item xs={12} sx={InsightHeaderStyle}>
               <ETHeading3 bold sx={{ color: Palette.primary.main }}>
-                Project Insights
+                Project Dashboard
               </ETHeading3>
             </Grid>
-            <Grid sx={InsightBoxWrapperStyle}>
+            <Grid item xs={12} sx={InsightBoxWrapperStyle}>
               <ProjectInsights />
+            </Grid>
+          </Case>
+          <Case condition={activeTab === INSIGHTS_TAB.Phase}>
+            <Grid container item xs={12} sx={InsightHeaderStyle}>
+              <ETHeading3 bold sx={{ color: Palette.primary.main }}>
+                Phase Dashboard
+              </ETHeading3>
+            </Grid>
+            <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+              <PhaseInsights />
             </Grid>
           </Case>
         </Switch>

@@ -14,11 +14,11 @@ import { useGetProjectByTypeQuery } from "services/rtkQuery/projectInsights";
 import { ProjectByType } from "models/insights";
 import { showNotification } from "components/shared/notificationProvider";
 import PieChartSkeleton from "components/insights/PieChartSkeleton";
-import { useProjectsContext } from "./ProjectsContext";
+import { useTableFilterContext } from "../TableFilterContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
 
 const ProjectByTypeChart = () => {
-  const { columnFilters } = useProjectsContext();
+  const { columnFilters } = useTableFilterContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
   const queryArgs = useMemo(
@@ -28,7 +28,6 @@ const ProjectByTypeChart = () => {
     }),
     [columnFilters, isUserInsights, staffId]
   );
-
   const {
     data: chartData,
     error,

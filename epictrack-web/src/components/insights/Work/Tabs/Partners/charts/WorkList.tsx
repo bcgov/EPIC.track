@@ -13,8 +13,8 @@ import { sort } from "utils";
 import { ETGridTitle, IButton } from "components/shared";
 import Icons from "components/icons";
 import { IconProps } from "components/icons/type";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: FC<IconProps> = Icons["DownloadIcon"];
 
@@ -23,7 +23,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
-  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
   const queryArg = useMemo(() => {

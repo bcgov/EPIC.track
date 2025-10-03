@@ -302,29 +302,6 @@ export const workInsightsApi = createApi({
   refetchOnMountOrArgChange: 300,
 });
 
-export function queryStringFromFilters(
-  columnFilters: { id: string; value: string | string[] }[] = []
-): string {
-  return columnFilters
-    .filter(({ value }) =>
-      Array.isArray(value)
-        ? value.length > 0 && value.some((v) => v !== "")
-        : value !== "" && value !== undefined && value !== null
-    )
-    .map(({ id, value }) => {
-      const encodedId = encodeURIComponent(id);
-      if (Array.isArray(value)) {
-        return value
-          .filter((v) => v !== "")
-          .map((v) => `${encodedId}=${encodeURIComponent(v)}`)
-          .join("&");
-      } else {
-        return `${encodedId}=${encodeURIComponent(value)}`;
-      }
-    })
-    .join("&");
-}
-
 export const {
   useGetWorksByTypeQuery,
   useGetWorksQuery,

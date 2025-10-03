@@ -1,16 +1,8 @@
-import React, { createContext, useContext, useState } from "react";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
+import React, { createContext, useContext } from "react";
 
-type WorkInsightsContextState = {
-  columnFilters: ColumnFilter[];
-  setColumnFilters: any;
-};
-const WorkInsightsContext = createContext<WorkInsightsContextState>({
-  columnFilters: [],
-  setColumnFilters: () => {
-    return;
-  },
-});
+type WorkInsightsContextState = {};
+
+const WorkInsightsContext = createContext<WorkInsightsContextState>({});
 
 type WorkInsightsContextProviderProps = {
   children: React.ReactNode;
@@ -18,15 +10,8 @@ type WorkInsightsContextProviderProps = {
 const WorkInsightsContextProvider: React.FC<
   WorkInsightsContextProviderProps
 > = ({ children }) => {
-  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
-
   return (
-    <WorkInsightsContext.Provider
-      value={{
-        columnFilters,
-        setColumnFilters,
-      }}
-    >
+    <WorkInsightsContext.Provider value={{}}>
       {children}
     </WorkInsightsContext.Provider>
   );

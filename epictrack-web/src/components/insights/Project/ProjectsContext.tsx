@@ -1,23 +1,16 @@
 import { Project } from "models/project";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
 import { useGetProjectsQuery } from "services/rtkQuery/projectInsights";
-import { ColumnFilter } from "components/shared/MasterTrackTable/type";
 import { useInsightsContext } from "../InsightsContext";
 
 interface ProjectsContextState {
   projects: Project[];
   loadingProjects: boolean;
-  columnFilters: ColumnFilter[];
-  setColumnFilters: any;
 }
 
 export const ProjectsContext = createContext<ProjectsContextState | undefined>({
   projects: [],
   loadingProjects: false,
-  columnFilters: [],
-  setColumnFilters: () => {
-    return;
-  },
 });
 
 type ProjectsContextProviderProps = {
@@ -26,7 +19,6 @@ type ProjectsContextProviderProps = {
 export const ProjectsContextProvider: React.FC<
   ProjectsContextProviderProps
 > = ({ children }) => {
-  const [columnFilters, setColumnFilters] = useState<ColumnFilter[]>([]);
   const { isUserInsights, staffId } = useInsightsContext();
 
   const queryArg = useMemo(
@@ -43,10 +35,8 @@ export const ProjectsContextProvider: React.FC<
     () => ({
       projects: projectsData ?? [],
       loadingProjects,
-      columnFilters,
-      setColumnFilters,
     }),
-    [projectsData, loadingProjects, columnFilters, setColumnFilters]
+    [projectsData, loadingProjects]
   );
   return (
     <ProjectsContext.Provider value={contextValue}>

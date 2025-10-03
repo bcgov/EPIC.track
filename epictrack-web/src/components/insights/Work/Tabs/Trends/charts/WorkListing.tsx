@@ -15,8 +15,8 @@ import { IconProps } from "components/icons/type";
 import { dateUtils } from "utils";
 import { MONTH_DAY_YEAR } from "constants/application-constant";
 import WorkState from "components/workPlan/WorkState";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 
 const DownloadIcon: React.FC<IconProps> = Icons["DownloadIcon"];
 
@@ -25,7 +25,7 @@ const WorkList = () => {
     pageIndex: 0,
     pageSize: 15,
   });
-  const { columnFilters, setColumnFilters } = useWorkInsightsContext();
+  const { columnFilters, setColumnFilters } = useTableFilterContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
   const queryArg = useMemo(() => {

@@ -1,8 +1,8 @@
 import { Box, Grid } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
+import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getChartColor } from "components/insights/utils";
-import { useWorkInsightsContext } from "components/insights/Work/WorkInsightsContext";
 import { ETCaption1, ETCaption3, GrayBox } from "components/shared";
 import { showNotification } from "components/shared/notificationProvider";
 import { WorkByYear } from "models/insights";
@@ -10,9 +10,9 @@ import { Cell, Tooltip, BarChart, Bar, XAxis, YAxis } from "recharts";
 import { useGetWorksByYearCompletedQuery } from "services/rtkQuery/workInsights";
 
 const WorksCompletedEachYear = () => {
-  const { columnFilters } = useWorkInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
 
+  const { columnFilters } = useTableFilterContext();
   const {
     data: chartData,
     error,
