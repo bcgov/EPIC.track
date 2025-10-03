@@ -62,7 +62,7 @@ const WorkByLeadChart = () => {
           </ETCaption3>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <Box style={{ width: "100%", maxHeight: 800, overflowY: "auto" }}>
+          <Box style={{ width: "100%", maxHeight: 500, overflowY: "auto" }}>
             <BarChart
               layout="vertical"
               data={formatData(chartData)}
@@ -70,7 +70,7 @@ const WorkByLeadChart = () => {
                 left: 40, // Increase left margin if names are getting cut off
               }}
               height={chartData.length * 30 + 100}
-              width={600} // Adjust this value as needed
+              width={440} // Adjust this value as needed
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" />
