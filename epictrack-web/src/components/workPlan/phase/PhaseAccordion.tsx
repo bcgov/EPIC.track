@@ -178,10 +178,14 @@ const PhaseAccordion = ({
   }, [phase.work_phase.id]);
 
   useEffect(() => {
-    if (phase.milestone_progress !== 0) {
+    if (phase.milestone_progress !== 0 || isCurrentPhase) {
       getPhaseOverageResponsibilities();
     }
-  }, [getPhaseOverageResponsibilities, phase.milestone_progress]);
+  }, [
+    getPhaseOverageResponsibilities,
+    isCurrentPhase,
+    phase.milestone_progress,
+  ]);
 
   const getPhaseOverdueColour = (
     isLegislated: boolean,
