@@ -9,5 +9,7 @@ export default defineConfig({
       bundler: "webpack",
     },
     specPattern: "**/*.cy.{js,jsx,ts,tsx}",
+    experimentalMemoryManagement: true,
+    numTestsKeptInMemory: 0,
   },
 });
