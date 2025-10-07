@@ -1,5 +1,6 @@
 import { Grid, Box } from "@mui/material";
 import BarChartSkeleton from "components/insights/BarChartSkeleton";
+import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { BAR_COLOR } from "components/insights/utils";
@@ -14,6 +15,7 @@ import { useGetOverageByActQuery } from "services/rtkQuery/phaseInsights";
 const PercentOfPhaseOveragesByAct = () => {
   const { columnFilters } = useTableFilterContext();
   const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { isUserInsights, staffId } = useInsightsContext();
   const [selectedWorkType, setSelectedWorkType] = useState<OptionType | null>({
     value: "all",
     label: "All",
@@ -26,6 +28,7 @@ const PercentOfPhaseOveragesByAct = () => {
   } = useGetOverageByActQuery({
     columnFilters,
     selectedWorkType: String(selectedWorkType?.value) || "all",
+    staffId: isUserInsights ? staffId : undefined,
   });
 
   const workTypeOptions = useMemo(() => {
