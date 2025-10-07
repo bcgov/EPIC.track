@@ -58,7 +58,7 @@ describe("IssueCard", () => {
         >
           <IssueCard item={item} />
         </MyIssuesContext.Provider>
-      </Router>
+      </Router>,
     );
 
     cy.contains("Test issue").should("exist");
@@ -75,7 +75,7 @@ describe("IssueCard", () => {
         >
           <IssueCard item={item} />
         </MyIssuesContext.Provider>
-      </Router>
+      </Router>,
     );
 
     cy.findByLabelText("staleness level").should("not.exist");
@@ -90,7 +90,7 @@ describe("IssueCard", () => {
         >
           <IssueCard item={item} />
         </MyIssuesContext.Provider>
-      </Router>
+      </Router>,
     );
 
     cy.contains("Edit Issue").should("not.exist");

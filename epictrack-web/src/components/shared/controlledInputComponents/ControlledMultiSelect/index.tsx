@@ -39,7 +39,7 @@ const ControlledSelectV2: React.ForwardRefRenderFunction<
     defaultValue,
     ...otherProps
   },
-  ref
+  ref,
 ) => {
   const [selectedOptions, setSelectedOptions] = React.useState<any>([]);
 

@@ -20,7 +20,7 @@ export const EventTypeFilter = () => {
   const value = useMemo(() => {
     // If no selected values, default to all options
     const selected = EVENT_TYPE_OPTIONS.filter((option) =>
-      searchOptions.event_types.includes(String(option.value))
+      searchOptions.event_types.includes(String(option.value)),
     );
     return selected.length > 0 ? selected : EVENT_TYPE_OPTIONS;
   }, [searchOptions.event_types]);

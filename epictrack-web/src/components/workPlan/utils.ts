@@ -20,7 +20,7 @@ export const useIsActiveTeamMember = () => {
   const team = useWorkplanSelector((context) => context.team);
   const { email } = useAppSelector((state) => state.user.userDetail);
   return team?.some(
-    (member) => member.staff.email === email && member.is_active
+    (member) => member.staff.email === email && member.is_active,
   );
 };
 
@@ -35,7 +35,7 @@ export const useUserHasRole = () => {
   ];
   return activeTeam.some(
     (member) =>
-      member.staff.email === email && rolesArray.includes(member.role.name)
+      member.staff.email === email && rolesArray.includes(member.role.name),
   );
 };
 
@@ -43,7 +43,7 @@ export const useUserHasRole = () => {
 export const calculateStaleness = (
   issue: WorkIssue,
   criticalThreshold?: number,
-  warningThreshold?: number
+  warningThreshold?: number,
 ) => {
   const now = moment();
   // Check if the issue is inactive or resolved
@@ -72,7 +72,7 @@ export const calculateStaleness = (
   const diffDays = dateUtils.diff(
     now.toLocaleString(),
     latestApprovedUpdate.posted_date,
-    "days"
+    "days",
   );
 
   // Determine the staleness level
@@ -95,7 +95,7 @@ export const calculateStaleness = (
 export const issueListMaxStaleness = (
   issues: WorkIssue[],
   criticalThreshold?: number,
-  warningThreshold?: number
+  warningThreshold?: number,
 ): StalenessEnum => {
   const stalenessPriority = [
     StalenessEnum.GOOD,
@@ -108,7 +108,7 @@ export const issueListMaxStaleness = (
   // Helper function to get the "highest" staleness
   const getHigherStaleness = (
     a: StalenessEnum,
-    b: StalenessEnum
+    b: StalenessEnum,
   ): StalenessEnum => {
     return stalenessPriority.indexOf(a) > stalenessPriority.indexOf(b) ? a : b;
   };
@@ -119,7 +119,7 @@ export const issueListMaxStaleness = (
     const staleness = calculateStaleness(
       issue,
       criticalThreshold,
-      warningThreshold
+      warningThreshold,
     );
     return getHigherStaleness(currentHighest, staleness);
   }, StalenessEnum.GOOD); // Start with GOOD as the "lowest" level

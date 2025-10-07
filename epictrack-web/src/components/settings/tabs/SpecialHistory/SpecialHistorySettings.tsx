@@ -13,7 +13,7 @@ const AddIcon: React.FC<IconProps> = Icons["AddIcon"];
 
 const SpecialHistorySettings = () => {
   const { setCreateMinistryDialogOpen, ministries, setMinistry } = useContext(
-    SpecialHistoryContext
+    SpecialHistoryContext,
   );
 
   const columns = useMemo<MRT_ColumnDef<Ministry>[]>(
@@ -86,7 +86,7 @@ const SpecialHistorySettings = () => {
         },
       },
     ],
-    [setCreateMinistryDialogOpen, setMinistry]
+    [setCreateMinistryDialogOpen, setMinistry],
   );
 
   return (

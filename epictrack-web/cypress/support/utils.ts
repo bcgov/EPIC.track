@@ -1,8 +1,14 @@
-import { Method } from 'cypress/types/net-stubbing';
+export type HttpMethod =
+  | "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "PATCH"
+  | "OPTIONS";
 
 export interface Endpoint {
   name: string;
-  method: Method;
+  method: HttpMethod;
   url: string;
   response?: object;
 }

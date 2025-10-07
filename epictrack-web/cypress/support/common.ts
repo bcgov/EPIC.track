@@ -53,32 +53,35 @@ export const generateMockEvent = (overrides?: Partial<EventsGridModel>): EventsG
   const startOfMonth = dayjs().startOf("month").toDate();
   const endOfMonth = dayjs().endOf("month").toDate();
 
-  const start = faker.date.between(startOfMonth, endOfMonth);
-  const end = faker.date.between(dayjs(start).add(1, "day").toDate(), dayjs(start).add(5, "day").toDate());
+  const start = faker.date.between({ from: startOfMonth, to: endOfMonth });
+  const end = faker.date.between({ 
+    from: dayjs(start).add(1, "day").toDate(), 
+    to: dayjs(start).add(5, "day").toDate() 
+  });
   const number_of_days = dayjs(end).diff(dayjs(start), "day") + 1;
 
   return {
-    id: faker.datatype.number(),
+    id: faker.number.int(),
     name: faker.lorem.words(3),
     start_date: start.toISOString(),
     end_date: end.toISOString(),
-    event_configuration_id: faker.datatype.number(),
+    event_configuration_id: faker.number.int(),
     event_configuration: { 
-      id: faker.datatype.number(),
+      id: faker.number.int(),
       name: faker.lorem.words(3),
-      event_category_id: faker.datatype.number(),
-      event_type_id: faker.datatype.number(),
+      event_category_id: faker.number.int(),
+      event_type_id: faker.number.int(),
       multiple_days: true,
       event_position: EventPosition.INTERMEDIATE,
       visibilty_mode: EventTemplateVisibility.MANDATORY,
-      work_phase_id: faker.datatype.number(),
+      work_phase_id: faker.number.int(),
     },
     is_active: true,
     type: faker.helpers.arrayElement([EVENT_TYPE.TASK, EVENT_TYPE.MILESTONE]),
     is_complete: faker.datatype.boolean(),
     long_description: faker.lorem.paragraph(),
     number_of_days,
-    outcome_id: faker.datatype.uuid(),
+    outcome_id: faker.string.uuid(),
     short_description: faker.lorem.words(2),
     assignees: [],
     responsibility: faker.name.jobTitle(),
@@ -97,9 +100,9 @@ export const mockEventsGrid: CalendarEvent[] = [
       phase_name: "Phase A",
     }),
     phase_name: "Phase A",
-    phase_id: faker.datatype.number(),
+    phase_id: faker.number.int(),
     work_name: faker.commerce.productName(),
-    work_id: faker.datatype.number(),
+    work_id: faker.number.int(),
   },
   {
     event: generateMockEvent({
@@ -107,9 +110,9 @@ export const mockEventsGrid: CalendarEvent[] = [
       phase_name: "Phase B",
     }),
     phase_name: "Phase B",
-    phase_id: faker.datatype.number(),
+    phase_id: faker.number.int(),
     work_name: faker.commerce.productName(),
-    work_id: faker.datatype.number(),
+    work_id: faker.number.int(),
   },
 ];
 
@@ -185,48 +188,48 @@ export const generateMockProject = (() => {
   return (): Project => {
     projectCounter += 1;
     return {
-      id: faker.datatype.number() + projectCounter,
+      id: faker.number.int() + projectCounter,
       name: `${faker.commerce.productName()} ${projectCounter}`,
       sub_type: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.commerce.productMaterial()} ${projectCounter}`,
-        type: { sort_order: faker.datatype.number() } as Type,
+        type: { sort_order: faker.number.int() } as Type,
       },
       type: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.commerce.product()} ${projectCounter}`,
-        sort_order: faker.datatype.number(),
+        sort_order: faker.number.int(),
       },
       is_active: faker.datatype.boolean(),
       description: `${faker.lorem.paragraph()} ${projectCounter}`,
-      region_id_env: faker.datatype.number() + projectCounter,
-      region_id_flnro: faker.datatype.number() + projectCounter,
-      proponent_id: faker.datatype.number() + projectCounter,
+      region_id_env: faker.number.int() + projectCounter,
+      region_id_flnro: faker.number.int() + projectCounter,
+      proponent_id: faker.number.int() + projectCounter,
       proponent: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.company.name()} ${projectCounter}`,
         is_active: false,
       },
       ea_certificate: `${faker.system.fileName()} ${projectCounter}`,
       abbreviation: `${faker.lorem.word()} ${projectCounter}`,
-      epic_guid: `${faker.datatype.uuid()} ${projectCounter}`,
+      epic_guid: `${faker.string.uuid()} ${projectCounter}`,
       latitude: `${faker.address.latitude().toString()} ${projectCounter}`,
       longitude: `${faker.address.longitude().toString()} ${projectCounter}`,
-      capital_investment: faker.datatype.number() + projectCounter,
+      capital_investment: faker.number.int() + projectCounter,
       address: `${faker.address.streetAddress()} ${projectCounter}`,
       is_project_closed: faker.datatype.boolean(),
       region_env: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.address.state()} ${projectCounter}`,
         entity: "",
       },
       region_flnro: {
-        id: faker.datatype.number() + projectCounter,
+        id: faker.number.int() + projectCounter,
         name: `${faker.address.state()} ${projectCounter}`,
         entity: "",
       },
-      fte_positions_construction: faker.datatype.number() + projectCounter,
-      fte_positions_operation: faker.datatype.number() + projectCounter,
+      fte_positions_construction: faker.number.int() + projectCounter,
+      fte_positions_operation: faker.number.int() + projectCounter,
     };
   };
 })();

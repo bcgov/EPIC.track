@@ -208,7 +208,7 @@ export const ETParagraph = React.forwardRef(
       enableEllipsis,
       ...rest
     }: HeaderProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: React.ForwardedRef<HTMLDivElement>,
   ) => {
     return (
       <Tooltip
@@ -233,7 +233,7 @@ export const ETParagraph = React.forwardRef(
         </Typography>
       </Tooltip>
     );
-  }
+  },
 );
 
 export const ETCaption1 = ({
@@ -372,7 +372,7 @@ export const ETFormLabel = (props: FormLabelBaseProps & FormLabelOwnProps) => {
 };
 
 export const ETFormLabelWithCharacterLimit = (
-  props: FormLabelWithCharacterCountProps
+  props: FormLabelWithCharacterCountProps,
 ) => {
   return (
     <Box

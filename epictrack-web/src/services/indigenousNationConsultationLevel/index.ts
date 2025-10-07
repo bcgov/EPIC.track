@@ -12,7 +12,7 @@ class IndigenousNationsConsultationLevels {
   async getAll(is_active = true) {
     return await http.GetRequest<ConsultationLevel[]>(
       Endpoints.IndigenousNationsConsultationLevels.GET_ALL,
-      { is_active }
+      { is_active },
     );
   }
 }

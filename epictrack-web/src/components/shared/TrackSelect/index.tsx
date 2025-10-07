@@ -13,7 +13,7 @@ type TrackSelectProps = Props & {
 const TrackSelect = React.forwardRef<any, TrackSelectProps>(
   (
     { disabled, error = false, helperText = "", fullWidth = false, ...rest },
-    ref
+    ref,
   ) => {
     return (
       <>
@@ -32,8 +32,8 @@ const TrackSelect = React.forwardRef<any, TrackSelectProps>(
                 borderColor: error
                   ? "#d32f2f"
                   : state.isFocused
-                  ? Palette.primary.accent.light
-                  : Palette.neutral.accent.light,
+                    ? Palette.primary.accent.light
+                    : Palette.neutral.accent.light,
                 borderWidth: "2px",
                 fontSize: "16px",
                 lineHeight: "24px",
@@ -69,7 +69,7 @@ const TrackSelect = React.forwardRef<any, TrackSelectProps>(
         )}
       </>
     );
-  }
+  },
 );
 
 export default TrackSelect;

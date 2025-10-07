@@ -27,12 +27,12 @@ export const ApprovedFilter: FC<ApprovedFilterProps> = ({
         value: "false",
       },
     ],
-    []
+    [],
   );
 
   const value = useMemo(() => {
     return isApprovedOptions.filter((option) =>
-      searchOptions.is_approved.includes(String(option.value))
+      searchOptions.is_approved.includes(String(option.value)),
     );
   }, [searchOptions.is_approved, isApprovedOptions]);
 

@@ -8,7 +8,7 @@ export function getSelectFilterOptions<T>(
   data: T[],
   key: keyof T,
   formatLabel: (value: any) => string = (value) => String(value),
-  formatValue: (value: any) => any = (value) => String(value)
+  formatValue: (value: any) => any = (value) => String(value),
 ) {
   // Step 1: Create a Map to store unique values and their formatted labels
   const optionsMap = new Map();
@@ -102,8 +102,8 @@ export async function exportToCsv<T extends MRT_RowData>({
   link.setAttribute(
     "download",
     `${filenamePrefix}-${dateUtils.formatDate(
-      downloadDate ? downloadDate : new Date().toISOString()
-    )}.csv`
+      downloadDate ? downloadDate : new Date().toISOString(),
+    )}.csv`,
   );
   document.body.appendChild(link);
   link.click();

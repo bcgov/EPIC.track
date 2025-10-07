@@ -300,7 +300,7 @@ export const EventCalendarContainer = ({
                           eventStart.isSame(monthStart, "month") ||
                           eventEnd.isSame(monthStart, "month")
                         );
-                      }
+                      },
                     )}
                     showWorkLegend={showWorkLegend}
                   />

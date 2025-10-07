@@ -129,7 +129,7 @@ const PhaseAccordion = ({
 
   const isSelectedPhase = useMemo<boolean>(
     () => phase.work_phase.id === selectedWorkPhase?.work_phase.id,
-    [phase, selectedWorkPhase]
+    [phase, selectedWorkPhase],
   );
 
   useEffect(() => {
@@ -142,17 +142,17 @@ const PhaseAccordion = ({
     if (isCompleted) {
       if (daysAhead > 0) {
         setDaysTakenText(
-          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} early)`
+          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} early)`,
         );
       } else if (daysAhead < 0) {
         setDaysTakenText(
-          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`
+          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`,
         );
       }
     } else {
       if (daysAhead < 0) {
         setDaysTakenText(
-          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`
+          `(${Math.abs(daysAhead)} day${daysAhead !== 1 ? "s" : ""} over)`,
         );
       }
     }
@@ -166,7 +166,7 @@ const PhaseAccordion = ({
     try {
       const overageResponsibilityData =
         await phaseOverageResponsibilityService.getAllByPhaseId(
-          phase.work_phase.id.toString()
+          phase.work_phase.id.toString(),
         );
       setOverageResponsibilities(overageResponsibilityData.data);
     } catch (error) {
@@ -189,7 +189,7 @@ const PhaseAccordion = ({
 
   const getPhaseOverdueColour = (
     isLegislated: boolean,
-    isCompleted: boolean
+    isCompleted: boolean,
   ) => {
     if (!isLegislated) return Palette.neutral.dark;
     if (daysAhead > 0 && isCompleted) return Palette.success.dark;
@@ -199,14 +199,14 @@ const PhaseAccordion = ({
 
   const handleSaveOverageResponsibility = async (
     data: any,
-    onSuccess: () => void
+    onSuccess: () => void,
   ) => {
     try {
       if (!selectedWorkPhase) return;
       // 1. Patch notes on the phase
       await workService.savePhaseResponsibilityNotes(
         selectedWorkPhase.work_phase.id,
-        data.notes
+        data.notes,
       );
       const existingRes: PhaseOverageResponsibility[] =
         overageResponsibilities || [];
@@ -214,7 +214,7 @@ const PhaseAccordion = ({
       const existingValues = existingRes.map((er) => er.responsibility);
       const toAdd = next.filter((r) => !existingValues.includes(r));
       const toRemove = existingRes.filter(
-        (er) => !next.includes(er.responsibility)
+        (er) => !next.includes(er.responsibility),
       );
       // 2. Add new responsibilities
       for (const r of toAdd) {
@@ -281,7 +281,7 @@ const PhaseAccordion = ({
                 <SummaryItem
                   title="Start date"
                   content={Moment(phase.work_phase.start_date).format(
-                    MONTH_DAY_YEAR
+                    MONTH_DAY_YEAR,
                   )}
                   isTitleBold={isSelectedPhase}
                 />
@@ -291,7 +291,7 @@ const PhaseAccordion = ({
                   <SummaryItem
                     title="Anticipated End"
                     content={Moment(
-                      phase.end_milestone?.anticipated_date
+                      phase.end_milestone?.anticipated_date,
                     ).format(MONTH_DAY_YEAR)}
                     isTitleBold={isSelectedPhase}
                   />
@@ -302,7 +302,7 @@ const PhaseAccordion = ({
                   <SummaryItem
                     title="Actual End"
                     content={Moment(phase.end_milestone?.actual_date).format(
-                      MONTH_DAY_YEAR
+                      MONTH_DAY_YEAR,
                     )}
                     isTitleBold={isSelectedPhase}
                   />
@@ -324,7 +324,7 @@ const PhaseAccordion = ({
                           ...summaryContentStyle,
                           color: getPhaseOverdueColour(
                             isLegislated,
-                            isCompleted
+                            isCompleted,
                           ),
                         }}
                       >

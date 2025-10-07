@@ -55,7 +55,7 @@ const Option = ({
             onClick={(event: any) => {
               rest.setValue(
                 event.target.checked ? event.target.value : "",
-                "select-option"
+                "select-option",
               );
             }}
             sx={{ color: "inherit !important" }}

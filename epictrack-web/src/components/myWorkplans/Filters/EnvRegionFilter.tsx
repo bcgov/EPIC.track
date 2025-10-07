@@ -42,7 +42,7 @@ export const EnvRegionFilter = ({
 
   const value = useMemo(() => {
     return options.filter((option) =>
-      searchOptions.regions.includes(String(option.value))
+      searchOptions.regions.includes(String(option.value)),
     );
   }, [searchOptions.regions, options]);
 

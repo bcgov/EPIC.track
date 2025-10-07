@@ -38,7 +38,7 @@ const highlightedRowBGColor = "rgb(249, 249, 251)";
 interface EventListTableProps {
   onRowClick: (
     event: React.MouseEvent<HTMLAnchorElement>,
-    rowOriginal: EventsGridModel
+    rowOriginal: EventsGridModel,
   ) => void;
   events: EventsGridModel[];
   loading: boolean;
@@ -89,19 +89,19 @@ const EventListTable = ({
     events,
     "start_date",
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
-    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
   );
   const endDateFilterOptions = getSelectFilterOptions(
     events,
     "end_date",
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
-    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
   );
   const numberOfDaysFilterOptions = getSelectFilterOptions(
     events,
     "number_of_days",
     (value) => String(value),
-    (value) => Number(value)
+    (value) => Number(value),
   );
   const assigneeOptions = Array.from(
     new Set(
@@ -111,17 +111,17 @@ const EventListTable = ({
         .map((assignee) =>
           assignee
             ? `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
-            : BLANK_OPTION
-        )
-    )
+            : BLANK_OPTION,
+        ),
+    ),
   );
   const responsibilityFilterOptions = Array.from(
     new Set(
       events
         .map((event) => event?.responsibility?.split(", "))
         .flat()
-        .map((responsibility) => responsibility || BLANK_OPTION)
-    )
+        .map((responsibility) => responsibility || BLANK_OPTION),
+    ),
   );
 
   const statusFilterOptions = getSelectFilterOptions(
@@ -129,7 +129,7 @@ const EventListTable = ({
     "status",
     (value) =>
       statusOptions.find((statusOption) => statusOption.value === value)
-        ?.label ?? BLANK_OPTION
+        ?.label ?? BLANK_OPTION,
   );
 
   const columns = React.useMemo<MRT_ColumnDef<EventsGridModel>[]>(
@@ -146,7 +146,7 @@ const EventListTable = ({
               <ETGridTitle
                 to="#"
                 bold={[EventPosition.START, EventPosition.END].includes(
-                  row.original.event_configuration?.event_position
+                  row.original.event_configuration?.event_position,
                 )}
                 onClick={(event: any) => onRowClick(event, row.original)}
                 enableTooltip={true}
@@ -218,7 +218,7 @@ const EventListTable = ({
           const value: string = row.getValue(id) || "";
 
           return filterValue.includes(
-            dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+            dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
           );
         },
         filterSelectOptions: startDateFilterOptions,
@@ -259,7 +259,7 @@ const EventListTable = ({
           return filterValue.includes(
             value === ""
               ? value
-              : dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+              : dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
           );
         },
         Cell: ({ cell, row }) => (
@@ -267,7 +267,7 @@ const EventListTable = ({
             {cell.getValue<string>() &&
               dateUtils.formatDate(
                 String(cell.getValue<string>()),
-                MONTH_DAY_YEAR
+                MONTH_DAY_YEAR,
               )}
           </ETParagraph>
         ),
@@ -335,7 +335,7 @@ const EventListTable = ({
 
           const renderedValue: string = row.renderValue(id) || BLANK_OPTION;
           return filterValue.every((filterName: string) =>
-            renderedValue.includes(filterName)
+            renderedValue.includes(filterName),
           );
         },
         filterSelectOptions: assigneeOptions,
@@ -377,7 +377,7 @@ const EventListTable = ({
           const value: string = row.getValue(id) || BLANK_OPTION;
 
           return filterValue.every((filterName: string) =>
-            value.includes(filterName)
+            value.includes(filterName),
           );
         },
         filterSelectOptions: responsibilityFilterOptions,
@@ -456,7 +456,7 @@ const EventListTable = ({
               <ETParagraph bold={row.original.type === EVENT_TYPE.MILESTONE}>
                 {
                   statusOptions.filter(
-                    (statusOption) => statusOption.value === value
+                    (statusOption) => statusOption.value === value,
                   )[0]?.label
                 }
               </ETParagraph>
@@ -475,7 +475,7 @@ const EventListTable = ({
       startDateFilterOptions,
       statusFilterOptions,
       typeFilterOptions,
-    ]
+    ],
   );
 
   return (
@@ -497,7 +497,7 @@ const EventListTable = ({
         const isHighlightRow = highlightedRows.find(
           (rowToHighlight) =>
             rowToHighlight.type === row.original.type &&
-            rowToHighlight.id === row.original.id
+            rowToHighlight.id === row.original.id,
         );
         if (isHighlightRow) {
           return {

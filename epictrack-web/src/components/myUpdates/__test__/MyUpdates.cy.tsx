@@ -9,7 +9,7 @@ describe("MyUpdates", () => {
         <Routes>
           <Route path="/" element={<MyUpdates />} />
         </Routes>
-      </Router>
+      </Router>,
     );
   };
 

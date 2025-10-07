@@ -45,7 +45,7 @@ const IssueHistory = ({ issue }: { issue: WorkIssue }) => {
 
   const firstNUpdatesInTimeline = subsequentUpdates.slice(
     0,
-    SHOW_MORE_THRESHOLD
+    SHOW_MORE_THRESHOLD,
   );
   const restOfUpdatesInTimeline = subsequentUpdates.slice(SHOW_MORE_THRESHOLD);
 

@@ -147,7 +147,7 @@ const ETNotification = React.forwardRef<HTMLDivElement, ETNotificationProps>(
         )}
       </SnackbarContent>
     );
-  }
+  },
 );
 
 ETNotification.displayName = "ETNotification";

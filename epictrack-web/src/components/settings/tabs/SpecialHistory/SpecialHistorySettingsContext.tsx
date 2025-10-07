@@ -81,13 +81,13 @@ export const SpecialHistoryProvider = ({
       await specialFieldService.getEntriesBasedOnFieldValue(
         SpecialFieldEntityEnum.STAFF,
         "position_id",
-        POSITION_ENUM.MINISTER.toString()
+        POSITION_ENUM.MINISTER.toString(),
       );
 
     if (previousMinisters.status === 200) {
       const ministerEntries = previousMinisters.data as SpecialField[];
       const ministerStaffIds = new Set(
-        ministerEntries.map((entry) => entry.entity_id)
+        ministerEntries.map((entry) => entry.entity_id),
       );
 
       // Fetch all staff who were ministers
@@ -95,7 +95,7 @@ export const SpecialHistoryProvider = ({
       if (allStaffResponse.status === 200) {
         const allStaff = allStaffResponse.data as Staff[];
         const filteredStaff = allStaff.filter((staff) =>
-          ministerStaffIds.has(staff.id)
+          ministerStaffIds.has(staff.id),
         );
         setAllMinisters(filteredStaff);
       }

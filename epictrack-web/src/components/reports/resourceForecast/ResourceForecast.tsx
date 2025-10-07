@@ -44,10 +44,10 @@ export default function ResourceForecast() {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [rfData, setRFData] = useState<ResourceForecastModel[]>([]);
   const [columnFilters, setColumnFilters] = useState<MRT_ColumnFiltersState>(
-    []
+    [],
   );
   const [columnVisibility, setColumnVisibility] = useState<MRT_VisibilityState>(
-    {}
+    {},
   );
   const [globalFilter, setGlobalFilter] = useState();
   const [filters, setFilters] = useState({});
@@ -68,16 +68,16 @@ export default function ResourceForecast() {
 
   useEffect(() => {
     const hiddenColumns = Object.keys(columnVisibility).filter(
-      (p) => !columnVisibility[p]
+      (p) => !columnVisibility[p],
     );
     const filteredColumnFilters = columnFilters.filter(
-      (p) => !hiddenColumns.includes(p.id)
+      (p) => !hiddenColumns.includes(p.id),
     );
     if (
       filteredColumnFilters.length !== columnFilters.length ||
       filteredColumnFilters.some(
         (f, i) =>
-          f.id !== columnFilters[i]?.id || f.value !== columnFilters[i]?.value
+          f.id !== columnFilters[i]?.id || f.value !== columnFilters[i]?.value,
       )
     ) {
       setColumnFilters(filteredColumnFilters);
@@ -108,20 +108,20 @@ export default function ResourceForecast() {
       link.setAttribute(
         "download",
         `${FILENAME_PREFIX}-${dateUtils.formatDate(
-          reportDate ? reportDate : new Date().toISOString()
-        )}.csv`
+          reportDate ? reportDate : new Date().toISOString(),
+        )}.csv`,
       );
       document.body.appendChild(link);
       link.click();
     },
-    [reportDate]
+    [reportDate],
   );
 
   useEffect(() => {
     const diff = dateUtils.diff(
       reportDate,
       new Date(2019, 11, 19).toISOString(),
-      "days"
+      "days",
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
@@ -131,7 +131,7 @@ export default function ResourceForecast() {
       const state = {
         ...prev,
         exclude: Object.keys(columnVisibility).filter(
-          (p) => !columnVisibility[p]
+          (p) => !columnVisibility[p],
         ),
         filter_search: (() => {
           let result: Record<string, any> = {};
@@ -192,7 +192,7 @@ export default function ResourceForecast() {
         .filter((p) => p[filterField])
         .map((p) => p[filterField]?.toString())
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [rfData]
+    [rfData],
   );
 
   const eaTypeFilter = filterFn("ea_type");
@@ -379,7 +379,7 @@ export default function ResourceForecast() {
       teamFilter,
       typeFilter,
       workLeadFilter,
-    ]
+    ],
   );
 
   const fetchReportData = useCallback(async () => {
@@ -391,13 +391,13 @@ export default function ResourceForecast() {
           report_date: reportDate,
           color_intensity: "25",
           first_phase: includeFirstPhase,
-        }
+        },
       );
       if (reportData.status && reportData.status === 200) {
         const data = reportData.data as never[];
         data.forEach((element) => {
           Object.keys(element).forEach(
-            (key) => (element[key] = element[key] ?? "")
+            (key) => (element[key] = element[key] ?? ""),
           );
         });
         setRFData(data);
@@ -423,18 +423,18 @@ export default function ResourceForecast() {
           filters,
           color_intensity: "25",
           first_phase: includeFirstPhase,
-        }
+        },
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
         `${FILENAME_PREFIX}-${dateUtils.formatDate(
-          reportDate ? reportDate : new Date().toISOString()
-        )}.pdf`
+          reportDate ? reportDate : new Date().toISOString(),
+        )}.pdf`,
       );
       document.body.appendChild(link);
       link.click();

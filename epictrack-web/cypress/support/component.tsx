@@ -13,6 +13,34 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
+// cypress/support/component.ts
+if (!(String.prototype as any).replaceAll) {
+  (String.prototype as any).replaceAll = function (
+    search: string | RegExp,
+    replacement: string | ((substring: string, ...args: any[]) => string)
+  ) {
+    const str = String(this);
+
+    // If search is a RegExp, ensure global flag and use native replace
+    if (search instanceof RegExp) {
+      const flags = search.flags.includes("g") ? search.flags : `${search.flags}g`;
+      const re = new RegExp(search.source, flags);
+      return (str as any).replace(re, replacement as any);
+    }
+
+    // If replacement is a function, build a global RegExp from the string
+    if (typeof replacement === "function") {
+      const escaped = (search as string).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const re = new RegExp(escaped, "g");
+      return (str as any).replace(re, replacement as any);
+    }
+
+    // string-to-string replacement
+    return str.split(search as string).join(replacement as string);
+  };
+}
+
+
 // Import commands.js using ES2015 syntax:
 import "./commands";
 import { Provider } from "react-redux";

@@ -23,7 +23,7 @@ export const projectInsightsApi = createApi({
       { is_active?: boolean; staffId?: number } | void
     >({
       query: (
-        args: { is_active?: boolean; staffId?: number } = { is_active: true }
+        args: { is_active?: boolean; staffId?: number } = { is_active: true },
       ) => {
         const { is_active = true, staffId } = args;
         let url = `projects?is_active=${is_active}`;

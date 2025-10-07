@@ -33,7 +33,7 @@ describe("EventCalendarContainer", () => {
         <EventCalendarProvider>
           <EventCalendarContainer />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
 
     // Year should render as plain text
@@ -55,7 +55,7 @@ describe("EventCalendarContainer", () => {
         <EventCalendarProvider>
           <EventCalendarContainer />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
 
     const currentYear = new Date().getFullYear();

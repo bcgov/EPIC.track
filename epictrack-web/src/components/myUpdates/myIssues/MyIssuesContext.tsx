@@ -132,7 +132,7 @@ export const MyIssuesProvider = ({
     {
       ...defaultSearchOptions,
       staff_id: user?.staffId || null,
-    }
+    },
   );
 
   const fetchIssues = useCallback(
@@ -142,7 +142,7 @@ export const MyIssuesProvider = ({
           page,
           PAGE_SIZE,
           sortOrder,
-          searchOptions
+          searchOptions,
         );
         if (!result?.data?.items || typeof result.data.total !== "number") {
           throw new Error("Failed to retrieve work issues.");
@@ -151,7 +151,7 @@ export const MyIssuesProvider = ({
         setIssues((prev) =>
           shouldAppend
             ? [...prev, ...result.data.items]
-            : [...result.data.items]
+            : [...result.data.items],
         );
         setTotalIssues(result.data.total);
         setLoadingIssues(false);
@@ -161,7 +161,7 @@ export const MyIssuesProvider = ({
         });
       }
     },
-    [searchOptions, sortOrder]
+    [searchOptions, sortOrder],
   );
 
   const fetchUserWorkIds = useCallback(async () => {
@@ -261,7 +261,7 @@ export const MyIssuesProvider = ({
       showIssueDialog,
       hideIssueDialog,
       selectedIssue,
-    ]
+    ],
   );
 
   return (

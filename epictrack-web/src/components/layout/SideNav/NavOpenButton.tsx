@@ -32,7 +32,7 @@ const DrawerToggleButton = styled(PlainDrawerToggleButton, {
 
 const NavOpenButton = () => {
   const { isDrawerExpanded, drawerWidth } = useAppSelector(
-    (state) => state.uiState
+    (state) => state.uiState,
   );
   const theme = useTheme();
   const dispatch = useAppDispatch();

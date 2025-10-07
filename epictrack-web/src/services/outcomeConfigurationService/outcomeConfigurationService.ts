@@ -4,7 +4,7 @@ import http from "../../apiManager/http-request-handler";
 class OutcomeConfigurationService {
   async getOutcomeConfigurations(configurationId: number) {
     return await http.GetRequest(
-      `${Endpoints.OutcomeConfigurations.CONFIGURATIONS}/?configuration_id=${configurationId}`
+      `${Endpoints.OutcomeConfigurations.CONFIGURATIONS}/?configuration_id=${configurationId}`,
     );
   }
 }

@@ -110,11 +110,11 @@ export const MyWorkplansProvider = ({
     {
       ...defaultSearchOptions,
       staff_id: user?.staffId || null,
-    }
+    },
   );
 
   const [myWorkPlanView, setMyWorkPlanView] = useState<MyWorkPlanView>(
-    MY_WORKPLAN_VIEW.CARDS
+    MY_WORKPLAN_VIEW.CARDS,
   );
 
   const fetchWorkplans = useCallback(
@@ -124,7 +124,7 @@ export const MyWorkplansProvider = ({
           page,
           PAGE_SIZE,
           sortOrder,
-          searchOptions
+          searchOptions,
         );
         if (!result || !result.data) {
           setWorkplans([]);
@@ -140,7 +140,7 @@ export const MyWorkplansProvider = ({
         setWorkplans((prev) =>
           shouldAppend
             ? [...prev, ...result.data.items]
-            : [...result.data.items]
+            : [...result.data.items],
         );
         setTotalWorkplans(result.data.total);
         setLoadingWorkplans(false);
@@ -150,7 +150,7 @@ export const MyWorkplansProvider = ({
         });
       }
     },
-    [searchOptions, sortOrder]
+    [searchOptions, sortOrder],
   );
 
   const getStalenessSettings = useCallback(async () => {
@@ -215,7 +215,7 @@ export const MyWorkplansProvider = ({
       setMyWorkPlanView,
       sortOrder,
       setSortOrder,
-    ]
+    ],
   );
 
   return (

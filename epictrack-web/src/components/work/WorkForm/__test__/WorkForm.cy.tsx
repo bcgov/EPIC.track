@@ -8,14 +8,14 @@ import { UserDetail } from "services/userService/type";
 import { AppConfig } from "config";
 import {
   Endpoint,
+  HttpMethod,
   setupIntercepts,
 } from "../../../../../cypress/support/utils";
-import { Method } from "cypress/types/net-stubbing";
 import { WORK_STATE } from "components/shared/constants";
 
 const generateFakePosition = () => {
   return {
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     first_name: faker.person.firstName(),
     full_name: faker.person.fullName(),
     id: faker.number.int(),
@@ -48,7 +48,7 @@ const mockProject = {
 const endpoints: Endpoint[] = [
   {
     name: "getEaActs",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}ea-acts`,
     response: {
       body: faker.lorem
@@ -62,7 +62,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getMinistries",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}ministries`,
     response: {
       body: faker.lorem
@@ -76,7 +76,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getWorkTypes",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}work-types`,
     response: {
       body: [mockWorkType],
@@ -84,7 +84,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getFederalActs",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}federal-involvements`,
     response: {
       body: faker.lorem
@@ -98,7 +98,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getEaoTeams",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}eao-teams`,
     response: {
       body: faker.lorem
@@ -113,7 +113,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getSubstitutionActs",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}substitution-acts`,
     response: {
       body: faker.lorem
@@ -127,7 +127,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getStaffsPosition",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}staffs?positions*`,
     response: {
       body: [
@@ -139,7 +139,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getProjectsListType",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}projects?return_type=list_type`,
     response: {
       body: [mockProject],
@@ -147,7 +147,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "checkWorkExists",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}works/exists?title=*`,
     response: {
       body: {
@@ -157,7 +157,7 @@ const endpoints: Endpoint[] = [
   },
   {
     name: "getProjectsAll",
-    method: "GET" as Method,
+    method: "GET" as HttpMethod,
     url: `${AppConfig.apiUrl}projects/*`,
     response: {
       body: {
@@ -224,7 +224,7 @@ const mockWork = {
       id: faker.number.int(),
       idir_user_id: faker.lorem.word(),
       phone: faker.lorem.word(),
-      email: faker.internet.email(),
+      email: `${faker.string.alphanumeric(5)}@example.com`,
       is_active: true,
       position_id: faker.number.int(),
       first_name: faker.lorem.word(),
@@ -248,7 +248,7 @@ const mockWork = {
     id: faker.number.int(),
     idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     is_active: true,
     position_id: faker.number.int(),
     first_name: faker.lorem.word(),
@@ -264,7 +264,7 @@ const mockWork = {
     id: faker.number.int(),
     idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     is_active: true,
     position_id: faker.number.int(),
     first_name: faker.lorem.word(),
@@ -283,7 +283,7 @@ const mockWork = {
     id: faker.number.int(),
     idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     is_active: true,
     position_id: faker.number.int(),
     first_name: faker.lorem.word(),
@@ -299,7 +299,7 @@ const mockWork = {
     id: faker.number.int(),
     idir_user_id: faker.lorem.word(),
     phone: faker.lorem.word(),
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     is_active: true,
     position_id: faker.number.int(),
     first_name: faker.lorem.word(),
@@ -320,17 +320,17 @@ describe("WorkForm", () => {
       userDetails(
         new UserDetail(
           faker.word.words(1),
-          faker.internet.userName(),
+          faker.string.uuid(),
           [faker.word.words(1)],
           faker.person.firstName(),
           faker.person.lastName(),
-          faker.internet.email(),
+          `${faker.string.alphanumeric(5)}@example.com`,
           faker.number.int(),
           faker.phone.number(),
           faker.person.jobTitle(),
-          [ROLES.EDIT]
-        )
-      )
+          [ROLES.EDIT],
+        ),
+      ),
     );
   });
 
@@ -338,7 +338,7 @@ describe("WorkForm", () => {
     cy.mount(
       <Provider store={store}>
         <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
-      </Provider>
+      </Provider>,
     );
     cy.get("form").should("be.visible");
   });
@@ -347,7 +347,7 @@ describe("WorkForm", () => {
     cy.mount(
       <Provider store={store}>
         <WorkForm work={null} fetchWork={cy.stub()} saveWork={cy.stub()} />
-      </Provider>
+      </Provider>,
     );
     cy.wait("@getWorkTypes").its("response.statusCode").should("eq", 200);
     cy.wait("@getProjectsListType")

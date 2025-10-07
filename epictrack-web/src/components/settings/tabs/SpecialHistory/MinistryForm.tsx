@@ -29,7 +29,7 @@ type MinistryFormProps = {
 
 const MinistryForm = ({ setDisableDialogSave }: MinistryFormProps) => {
   const { onSave, allMinisters, ministry, getMinistries } = useContext(
-    SpecialHistoryContext
+    SpecialHistoryContext,
   );
 
   const [isAbbreviationUnLocked, setIsAbbreviationUnLocked] = useState(false);

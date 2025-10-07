@@ -24,7 +24,7 @@ const WorkDetails = () => {
   const [loadingWork, setLoadingWork] = useState(false);
 
   const currentWorkPhaseIndex = workPhases?.findIndex(
-    (phase) => phase.work_phase.id === work?.current_work_phase_id
+    (phase) => phase.work_phase.id === work?.current_work_phase_id,
   );
   const previousWorkPhase =
     currentWorkPhaseIndex > 0 ? workPhases?.[currentWorkPhaseIndex - 1] : null;

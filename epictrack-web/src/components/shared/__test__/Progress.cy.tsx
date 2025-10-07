@@ -7,7 +7,7 @@ describe("BorderLinearProgress", () => {
         variant="determinate"
         value={0}
         sx={{ marginTop: "10px" }}
-      />
+      />,
     );
     cy.get("span").should("have.class", "MuiLinearProgress-root");
   });
@@ -19,7 +19,7 @@ describe("BorderLinearProgress", () => {
         variant="determinate"
         value={increment}
         sx={{ marginTop: "10px" }}
-      />
+      />,
     );
 
     //check if it increments successfully by looking at the translate value for the bar

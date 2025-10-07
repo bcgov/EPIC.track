@@ -28,7 +28,7 @@ const StatusCardBody = ({ item }: StatusCardProps) => {
   const { userWorkIds } = useContext(MyStatusesContext);
   const navigate = useNavigate();
   const { roles: currentRoles } = useAppSelector(
-    (state) => state.user.userDetail
+    (state) => state.user.userDetail,
   );
 
   const isActiveTeamMember = userWorkIds?.includes(status.work_id);

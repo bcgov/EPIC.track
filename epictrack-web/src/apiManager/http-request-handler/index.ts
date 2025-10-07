@@ -78,7 +78,7 @@ const MultipartFormPostRequest = <T>(
   url: string,
   data = {},
   params = {},
-  config = {}
+  config = {},
 ) => {
   return instance.post<T>(url, data, {
     params,
@@ -98,7 +98,7 @@ interface OSSRequestOptions {
 }
 export const OSSGetRequest = <T>(
   url: string,
-  requestOptions: OSSRequestOptions
+  requestOptions: OSSRequestOptions,
 ) => {
   return instance.get<T>(url, {
     headers: {
@@ -112,7 +112,7 @@ export const OSSGetRequest = <T>(
 export const OSSPutRequest = <T>(
   url: string,
   data: File,
-  requestOptions: OSSRequestOptions
+  requestOptions: OSSRequestOptions,
 ) => {
   return instance.put<T>(url, data, {
     headers: {

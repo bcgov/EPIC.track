@@ -81,7 +81,7 @@ describe("ResourceForecast", () => {
     cy.window().then((win) => {
       const link = win.document.querySelector("a[download]");
       expect(link?.getAttribute("download")).to.contain(
-        "EAO_Resource_Forecast"
+        "EAO_Resource_Forecast",
       );
     });
   });

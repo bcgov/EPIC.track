@@ -21,5 +21,5 @@ export const OverageResponsibilityLookup: Record<
   Object.entries(OverageResponsibilityEnum).map(([key, value]) => [
     value,
     key as OverageResponsibilityEnum,
-  ])
+  ]),
 );

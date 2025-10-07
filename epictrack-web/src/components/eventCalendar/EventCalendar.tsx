@@ -91,7 +91,7 @@ const EventCalendar = () => {
           (extendedMoment(e.start_date).year() === month.year() &&
             extendedMoment(e.start_date).month() === month.month()) ||
           (extendedMoment(e.end_date).year() === month.year() &&
-            extendedMoment(e.end_date).month() === month.month())
+            extendedMoment(e.end_date).month() === month.month()),
       );
       monthData[month.format("MMMM")] = data;
     });
@@ -246,7 +246,7 @@ const EventCalendar = () => {
                 >
                   <ETParagraph>{days[i]}</ETParagraph>
                 </Box>
-              ))
+              )),
             )}
 
             {months.map((month, index) => (

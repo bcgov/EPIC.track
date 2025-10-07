@@ -54,7 +54,7 @@ describe("OverageResponsibilityForm", () => {
         <button type="submit" form="overage-responsibility-form">
           Submit
         </button>
-      </WorkplanContext.Provider>
+      </WorkplanContext.Provider>,
     );
   };
 
@@ -69,13 +69,13 @@ describe("OverageResponsibilityForm", () => {
   it("renders with initial data", () => {
     mountForm();
     cy.contains(
-      `${mockWorkPhaseAdditionalInfo.days_taken} / ${mockWorkPhaseAdditionalInfo.total_number_of_days} days taken`
+      `${mockWorkPhaseAdditionalInfo.days_taken} / ${mockWorkPhaseAdditionalInfo.total_number_of_days} days taken`,
     ).should("exist");
     cy.findByText("Overage Responsibility").should("exist");
     cy.findByText("Notes").should("exist");
     cy.get("textarea").should(
       "have.value",
-      mockWorkPhaseAdditionalInfo.work_phase.responsibility_notes
+      mockWorkPhaseAdditionalInfo.work_phase.responsibility_notes,
     );
   });
 

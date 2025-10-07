@@ -28,7 +28,7 @@ const ProjectList = () => {
   const [loadingProjects, setLoadingProjects] = useState(true);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     projectsListingFiltersCacheKey,
-    []
+    [],
   );
 
   const fetchProjects = async () => {
@@ -67,14 +67,14 @@ const ProjectList = () => {
         projects,
         "is_active",
         (value) => (value ? "Active" : "Inactive"),
-        (value) => value
+        (value) => value,
       ),
-    [projects]
+    [projects],
   );
 
   const envRegionsOptions = getSelectFilterOptions(
     projects.map((project) => project.region_env),
-    "name"
+    "name",
   );
 
   const columns = useMemo<MRT_ColumnDef<Project>[]>(
@@ -228,7 +228,7 @@ const ProjectList = () => {
         ),
       },
     ],
-    [envRegionsOptions, proponents, statusesOptions, subTypes, types]
+    [envRegionsOptions, proponents, statusesOptions, subTypes, types],
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {

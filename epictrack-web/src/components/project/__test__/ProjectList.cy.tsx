@@ -40,7 +40,7 @@ describe("ProjectList", () => {
     cy.mount(
       <Router>
         <ProjectList />
-      </Router>
+      </Router>,
     );
   });
 
@@ -51,7 +51,7 @@ describe("ProjectList", () => {
   it("should filter the project list based on the project name input", () => {
     // Type a project name into the project name input field
     cy.get('input[placeholder="Project Name"][type="text"]').type(
-      project1.name
+      project1.name,
     );
 
     // Check that the table contains a row for Project 1 and does not contain a row for Project 2

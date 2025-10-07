@@ -6,7 +6,7 @@ describe("NoResultsFound", () => {
     cy.mount(
       <Router>
         <NoResultsFound />
-      </Router>
+      </Router>,
     );
   });
 

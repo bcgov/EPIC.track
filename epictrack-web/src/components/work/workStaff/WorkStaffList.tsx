@@ -21,7 +21,7 @@ const WorkStaffList = () => {
   const [workStates, setWorkStates] = useState<string[]>([]);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     workStaffListColumnFiltersCacheKey,
-    []
+    [],
   );
 
   const getWorkStaffAllocation = useCallback(async () => {
@@ -53,7 +53,7 @@ const WorkStaffList = () => {
               ![
                 WorkStaffRole.TEAM_LEAD,
                 WorkStaffRole.RESPONSIBLE_EPD,
-              ].includes(person.role.id)
+              ].includes(person.role.id),
           )
           .forEach((person) => uniqueRoles.add(person.role.name));
       }
@@ -72,11 +72,11 @@ const WorkStaffList = () => {
             `${row.staff
               .filter(
                 (person: { role: { name: any } }) =>
-                  person.role.name === rolename
+                  person.role.name === rolename,
               )
               .map(
                 (person: { first_name: string; last_name: string }) =>
-                  `${person.last_name} ${person.first_name}`
+                  `${person.last_name} ${person.first_name}`,
               )
               .join("; ")}`,
           enableHiding: false,
@@ -85,11 +85,11 @@ const WorkStaffList = () => {
             const staff = row.original.staff
               .filter(
                 (person: { role: { name: any } }) =>
-                  person.role.name === rolename
+                  person.role.name === rolename,
               )
               .map(
                 (person: { first_name: string; last_name: string }) =>
-                  `${person.last_name} ${person.first_name}`
+                  `${person.last_name} ${person.first_name}`,
               )
               .join("; ");
 
@@ -109,7 +109,7 @@ const WorkStaffList = () => {
     workStaffData,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   useEffect(() => {
@@ -118,10 +118,10 @@ const WorkStaffList = () => {
       .map(
         (w) =>
           WORK_STATE[w.work_state as keyof typeof WORK_STATE]?.label ||
-          w.work_state
+          w.work_state,
       )
       .filter(
-        (element, index, array) => element && array.indexOf(element) === index
+        (element, index, array) => element && array.indexOf(element) === index,
       );
     setWorkStates(options);
   }, [workStaffData]);
@@ -132,7 +132,7 @@ const WorkStaffList = () => {
         .filter((person) => person.project && person.project.name)
         .map((person) => person.project.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [workStaffData]
+    [workStaffData],
   );
 
   const titleFilter = useMemo(
@@ -141,7 +141,7 @@ const WorkStaffList = () => {
         .filter((p) => p.title)
         .map((p) => p.title)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [workStaffData]
+    [workStaffData],
   );
 
   const teamFilter = useMemo(
@@ -150,7 +150,7 @@ const WorkStaffList = () => {
         .filter((person) => person.eao_team)
         .map((person) => person.eao_team.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [workStaffData]
+    [workStaffData],
   );
 
   const responsibleEpdFilter = useMemo(
@@ -159,10 +159,10 @@ const WorkStaffList = () => {
         .filter((person) => person.responsible_epd)
         .map(
           (person) =>
-            `${person.responsible_epd.first_name} ${person.responsible_epd.last_name}`
+            `${person.responsible_epd.first_name} ${person.responsible_epd.last_name}`,
         )
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [workStaffData]
+    [workStaffData],
   );
 
   const workLeadFilter = useMemo(
@@ -171,10 +171,10 @@ const WorkStaffList = () => {
         .filter((person) => person.responsible_epd)
         .map(
           (person) =>
-            `${person.work_lead?.first_name} ${person.work_lead?.last_name}`
+            `${person.work_lead?.first_name} ${person.work_lead?.last_name}`,
         )
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [workStaffData]
+    [workStaffData],
   );
 
   const columns = useMemo<MRT_ColumnDef<WorkStaff>[]>(
@@ -301,7 +301,7 @@ const WorkStaffList = () => {
       titleFilter,
       workLeadFilter,
       workStates,
-    ]
+    ],
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {

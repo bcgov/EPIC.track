@@ -85,7 +85,7 @@ const TemplateList = () => {
     templates,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   const handleDelete = (id: number) => {
@@ -187,7 +187,7 @@ const TemplateList = () => {
         ),
       },
     ],
-    [canEdit, eaActs, phases, statuses, workTypes]
+    [canEdit, eaActs, phases, statuses, workTypes],
   );
 
   return (

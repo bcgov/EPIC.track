@@ -42,8 +42,8 @@ describe("calendar utils", () => {
     cy.wrap(
       resolveEventIconName(
         { type: EVENT_TYPE.TASK, event_configuration: {} } as any,
-        icons
-      )
+        icons,
+      ),
     ).should("eq", "AllIcon");
 
     cy.wrap(
@@ -52,8 +52,8 @@ describe("calendar utils", () => {
           type: EVENT_TYPE.MILESTONE,
           event_configuration: { event_type_id: EventType.SUBMISSION },
         } as any,
-        icons
-      )
+        icons,
+      ),
     ).should("eq", "Submission");
 
     cy.wrap(
@@ -62,8 +62,8 @@ describe("calendar utils", () => {
           type: EVENT_TYPE.MILESTONE,
           event_configuration: { event_category_id: EventCategory.DECISION },
         } as any,
-        icons
-      )
+        icons,
+      ),
     ).should("eq", "ApplyHere");
 
     cy.wrap(
@@ -72,15 +72,15 @@ describe("calendar utils", () => {
           type: EVENT_TYPE.MILESTONE,
           event_configuration: { event_category_id: EventCategory.PCP },
         } as any,
-        icons
-      )
+        icons,
+      ),
     ).should("eq", "AddBubble");
 
     cy.wrap(
       resolveEventIconName(
         { type: EVENT_TYPE.MILESTONE, event_configuration: {} } as any,
-        icons
-      )
+        icons,
+      ),
     ).should("eq", "ApproveCircle");
   });
 });

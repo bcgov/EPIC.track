@@ -62,7 +62,7 @@ const schema = yup.object<Work>().shape({
         if (value) {
           const validateWorkResult = await workService.checkWorkExists(
             value,
-            parent["id"]
+            parent["id"],
           );
           return validateWorkResult.data
             ? (!(validateWorkResult.data as any)["exists"] as boolean)
@@ -99,7 +99,7 @@ export default function WorkForm({
   const [projects, setProjects] = useState<ListType[]>([]);
   const [ministries, setMinistries] = useState<ListType[]>([]);
   const [federalInvolvements, setFederalInvolvements] = useState<ListType[]>(
-    []
+    [],
   );
   const [substitutionActs, setSubstitutionActs] = useState<ListType[]>([]);
   const [teams, setTeams] = useState<ListType[]>([]);
@@ -165,10 +165,10 @@ export default function WorkForm({
 
   useEffect(() => {
     const noneFederalInvolvement = federalInvolvements.find(
-      ({ name }) => name === "None"
+      ({ name }) => name === "None",
     );
     const noneSubstitutionAct = substitutionActs.find(
-      ({ name }) => name === "None"
+      ({ name }) => name === "None",
     );
 
     if (
@@ -190,7 +190,7 @@ export default function WorkForm({
         POSITION_ENUM.MINISTER,
       ];
       const staffResult = await staffService.getAllStaffByPosition(
-        positions.join(",")
+        positions.join(","),
       );
       if (staffResult.status === 200) {
         const data = sort(staffResult.data as Staff[], "full_name");
@@ -327,7 +327,7 @@ export default function WorkForm({
     let prefix = "";
     if (projectId) {
       const project = projects.find(
-        (project) => project.id === Number(projectId)
+        (project) => project.id === Number(projectId),
       );
       prefix += `${project?.name}${titleSeparator}`;
     }

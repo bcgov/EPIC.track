@@ -50,7 +50,7 @@ const RichTextEditor = ({
   }, [initialHTMLText, initialRawEditorState]);
 
   const [editorState, setEditorState] = useState(
-    getEditorStateFromRaw(initialRawEditorState)
+    getEditorStateFromRaw(initialRawEditorState),
   );
   const [focused, setFocused] = useState<boolean>(false);
 
@@ -58,7 +58,7 @@ const RichTextEditor = ({
     const plainText = newEditorState.getCurrentContent().getPlainText();
     setEditorState(newEditorState);
     const stringifiedEditorState = JSON.stringify(
-      convertToRaw(newEditorState.getCurrentContent())
+      convertToRaw(newEditorState.getCurrentContent()),
     );
     handleEditorStateChange(stringifiedEditorState);
     setRawText(plainText);

@@ -16,7 +16,7 @@ const AxiosErrorHandler = ({ ...props }) => {
           dispatch(setLoadingState(true));
         }
         return request;
-      }
+      },
     );
 
     // Response interceptor
@@ -58,7 +58,7 @@ const AxiosErrorHandler = ({ ...props }) => {
         }
 
         return error;
-      }
+      },
     );
 
     return () => {

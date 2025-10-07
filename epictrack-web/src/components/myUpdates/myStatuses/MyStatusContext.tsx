@@ -135,7 +135,7 @@ export const MyStatusesProvider = ({
     {
       ...defaultSearchOptions,
       staff_id: user?.staffId || null,
-    }
+    },
   );
 
   const fetchStatuses = useCallback(
@@ -145,7 +145,7 @@ export const MyStatusesProvider = ({
           page,
           PAGE_SIZE,
           sortOrder,
-          searchOptions
+          searchOptions,
         );
         if (!result?.data?.items || typeof result.data.total !== "number") {
           throw new Error("Failed to retrieve work statuses.");
@@ -154,7 +154,7 @@ export const MyStatusesProvider = ({
         setStatuses((prev) =>
           shouldAppend
             ? [...prev, ...result.data.items]
-            : [...result.data.items]
+            : [...result.data.items],
         );
         setTotalStatuses(result.data.total);
         setLoadingStatuses(false);
@@ -164,7 +164,7 @@ export const MyStatusesProvider = ({
         });
       }
     },
-    [searchOptions, sortOrder]
+    [searchOptions, sortOrder],
   );
 
   const fetchUserWorkIds = useCallback(async () => {
@@ -264,7 +264,7 @@ export const MyStatusesProvider = ({
       showStatusDialog,
       hideStatusDialog,
       selectedStatus,
-    ]
+    ],
   );
 
   return (

@@ -75,7 +75,7 @@ export default function ThirtySixtyNinety() {
     const diff = dateUtils.diff(
       reportDate || "",
       new Date(2019, 11, 19).toISOString(),
-      "days"
+      "days",
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
@@ -97,8 +97,8 @@ export default function ThirtySixtyNinety() {
   const isIssueStaleIndicatorRequired = (reportItem: any) => {
     return (reportItem["work_issues"] as []).some((workIssue) =>
       [StalenessEnum.CRITICAL, StalenessEnum.WARN].includes(
-        issueStalenessLevel(workIssue)
-      )
+        issueStalenessLevel(workIssue),
+      ),
     );
   };
 
@@ -117,7 +117,7 @@ export default function ThirtySixtyNinety() {
       const diffDays = dateUtils.diff(
         reportDate || "",
         workIssue["latest_update"]["posted_date"],
-        "days"
+        "days",
       );
 
       if (
@@ -125,7 +125,7 @@ export default function ThirtySixtyNinety() {
         dateUtils.diff(
           reportDate || "",
           workIssue.expected_resolution_date,
-          "days"
+          "days",
         ) > 0
       ) {
         return StalenessEnum.RESOLVED;
@@ -137,7 +137,7 @@ export default function ThirtySixtyNinety() {
         return StalenessEnum.GOOD;
       }
     },
-    [issueStalenessSettings, reportDate]
+    [issueStalenessSettings, reportDate],
   );
 
   const fetchReportData = useCallback(async () => {
@@ -148,7 +148,7 @@ export default function ThirtySixtyNinety() {
         {
           report_date: reportDate,
           first_phase: includeFirstPhase,
-        }
+        },
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
@@ -181,10 +181,10 @@ export default function ThirtySixtyNinety() {
         {
           report_date: reportDate,
           first_phase: includeFirstPhase,
-        }
+        },
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
@@ -192,8 +192,8 @@ export default function ThirtySixtyNinety() {
         "download",
         `${FILENAME_PREFIX}-
           ${dateUtils.formatDate(
-            reportDate ? reportDate : new Date().toISOString()
-          )}.pdf`
+            reportDate ? reportDate : new Date().toISOString(),
+          )}.pdf`,
       );
       document.body.appendChild(link);
       link.click();
@@ -235,12 +235,12 @@ export default function ThirtySixtyNinety() {
 
   const overallStalenessLevel = (
     status_staleness: string,
-    work_issues: WorkIssue[]
+    work_issues: WorkIssue[],
   ) => {
     const issuesStaleness = new Set(
       work_issues
         .filter((issue) => issue.is_active && !issue.is_resolved)
-        .map((issue: WorkIssue) => issueStalenessLevel(issue))
+        .map((issue: WorkIssue) => issueStalenessLevel(issue)),
     );
 
     if (
@@ -312,8 +312,8 @@ export default function ThirtySixtyNinety() {
                                   ...staleLevel(
                                     overallStalenessLevel(
                                       item["status_staleness"],
-                                      item["work_issues"]
-                                    )
+                                      item["work_issues"],
+                                    ),
                                   ),
                                 }}
                                 label={
@@ -324,7 +324,7 @@ export default function ThirtySixtyNinety() {
                                             .diff(
                                               reportDate,
                                               item["oldest_update"],
-                                              "days"
+                                              "days",
                                             )
                                             .toString()
                                             .concat(" days ago")
@@ -336,7 +336,7 @@ export default function ThirtySixtyNinety() {
                               {item["project_name"]} - {item["event_title"]}:{" "}
                               {dateUtils.formatDate(
                                 item["event_date"],
-                                DISPLAY_DATE_FORMAT
+                                DISPLAY_DATE_FORMAT,
                               )}
                             </Typography>
                           </AccordionSummary>
@@ -407,7 +407,7 @@ export default function ThirtySixtyNinety() {
                                     <TableCell>
                                       {dateUtils.formatDate(
                                         item["event_date"],
-                                        DISPLAY_DATE_FORMAT
+                                        DISPLAY_DATE_FORMAT,
                                       )}
                                     </TableCell>
                                   </TableRow>
@@ -432,7 +432,7 @@ export default function ThirtySixtyNinety() {
                                       <b>
                                         {dateUtils.formatDate(
                                           item["status_date_updated"],
-                                          DISPLAY_DATE_FORMAT
+                                          DISPLAY_DATE_FORMAT,
                                         )}
                                       </b>
                                     </>
@@ -471,7 +471,7 @@ export default function ThirtySixtyNinety() {
                                                   issue["latest_update"][
                                                     "posted_date"
                                                   ],
-                                                  DISPLAY_DATE_FORMAT
+                                                  DISPLAY_DATE_FORMAT,
                                                 )}
                                               </b>
                                             </>

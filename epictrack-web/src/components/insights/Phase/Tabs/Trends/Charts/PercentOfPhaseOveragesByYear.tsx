@@ -40,8 +40,8 @@ const PercentOfPhaseOveragesByYear = () => {
         workPhases.map((item: any) => [
           item.work.work_type_id,
           item.work.work_type.name,
-        ])
-      ).entries()
+        ]),
+      ).entries(),
     );
     return workTypes.map(([id, name]) => ({
       id,
@@ -51,7 +51,7 @@ const PercentOfPhaseOveragesByYear = () => {
 
   const yearOptions = useMemo(() => {
     const years = workPhases?.flatMap((phaseItem: any) =>
-      new Date(phaseItem.work_phase.end_date).getFullYear()
+      new Date(phaseItem.work_phase.end_date).getFullYear(),
     );
     return Array.from(new Set(years) as Set<number>).sort((a, b) => b - a);
   }, [workPhases]);
@@ -62,7 +62,7 @@ const PercentOfPhaseOveragesByYear = () => {
       {
         duration: 3000,
         type: "error",
-      }
+      },
     );
   }
 

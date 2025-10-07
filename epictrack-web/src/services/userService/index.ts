@@ -109,13 +109,13 @@ const initKeycloak = async (dispatch: Dispatch<AnyAction>) => {
       staffProfile?.id ?? 0,
       staffProfile?.phone ?? "",
       staffProfile?.position?.name ?? "",
-      roles
+      roles,
     );
     const isAuthorized = userDetail.groups.some(
       (group) =>
         group.startsWith("TRACK/") &&
         group !== "TRACK" &&
-        group !== "TRACK/NO_ROLE"
+        group !== "TRACK/NO_ROLE",
     );
     dispatch(userAuthorization(isAuthorized));
     dispatch(userDetails(userDetail));
@@ -149,17 +149,17 @@ const getGroups = async () => {
 
 const updateUserGroup = async (
   userId: string,
-  updateUserGroup: UserGroupUpdate
+  updateUserGroup: UserGroupUpdate,
 ) => {
   return await http.PutRequest(
     Endpoints.Users.UPDATE_USER_GROUPS.replace(":userId", userId),
-    JSON.stringify(updateUserGroup)
+    JSON.stringify(updateUserGroup),
   );
 };
 const updateLastActiveTime = async (userId: number) => {
   try {
     await http.PatchRequest(
-      `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`
+      `${Endpoints.Staffs.STAFFS}/${userId}/last_active_at`,
     );
   } catch (error) {
     console.error("Error updating last active time:", error);

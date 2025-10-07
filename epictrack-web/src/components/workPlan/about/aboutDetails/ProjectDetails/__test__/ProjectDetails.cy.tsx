@@ -41,7 +41,7 @@ describe("About Project", () => {
     cy.mount(
       <ContextWrapper>
         <ProjectDetails />
-      </ContextWrapper>
+      </ContextWrapper>,
     );
   });
 

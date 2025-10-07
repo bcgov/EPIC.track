@@ -45,7 +45,7 @@ const WorkList = () => {
         id: "work_state",
         value: ["In Progress"],
       },
-    ]
+    ],
   );
 
   const isActiveTeamMember = useIsActiveTeamMember();
@@ -79,7 +79,7 @@ const WorkList = () => {
       work_state: setStates,
       work_type: setWorkTypes,
     }),
-    [setEAActs, setPhases, setProjects, setStates, setTeams, setWorkTypes]
+    [setEAActs, setPhases, setProjects, setStates, setTeams, setWorkTypes],
   );
 
   useEffect(() => {
@@ -95,11 +95,11 @@ const WorkList = () => {
           .map(
             (w) =>
               WORK_STATE[w.work_state as keyof typeof WORK_STATE]?.label ||
-              w.work_state
+              w.work_state,
           )
           .filter(
             (element, index, array) =>
-              element && array.indexOf(element) === index
+              element && array.indexOf(element) === index,
           );
         codeTypes[key as keyof typeof codeTypes](codes);
         return;
@@ -110,7 +110,8 @@ const WorkList = () => {
           return w[workKey] ? (w[workKey] as any)[accessor] : null;
         })
         .filter(
-          (element, index, array) => element && array.indexOf(element) === index
+          (element, index, array) =>
+            element && array.indexOf(element) === index,
         );
       codeTypes[key as keyof typeof codeTypes](codes);
     });
@@ -120,7 +121,7 @@ const WorkList = () => {
     works,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   const columns = useMemo<MRT_ColumnDef<Work>[]>(
@@ -334,7 +335,7 @@ const WorkList = () => {
         ),
       },
     ],
-    [eaActs, phases, projects, states, statuses, teams, workTypes]
+    [eaActs, phases, projects, states, statuses, teams, workTypes],
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {

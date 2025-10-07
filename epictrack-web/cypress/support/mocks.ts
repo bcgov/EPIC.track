@@ -7,7 +7,7 @@ import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
 export const generateMockStaff = (): Staff => ({
   id: faker.number.int(),
   phone: faker.phone.number(),
-  email: faker.internet.email(),
+  email: `${faker.string.alphanumeric(5)}@example.com`,
   is_active: faker.datatype.boolean(),
   position_id: faker.number.int(),
   first_name: faker.person.firstName(),
@@ -18,6 +18,7 @@ export const generateMockStaff = (): Staff => ({
     name: faker.lorem.word(),
     sort_order: faker.number.int(),
   },
+  idir_user_id: ""
 });
 
 export const generateMockProject = () => ({
@@ -46,7 +47,7 @@ export const generateMockMinistry = (): Ministry => ({
     first_name: faker.person.firstName(),
     last_name: faker.person.lastName(),
     full_name: faker.person.fullName(),
-    email: faker.internet.email(),
+    email: `${faker.string.alphanumeric(5)}@example.com`,
     phone: faker.phone.number(),
     is_active: faker.datatype.boolean(),
     position_id: faker.number.int(),
@@ -55,9 +56,14 @@ export const generateMockMinistry = (): Ministry => ({
       name: faker.lorem.word(),
       sort_order: faker.number.int(),
     },
+    idir_user_id: ""
   },
   abbreviation: faker.lorem.word(),
   combined: faker.lorem.word(),
+  minister_id: 0,
+  sort_order: 0,
+  date_created: "",
+  date_closed: ""
 });
 
 export const generateMockListType = (): ListType => ({
@@ -107,7 +113,7 @@ export const generateMockWork = (): Work => ({
   eao_team: generateMockListType(),
   federal_involvement: generateMockListType(),
   work_type: generateMockListType(),
-  current_work_phase: generateMockListType(),
+  current_work_phase: generateMockWorkPhase(),
   substitution_act: generateMockListType(),
   indigenous_works: [generateMockListType(), generateMockListType()],
   work_decision_date: "",
@@ -119,7 +125,7 @@ export const generateMockWorkPhase = (): WorkPhase => ({
   start_date: faker.date.recent().toISOString(),
   name: faker.lorem.word(),
   phase: generateMockListType(),
-  milestone_progress: faker.datatype.number(),
+  milestone_progress: faker.number.int(),
   next_milestone: faker.lorem.sentence(),
   is_completed: faker.datatype.boolean(),
   is_suspended: faker.datatype.boolean(),
@@ -135,7 +141,13 @@ export const generateMockWorkPhaseAdditionalInfo =
     total_number_of_days: faker.number.int(),
     next_milestone: faker.lorem.sentence(),
     current_milestone: faker.lorem.sentence(),
-    milestone_progress: faker.datatype.number(),
+    milestone_progress: faker.number.int(),
     days_left: faker.number.int(),
     is_last_phase: faker.datatype.boolean(),
+    days_taken: 0,
+    end_milestone: {
+      name: faker.lorem.word(),
+      actual_date: "",
+      anticipated_date: ""
+    }
   });

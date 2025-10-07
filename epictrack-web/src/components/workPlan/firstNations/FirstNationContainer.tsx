@@ -61,7 +61,7 @@ const FirstNationContainer = () => {
     async (value: string) => {
       const result = await workService.saveFirstNationNotes(
         Number(ctx.work?.id),
-        value
+        value,
       );
       if (result.status === 200) {
         ctx.setWork(result.data as Work);
@@ -71,7 +71,7 @@ const FirstNationContainer = () => {
         });
       }
     },
-    [ctx]
+    [ctx],
   );
 
   const debounceSave = useMemo(() => {
@@ -87,7 +87,7 @@ const FirstNationContainer = () => {
 
   const firstNationsLabelCallback = useCallback(
     () => WORKPLAN_TAB.FIRST_NATIONS.label,
-    []
+    [],
   );
   useRouterLocationStateForHelpPage(firstNationsLabelCallback);
 

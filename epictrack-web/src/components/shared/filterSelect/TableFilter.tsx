@@ -4,7 +4,7 @@ import { TableFilterProps } from "./type";
 
 const makeTableFilter =
   <SelectProps extends object>(
-    Component: React.ComponentType<SelectProps>
+    Component: React.ComponentType<SelectProps>,
   ): React.FC<TableFilterProps> =>
   ({ header, column, ...props }: TableFilterProps) => {
     const setFilter = useCallback(
@@ -13,11 +13,11 @@ const makeTableFilter =
           | { value: any; label: string }[]
           | { value: any; label: string }
           | string[]
-          | string
+          | string,
       ) => {
         if (Array.isArray(value)) {
           column.setFilterValue(
-            value.map((v) => (typeof v === "object" ? v.value : v))
+            value.map((v) => (typeof v === "object" ? v.value : v)),
           );
         } else if (typeof value === "object" && value !== null) {
           column.setFilterValue([value.value]);
@@ -27,7 +27,7 @@ const makeTableFilter =
           column.setFilterValue([]);
         }
       },
-      [column]
+      [column],
     );
 
     const toOptionType = (option: any) => {

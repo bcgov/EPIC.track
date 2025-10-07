@@ -15,7 +15,7 @@ describe("ReportHeader", () => {
           downloadPDFReport={fakeDownloadPDFReport}
           showReportDateBanner={false}
         />
-      </Router>
+      </Router>,
     );
   });
 
@@ -29,7 +29,7 @@ describe("ReportHeader", () => {
     cy.contains("Generate").click();
     cy.get('[role="alert"]').should(
       "contain.text",
-      "Please select a date before generating the report."
+      "Please select a date before generating the report.",
     );
   });
 
@@ -58,12 +58,12 @@ describe("ReportHeader", () => {
           downloadPDFReport={fakeDownloadPDFReport}
           showReportDateBanner={true}
         />
-      </Router>
+      </Router>,
     );
 
     cy.get('[role="alert"]').should(
       "contain.text",
-      "Currently EPIC.track only contains EA Act (2018) data"
+      "Currently EPIC.track only contains EA Act (2018) data",
     );
   });
 });

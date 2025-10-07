@@ -10,7 +10,7 @@ describe("<SideNav />", () => {
       <Router initialEntries={["/initial/path"]}>
         // Create store and pass above props to the store
         <SideNav />
-      </Router>
+      </Router>,
     );
 
     Routes.forEach((route) => {
@@ -18,7 +18,7 @@ describe("<SideNav />", () => {
       if (route.allowedRoles && route.allowedRoles.length === 0) {
         // Perform a cy.get for the route
         cy.get(`[data-testid="SideNav/${route.name}-button"]`).should(
-          "be.visible"
+          "be.visible",
         );
       }
 
@@ -27,7 +27,7 @@ describe("<SideNav />", () => {
         // Check if all nested routes have empty allowedRoles
         const allNestedRoutesAllowed = route.routes.every(
           (nestedRoute) =>
-            nestedRoute.allowedRoles && nestedRoute.allowedRoles.length === 0
+            nestedRoute.allowedRoles && nestedRoute.allowedRoles.length === 0,
         );
 
         if (allNestedRoutesAllowed) {
@@ -37,7 +37,7 @@ describe("<SideNav />", () => {
           route.routes.forEach((nestedRoute) => {
             // Then check that the nested route is visible
             cy.get(`[data-testid="SideNav/${nestedRoute.name}-button"]`).should(
-              "be.visible"
+              "be.visible",
             );
           });
         }

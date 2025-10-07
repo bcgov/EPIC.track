@@ -34,7 +34,7 @@ export const StalenessFilter: FC<StalenessFilterProps> = ({
 
   const value = useMemo(() => {
     return stalenessOptions.filter((option) =>
-      searchOptions.staleness.includes(String(option.value))
+      searchOptions.staleness.includes(String(option.value)),
     );
   }, [searchOptions.staleness]);
 

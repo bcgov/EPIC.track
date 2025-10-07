@@ -75,7 +75,7 @@ const EventList = () => {
     useState<boolean>(false);
   const [showTemplateForm, setShowTemplateForm] = useState<boolean>(false);
   const [staffSelectOptions, setStaffSelectOptions] = useState<OptionType[]>(
-    []
+    [],
   );
   const [taskEvent, setTaskEvent] = useState<TaskEvent>();
   const [templateAvailable, setTemplateAvailable] = useState<TemplateStatus>();
@@ -94,7 +94,7 @@ const EventList = () => {
   const userIsActiveTeamMember = useMemo(
     () =>
       team.some((member) => member.staff.email === email && member.is_active),
-    [team, email]
+    [team, email],
   );
   const isConfettiShown = useAppSelector((state) => state.uiState.showConfetti);
   const { handleHighlightRows } = useContext(EventContext);
@@ -106,7 +106,7 @@ const EventList = () => {
       Number(selectedWorkPhase?.days_left) < 0 &&
       selectedWorkPhase?.work_phase.legislated &&
       openExtensionWarningBox,
-    [selectedWorkPhase, openExtensionWarningBox]
+    [selectedWorkPhase, openExtensionWarningBox],
   );
 
   const isEventFormFieldLocked = useMemo(() => {
@@ -132,7 +132,7 @@ const EventList = () => {
       })
       .filter(
         (ele, index, arr) =>
-          arr.findIndex((t) => t.value === ele.value) === index
+          arr.findIndex((t) => t.value === ele.value) === index,
       );
     setStaffSelectOptions(options);
   }, [team]);
@@ -157,12 +157,12 @@ const EventList = () => {
       }
       return Promise.resolve(result);
     },
-    []
+    [],
   );
 
   const milestoneEvents = useMemo(
     () => events.filter((p) => p.type === EVENT_TYPE.MILESTONE),
-    [events]
+    [events],
   );
 
   const getMilestoneEvents = useCallback(
@@ -178,13 +178,13 @@ const EventList = () => {
             element.is_complete = !!element.actual_date;
             const actualToTodayDiff = Moment(element.start_date).diff(
               Moment(),
-              "days"
+              "days",
             );
             element.status = element.is_complete
               ? EVENT_STATUS.COMPLETED
               : actualToTodayDiff <= 0
-              ? EVENT_STATUS.INPROGRESS
-              : EVENT_STATUS.NOT_STARTED;
+                ? EVENT_STATUS.INPROGRESS
+                : EVENT_STATUS.NOT_STARTED;
             element.visibility = element.event_configuration.visibility;
             return element;
           });
@@ -194,7 +194,7 @@ const EventList = () => {
       }
       return Promise.resolve(result);
     },
-    []
+    [],
   );
 
   const getCombinedEvents = useCallback(() => {
@@ -231,7 +231,7 @@ const EventList = () => {
             // Next priorit is for dates, lower dates comes first
             const diff = Moment(eventX.start_date).diff(
               eventY.start_date,
-              "days"
+              "days",
             );
             if (diff < 0) {
               return -1;
@@ -298,7 +298,7 @@ const EventList = () => {
           });
           setEvents(result);
           setLoading(false);
-        }
+        },
       );
     }
     setRowSelection({});
@@ -316,7 +316,7 @@ const EventList = () => {
   const updateSelectedWorkPhaseState = useCallback(() => {
     if (work?.current_work_phase_id && workPhases.length > 0) {
       const selectedWp = workPhases.find(
-        (p) => p.work_phase.id === work.current_work_phase_id
+        (p) => p.work_phase.id === work.current_work_phase_id,
       );
       if (selectedWp) {
         setSelectedWorkPhase(selectedWp);
@@ -333,7 +333,7 @@ const EventList = () => {
     if (work?.id) {
       setLoading(true);
       const workPhasesResult = await workService.getWorkPhases(
-        String(work?.id)
+        String(work?.id),
       );
       const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
       setWorkPhases(workPhases);
@@ -385,7 +385,7 @@ const EventList = () => {
         {
           work_phase_id: selectedWorkPhase?.work_phase.id,
         },
-        Number(selectedTemplateId)
+        Number(selectedTemplateId),
       );
       if (result.status === 201) {
         showNotification("Task events uploaded", {
@@ -406,10 +406,10 @@ const EventList = () => {
   const handleExportToSheet = useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadWorkplan(
-        Number(selectedWorkPhase?.work_phase.id)
+        Number(selectedWorkPhase?.work_phase.id),
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
@@ -460,7 +460,7 @@ const EventList = () => {
     dispatch(setLoadingState(false));
     setShowDeleteMilestoneButton(
       (row.type === EVENT_TYPE.MILESTONE || row.type === EVENT_TYPE.TASK) &&
-        !(row.visibility === EventTemplateVisibility.MANDATORY)
+        !(row.visibility === EventTemplateVisibility.MANDATORY),
     );
   };
 
@@ -492,7 +492,7 @@ const EventList = () => {
       const result = await taskEventService.getById(Number(eventId));
       if (result.status === 200) {
         const assignee_ids: any[] = (result.data as any)["assignees"].map(
-          (p: any) => p["assignee_id"]
+          (p: any) => p["assignee_id"],
         );
         const responsibility_ids: any[] = (result.data as any)[
           "responsibilities"
@@ -516,7 +516,7 @@ const EventList = () => {
         notificationId.current = null;
       }
       const response = await workService.checkTemplateUploadStatus(
-        Number(selectedWorkPhase.work_phase.id)
+        Number(selectedWorkPhase.work_phase.id),
       );
       const templateUploadStatus: TemplateStatus =
         response.data as TemplateStatus;
@@ -557,7 +557,7 @@ const EventList = () => {
     if (workPhaseId) {
       try {
         const workPhase = (await workService.getWorkPhaseById(
-          Number(workPhaseId)
+          Number(workPhaseId),
         )) as WorkPhase;
 
         if (workPhase?.is_completed && !isCompleted) {
@@ -566,7 +566,7 @@ const EventList = () => {
       } catch (error) {
         console.error(
           `Error fetching work phase with ID: ${workPhaseId}`,
-          error
+          error,
         );
       }
     }
@@ -610,7 +610,7 @@ const EventList = () => {
   const assignTasks = useCallback(
     async (assignee_ids: any) => {
       assignee_ids = assignee_ids.filter(
-        (assignee_id: string) => assignee_id !== "<SELECT_ALL>"
+        (assignee_id: string) => assignee_id !== "<SELECT_ALL>",
       );
       const data = {
         task_ids: Object.keys(rowSelection),
@@ -638,13 +638,13 @@ const EventList = () => {
         });
       }
     },
-    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id]
+    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
   const assignResponsibility = useCallback(
     async (responsibility_ids: any) => {
       responsibility_ids = responsibility_ids.filter(
-        (responsibility_id: string) => responsibility_id !== "<SELECT_ALL>"
+        (responsibility_id: string) => responsibility_id !== "<SELECT_ALL>",
       );
       const data = {
         task_ids: Object.keys(rowSelection),
@@ -672,7 +672,7 @@ const EventList = () => {
         });
       }
     },
-    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id]
+    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
   const assignProgress = useCallback(
@@ -703,7 +703,7 @@ const EventList = () => {
         });
       }
     },
-    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id]
+    [getCombinedEvents, handleHighlightRows, rowSelection, work?.id],
   );
 
   const taskData = () => {

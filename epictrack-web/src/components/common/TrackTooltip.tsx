@@ -13,7 +13,7 @@ export const TrackTooltip = styled(
       title={body}
       {...props}
     />
-  )
+  ),
 )(
   ({ theme }) => `
         background-color: ${theme.palette.background.paper};
@@ -23,5 +23,5 @@ export const TrackTooltip = styled(
         box-shadow: ${theme.shadows[2]};        
         min-width: ${TrackTooltipMinWidth}px;
         z-index: ${theme.zIndex.tooltip};
-`
+`,
 );

@@ -45,7 +45,7 @@ const EventDatePushConfirmForm = ({
         value: 1,
       },
     ],
-    []
+    [],
   );
 
   return (

@@ -3,10 +3,10 @@ import http from "../../apiManager/http-request-handler";
 
 const getPhaseByWorkTypeEAact = async (
   eaactid?: number,
-  worktypeId?: number
+  worktypeId?: number,
 ) => {
   return await http.GetRequest(
-    Endpoints.Phases.PHASES + `/ea_acts/${eaactid}/work_types/${worktypeId}  `
+    Endpoints.Phases.PHASES + `/ea_acts/${eaactid}/work_types/${worktypeId}  `,
   );
 };
 const phaseService = {

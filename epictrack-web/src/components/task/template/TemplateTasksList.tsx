@@ -31,7 +31,7 @@ const TemplateTaskList = ({ ...props }) => {
         setResultStatus(RESULT_STATUS.LOADED);
       }
     },
-    []
+    [],
   );
   const getTemplate = React.useCallback(
     async (templateId: number | undefined) => {
@@ -45,7 +45,7 @@ const TemplateTaskList = ({ ...props }) => {
         console.error("Get template: ", error);
       }
     },
-    []
+    [],
   );
 
   React.useEffect(() => {
@@ -73,7 +73,7 @@ const TemplateTaskList = ({ ...props }) => {
         header: "Notes",
       },
     ],
-    []
+    [],
   );
 
   const handleApproval = async (event: any) => {
@@ -82,7 +82,7 @@ const TemplateTaskList = ({ ...props }) => {
     });
     if (result.status === 200) {
       setAlertContentText(
-        `Template ${template?.is_active ? "Deactivated" : "Activated"}`
+        `Template ${template?.is_active ? "Deactivated" : "Activated"}`,
       );
       setOpenAlertDialog(true);
       props.onApproval();

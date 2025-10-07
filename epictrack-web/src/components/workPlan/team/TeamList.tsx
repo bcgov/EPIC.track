@@ -31,7 +31,7 @@ const TeamList = () => {
   const ctx = useContext(WorkplanContext);
   const staff = ctx.selectedStaff?.staff;
   const { roles: givenUserAuthRoles } = useAppSelector(
-    (state) => state.user.userDetail
+    (state) => state.user.userDetail,
   );
 
   const teamMembers = useMemo(() => ctx.team, [ctx.team]);
@@ -127,7 +127,7 @@ const TeamList = () => {
         ),
       },
     ],
-    [canEdit, roles, statuses]
+    [canEdit, roles, statuses],
   );
 
   const onCancelHandler = () => {
@@ -156,7 +156,7 @@ const TeamList = () => {
     setLoading(true);
     try {
       const teamResult = await workService.getWorkTeamMembers(
-        Number(ctx.work?.id)
+        Number(ctx.work?.id),
       );
       if (teamResult.status === 200) {
         const team = (teamResult.data as StaffWorkRole[]).map((p) => {

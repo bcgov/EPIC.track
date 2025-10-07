@@ -20,14 +20,14 @@ export const ReferralSchedule = () => {
   const currentStatus = statuses.find((status) => status.is_approved);
 
   const currentWorkPhase = workPhases.find(
-    (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id
+    (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id,
   );
 
   const activeApprovedIssues = issues.filter(
     (issue) =>
       !issue.is_resolved &&
       issue.is_active &&
-      issue.updates.find((update) => update.is_approved)
+      issue.updates.find((update) => update.is_approved),
   );
 
   const issueUpdates = activeApprovedIssues

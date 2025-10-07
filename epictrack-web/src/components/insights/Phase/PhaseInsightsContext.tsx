@@ -30,7 +30,7 @@ export const PhaseInsightsContextProvider: React.FC<
       workPhases: workPhases ?? [],
       loadingWorkPhases,
     }),
-    [workPhases, loadingWorkPhases]
+    [workPhases, loadingWorkPhases],
   );
   return (
     <PhaseInsightsContext.Provider value={contextValue}>
@@ -43,7 +43,7 @@ export const usePhaseInsightsContext = () => {
   const context = useContext(PhaseInsightsContext);
   if (!context) {
     throw new Error(
-      "usePhaseInsightsContext must be used within a PhaseInsightsContextProvider"
+      "usePhaseInsightsContext must be used within a PhaseInsightsContextProvider",
     );
   }
   return context;

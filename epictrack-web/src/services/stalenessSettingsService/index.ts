@@ -6,7 +6,7 @@ import { MasterBase } from "models/type";
 class StalenessSettingsService {
   async getAll() {
     return http.GetRequest<StalenessSettings[]>(
-      Endpoints.StalenessSettings.STALENESS
+      Endpoints.StalenessSettings.STALENESS,
     );
   }
 
@@ -28,14 +28,14 @@ class StalenessSettingsService {
 
   private async _updateStalenessByType(
     data: MasterBase,
-    type: StalenessSettingTypeEnum
+    type: StalenessSettingTypeEnum,
   ) {
     return http.PutRequest(
       Endpoints.StalenessSettings.UPDATE_STALENESS_BY_TYPE.replace(
         ":staleness_type",
-        type
+        type,
       ),
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
@@ -43,8 +43,8 @@ class StalenessSettingsService {
     return http.GetRequest<StalenessSettings>(
       Endpoints.StalenessSettings.STALENESS_BY_TYPE.replace(
         ":staleness_type",
-        type
-      )
+        type,
+      ),
     );
   }
 }

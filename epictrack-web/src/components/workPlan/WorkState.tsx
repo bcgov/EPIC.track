@@ -43,7 +43,7 @@ const WorkState = ({ work_state }: WorkStateProps) => {
       </Case>
       <Case
         condition={["WITHDRAWN", "CLOSED", "TERMINATED"].includes(
-          work_state || ""
+          work_state || "",
         )}
       >
         <Box

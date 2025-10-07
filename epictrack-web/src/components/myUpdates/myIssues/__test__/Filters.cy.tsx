@@ -9,7 +9,7 @@ describe("My Issues Filters", () => {
     mount(
       <MyIssuesContext.Provider value={issuesContextValue}>
         <Filters />
-      </MyIssuesContext.Provider>
+      </MyIssuesContext.Provider>,
     );
 
     // Assert that each filter renders
@@ -44,7 +44,7 @@ describe("My Issues Filters", () => {
         }}
       >
         <Filters />
-      </MyIssuesContext.Provider>
+      </MyIssuesContext.Provider>,
     );
 
     cy.findByPlaceholderText("Search for a Project")

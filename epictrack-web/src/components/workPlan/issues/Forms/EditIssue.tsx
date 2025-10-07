@@ -54,7 +54,7 @@ const EditIssue = () => {
 
     // find the min date of updates
     const updatesPostedDates = issueToEdit.updates.map((update) =>
-      moment(update.posted_date)
+      moment(update.posted_date),
     );
     const minPostedDate = moment.min(updatesPostedDates).toDate();
     return dayjs(minPostedDate);

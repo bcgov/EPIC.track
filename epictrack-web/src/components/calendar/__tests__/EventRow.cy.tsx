@@ -10,7 +10,7 @@ import {
 const generateDaysForMonth = (
   year = dayjs().year(),
   month = dayjs().month(),
-  daysInRow = 7
+  daysInRow = 7,
 ) => {
   const start = dayjs().year(year).month(month).startOf("month");
   const daysInMonth = start.daysInMonth();
@@ -40,7 +40,7 @@ describe("EventRow Component", () => {
           cellSizePx={40}
           showWorkLegend={true}
         />
-      </EventCalendarProvider>
+      </EventCalendarProvider>,
     );
     cy.viewport(1920, 1080);
 
@@ -84,7 +84,7 @@ describe("EventRow Component", () => {
           cellSizePx={40}
           showWorkLegend={true}
         />
-      </EventCalendarProvider>
+      </EventCalendarProvider>,
     );
     // Event should occupy multiple columns (grid span)
     cy.contains(multiDayEvent.name).should("exist");
@@ -125,7 +125,7 @@ describe("EventRow Component", () => {
           cellSizePx={40}
           showWorkLegend={true}
         />
-      </EventCalendarProvider>
+      </EventCalendarProvider>,
     );
 
     cy.contains(event1.name)
@@ -166,7 +166,7 @@ describe("EventRow Component", () => {
           cellSizePx={40}
           showWorkLegend={true}
         />
-      </EventCalendarProvider>
+      </EventCalendarProvider>,
     );
     cy.viewport(1920, 1080);
     cy.get("div").contains(taskEvent.name).scrollIntoView().should("exist");
@@ -192,7 +192,7 @@ describe("EventRow Component", () => {
           cellSizePx={40}
           showWorkLegend={false}
         />
-      </EventCalendarProvider>
+      </EventCalendarProvider>,
     );
 
     cy.contains(taskEvent.name).should("exist");

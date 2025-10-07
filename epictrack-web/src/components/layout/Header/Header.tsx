@@ -41,13 +41,13 @@ const AppBar = styled(MuiAppBar, {
 
 const Header = () => {
   const { isDrawerExpanded: open }: UIState = useAppSelector(
-    (state) => state.uiState
+    (state) => state.uiState,
   );
   const dispatch = useDispatch();
 
   const user = useAppSelector((state) => state.user.userDetail);
   const isMediumScreen = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.up("md")
+    theme.breakpoints.up("md"),
   );
 
   const [profileMenuAnchorEl, setProfileMenuAnchorEl] =

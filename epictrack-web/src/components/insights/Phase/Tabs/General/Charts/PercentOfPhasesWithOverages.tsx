@@ -35,8 +35,8 @@ const PercentOfPhasesWithOveragesChart = () => {
         workPhases.map((item) => [
           item.work.work_type_id,
           item.work.work_type.name,
-        ])
-      ).entries()
+        ]),
+      ).entries(),
     );
     return workTypes.map(([id, name]) => ({
       id,
@@ -50,7 +50,7 @@ const PercentOfPhasesWithOveragesChart = () => {
       {
         duration: 3000,
         type: "error",
-      }
+      },
     );
   }
 

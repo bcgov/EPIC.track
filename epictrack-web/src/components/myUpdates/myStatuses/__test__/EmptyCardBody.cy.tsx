@@ -25,7 +25,7 @@ describe("Status Card - EmptyCardBody ", () => {
     cy.mount(
       <Provider store={store}>
         <EmptyCardBody onAddClick={cy.stub().as("onAddClick")} />
-      </Provider>
+      </Provider>,
     );
 
     cy.contains("button", "Add Status").should("exist").click();
@@ -40,7 +40,7 @@ describe("Status Card - EmptyCardBody ", () => {
     cy.mount(
       <Provider store={store}>
         <EmptyCardBody onAddClick={cy.stub()} />
-      </Provider>
+      </Provider>,
     );
 
     cy.contains("button", "Add Status").should("not.exist");

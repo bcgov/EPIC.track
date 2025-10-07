@@ -34,7 +34,7 @@ describe("<CardList />", () => {
         setLoadingMore={cy.stub()}
         lazyLoadMore={cy.stub()}
         CardComponent={TestCard}
-      />
+      />,
     );
 
     // rely on the skeleton MUI structure
@@ -51,7 +51,7 @@ describe("<CardList />", () => {
         setLoadingMore={cy.stub()}
         lazyLoadMore={cy.stub()}
         CardComponent={TestCard}
-      />
+      />,
     );
 
     cy.contains(/no results/i).should("exist");
@@ -72,7 +72,7 @@ describe("<CardList />", () => {
         setLoadingMore={cy.stub()}
         lazyLoadMore={cy.stub()}
         CardComponent={TestCard}
-      />
+      />,
     );
 
     items.forEach((item) => {
@@ -98,7 +98,7 @@ describe("<CardList />", () => {
         setLoadingMore={setLoadingMore}
         lazyLoadMore={lazyLoadMore}
         CardComponent={({ item }) => <div>{item.title}</div>}
-      />
+      />,
     );
 
     cy.get("@setLoadingMore").should("have.been.calledWith", true);

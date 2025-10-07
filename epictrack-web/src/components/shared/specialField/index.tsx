@@ -84,7 +84,7 @@ export const SpecialFieldGrid = ({
     const specialFieldEntries = await specialFieldService.getEntries(
       entity,
       entity_id,
-      fieldName
+      fieldName,
     );
     if (specialFieldEntries.status === 200) {
       setEntries(specialFieldEntries.data as SpecialField[]);
@@ -231,7 +231,7 @@ export const SpecialFieldGrid = ({
         },
       },
     ],
-    [fieldLabel, fieldName, fieldType, options, errors, tableState]
+    [fieldLabel, fieldName, fieldType, options, errors, tableState],
   );
 
   const validateRowInputs = (values: Record<SPECIAL_FIELD_KEY, any>) => {
@@ -286,7 +286,7 @@ export const SpecialFieldGrid = ({
 
   const saveEntry = async (
     payload: SpecialField,
-    objectId: number | undefined = undefined
+    objectId: number | undefined = undefined,
   ) => {
     const data = {
       ...payload,

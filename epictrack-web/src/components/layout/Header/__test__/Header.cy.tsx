@@ -10,7 +10,7 @@ describe("Header", () => {
         <Router>
           <Header />
         </Router>
-      </Provider>
+      </Provider>,
     );
   });
 

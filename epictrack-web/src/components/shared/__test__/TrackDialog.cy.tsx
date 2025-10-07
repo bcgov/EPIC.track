@@ -12,7 +12,7 @@ describe("TrackDialog", () => {
         open={true}
         dialogTitle="Test Dialog"
         dialogContentText="Test Content"
-      />
+      />,
     );
     cy.get('div[role="dialog"]').contains("Test Content").should("be.visible");
   });

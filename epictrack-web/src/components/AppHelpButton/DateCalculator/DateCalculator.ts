@@ -130,7 +130,7 @@ export const dateCalculator = (
   startDate: Date | null,
   endDate: Date | null,
   suspendDate: Date | null,
-  resumeDate: Date | null
+  resumeDate: Date | null,
 ) => {
   const calcRes = new DayCalculatorResult();
 
@@ -144,10 +144,10 @@ export const dateCalculator = (
       "The suspension date must come before the resumption date.",
       {
         type: "error",
-      }
+      },
     );
     throw new Error(
-      "The suspension date must come before the resumption date."
+      "The suspension date must come before the resumption date.",
     );
   }
 

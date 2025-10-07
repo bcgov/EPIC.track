@@ -13,7 +13,7 @@ export const WorkStateFilter = () => {
 
   const value = useMemo(() => {
     return options.filter((option) =>
-      searchOptions.work_states.includes(String(option.value))
+      searchOptions.work_states.includes(String(option.value)),
     );
   }, [searchOptions.work_states, options]);
 

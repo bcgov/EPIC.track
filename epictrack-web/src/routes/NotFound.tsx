@@ -37,7 +37,7 @@ const NotFound = React.memo(
         </Grid>
       </ETPageContainer>
     );
-  }
+  },
 );
 
 export default NotFound;

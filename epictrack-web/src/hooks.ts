@@ -14,7 +14,7 @@ export const useOnScreen = (ref: RefObject<HTMLElement>) => {
       new IntersectionObserver(([entry]) => {
         setIsOnScreen(entry.isIntersecting);
       }),
-    []
+    [],
   );
 
   useEffect(() => {

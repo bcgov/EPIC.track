@@ -23,7 +23,7 @@ const SingleValue = (props: SingleValueProps) => {
           }}
           className={clsx(
             emotionCss(props.getStyles("singleValue", props)),
-            props.className
+            props.className,
           )}
         >
           <ETCaption2 bold color={Palette.primary.accent.light}>

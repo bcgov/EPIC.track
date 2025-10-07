@@ -10,7 +10,7 @@ class PhaseOverageResponsibilityService implements ServiceBase {
       Endpoints.PhaseOverageResponsibilities.OVERAGE_RESPONSIBILITIES,
       {
         is_active,
-      }
+      },
     );
   }
 
@@ -20,14 +20,14 @@ class PhaseOverageResponsibilityService implements ServiceBase {
       +`/${id}`,
       {
         is_active,
-      }
+      },
     );
   }
 
   async create(data: MasterBase) {
     return await http.PostRequest(
       Endpoints.PhaseOverageResponsibilities.OVERAGE_RESPONSIBILITIES,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
@@ -35,13 +35,14 @@ class PhaseOverageResponsibilityService implements ServiceBase {
     return await http.PutRequest(
       Endpoints.PhaseOverageResponsibilities.OVERAGE_RESPONSIBILITIES +
         `/${id}`,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
   async delete(id: string) {
     return await http.DeleteRequest(
-      Endpoints.PhaseOverageResponsibilities.OVERAGE_RESPONSIBILITIES + `/${id}`
+      Endpoints.PhaseOverageResponsibilities.OVERAGE_RESPONSIBILITIES +
+        `/${id}`,
     );
   }
 
@@ -49,8 +50,8 @@ class PhaseOverageResponsibilityService implements ServiceBase {
     return await http.GetRequest<PhaseOverageResponsibility[]>(
       Endpoints.Works.GET_OVERAGE_RESPONSIBILITY_BY_PHASE_ID.replace(
         ":work_phase_id",
-        work_phase_id
-      )
+        work_phase_id,
+      ),
     );
   }
 }

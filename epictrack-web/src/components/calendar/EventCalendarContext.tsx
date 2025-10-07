@@ -69,7 +69,7 @@ export const useEventCalendarContext = () => {
   const context = useContext(EventCalendarContext);
   if (!context) {
     throw new Error(
-      "useEventCalendarContext must be used within a EventCalendarProvider"
+      "useEventCalendarContext must be used within a EventCalendarProvider",
     );
   }
   return context;
@@ -99,7 +99,7 @@ export const EventCalendarProvider = ({
   const [searchOptions, setSearchOptions] =
     useState<CalendarSearchOptions>(defaultSearchOptions);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
-    null
+    null,
   );
   const [milestoneEvent, setMilestoneEvent] = useState<MilestoneEvent>();
   const [taskEvent, setTaskEvent] = useState<TaskEvent>();
@@ -142,7 +142,7 @@ export const EventCalendarProvider = ({
       const eventPromise = eventService.getCalendarEvents({
         ...searchOptions,
         event_types: searchOptions.event_types.filter(
-          (t) => t !== "include_tasks:true"
+          (t) => t !== "include_tasks:true",
         ),
       });
 
@@ -172,7 +172,7 @@ export const EventCalendarProvider = ({
             .add(
               element.event.actual_date || element.event.anticipated_date,
               element.event.number_of_days,
-              "days"
+              "days",
             )
             .toISOString(),
           type: EVENT_TYPE.MILESTONE,
@@ -259,7 +259,7 @@ export const EventCalendarProvider = ({
       } else if (event.type === EVENT_TYPE.TASK && eventRes.status === 200) {
         const taskEvent = eventRes.data as TaskEvent;
         taskEvent.assignee_ids = (eventRes.data as any)["assignees"].map(
-          (p: any) => p["assignee_id"]
+          (p: any) => p["assignee_id"],
         );
         taskEvent.responsibility_ids = (eventRes.data as any)[
           "responsibilities"
@@ -275,7 +275,7 @@ export const EventCalendarProvider = ({
     async (event: CalendarEvent) => {
       await loadEventDetails(event);
     },
-    [loadEventDetails]
+    [loadEventDetails],
   );
 
   const resetEventDetails = useCallback(() => {

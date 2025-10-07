@@ -23,7 +23,7 @@ export const ProjectsContextProvider: React.FC<
 
   const queryArg = useMemo(
     () => ({ staffId: isUserInsights ? staffId : undefined }),
-    [isUserInsights, staffId]
+    [isUserInsights, staffId],
   );
 
   const { data: projectsData, isLoading: loadingProjects } =
@@ -36,7 +36,7 @@ export const ProjectsContextProvider: React.FC<
       projects: projectsData ?? [],
       loadingProjects,
     }),
-    [projectsData, loadingProjects]
+    [projectsData, loadingProjects],
   );
   return (
     <ProjectsContext.Provider value={contextValue}>
@@ -49,7 +49,7 @@ export const useProjectsContext = () => {
   const context = useContext(ProjectsContext);
   if (!context) {
     throw new Error(
-      "useProjectsContext must be used within an ProjectsContextProvider"
+      "useProjectsContext must be used within an ProjectsContextProvider",
     );
   }
   return context;

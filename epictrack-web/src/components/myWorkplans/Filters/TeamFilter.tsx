@@ -41,7 +41,7 @@ export const TeamFilter = ({
 
   const value = useMemo(() => {
     return options.filter((option) =>
-      searchOptions.teams.includes(String(option.value))
+      searchOptions.teams.includes(String(option.value)),
     );
   }, [searchOptions.teams, options]);
 

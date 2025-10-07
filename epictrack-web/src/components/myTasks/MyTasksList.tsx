@@ -44,7 +44,7 @@ export default function MyTasksList() {
         id: "assigned",
         value: [`${user.firstName} ${user.lastName}`],
       },
-    ]
+    ],
   );
   const ctx = useContext(MasterContext);
   const { roles } = useAppSelector((state) => state.user.userDetail);
@@ -57,7 +57,7 @@ export default function MyTasksList() {
     const result: [] = [];
     try {
       const taskResult = await taskEventService.getMyTasks(
-        Number(user.staffId)
+        Number(user.staffId),
       );
 
       if (taskResult.status === 200) {
@@ -96,27 +96,27 @@ export default function MyTasksList() {
     "status",
     (value) =>
       statusOptions.find((statusOption) => statusOption.value === value)
-        ?.label ?? BLANK_OPTION
+        ?.label ?? BLANK_OPTION,
   );
 
   const startDateFilterOptions = getSelectFilterOptions(
     myTasks,
     "start_date",
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
-    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
   );
 
   const endDateFilterOptions = getSelectFilterOptions(
     myTasks,
     "end_date",
     (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
-    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+    (value) => dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
   );
 
   const workFilterOptions = getSelectFilterOptions(
     myTasks,
     "work",
-    (value) => value || BLANK_OPTION
+    (value) => value || BLANK_OPTION,
   );
 
   const assigneeOptions = Array.from(
@@ -127,9 +127,9 @@ export default function MyTasksList() {
         .map((assignee) =>
           assignee
             ? `${assignee.assignee.first_name} ${assignee.assignee.last_name}`
-            : BLANK_OPTION
-        )
-    )
+            : BLANK_OPTION,
+        ),
+    ),
   );
 
   const columns = useMemo<MRT_ColumnDef<MyTask>[]>(
@@ -183,7 +183,7 @@ export default function MyTasksList() {
           const value: string = row.getValue(id) || "";
 
           return filterValue.includes(
-            dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+            dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
           );
         },
         Cell: ({ cell, row }) => (
@@ -222,7 +222,7 @@ export default function MyTasksList() {
           return filterValue.includes(
             value === ""
               ? value
-              : dateUtils.formatDate(String(value), MONTH_DAY_YEAR)
+              : dateUtils.formatDate(String(value), MONTH_DAY_YEAR),
           );
         },
         Cell: ({ cell, row }) => (
@@ -230,7 +230,7 @@ export default function MyTasksList() {
             {cell.getValue<string>() &&
               dateUtils.formatDate(
                 String(cell.getValue<string>()),
-                MONTH_DAY_YEAR
+                MONTH_DAY_YEAR,
               )}
           </ETParagraph>
         ),
@@ -276,7 +276,7 @@ export default function MyTasksList() {
               <ETParagraph>
                 {
                   statusOptions.filter(
-                    (statusOption) => statusOption.value === value
+                    (statusOption) => statusOption.value === value,
                   )[0]?.label
                 }
               </ETParagraph>
@@ -313,7 +313,7 @@ export default function MyTasksList() {
 
           const renderedValue: string = row.renderValue(id) || BLANK_OPTION;
           return filterValue.every((filterName: string) =>
-            renderedValue.includes(filterName)
+            renderedValue.includes(filterName),
           );
         },
         filterSelectOptions: assigneeOptions,
@@ -372,7 +372,7 @@ export default function MyTasksList() {
       startDateFilterOptions,
       statusFilterOptions,
       workFilterOptions,
-    ]
+    ],
   );
 
   const handleCacheFilters = (filters?: ColumnFilter[]) => {

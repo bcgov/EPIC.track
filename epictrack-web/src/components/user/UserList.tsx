@@ -96,7 +96,7 @@ const UserList = () => {
               required={true}
               onChange={(newVal) => setSelectedGroup(newVal)}
               defaultValue={groups.find(
-                (p) => p.id === cell.row.original.group?.id
+                (p) => p.id === cell.row.original.group?.id,
               )}
               value={selectedGroup}
             />
@@ -113,7 +113,7 @@ const UserList = () => {
         ),
       },
     ],
-    [currentUserGroup, groups, isValidGroup, selectedGroup]
+    [currentUserGroup, groups, isValidGroup, selectedGroup],
   );
 
   const handleCancelRowEdits = () => {
