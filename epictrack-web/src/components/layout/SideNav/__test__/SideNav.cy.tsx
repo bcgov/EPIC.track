@@ -8,7 +8,7 @@ describe("<SideNav />", () => {
 
     cy.mount(
       <Router initialEntries={["/initial/path"]}>
-        // Create store and pass above props to the store
+        {/*Create store and pass above props to the store*/}
         <SideNav />
       </Router>,
     );
