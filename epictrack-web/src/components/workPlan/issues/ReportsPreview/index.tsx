@@ -15,7 +15,7 @@ const TAB = {
 export const ReportsPreview = () => {
   const { loading } = React.useContext(WorkplanContext);
   const [selectedTabIndex, setSelectedTabIndex] = React.useState(
-    TAB.THIRTY_SIXTY_NINETY
+    TAB.THIRTY_SIXTY_NINETY,
   );
 
   if (loading) {

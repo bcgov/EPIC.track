@@ -58,7 +58,7 @@ export default function AnticipatedEAOSchedule() {
     const diff = dateUtils.diff(
       reportDate || "",
       new Date(2019, 11, 19).toISOString(),
-      "days"
+      "days",
     );
     setShowReportDateBanner(diff < 0 && !Number.isNaN(diff));
   }, [reportDate]);
@@ -78,7 +78,7 @@ export default function AnticipatedEAOSchedule() {
         {
           report_date: reportDate,
           first_phase: includeFirstPhase,
-        }
+        },
       );
       setResultStatus(RESULT_STATUS.LOADED);
       if (reportData.status === 200) {
@@ -108,18 +108,18 @@ export default function AnticipatedEAOSchedule() {
           report_date: reportDate,
           filters: filtersToSend,
           first_phase: includeFirstPhase,
-        }
+        },
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute(
         "download",
         `${FILENAME_PREFIX}-${dateUtils.formatDate(
-          reportDate ? reportDate : new Date().toISOString()
-        )}.pdf`
+          reportDate ? reportDate : new Date().toISOString(),
+        )}.pdf`,
       );
       document.body.appendChild(link);
       link.click();
@@ -254,7 +254,7 @@ export default function AnticipatedEAOSchedule() {
                                         {item["date_updated"]
                                           ? dateUtils.formatDate(
                                               item["date_updated"],
-                                              DISPLAY_DATE_FORMAT
+                                              DISPLAY_DATE_FORMAT,
                                             )
                                           : "Needs Status"}
                                       </b>
@@ -333,7 +333,7 @@ export default function AnticipatedEAOSchedule() {
                                       <TableCell>
                                         {dateUtils.formatDate(
                                           item["referral_date"],
-                                          DISPLAY_DATE_FORMAT
+                                          DISPLAY_DATE_FORMAT,
                                         )}
                                       </TableCell>
                                     </TableRow>
@@ -343,7 +343,7 @@ export default function AnticipatedEAOSchedule() {
                                         {item["date_updated"]
                                           ? dateUtils.formatDate(
                                               item["date_updated"],
-                                              DISPLAY_DATE_FORMAT
+                                              DISPLAY_DATE_FORMAT,
                                             )
                                           : ""}
                                       </TableCell>
@@ -354,7 +354,7 @@ export default function AnticipatedEAOSchedule() {
                                         <TableCell>
                                           {dateUtils.formatDate(
                                             item["next_pecp_date"],
-                                            DISPLAY_DATE_FORMAT
+                                            DISPLAY_DATE_FORMAT,
                                           )}
                                         </TableCell>
                                       </TableRow>
@@ -399,7 +399,7 @@ export default function AnticipatedEAOSchedule() {
                                             );
                                           }
                                           return null;
-                                        }
+                                        },
                                       )}
                                   </TableBody>
                                 </Table>

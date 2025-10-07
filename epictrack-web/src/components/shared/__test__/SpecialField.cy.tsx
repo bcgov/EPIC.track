@@ -48,7 +48,7 @@ describe("SpecialFieldGrid Component Tests", () => {
           <ETCaption3>Testing Description for test field</ETCaption3>
         }
         onSave={cy.stub()}
-      />
+      />,
     );
   });
 
@@ -62,7 +62,7 @@ describe("SpecialFieldGrid Component Tests", () => {
 
   it("should display the correct description", () => {
     cy.get('[data-cy="description"]').contains(
-      "Testing Description for test field"
+      "Testing Description for test field",
     );
   });
 });

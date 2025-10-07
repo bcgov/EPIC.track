@@ -15,7 +15,7 @@ describe("MasterContext", () => {
         <MasterContext.Provider value={createMockMasterContext([], [])}>
           <TestComponent />
         </MasterContext.Provider>
-      </Router>
+      </Router>,
     );
   });
   it("should display the project list", () => {

@@ -8,7 +8,7 @@ class WorkPlanService {
     page: number,
     size: number,
     sort_order: string,
-    searchOptions: WorkPlanSearchOptions
+    searchOptions: WorkPlanSearchOptions,
   ) {
     return await http.GetRequest<{ items: WorkPlan[]; total: number }>(
       Endpoints.Workplan.GET_ALL,
@@ -17,7 +17,7 @@ class WorkPlanService {
         size: size,
         sort_order: sort_order,
         ...searchOptions,
-      }
+      },
     );
   }
 }

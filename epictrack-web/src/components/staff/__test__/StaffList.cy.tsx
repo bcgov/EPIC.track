@@ -56,7 +56,7 @@ describe("StaffList", () => {
         <Router>
           <StaffList />
         </Router>
-      </SnackbarProvider>
+      </SnackbarProvider>,
     );
   });
 

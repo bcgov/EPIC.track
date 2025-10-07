@@ -12,7 +12,7 @@ const Notes = () => {
   const [notes, setNotes] = React.useState("");
   const initialNotes = React.useMemo(
     () => work?.issue_notes,
-    [work?.issue_notes]
+    [work?.issue_notes],
   );
 
   React.useEffect(() => {
@@ -24,7 +24,7 @@ const Notes = () => {
       const result = await workService.saveNotes(
         Number(workId),
         value,
-        "issue_notes"
+        "issue_notes",
       );
       if (result.status === 200) {
         setWork(result.data);
@@ -34,7 +34,7 @@ const Notes = () => {
         });
       }
     },
-    [setWork, workId]
+    [setWork, workId],
   );
 
   const debounceSave = React.useMemo(() => {

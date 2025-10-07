@@ -7,7 +7,7 @@ class StatusService {
   async create(workId: number, data: any) {
     const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
     return await http.PostRequest(query, JSON.stringify(data));
   }
@@ -15,7 +15,7 @@ class StatusService {
   async update(workId: number, statusId: number, data: any) {
     const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}/${statusId.toString()}`;
     return await http.PutRequest(query, JSON.stringify(data));
   }
@@ -23,7 +23,7 @@ class StatusService {
   async getAllbyWorkId(workId: number) {
     const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}`;
     return await http.GetRequest<Status[]>(query);
   }
@@ -32,7 +32,7 @@ class StatusService {
     page: number,
     size: number,
     sort_order: string,
-    searchOptions: StatusSearchOptions
+    searchOptions: StatusSearchOptions,
   ) {
     return await http.GetRequest<{
       items: StatusDashboardItem[];
@@ -49,7 +49,7 @@ class StatusService {
   async approve(workId: number, statusId: number) {
     const query = `${Endpoints.WorkStatuses.WORK_STATUSES.replace(
       ":work_id",
-      workId.toString()
+      workId.toString(),
     )}/${statusId}/approve`;
     return await http.PatchRequest(query);
   }

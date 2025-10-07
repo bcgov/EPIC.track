@@ -19,7 +19,7 @@ export const getEditorStateFromHtml = (htmlToConvert: string) => {
   const blocksFromHTML = convertFromHTML(htmlToConvert);
   const contentState = ContentState.createFromBlockArray(
     blocksFromHTML.contentBlocks,
-    blocksFromHTML.entityMap
+    blocksFromHTML.entityMap,
   );
   return EditorState.createWithContent(contentState);
 };

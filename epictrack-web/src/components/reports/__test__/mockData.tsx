@@ -79,22 +79,22 @@ function randomEventType() {
 }
 
 function createWorkIssue(workId: number): WorkIssue {
-  const startDate = faker.date.past(1);
-  const postedDate = faker.date.between(startDate, new Date());
+  const startDate = faker.date.past({ years: 1 });
+  const postedDate = faker.date.between({ from: startDate, to: new Date() });
   return {
     expected_resolution_date: faker.date.future().toISOString(),
-    id: faker.datatype.number(1000),
+    id: faker.number.int(1000),
     is_active: true,
     is_high_priority: faker.datatype.boolean(),
     is_resolved: faker.datatype.boolean(),
     latest_update: {
-      approved_by: faker.internet.email(),
+      approved_by: `${faker.string.alphanumeric(5)}@example.com`,
       description: faker.lorem.paragraph(),
-      id: faker.datatype.number(1000),
+      id: faker.number.int(1000),
       is_active: true,
       is_approved: true,
       posted_date: postedDate.toISOString(),
-      work_issue_id: faker.datatype.number(1000),
+      work_issue_id: faker.number.int(1000),
     },
     start_date: startDate.toISOString(),
     title: faker.lorem.words(3),
@@ -105,10 +105,13 @@ function createWorkIssue(workId: number): WorkIssue {
 function createItem(workId: number, slNo: number): WorkItem {
   const eventType = randomEventType();
   const eventDate = faker.date.future();
-  const statusDateUpdated = faker.date.between(new Date(), eventDate);
-  const numIssues = faker.datatype.number({ min: 0, max: 2 });
+  const statusDateUpdated = faker.date.between({
+    from: new Date(),
+    to: eventDate,
+  });
+  const numIssues = faker.number.int({ min: 0, max: 2 });
   const workIssues = Array.from({ length: numIssues }, () =>
-    createWorkIssue(workId)
+    createWorkIssue(workId),
   );
 
   return {
@@ -122,19 +125,19 @@ function createItem(workId: number, slNo: number): WorkItem {
     decision_information: faker.datatype.boolean()
       ? faker.date.future().toISOString().slice(0, 10) + " Decision Info"
       : null,
-    event_configuration_id: faker.datatype.number(50000),
+    event_configuration_id: faker.number.int(50000),
     event_date: eventDate.toISOString(),
     event_description: faker.datatype.boolean() ? faker.lorem.sentence() : null,
-    event_id: faker.datatype.number(10000),
+    event_id: faker.number.int(10000),
     event_title: faker.lorem.words(3),
     event_type: eventType.event_type,
     event_type_id: eventType.event_type_id,
-    milestone_id: faker.datatype.number({ min: 1, max: 10 }),
+    milestone_id: faker.number.int({ min: 1, max: 10 }),
     oldest_update: faker.datatype.boolean()
       ? faker.date.past().toISOString()
       : null,
     pecp_explanation: null,
-    project_id: faker.datatype.number(500),
+    project_id: faker.number.int(500),
     project_name: faker.company.name(),
     sl_no: slNo,
     status_date_updated: statusDateUpdated.toISOString(),
@@ -153,7 +156,7 @@ function createGroup(groupId: number, numItems: number): Group {
   return {
     group: groupId,
     items: Array.from({ length: numItems }, (_, idx) =>
-      createItem(groupId, idx + 1)
+      createItem(groupId, idx + 1),
     ),
   };
 }
@@ -163,20 +166,20 @@ export function generateMock306090ReportData(): ReportData {
     data: {
       "30": [
         createGroup(
-          faker.datatype.number({ min: 100, max: 200 }),
-          faker.datatype.number({ min: 1, max: 3 })
+          faker.number.int({ min: 100, max: 200 }),
+          faker.number.int({ min: 1, max: 3 }),
         ),
       ],
       "60": [
         createGroup(
-          faker.datatype.number({ min: 201, max: 300 }),
-          faker.datatype.number({ min: 1, max: 3 })
+          faker.number.int({ min: 201, max: 300 }),
+          faker.number.int({ min: 1, max: 3 }),
         ),
       ],
       "90": [
         createGroup(
-          faker.datatype.number({ min: 301, max: 400 }),
-          faker.datatype.number({ min: 1, max: 3 })
+          faker.number.int({ min: 301, max: 400 }),
+          faker.number.int({ min: 1, max: 3 }),
         ),
       ],
     },
@@ -185,7 +188,7 @@ export function generateMock306090ReportData(): ReportData {
 
 function createASGroup(groupName: string, numItems: number): Group {
   const items = Array.from({ length: numItems }, (_, idx) =>
-    createItem(idx + 1, idx + 1)
+    createItem(idx + 1, idx + 1),
   );
   return { group: groupName, items };
 }
@@ -199,7 +202,7 @@ export const AS_GROUP_HEADERS = [
 export function generateMockASReportData(): ReportDataAS {
   return {
     data: AS_GROUP_HEADERS.map((groupName) =>
-      createASGroup(groupName, faker.datatype.number({ min: 1, max: 4 }))
+      createASGroup(groupName, faker.number.int({ min: 1, max: 4 })),
     ),
   };
 }

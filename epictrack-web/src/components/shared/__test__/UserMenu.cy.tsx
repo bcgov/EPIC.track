@@ -18,14 +18,14 @@ describe("UserMenu", () => {
     cy.mount(
       <>
         <UserMenuTest onClose={onCloseHandler} {...props} />
-      </>
+      </>,
     );
   });
 
   it("renders the user name", () => {
     cy.get('[data-cy="user-name"]').should(
       "contain",
-      `${props.firstName} ${props.lastName}`
+      `${props.firstName} ${props.lastName}`,
     );
   });
 

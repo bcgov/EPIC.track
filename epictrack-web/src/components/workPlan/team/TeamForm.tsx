@@ -38,7 +38,7 @@ const schema = yup.object().shape({
             parent["work_id"],
             Number(value),
             parent["role_id"],
-            parent["id"]
+            parent["id"],
           );
           return !(validateWorkStaff.data as any)["exists"] as boolean;
         }
@@ -128,7 +128,7 @@ const TeamForm = ({ onSave, workStaffId }: TeamFormProps) => {
       if (result.status === 200) {
         const roles = result.data as ListType[];
         const filteredRoles = roles.filter(
-          (role) => !unEditableTeamMembers.includes(role.id)
+          (role) => !unEditableTeamMembers.includes(role.id),
         );
         setRoles(sort(filteredRoles, "name"));
       }

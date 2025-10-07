@@ -25,7 +25,7 @@ export const AssigneeToggle = <T extends { staff_id: number | null }>({
   const user = useAppSelector((state) => state.user.userDetail);
   const [haveInitializedtoggle, setHaveInitializedToggle] = useState(false);
   const [isUsersItems, setIsUsersItems] = useState(
-    searchOptions.staff_id != null
+    searchOptions.staff_id != null,
   );
 
   const handleToggleChange = useCallback(
@@ -36,7 +36,7 @@ export const AssigneeToggle = <T extends { staff_id: number | null }>({
         staff_id: checked ? user.staffId : null,
       }));
     },
-    [setSearchOptions, user.staffId]
+    [setSearchOptions, user.staffId],
   );
 
   useEffect(() => {

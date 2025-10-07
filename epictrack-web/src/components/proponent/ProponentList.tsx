@@ -27,7 +27,7 @@ const proponentsListColumnFiltersCacheKey = "proponents-listing-column-filters";
 const ProponentList = () => {
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     proponentsListColumnFiltersCacheKey,
-    []
+    [],
   );
   const [loadingProponents, setLoadingProponents] = useState(true);
   const [proponentId, setProponentId] = useState<number>();
@@ -36,7 +36,7 @@ const ProponentList = () => {
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const [relationshipHolder, setRelationshipHolder] = useState<Staff>();
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
-    null
+    null,
   );
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -59,7 +59,7 @@ const ProponentList = () => {
 
   const handleOpenUserMenu = (
     event: React.MouseEvent<HTMLElement>,
-    staff: Staff
+    staff: Staff,
   ) => {
     setRelationshipHolder(staff);
     setUserMenuAnchorEl(event.currentTarget);
@@ -76,7 +76,7 @@ const ProponentList = () => {
     proponents,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   const columns = useMemo<MRT_ColumnDef<Proponent>[]>(
@@ -164,7 +164,7 @@ const ProponentList = () => {
         ),
       },
     ],
-    [canEdit, handleCloseUserMenu, staffs, statusesOptions]
+    [canEdit, handleCloseUserMenu, staffs, statusesOptions],
   );
 
   const getStaffs = async () => {

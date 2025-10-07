@@ -43,7 +43,7 @@ const UserManagementList = () => {
         id: "is_active",
         value: [true],
       },
-    ]
+    ],
   );
   const [elevatedRoles, setElevatedRoles] = useState<ElevatedRole[]>([]);
   const [loading, setLoading] = useState(true);
@@ -117,9 +117,9 @@ const UserManagementList = () => {
         staffs,
         "position",
         (value) => value?.name,
-        (value) => value?.name
+        (value) => value?.name,
       ),
-    [staffs]
+    [staffs],
   );
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const UserManagementList = () => {
           .filter((ser) => ser.staff_id === staff.id)
           .map((ser) => {
             const el = elevatedRoles.find(
-              (er) => er.id === ser.elevated_role_id
+              (er) => er.id === ser.elevated_role_id,
             );
             return {
               id: ser.elevated_role_id,
@@ -149,7 +149,7 @@ const UserManagementList = () => {
             ...staff,
             elevated_roles: [],
           } as StaffWithElevatedRoles;
-        })
+        }),
       );
     }
   }, [elevatedRoles, staffElevatedRoles, staffs]);
@@ -158,7 +158,7 @@ const UserManagementList = () => {
     staffs,
     "is_active",
     (value) => (value ? "Active" : "Inactive"),
-    (value) => value
+    (value) => value,
   );
 
   const columns = useMemo<MRT_ColumnDef<StaffWithElevatedRoles>[]>(
@@ -235,7 +235,7 @@ const UserManagementList = () => {
         editVariant: "select",
         filterVariant: "multi-select",
         filterSelectOptions: elevatedRoleOptions.map((option) =>
-          String(option.label)
+          String(option.label),
         ),
         size: 200,
         Edit: ({ column, row, table }) => {
@@ -282,12 +282,12 @@ const UserManagementList = () => {
           const thisStaffsElevatedRoles: string[] =
             row.original.elevated_roles?.map((role) => role.name) || [];
           return filterValues.some((filterValue: string) =>
-            thisStaffsElevatedRoles.includes(filterValue)
+            thisStaffsElevatedRoles.includes(filterValue),
           );
         },
       },
     ],
-    [elevatedRoleOptions, positions, statusesOptions]
+    [elevatedRoleOptions, positions, statusesOptions],
   );
 
   const handleEditRowSave: MRT_TableOptions<StaffWithElevatedRoles>["onEditingRowSave"] =
@@ -309,7 +309,7 @@ const UserManagementList = () => {
             });
 
         const previousRoleIds = previousEntries.map(
-          (role) => role.elevated_role_id
+          (role) => role.elevated_role_id,
         );
 
         // Find roles to update and/or add
@@ -319,20 +319,20 @@ const UserManagementList = () => {
         }));
 
         const newRoles = [...elevated_roles_selected].filter(
-          (role) => !previousRoleIds.includes(role)
+          (role) => !previousRoleIds.includes(role),
         );
 
         // Updates
         await Promise.all([
           ...rolesToUpdate.map((role) =>
-            staffElevatedRoleService.update(role, role.id)
+            staffElevatedRoleService.update(role, role.id),
           ),
           ...newRoles.map((role) =>
             staffElevatedRoleService.create({
               elevated_role_id: Number(role),
               is_active: true,
               staff_id,
-            })
+            }),
           ),
         ]);
 

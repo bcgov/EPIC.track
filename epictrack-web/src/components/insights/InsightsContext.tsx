@@ -41,7 +41,7 @@ export const InsightsContextProvider: React.FC<
       setIsUserInsights,
       staffId,
     }),
-    [activeTab, isUserInsights, staffId]
+    [activeTab, isUserInsights, staffId],
   );
 
   return (
@@ -55,7 +55,7 @@ export const useInsightsContext = () => {
   const context = useContext(InsightsContext);
   if (!context) {
     throw new Error(
-      "useInsightsContext must be used within an InsightsContextProvider"
+      "useInsightsContext must be used within an InsightsContextProvider",
     );
   }
   return context;

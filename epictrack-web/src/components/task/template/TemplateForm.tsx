@@ -50,7 +50,7 @@ export default function TemplateForm({ ...props }) {
   const getPhaseByWorkTypeEAact = useCallback(async () => {
     const phaseResult = await phaseService.getPhaseByWorkTypeEAact(
       formValues.ea_act_id,
-      formValues.work_type_id
+      formValues.work_type_id,
     );
     if (phaseResult.status === 200) {
       setPhases(phaseResult.data as ListType[]);

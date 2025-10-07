@@ -62,10 +62,10 @@ const TaskForm = ({
   const endDateRef = useRef();
   const initialNotes = useMemo(() => taskEvent?.notes, [taskEvent]);
   const assigneeIds = taskEvent?.assignees?.map((assignee) =>
-    assignee.assignee_id.toString()
+    assignee.assignee_id.toString(),
   );
   const responsibilityIds = taskEvent?.responsibilities?.map((responsibility) =>
-    responsibility.responsibility_id.toString()
+    responsibility.responsibility_id.toString(),
   );
 
   const defaultValues: TaskEventForm = {
@@ -107,7 +107,7 @@ const TaskForm = ({
     const getWorkTeamMembers = async () => {
       const assigneeResult = await workService.getWorkTeamMembers(
         Number(taskEvent.work.id),
-        true
+        true,
       );
       if (assigneeResult.status === 200) {
         const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
@@ -124,7 +124,7 @@ const TaskForm = ({
 
     const updateResult = await taskEventService.update(
       data,
-      Number(taskEvent?.id)
+      Number(taskEvent?.id),
     );
     showNotification("Task details updated", {
       type: "success",
@@ -168,7 +168,7 @@ const TaskForm = ({
       const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
       setEndDate(endDate);
     },
-    [startDate]
+    [startDate],
   );
 
   const handleEndDateChange = (newEndDate: Dayjs | null) => {
@@ -291,7 +291,7 @@ const TaskForm = ({
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
                 defaultValue={taskEvent?.assignees?.map((assignee) =>
-                  assignee.assignee_id.toString()
+                  assignee.assignee_id.toString(),
                 )}
                 options={assignees || []}
                 getOptionValue={(o: Staff) => o?.id.toString()}
@@ -307,7 +307,7 @@ const TaskForm = ({
                 hideSelectedOptions={false}
                 defaultValue={taskEvent?.responsibilities?.map(
                   (responsibility) =>
-                    responsibility.responsibility_id.toString()
+                    responsibility.responsibility_id.toString(),
                 )}
                 options={responsibilities || []}
                 getOptionValue={(o: ListType) => o?.id.toString()}

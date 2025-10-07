@@ -109,7 +109,7 @@ describe("MasterTrackTable", () => {
             )}
           />
         </MasterContext.Provider>
-      </Router>
+      </Router>,
     );
   });
 

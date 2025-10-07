@@ -33,12 +33,12 @@ const schema = yup.object().shape({
           const validateINationsResult =
             await indigenousNationService.checkIndigenousNationExists(
               value,
-              parent["id"]
+              parent["id"],
             );
           return !(validateINationsResult.data as any)["exists"] as boolean;
         }
         return true;
-      }
+      },
     ),
   relationship_holder_id: yup.number().nullable(),
   pip_org_type_id: yup.number().nullable(),

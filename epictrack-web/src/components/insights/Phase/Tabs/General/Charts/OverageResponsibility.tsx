@@ -45,8 +45,8 @@ const OverageResponsibilityChart = () => {
         workPhases.map((item: any) => [
           item.work.work_type_id,
           item.work.work_type.name,
-        ])
-      ).entries()
+        ]),
+      ).entries(),
     ) as [string, string][];
     return workTypes
       .map(([id, name]) => ({

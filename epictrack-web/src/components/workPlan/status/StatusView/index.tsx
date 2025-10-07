@@ -22,7 +22,7 @@ const StatusView = () => {
   } = useContext(StatusContext);
 
   const { roles: currentRoles } = useAppSelector(
-    (state) => state.user.userDetail
+    (state) => state.user.userDetail,
   );
   const canAddStatus =
     isActiveTeamMember ||
@@ -41,7 +41,7 @@ const StatusView = () => {
     : calculateStatusStaleness(
         latestApprovedStatus,
         statusStalenessSetting?.staleness_length,
-        statusStalenessSetting?.warning_length
+        statusStalenessSetting?.warning_length,
       );
 
   return (

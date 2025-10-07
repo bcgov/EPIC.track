@@ -85,7 +85,7 @@ const EventForm = ({
   work: propWork,
 }: EventFormProps) => {
   const [configurations, setConfigurations] = useState<EventConfiguration[]>(
-    []
+    [],
   );
   const [notes, setNotes] = useState("");
   const [titleCharacterCount, setTitleCharacterCount] = useState<number>(0);
@@ -104,7 +104,7 @@ const EventForm = ({
   const [dateCheckStatus, setDateCheckStatus] =
     useState<MilestoneEventDateCheck>();
   const [actualAdded, setActualAdded] = useState<boolean>(
-    event?.actual_date ? true : false
+    event?.actual_date ? true : false,
   );
   const [anticipatedLabel, setAnticipatedLabel] = useState("Anticipated Date");
   const [actualDateLabel, setActualDateLabel] = useState("Actual Date");
@@ -163,7 +163,7 @@ const EventForm = ({
           otherwise: () => yup.string().nullable(),
         }),
       }),
-    [selectedConfiguration, actualAdded]
+    [selectedConfiguration, actualAdded],
   );
 
   const [workPhaseAdditionalInfo, setWorkPhaseAdditionalInfo] =
@@ -174,7 +174,7 @@ const EventForm = ({
         if (work?.id && selectedWorkPhase?.id) {
           const result = await workService.getWorkPhaseAdditionalInfo(
             work.id,
-            selectedWorkPhase.id
+            selectedWorkPhase.id,
           );
           if (result.status === 200) {
             const [first] = result.data;
@@ -196,26 +196,26 @@ const EventForm = ({
           selectedWorkPhase?.legislated &&
           workPhaseAdditionalInfo &&
           workPhaseAdditionalInfo?.milestone_progress === 0 &&
-          selectedConfiguration?.event_position === EventPosition.END
+          selectedConfiguration?.event_position === EventPosition.END,
       ),
     [
       isFormFieldsLocked,
       selectedConfiguration,
       workPhaseAdditionalInfo,
       selectedWorkPhase,
-    ]
+    ],
   );
 
   const pushRequired = useMemo(
     () =>
       dateCheckStatus?.subsequent_event_push_required &&
       event?.event_configuration.event_category_id !== EventCategory.EXTENSION,
-    [dateCheckStatus, event]
+    [dateCheckStatus, event],
   );
 
   const getDecisionMakers = useCallback(async () => {
     const result = await staffService.getActiveStaffByPosition(
-      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(",")
+      [POSITION_ENUM.ASSOCIATE_DEPUTY_MINISTER, POSITION_ENUM.ADM].join(","),
     );
     if (result.status === 200) {
       const decisionMakers = result.data as Staff[];
@@ -234,8 +234,8 @@ const EventForm = ({
             decisionMakers.map((decisionMaker) => [
               decisionMaker.id,
               decisionMaker,
-            ])
-          ).values()
+            ]),
+          ).values(),
         ),
       ];
       setDecisionMakers(uniqueDecisionMakers);
@@ -264,24 +264,24 @@ const EventForm = ({
       dateCheckStatus,
       selectedConfiguration?.event_category_id,
       selectedWorkPhase,
-    ]
+    ],
   );
 
   const isMilestoneTypeDisabled = useMemo(
     () => !!event || isFormFieldsLocked || selectedWorkPhase?.is_suspended,
-    [event, isFormFieldsLocked, selectedWorkPhase?.is_suspended]
+    [event, isFormFieldsLocked, selectedWorkPhase?.is_suspended],
   );
 
   const isTitleDisabled = useMemo(
     () => isFormFieldsLocked || selectedWorkPhase?.is_suspended,
-    [isFormFieldsLocked, selectedWorkPhase?.is_suspended]
+    [isFormFieldsLocked, selectedWorkPhase?.is_suspended],
   );
 
   const isStartPhase = useMemo(
     () =>
       workPhases.findIndex((p) => p.work_phase.id === selectedWorkPhase?.id) ===
       0,
-    [workPhases, selectedWorkPhase]
+    [workPhases, selectedWorkPhase],
   );
 
   const isStartEvent = useMemo(
@@ -289,7 +289,7 @@ const EventForm = ({
       event &&
       selectedConfiguration &&
       selectedConfiguration?.event_position === EventPosition.START,
-    [event, selectedConfiguration]
+    [event, selectedConfiguration],
   );
 
   const anticipatedDefaultValue = useMemo(() => {
@@ -304,14 +304,14 @@ const EventForm = ({
       isStartEvent && isStartPhase
         ? dayjs(MIN_WORK_START_DATE)
         : dayjs(work?.start_date),
-    [work?.start_date, isStartEvent, isStartPhase]
+    [work?.start_date, isStartEvent, isStartPhase],
   );
   const actualDateMin = useMemo(
     () =>
       isStartEvent && isStartPhase
         ? dayjs(MIN_WORK_START_DATE)
         : dayjs(selectedWorkPhase?.start_date),
-    [selectedWorkPhase, isStartEvent, isStartPhase]
+    [selectedWorkPhase, isStartEvent, isStartPhase],
   );
   const methods = useForm({
     resolver: yupResolver(schema),
@@ -365,7 +365,7 @@ const EventForm = ({
   useEffect(() => {
     if (configurations && event) {
       const config = configurations.filter(
-        (p) => p.id === event.event_configuration_id
+        (p) => p.id === event.event_configuration_id,
       )[0];
       setSelectedConfiguration(config);
     }
@@ -382,7 +382,7 @@ const EventForm = ({
       !event
     ) {
       const config = configurations.filter(
-        (p) => p.event_type_id === EventType.TIME_LIMIT_RESUMPTION
+        (p) => p.event_type_id === EventType.TIME_LIMIT_RESUMPTION,
       );
       if (!config || config.length === 0) {
         showNotification(MISSING_RESUMPTION_ERROR, {
@@ -402,7 +402,7 @@ const EventForm = ({
     try {
       const result = await configurationService.getAll(
         Number(selectedWorkPhase?.id),
-        [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED]
+        [EventTemplateVisibility.OPTIONAL, EventTemplateVisibility.SUGGESTED],
       );
       if (result.status === 200) {
         setConfigurations(result.data as any[]);
@@ -430,7 +430,7 @@ const EventForm = ({
     try {
       const result = await eventService.check_event_for_date_push(
         getValues(),
-        event?.id
+        event?.id,
       );
       if (result.status === 200) {
         setDateCheckStatus(result.data as MilestoneEventDateCheck);
@@ -470,7 +470,7 @@ const EventForm = ({
       const createdResult = await eventService.create(
         data,
         Number(selectedWorkPhase?.id),
-        pushEvents || pushEventConfirmed
+        pushEvents || pushEventConfirmed,
       );
       showNotification("Milestone details inserted", {
         type: "success",
@@ -484,7 +484,7 @@ const EventForm = ({
 
       return createdResult;
     },
-    [handleHighlightRows, pushEvents, selectedWorkPhase?.id]
+    [handleHighlightRows, pushEvents, selectedWorkPhase?.id],
   );
 
   const updateEvent = useCallback(
@@ -496,7 +496,7 @@ const EventForm = ({
       const updatedResult = await eventService.update(
         data,
         Number(event.id),
-        pushEvents || pushEventConfirmed
+        pushEvents || pushEventConfirmed,
       );
       showNotification("Milestone details updated", {
         type: "success",
@@ -509,7 +509,7 @@ const EventForm = ({
       ]);
       return updatedResult;
     },
-    [event, handleHighlightRows, pushEvents]
+    [event, handleHighlightRows, pushEvents],
   );
 
   const saveEvent = useCallback(
@@ -520,12 +520,12 @@ const EventForm = ({
 
       return createEvent(data, pushEventConfirmed);
     },
-    [event, createEvent, updateEvent]
+    [event, createEvent, updateEvent],
   );
   const handleSaveEvent = async (
     data?: MilestoneEvent,
     pushEventConfirmed = false,
-    confirmSaveInLocked = false
+    confirmSaveInLocked = false,
   ) => {
     pushEventConfirmed =
       pushEventConfirmed ||
@@ -545,11 +545,11 @@ const EventForm = ({
         setShowEventLockDialog(true);
       } else {
         dataToBeSubmitted.anticipated_date = Moment(
-          dataToBeSubmitted.anticipated_date
+          dataToBeSubmitted.anticipated_date,
         ).format();
         if (!!dataToBeSubmitted.actual_date) {
           dataToBeSubmitted.actual_date = Moment(
-            dataToBeSubmitted.actual_date
+            dataToBeSubmitted.actual_date,
           ).format();
         }
         await saveEvent(dataToBeSubmitted, pushEventConfirmed);
@@ -567,7 +567,7 @@ const EventForm = ({
 
   const onChangeMilestoneType = (configuration_id: number) => {
     const configuration = configurations.filter(
-      (p) => p.id === Number(configuration_id)
+      (p) => p.id === Number(configuration_id),
     )[0];
     setSelectedConfiguration(configuration);
     (titleRef?.current as any)["value"] = configuration.name;
@@ -613,9 +613,9 @@ const EventForm = ({
               params.anticipatedDate ||
               String((anticipatedDateRef?.current as any)["value"]),
             number_of_days,
-            "days"
+            "days",
           )
-          .toISOString()
+          .toISOString(),
       );
     }
     return Promise.resolve();
@@ -626,7 +626,7 @@ const EventForm = ({
       await daysOnChangeHandler(params);
       eventDateCheck();
     },
-    [eventDateCheck]
+    [eventDateCheck],
   );
 
   return (
@@ -817,7 +817,7 @@ const EventForm = ({
                 selectedConfiguration?.event_category_id ===
                   EventCategory.PCP &&
                 ![EventType.OPEN_HOUSE, EventType.VIRTUAL_OPEN_HOUSE].includes(
-                  selectedConfiguration?.event_type_id
+                  selectedConfiguration?.event_type_id,
                 )
               }
             >

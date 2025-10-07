@@ -28,7 +28,7 @@ import MyCalendar from "components/myCalendar";
 const AuthenticatedRoutes = () => {
   const isAuthorized = useAppSelector((state) => state.user.isAuthorized);
   const isAuthenticated = useAppSelector(
-    (state) => state.user.authentication.authenticated
+    (state) => state.user.authentication.authenticated,
   );
 
   if (isAuthenticated && !isAuthorized) {

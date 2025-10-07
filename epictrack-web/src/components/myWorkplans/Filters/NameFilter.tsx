@@ -47,7 +47,7 @@ export const NameFilter = ({
         const with_works = true;
         const response = (await projectService.getAll(
           PROJECT_RETURN_TYPE.LIST_TYPE,
-          with_works
+          with_works,
         )) as { data: ListType[] };
 
         const projectNames = response.data.map((project) => project.name);

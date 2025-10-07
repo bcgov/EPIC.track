@@ -130,7 +130,7 @@ const TaskForm = ({
   const getWorkTeamMembers = useCallback(async () => {
     const assigneeResult = await workService.getWorkTeamMembers(
       Number(effectiveWorkId),
-      true
+      true,
     );
     if (assigneeResult.status === 200) {
       const staff: any = (assigneeResult.data as any[]).map((p) => p.staff);
@@ -167,7 +167,7 @@ const TaskForm = ({
 
     const updateResult = await taskEventService.update(
       data,
-      Number(taskEvent?.id)
+      Number(taskEvent?.id),
     );
     showNotification("Task details updated", {
       type: "success",
@@ -217,7 +217,7 @@ const TaskForm = ({
       const endDate = dayjs(dateUtils.add(startDate, days, "days").toString());
       setEndDate(endDate);
     },
-    [startDate]
+    [startDate],
   );
 
   const handleEndDateChange = (newEndDate: Dayjs | null) => {
@@ -357,7 +357,7 @@ const TaskForm = ({
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
                 defaultValue={taskEvent?.responsibility_ids?.map((p) =>
-                  p.toString()
+                  p.toString(),
                 )}
                 options={responsibilities || []}
                 getOptionValue={(o: ListType) => o?.id.toString()}

@@ -36,7 +36,7 @@ const WorksClosedYearlyBreakdown = () => {
       if (!years.find((item) => item?.value === year?.value)) years.push(year);
     });
     years.sort(
-      (a, b) => parseInt(b?.value as string) - parseInt(a?.value as string)
+      (a, b) => parseInt(b?.value as string) - parseInt(a?.value as string),
     );
     setYearOptions(years);
     setSetSelectedYear(years[0]?.value as string);

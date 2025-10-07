@@ -40,16 +40,16 @@ const Month = ({
 
   const engagements = _.filter(
     events,
-    (e: any) => e.project && e.project !== "null"
+    (e: any) => e.project && e.project !== "null",
   );
 
   const engagementsWithoutProject = prepareEventDates(
-    _.filter(events, (e: any) => e.project === "null" || e.project === null)
+    _.filter(events, (e: any) => e.project === "null" || e.project === null),
   );
 
   const eventsData = _.groupBy(
     prepareEventDates(_.slice(_.orderBy(engagements, "start_date"))),
-    "project"
+    "project",
   );
 
   const numTasks =

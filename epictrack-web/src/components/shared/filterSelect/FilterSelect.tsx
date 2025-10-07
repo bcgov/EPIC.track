@@ -19,7 +19,7 @@ const FilterSelect = (props: SelectProps) => {
   const [options, setOptions] = useState<OptionType[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<any>();
   const [selectValue, setSelectValue] = useState<any>(
-    defaultValue ?? standardDefault
+    defaultValue ?? standardDefault,
   );
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [menuIsOpen, setMenuIsOpen] = useState<boolean>(!!props.menuIsOpen);
@@ -32,7 +32,7 @@ const FilterSelect = (props: SelectProps) => {
       label: "Select All",
       value: "<SELECT_ALL>",
     }),
-    []
+    [],
   );
 
   const isSelectAllSelected = () =>
@@ -64,8 +64,8 @@ const FilterSelect = (props: SelectProps) => {
       if (isOptionSelected(option)) {
         setSelectedOptions(
           selectedOptions.filter(
-            (o: string) => o !== option.value && o !== selectAllOption.value
-          )
+            (o: string) => o !== option.value && o !== selectAllOption.value,
+          ),
         );
       } else {
         let value = [...selectedOptions, option.value];
@@ -79,7 +79,7 @@ const FilterSelect = (props: SelectProps) => {
     if (props.filterAppliedCallback) {
       const options = isMulti
         ? (selectedOptions as string[]).filter(
-            (p) => p !== selectAllOption.value
+            (p) => p !== selectAllOption.value,
           )
         : selectedOptions;
       props.filterAppliedCallback(options);
@@ -89,12 +89,12 @@ const FilterSelect = (props: SelectProps) => {
     }
     if (isMulti) {
       const value = options.filter((o: OptionType) =>
-        selectedOptions.includes(o.value)
+        selectedOptions.includes(o.value),
       );
       setSelectValue(value);
     } else {
       const value = options.find(
-        (o: OptionType) => o.value === selectedOptions
+        (o: OptionType) => o.value === selectedOptions,
       );
       setSelectValue(value);
     }

@@ -43,7 +43,7 @@ const schema = yup.object().shape({
           const validateWorkNation = await workService.checkWorkNationExists(
             parent["work_id"],
             Number(value),
-            parent["id"]
+            parent["id"],
           );
           return !(validateWorkNation.data as any)["exists"] as boolean;
         }
@@ -95,7 +95,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
               value: String(level.id),
               label: level.name,
             };
-          }
+          },
         );
         setConsultationLevels(consultationLevels);
       }
@@ -138,7 +138,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
     const getWorkFirstNation = async () => {
       try {
         const result = await workService.getWorkFirstNation(
-          Number(workNationId)
+          Number(workNationId),
         );
         if (result.status === 200) {
           const firstNation = result.data as WorkFirstNation;
@@ -161,7 +161,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
       if (workNationId) {
         const createResult = await workService.updateFirstNation(
           data,
-          Number(workNationId)
+          Number(workNationId),
         );
         if (createResult.status === 200) {
           showNotification("Your changes were successfully saved", {
@@ -174,7 +174,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
       } else {
         const createResult = await workService.createFirstNation(
           data,
-          Number(ctx.work?.id)
+          Number(ctx.work?.id),
         );
         if (createResult.status === 201) {
           showNotification("First nation details inserted", {
@@ -195,7 +195,7 @@ const FirstNationForm = ({ onSave, workNationId }: FirstNationFormProps) => {
 
   const onFirstNationChangeHandler = (firstNationId: number) => {
     const selectedFirstNation = firstNations.filter(
-      (p) => p.id === Number(firstNationId)
+      (p) => p.id === Number(firstNationId),
     )[0];
     (relationShipHolderRef?.current as any)["value"] = selectedFirstNation
       ? selectedFirstNation.relationship_holder?.full_name || ""

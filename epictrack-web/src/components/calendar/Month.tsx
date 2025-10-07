@@ -59,7 +59,7 @@ const Month: FC<MonthProps> = ({
 
   useEffect(() => {
     const uniqueWorks = Array.from(
-      new Set(events?.map((event) => event.work_id))
+      new Set(events?.map((event) => event.work_id)),
     ).map((workId) => {
       const event = events?.find((event) => event.work_id === workId);
       return {

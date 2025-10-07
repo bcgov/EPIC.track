@@ -53,7 +53,7 @@ const OverageResponsibilityForm = ({
   const { selectedWorkPhase } = useContext(WorkplanContext);
 
   const responsibilityOptions: OptionType[] = Object.values(
-    OverageResponsibilityEnum
+    OverageResponsibilityEnum,
   ).map((val) => ({ value: val, label: val }));
 
   const methods = useForm({
@@ -127,11 +127,11 @@ const OverageResponsibilityForm = ({
                     isMulti
                     options={responsibilityOptions}
                     value={responsibilityOptions.filter((option) =>
-                      field.value?.includes(option.value)
+                      field.value?.includes(option.value),
                     )}
                     onChange={(selectedOptions) => {
                       const values = (selectedOptions as OptionType[]).map(
-                        (opt) => opt.value
+                        (opt) => opt.value,
                       );
                       field.onChange(values);
                     }}

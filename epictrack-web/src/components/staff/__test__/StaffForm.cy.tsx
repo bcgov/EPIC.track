@@ -49,7 +49,7 @@ describe("StaffForm", () => {
   beforeEach(() => {
     setupIntercepts(endpoints);
     cy.mount(
-      <StaffForm fetchStaff={cy.stub()} staff={null} saveStaff={cy.stub()} />
+      <StaffForm fetchStaff={cy.stub()} staff={null} saveStaff={cy.stub()} />,
     );
   });
 

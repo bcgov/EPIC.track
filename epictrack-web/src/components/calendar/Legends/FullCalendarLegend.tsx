@@ -11,7 +11,7 @@ export interface CalendarType {
 
 const FullCalendarLegend: React.FC<CalendarType> = ({ calendar }) => {
   const filteredItems = LEGEND_ITEMS.filter((item) =>
-    item.calendars.includes(calendar)
+    item.calendars.includes(calendar),
   );
 
   return (

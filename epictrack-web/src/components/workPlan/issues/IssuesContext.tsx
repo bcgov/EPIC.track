@@ -97,7 +97,7 @@ export const initialIssueContextValue = {
 };
 
 export const IssuesContext = createContext<IssuesContextProps>(
-  initialIssueContextValue
+  initialIssueContextValue,
 );
 
 export const LASTEST_ISSUE_UPDATE_INDEX = 0;
@@ -122,11 +122,11 @@ export const IssuesProvider = ({
 
   const [issueToEdit, setIssueToEdit] = useState<WorkIssue | null>(null);
   const [updateToEdit, setUpdateToEdit] = useState<WorkIssueUpdate | null>(
-    null
+    null,
   );
 
   const [updateToClone, setUpdateToClone] = useState<WorkIssueUpdate | null>(
-    null
+    null,
   );
 
   const [issueToApproveId, setIssueToApproveId] = useState<number | null>(null);
@@ -214,7 +214,7 @@ export const IssuesProvider = ({
         workId,
         String(updateToEdit.work_issue_id),
         String(updateToEdit.id),
-        request
+        request,
       );
       refetchIssues?.();
       handleLoadIssues();
@@ -234,7 +234,7 @@ export const IssuesProvider = ({
       await issueService.approve(
         workId,
         String(issueId),
-        String(issueUpdateId)
+        String(issueUpdateId),
       );
       refetchIssues?.();
       handleLoadIssues();

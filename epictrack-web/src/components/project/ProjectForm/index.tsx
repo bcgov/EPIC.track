@@ -40,7 +40,7 @@ const schema = yup.object().shape({
         if (value) {
           const validateProjectResult = await projectService.checkProjectExists(
             value,
-            parent["id"]
+            parent["id"],
           );
           return !(validateProjectResult.data as any)["exists"] as boolean;
         }
@@ -132,7 +132,7 @@ export default function ProjectForm({
 
   const getSubTypesByType = useCallback(async () => {
     const subTypeResult = await subTypeService.getSubTypeByType(
-      formValues.type_id
+      formValues.type_id,
     );
     if (subTypeResult.status === 200) {
       setSubTypes(subTypeResult.data as SubType[]);
@@ -164,7 +164,7 @@ export default function ProjectForm({
 
     try {
       const response = await projectService.createProjectAbbreviation(
-        formValues.name
+        formValues.name,
       );
       const generatedAbbreviation = response.data as string;
       resetField("abbreviation");

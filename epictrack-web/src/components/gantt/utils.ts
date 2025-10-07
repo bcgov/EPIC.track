@@ -14,7 +14,7 @@ export const getDefaultScrollDays = (start: Date, numMonths: number) => {
 
 export const scrollToToday = (
   start: Date,
-  chartReff?: React.RefObject<HTMLDivElement> | null
+  chartReff?: React.RefObject<HTMLDivElement> | null,
 ) => {
   if (chartReff?.current) {
     chartReff.current.scrollLeft =

@@ -11,7 +11,7 @@ import { Palette } from "styles/theme";
 
 const SettingsContainer = () => {
   const [selectedTabIndex, setSelectedTabIndex] = useState(
-    SETTINGS_TAB.GENERAL.index
+    SETTINGS_TAB.GENERAL.index,
   );
 
   const handleTabSelected = (_event: SyntheticEvent, index: number) => {

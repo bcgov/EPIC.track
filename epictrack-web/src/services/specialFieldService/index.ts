@@ -7,7 +7,7 @@ class SpecialFieldService {
   getEntries = async (
     entity: SpecialFieldEntityEnum,
     entity_id: number,
-    field_name: string
+    field_name: string,
   ) => {
     return await http.GetRequest(Endpoints.SpecialFields.SPECIAL_FIELDS, {
       entity,
@@ -19,7 +19,7 @@ class SpecialFieldService {
   getEntriesBasedOnFieldValue = async (
     entity: SpecialFieldEntityEnum,
     field_name: string,
-    field_value: string
+    field_value: string,
   ) => {
     return await http.GetRequest(Endpoints.SpecialFields.SPECIAL_FIELDS, {
       entity,
@@ -31,7 +31,7 @@ class SpecialFieldService {
   createSpecialFieldEntry = async (payload: SpecialField) => {
     return await http.PostRequest(
       Endpoints.SpecialFields.SPECIAL_FIELDS,
-      payload
+      payload,
     );
   };
 
@@ -39,9 +39,9 @@ class SpecialFieldService {
     return await http.PutRequest(
       Endpoints.SpecialFields.UPDATE.replace(
         ":specialFieldId",
-        objectId.toString()
+        objectId.toString(),
       ),
-      payload
+      payload,
     );
   };
 
@@ -49,8 +49,8 @@ class SpecialFieldService {
     return await http.DeleteRequest(
       Endpoints.SpecialFields.DELETE.replace(
         ":specialFieldId",
-        objectId.toString()
-      )
+        objectId.toString(),
+      ),
     );
   };
 }

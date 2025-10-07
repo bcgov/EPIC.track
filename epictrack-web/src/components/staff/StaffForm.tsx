@@ -30,7 +30,7 @@ const schema = yup.object().shape({
           if (value) {
             const result = await staffService.validateEmail(
               value,
-              parent["id"]
+              parent["id"],
             );
             if (result.status === 200) {
               return !(result.data as never)["exists"];

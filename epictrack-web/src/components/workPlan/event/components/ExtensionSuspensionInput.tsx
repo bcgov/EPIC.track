@@ -29,7 +29,7 @@ const ExtensionSuspensionInput = (props: ExtensionSuspensionInputProps) => {
     const getActSections = async () => {
       try {
         const result = await actSectionService.getActSectionsByEaAct(
-          ctx.work?.ea_act_id
+          ctx.work?.ea_act_id,
         );
         if (result.status === 200) {
           setActSections(result.data as ListType[]);

@@ -65,7 +65,7 @@ export const AboutProvider = ({
     try {
       await workService.deleteWorkResource(selectedWorkResource.id);
       setWorkResources((prev) =>
-        prev.filter((res) => res.id !== selectedWorkResource.id)
+        prev.filter((res) => res.id !== selectedWorkResource.id),
       );
       showNotification("Work Resource deleted successfully", {
         duration: 3000,

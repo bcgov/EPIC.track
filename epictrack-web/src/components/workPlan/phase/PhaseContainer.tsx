@@ -36,7 +36,7 @@ const PhaseContainer = () => {
     number | null
   >(
     WORKPLAN_EXPANDED_PHASE_CACHE_KEY,
-    ctx.selectedWorkPhase?.work_phase.id ?? null
+    ctx.selectedWorkPhase?.work_phase.id ?? null,
   );
   const [showCompletedPhases, setShowCompletedPhases] = useState<boolean>(true);
   const [showCompletedActual, setShowCompletedActual] = useState<boolean>(true);
@@ -45,11 +45,11 @@ const PhaseContainer = () => {
 
   const currentAndFuturePhases: WorkPhaseAdditionalInfo[] = useMemo(
     () => ctx.workPhases.filter((p) => !p.work_phase.is_completed),
-    [ctx.workPhases]
+    [ctx.workPhases],
   );
   const completedPhases: WorkPhaseAdditionalInfo[] = useMemo(
     () => ctx.workPhases.filter((p) => p.work_phase.is_completed),
-    [ctx.workPhases]
+    [ctx.workPhases],
   );
 
   const overduePhases: WorkPhaseAdditionalInfo[] = useMemo(
@@ -58,15 +58,15 @@ const PhaseContainer = () => {
         (p) =>
           p.work_phase.is_completed &&
           p.work_phase.legislated &&
-          p.total_number_of_days - p.days_taken < 0
+          p.total_number_of_days - p.days_taken < 0,
       ),
-    [ctx.workPhases]
+    [ctx.workPhases],
   );
 
   const daysOverdue = useMemo(() => {
     const overdue = overduePhases.reduce(
       (sum, p) => sum + (p.total_number_of_days - p.days_taken),
-      0
+      0,
     );
     const finalPhase = ctx.workPhases.find((phase) => phase.is_last_phase);
     const finalRemaining = finalPhase
@@ -88,7 +88,7 @@ const PhaseContainer = () => {
     ) {
       const phase = ctx.workPhases.find(
         (workPhase) =>
-          workPhase.work_phase.id === ctx.work?.current_work_phase_id
+          workPhase.work_phase.id === ctx.work?.current_work_phase_id,
       );
       ctx.setSelectedWorkPhase(phase);
       setCachedExpandedPhase(phase?.work_phase.id ?? null);
@@ -109,7 +109,7 @@ const PhaseContainer = () => {
 
   const formatDateStyleOptionLabel = (
     option: any,
-    { context }: { context: "menu" | "value" }
+    { context }: { context: "menu" | "value" },
   ) => {
     return (
       <ETCaption1
@@ -170,7 +170,7 @@ const PhaseContainer = () => {
                 value={
                   showCompletedAnticipated
                     ? dateStyleOptions.find(
-                        (option) => option.value === "ACTUAL_AND_ANTICIPATED"
+                        (option) => option.value === "ACTUAL_AND_ANTICIPATED",
                       )
                     : dateStyleOptions[0]
                 }

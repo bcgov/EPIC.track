@@ -116,7 +116,7 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
 
   const groupedRoutes = useMemo(
     () => groupBy(allowedRoutes, (p) => p.group),
-    [allowedRoutes]
+    [allowedRoutes],
   );
 
   return (
@@ -163,7 +163,7 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
                       >
                         {renderIcon(
                           route.icon,
-                          location.pathname === route.path
+                          location.pathname === route.path,
                         )}
                       </ListItemIconStyled>
                     )}
@@ -258,7 +258,7 @@ export const DrawerBox = ({ open = true }: { open?: boolean }) => {
 const SideNav = () => {
   const { isDrawerExpanded: open } = useAppSelector((state) => state.uiState);
   const isMediumScreen = useMediaQuery((theme: Theme) =>
-    theme.breakpoints.up("md")
+    theme.breakpoints.up("md"),
   );
   const dispatch = useAppDispatch();
   const handleToggleDrawer = () => {

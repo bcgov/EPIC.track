@@ -23,7 +23,7 @@ type InsightQueryArgs = {
 
 function buildInsightBody(
   groupBy: string,
-  { columnFilters, staffId }: InsightQueryArgs
+  { columnFilters, staffId }: InsightQueryArgs,
 ) {
   return {
     group_by: groupBy,
@@ -34,7 +34,7 @@ function buildInsightBody(
 
 function buildQueryString(
   base: string,
-  { is_active, staffId }: { is_active?: boolean; staffId?: number } = {}
+  { is_active, staffId }: { is_active?: boolean; staffId?: number } = {},
 ): string {
   const params: string[] = [];
 
@@ -87,7 +87,7 @@ export const workInsightsApi = createApi({
                 { type: "AssessmentsByPhase", id: "LIST" },
               ]
             : [{ type: "AssessmentsByPhase", id: "LIST" }],
-      }
+      },
     ),
 
     getAllWorks: builder.query<
@@ -95,7 +95,7 @@ export const workInsightsApi = createApi({
       { is_active?: boolean; staffId?: number } | void
     >({
       query: (
-        args: { is_active?: boolean; staffId?: number } = { is_active: true }
+        args: { is_active?: boolean; staffId?: number } = { is_active: true },
       ) => buildQueryString("works", args),
       providesTags: (result) =>
         result
@@ -114,7 +114,7 @@ export const workInsightsApi = createApi({
       { is_active?: boolean; staffId?: number } | void
     >({
       query: (
-        args: { is_active?: boolean; staffId?: number } = { is_active: true }
+        args: { is_active?: boolean; staffId?: number } = { is_active: true },
       ) => buildQueryString("works", args),
       providesTags: (result) =>
         result
@@ -296,7 +296,7 @@ export const workInsightsApi = createApi({
           method: "POST",
           body: buildInsightBody("work_closure_breakdown", args),
         }),
-      }
+      },
     ),
   }),
   refetchOnMountOrArgChange: 300,

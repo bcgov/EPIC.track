@@ -58,11 +58,11 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
       try {
         const result = await projectService.getWorkTypes(
           Number(ctx.work?.project_id),
-          Number(ctx.work?.id)
+          Number(ctx.work?.id),
         );
         if (result.status === 200) {
           const workTypes = (result.data as any[]).filter(
-            (p) => p["is_active"] === true
+            (p) => p["is_active"] === true,
           );
           if (workTypes.length > 0)
             setWorkTypes([
@@ -86,7 +86,7 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
         const result = await projectService.getFirstNations(
           Number(ctx.work?.project_id),
           Number(ctx.work?.id),
-          workTypeId
+          workTypeId,
         );
         if (result.status === 200) {
           setFirstNations(result.data as ListType[]);
@@ -108,7 +108,7 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
 
   const handleNationSelect = (
     event: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean
+    checked: boolean,
   ) => {
     if (checked) {
       setSelectedFirstNations([
@@ -117,7 +117,7 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
       ]);
     } else {
       const firstNations = selectedFirstNations.filter(
-        (id) => id !== Number(event.target.value)
+        (id) => id !== Number(event.target.value),
       );
       setSelectedFirstNations(firstNations);
       setIsSelectAllSelected(false);
@@ -126,7 +126,7 @@ const ImportFirstNation = (props: ImportFirstNationsProps) => {
 
   const handleNationSelectAll = (
     event: React.ChangeEvent<HTMLInputElement>,
-    checked: boolean
+    checked: boolean,
   ) => {
     setIsSelectAllSelected(checked);
     if (checked) {

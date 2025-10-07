@@ -76,7 +76,7 @@ const StatusHistory = ({
   const userHasRole = useUserHasRole();
 
   const approvedStatuses = statuses.filter(
-    (status) => status.is_approved && status.id !== statuses?.[0]?.id
+    (status) => status.is_approved && status.id !== statuses?.[0]?.id,
   );
 
   const mergedStatuses = mergeAdjacentStatuses(approvedStatuses);

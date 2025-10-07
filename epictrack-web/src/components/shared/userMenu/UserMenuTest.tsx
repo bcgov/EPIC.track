@@ -42,7 +42,7 @@ const UserMenuTest = (props: UserMenuProps) => {
   }, [origin]);
 
   const [anchorElState, setAnchorElState] = React.useState<null | HTMLElement>(
-    anchorEl
+    anchorEl,
   );
 
   return (

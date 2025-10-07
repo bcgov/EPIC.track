@@ -20,7 +20,7 @@ export const ThirtySixtyNinety = () => {
   const currentStatus = statuses.find((status) => status.is_approved);
 
   const currentWorkPhase = workPhases.find(
-    (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id
+    (workPhase) => workPhase.work_phase.id === work?.current_work_phase_id,
   );
 
   const activeApprovedHighprioIssues = issues.filter(
@@ -28,7 +28,7 @@ export const ThirtySixtyNinety = () => {
       !issue.is_resolved &&
       issue.is_active &&
       issue.is_high_priority &&
-      issue.updates.find((update) => update.is_approved)
+      issue.updates.find((update) => update.is_approved),
   );
 
   const issueUpdates = activeApprovedHighprioIssues

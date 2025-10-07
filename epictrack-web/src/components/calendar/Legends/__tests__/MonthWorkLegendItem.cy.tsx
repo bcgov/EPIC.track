@@ -21,7 +21,7 @@ describe("MonthWorkLegendItem", () => {
     cy.mount(
       <Router>
         <MonthWorkLegendItem {...mockWorkItem} />
-      </Router>
+      </Router>,
     );
 
     cy.contains(mockWorkItem.name).should("be.visible");
@@ -31,7 +31,7 @@ describe("MonthWorkLegendItem", () => {
     cy.mount(
       <Router>
         <MonthWorkLegendItem {...mockWorkItem} />
-      </Router>
+      </Router>,
     );
 
     // Hover over the component for the tooltip
@@ -47,7 +47,7 @@ describe("MonthWorkLegendItem", () => {
           <Route path="/" element={<MonthWorkLegendItem {...mockWorkItem} />} />
           <Route path="/work-plan" element={<LocationDisplay />} />
         </Routes>
-      </Router>
+      </Router>,
     );
 
     // Click the work item
@@ -56,7 +56,7 @@ describe("MonthWorkLegendItem", () => {
     // Assert the navigation
     cy.get("[data-cy=location]").should(
       "contain.text",
-      `/work-plan?work_id=${mockWorkItem.work_id}`
+      `/work-plan?work_id=${mockWorkItem.work_id}`,
     );
   });
 });

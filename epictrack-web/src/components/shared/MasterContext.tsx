@@ -109,11 +109,11 @@ export const MasterProvider = ({
           "Error fetching the requested data. Please try again after some time",
           {
             type: "error",
-          }
+          },
         );
       }
     },
-    [service]
+    [service],
   );
 
   useEffect(() => {
@@ -166,7 +166,7 @@ export const MasterProvider = ({
         });
       }
     },
-    [getData, id, service, title]
+    [getData, id, service, title],
   );
 
   const handleDelete = useCallback(() => {

@@ -89,7 +89,7 @@ describe("UserManagementList", () => {
         <Router>
           <UserManagementList />
         </Router>
-      </SnackbarProvider>
+      </SnackbarProvider>,
     );
     cy.wait(["@getAllStaffs", "@getElevatedRoles", "@getStaffElevatedRoles"]);
   });

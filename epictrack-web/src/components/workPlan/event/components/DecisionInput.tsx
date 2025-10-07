@@ -33,7 +33,7 @@ const DecisionInput = ({
       try {
         const result =
           await outcomeConfigurationService.getOutcomeConfigurations(
-            Number(configurationId)
+            Number(configurationId),
           );
         if (result.status === 200) {
           setOutcomes(result.data as any[]);

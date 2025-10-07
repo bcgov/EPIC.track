@@ -16,7 +16,7 @@ export const ReportsPreview = () => {
   const { loading, loadIssues, issues } = useContext(WorkplanContext);
   const [loadingPreview, setLoadingPreview] = useState(true);
   const [selectedTabIndex, setSelectedTabIndex] = useState(
-    TAB.THIRTY_SIXTY_NINETY
+    TAB.THIRTY_SIXTY_NINETY,
   );
 
   const handleLoadIssues = useCallback(async () => {

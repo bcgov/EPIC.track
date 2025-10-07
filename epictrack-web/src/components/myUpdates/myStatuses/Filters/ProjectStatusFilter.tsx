@@ -10,7 +10,7 @@ export const ProjectStatusFilter = () => {
 
   const value = useMemo(() => {
     return statusesOptions.filter((option) =>
-      searchOptions.project_is_active.includes(String(option.value))
+      searchOptions.project_is_active.includes(String(option.value)),
     );
   }, [searchOptions.project_is_active, statusesOptions]);
 

@@ -5,7 +5,7 @@ import { EVENT_TYPE } from "components/workPlan/phase/type";
 
 export const getNDaysArray = (
   startDate: Dayjs,
-  count: number
+  count: number,
 ): (Date | null)[] => {
   const start = dayjs(startDate);
   const startDayOfWeek = start.day(); // 0-6 (Sun-Sat)
@@ -36,7 +36,7 @@ export function getLegendIconMap() {
 
 export function resolveEventIconName(
   event: EventsGridModel,
-  icons: Record<string, string>
+  icons: Record<string, string>,
 ): string {
   if (event.type === EVENT_TYPE.TASK) return icons["Task"];
   if (event.event_configuration.event_type_id === EventType.SUBMISSION)

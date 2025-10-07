@@ -84,7 +84,7 @@ export const initialWorkPlanContext: WorkplanContextProps = {
 };
 
 export const WorkplanContext = createContext<WorkplanContextProps>(
-  initialWorkPlanContext
+  initialWorkPlanContext,
 );
 
 export const WorkplanProvider = ({
@@ -123,7 +123,7 @@ export const WorkplanProvider = ({
 
   const isActiveTeamMember = useMemo(() => {
     return team?.some(
-      (member) => member.staff.email === email && member.is_active
+      (member) => member.staff.email === email && member.is_active,
     );
   }, [team, email]);
 
@@ -145,14 +145,14 @@ export const WorkplanProvider = ({
   const getWorkFirstNations = useCallback(async () => {
     if (workId) {
       const firstNationResult = await workService.getWorkFirstNations(
-        Number(workId)
+        Number(workId),
       );
       if (firstNationResult.status === 200) {
         const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
           (p) => ({
             ...p,
             status: p.is_active ? ACTIVE_STATUS.ACTIVE : ACTIVE_STATUS.INACTIVE,
-          })
+          }),
         );
         setFirstNations(firstNations);
       }

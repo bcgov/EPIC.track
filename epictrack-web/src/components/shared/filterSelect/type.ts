@@ -10,7 +10,7 @@ declare module "react-select/dist/declarations/src/Select" {
   export interface Props<
     Option,
     IsMulti extends boolean,
-    Group extends GroupBase<Option> = GroupBase<Option>
+    Group extends GroupBase<Option> = GroupBase<Option>,
   > {
     // Marking as optional here to not raise errors for ControlledSelect
     // Make sure to add for FilterSelect

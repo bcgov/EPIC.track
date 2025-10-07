@@ -20,14 +20,14 @@ class StaffService implements ServiceBase {
   async create(data: MasterBase) {
     return await http.PostRequest(
       Endpoints.Staffs.STAFFS,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
   async update(data: MasterBase, id: any) {
     return await http.PutRequest(
       Endpoints.Staffs.STAFFS + `/${id}`,
-      JSON.stringify(data)
+      JSON.stringify(data),
     );
   }
 
@@ -37,13 +37,13 @@ class StaffService implements ServiceBase {
 
   async getActiveStaffByPosition(position: string) {
     return await http.GetRequest<Staff[]>(
-      Endpoints.Staffs.STAFFS + `?positions=${position}`
+      Endpoints.Staffs.STAFFS + `?positions=${position}`,
     );
   }
 
   async getAllStaffByPosition(position: string) {
     return await http.GetRequest<Staff[]>(
-      Endpoints.Staffs.STAFFS + `?positions=${position}&is_active=false`
+      Endpoints.Staffs.STAFFS + `?positions=${position}&is_active=false`,
     );
   }
 

@@ -34,7 +34,7 @@ const firstNationListColumnFiltersCacheKey =
 const FirstNationList = () => {
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     firstNationListColumnFiltersCacheKey,
-    []
+    [],
   );
   const [elevatedRoles, setElevatedRoles] = useState<number[]>([]);
   const [firstNationId, setFirstNationId] = useState<number>();
@@ -44,7 +44,7 @@ const FirstNationList = () => {
   const [showFormDialog, setShowFormDialog] = useState(false);
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
-    null
+    null,
   );
 
   const { roles, staffId } = useAppSelector((state) => state.user.userDetail);
@@ -81,7 +81,7 @@ const FirstNationList = () => {
       try {
         const response =
           await staffElevatedRoleService.getActiveStaffElevatedRoleByStaffId(
-            String(staffId)
+            String(staffId),
           );
         setElevatedRoles(response.data.map((role) => role.elevated_role_id));
       } catch (error) {
@@ -104,9 +104,9 @@ const FirstNationList = () => {
         firstNations,
         "pip_org_type",
         (value) => value?.name,
-        (value) => value?.name
+        (value) => value?.name,
       ),
-    [firstNations]
+    [firstNations],
   );
 
   const statusesOptions = useMemo(
@@ -115,9 +115,9 @@ const FirstNationList = () => {
         firstNations,
         "is_active",
         (value) => (value ? "Active" : "Inactive"),
-        (value) => value
+        (value) => value,
       ),
-    [firstNations]
+    [firstNations],
   );
 
   const handleCloseUserMenu = debounce(() => {
@@ -129,7 +129,7 @@ const FirstNationList = () => {
 
   const handleOpenUserMenu = (
     event: React.MouseEvent<HTMLElement>,
-    staff: Staff
+    staff: Staff,
   ) => {
     setRelationshipHolder(staff);
     setUserMenuAnchorEl(event.currentTarget);
@@ -241,7 +241,7 @@ const FirstNationList = () => {
       orgTypes,
       staffs,
       statusesOptions,
-    ]
+    ],
   );
 
   const getStaffs = async () => {
@@ -269,7 +269,7 @@ const FirstNationList = () => {
         return isEqual(prevFilters, filters) ? prevFilters : filters;
       });
     },
-    [setColumnFilters]
+    [setColumnFilters],
   );
 
   const renderTopToolbarCustomActions = useCallback(
@@ -291,7 +291,7 @@ const FirstNationList = () => {
         </Button>
       </Restricted>
     ),
-    [setShowFormDialog, setFirstNationId, elevatedRoles]
+    [setShowFormDialog, setFirstNationId, elevatedRoles],
   );
 
   return (

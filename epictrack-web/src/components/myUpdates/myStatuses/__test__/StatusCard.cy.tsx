@@ -58,7 +58,7 @@ describe("StatusCard", () => {
         >
           <StatusCard item={item} />
         </MyStatusesContext.Provider>
-      </Router>
+      </Router>,
     );
 
     cy.contains("You don't have any Status yet").should("exist");
@@ -73,7 +73,7 @@ describe("StatusCard", () => {
         >
           <StatusCard item={item} />
         </MyStatusesContext.Provider>
-      </Router>
+      </Router>,
     );
 
     // RecentStatus renders description
@@ -95,7 +95,7 @@ describe("StatusCard", () => {
         >
           <StatusCard item={item} />
         </MyStatusesContext.Provider>
-      </Router>
+      </Router>,
     );
 
     cy.findByLabelText("staleness level").trigger("mouseover", { force: true });

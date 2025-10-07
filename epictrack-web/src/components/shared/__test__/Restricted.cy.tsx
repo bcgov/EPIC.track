@@ -40,7 +40,7 @@ describe("Restricted Component", () => {
         <Restricted allowed={[ROLES.CREATE]} errorProps={{ disabled: true }}>
           <div data-cy="restricted-content">Restricted Content</div>
         </Restricted>
-      </Provider>
+      </Provider>,
     );
 
     cy.get("[data-cy=restricted-content]").should("be.visible");
@@ -52,7 +52,7 @@ describe("Restricted Component", () => {
         <Restricted allowed={["test"]}>
           <div data-cy="restricted-content">Restricted Content</div>
         </Restricted>
-      </Provider>
+      </Provider>,
     );
 
     cy.get("[data-cy=restricted-content]").should("not.exist");
@@ -69,7 +69,7 @@ describe("Restricted Component", () => {
         >
           <div data-cy="restricted-content">Restricted Content</div>
         </Restricted>
-      </Provider>
+      </Provider>,
     );
 
     cy.get("[data-cy=restricted-content]").should("be.visible");
@@ -84,7 +84,7 @@ describe("Restricted Component", () => {
         >
           <div data-cy="restricted-content">Restricted Content</div>
         </Restricted>
-      </Provider>
+      </Provider>,
     );
 
     cy.get("[data-cy=restricted-content]").should("not.exist");

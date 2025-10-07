@@ -15,7 +15,7 @@ type ControlledDatePickerProps = {
     maxDate?: dayjs.Dayjs | undefined;
     onDateChange?: (
       value: dayjs.Dayjs | null,
-      defaultOnChangeFunc: (value: dayjs.Dayjs | null) => void
+      defaultOnChangeFunc: (value: dayjs.Dayjs | null) => void,
     ) => void;
     // Add any other DatePicker-specific props you want to pass
   };

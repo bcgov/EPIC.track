@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const useRouterLocationStateForHelpPage = (
-  callback: () => string[] | string | undefined
+  callback: () => string[] | string | undefined,
 ) => {
   const navigate = useNavigate();
   const location = useLocation();

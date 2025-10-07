@@ -9,7 +9,7 @@ describe("Month", () => {
   const days = Array.from({ length: 30 }, (_, i) =>
     dayjs()
       .date(i + 1)
-      .toDate()
+      .toDate(),
   );
   const labelWidth = 120;
   const cellSizePx = 40;
@@ -39,7 +39,7 @@ describe("Month", () => {
             milestoneEvents={mockEventsGrid}
           />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
 
     cy.contains("September 2025").should("exist");
@@ -68,7 +68,7 @@ describe("Month", () => {
             milestoneEvents={mockEventsGrid}
           />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
 
     cy.contains("September 2025").should("exist");
@@ -91,7 +91,7 @@ describe("Month", () => {
             milestoneEvents={[]}
           />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
 
     cy.get("div").contains("1").should("exist");
@@ -111,7 +111,7 @@ describe("Month", () => {
             milestoneEvents={mockEventsGrid}
           />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
     cy.contains(mockEventsGrid[0].event.name).should("not.exist");
 
@@ -127,7 +127,7 @@ describe("Month", () => {
             milestoneEvents={mockEventsGrid}
           />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
     cy.contains(mockEventsGrid[0].event.name).scrollIntoView().should("exist");
   });
@@ -156,7 +156,7 @@ describe("Month", () => {
             milestoneEvents={mixedEvents}
           />
         </EventCalendarProvider>
-      </Router>
+      </Router>,
     );
 
     mixedEvents.forEach((calendarItem) => {

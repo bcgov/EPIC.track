@@ -37,10 +37,10 @@ const TrendWorkPhaseListing = () => {
           workPhases
             .map((workPhase) => workPhase.work?.work_type?.name || "")
             .filter((type) => type)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [workPhases]
+    [workPhases],
   );
 
   const phaseOptions = useMemo(
@@ -50,10 +50,10 @@ const TrendWorkPhaseListing = () => {
           workPhases
             .map((workPhase) => workPhase.work_phase.name || "")
             .filter((phase) => phase)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [workPhases]
+    [workPhases],
   );
 
   const eaActOptions = useMemo(
@@ -63,10 +63,10 @@ const TrendWorkPhaseListing = () => {
           workPhases
             .map((workPhase) => workPhase.work?.ea_act?.name || "")
             .filter((act) => act)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [workPhases]
+    [workPhases],
   );
 
   const yearOptions = useMemo(() => {
@@ -248,7 +248,7 @@ const TrendWorkPhaseListing = () => {
         },
       },
     ],
-    [phaseOptions, eaActOptions, yearOptions, workTypeOptions]
+    [phaseOptions, eaActOptions, yearOptions, workTypeOptions],
   );
   return (
     <MasterTrackTable

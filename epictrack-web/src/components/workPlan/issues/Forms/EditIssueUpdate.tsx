@@ -31,7 +31,7 @@ const EditIssueUpdate = () => {
 
   const minPostedDate = useMemo(() => {
     const issue = issues.find(
-      (issue) => issue.id === updateToEdit?.work_issue_id
+      (issue) => issue.id === updateToEdit?.work_issue_id,
     );
     if (!issue) return undefined;
     const approvedIssueUpdatesDates = issue?.updates
@@ -39,7 +39,7 @@ const EditIssueUpdate = () => {
       .map((update) => dayjs(update.posted_date).add(1, "day").unix());
     const minDateUnix = Math.max(
       ...approvedIssueUpdatesDates,
-      dayjs(issue?.start_date).unix()
+      dayjs(issue?.start_date).unix(),
     );
     const minDate = dayjs(minDateUnix * 1000);
     return minDate;

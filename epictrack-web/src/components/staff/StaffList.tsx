@@ -27,7 +27,7 @@ const StaffList = () => {
   const [positions, setPositions] = useState<string[]>([]);
   const [columnFilters, setColumnFilters] = useCachedState<ColumnFilter[]>(
     staffListColumnFiltersCacheKey,
-    []
+    [],
   );
   const { roles } = useAppSelector((state) => state.user.userDetail);
   const canEdit = hasPermission({ roles, allowed: [ROLES.EDIT] });
@@ -52,7 +52,7 @@ const StaffList = () => {
       const positions = staffs
         .map((staffs) => staffs.position)
         .sort(
-          (positionA, positionB) => positionA.sort_order - positionB.sort_order
+          (positionA, positionB) => positionA.sort_order - positionB.sort_order,
         )
         .map((position) => position.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index);
@@ -66,9 +66,9 @@ const StaffList = () => {
         staffs,
         "is_active",
         (value) => (value ? "Active" : "Inactive"),
-        (value) => value
+        (value) => value,
       ),
-    [staffs]
+    [staffs],
   );
 
   const columns = useMemo<MRT_ColumnDef<Staff>[]>(
@@ -127,7 +127,7 @@ const StaffList = () => {
         ),
       },
     ],
-    [canEdit, statusesOptions, positions]
+    [canEdit, statusesOptions, positions],
   );
 
   const handleCacheFilters = useCallback(
@@ -142,7 +142,7 @@ const StaffList = () => {
         setColumnFilters(filters);
       }
     },
-    [columnFilters, setColumnFilters]
+    [columnFilters, setColumnFilters],
   );
 
   const renderTopToolbarCustomActions = useCallback(
@@ -159,7 +159,7 @@ const StaffList = () => {
         </Button>
       </Restricted>
     ),
-    [setShowFormDialog, setStaffId]
+    [setShowFormDialog, setStaffId],
   );
 
   return (

@@ -95,7 +95,7 @@ const FirstNationList = () => {
   }, [ctx.loading]);
 
   const [userMenuAnchorEl, setUserMenuAnchorEl] = useState<null | HTMLElement>(
-    null
+    null,
   );
 
   const getStatusOptions = useCallback(() => {
@@ -124,7 +124,7 @@ const FirstNationList = () => {
   const getFirstNationAvailability = useCallback(async () => {
     const response = await projectService.checkFirstNationAvailability(
       Number(ctx.work?.project_id),
-      Number(ctx.work?.id)
+      Number(ctx.work?.id),
     );
     const firstNationStatus = response.data as any;
     setFirstNationAvailable(firstNationStatus["first_nation_available"]);
@@ -136,7 +136,7 @@ const FirstNationList = () => {
 
   const handleOpenUserMenu = (
     event: MouseEvent<HTMLElement>,
-    row: WorkFirstNation
+    row: WorkFirstNation,
   ) => {
     const staff = row.indigenous_nation.relationship_holder;
     setRelationshipHolder(staff);
@@ -269,7 +269,7 @@ const FirstNationList = () => {
         ),
       },
     ],
-    [canEdit, consultationLevels, handleCloseUserMenu, statusOptions]
+    [canEdit, consultationLevels, handleCloseUserMenu, statusOptions],
   );
 
   const onCancelHandler = () => {
@@ -298,7 +298,7 @@ const FirstNationList = () => {
     setLoading(true);
     try {
       const firstNationResult = await workService.getWorkFirstNations(
-        Number(ctx.work?.id)
+        Number(ctx.work?.id),
       );
       if (firstNationResult.status === 200) {
         const firstNations = (firstNationResult.data as WorkFirstNation[]).map(
@@ -309,7 +309,7 @@ const FirstNationList = () => {
                 ? ACTIVE_STATUS.ACTIVE
                 : ACTIVE_STATUS.INACTIVE,
             };
-          }
+          },
         );
         ctx.setFirstNations(firstNations);
       }
@@ -324,10 +324,10 @@ const FirstNationList = () => {
   const downloadPDFReport = useCallback(async () => {
     try {
       const binaryReponse = await workService.downloadFirstNations(
-        Number(ctx.work?.id)
+        Number(ctx.work?.id),
       );
       const url = window.URL.createObjectURL(
-        new Blob([(binaryReponse as any).data])
+        new Blob([(binaryReponse as any).data]),
       );
       const link = document.createElement("a");
       link.href = url;
@@ -346,7 +346,7 @@ const FirstNationList = () => {
     try {
       const result = await workService.importFirstNations(
         Number(ctx.work?.id),
-        { indigenous_nation_ids: firstNationIds }
+        { indigenous_nation_ids: firstNationIds },
       );
       if (result.status === 200) {
         showNotification("First nations imported", {

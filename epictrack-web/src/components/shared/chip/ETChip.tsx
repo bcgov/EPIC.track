@@ -24,7 +24,7 @@ const ETChip = styled(
     error = false,
     size = "small",
     ...other
-  }: StyledChipProps) => <Chip size={size} {...other} />
+  }: StyledChipProps) => <Chip size={size} {...other} />,
 )(({ active, inactive, highPriority, resolved, error }: StyledChipProps) => {
   if (inactive) {
     return {

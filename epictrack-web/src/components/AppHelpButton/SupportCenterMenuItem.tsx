@@ -38,7 +38,7 @@ const SupportCenterMenuItem = () => {
           .join("/");
 
         return currentPathWithoutPathVariables === helpPageLink.epicTrackPath;
-      }
+      },
     );
     return matchingLinks;
   };
@@ -62,7 +62,7 @@ const SupportCenterMenuItem = () => {
 
     window.open(
       matchingLink?.helpPage ?? helpPageMap.help.default.helpPage,
-      "_blank"
+      "_blank",
     );
   };
 

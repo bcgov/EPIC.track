@@ -28,7 +28,7 @@ const StatusForm = () => {
     if (statuses.length === 0) return dayjs(EARLIEST_WORK_DATE);
 
     const sortedStatuses = [...statuses].sort((a, b) =>
-      dayjs(b.posted_date).diff(dayjs(a.posted_date))
+      dayjs(b.posted_date).diff(dayjs(a.posted_date)),
     );
 
     if (isCloning || !statusToEdit) return dayjs(sortedStatuses[0].posted_date);
@@ -36,7 +36,7 @@ const StatusForm = () => {
     const previousStatus = sortedStatuses.find(
       (s) =>
         s.id !== statusToEdit.id &&
-        dayjs(s.posted_date) < dayjs(statusToEdit.posted_date)
+        dayjs(s.posted_date) < dayjs(statusToEdit.posted_date),
     );
 
     return dayjs(previousStatus?.posted_date || EARLIEST_WORK_DATE);

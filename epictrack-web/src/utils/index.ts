@@ -11,7 +11,7 @@ const sort = (collection: any[], sortField: string) => {
     return collection.sort(function (a, b) {
       return naturalSortCollator.compare(
         a[keys[0]][keys[1]],
-        b[keys[0]][keys[1]]
+        b[keys[0]][keys[1]],
       );
     });
   } else {

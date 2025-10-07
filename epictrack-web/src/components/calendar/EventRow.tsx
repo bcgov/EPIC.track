@@ -20,7 +20,7 @@ type EventWithRow = CalendarEvent & { row: number };
 
 function assignEventRows(events: CalendarEvent[]): EventWithRow[][] {
   const sorted = [...events].sort((a, b) =>
-    dayjs(a.event.start_date).diff(dayjs(b.event.start_date))
+    dayjs(a.event.start_date).diff(dayjs(b.event.start_date)),
   );
   const rows: EventWithRow[][] = [];
 
@@ -30,7 +30,7 @@ function assignEventRows(events: CalendarEvent[]): EventWithRow[][] {
       if (
         dayjs(event.event.start_date).isAfter(
           dayjs(lastInRow.event.end_date),
-          "day"
+          "day",
         )
       ) {
         row.push({ ...event, row: rows.indexOf(row) });
@@ -72,7 +72,7 @@ const EventRow: FC<EventRowProps> = ({
       Math.max(0, eventRows.length - 1) * rowGapPx;
     return Math.max(
       Math.ceil((legendHeight - eventRowsHeight) / (cellSizePx + rowGapPx)),
-      0
+      0,
     );
   }, [legendHeight, cellSizePx, eventRows.length]);
 
@@ -134,11 +134,11 @@ const EventRow: FC<EventRowProps> = ({
                 [...days].reverse().findIndex((d) => d !== null);
 
               const actualStartIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(event.start_date), "day")
+                (d) => d && dayjs(d).isSame(dayjs(event.start_date), "day"),
               );
 
               const actualEndIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(event.end_date), "day")
+                (d) => d && dayjs(d).isSame(dayjs(event.end_date), "day"),
               );
 
               // If the event starts before this month, start from first day in month
@@ -158,8 +158,8 @@ const EventRow: FC<EventRowProps> = ({
                 const colour = showWorkLegend
                   ? getWorkColour(eventItem.work_name)
                   : eventItem.event.type === EVENT_TYPE.MILESTONE
-                  ? LEGEND_COLOURS.backgroundColour.MILESTONE
-                  : LEGEND_COLOURS.backgroundColour.TASK;
+                    ? LEGEND_COLOURS.backgroundColour.MILESTONE
+                    : LEGEND_COLOURS.backgroundColour.TASK;
 
                 const borderColour = showWorkLegend
                   ? darkenHex(colour, 0.3)
@@ -225,10 +225,10 @@ const EventRow: FC<EventRowProps> = ({
             // If this cell falls inside a span already rendered, skip rendering it
             const inSpan = rowEvents.some((ev) => {
               const evStartIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(ev.event.start_date), "day")
+                (d) => d && dayjs(d).isSame(dayjs(ev.event.start_date), "day"),
               );
               const evEndIdx = days.findIndex(
-                (d) => d && dayjs(d).isSame(dayjs(ev.event.end_date), "day")
+                (d) => d && dayjs(d).isSame(dayjs(ev.event.end_date), "day"),
               );
               const start = evStartIdx === -1 ? 0 : evStartIdx;
               const end = evEndIdx === -1 ? days.length - 1 : evEndIdx;

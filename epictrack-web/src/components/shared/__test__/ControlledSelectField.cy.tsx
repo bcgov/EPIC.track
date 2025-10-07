@@ -5,7 +5,7 @@ import { MenuItem } from "@mui/material";
 
 interface TestComponentProps {
   onChange?: (
-    event: React.ChangeEvent<{ name?: string; value: unknown }>
+    event: React.ChangeEvent<{ name?: string; value: unknown }>,
   ) => void;
 }
 

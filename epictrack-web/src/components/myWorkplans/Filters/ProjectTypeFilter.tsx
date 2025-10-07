@@ -41,7 +41,7 @@ export const ProjectTypeFilter = ({
 
   const value = useMemo(() => {
     return options.filter((option) =>
-      searchOptions.project_types.includes(String(option.value))
+      searchOptions.project_types.includes(String(option.value)),
     );
   }, [searchOptions.project_types, options]);
 

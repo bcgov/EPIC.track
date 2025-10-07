@@ -55,7 +55,7 @@ export interface WorkPlan {
       role: {
         name: string;
       };
-    }
+    },
   ];
 
   status_info: {

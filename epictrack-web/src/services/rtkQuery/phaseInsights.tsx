@@ -11,7 +11,7 @@ import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
 
 function buildQueryString(
   base: string,
-  { legislated, staffId }: { legislated?: boolean; staffId?: number } = {}
+  { legislated, staffId }: { legislated?: boolean; staffId?: number } = {},
 ): string {
   const params: string[] = [];
 

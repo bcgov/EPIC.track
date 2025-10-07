@@ -12,7 +12,7 @@ export const IssueStateFilter = () => {
       { label: "High Profile", value: "is_high_priority:true" },
       { label: "Resolved", value: "is_resolved:true" },
     ],
-    []
+    [],
   );
 
   const value = useMemo(() => {

@@ -39,7 +39,7 @@ const WorkPlanContainer = () => {
   const ctx = useContext(WorkplanContext);
 
   const activeStaff = ctx.team.filter(
-    (staffWorkRole) => staffWorkRole.is_active
+    (staffWorkRole) => staffWorkRole.is_active,
   );
 
   const handleTabSelected = (_event: React.SyntheticEvent, index: number) => {
@@ -52,13 +52,13 @@ const WorkPlanContainer = () => {
       : calculateStatusStaleness(
           ctx.statuses.find((status) => status.is_approved),
           ctx.statusStalenessSetting?.staleness_length,
-          ctx.statusStalenessSetting?.warning_length
+          ctx.statusStalenessSetting?.warning_length,
         );
 
   const highestStaleness = issueListMaxStaleness(
     ctx.issues,
     ctx.issueStalenessSetting?.staleness_length,
-    ctx.issueStalenessSetting?.warning_length
+    ctx.issueStalenessSetting?.warning_length,
   );
 
   const iconStyles = React.useMemo(() => {
