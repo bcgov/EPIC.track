@@ -18,9 +18,12 @@ from collections import defaultdict
 from datetime import timezone
 from typing import List, Dict, Any, Union
 
+from sqlalchemy import and_
+
 from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
+from api.models.staff_work_role import StaffWorkRole
 from api.schemas.work import WorkPhaseSchema
 from api.models.phase_code import PhaseVisibilityEnum
 from api.models.event_template import EventPositionEnum
@@ -330,9 +333,9 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
         return days_taken
 
     @classmethod
-    def find_all_work_phases_with_additional_info(cls, legislated: bool = None) -> List[WorkPhase]:
+    def find_all_work_phases_with_additional_info(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
         """Return all work phases."""
-        work_phases = WorkPhase.find_by_params({'legislated': legislated})
+        work_phases = cls.find_work_phases_by_staff_id(staff_id=staff_id, legislated=legislated)
         phase_by_work = defaultdict(list)
 
         data = []
@@ -350,3 +353,25 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
             item["work"] = res.WorkResponseSchema().dump(Work.find_by_id(item["work_phase"]["work_id"]))
 
         return data
+
+    @classmethod
+    def find_work_phases_by_staff_id(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
+        """Return all work phases assigned to a staff."""
+        query = WorkPhase.query.filter(
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            legislated is None or WorkPhase.legislated == legislated
+        )
+
+        if staff_id:
+            query = query.join(
+                StaffWorkRole,
+                and_(
+                    StaffWorkRole.work_id == WorkPhase.work_id,
+                    StaffWorkRole.is_active.is_(True),
+                    StaffWorkRole.is_deleted.is_(False),
+                    StaffWorkRole.staff_id == staff_id
+                )
+            )
+
+        return query.all()

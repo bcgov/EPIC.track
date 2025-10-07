@@ -331,3 +331,9 @@ class WorkPhaseQueryParameterSchema(RequestQueryParameterSchema):
         default=None,
         allow_none=True
     )
+
+    staff_id = fields.Int(
+        metadata={"description": "The staff_id to filter by"},
+        required=False,
+        missing=None
+    )
