@@ -41,7 +41,7 @@ export const InsightsContextProvider: React.FC<
       setIsUserInsights,
       staffId,
     }),
-    [activeTab, isUserInsights, staffId]
+    [activeTab, isUserInsights, staffId],
   );
 
   return (

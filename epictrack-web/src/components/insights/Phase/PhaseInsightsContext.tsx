@@ -25,7 +25,7 @@ export const PhaseInsightsContextProvider: React.FC<
 
   const queryArg = useMemo(
     () => ({ legislated: true, staffId: isUserInsights ? staffId : undefined }),
-    [isUserInsights, staffId]
+    [isUserInsights, staffId],
   );
 
   const { data: workPhasesData, isLoading: loadingWorkPhases } =
@@ -40,7 +40,7 @@ export const PhaseInsightsContextProvider: React.FC<
       workPhases: workPhasesData ?? [],
       loadingWorkPhases,
     }),
-    [workPhasesData, loadingWorkPhases]
+    [workPhasesData, loadingWorkPhases],
   );
   return (
     <PhaseInsightsContext.Provider value={contextValue}>
