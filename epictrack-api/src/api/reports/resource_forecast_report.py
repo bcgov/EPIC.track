@@ -122,13 +122,13 @@ class EAResourceForeCastReport(ReportFactory):
                 {"data_key": "eao_team", "label": "TEAM", "width": 0.031},
                 {"data_key": "work_lead", "label": "PROJECT LEAD", "width": 0.045},
                 {
-                    "data_key": "work_team_members",
-                    "label": "WORK TEAM MEMBERS",
+                    "data_key": "coleads",
+                    "label": "CO-LEADS",
                     "width": 0.072,
                 },
                 {
-                    "data_key": "coleads",
-                    "label": "CO-LEADS",
+                    "data_key": "work_team_members",
+                    "label": "WORK TEAM MEMBERS",
                     "width": 0.072,
                 },
             ],
