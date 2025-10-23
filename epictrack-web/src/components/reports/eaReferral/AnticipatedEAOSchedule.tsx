@@ -31,6 +31,7 @@ import { dateUtils } from "../../../utils";
 import ReportHeader from "../shared/report-header/ReportHeader";
 import { ETReportContainer } from "../../shared";
 import { staleLevel } from "utils/uiUtils";
+import { Palette } from "styles/theme";
 
 interface Group {
   group: string;
@@ -165,7 +166,7 @@ export default function AnticipatedEAOSchedule() {
       alignItems="flex-start"
       container
       columnSpacing={2}
-      rowSpacing={3}
+      rowSpacing={2}
     >
       <Grid item sm={12}>
         {" "}
@@ -180,16 +181,20 @@ export default function AnticipatedEAOSchedule() {
       </Grid>
       {reports && reports.length > 0 && (
         <>
-          <Grid item sm={2}>
+          <Grid
+            item
+            sm={0.95}
+            sx={{ margin: ".5rem 0 0 2.5rem ", alignContent: "center" }}
+          >
             <FormLabel>Select Type to Hide</FormLabel>
           </Grid>
-          <Grid item sm={2}>
+          <Grid item sm={1.75}>
             <Autocomplete
               sx={{
                 [`& .MuiInputBase-root`]: {
                   padding: "5px",
-                  border: "1px solid",
-                  borderColor: "black",
+                  border: "2px solid",
+                  borderColor: Palette.neutral.accent.light,
                   borderRadius: "4px",
                 },
               }}
@@ -201,7 +206,14 @@ export default function AnticipatedEAOSchedule() {
               }}
               options={typeFilter}
               renderInput={(params) => (
-                <TextField {...params} variant="standard" />
+                <TextField
+                  {...params}
+                  variant="standard"
+                  InputProps={{
+                    ...params.InputProps,
+                    disableUnderline: true,
+                  }}
+                />
               )}
             />
           </Grid>
