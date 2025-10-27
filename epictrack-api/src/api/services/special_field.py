@@ -39,7 +39,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         return SpecialField.find_by_params(args)
 
     @classmethod
-    def create_special_field_entry(cls, payload: dict, commit: bool = True):
+    def create_special_field_entry(cls, payload: dict, commit: bool = True, work_id: int = None):
         """Create special field entry"""
         upper_limit = cls._get_upper_limit(payload)
         payload["time_range"] = DateTimeTZRange(
@@ -47,7 +47,7 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         )
         special_field = SpecialField(**payload)
 
-        cls._check_auth(special_field=special_field)
+        cls._check_auth(special_field=special_field, work_id=work_id)
 
         db.session.add(special_field)
         db.session.flush()
@@ -272,9 +272,8 @@ class SpecialFieldService:  # pylint:disable=too-many-arguments
         return query.all()
 
     @classmethod
-    def _check_auth(cls, special_field=None):
+    def _check_auth(cls, special_field=None, work_id=None):
         """Check if user has extended_edit role or is team member"""
-        work_id = None
         if special_field and special_field.entity == EntityEnum.WORK:
             work_id = special_field.entity_id
 

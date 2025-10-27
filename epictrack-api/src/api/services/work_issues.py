@@ -150,7 +150,8 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
         cls.create_special_fields(
             new_work_issue.id,
             new_work_issue.is_active,
-            new_work_issue.start_date
+            new_work_issue.start_date,
+            work_id
         )
 
         # create updates
@@ -241,7 +242,8 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             cls.create_special_fields(
                 issue_id,
                 issue_data.get('is_active'),
-                datetime.now(timezone.utc)
+                datetime.now(timezone.utc),
+                work_id
             )
 
         # If work_issue.start_date has been updated update the original special field entry
@@ -327,7 +329,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
                 raise BadRequestError('Cannot exceed the posted date of a pending unapproved update')
 
     @classmethod
-    def create_special_fields(cls, entity_id, is_active, active_from):
+    def create_special_fields(cls, entity_id, is_active, active_from, work_id):
         """Create special fields for work issue"""
         # pylint: disable=import-outside-toplevel,cyclic-import
         from api.services.special_field import SpecialFieldService
@@ -340,7 +342,7 @@ class WorkIssuesService:  # pylint: disable=too-many-public-methods
             "field_type": FieldTypeEnum.BOOLEAN.value,
         }
         SpecialFieldService.create_special_field_entry(
-            work_issue_special_field_data, commit=False
+            work_issue_special_field_data, work_id=work_id, commit=False
         )
 
     @classmethod
