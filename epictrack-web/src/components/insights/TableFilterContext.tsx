@@ -7,7 +7,7 @@ type TableFilterContextType = {
 };
 
 const TableFilterContext = createContext<TableFilterContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const TableFilterProvider: React.FC<{ children: React.ReactNode }> = ({

@@ -26,7 +26,7 @@ const ProjectByTypeChart = () => {
       columnFilters,
       staffId: isUserInsights ? staffId : undefined,
     }),
-    [columnFilters, isUserInsights, staffId],
+    [columnFilters, isUserInsights, staffId]
   );
   const {
     data: chartData,

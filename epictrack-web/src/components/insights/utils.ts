@@ -25,7 +25,7 @@ export const getChartColor = (index: number) => {
 /* Helper to export insights charts to PDF */
 export const exportAccordionChartsToPdf = async (
   container: HTMLDivElement,
-  name: string,
+  name: string
 ) => {
   if (!container) return;
 
@@ -127,7 +127,7 @@ export const exportAccordionChartsToPdf = async (
         pageMargin,
         currentY,
         scaledWidth,
-        scaledHeight,
+        scaledHeight
       );
       currentY += scaledHeight + pageSpacing;
     }

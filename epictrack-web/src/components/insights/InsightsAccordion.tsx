@@ -79,7 +79,7 @@ const InsightAccordion: React.FC<InsightAccordionProps> = ({
                 onClick={() =>
                   exportAccordionChartsToPdf(
                     chartsRef.current!,
-                    `${tab} ${title ?? "Insights"}`,
+                    `${tab} ${title ?? "Insights"}`
                   )
                 }
                 sx={{ m: "0.5rem", p: "0.275rem 0.5rem" }}

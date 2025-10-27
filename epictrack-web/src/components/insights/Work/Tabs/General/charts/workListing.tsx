@@ -52,10 +52,10 @@ const WorkList = () => {
           works
             .map((work) => work?.work_type?.name || "")
             .filter((type) => type)
-            .sort(),
-        ),
+            .sort()
+        )
       ),
-    [works],
+    [works]
   );
 
   const projects = useMemo(
@@ -65,10 +65,10 @@ const WorkList = () => {
           works
             .map((work) => work?.project?.name || "")
             .filter((project) => project)
-            .sort(),
-        ),
+            .sort()
+        )
       ),
-    [works],
+    [works]
   );
 
   const phases = useMemo(
@@ -78,10 +78,10 @@ const WorkList = () => {
           works
             .map((work) => work?.current_work_phase?.name || "")
             .filter((phase) => phase)
-            .sort(),
-        ),
+            .sort()
+        )
       ),
-    [works],
+    [works]
   );
 
   useEffect(() => {
@@ -200,7 +200,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, phases, workTypes],
+    [projects, phases, workTypes]
   );
   return (
     <MasterTrackTable

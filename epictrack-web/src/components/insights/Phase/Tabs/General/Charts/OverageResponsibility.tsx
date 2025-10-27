@@ -38,12 +38,15 @@ const OverageResponsibilityChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetOverageResponsibilityQuery({
-    columnFilters,
-    selectedWorkType: String(selectedWorkType?.value) || "all",
-    selectedPhase: String(selectedPhase?.value) || "all",
-    staffId: isUserInsights ? staffId : undefined,
-  }, { skip: columnFilters.length === 0 });
+  } = useGetOverageResponsibilityQuery(
+    {
+      columnFilters,
+      selectedWorkType: String(selectedWorkType?.value) || "all",
+      selectedPhase: String(selectedPhase?.value) || "all",
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 }
+  );
 
   const workTypeOptions = useMemo(() => {
     if (!workPhases) return [];

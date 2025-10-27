@@ -29,7 +29,7 @@ const ProjectList = () => {
 
   const types = useMemo(
     () => projects.map((project) => project.type),
-    [projects],
+    [projects]
   );
   const types_filter = useMemo(
     () =>
@@ -37,45 +37,45 @@ const ProjectList = () => {
         new Set(
           types
             .sort((type_a, type_b) => type_a.sort_order - type_b.sort_order)
-            .map((type) => type.name),
-        ),
+            .map((type) => type.name)
+        )
       ),
-    [types],
+    [types]
   );
   const subTypes = useMemo(
     () =>
       sort([...projects], "sub_type.sort_order")
         .map((p) => p.sub_type.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [projects],
+    [projects]
   );
   const proponents = useMemo(
     () =>
       sort(
         projects.map((project) => project.proponent),
-        "name",
+        "name"
       )
         .map((proponent) => proponent.name)
         .filter((ele, index, arr) => arr.findIndex((t) => t === ele) === index),
-    [projects],
+    [projects]
   );
 
   const envRegionsOptions = useMemo(
     () =>
       getSelectFilterOptions(
         projects.map((project) => project.region_env),
-        "name",
+        "name"
       ),
-    [projects],
+    [projects]
   );
 
   const nrsRegionOptions = useMemo(
     () =>
       getSelectFilterOptions(
         projects.map((project) => project.region_flnro),
-        "name",
+        "name"
       ),
-    [projects],
+    [projects]
   );
   const columns = useMemo<MRT_ColumnDef<Project>[]>(
     () => [
@@ -234,7 +234,7 @@ const ProjectList = () => {
         },
       },
     ],
-    [envRegionsOptions, nrsRegionOptions, proponents, subTypes, types_filter],
+    [envRegionsOptions, nrsRegionOptions, proponents, subTypes, types_filter]
   );
 
   return (

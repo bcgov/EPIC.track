@@ -55,10 +55,10 @@ const WorkList = () => {
           works
             .map((work) => work?.work_state || "")
             .filter((type) => type)
-            .sort(),
-        ),
+            .sort()
+        )
       ),
-    [works],
+    [works]
   );
 
   const workTypes = useMemo(
@@ -68,10 +68,10 @@ const WorkList = () => {
           works
             .map((work) => work?.work_type?.name || "")
             .filter((type) => type)
-            .sort(),
-        ),
+            .sort()
+        )
       ),
-    [works],
+    [works]
   );
 
   const projects = useMemo(
@@ -81,20 +81,20 @@ const WorkList = () => {
           works
             .map((work) => work?.project?.name || "")
             .filter((project) => project)
-            .sort(),
-        ),
+            .sort()
+        )
       ),
-    [works],
+    [works]
   );
 
   const started_years = useMemo(
     () =>
       Array.from(
         new Set(
-          works.map((work) => dateUtils.formatDate(work?.start_date, "YYYY")),
-        ),
+          works.map((work) => dateUtils.formatDate(work?.start_date, "YYYY"))
+        )
       ).sort((a, b) => parseInt(b) - parseInt(a)),
-    [works],
+    [works]
   );
 
   const closed_years = useMemo(
@@ -103,12 +103,12 @@ const WorkList = () => {
         new Set(
           works
             .map((work) =>
-              dateUtils.formatDate(work?.work_decision_date as string, "YYYY"),
+              dateUtils.formatDate(work?.work_decision_date as string, "YYYY")
             )
-            .filter((year) => year !== "Invalid date"),
-        ),
+            .filter((year) => year !== "Invalid date")
+        )
       ).sort((a, b) => parseInt(b) - parseInt(a)),
-    [works],
+    [works]
   );
 
   useEffect(() => {
@@ -200,7 +200,7 @@ const WorkList = () => {
         Cell: ({ row, renderedCellValue }) => {
           return dateUtils.formatDate(
             renderedCellValue?.toString() || "",
-            MONTH_DAY_YEAR,
+            MONTH_DAY_YEAR
           );
         },
         filterVariant: "multi-select",
@@ -237,7 +237,7 @@ const WorkList = () => {
           return renderedCellValue
             ? dateUtils.formatDate(
                 renderedCellValue?.toString() || "",
-                MONTH_DAY_YEAR,
+                MONTH_DAY_YEAR
               )
             : "";
         },
@@ -307,7 +307,7 @@ const WorkList = () => {
         },
       },
     ],
-    [projects, workStates, workTypes, started_years, closed_years],
+    [projects, workStates, workTypes, started_years, closed_years]
   );
   return (
     <MasterTrackTable

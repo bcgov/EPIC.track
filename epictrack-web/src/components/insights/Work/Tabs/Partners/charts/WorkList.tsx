@@ -62,11 +62,11 @@ const WorkList = () => {
           .sort(
             (a, b) =>
               Number(a?.federal_involvement?.sort_order) -
-              Number(b?.federal_involvement?.sort_order),
+              Number(b?.federal_involvement?.sort_order)
           )
           .filter((p) => p.federal_involvement)
-          .map((w) => w?.federal_involvement?.name),
-      ),
+          .map((w) => w?.federal_involvement?.name)
+      )
     );
   }, [works]);
 
@@ -76,8 +76,8 @@ const WorkList = () => {
         [...works]
           .sort((a, b) => a.ministry?.sort_order - b.ministry?.sort_order)
           .filter((w) => w.ministry)
-          .map((w) => w.ministry.name),
-      ),
+          .map((w) => w.ministry.name)
+      )
     );
     return ministry;
   }, [works]);
@@ -89,8 +89,8 @@ const WorkList = () => {
       new Set(
         sort([...nations], "name")
           .map((nation) => nation?.name ?? "")
-          .filter((nation) => nation),
-      ),
+          .filter((nation) => nation)
+      )
     );
 
     return uniqueNations;
@@ -142,7 +142,7 @@ const WorkList = () => {
           const value: string = row.getValue(id) || "";
 
           return filterValues.some((filerValue: string) =>
-            value.includes(filerValue),
+            value.includes(filerValue)
           );
         },
       },
@@ -214,12 +214,12 @@ const WorkList = () => {
             row.original.indigenous_works?.map((work) => work.name) || [];
 
           return filterValues.some((filterValue: string) =>
-            workIndigenousNations.includes(filterValue),
+            workIndigenousNations.includes(filterValue)
           );
         },
       },
     ],
-    [federalInvolvements, indigenousNations, ministries],
+    [federalInvolvements, indigenousNations, ministries]
   );
   return (
     <MasterTrackTable
