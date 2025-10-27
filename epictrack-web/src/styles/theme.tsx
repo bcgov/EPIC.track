@@ -135,7 +135,7 @@ export const BaseTheme = createTheme({
         root: ({ ownerState, theme }) => ({
           boxShadow: "none",
           fontWeight: MET_Header_Font_Weight_Bold,
-          fontFamily: "BCSans",
+          fontFamily: "cursive", 
           padding: "0.75rem 1rem",
           ...(ownerState.size === "medium" && {
             fontSize: "0.875rem",
@@ -360,7 +360,7 @@ export const BaseTheme = createTheme({
     },
   },
   typography: {
-    fontFamily: '"BCSans",·"Noto·Sans",·Verdana,·Arial,·sans-serif',
+    fontFamily: 'cursive',
     h1: {
       fontWeight: MET_Header_Font_Weight_Regular,
       fontSize: "2rem",
