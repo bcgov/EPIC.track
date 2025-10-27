@@ -16,6 +16,7 @@ from api.models import StaffWorkRole as StaffWorkRoleModel
 def check_auth(**kwargs):
     """Check if user is authorized to perform action on the service."""
     raw_roles = kwargs.get("one_of_roles", [])
+    work_id = kwargs.get("work_id")
     permitted_roles = {_normalize_role(r) for r in raw_roles}
 
     token_roles = set(TokenInfo.get_roles())
@@ -24,7 +25,7 @@ def check_auth(**kwargs):
 
     membership_values = {m.value for m in Membership}
     matching_memberships = membership_values & permitted_roles
-    if matching_memberships and _has_team_membership(kwargs, matching_memberships):
+    if matching_memberships and _has_team_membership(work_id, matching_memberships):
         return True
 
     if permitted_roles and _has_elevated_role(permitted_roles):
@@ -52,8 +53,7 @@ def _has_elevated_role(permitted_roles) -> bool:
     return any(role.elevated_role_id in permitted_roles for role in elevated_roles)
 
 
-def _has_team_membership(kwargs, team_permitted_roles) -> bool:
-    work_id = kwargs.get("work_id")
+def _has_team_membership(work_id, team_permitted_roles) -> bool:
     if not work_id:
         return False
 
