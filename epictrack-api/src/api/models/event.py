@@ -95,7 +95,7 @@ class Event(BaseModelVersioned):
         # create alias inside method
         event_config_alias = aliased(EventConfiguration)
 
-        query = cls.find_by_work_ids_and_year(work_ids, search_filters, event_config_alias)
+        include_phase_zero = True
 
         # parse event_types[] filters
         filter_conditions = []
@@ -110,6 +110,8 @@ class Event(BaseModelVersioned):
                         val = int(value)
                         filter_conditions.append(event_config_alias.event_type_id == val)
                     elif key == "event_position":
+                        # EAO Calendar removes phase zero events
+                        include_phase_zero = False
                         positions = [v.strip().upper() for v in value.split(",")]
                         valid_positions = []
                         for position in positions:
@@ -130,6 +132,8 @@ class Event(BaseModelVersioned):
                     current_app.logger.warning(f"Invalid filter format: {f}. Expected format 'key:value'.")
                     continue
 
+        query = cls.find_by_work_ids_and_year(work_ids, search_filters, event_config_alias, include_phase_zero)
+
         if filter_conditions:
             # combine all conditions with OR
             query = query.filter(or_(*filter_conditions))
@@ -138,7 +142,7 @@ class Event(BaseModelVersioned):
         return items, len(items)
 
     @classmethod
-    def find_by_work_ids_and_year(cls, work_ids, search_filters, event_config_alias):
+    def find_by_work_ids_and_year(cls, work_ids, search_filters, event_config_alias, include_phase_zero=True):
         """Find events by work ids and year."""
         start_of_year = date(search_filters.year, 1, 1)
         end_of_year = date(search_filters.year, 12, 31)
@@ -158,9 +162,12 @@ class Event(BaseModelVersioned):
                 Event.is_active.is_(True),
                 start_date <= cast(end_of_year, Date),
                 end_date >= cast(start_of_year, Date),
-                WorkPhase.name.notin_(FIRST_WORK_PHASES),
             )
         )
+
+        if not include_phase_zero:
+            query = query.filter(WorkPhase.name.notin_(FIRST_WORK_PHASES))
+
         return query
 
     @classmethod
