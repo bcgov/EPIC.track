@@ -17,10 +17,13 @@ const WorkByNationChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByNationQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorksByNationQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 }
+  );
 
   const formatData = (data?: WorkByNation[]) => {
     if (!data) return [];
@@ -58,27 +61,29 @@ const WorkByNationChart = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
-            <BarChart
-              layout="vertical"
-              data={chartData}
-              margin={{
-                left: 40, // Increase left margin if names are getting cut off
-              }}
-              height={chartData.length * 30 + 100}
-              width={600} // Adjust this value as needed
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" allowDecimals={false} />
-              <YAxis
-                dataKey="nation"
-                interval={0}
-                tick={{ fontSize: 12 }}
-                type="category"
-                width={100}
-              />
-              <Tooltip />
-              <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
-            </BarChart>
+            {chartData.length > 0 && (
+              <BarChart
+                layout="vertical"
+                data={chartData}
+                margin={{
+                  left: 40, // Increase left margin if names are getting cut off
+                }}
+                height={chartData.length * 30 + 100}
+                width={600} // Adjust this value as needed
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" allowDecimals={false} />
+                <YAxis
+                  dataKey="nation"
+                  interval={0}
+                  tick={{ fontSize: 12 }}
+                  type="category"
+                  width={100}
+                />
+                <Tooltip />
+                <Bar dataKey="count" fill={BAR_COLOR} barSize={20} />
+              </BarChart>
+            )}
           </Box>
         </Grid>
       </Grid>

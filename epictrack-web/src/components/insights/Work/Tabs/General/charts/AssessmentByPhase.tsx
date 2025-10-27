@@ -16,10 +16,13 @@ const AssessmentByPhaseChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetAssessmentsByPhaseQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetAssessmentsByPhaseQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 }
+  );
 
   const formatData = (data?: AssessmentByPhase[]) => {
     if (!data) return [];

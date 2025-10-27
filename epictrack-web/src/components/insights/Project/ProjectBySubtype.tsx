@@ -35,7 +35,7 @@ const ProjectBySubtypeChart = () => {
   }, [projectTypes]);
 
   useEffect(() => {
-    if (selectedType?.id) {
+    if (selectedType?.id && columnFilters.length > 0) {
       loadChartTrigger({
         type_id: selectedType.id,
         columnFilters,

@@ -2,20 +2,18 @@
 
 from typing import List
 
-
 from api.models import db
 from api.models.work_phase import WorkPhase
-from api.models.phase_code import PhaseCode
 from api.models.work import Work
-from api.models.phase_overage_responsibility import OverageResponsibilityEnum
 from api.models.work_type import WorkType
+from api.models.phase_code import PhaseCode as Phase
 from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models.project import Project
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
-from api.services.work_phase import WorkPhaseService
-from api.schemas.response.phase_overage_responsibility_response import PhaseOverageResponsibilityResponseSchema
 from api.insights.insights_table_filters import build_insights_filters
+from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
+from sqlalchemy import func
 
 
 # pylint: disable=not-callable
@@ -27,14 +25,26 @@ class OverageByResponsibilityInsightGenerator:
         """Fetch data from db"""
         filter_exprs = build_insights_filters(filters, "phases") if filters else []
         selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
-        selected_phase = PhaseCode.find_by_id(int(selected_phase_id)) if selected_phase_id != "all" else None
 
-        query = db.session.query(WorkPhase).join(Work, WorkPhase.work_id == Work.id)
+        # Build all necessary subqueries
+        work_subq = get_work_subquery()
+        ext_subq = get_extension_days_subquery()
+        sus_subq = get_suspended_days_subquery()
+        total_days_subq = get_total_days_subquery(ext_subq)
+        days_taken_subq = get_days_taken_subquery(sus_subq)
+        days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
+
+        query = db.session.query(
+            PhaseOverageResponsibility.responsibility.label("responsibility_name"),
+            func.count(func.distinct(WorkPhase.id)).label("count"),
+        ).select_from(WorkPhase) \
+         .join(Work, WorkPhase.work_id == Work.id) \
+         .join(Phase, WorkPhase.phase_id == Phase.id) \
+         .join(PhaseOverageResponsibility, WorkPhase.id == PhaseOverageResponsibility.work_phase_id)
 
         if filters:
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
-            query = query.join(PhaseOverageResponsibility, WorkPhase.id == PhaseOverageResponsibility.work_phase_id)
 
         if staff_id:
             query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
@@ -47,44 +57,34 @@ class OverageByResponsibilityInsightGenerator:
             WorkPhase.legislated.is_(True),
             *filter_exprs if filter_exprs else [],
         )
+
         if selected_work_type:
             query = query.filter(Work.work_type_id == selected_work_type.id)
-        if selected_phase:
-            query = query.filter(WorkPhase.phase_id == selected_phase.id)
+
+        if selected_phase_id != "all":
+            query = query.filter(WorkPhase.phase_id == int(selected_phase_id))
+
+        query = query \
+            .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id) \
+            .where(days_left_subq.c.days_left < 0) \
+            .group_by(PhaseOverageResponsibility.responsibility)
+
         work_phases = query.all()
 
-        overage_by_responsibility = {
-            responsibility.value: {
-                "name": responsibility.value,
-                "responsibility_id": None,
-                "count": 0,
-            }
-            for responsibility in OverageResponsibilityEnum
-        }
-
-        unique_work_ids = list(set(phase.work_id for phase in work_phases))
-
-        for work_id in unique_work_ids:
-            phases_for_work = [phase for phase in work_phases if phase.work_id == work_id]
-            phase_stats = WorkPhaseService.find_work_phase_status(work_id, None, phases_for_work)
-            for stats in phase_stats:
-                responsibility_list = PhaseOverageResponsibilityResponseSchema(many=True).dump(stats["overage_responsibility"])
-                for responsibility in responsibility_list:
-                    overage_by_responsibility[responsibility["responsibility"]]["count"] += 1
-                    if overage_by_responsibility[responsibility["responsibility"]]["responsibility_id"] is None:
-                        overage_by_responsibility[responsibility["responsibility"]]["responsibility_id"] = responsibility["id"]
-
-        return self._format_data(overage_by_responsibility)
+        return self._format_data(work_phases)
 
     def _format_data(self, data) -> List[dict]:
         """Format data to the response format"""
         overage_insights = [
             {
-                "responsibility_name": responsibility_name,
-                "responsibility_id": responsibility_info['responsibility_id'],
-                "count": responsibility_info['count'],
+                "responsibility_name": phase[0].value,
+                "count": phase[1],
             }
-            for responsibility_name, responsibility_info in data.items()
-            if responsibility_info["responsibility_id"] is not None
+            for phase in data
         ]
         return sorted(overage_insights, key=lambda x: x['count'], reverse=True)

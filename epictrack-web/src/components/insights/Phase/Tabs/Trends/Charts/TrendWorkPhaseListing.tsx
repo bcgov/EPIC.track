@@ -72,8 +72,8 @@ const TrendWorkPhaseListing = () => {
   const yearOptions = useMemo(() => {
     const years = workPhases
       .map((workPhase) => {
-        const decisionDate = workPhase.work?.decision_date;
-        return decisionDate ? new Date(decisionDate).getFullYear() : undefined;
+        const endDate = workPhase.work_phase.end_date;
+        return endDate ? new Date(endDate).getFullYear() : undefined;
       })
       .filter((year): year is number => year !== undefined);
 
@@ -132,12 +132,12 @@ const TrendWorkPhaseListing = () => {
         },
       },
       {
-        accessorKey: "work.decision_date",
+        accessorKey: "work_phase.end_date",
         header: "Year Closed",
         filterVariant: "multi-select",
         filterSelectOptions: yearOptions.map(String),
         Cell: ({ row }) => {
-          const date = row.original.work?.decision_date;
+          const date = row.original.work_phase.end_date;
           return <span>{date ? new Date(date).getFullYear() : ""}</span>;
         },
         Filter: ({ header, column }) => {

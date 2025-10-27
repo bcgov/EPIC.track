@@ -17,10 +17,13 @@ const WorksCompletedEachYear = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByYearCompletedQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorksByYearCompletedQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 }
+  );
 
   if (error) {
     showNotification("Could not load Works completed each year", {
@@ -55,26 +58,31 @@ const WorksCompletedEachYear = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
-            <BarChart
-              layout="vertical"
-              width={350}
-              height={chartData.length * 30 + 100}
-              data={formatData(chartData)}
-            >
-              <XAxis allowDecimals={false} type={"number"} />
-              <YAxis
-                dataKey={"name"}
-                type={"category"}
-                width={40}
-                tick={{ fontSize: 12 }}
-              />
-              <Bar dataKey="value">
-                {formatData(chartData).map((entry, index: number) => (
-                  <Cell key={`cell-${entry.id}`} fill={getChartColor(index)} />
-                ))}
-              </Bar>
-              <Tooltip />
-            </BarChart>
+            {chartData.length > 0 && (
+              <BarChart
+                layout="vertical"
+                width={350}
+                height={chartData.length * 30 + 100}
+                data={formatData(chartData)}
+              >
+                <XAxis allowDecimals={false} type={"number"} />
+                <YAxis
+                  dataKey={"name"}
+                  type={"category"}
+                  width={40}
+                  tick={{ fontSize: 12 }}
+                />
+                <Bar dataKey="value">
+                  {formatData(chartData).map((entry, index: number) => (
+                    <Cell
+                      key={`cell-${entry.id}`}
+                      fill={getChartColor(index)}
+                    />
+                  ))}
+                </Bar>
+                <Tooltip />
+              </BarChart>
+            )}
           </Box>
         </Grid>
       </Grid>
