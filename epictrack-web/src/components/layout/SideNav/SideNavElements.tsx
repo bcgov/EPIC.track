@@ -114,12 +114,6 @@ export const Routes: RouteType[] = [
         allowedRoles: [],
         isAuthenticated: false,
       },
-      {
-        name: "Work Staff",
-        path: "/list-management/work-staff",
-        allowedRoles: [],
-        isAuthenticated: false,
-      },
     ],
   },
   {

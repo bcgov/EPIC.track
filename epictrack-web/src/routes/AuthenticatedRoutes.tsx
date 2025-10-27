@@ -12,7 +12,6 @@ import ProjectList from "../components/project/ProjectList";
 import UserList from "../components/user/UserList";
 import TemplateList from "../components/task/template/TemplateList";
 import { MasterProvider } from "../components/shared/MasterContext";
-import WorkStaffList from "../components/work/workStaff/WorkStaffList";
 import WorkPlan from "../components/workPlan";
 import EventCalendar from "../components/eventCalendar/EventCalendar";
 import { ROLES } from "../constants/application-constant";
@@ -86,7 +85,6 @@ const AuthenticatedRoutes = () => {
           </MasterProvider>
         }
       />
-      <Route path="/list-management/work-staff" element={<WorkStaffList />} />
       <Route path="/work-plan" element={<WorkPlan />} />
       <Route element={<AuthGate allowed={[ROLES.MANAGE_USERS]} />}>
         <Route path="/admin/users" element={<UserList />} />
