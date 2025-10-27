@@ -37,10 +37,10 @@ const GeneralWorkPhaseListing = () => {
           workPhases
             .map((workPhase) => workPhase.work?.work_type?.name || "")
             .filter((type) => type)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [workPhases]
+    [workPhases],
   );
 
   const phaseOptions = useMemo(
@@ -50,10 +50,10 @@ const GeneralWorkPhaseListing = () => {
           workPhases
             .map((workPhase) => workPhase.work_phase.name || "")
             .filter((phase) => phase)
-            .sort()
-        )
+            .sort(),
+        ),
       ),
-    [workPhases]
+    [workPhases],
   );
 
   const responsibilityOptions = useMemo(
@@ -64,10 +64,10 @@ const GeneralWorkPhaseListing = () => {
             .flatMap((wp) => wp.overage_responsibility)
             .map((r) => r?.responsibility)
             .filter((r) => r)
-            .sort()
-        )
+            .sort(),
+        ),
       ).sort(),
-    [workPhases]
+    [workPhases],
   );
 
   const columns = useMemo<
@@ -202,14 +202,14 @@ const GeneralWorkPhaseListing = () => {
           ).map((r) => r.responsibility);
 
           const containsAll = filterValue.every((value: any) =>
-            responsibilityList.includes(value)
+            responsibilityList.includes(value),
           );
 
           return containsAll;
         },
       },
     ],
-    [phaseOptions, responsibilityOptions, workTypeOptions]
+    [phaseOptions, responsibilityOptions, workTypeOptions],
   );
   return (
     <MasterTrackTable

@@ -22,7 +22,7 @@ const WorksCreatedEachYear = () => {
       columnFilters,
       staffId: isUserInsights ? staffId : undefined,
     },
-    { skip: columnFilters.length === 0 }
+    { skip: columnFilters.length === 0 },
   );
 
   if (error) {

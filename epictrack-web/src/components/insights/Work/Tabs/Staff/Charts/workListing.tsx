@@ -52,11 +52,11 @@ const WorkList = () => {
             ? workStaff.staff
                 .map((staff) => staff.id)
                 ?.includes(staffId ? staffId : -1)
-            : true
+            : true,
         )
         .map((workStaff) => {
           const work = works.find(
-            (w) => w.eao_team_id === workStaff.eao_team.id
+            (w) => w.eao_team_id === workStaff.eao_team.id,
           );
           if (!work) {
             return null;
@@ -76,16 +76,16 @@ const WorkList = () => {
     return Array.from(
       new Set(
         workStaffs?.map((workStaff) => workStaff.work_lead.full_name).sort() ||
-          []
-      )
+          [],
+      ),
     );
   }, [workStaffs]);
 
   const teams = useMemo(() => {
     return Array.from(
       new Set(
-        workStaffs?.map((workStaff) => workStaff.eao_team.name).sort() || []
-      )
+        workStaffs?.map((workStaff) => workStaff.eao_team.name).sort() || [],
+      ),
     );
   }, [workStaffs]);
 
@@ -95,25 +95,25 @@ const WorkList = () => {
       const staff = workStaffs.flatMap((row: any) =>
         row.staff
           ? row.staff.filter((p: { role: Role }) => p.role.id === roleId)
-          : []
+          : [],
       );
       const staffSorted = sort(staff, "full_name");
       const uniqueStaffNames = Array.from(
         new Set(
           staffSorted.map(
             (staffEntry: any) =>
-              `${staffEntry.last_name}, ${staffEntry.first_name}`
-          )
-        )
+              `${staffEntry.last_name}, ${staffEntry.first_name}`,
+          ),
+        ),
       );
       return uniqueStaffNames;
     },
-    [workStaffs]
+    [workStaffs],
   );
 
   const coLeadOptions = filteredStaffByPosition(WorkStaffRole.TEAM_CO_LEAD);
   const officerAnalystOptions = filteredStaffByPosition(
-    WorkStaffRole.OFFICER_ANALYST
+    WorkStaffRole.OFFICER_ANALYST,
   );
 
   const roleFilterFunction = useCallback(
@@ -136,7 +136,7 @@ const WorkList = () => {
       // Check if any name includes the filter value
       return names.some((name) => filterValue.includes(name));
     },
-    [coLeadOptions, officerAnalystOptions]
+    [coLeadOptions, officerAnalystOptions],
   );
 
   const getRolefilterOptions = useCallback(
@@ -145,7 +145,7 @@ const WorkList = () => {
         ? officerAnalystOptions
         : coLeadOptions;
     },
-    [officerAnalystOptions, coLeadOptions]
+    [officerAnalystOptions, coLeadOptions],
   );
 
   useEffect(() => {
@@ -163,7 +163,7 @@ const WorkList = () => {
               return "";
             }
             const staffRowWithRole = row.staff.filter(
-              (p: { role: Role }) => p.role.id === role
+              (p: { role: Role }) => p.role.id === role,
             );
             return staffRowWithRole
               .map((staff: any) => `${staff.last_name}, ${staff.first_name}`)

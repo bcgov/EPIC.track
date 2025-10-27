@@ -31,7 +31,7 @@ const PercentOfPhasesWithOveragesChart = () => {
       selectedWorkType: String(selectedWorkType?.value) || "all",
       staffId: isUserInsights ? staffId : undefined,
     },
-    { skip: columnFilters.length === 0 }
+    { skip: columnFilters.length === 0 },
   );
 
   const workTypeOptions = useMemo(() => {
@@ -41,8 +41,8 @@ const PercentOfPhasesWithOveragesChart = () => {
         workPhases.map((item) => [
           item.work.work_type_id,
           item.work.work_type.name,
-        ])
-      ).entries()
+        ]),
+      ).entries(),
     );
     return workTypes.map(([id, name]) => ({
       id,
@@ -56,7 +56,7 @@ const PercentOfPhasesWithOveragesChart = () => {
       {
         duration: 3000,
         type: "error",
-      }
+      },
     );
   }
 

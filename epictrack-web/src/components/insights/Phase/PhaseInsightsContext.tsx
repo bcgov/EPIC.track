@@ -25,7 +25,7 @@ export const PhaseInsightsContextProvider: React.FC<
 
   const queryArg = useMemo(
     () => ({ legislated: true, staffId: isUserInsights ? staffId : undefined }),
-    [isUserInsights, staffId]
+    [isUserInsights, staffId],
   );
 
   const { data: workPhasesData, isLoading: loadingWorkPhases } =
@@ -38,7 +38,7 @@ export const PhaseInsightsContextProvider: React.FC<
       workPhases: workPhasesData ?? [],
       loadingWorkPhases,
     }),
-    [workPhasesData, loadingWorkPhases]
+    [workPhasesData, loadingWorkPhases],
   );
   return (
     <PhaseInsightsContext.Provider value={contextValue}>
@@ -51,7 +51,7 @@ export const usePhaseInsightsContext = () => {
   const context = useContext(PhaseInsightsContext);
   if (!context) {
     throw new Error(
-      "usePhaseInsightsContext must be used within a PhaseInsightsContextProvider"
+      "usePhaseInsightsContext must be used within a PhaseInsightsContextProvider",
     );
   }
   return context;

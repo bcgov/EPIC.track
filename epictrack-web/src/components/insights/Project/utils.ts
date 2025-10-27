@@ -9,6 +9,6 @@ export const getProjectsTypes = (projects: Project[]) => {
     }
   });
   return Array.from(map.values()).sort((typeA, typeB) =>
-    typeA.id > typeB.id ? 1 : -1
+    typeA.id > typeB.id ? 1 : -1,
   );
 };

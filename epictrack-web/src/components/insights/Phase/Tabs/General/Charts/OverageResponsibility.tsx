@@ -45,7 +45,7 @@ const OverageResponsibilityChart = () => {
       selectedPhase: String(selectedPhase?.value) || "all",
       staffId: isUserInsights ? staffId : undefined,
     },
-    { skip: columnFilters.length === 0 }
+    { skip: columnFilters.length === 0 },
   );
 
   const workTypeOptions = useMemo(() => {
@@ -55,8 +55,8 @@ const OverageResponsibilityChart = () => {
         workPhases.map((item: any) => [
           item.work.work_type_id,
           item.work.work_type.name,
-        ])
-      ).entries()
+        ]),
+      ).entries(),
     ) as [string, string][];
     return workTypes
       .map(([id, name]) => ({
