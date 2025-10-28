@@ -1,12 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Tooltip, Box } from "@mui/material";
-import {
-  Work,
-  WorkPhase,
-  WorkPhaseAdditionalInfo,
-  WorkPhaseInsight,
-} from "models/work";
+import { WorkPhaseInsight } from "models/work";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";

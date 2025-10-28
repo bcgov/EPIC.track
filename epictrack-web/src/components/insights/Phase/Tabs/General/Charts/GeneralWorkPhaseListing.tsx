@@ -201,7 +201,7 @@ const GeneralWorkPhaseListing = () => {
         },
       },
     ],
-    [phaseOptions, workTypeOptions],
+    [phaseOptions, responsibilityOptions, workTypeOptions],
   );
   return (
     <MasterTrackTable
