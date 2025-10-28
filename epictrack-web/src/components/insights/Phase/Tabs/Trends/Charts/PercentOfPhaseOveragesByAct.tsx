@@ -25,11 +25,14 @@ const PercentOfPhaseOveragesByAct = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetOverageByActQuery({
-    columnFilters,
-    selectedWorkType: String(selectedWorkType?.value) || "all",
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetOverageByActQuery(
+    {
+      columnFilters,
+      selectedWorkType: String(selectedWorkType?.value) || "all",
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const workTypeOptions = useMemo(() => {
     if (!workPhases) return [];
@@ -63,9 +66,9 @@ const PercentOfPhaseOveragesByAct = () => {
 
   return (
     <GrayBox sx={{ height: "100%" }}>
-      <Grid container spacing={1} sx={{ height: "100%" }}>
+      <Grid container spacing={1}>
         <Grid item xs={6}>
-          <ETCaption1 bold>AVERAGE PHASE OVERAGE BY ACT</ETCaption1>
+          <ETCaption1 bold>% OF PHASES WITH OVERAGES BY ACT</ETCaption1>
         </Grid>
         <Grid item xs={6} container justifyContent="flex-end">
           <Box sx={{ width: "200px" }}>
@@ -116,39 +119,46 @@ const PercentOfPhaseOveragesByAct = () => {
               pb: 4,
             }}
           >
-            <BarChart
-              layout="vertical"
-              data={chartData}
-              margin={{ left: 80, bottom: 40 }}
-              height={Math.max(chartData.length * 80 + 100, 350)}
-              width={400}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                type="number"
-                allowDecimals={false}
-                label={{
-                  value: "% of Phases with Overage",
-                  position: "insideBottom",
-                  offset: -5,
-                }}
-              />
-              <YAxis
-                dataKey="phase_act"
-                type="category"
-                width={40}
-                tick={{ fontSize: 12 }}
-              />
-              <Tooltip
-                formatter={(value: number, name: string) => [`${value}%`, name]}
-              />
-              <Bar
-                dataKey="percent_overage"
-                fill={BAR_COLOR}
-                barSize={20}
-                name="Average Overage"
-              />
-            </BarChart>
+            {chartData.length > 0 && (
+              <BarChart
+                layout="vertical"
+                data={chartData}
+                margin={{ left: 80, bottom: 40 }}
+                height={Math.max(chartData.length * 80 + 100, 350)}
+                width={400}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  type="number"
+                  allowDecimals={false}
+                  label={{
+                    value: "% of Phases with Overage",
+                    position: "insideBottom",
+                    offset: -5,
+                    dy: 20,
+                    style: { fontSize: 16 },
+                  }}
+                />
+                <YAxis
+                  dataKey="phase_act"
+                  type="category"
+                  width={40}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip
+                  formatter={(value: number, name: string) => [
+                    `${value}%`,
+                    name,
+                  ]}
+                />
+                <Bar
+                  dataKey="percent_overage"
+                  fill={BAR_COLOR}
+                  barSize={20}
+                  name="Average Overage"
+                />
+              </BarChart>
+            )}
           </Box>
         </Grid>
       </Grid>

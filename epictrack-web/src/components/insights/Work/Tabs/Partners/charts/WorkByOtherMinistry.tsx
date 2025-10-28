@@ -24,10 +24,13 @@ const WorkByOtherMinistryChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkByMinistryQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorkByMinistryQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const formatData = (data?: WorkByMinistry[]) => {
     if (!data) return [];

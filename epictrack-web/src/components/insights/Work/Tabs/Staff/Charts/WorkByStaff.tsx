@@ -23,10 +23,13 @@ const WorkByStaffChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByStaffQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorksByStaffQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   if (error) {
     showNotification("Could not load Works by Staff data", {
@@ -63,30 +66,32 @@ const WorkByStaffChart = () => {
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
           <Box style={{ width: "100%", maxHeight: 500, overflowY: "auto" }}>
-            <BarChart
-              layout="vertical"
-              data={formatData(chartData)}
-              margin={{
-                left: 40, // Increase left margin if names are getting cut off
-              }}
-              height={chartData.length * 30 + 100}
-              width={440} // Adjust this value as needed
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis
-                dataKey="name"
-                type="category"
-                width={45} // Adjust the width to give more space for text
-                tick={{ fontSize: 12 }} // Make sure to pass the width
-              />
-              <Tooltip />
-              <Bar dataKey="value" fill="#82ca9d" barSize={20}>
-                {chartData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={"#4bacc6"} />
-                ))}
-              </Bar>
-            </BarChart>
+            {chartData.length > 0 && (
+              <BarChart
+                layout="vertical"
+                data={formatData(chartData)}
+                margin={{
+                  left: 40, // Increase left margin if names are getting cut off
+                }}
+                height={chartData.length * 30 + 100}
+                width={440} // Adjust this value as needed
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={45} // Adjust the width to give more space for text
+                  tick={{ fontSize: 12 }} // Make sure to pass the width
+                />
+                <Tooltip />
+                <Bar dataKey="value" fill="#82ca9d" barSize={20}>
+                  {chartData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={"#4bacc6"} />
+                  ))}
+                </Bar>
+              </BarChart>
+            )}
           </Box>
         </Grid>
       </Grid>

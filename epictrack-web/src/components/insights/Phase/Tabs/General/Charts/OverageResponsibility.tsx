@@ -1,7 +1,7 @@
 import { Grid, Box } from "@mui/material";
-import BarChartSkeleton from "components/insights/BarChartSkeleton";
 import { useInsightsContext } from "components/insights/InsightsContext";
 import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsightsContext";
+import PieChartSkeleton from "components/insights/PieChartSkeleton";
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { getChartColor } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
@@ -10,7 +10,14 @@ import { showNotification } from "components/shared/notificationProvider";
 import TrackSelect from "components/shared/TrackSelect";
 import { ResponsibilityByWorktypePhase } from "models/insights";
 import { useMemo, useState } from "react";
-import { Cell, Legend, Pie, PieChart, Tooltip } from "recharts";
+import {
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import { useGetOverageResponsibilityQuery } from "services/rtkQuery/phaseInsights";
 
 const OverageResponsibilityChart = () => {
@@ -31,12 +38,15 @@ const OverageResponsibilityChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetOverageResponsibilityQuery({
-    columnFilters,
-    selectedWorkType: String(selectedWorkType?.value) || "all",
-    selectedPhase: String(selectedPhase?.value) || "all",
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetOverageResponsibilityQuery(
+    {
+      columnFilters,
+      selectedWorkType: String(selectedWorkType?.value) || "all",
+      selectedPhase: String(selectedPhase?.value) || "all",
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const workTypeOptions = useMemo(() => {
     if (!workPhases) return [];
@@ -64,7 +74,14 @@ const OverageResponsibilityChart = () => {
       const name = item.work.current_work_phase.phase.name;
       uniquePhases.set(id, name);
     });
+    // Remove any duplicate names as well as duplicate ids
+    const seenNames = new Set<string>();
     return Array.from(uniquePhases.entries())
+      .filter(([_, name]) => {
+        if (seenNames.has(name)) return false;
+        seenNames.add(name);
+        return true;
+      })
       .map(([id, name]) => ({ id, name }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [data, workPhases]);
@@ -77,7 +94,7 @@ const OverageResponsibilityChart = () => {
   }
 
   if (isChartLoading || loadingWorkPhases || !data) {
-    return <BarChartSkeleton loading={isChartLoading} />;
+    return <PieChartSkeleton loading={isChartLoading} />;
   }
 
   const formatData = (data?: ResponsibilityByWorktypePhase[]) => {
@@ -95,9 +112,9 @@ const OverageResponsibilityChart = () => {
 
   return (
     <GrayBox sx={{ height: "100%" }}>
-      <Grid container spacing={1} sx={{ height: "100%" }}>
+      <Grid container spacing={1}>
         <Grid item xs={4}>
-          <ETCaption1 bold>Overage Responsibility</ETCaption1>
+          <ETCaption1 bold>OVERAGE RESPONSIBILITY</ETCaption1>
         </Grid>
         <Grid item xs={4} container justifyContent="flex-end">
           <Box sx={{ width: "200px" }}>
@@ -160,7 +177,7 @@ const OverageResponsibilityChart = () => {
           </Box>
         </Grid>
         <Grid item xs={12} container justifyContent={"center"}>
-          <Box style={{ width: "100%", height: "300px", overflowY: "scroll" }}>
+          <ResponsiveContainer width="100%" height={300}>
             <PieChart width={400} height={350}>
               <Pie
                 data={chartData}
@@ -183,13 +200,11 @@ const OverageResponsibilityChart = () => {
                 iconSize={16}
                 wrapperStyle={{
                   fontSize: "16px",
-                  maxWidth: "100px",
-                  overflow: "hidden",
                 }}
               />
               <Tooltip />
             </PieChart>
-          </Box>
+          </ResponsiveContainer>
         </Grid>
       </Grid>
     </GrayBox>

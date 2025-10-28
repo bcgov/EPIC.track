@@ -6,11 +6,12 @@ from api.models import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
 from api.models.work_type import WorkType
-from api.services.work_phase import WorkPhaseService
-from api.models.phase_overage_responsibility import PhaseOverageResponsibility
+from api.models.phase_code import PhaseCode as Phase
 from api.models.project import Project
 from api.insights.insights_table_filters import build_insights_filters
+from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
 from api.utils.helpers import filter_query_by_staff
+from sqlalchemy import func
 
 
 # pylint: disable=not-callable
@@ -22,12 +23,27 @@ class AveragePhaseOverageInsightGenerator:
         """Fetch data from db"""
         filter_exprs = build_insights_filters(filters, "phases") if filters else []
         selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
-        query = db.session.query(WorkPhase).join(Work, WorkPhase.work_id == Work.id)
+
+        # Build all necessary subqueries
+        work_subq = get_work_subquery()
+        ext_subq = get_extension_days_subquery()
+        sus_subq = get_suspended_days_subquery()
+        total_days_subq = get_total_days_subquery(ext_subq)
+        days_taken_subq = get_days_taken_subquery(sus_subq)
+        days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
+
+        # pylint: disable=duplicate-code
+
+        query = db.session.query(
+            func.max(Phase.name).label("phase_name"),
+            func.avg(func.coalesce(days_left_subq.c.days_left, 0)).label("average_overage"),
+        ).select_from(WorkPhase) \
+         .join(Work, WorkPhase.work_id == Work.id) \
+         .join(Phase, WorkPhase.phase_id == Phase.id)
 
         if filters:
             query = query.join(WorkType, Work.work_type_id == WorkType.id)
             query = query.join(Project, Work.project_id == Project.id)
-            query = query.outerjoin(PhaseOverageResponsibility, WorkPhase.id == PhaseOverageResponsibility.work_phase_id)
 
         if staff_id:
             query = filter_query_by_staff(query, staff_id)
@@ -42,46 +58,29 @@ class AveragePhaseOverageInsightGenerator:
         if selected_work_type:
             query = query.filter(Work.work_type_id == selected_work_type.id)
 
+        query = query \
+            .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id) \
+            .where(days_left_subq.c.days_left < 0) \
+            .group_by(WorkPhase.phase_id, Phase.name)
+
+        # pylint: enable=duplicate-code
+
         work_phases = query.all()
 
-        overage_by_phase = {
-            phase.phase_id: {
-                "phase": phase.name,
-                "total_overage": 0,
-                "average_overage": 0,
-                "count": 0
-            }
-            for phase in work_phases
-        }
-
-        unique_work_ids = list(set(phase.work_id for phase in work_phases))
-
-        for work_id in unique_work_ids:
-            phases_for_work = [phase for phase in work_phases if phase.work_id == work_id]
-            phase_stats = WorkPhaseService.find_work_phase_status(work_id, None, phases_for_work)
-            for stats in phase_stats:
-                if stats["days_left"] < 0:
-                    overage_by_phase[stats["work_phase"].phase_id]["total_overage"] += abs(stats["days_left"])
-                    overage_by_phase[stats["work_phase"].phase_id]["count"] += 1
-
-        for phase_id, stats in overage_by_phase.items():
-            if stats["count"] > 0:
-                overage_by_phase[phase_id]["average_overage"] = stats["total_overage"] / stats["count"]
-            else:
-                overage_by_phase[phase_id]["average_overage"] = 0
-
-        return self._format_data(overage_by_phase)
+        return self._format_data(work_phases)
 
     def _format_data(self, data) -> List[dict]:
         """Format data to the response format"""
         phase_insights = [
             {
-                "phase_id": phase_id,
-                "phase": phase_info['phase'],
-                "total_overage": phase_info['total_overage'],
-                "average_overage": phase_info['average_overage'],
-                "count": phase_info['count'],
+                "phase": phase[0],
+                "average_overage": round(abs(phase[1])),
             }
-            for phase_id, phase_info in data.items()
+            for phase in data
         ]
         return sorted(phase_insights, key=lambda x: x['average_overage'], reverse=True)
