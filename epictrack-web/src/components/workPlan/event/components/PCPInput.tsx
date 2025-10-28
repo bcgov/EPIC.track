@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { ETFormLabel, ETFormLabelWithCharacterLimit } from "../../../shared";
 import { Grid, TextField } from "@mui/material";
@@ -12,7 +12,7 @@ const PCPInput = () => {
   const topicRegister = register("topic");
   const numberResponsesRegister = register("number_of_responses");
 
-  const [topicCount, setTopicCount] = React.useState<number>(0);
+  const [topicCount, setTopicCount] = useState<number>(0);
 
   const topicChangeHandler = (event: any) => {
     setTopicCount(event.target.value.length);

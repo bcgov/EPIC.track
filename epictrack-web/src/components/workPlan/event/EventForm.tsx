@@ -778,13 +778,14 @@ const EventForm = ({
           </Grid>
           <Grid
             container
+            item
+            xs={12}
             columnSpacing={2}
             rowSpacing={2}
             sx={{
-              px: 1,
-              pt: 1,
-              pb: 0,
+              padding: "0.5rem 0.5rem 0 0",
               mt: 0,
+              ml: 0,
               backgroundColor: Palette.white,
               borderTop: `1px solid ${Palette.neutral.bg.dark}`,
             }}

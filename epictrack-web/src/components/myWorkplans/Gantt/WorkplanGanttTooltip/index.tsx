@@ -1,4 +1,4 @@
-import { TrackTooltip } from "components/common/TrackTooltip";
+import { TrackTooltip } from "components/shared/TrackTooltip";
 import { TaskBarTooltipProps } from "components/gantt";
 import { TooltipBody } from "./Body";
 
