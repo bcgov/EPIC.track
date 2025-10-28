@@ -30,6 +30,7 @@ class WorkClosureByWorkState:
             .filter(
                 Work.work_decision_date.isnot(None),
                 Staff.id == staff_id if staff_id else True,
+                StaffWorkRole.is_active.is_(True) if staff_id else True,
                 *filter_exprs if filter_exprs else []
             )
             .join(Work.work_type)

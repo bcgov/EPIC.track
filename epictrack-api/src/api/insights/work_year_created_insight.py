@@ -29,7 +29,11 @@ class WorkByYearOpenedInsightGenerator:
             .join(Work.project)
             .join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
             .join(Staff, StaffWorkRole.staff_id == Staff.id)
-            .filter(Staff.id == staff_id if staff_id else True, *filter_exprs if filter_exprs else [])
+            .filter(
+                Staff.id == staff_id if staff_id else True,
+                StaffWorkRole.is_active.is_(True) if staff_id else True,
+                *filter_exprs if filter_exprs else []
+            )
             .group_by(extract('year', Work.start_date))
             .order_by(extract('year', Work.start_date).desc())
             .all()

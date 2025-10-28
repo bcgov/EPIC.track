@@ -1,5 +1,6 @@
 import { Grid } from "@mui/material";
 import { ETHeading3, ETPageContainer } from "components/shared";
+import NoResultsFound from "components/NoResultsFound";
 import WorkInsights from "./Work";
 import ProjectInsights from "./Project";
 import ButtonBar from "./ButtonBar";
@@ -35,7 +36,8 @@ const InsightHeaderStyle = {
 };
 
 const Main = () => {
-  const { activeTab } = useInsightsContext();
+  const { activeTab, isUserAssignedToWork, isUserInsights } =
+    useInsightsContext();
   return (
     <ETPageContainer>
       <Grid container direction="row" gap={2}>
@@ -49,9 +51,15 @@ const Main = () => {
                 Work Dashboard
               </ETHeading3>
             </Grid>
-            <Grid item xs={12} sx={InsightBoxWrapperStyle}>
-              <WorkInsights />
-            </Grid>
+            {!isUserAssignedToWork && isUserInsights ? (
+              <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+                <NoResultsFound />
+              </Grid>
+            ) : (
+              <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+                <WorkInsights />
+              </Grid>
+            )}
           </Case>
           <Case condition={activeTab === INSIGHTS_TAB.Project}>
             <Grid container item xs={12} sx={InsightHeaderStyle}>
@@ -59,9 +67,15 @@ const Main = () => {
                 Project Dashboard
               </ETHeading3>
             </Grid>
-            <Grid item xs={12} sx={InsightBoxWrapperStyle}>
-              <ProjectInsights />
-            </Grid>
+            {!isUserAssignedToWork && isUserInsights ? (
+              <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+                <NoResultsFound />
+              </Grid>
+            ) : (
+              <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+                <ProjectInsights />
+              </Grid>
+            )}
           </Case>
           <Case condition={activeTab === INSIGHTS_TAB.Phase}>
             <Grid container item xs={12} sx={InsightHeaderStyle}>
@@ -69,9 +83,15 @@ const Main = () => {
                 Phase Dashboard
               </ETHeading3>
             </Grid>
-            <Grid item xs={12} sx={InsightBoxWrapperStyle}>
-              <PhaseInsights />
-            </Grid>
+            {!isUserAssignedToWork && isUserInsights ? (
+              <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+                <NoResultsFound />
+              </Grid>
+            ) : (
+              <Grid item xs={12} sx={InsightBoxWrapperStyle}>
+                <PhaseInsights />
+              </Grid>
+            )}
           </Case>
         </Switch>
       </Grid>
