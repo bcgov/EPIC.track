@@ -7,7 +7,7 @@ import {
 } from "models/insights";
 import { prepareHeaders } from "./util";
 import { ColumnFilter } from "components/shared/MasterTrackTable/type";
-import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
+import { WorkPhaseInsight } from "models/work";
 
 function buildQueryString(
   base: string,
@@ -33,7 +33,7 @@ export const phaseInsightsApi = createApi({
   }),
   endpoints: (builder) => ({
     getWorkPhases: builder.query<
-      ({ work: Work } & WorkPhase & WorkPhaseAdditionalInfo)[],
+      WorkPhaseInsight[],
       { legislated?: boolean; staffId?: number } | void
     >({
       query: ({ legislated = true, staffId } = {}) =>

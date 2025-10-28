@@ -124,3 +124,19 @@ export enum WorkStateEnum {
   CLOSED,
   COMPLETED,
 }
+
+export interface WorkPhaseInsight {
+  work_id: number;
+  work_type_id: number;
+  work_phase_id: number;
+  work_title: string;
+  work_type_name: string;
+  phase_name: string;
+  phase_id: number;
+  work_phase_end_date: string;
+  ea_act_name: string;
+  phase_overage_responsibilities: string[];
+  total_days: number;
+  days_taken: number;
+  days_left: number;
+}

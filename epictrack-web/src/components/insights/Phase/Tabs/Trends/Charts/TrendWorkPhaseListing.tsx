@@ -1,7 +1,12 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Tooltip, Box } from "@mui/material";
-import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
+import {
+  Work,
+  WorkPhase,
+  WorkPhaseAdditionalInfo,
+  WorkPhaseInsight,
+} from "models/work";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
@@ -35,7 +40,7 @@ const TrendWorkPhaseListing = () => {
       Array.from(
         new Set(
           workPhases
-            .map((workPhase) => workPhase.work?.work_type?.name || "")
+            .map((workPhase) => workPhase.work_type_name || "")
             .filter((type) => type)
             .sort(),
         ),
@@ -48,7 +53,7 @@ const TrendWorkPhaseListing = () => {
       Array.from(
         new Set(
           workPhases
-            .map((workPhase) => workPhase.work_phase.name || "")
+            .map((workPhase) => workPhase.phase_name || "")
             .filter((phase) => phase)
             .sort(),
         ),
@@ -61,7 +66,7 @@ const TrendWorkPhaseListing = () => {
       Array.from(
         new Set(
           workPhases
-            .map((workPhase) => workPhase.work?.ea_act?.name || "")
+            .map((workPhase) => workPhase.ea_act_name || "")
             .filter((act) => act)
             .sort(),
         ),
@@ -72,7 +77,7 @@ const TrendWorkPhaseListing = () => {
   const yearOptions = useMemo(() => {
     const years = workPhases
       .map((workPhase) => {
-        const endDate = workPhase.work_phase.end_date;
+        const endDate = workPhase.work_phase_end_date;
         return endDate ? new Date(endDate).getFullYear() : undefined;
       })
       .filter((year): year is number => year !== undefined);
@@ -80,21 +85,17 @@ const TrendWorkPhaseListing = () => {
     return Array.from(new Set(years)).sort((a, b) => a - b);
   }, [workPhases]);
 
-  const columns = useMemo<
-    MRT_ColumnDef<{ work: Work } & WorkPhase & WorkPhaseAdditionalInfo>[]
-  >(
+  const columns = useMemo<MRT_ColumnDef<WorkPhaseInsight>[]>(
     () => [
       {
-        accessorKey: "work.title",
+        accessorKey: "work_title",
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle
-            to={`/work-plan?work_id=${
-              row.original.work?.id ?? row.original.id
-            }`}
+            to={`/work-plan?work_id=${row.original.work_id}`}
             enableTooltip
-            tooltip={row.original.work?.title ?? ""}
+            tooltip={row.original.work_title ?? ""}
           >
             {renderedCellValue}
           </ETGridTitle>
@@ -103,7 +104,7 @@ const TrendWorkPhaseListing = () => {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "work.ea_act.name",
+        accessorKey: "ea_act_name",
         header: "Act",
         filterVariant: "multi-select",
         filterSelectOptions: eaActOptions,
@@ -132,12 +133,12 @@ const TrendWorkPhaseListing = () => {
         },
       },
       {
-        accessorKey: "work_phase.end_date",
+        accessorKey: "work_phase_end_date",
         header: "Year Closed",
         filterVariant: "multi-select",
         filterSelectOptions: yearOptions.map(String),
         Cell: ({ row }) => {
-          const date = row.original.work_phase.end_date;
+          const date = row.original.work_phase_end_date;
           return <span>{date ? new Date(date).getFullYear() : ""}</span>;
         },
         Filter: ({ header, column }) => {
@@ -166,7 +167,7 @@ const TrendWorkPhaseListing = () => {
         },
       },
       {
-        accessorKey: "work.work_type.name",
+        accessorKey: "work_type_name",
         header: "Work type",
         filterVariant: "multi-select",
         filterSelectOptions: workTypeOptions,
@@ -195,7 +196,7 @@ const TrendWorkPhaseListing = () => {
         },
       },
       {
-        accessorKey: "work_phase.name",
+        accessorKey: "phase_name",
         header: "Phase",
         filterVariant: "multi-select",
         filterSelectOptions: phaseOptions,
@@ -229,7 +230,7 @@ const TrendWorkPhaseListing = () => {
         Cell: ({ row }) => {
           return (
             <span>
-              {row.original.days_taken}/{row.original.total_number_of_days} days
+              {row.original.days_taken}/{row.original.total_days} days
             </span>
           );
         },
@@ -257,7 +258,7 @@ const TrendWorkPhaseListing = () => {
       initialState={{
         sorting: [
           {
-            id: "work.title",
+            id: "work_title",
             desc: false,
           },
         ],

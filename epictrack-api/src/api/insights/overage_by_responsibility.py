@@ -56,6 +56,8 @@ class OverageByResponsibilityInsightGenerator:
             WorkPhase.is_deleted.is_(False),
             WorkPhase.legislated.is_(True),
             *filter_exprs if filter_exprs else [],
+            PhaseOverageResponsibility.is_active.is_(True),
+            PhaseOverageResponsibility.is_deleted.is_(False),
         )
 
         if selected_work_type:

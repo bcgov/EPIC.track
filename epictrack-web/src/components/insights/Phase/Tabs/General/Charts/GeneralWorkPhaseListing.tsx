@@ -1,7 +1,7 @@
 import { FC, useEffect, useMemo, useState } from "react";
 import { MRT_ColumnDef } from "material-react-table";
 import { Tooltip, Box } from "@mui/material";
-import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
+import { WorkPhaseInsight } from "models/work";
 import { searchFilter } from "components/shared/MasterTrackTable/filters";
 import { rowsPerPageOptions } from "components/shared/MasterTrackTable/utils";
 import { TableFilter } from "components/shared/filterSelect/TableFilter";
@@ -35,7 +35,7 @@ const GeneralWorkPhaseListing = () => {
       Array.from(
         new Set(
           workPhases
-            .map((workPhase) => workPhase.work?.work_type?.name || "")
+            .map((workPhase) => workPhase.work_type_name || "")
             .filter((type) => type)
             .sort(),
         ),
@@ -48,7 +48,7 @@ const GeneralWorkPhaseListing = () => {
       Array.from(
         new Set(
           workPhases
-            .map((workPhase) => workPhase.work_phase.name || "")
+            .map((workPhase) => workPhase.phase_name || "")
             .filter((phase) => phase)
             .sort(),
         ),
@@ -61,30 +61,25 @@ const GeneralWorkPhaseListing = () => {
       Array.from(
         new Set(
           workPhases
-            .flatMap((wp) => wp.overage_responsibility)
-            .map((r) => r?.responsibility)
+            .flatMap((wp) => wp.phase_overage_responsibilities ?? [])
             .filter((r) => r)
             .sort(),
         ),
-      ).sort(),
+      ),
     [workPhases],
   );
 
-  const columns = useMemo<
-    MRT_ColumnDef<{ work: Work } & WorkPhase & WorkPhaseAdditionalInfo>[]
-  >(
+  const columns = useMemo<MRT_ColumnDef<WorkPhaseInsight>[]>(
     () => [
       {
-        accessorKey: "work.title",
+        accessorKey: "work_title",
         header: "Name",
         size: 300,
         Cell: ({ row, renderedCellValue }) => (
           <ETGridTitle
-            to={`/work-plan?work_id=${
-              row.original.work?.id ?? row.original.id
-            }`}
+            to={`/work-plan?work_id=${row.original.work_id}`}
             enableTooltip
-            tooltip={row.original.work?.title ?? ""}
+            tooltip={row.original.work_title ?? ""}
           >
             {renderedCellValue}
           </ETGridTitle>
@@ -93,7 +88,7 @@ const GeneralWorkPhaseListing = () => {
         filterFn: searchFilter,
       },
       {
-        accessorKey: "work.work_type.name",
+        accessorKey: "work_type_name",
         header: "Work type",
         filterVariant: "multi-select",
         filterSelectOptions: workTypeOptions,
@@ -122,7 +117,7 @@ const GeneralWorkPhaseListing = () => {
         },
       },
       {
-        accessorKey: "work_phase.name",
+        accessorKey: "phase_name",
         header: "Phase",
         filterVariant: "multi-select",
         filterSelectOptions: phaseOptions,
@@ -156,7 +151,7 @@ const GeneralWorkPhaseListing = () => {
         Cell: ({ row }) => {
           return (
             <span>
-              {row.original.days_taken}/{row.original.total_number_of_days} days
+              {row.original.days_taken}/{row.original.total_days} days
             </span>
           );
         },
@@ -180,10 +175,11 @@ const GeneralWorkPhaseListing = () => {
         filterVariant: "multi-select",
         filterSelectOptions: responsibilityOptions as string[],
         Cell: ({ row }) => {
-          const responsibilityString = (
-            row.original.overage_responsibility ?? []
-          ).map((r) => r.responsibility);
-          return <span>{responsibilityString.join(", ")}</span>;
+          return (
+            <span>
+              {row.original.phase_overage_responsibilities.join(", ")}
+            </span>
+          );
         },
         Filter: ({ header, column }) => {
           return (
@@ -197,19 +193,15 @@ const GeneralWorkPhaseListing = () => {
           );
         },
         filterFn: (row, id, filterValue) => {
-          const responsibilityList = (
-            row.original.overage_responsibility ?? []
-          ).map((r) => r.responsibility);
-
           const containsAll = filterValue.every((value: any) =>
-            responsibilityList.includes(value),
+            row.original.phase_overage_responsibilities.includes(value),
           );
 
           return containsAll;
         },
       },
     ],
-    [phaseOptions, responsibilityOptions, workTypeOptions],
+    [phaseOptions, workTypeOptions],
   );
   return (
     <MasterTrackTable
@@ -218,7 +210,7 @@ const GeneralWorkPhaseListing = () => {
       initialState={{
         sorting: [
           {
-            id: "work.title",
+            id: "work_title",
             desc: false,
           },
         ],
