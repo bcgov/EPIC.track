@@ -6,6 +6,7 @@ type TrackPopperProps = {
   body: React.ReactNode;
   children: React.ReactElement;
 } & Partial<TooltipProps>;
+
 export const TrackTooltip = styled(
   ({ className, body, ...props }: TrackPopperProps) => (
     <Tooltip
