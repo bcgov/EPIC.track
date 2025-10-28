@@ -43,6 +43,8 @@ def get_filtered_work_phases(filter_exprs=None, selected_work_type=None, selecte
         query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
         query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
         query = query.filter(Staff.id == staff_id)
+        query = query.filter(Staff.is_active.is_(True))
+        query = query.filter(StaffWorkRole.is_active.is_(True))
 
     query = query.filter(
         WorkPhase.is_active.is_(True),

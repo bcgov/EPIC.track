@@ -1,12 +1,20 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { INSIGHTS_TAB, InsightsTab } from "./constants";
 import { useAppSelector } from "hooks";
+import { workService } from "services/workService/workService";
 
 interface InsightsContextState {
   activeTab: InsightsTab;
   setActiveTab: (tab: InsightsTab) => void;
   isUserInsights: boolean;
   setIsUserInsights: (isUser: boolean) => void;
+  isUserAssignedToWork: boolean;
   staffId?: number;
 }
 
@@ -19,6 +27,7 @@ export const InsightsContext = createContext<InsightsContextState | undefined>({
   setIsUserInsights: () => {
     return;
   },
+  isUserAssignedToWork: false,
   staffId: undefined,
 });
 
@@ -30,8 +39,27 @@ export const InsightsContextProvider: React.FC<
 > = ({ children }) => {
   const [activeTab, setActiveTab] = useState<InsightsTab>(INSIGHTS_TAB.Work);
   const [isUserInsights, setIsUserInsights] = useState<boolean>(false);
+  const [isUserAssignedToWork, setIsUserAssignedToWork] =
+    useState<boolean>(false);
   const user = useAppSelector((state) => state.user.userDetail);
   const staffId = user?.staffId || undefined;
+
+  useEffect(() => {
+    const fetchStaffWorks = async () => {
+      if (staffId) {
+        try {
+          const response = await workService.getWorkIdsByStaff(staffId);
+          setIsUserAssignedToWork(response.data && response.data.length > 0);
+        } catch (error) {
+          console.error("Error fetching Staff's works:", error);
+          setIsUserAssignedToWork(false);
+        }
+      } else {
+        setIsUserAssignedToWork(false);
+      }
+    };
+    fetchStaffWorks();
+  }, [staffId]);
 
   const contextValue = useMemo(
     () => ({
@@ -39,9 +67,10 @@ export const InsightsContextProvider: React.FC<
       setActiveTab,
       isUserInsights,
       setIsUserInsights,
+      isUserAssignedToWork,
       staffId,
     }),
-    [activeTab, isUserInsights, staffId],
+    [activeTab, isUserInsights, staffId, isUserAssignedToWork],
   );
 
   return (

@@ -36,6 +36,8 @@ class WorkStaffInsightGenerator:
 
         if staff_id:
             query = query.filter(Staff.id == staff_id)
+            query = query.filter(Staff.is_active.is_(True))
+            query = query.filter(StaffWorkRole.is_active.is_(True))
 
         query = query.filter(
             Work.is_active.is_(True),

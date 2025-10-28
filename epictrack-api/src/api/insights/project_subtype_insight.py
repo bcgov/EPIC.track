@@ -35,6 +35,8 @@ class ProjectBySubTypeInsightGenerator:
                 .join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
                 .join(Staff, StaffWorkRole.staff_id == Staff.id)
                 .filter(Staff.id == staff_id)
+                .filter(Staff.is_active.is_(True))
+                .filter(StaffWorkRole.is_active.is_(True))
             )
 
         partition_query = partition_query.filter(
