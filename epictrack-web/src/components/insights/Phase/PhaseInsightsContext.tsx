@@ -33,8 +33,6 @@ export const PhaseInsightsContextProvider: React.FC<
       refetchOnMountOrArgChange: true,
     });
 
-  console.log(workPhasesData?.length);
-
   const contextValue = useMemo(
     () => ({
       workPhases: workPhasesData ?? [],

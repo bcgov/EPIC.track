@@ -1,8 +1,6 @@
 """Generate filters from front end for insights"""
-from operator import and_
 from typing import List, Dict, Any
 
-# Import your models
 from api.models.work import Work
 from api.models.project import Project
 from api.models.work_type import WorkType
@@ -19,6 +17,8 @@ from api.models.proponent import Proponent
 from api.models.region import Region
 from api.models.ea_act import EAAct
 from sqlalchemy import extract
+from sqlalchemy.sql import exists, and_
+
 
 # The keys in the filter map correspond to the id values from the front end table filters
 work_table_filter_map = {
@@ -50,9 +50,14 @@ phase_table_filter_map = {
     "work.title": lambda v: Work.title.ilike(f"%{v}%"),
     "work.work_type.name": lambda v: Work.work_type.has(WorkType.name.in_(v)),
     "work_phase.name": WorkPhase.name.in_,
-    "overage_responsibility": PhaseOverageResponsibility.responsibility.in_,
+    "overage_responsibility": lambda v: exists().where(
+        and_(
+            PhaseOverageResponsibility.work_phase_id == WorkPhase.id,
+            PhaseOverageResponsibility.responsibility.in_(v)
+        )
+    ).correlate(WorkPhase),
     "work.ea_act.name": lambda v: Work.ea_act.has(EAAct.name.in_(v)),
-    "work.decision_date": lambda v: extract('year', Work.decision_date).in_(v),
+    "work_phase.end_date": lambda v: extract('year', WorkPhase.end_date).in_(v),
 }
 
 WORKS = "works"

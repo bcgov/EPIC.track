@@ -24,10 +24,13 @@ const WorkByFederalInvolvementChart = () => {
     data,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByFederalInvolvementQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorksByFederalInvolvementQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   const formatData = (data?: WorkByFederalInvolvement[]) => {
     if (!data) return [];

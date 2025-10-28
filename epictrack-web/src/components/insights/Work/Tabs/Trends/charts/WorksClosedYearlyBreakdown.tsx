@@ -23,10 +23,13 @@ const WorksClosedYearlyBreakdown = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorkClosureBreakdownQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorkClosureBreakdownQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   useEffect(() => {
     if (!chartData) return;

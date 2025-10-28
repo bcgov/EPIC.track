@@ -1,35 +1,43 @@
 """Utility functions for insights calculations."""
 
-from sqlalchemy import extract
-
-from api.models import db
-from api.services.work_phase import WorkPhaseService
+from api.models.db import db
 from api.models.work_phase import WorkPhase
 from api.models.work import Work
 from api.models.work_type import WorkType
-from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models.project import Project
 from api.models.staff import Staff
 from api.models.staff_work_role import StaffWorkRole
-from api.insights.insights_table_filters import build_insights_filters
+from api.models.event_configuration import EventConfiguration
+from api.models.event import Event
+from api.models.event_type import EventTypeEnum
+from api.models.phase_code import PhaseCode as Phase
+from api.models.event_category import PRIMARY_CATEGORIES
+
+from sqlalchemy import func, Integer, case, cast, select, Float
 
 
-def get_filtered_work_phases(filters, selected_work_type_id, selected_year=None, staff_id=None):
-    """Retrieve filtered work phases based on provided filters and selected work type."""
-    filter_exprs = build_insights_filters(filters, "phases") if filters else []
-    selected_work_type = WorkType.find_by_id(int(selected_work_type_id)) if selected_work_type_id != "all" else None
-    query = db.session.query(WorkPhase).join(Work, WorkPhase.work_id == Work.id)
+def get_filtered_work_phases(filter_exprs=None, selected_work_type=None, selected_year=None, staff_id=None):
+    """Fetch filtered work phases with overage calculations."""
+    # Build all necessary subqueries
+    work_subq = get_work_subquery()
+    ext_subq = get_extension_days_subquery()
+    sus_subq = get_suspended_days_subquery()
+    total_days_subq = get_total_days_subquery(ext_subq)
+    days_taken_subq = get_days_taken_subquery(sus_subq)
+    days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
 
-    if selected_year:
-        query = query.filter(extract('year', WorkPhase.end_date) == selected_year)
+    query = db.session.query(
+        func.max(Phase.name).label("phase_name"),
+        (
+            (cast(func.count(case((days_left_subq.c.days_left < 0, 1))), Float)
+             / cast(func.count(func.distinct(WorkPhase.id)), Float)) * 100
+        ).label("percent_with_overages")
+    ).join(Work, WorkPhase.work_id == Work.id) \
+     .join(Phase, WorkPhase.phase_id == Phase.id)
 
-    if selected_work_type:
-        query = query.filter(Work.work_type_id == selected_work_type.id)
-
-    if filters:
+    if filter_exprs:
         query = query.join(WorkType, Work.work_type_id == WorkType.id)
         query = query.join(Project, Work.project_id == Project.id)
-        query = query.outerjoin(PhaseOverageResponsibility, WorkPhase.id == PhaseOverageResponsibility.work_phase_id)
 
     if staff_id:
         query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
@@ -43,36 +51,228 @@ def get_filtered_work_phases(filters, selected_work_type_id, selected_year=None,
         *filter_exprs if filter_exprs else [],
     )
 
+    if selected_work_type:
+        query = query.filter(Work.work_type_id == selected_work_type.id)
+
+    if selected_year:
+        query = query.filter(func.extract('year', WorkPhase.end_date) == selected_year)
+
+    query = query \
+        .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id) \
+        .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id) \
+        .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+        .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
+        .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id) \
+        .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id) \
+        .group_by(Phase.name)
+
+    # Only include the data where percent is not 0
+    query = query.having(
+        (
+            cast(func.count(case((days_left_subq.c.days_left < 0, 1))), Float)
+            / cast(func.count(func.distinct(WorkPhase.id)), Float)
+        ) > 0
+    )
+
     return query.all()
 
 
-def compute_phase_overage_insights(work_phases, year=None):
-    """Compute overage insights for each work phase."""
-    overage_by_phase = {
-        phase.phase_id: {
-            "phase": phase.name,
-            "count_with_overages": 0,
-            "count": 0,
-            "percent_overage": 0,
-            "year": year,
-        }
-        for phase in work_phases
-    }
+# Extension days subquery
+def get_extension_days_subquery():
+    """Returns a subquery that computes total extension days for each work_phase_id."""
+    return (
+        db.session.query(
+            EventConfiguration.work_phase_id.label('work_phase_id'),
+            func.sum(Event.number_of_days).label('extension_days')
+        ).select_from(EventConfiguration)
+         .join(Event, Event.event_configuration_id == EventConfiguration.id)
+        .filter(
+            EventConfiguration.event_type_id == EventTypeEnum.TIME_LIMIT_EXTENSION.value,
+            Event.is_active.is_(True),
+            Event.is_deleted.is_(False),
+            EventConfiguration.is_active.is_(True),
+            EventConfiguration.event_category_id.in_(list(map(lambda x: x.value, PRIMARY_CATEGORIES))),
+        )
+        .group_by(EventConfiguration.work_phase_id)
+        .subquery()
+    )
 
-    unique_work_ids = list(set(phase.work_id for phase in work_phases))
 
-    for work_id in unique_work_ids:
-        phases_for_work = [phase for phase in work_phases if phase.work_id == work_id]
-        phase_stats = WorkPhaseService.find_work_phase_status(work_id, None, phases_for_work)
-        for stats in phase_stats:
-            overage_by_phase[stats["work_phase"].phase_id]["count"] += 1
-            if stats["days_left"] < 0:
-                overage_by_phase[stats["work_phase"].phase_id]["count_with_overages"] += 1
+# Suspended days subquery
+def get_suspended_days_subquery():
+    """Returns a subquery that computes total suspended days for each work_phase_id."""
+    return (
+        db.session.query(
+            EventConfiguration.work_phase_id.label('work_phase_id'),
+            func.sum(Event.number_of_days).label('suspended_days')
+        ).select_from(EventConfiguration)
+        .join(Event, Event.event_configuration_id == EventConfiguration.id)
+        .filter(
+            EventConfiguration.event_type_id == EventTypeEnum.TIME_LIMIT_RESUMPTION.value,
+            Event.actual_date.isnot(None),
+            Event.is_active.is_(True),
+            Event.is_deleted.is_(False),
+            EventConfiguration.is_active.is_(True),
+            EventConfiguration.event_category_id.in_(list(map(lambda x: x.value, PRIMARY_CATEGORIES))),
+        )
+        .group_by(EventConfiguration.work_phase_id)
+        .subquery()
+    )
 
-    for phase_id, stats in overage_by_phase.items():
-        if stats["count"] > 0:
-            overage_by_phase[phase_id]["percent_overage"] = round(stats["count_with_overages"] / stats["count"] * 100)
-        else:
-            overage_by_phase[phase_id]["percent_overage"] = 0
 
-    return overage_by_phase
+def get_total_days_subquery(ext_subq):
+    """Returns a subquery that computes total days for each work_phase_id."""
+    subq = (
+        select(
+            WorkPhase.id.label("work_phase_id"),
+            case(
+                (
+                    WorkPhase.number_of_days.isnot(None),
+                    WorkPhase.number_of_days + func.coalesce(ext_subq.c.extension_days, 0)
+                ),
+                else_=cast(func.DATE(WorkPhase.end_date) - func.DATE(WorkPhase.start_date), Integer)
+            ).label("total_days")
+        )
+        .select_from(WorkPhase)
+        .filter(
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            WorkPhase.legislated.is_(True),
+        )
+        .outerjoin(ext_subq, ext_subq.c.work_phase_id == WorkPhase.id)
+        .subquery()
+    )
+    return subq
+
+
+def get_days_taken_subquery(sus_subq):
+    """
+    Returns a subquery that computes `days_taken` for each work_phase_id, based on the business rules.
+
+    Includes internal subqueries for start and end dates from START/END events.
+    """
+    start_event_date_subq = (
+        select(
+            EventConfiguration.work_phase_id.label("work_phase_id"),
+            func.min(Event.actual_date).label("start_date")
+        ).select_from(EventConfiguration)
+        .join(Event, Event.event_configuration_id == EventConfiguration.id)
+        .where(EventConfiguration.event_position == "START", Event.actual_date.is_not(None))
+        .group_by(EventConfiguration.work_phase_id)
+        .subquery()
+    )
+
+    end_event_date_subq = (
+        select(
+            EventConfiguration.work_phase_id.label("work_phase_id"),
+            func.max(Event.actual_date).label("end_date")
+        ).select_from(EventConfiguration)
+        .join(Event, Event.event_configuration_id == EventConfiguration.id)
+        .where(EventConfiguration.event_position == "END", Event.actual_date.is_not(None))
+        .group_by(EventConfiguration.work_phase_id)
+        .subquery()
+    )
+
+    # Main subquery for days_taken
+    subq = (
+        select(
+            WorkPhase.id.label("work_phase_id"),
+            func.greatest(
+                0,
+                case(
+                    # Completed phase: use end - start
+                    (
+                        WorkPhase.is_completed.is_(True),
+                        func.coalesce(
+                            func.date(end_event_date_subq.c.end_date) - func.date(start_event_date_subq.c.start_date),
+                            0,
+                        )
+                    ),
+                    # Current (uncompleted) phase: suspended
+                    (
+                        (Work.current_work_phase_id == WorkPhase.id) & WorkPhase.is_suspended.is_(True),
+                        func.coalesce(
+                            func.date(WorkPhase.suspended_date) - func.date(WorkPhase.start_date),
+                            0
+                        )
+                    ),
+                    # Current (uncompleted) phase: not suspended
+                    (
+                        (Work.current_work_phase_id == WorkPhase.id) & WorkPhase.is_suspended.is_(False),
+                        func.coalesce(
+                            func.date(func.now()) - func.date(WorkPhase.start_date),
+                            0
+                        )
+                    ),
+                    else_=0
+                )
+                - func.coalesce(sus_subq.c.suspended_days, 0)
+            ).label("days_taken")
+        )
+        .select_from(WorkPhase)
+        .join(Work, WorkPhase.work_id == Work.id)
+        .filter(
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            WorkPhase.legislated.is_(True),
+        )
+        .outerjoin(start_event_date_subq, start_event_date_subq.c.work_phase_id == WorkPhase.id)
+        .outerjoin(end_event_date_subq, end_event_date_subq.c.work_phase_id == WorkPhase.id)
+        .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id)
+        .subquery()
+    )
+    return subq
+
+
+def get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq):
+    """
+    Returns a subquery that computes `days_left` for each work_phase_id.
+
+    Relies on the subquery from get_days_taken_subquery (for days_taken)
+    and a total_days_expr (which should resolve to the total allowed days for the phase).
+    """
+    subq = (
+        select(
+            WorkPhase.id.label("work_phase_id"),
+            case(
+                (
+                    (work_subq.c.current_work_phase_id == WorkPhase.id) &
+                    (WorkPhase.is_completed.is_(False)),
+                    (total_days_subq.c.total_days - func.coalesce(sus_subq.c.suspended_days, 0)) - days_taken_subq.c.days_taken
+                ),
+                else_=(total_days_subq.c.total_days - func.coalesce(sus_subq.c.suspended_days, 0))
+            ).label("days_left")
+        )
+        .select_from(WorkPhase)
+        .filter(
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            WorkPhase.legislated.is_(True),
+        )
+        .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id)
+        .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id)
+        .outerjoin(work_subq, work_subq.c.work_phase_id == WorkPhase.id)
+        .outerjoin(sus_subq, sus_subq.c.work_phase_id == WorkPhase.id)
+        .distinct(WorkPhase.id)
+        .subquery()
+    )
+    return subq
+
+
+def get_work_subquery():
+    """Returns a subquery that selects work_id, current_work_phase_id, and work_phase_id."""
+    return (
+        select(
+            Work.id.label("work_id"),
+            Work.current_work_phase_id.label("current_work_phase_id"),
+            WorkPhase.id.label("work_phase_id"),
+        )
+        .select_from(WorkPhase)
+        .filter(
+            WorkPhase.is_active.is_(True),
+            WorkPhase.is_deleted.is_(False),
+            WorkPhase.legislated.is_(True),
+        )
+        .join(Work, WorkPhase.work_id == Work.id)
+        .subquery()
+    )

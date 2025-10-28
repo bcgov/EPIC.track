@@ -24,10 +24,13 @@ const WorkByTeamChart = () => {
     data: chartData,
     error,
     isLoading: isChartLoading,
-  } = useGetWorksByTeamQuery({
-    columnFilters,
-    staffId: isUserInsights ? staffId : undefined,
-  });
+  } = useGetWorksByTeamQuery(
+    {
+      columnFilters,
+      staffId: isUserInsights ? staffId : undefined,
+    },
+    { skip: columnFilters.length === 0 },
+  );
 
   if (error) {
     showNotification("Could not load Works by Team data", {
