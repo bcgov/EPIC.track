@@ -47,17 +47,19 @@ project_table_filter_map = {
 }
 
 phase_table_filter_map = {
-    "work.title": lambda v: Work.title.ilike(f"%{v}%"),
-    "work.work_type.name": lambda v: Work.work_type.has(WorkType.name.in_(v)),
-    "work_phase.name": WorkPhase.name.in_,
+    "work_title": lambda v: Work.title.ilike(f"%{v}%"),
+    "work_type_name": lambda v: Work.work_type.has(WorkType.name.in_(v)),
+    "phase_name": WorkPhase.name.in_,
     "overage_responsibility": lambda v: exists().where(
         and_(
             PhaseOverageResponsibility.work_phase_id == WorkPhase.id,
-            PhaseOverageResponsibility.responsibility.in_(v)
+            PhaseOverageResponsibility.responsibility.in_(v),
+            PhaseOverageResponsibility.is_active.is_(True),
+            PhaseOverageResponsibility.is_deleted.is_(False),
         )
     ).correlate(WorkPhase),
-    "work.ea_act.name": lambda v: Work.ea_act.has(EAAct.name.in_(v)),
-    "work_phase.end_date": lambda v: extract('year', WorkPhase.end_date).in_(v),
+    "ea_act_name": lambda v: Work.ea_act.has(EAAct.name.in_(v)),
+    "work_phase_end_date": lambda v: extract('year', WorkPhase.end_date).in_(v),
 }
 
 WORKS = "works"

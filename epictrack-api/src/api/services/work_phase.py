@@ -18,8 +18,9 @@ from collections import defaultdict
 from datetime import timezone
 from typing import List, Dict, Any, Union
 
-from sqlalchemy import and_
-
+from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
+from api.models.ea_act import EAAct
+from api.models.phase_overage_responsibility import PhaseOverageResponsibility
 from api.models import PhaseCode, WorkPhase, PRIMARY_CATEGORIES, db
 from api.models.event_type import EventTypeEnum
 from api.models.event_category import EventCategoryEnum
@@ -31,8 +32,12 @@ from api.services.event import EventService
 from api.services.task_template import TaskTemplateService
 from api.services.phase_overage_responsibility_service import PhaseOverageResponsibilityService
 from api.models.work import Work
+from api.models.phase_code import PhaseCode as Phase
+from api.models.work_type import WorkType
+from api.models.project import Project
+
 from .common_service import event_compare_func
-from api.schemas import response as res
+from sqlalchemy import func, and_
 
 
 class WorkPhaseService:  # pylint: disable=too-few-public-methods
@@ -335,32 +340,53 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
     @classmethod
     def find_all_work_phases_with_additional_info(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
         """Return all work phases."""
-        work_phases = cls.find_work_phases_by_staff_id(staff_id=staff_id, legislated=legislated)
-        phase_by_work = defaultdict(list)
+        work_subq = get_work_subquery()
+        ext_subq = get_extension_days_subquery()
+        sus_subq = get_suspended_days_subquery()
+        total_days_subq = get_total_days_subquery(ext_subq)
+        days_taken_subq = get_days_taken_subquery(sus_subq)
+        days_left_subq = get_days_left_subquery(sus_subq, total_days_subq, work_subq, days_taken_subq)
 
-        data = []
-        for phase in work_phases:
-            phase_by_work[phase.work_id].append(phase)
+        query = db.session.query(
+            Work.id.label("work_id"),
+            WorkPhase.id.label("work_phase_id"),
+            Work.title.label("work_title"),
+            WorkType.name.label("work_type_name"),
+            WorkType.id.label("work_type_id"),
+            Phase.name.label("phase_name"),
+            Phase.id.label("phase_id"),
+            EAAct.name.label("ea_act_name"),
+            WorkPhase.end_date.label("work_phase_end_date"),
+            total_days_subq.c.total_days.label("total_days"),
+            days_taken_subq.c.days_taken.label("days_taken"),
+            days_left_subq.c.days_left.label("days_left"),
+            func.coalesce(
+                func.array_agg(
+                    PhaseOverageResponsibility.responsibility
+                ).filter(
+                    PhaseOverageResponsibility.responsibility.isnot(None),
+                    PhaseOverageResponsibility.is_active.is_(True),
+                    PhaseOverageResponsibility.is_deleted.is_(False)
+                ),
+                []
+            ).label("phase_overage_responsibilities"),
+        ).select_from(WorkPhase) \
+         .join(Work, WorkPhase.work_id == Work.id) \
+         .join(Phase, WorkPhase.phase_id == Phase.id) \
+         .join(WorkType, Work.work_type_id == WorkType.id) \
+         .join(Project, Work.project_id == Project.id) \
+         .join(EAAct, Work.ea_act_id == EAAct.id) \
+         .outerjoin(PhaseOverageResponsibility, PhaseOverageResponsibility.work_phase_id == WorkPhase.id)
 
-        # Grouped by work_id to process together is faster
-        for work_id, group in phase_by_work.items():
-            phase_with_info = cls.find_work_phase_status(work_id, None, group)
-            data.extend(phase_with_info)
+        query = query \
+            .outerjoin(total_days_subq, total_days_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_taken_subq, days_taken_subq.c.work_phase_id == WorkPhase.id) \
+            .outerjoin(days_left_subq, days_left_subq.c.work_phase_id == WorkPhase.id)
 
-        data = res.WorkPhaseAdditionalInfoResponseSchema(many=True).dump(data)
-
-        for item in data:
-            item["work"] = res.WorkResponseSchema().dump(Work.find_by_id(item["work_phase"]["work_id"]))
-
-        return data
-
-    @classmethod
-    def find_work_phases_by_staff_id(cls, staff_id: int = None, legislated: bool = None) -> List[WorkPhase]:
-        """Return all work phases assigned to a staff."""
-        query = WorkPhase.query.filter(
+        query = query.filter(
             WorkPhase.is_active.is_(True),
             WorkPhase.is_deleted.is_(False),
-            legislated is None or WorkPhase.legislated == legislated
+            legislated is None or WorkPhase.legislated == legislated,
         )
 
         if staff_id:
@@ -374,4 +400,44 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
                 )
             )
 
-        return query.all()
+        # Group by necessary fields to use aggregate functions like array_agg for PhaseOverageResponsibility
+        query = query.group_by(
+            Work.id,
+            WorkPhase.id,
+            Work.title,
+            WorkType.name,
+            WorkType.id,
+            Phase.name,
+            Phase.id,
+            EAAct.name,
+            WorkPhase.end_date,
+            total_days_subq.c.total_days,
+            days_taken_subq.c.days_taken,
+            days_left_subq.c.days_left
+        )
+
+        data = cls._serialize_work_phases(query)
+        return data
+
+    @classmethod
+    def _serialize_work_phases(cls, query) -> List[dict]:
+        """Serialize work phases from query result."""
+        data = []
+        for row in query.all():
+            item = {
+                "work_id": row.work_id,
+                "work_type_id": row.work_type_id,
+                "work_phase_id": row.work_phase_id,
+                "work_title": row.work_title,
+                "work_type_name": row.work_type_name,
+                "phase_name": row.phase_name,
+                "phase_id": row.phase_id,
+                "work_phase_end_date": row.work_phase_end_date,
+                "ea_act_name": row.ea_act_name,
+                "phase_overage_responsibilities": [p.value if hasattr(p, 'value') else p for p in row.phase_overage_responsibilities],
+                "total_days": row.total_days,
+                "days_taken": row.days_taken,
+                "days_left": row.days_left,
+            }
+            data.append(item)
+        return data

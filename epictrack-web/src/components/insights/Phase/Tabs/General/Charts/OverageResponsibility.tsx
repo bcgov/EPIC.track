@@ -52,10 +52,7 @@ const OverageResponsibilityChart = () => {
     if (!workPhases) return [];
     const workTypes = Array.from(
       new Map(
-        workPhases.map((item: any) => [
-          item.work.work_type_id,
-          item.work.work_type.name,
-        ]),
+        workPhases.map((item: any) => [item.work_type_id, item.work_type_name]),
       ).entries(),
     ) as [string, string][];
     return workTypes
@@ -70,8 +67,8 @@ const OverageResponsibilityChart = () => {
     if (!data || !workPhases) return [];
     const uniquePhases = new Map<string, string>();
     workPhases.forEach((item: any) => {
-      const id = item.work.current_work_phase.phase.id;
-      const name = item.work.current_work_phase.phase.name;
+      const id = item.phase_id;
+      const name = item.phase_name;
       uniquePhases.set(id, name);
     });
     // Remove any duplicate names as well as duplicate ids
