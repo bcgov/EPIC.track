@@ -39,10 +39,11 @@ class PhaseOverageResponsibilityService implements ServiceBase {
     );
   }
 
-  async delete(id: string) {
+  async delete(id: string, params: any) {
     return await http.DeleteRequest(
       Endpoints.PhaseOverageResponsibilities.OVERAGE_RESPONSIBILITIES +
         `/${id}`,
+      params,
     );
   }
 

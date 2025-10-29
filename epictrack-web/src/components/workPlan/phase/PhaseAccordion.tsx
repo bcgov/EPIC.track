@@ -111,7 +111,7 @@ const PhaseAccordion = ({
   >([]);
   const [daysTakenText, setDaysTakenText] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
-  const { getWorkPhases, selectedWorkPhase, setSelectedWorkPhase } =
+  const { getWorkPhases, selectedWorkPhase, setSelectedWorkPhase, work } =
     useContext(WorkplanContext);
 
   const userHasRole = useUserHasRole();
@@ -221,11 +221,14 @@ const PhaseAccordion = ({
         await phaseOverageResponsibilityService.create({
           work_phase_id: selectedWorkPhase.work_phase.id,
           responsibility: OverageResponsibilityLookup[r],
+          work_id: work?.id,
         });
       }
       // 3. Remove responsibilities
       for (const er of toRemove) {
-        await phaseOverageResponsibilityService.delete(String(er.id));
+        await phaseOverageResponsibilityService.delete(String(er.id), {
+          work_id: work?.id,
+        });
       }
       onSuccess();
       getWorkPhases();

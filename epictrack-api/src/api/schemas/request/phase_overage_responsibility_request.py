@@ -15,6 +15,7 @@ class PhaseOverageResponsibilityBodyRequestSchema(RequestBodyParameterSchema):
         validate=validate.OneOf([e.name for e in OverageResponsibilityEnum])
     )
     notes = fields.Str(required=False, allow_none=True, validate=validate.Length(max=2000))
+    work_id = fields.Int(required=False)
 
 
 class PhaseOverageResponsibilityBodyUpdateRequestSchema(RequestBodyParameterSchema):
@@ -25,3 +26,4 @@ class PhaseOverageResponsibilityBodyUpdateRequestSchema(RequestBodyParameterSche
         validate=validate.OneOf([e.value for e in OverageResponsibilityEnum])
     )
     notes = fields.Str(required=False, allow_none=True, validate=validate.Length(max=2000))
+    work_id = fields.Int(required=False)
