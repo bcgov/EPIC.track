@@ -6,7 +6,7 @@ interface ServiceBase {
   getById(id: string): Promise<AxiosResponse<any>>;
   create(data: MasterBase): Promise<AxiosResponse<any>>;
   update(data: MasterBase, id: any): Promise<AxiosResponse<any>>;
-  delete(id: string | undefined): Promise<AxiosResponse<any>>;
+  delete(id: string | undefined, params?: any): Promise<AxiosResponse<any>>;
 }
 
 export default ServiceBase;

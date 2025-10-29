@@ -78,5 +78,6 @@ class PhaseOverageResponsibility(Resource):
     @profiletime
     def delete(responsibility_id):
         """Delete a responsibility by ID."""
-        PhaseOverageResponsibilityService.delete(responsibility_id)
+        work_id = request.args.get("work_id")
+        PhaseOverageResponsibilityService.delete(responsibility_id, work_id)
         return "Phase overage responsibility successfully deleted", HTTPStatus.OK
