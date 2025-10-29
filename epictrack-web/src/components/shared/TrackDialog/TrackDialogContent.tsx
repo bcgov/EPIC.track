@@ -58,13 +58,40 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         }),
       }}
     >
+      {!isCompact && (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+            height: "100%",
+            pt: "1rem",
+            pr: "1rem",
+          }}
+        >
+          <IconButton
+            onClick={onCancel}
+            sx={{
+              width: isCompact ? "1.2rem" : "1.5rem",
+              height: isCompact ? "1.2rem" : "1.5rem",
+              padding: "0",
+              gridColumn: 2,
+              gridRow: 1,
+              alignSelf: "end",
+            }}
+            disableRipple
+          >
+            <CloseIconComponent />
+          </IconButton>
+        </Box>
+      )}
       <DialogTitle
         className="modal-header"
         sx={{
           display: "flex",
           flexDirection: "column",
           alignItems: "flex-end",
-          padding: isCompact ? "12px 16px" : "24px 40px",
+          padding: isCompact ? "12px 16px" : "0px 40px 24px 40px",
           borderBottom: `2px solid ${Palette.primary.main}`,
           borderRadius: "4px 4px 0 0",
         }}
@@ -72,18 +99,17 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
         <Box
           display="grid"
           gridTemplateColumns="1fr auto"
-          gridTemplateRows={
-            heading && subHeading ? "auto auto auto" : "auto auto"
-          }
+          gridTemplateRows="auto"
           gap={1}
           sx={{
+            alignItems: "center",
             backgroundColor: headingBackgroundColor ?? "inherit",
             border: headingBackgroundColor
               ? `2px solid ${Palette.neutral.accent.light};`
               : "none",
             borderRadius: "4px",
             width: "100%",
-            padding: isCompact ? "0.5rem 0.875rem" : "1rem",
+            padding: isCompact ? "0.5rem 0.875rem" : "0rem",
           }}
         >
           {heading && (
@@ -134,29 +160,28 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
               </span>
             </Tooltip>
           )}
-
-          <IconButton
-            onClick={onCancel}
-            sx={{
-              width: isCompact ? "1.2rem" : "1.5rem",
-              height: isCompact ? "1.2rem" : "1.5rem",
-              padding: "0",
-              gridColumn: 2,
-              gridRow: 1,
-              alignSelf: "start",
-            }}
-            disableRipple
-          >
-            <CloseIconComponent />
-          </IconButton>
+          {isCompact && (
+            <IconButton
+              onClick={onCancel}
+              sx={{
+                width: isCompact ? "1.2rem" : "1.5rem",
+                height: isCompact ? "1.2rem" : "1.5rem",
+                padding: "0",
+                gridColumn: 2,
+                gridRow: 1,
+                alignSelf: heading || subHeading ? "start" : "center",
+              }}
+              disableRipple
+            >
+              <CloseIconComponent />
+            </IconButton>
+          )}
           <ETHeading4
             bold
             sx={{
               color: Palette.primary.main,
               width: "100%",
               gridColumn: subHeading ? 1 : "1 / span 2",
-              gridRow:
-                heading && subHeading ? 3 : heading || subHeading ? 2 : 1,
               alignSelf: heading && subHeading ? "start" : "center",
               fontSize: heading ? "0.875rem" : "1.25rem",
               mt: heading && subHeading ? "-0.5rem" : 0,
@@ -174,14 +199,32 @@ const TrackDialogContent: FC<TrackDialogContentProps> = ({
                   {dialogTitleIcon}
                 </Box>
               )}
-              {dialogTitle}
+              <Tooltip title={dialogTitle ?? ""}>
+                <span>
+                  <Box
+                    sx={{
+                      color: Palette.primary.main,
+                      display: "-webkit-box",
+                      overflow: "hidden",
+                      WebkitBoxOrient: "vertical",
+                      WebkitLineClamp: 1,
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {dialogTitle}
+                  </Box>
+                </span>
+              </Tooltip>
             </Box>
           </ETHeading4>
         </Box>
       </DialogTitle>
       <DialogContent
         sx={{
-          padding: isCompact ? "12px 16px" : "24px 40px",
+          padding: isCompact ? "10px 16px" : "20px 40px",
+          "&.MuiDialogContent-root": {
+            paddingTop: isCompact ? "8px !important" : "16px !important",
+          },
           display: "flex",
           flexDirection: "column",
           gap: "1rem",
