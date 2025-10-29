@@ -124,12 +124,12 @@ class EAResourceForeCastReport(ReportFactory):
                 {
                     "data_key": "coleads",
                     "label": "CO-LEADS",
-                    "width": 0.072,
+                    "width": 0.050,
                 },
                 {
                     "data_key": "work_team_members",
                     "label": "WORK TEAM MEMBERS",
-                    "width": 0.072,
+                    "width": 0.070,
                 },
             ],
             "QUARTERS": [],
@@ -137,7 +137,7 @@ class EAResourceForeCastReport(ReportFactory):
                 {
                     "data_key": "referral_timing",
                     "label": "Expected Referral Date",
-                    "width": 0.0705,
+                    "width": 0.068,
                 }
             ],
         }
@@ -155,6 +155,14 @@ class EAResourceForeCastReport(ReportFactory):
         cell_keys = []
         cell_widths = []
         cell_index = 0
+
+        total_proportion = 0
+        for section_heading, cells in self.report_cells.items():
+            if section_heading == "QUARTERS":
+                total_proportion += 0.15
+            else:
+                total_proportion += sum(cell["width"] for cell in cells)
+
         for section_heading, cells in self.report_cells.items():
             filtered_cells = []
             if section_heading == "QUARTERS":
@@ -164,7 +172,7 @@ class EAResourceForeCastReport(ReportFactory):
                     c_widths,
                     s_styles,
                 ) = self._get_quarter_section_meta_data(
-                    report_date, cell_index, available_width
+                    report_date, cell_index, available_width, total_proportion  # pass it
                 )
                 section_headings.extend(s_headings)
                 cell_headings.extend(c_headings)
@@ -184,7 +192,7 @@ class EAResourceForeCastReport(ReportFactory):
             for cell in filtered_cells:
                 cell_headings.append(cell["label"])
                 cell_keys.append(cell["data_key"])
-                cell_widths.append(available_width * cell["width"])
+                cell_widths.append(available_width * cell["width"] / total_proportion)
             cell_index += len(filtered_cells)
         headers = [section_headings, cell_headings]
         return headers, cell_keys, styles, cell_widths
@@ -995,7 +1003,11 @@ class EAResourceForeCastReport(ReportFactory):
         return add_default_info
 
     def _get_quarter_section_meta_data(
-        self, report_date: datetime, cell_index: int, available_width: int
+        self,
+        report_date: datetime,
+        cell_index: int,
+        available_width: int,
+        total_proportion: float,
     ):
         report_start_date = report_date.date().replace(day=1)
         report_start_date = self._add_months(report_start_date, 1, False)
@@ -1027,8 +1039,8 @@ class EAResourceForeCastReport(ReportFactory):
             )
         )
         cell_headings = self.month_labels
-        cell_widths.extend([0.051 * available_width] * 3)
-        cell_widths.extend([0.058 * available_width])
+        cell_widths.extend([0.055 * available_width / total_proportion] * 3)
+        cell_widths.extend([0.058 * available_width / total_proportion])
         return section_headings, cell_headings, cell_widths, styles
 
     def _get_other_section_meta_data(self, section_heading, cells, cell_index):
