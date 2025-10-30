@@ -561,14 +561,13 @@ class EventService:
     ):
         """Return true if the current phase is start phase"""
         return all_work_phases[0].id == current_work_phase.id
-    
+
     @classmethod
     def _is_last_phase(
         cls, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
     ):
         """Return true if the current phase is the last phase"""
         return all_work_phases[-1].id == current_work_phase.id
-
 
     @classmethod
     def _validate_no_extension_required_to_complete_work(
@@ -595,7 +594,7 @@ class EventService:
             return True  # all good, no overage
         raise UnprocessableEntityError(
             f"Overage days need to be addressed before completing the work. Total overage days: {total_overage_days + days_difference}"
-            )
+        )
 
     @classmethod
     def _handle_work_phase_for_start_event(
