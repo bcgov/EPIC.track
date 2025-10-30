@@ -48,3 +48,11 @@ class WorkPhase(BaseModelVersioned):
 
     work = relationship("Work", foreign_keys=[work_id], lazy="select")
     phase = relationship("PhaseCode", foreign_keys=[phase_id], lazy="select")
+
+    def get_overage_days(self) -> int:
+        """Calculate overage days for this work phase."""
+        if self.end_date and self.start_date and self.legislated:
+            actual_days = (self.end_date.date() - self.start_date.date()).days
+            overage_days = actual_days - self.number_of_days
+            return overage_days if overage_days > 0 else 0
+        return 0
