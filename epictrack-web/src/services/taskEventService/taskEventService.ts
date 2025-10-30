@@ -56,7 +56,7 @@ class TaskEventService {
       `${Endpoints.TaskEvents.MY_TASKS.replace(
         ":staff_id",
         staffId.toString(),
-      )}`,
+      )}?is_active=true`,
     );
   }
 
