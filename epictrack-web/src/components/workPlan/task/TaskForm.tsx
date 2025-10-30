@@ -128,6 +128,7 @@ const TaskForm = ({
   }, []);
 
   const getWorkTeamMembers = useCallback(async () => {
+    if (!effectiveWorkId) return;
     const assigneeResult = await workService.getWorkTeamMembers(
       Number(effectiveWorkId),
       true,
@@ -260,19 +261,11 @@ const TaskForm = ({
           >
             <Grid item xs={12}>
               <ETFormLabel required>Title</ETFormLabel>
-              <ControlledTextField
-                name="name"
-                placeholder="Title"
-                defaultValue={taskEvent?.name}
-                fullWidth
-              />
+              <ControlledTextField name="name" placeholder="Title" fullWidth />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Start Date</ETFormLabel>
-              <ControlledDatePicker
-                name="start_date"
-                defaultValue={Moment(taskEvent?.start_date).format()}
-              />
+              <ControlledDatePicker name="start_date" />
             </Grid>
             <Grid item xs={4}>
               <ETFormLabel>Number of Days</ETFormLabel>
@@ -318,7 +311,6 @@ const TaskForm = ({
               <ControlledSelectV2
                 placeholder="Select your progress"
                 helperText={errors?.status?.message?.toString()}
-                defaultValue={taskEvent?.status}
                 options={statuses || []}
                 getOptionValue={(o: any) => o?.value.toString()}
                 getOptionLabel={(o: any) => o.label}
@@ -343,7 +335,6 @@ const TaskForm = ({
                 isMulti={true}
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
-                defaultValue={taskEvent?.assignee_ids?.map((p) => p.toString())}
                 options={assignees || []}
                 getOptionValue={(o: Staff) => o?.id.toString()}
                 getOptionLabel={(o: Staff) => o.full_name}
@@ -356,9 +347,6 @@ const TaskForm = ({
                 isMulti
                 closeMenuOnSelect={false}
                 hideSelectedOptions={false}
-                defaultValue={taskEvent?.responsibility_ids?.map((p) =>
-                  p.toString(),
-                )}
                 options={responsibilities || []}
                 getOptionValue={(o: ListType) => o?.id.toString()}
                 getOptionLabel={(o: ListType) => o.name}

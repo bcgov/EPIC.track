@@ -152,7 +152,12 @@ export const EventCalendarContainer = ({
             showWorkLegend && work ? getWorkColour(work.title) : undefined
           }
         >
-          <TaskForm onSave={onSaveHandler} taskEvent={taskEvent} />
+          <TaskForm
+            onSave={onSaveHandler}
+            taskEvent={taskEvent}
+            work_id={work?.id}
+            phase_id={taskEvent?.work_phase_id}
+          />
         </TrackSidePanel>
       );
     }
