@@ -354,6 +354,7 @@ class EventService:
             all_work_phases, current_work_phase
         )
         cls._validate_dates(event, current_work_phase, all_work_phases)
+        cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases)
         cls._previous_event_actual_date_rule(
             all_work_events, all_work_phases, current_work_phase_index, event, event_old_data
         )
@@ -501,13 +502,9 @@ class EventService:
             actual_min_date = cls._find_actual_date_min(
                 event, current_work_phase, all_work_phases
             )
-            actual_max_date = cls._find_actual_date_max(current_work_phase, event)
-            if (
-                event.actual_date.date() < actual_min_date.date()
-                or event.actual_date.date() > actual_max_date.date()
-            ):
+            if event.actual_date.date() < actual_min_date.date():
                 raise UnprocessableEntityError(
-                    f"Actual date should be between {actual_min_date} and {actual_max_date}"
+                    f"Actual date should be greater than {actual_min_date}"
                 )
         if not event.actual_date:
             anticipated_min_date = cls._find_anticipated_date_min(
@@ -551,18 +548,6 @@ class EventService:
         return actual_date_min
 
     @classmethod
-    def _find_actual_date_max(cls, current_work_phase: WorkPhase, event: Event):
-        """Return the max date of actual date"""
-        actual_date_max = (
-            current_work_phase.end_date
-            if current_work_phase.legislated
-            and event.event_configuration.event_category_id
-            != EventCategoryEnum.EXTENSION.value
-            else datetime.utcnow().replace(tzinfo=pytz.utc)
-        )
-        return actual_date_max
-
-    @classmethod
     def _is_start_event(cls, event):
         """Return true if the given event is start event"""
         return (
@@ -576,6 +561,41 @@ class EventService:
     ):
         """Return true if the current phase is start phase"""
         return all_work_phases[0].id == current_work_phase.id
+    
+    @classmethod
+    def _is_last_phase(
+        cls, current_work_phase: WorkPhase, all_work_phases: List[WorkPhase]
+    ):
+        """Return true if the current phase is the last phase"""
+        return all_work_phases[-1].id == current_work_phase.id
+
+
+    @classmethod
+    def _validate_no_extension_required_to_complete_work(
+        cls,
+        event: Event,
+        current_work_phase: WorkPhase,
+        all_work_phases: List[WorkPhase],
+    ):
+        """Validate that overages have been dealt with before allowing the last phase to complete"""
+        total_overage_days = 0
+        for work_phase in all_work_phases[:-1]:  # all except last phase
+            total_overage_days += work_phase.get_overage_days()
+
+        if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
+            return True
+        if (
+            event.actual_date
+            and event.event_configuration.event_position.value != EventPositionEnum.END.value
+        ): # not end event
+            return True
+        # find date difference between event actual and phase end date
+        days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
+        if total_overage_days + days_difference <= 0:
+            return True  # all good, no overage
+        raise UnprocessableEntityError(
+            f"Overage days need to be addressed before completing the work. Total overage days: {total_overage_days + days_difference}"
+            )
 
     @classmethod
     def _handle_work_phase_for_start_event(
