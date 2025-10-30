@@ -1,10 +1,10 @@
-import { Work, WorkPhase, WorkPhaseAdditionalInfo } from "models/work";
+import { WorkPhaseInsight } from "models/work";
 import React, { createContext, useContext, useMemo } from "react";
 import { useGetWorkPhasesQuery } from "services/rtkQuery/phaseInsights";
 import { useInsightsContext } from "../InsightsContext";
 
 interface PhaseInsightsContextState {
-  workPhases: ({ work: Work } & WorkPhase & WorkPhaseAdditionalInfo)[];
+  workPhases: WorkPhaseInsight[];
   loadingWorkPhases: boolean;
 }
 

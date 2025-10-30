@@ -33,4 +33,6 @@ def filter_query_by_staff(query, staff_id):
         query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
         query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
         query = query.filter(Staff.id == staff_id)
+        query = query.filter(Staff.is_active.is_(True))
+        query = query.filter(StaffWorkRole.is_active.is_(True))
     return query

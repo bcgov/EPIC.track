@@ -38,10 +38,7 @@ const PercentOfPhaseOveragesByAct = () => {
     if (!workPhases) return [];
     const workTypes = Array.from(
       new Map(
-        workPhases.map((item) => [
-          item.work.work_type_id,
-          item.work.work_type.name,
-        ]),
+        workPhases.map((item) => [item.work_type_id, item.work_type_name]),
       ).entries(),
     );
     return workTypes.map(([id, name]) => ({
@@ -123,7 +120,7 @@ const PercentOfPhaseOveragesByAct = () => {
               <BarChart
                 layout="vertical"
                 data={chartData}
-                margin={{ left: 80, bottom: 40 }}
+                margin={{ top: 20, left: 80, bottom: 40 }}
                 height={Math.max(chartData.length * 80 + 100, 350)}
                 width={400}
               >

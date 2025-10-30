@@ -31,7 +31,7 @@ class PhaseOverageResponsibilityService:
     @classmethod
     def create(cls, data: dict):
         """Create a new phase overage responsibility"""
-        cls._check_auth()
+        cls._check_auth(data.pop("work_id", None))
         if "responsibility" in data and isinstance(data["responsibility"], str):
             data["responsibility"] = OverageResponsibilityEnum[data["responsibility"]]
 
@@ -44,7 +44,7 @@ class PhaseOverageResponsibilityService:
     @classmethod
     def update(cls, identifier: int, data: dict):
         """Update an existing responsibility"""
-        cls._check_auth()
+        cls._check_auth(data.pop("work_id", None))
         item = cls.find_by_id(identifier, is_deleted=False)
 
         has_changes = False
@@ -58,17 +58,17 @@ class PhaseOverageResponsibilityService:
         return item
 
     @classmethod
-    def delete(cls, identifier: int):
+    def delete(cls, identifier: int, work_id: int):
         """Soft-delete a responsibility"""
-        cls._check_auth()
+        cls._check_auth(work_id=work_id)
         item = cls.find_by_id(identifier)
         item.is_deleted = True
         return item.save()
 
     @classmethod
-    def _check_auth(cls):
+    def _check_auth(cls, work_id: int = None):
         """Check if user has extended edit role or is team member"""
         one_of_roles = (
             KeycloakRole.EXTENDED_EDIT.value, Membership.TEAM_MEMBER.value
         )
-        authorisation.check_auth(one_of_roles=one_of_roles)
+        authorisation.check_auth(one_of_roles=one_of_roles, work_id=work_id)

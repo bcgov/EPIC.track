@@ -8,10 +8,9 @@ from api.models.work import Work
 from api.models.work_type import WorkType
 from api.models.phase_code import PhaseCode as Phase
 from api.models.project import Project
-from api.models.staff import Staff
-from api.models.staff_work_role import StaffWorkRole
 from api.insights.insights_table_filters import build_insights_filters
 from api.insights.utils import get_days_left_subquery, get_days_taken_subquery, get_extension_days_subquery, get_suspended_days_subquery, get_total_days_subquery, get_work_subquery
+from api.utils.helpers import filter_query_by_staff
 from sqlalchemy import func
 
 
@@ -47,9 +46,7 @@ class AveragePhaseOverageInsightGenerator:
             query = query.join(Project, Work.project_id == Project.id)
 
         if staff_id:
-            query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
-            query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
-            query = query.filter(Staff.id == staff_id)
+            query = filter_query_by_staff(query, staff_id)
 
         query = query.filter(
             WorkPhase.is_active.is_(True),

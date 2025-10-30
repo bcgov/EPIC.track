@@ -728,7 +728,9 @@ const EventList = () => {
         showNotification("Deleted successfully", {
           type: "success",
         });
+        setShowDeleteDialog(false);
         getCombinedEvents();
+        onSaveHandler();
       }
     } catch (e) {}
   };
@@ -757,7 +759,7 @@ const EventList = () => {
   };
   const deleteAction = (
     <>
-      {showDeleteMilestoneButton && (
+      {showDeleteMilestoneButton && taskEvent && (
         <Box
           sx={{
             display: "flex",

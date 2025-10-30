@@ -6,12 +6,11 @@ from sqlalchemy import func
 
 from api.models import db
 from api.models.project import Project
-from api.models.staff import Staff
-from api.models.staff_work_role import StaffWorkRole
 from api.models.work import Work
 from api.models.work_phase import WorkPhase
 from api.models.work_type import WorkType
 from api.insights.insights_table_filters import build_insights_filters
+from api.utils.helpers import filter_query_by_staff
 
 
 # pylint: disable=not-callable
@@ -31,9 +30,8 @@ class WorkByTypeInsightGenerator:
             query = query.join(Project, Work.project_id == Project.id)
             query = query.join(WorkPhase, Work.current_work_phase_id == WorkPhase.id)
         if staff_id:
-            query = query.join(StaffWorkRole, StaffWorkRole.work_id == Work.id)
-            query = query.join(Staff, StaffWorkRole.staff_id == Staff.id)
-            query = query.filter(Staff.id == staff_id)
+            query = filter_query_by_staff(query, staff_id)
+
         query = query.filter(
             Work.is_active.is_(True),
             Work.is_deleted.is_(False),

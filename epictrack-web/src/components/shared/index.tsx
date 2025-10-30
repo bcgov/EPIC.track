@@ -380,6 +380,7 @@ export const ETFormLabelWithCharacterLimit = (
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "baseline",
       }}
     >
       <FormLabel
@@ -398,11 +399,14 @@ export const ETFormLabelWithCharacterLimit = (
       </FormLabel>
       <ETParagraph
         sx={{
+          fontSize: "12px",
+          margin: 0,
+          lineHeight: "1.5rem",
           color: Palette.neutral.light,
         }}
       >
         {props.maxCharacterLength - props.characterCount}/
-        {props.maxCharacterLength} character left
+        {props.maxCharacterLength} characters left
       </ETParagraph>
     </Box>
   );

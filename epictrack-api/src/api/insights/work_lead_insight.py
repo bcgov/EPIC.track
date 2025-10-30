@@ -48,6 +48,8 @@ class WorkLeadInsightGenerator:
 
         if staff_id is not None:
             query = query.filter(Staff.id == staff_id)
+            query = query.filter(Staff.is_active.is_(True))
+            query = query.filter(StaffWorkRole.is_active.is_(True))
 
         query = query.group_by(StaffWorkRole.staff_id)
         return query.subquery()

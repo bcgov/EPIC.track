@@ -242,7 +242,6 @@ class TaskService:
         if exclude_deleted:
             query = query.filter(TaskEvent.is_deleted.is_(False))
         task_event = query.options(contains_eager(TaskEvent.assignees)).scalar()
-        print(f"Task event in service {task_event}")
         if task_event:
             return task_event
         raise ResourceNotFoundError(f"TaskEvent with id '{event_id}' not found.")
