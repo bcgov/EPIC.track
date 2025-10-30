@@ -123,30 +123,12 @@ class UserService:
         ):
             raise PermissionDeniedError("Permission denied")
 
-        # if a group has exclusive flag , user can only be present exclusively in that group
-        # All other group access has to be removed before assigning to exclusive group
-        requires_all_group_removal = updating_group.get("attributes", {}).get("exclusive", ['false'])[
-                                          0].lower() == 'true'
-
-        if requires_all_group_removal:
-            UserService._delete_from_all_epictrack_subgroups(user_id)
-        else:
-            UserService._delete_from_current_group(user_group_request, user_id)
+        UserService._delete_from_all_epictrack_subgroups(user_id)
 
         result = KeycloakService.update_user_group(
             user_id, user_group_request["group_id_to_update"]
         )
         return result
-
-    @classmethod
-    def _delete_from_current_group(cls, user_group_request, user_id):
-        existing_group_id = user_group_request.get("existing_group_id")
-        if existing_group_id:
-            result = KeycloakService.delete_user_group(
-                user_id, user_group_request.get("existing_group_id")
-            )
-            if result.status_code != 204:
-                raise BusinessError("Error removing group", 500)
 
     @staticmethod
     def _delete_from_all_epictrack_subgroups(user_id):
