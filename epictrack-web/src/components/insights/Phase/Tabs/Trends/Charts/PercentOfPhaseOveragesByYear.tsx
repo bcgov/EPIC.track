@@ -5,25 +5,14 @@ import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsights
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
-import { OptionType } from "components/shared/filterSelect/type";
 import { showNotification } from "components/shared/notificationProvider";
-import TrackSelect from "components/shared/TrackSelect";
-import { useMemo, useState } from "react";
 import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from "recharts";
 import { useGetOverageByYearQuery } from "services/rtkQuery/phaseInsights";
 
 const PercentOfPhaseOveragesByYear = () => {
   const { columnFilters } = useTableFilterContext();
-  const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
-  const [selectedWorkType, setSelectedWorkType] = useState<OptionType | null>({
-    value: "all",
-    label: "All",
-  });
-  const [selectedYear, setSelectedYear] = useState<OptionType | null>({
-    value: new Date().getFullYear(),
-    label: String(new Date().getFullYear()),
-  });
 
   const {
     data: chartData,
@@ -32,32 +21,11 @@ const PercentOfPhaseOveragesByYear = () => {
   } = useGetOverageByYearQuery(
     {
       columnFilters,
-      selectedWorkType: String(selectedWorkType?.value) || "all",
-      selectedYear: String(selectedYear?.value) || "all",
+      selectedWorkType: "all",
       staffId: isUserInsights ? staffId : undefined,
     },
     { skip: columnFilters.length === 0 },
   );
-
-  const workTypeOptions = useMemo(() => {
-    if (!workPhases) return [];
-    const workTypes = Array.from(
-      new Map(
-        workPhases.map((item: any) => [item.work_type_id, item.work_type_name]),
-      ).entries(),
-    );
-    return workTypes.map(([id, name]) => ({
-      id,
-      name,
-    }));
-  }, [workPhases]);
-
-  const yearOptions = useMemo(() => {
-    const years = workPhases?.flatMap((phaseItem: any) =>
-      new Date(phaseItem.work_phase_end_date).getFullYear(),
-    );
-    return Array.from(new Set(years) as Set<number>).sort((a, b) => b - a);
-  }, [workPhases]);
 
   if (error) {
     showNotification(
@@ -79,65 +47,6 @@ const PercentOfPhaseOveragesByYear = () => {
         <Grid item xs={4}>
           <ETCaption1 bold>PHASE OVERAGE BY YEAR</ETCaption1>
         </Grid>
-        <Grid item xs={4} container justifyContent="flex-end">
-          <Box sx={{ width: "200px" }}>
-            <TrackSelect
-              options={[
-                { value: "all", label: "All" },
-                ...workTypeOptions.map((workType) => ({
-                  value: workType.id,
-                  label: workType.name,
-                })),
-              ]}
-              placeholder="Select Work Type"
-              value={
-                selectedWorkType
-                  ? {
-                      value: selectedWorkType.value,
-                      label: selectedWorkType.label,
-                    }
-                  : { value: "all", label: "All" }
-              }
-              onChange={(selectedOption) => {
-                const option = selectedOption as OptionType;
-                setSelectedWorkType({
-                  value: option.value,
-                  label: option.label as string,
-                });
-              }}
-              isClearable={false}
-            />
-          </Box>
-        </Grid>
-        <Grid item xs={4} container justifyContent="flex-end">
-          <Box sx={{ width: "200px" }}>
-            <TrackSelect
-              options={[
-                ...yearOptions.map((year) => ({
-                  value: year,
-                  label: String(year),
-                })),
-              ]}
-              placeholder="Select a Year"
-              value={
-                selectedYear
-                  ? {
-                      value: selectedYear.value,
-                      label: selectedYear.label,
-                    }
-                  : { value: "all", label: "All" }
-              }
-              onChange={(selectedOption) => {
-                const option = selectedOption as OptionType;
-                setSelectedYear({
-                  value: option.value,
-                  label: option.label as string,
-                });
-              }}
-              isClearable={false}
-            />
-          </Box>
-        </Grid>
         <Grid item xs={12} container sx={{ flex: 1, minHeight: 350 }}>
           <Box
             sx={{
@@ -154,9 +63,9 @@ const PercentOfPhaseOveragesByYear = () => {
               <BarChart
                 layout="vertical"
                 data={chartData}
-                margin={{ left: 80, bottom: 40 }}
+                margin={{ left: 40, bottom: 40 }}
                 height={Math.max(chartData.length * 50 + 100, 350)}
-                width={400}
+                width={600}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
@@ -173,7 +82,7 @@ const PercentOfPhaseOveragesByYear = () => {
                 <YAxis
                   dataKey="phase"
                   type="category"
-                  width={40}
+                  width={140}
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip

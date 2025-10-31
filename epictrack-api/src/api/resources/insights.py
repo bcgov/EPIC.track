@@ -56,7 +56,7 @@ class Projects(Resource):
         """Return project insights based on group by param."""
         args = req.ProjectInsightRequestQueryParameterSchema().load(request.json)
         staff_id = args.get("staff_id", None)
-        project_insights = InsightService.fetch_project_insights(args["group_by"], args["type_id"], args["filters"], staff_id)
+        project_insights = InsightService.fetch_project_insights(args["group_by"], args["filters"], staff_id)
         return jsonify(project_insights), HTTPStatus.OK
 
 

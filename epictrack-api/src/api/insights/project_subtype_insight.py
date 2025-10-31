@@ -17,7 +17,7 @@ from api.insights.insights_table_filters import build_insights_filters
 class ProjectBySubTypeInsightGenerator:
     """Insight generator for project resource filtered by type and grouped by subtypes"""
 
-    def generate_partition_query(self, type_id: int, filters: List = None, staff_id: int = None):
+    def generate_partition_query(self, filters: List = None, staff_id: int = None):
         """Generates the group by subquery."""
         filter_exprs = build_insights_filters(filters, "projects") if filters else []
         partition_query = (
@@ -42,15 +42,14 @@ class ProjectBySubTypeInsightGenerator:
         partition_query = partition_query.filter(
             Project.is_active.is_(True),
             Project.is_deleted.is_(False),
-            Project.type_id == type_id,
             *filter_exprs if filter_exprs else []
         ).distinct(Project.sub_type_id)
 
         return partition_query.subquery()
 
-    def fetch_data(self, type_id: int, filters: List = None, staff_id: int = None) -> List[dict]:
+    def fetch_data(self, filters: List = None, staff_id: int = None) -> List[dict]:
         """Fetch data from db"""
-        partition_query = self.generate_partition_query(type_id, filters, staff_id)
+        partition_query = self.generate_partition_query(filters, staff_id)
 
         subtype_insights = (
             db.session.query(SubType)
