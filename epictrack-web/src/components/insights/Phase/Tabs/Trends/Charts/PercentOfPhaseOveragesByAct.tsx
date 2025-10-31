@@ -5,21 +5,14 @@ import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsights
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
-import { OptionType } from "components/shared/filterSelect/type";
 import { showNotification } from "components/shared/notificationProvider";
-import TrackSelect from "components/shared/TrackSelect";
-import { useMemo, useState } from "react";
 import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from "recharts";
 import { useGetOverageByActQuery } from "services/rtkQuery/phaseInsights";
 
 const PercentOfPhaseOveragesByAct = () => {
   const { columnFilters } = useTableFilterContext();
-  const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
-  const [selectedWorkType, setSelectedWorkType] = useState<OptionType | null>({
-    value: "all",
-    label: "All",
-  });
 
   const {
     data: chartData,
@@ -28,24 +21,11 @@ const PercentOfPhaseOveragesByAct = () => {
   } = useGetOverageByActQuery(
     {
       columnFilters,
-      selectedWorkType: String(selectedWorkType?.value) || "all",
+      selectedWorkType: "all",
       staffId: isUserInsights ? staffId : undefined,
     },
     { skip: columnFilters.length === 0 },
   );
-
-  const workTypeOptions = useMemo(() => {
-    if (!workPhases) return [];
-    const workTypes = Array.from(
-      new Map(
-        workPhases.map((item) => [item.work_type_id, item.work_type_name]),
-      ).entries(),
-    );
-    return workTypes.map(([id, name]) => ({
-      id,
-      name,
-    }));
-  }, [workPhases]);
 
   if (error) {
     showNotification(
@@ -66,36 +46,6 @@ const PercentOfPhaseOveragesByAct = () => {
       <Grid container spacing={1}>
         <Grid item xs={6}>
           <ETCaption1 bold>% OF PHASES WITH OVERAGES BY ACT</ETCaption1>
-        </Grid>
-        <Grid item xs={6} container justifyContent="flex-end">
-          <Box sx={{ width: "200px" }}>
-            <TrackSelect
-              options={[
-                { value: "all", label: "All" },
-                ...workTypeOptions.map((workType) => ({
-                  value: workType.id,
-                  label: workType.name,
-                })),
-              ]}
-              placeholder="Select Work Type"
-              value={
-                selectedWorkType
-                  ? {
-                      value: selectedWorkType.value,
-                      label: selectedWorkType.label,
-                    }
-                  : { value: "all", label: "All" }
-              }
-              onChange={(selectedOption) => {
-                const option = selectedOption as OptionType;
-                setSelectedWorkType({
-                  value: option.value,
-                  label: option.label as string,
-                });
-              }}
-              isClearable={false}
-            />
-          </Box>
         </Grid>
         <Grid
           item
@@ -120,9 +70,9 @@ const PercentOfPhaseOveragesByAct = () => {
               <BarChart
                 layout="vertical"
                 data={chartData}
-                margin={{ top: 20, left: 80, bottom: 40 }}
+                margin={{ top: 20, left: 40, bottom: 40 }}
                 height={Math.max(chartData.length * 80 + 100, 350)}
-                width={400}
+                width={500}
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis
@@ -139,7 +89,7 @@ const PercentOfPhaseOveragesByAct = () => {
                 <YAxis
                   dataKey="phase_act"
                   type="category"
-                  width={40}
+                  width={140}
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip

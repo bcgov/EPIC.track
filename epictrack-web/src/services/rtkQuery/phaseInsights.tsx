@@ -122,18 +122,16 @@ export const phaseInsightsApi = createApi({
       {
         columnFilters?: ColumnFilter[];
         selectedWorkType?: string;
-        selectedYear?: string;
         staffId?: number;
       }
     >({
-      query: ({ columnFilters, selectedWorkType, selectedYear, staffId }) => ({
+      query: ({ columnFilters, selectedWorkType, staffId }) => ({
         url: `insights/phases`,
         method: "POST",
         body: {
           group_by: "overages_by_year",
           filters: columnFilters ?? [],
           selected_work_type_id: selectedWorkType,
-          selected_year: selectedYear,
           staff_id: staffId,
         },
       }),

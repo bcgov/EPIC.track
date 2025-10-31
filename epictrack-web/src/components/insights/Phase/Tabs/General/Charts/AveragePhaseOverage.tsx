@@ -5,21 +5,15 @@ import { usePhaseInsightsContext } from "components/insights/Phase/PhaseInsights
 import { useTableFilterContext } from "components/insights/TableFilterContext";
 import { BAR_COLOR } from "components/insights/utils";
 import { GrayBox, ETCaption1 } from "components/shared";
-import { OptionType } from "components/shared/filterSelect/type";
 import { showNotification } from "components/shared/notificationProvider";
-import TrackSelect from "components/shared/TrackSelect";
-import { useMemo, useState } from "react";
 import { BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar } from "recharts";
 import { useGetPhasesByAverageOverageQuery } from "services/rtkQuery/phaseInsights";
 
 const AveragePhaseOverageChart = () => {
   const { columnFilters } = useTableFilterContext();
-  const { workPhases, loadingWorkPhases } = usePhaseInsightsContext();
+  const { loadingWorkPhases } = usePhaseInsightsContext();
   const { isUserInsights, staffId } = useInsightsContext();
-  const [selectedWorkType, setSelectedWorkType] = useState<OptionType | null>({
-    value: "all",
-    label: "All",
-  });
+
   const {
     data: chartData,
     error,
@@ -27,24 +21,11 @@ const AveragePhaseOverageChart = () => {
   } = useGetPhasesByAverageOverageQuery(
     {
       columnFilters,
-      selectedWorkType: String(selectedWorkType?.value) || "all",
+      selectedWorkType: "all",
       staffId: isUserInsights ? staffId : undefined,
     },
     { skip: columnFilters.length === 0 },
   );
-
-  const workTypeOptions = useMemo(() => {
-    if (!workPhases) return [];
-    const workTypes = Array.from(
-      new Map(
-        workPhases.map((item) => [item.work_type_id, item.work_type_name]),
-      ).entries(),
-    );
-    return workTypes.map(([id, name]) => ({
-      id,
-      name,
-    }));
-  }, [workPhases]);
 
   if (error) {
     showNotification(
@@ -65,36 +46,6 @@ const AveragePhaseOverageChart = () => {
       <Grid container spacing={1}>
         <Grid item xs={6}>
           <ETCaption1 bold>AVERAGE PHASE OVERAGE</ETCaption1>
-        </Grid>
-        <Grid item xs={6} container justifyContent="flex-end">
-          <Box sx={{ width: "200px" }}>
-            <TrackSelect
-              options={[
-                { value: "all", label: "All" },
-                ...workTypeOptions.map((workType) => ({
-                  value: workType.id,
-                  label: workType.name,
-                })),
-              ]}
-              placeholder="Select Work Type"
-              value={
-                selectedWorkType
-                  ? {
-                      value: selectedWorkType.value,
-                      label: selectedWorkType.label,
-                    }
-                  : { value: "all", label: "All" }
-              }
-              onChange={(selectedOption) => {
-                const option = selectedOption as OptionType;
-                setSelectedWorkType({
-                  value: option.value,
-                  label: option.label as string,
-                });
-              }}
-              isClearable={false}
-            />
-          </Box>
         </Grid>
         <Grid
           item

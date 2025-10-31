@@ -69,14 +69,12 @@ export const projectInsightsApi = createApi({
     }),
     getProjectBySubType: builder.query<
       ProjectBySubtype[],
-      { type_id: number; columnFilters?: ColumnFilter[]; staffId?: number }
+      { columnFilters?: ColumnFilter[]; staffId?: number }
     >({
       query: ({
-        type_id,
         columnFilters,
         staffId,
       }: {
-        type_id: number;
         columnFilters?: ColumnFilter[];
         staffId?: number;
       }) => ({
@@ -84,7 +82,6 @@ export const projectInsightsApi = createApi({
         method: "POST",
         body: {
           group_by: "subtype",
-          type_id: type_id,
           filters: columnFilters ?? [],
           ...(staffId !== undefined && { staff_id: staffId }),
         },
