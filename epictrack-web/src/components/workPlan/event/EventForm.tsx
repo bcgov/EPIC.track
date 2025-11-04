@@ -62,7 +62,7 @@ import EventDatePushConfirmForm from "./components/EventDatePushConfirmForm";
 import { Work, WorkPhase } from "models/work";
 
 interface EventFormProps {
-  onSave: () => void;
+  onSave: (remainingPhasesToComplete?: boolean) => void;
   event?: MilestoneEvent;
   milestoneEvents?: EventsGridModel[];
   isFormFieldsLocked: boolean;
@@ -553,7 +553,11 @@ const EventForm = ({
           ).format();
         }
         await saveEvent(dataToBeSubmitted, pushEventConfirmed);
-        onSave();
+        const remainingPhasesToComplete = workPhases?.some(
+          (phase) =>
+            phase.work_phase.legislated && !phase.work_phase.is_completed,
+        );
+        onSave(remainingPhasesToComplete);
         setDateCheckStatus(undefined);
       }
     } catch (e) {
