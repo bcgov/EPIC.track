@@ -338,6 +338,7 @@ const EventList = () => {
       const workPhases = workPhasesResult.data as WorkPhaseAdditionalInfo[];
       setWorkPhases(workPhases);
       setLoading(false);
+      return workPhases;
     }
   }, [setWorkPhases, setLoading, work?.id]);
 
@@ -349,12 +350,20 @@ const EventList = () => {
     }
   }, [setWork, work?.id]);
 
-  const onSaveHandler = () => {
+  const onSaveHandler = (dispatchShowConfetti?: boolean) => {
     setShowTaskForm(false);
     setShowTemplateForm(false);
     setShowMilestoneForm(false);
     getCombinedEvents();
-    getWorkPhases().then(() => getWorkById());
+    getWorkPhases().then((newWorkPhases) => {
+      getWorkById();
+      const allLegislatedWorkPhasesComplete = (newWorkPhases ?? [])
+        .filter((wp) => wp.work_phase.legislated)
+        .every((wp) => wp.work_phase.is_completed);
+      if (allLegislatedWorkPhasesComplete && dispatchShowConfetti) {
+        dispatch(showConfetti(true));
+      }
+    });
     getTemplateUploadStatus();
     if (
       milestoneEvent?.event_configuration?.event_position === EventPosition.END

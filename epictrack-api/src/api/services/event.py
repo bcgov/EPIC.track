@@ -21,6 +21,7 @@ from flask import current_app
 import pytz
 
 from sqlalchemy import and_, extract, func, or_
+from sqlalchemy.orm import joinedload
 
 from api.actions.action_handler import ActionHandler
 from api.models.dashboard_search_options import EventCalendarSearchOptions
@@ -88,6 +89,50 @@ class EventService:
             )
         cls._process_actions(event, data.get("outcome_id", None))
         cls._post_process_actions(event)
+
+        # Find the last event in the current phase with actual_date set and END position
+        last_event = next(
+            (
+                e
+                for e in all_work_events
+                if e.actual_date is not None
+                and e.event_configuration.work_phase_id == current_work_phase.id
+                and e.event_configuration.event_position.value == EventPositionEnum.END.value
+            ),
+            None,
+        )
+        if last_event:
+            last_event = (
+                db.session.query(Event)
+                .options(joinedload(Event.work))
+                .get(last_event.id)
+            )
+
+        all_work_phases = WorkPhase.find_by_params(
+            {
+                "work_id": current_work_phase.work_id,
+                "visibility": PhaseVisibilityEnum.REGULAR.value,
+            }
+        )
+        # Check if current phase is the last phase, current phase is not yet complete, last event exists that has actual date,
+        # and no further extensions are required to complete the work phase.
+        # This will occur when the end event for a legislated phase had an actual date entered but the work phase could not be completed as there
+        # was remaining overage to deal with. In this case we check if the newly created event allows the work phase to be completed now.
+        if (
+            cls._is_last_phase(current_work_phase, all_work_phases)
+            and current_work_phase.is_completed is False
+            and last_event
+            and cls._validate_no_extension_required_to_complete_work(
+                last_event, current_work_phase, all_work_phases, throw_error=False
+            )
+        ):
+            if not current_app.config["SKIP_EVENT_LOGIC"]:
+                cls._process_events(
+                    current_work_phase, last_event, all_work_events, push_events, None
+                )
+            cls._process_actions(last_event, last_event.outcome_id)
+            cls._post_process_actions(last_event)
+
         if commit:
             db.session.commit()
         return event
@@ -143,8 +188,28 @@ class EventService:
                 current_app.logger.info("No start event found in the phase.")
 
         event = event.update(data, commit=False)
+
+        all_work_phases = WorkPhase.find_by_params(
+            {
+                "work_id": work_id,
+                "visibility": PhaseVisibilityEnum.REGULAR.value,
+            }
+        )
+
+        # Allow user to enter an actual date from the final END event for a Work Phase even if the Work Phase still has overage to deal with.
+        # If the Work still has overage in any of the legislated phases the actions will not be run to mark the phase as completed
+        if cls._is_last_phase(current_work_phase, all_work_phases) and current_work_phase.is_completed is False and event.event_configuration.event_position is EventPositionEnum.END:
+            current_work_phase_index = util.find_index_in_array(
+                all_work_phases, current_work_phase
+            )
+            cls._validate_dates(event, current_work_phase, all_work_phases)
+            cls._previous_event_actual_date_rule(
+                all_work_events, all_work_phases, current_work_phase_index, event, event_old_data
+            )
+            db.session.commit()
+
         # Do not process the date logic if the event is already locked(has actual date entered)
-        if not event_old_data.get("actual_date"):
+        if not event_old_data.get("actual_date") and cls._validate_no_extension_required_to_complete_work(event, current_work_phase, all_work_phases, throw_error=False):
             if not current_app.config["SKIP_EVENT_LOGIC"]:
                 cls._process_events(
                     current_work_phase,
@@ -575,11 +640,13 @@ class EventService:
         event: Event,
         current_work_phase: WorkPhase,
         all_work_phases: List[WorkPhase],
+        throw_error: bool = True,
     ):
         """Validate that overages have been dealt with before allowing the last phase to complete"""
         total_overage_days = 0
         for work_phase in all_work_phases[:-1]:  # all except last phase
-            total_overage_days += work_phase.get_overage_days()
+            if work_phase.legislated:
+                total_overage_days += work_phase.get_overage_days()
 
         if not cls._is_last_phase(current_work_phase, all_work_phases): # not last phase
             return True
@@ -592,9 +659,11 @@ class EventService:
         days_difference = (event.actual_date.date() - current_work_phase.end_date.date()).days
         if total_overage_days + days_difference <= 0:
             return True  # all good, no overage
-        raise UnprocessableEntityError(
-            f"Overage days need to be addressed before completing the work. Total overage days: {total_overage_days + days_difference}"
-        )
+        if throw_error:
+            raise UnprocessableEntityError(
+                f"Overage days need to be addressed before completing the work. Total overage days: {total_overage_days + days_difference}"
+            )
+        return False
 
     @classmethod
     def _handle_work_phase_for_start_event(

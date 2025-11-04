@@ -267,9 +267,13 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def _calculate_milestone_progress(cls, work_phase_events):
+        any_incomplete_phase = any(getattr(e.event_configuration.work_phase, 'is_completed', True) is False for e in work_phase_events)
         total_number_of_milestones = len(work_phase_events)
         completed_ones = sum(1 for x in work_phase_events if x.actual_date is not None)
         milestone_progress = (completed_ones / total_number_of_milestones) * 100
+        # If all milestones are complete but the phase is not marked complete, cap progress at 90% so progress bar is not full
+        if milestone_progress == 100 and any_incomplete_phase:
+            milestone_progress = 90
         return milestone_progress
 
     @classmethod
@@ -296,9 +300,12 @@ class WorkPhaseService:  # pylint: disable=too-few-public-methods
 
     @classmethod
     def _get_days_taken(cls, work_phase, events, suspended_days=0):
+        all_events_completed = all(
+            e.actual_date is not None for e in events
+        )
         days_taken = 0
         # Completed phase
-        if work_phase.is_completed:
+        if work_phase.is_completed or all_events_completed:
             start_event = next(
                 (
                     e
